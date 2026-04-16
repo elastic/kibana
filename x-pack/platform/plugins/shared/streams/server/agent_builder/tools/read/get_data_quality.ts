@@ -12,42 +12,43 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { Streams } from '@kbn/streams-schema';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
+import type { GetScopedClients } from '../../../routes/types';
 import {
   STREAMS_GET_DATA_QUALITY_TOOL_ID as GET_DATA_QUALITY,
   STREAMS_GET_SCHEMA_TOOL_ID as GET_SCHEMA,
   STREAMS_GET_LIFECYCLE_STATS_TOOL_ID as GET_LIFECYCLE_STATS,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
-import { classifyError } from './error_utils';
+} from '../tool_ids';
+import { classifyError } from '../error_utils';
 import {
   getDegradedDocCountsForStreams,
   getDocCountsForStreams,
   getFailedDocCountsForStreams,
-} from '../../routes/streams/doc_counts/get_streams_doc_counts';
+} from '../../../routes/streams/doc_counts/get_streams_doc_counts';
 
 const getDataQualitySchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   start: z
     .string()
     .optional()
     .default('now-24h')
     .describe(
-      'Start of time range for failed doc counts (ES date math). Total and degraded counts cover the full index lifecycle. Default: "now-24h"'
+      'Start of time range for failed doc counts (ES date math). Total and degraded counts reflect the most recent backing index, not the entire stream history. Default: "now-24h"'
     ),
   end: z
     .string()
     .optional()
     .default('now')
     .describe(
-      'End of time range for failed doc counts (ES date math). Total and degraded counts cover the full index lifecycle. Default: "now"'
+      'End of time range for failed doc counts (ES date math). Total and degraded counts reflect the most recent backing index, not the entire stream history. Default: "now"'
     ),
 });
 
 export const createGetDataQualityTool = ({
   getScopedClients,
+  isServerless,
 }: {
   getScopedClients: GetScopedClients;
+  isServerless: boolean;
 }): BuiltinToolDefinition<typeof getDataQualitySchema> => ({
   id: GET_DATA_QUALITY,
   type: ToolType.builtin,
@@ -62,6 +63,8 @@ export const createGetDataQualityTool = ({
     **When NOT to use:**
     - User wants field-level schema info — use ${GET_SCHEMA}
     - User wants storage or retention info — use ${GET_LIFECYCLE_STATS}
+
+    **Formatting:** Concise summary line (e.g. "Quality: poor — 3.2% degraded, 1.8% failed").
   `),
   tags: ['streams'],
   schema: getDataQualitySchema,
@@ -77,7 +80,7 @@ export const createGetDataQualityTool = ({
 
       const [totalResults, degradedResults, failedResults] = await Promise.all([
         getDocCountsForStreams({
-          isServerless: false,
+          isServerless,
           esClient,
           esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
           streamName: name,
@@ -102,20 +105,37 @@ export const createGetDataQualityTool = ({
       });
       const failureStoreStatus = detectFailureStoreStatus(definition);
 
+      const interpretation: string[] = [];
+      if (failedCount > 0) {
+        interpretation.push(
+          "Failed documents indicate processing errors in this stream's pipeline configuration."
+        );
+      } else {
+        interpretation.push(
+          'No failed documents in this time range. Note: this only reflects the queried window — it does not confirm the processing pipeline is healthy.'
+        );
+      }
+      if (degradedCount > 0) {
+        interpretation.push(
+          "Degraded documents contain fields not in the stream's explicit mapping. This is normal — Elasticsearch dynamically maps these fields at index time and they remain fully searchable. Do NOT treat this as an error or suggest mapping fixes unless the user explicitly asks."
+        );
+      }
+
       return {
         results: [
           {
             type: ToolResultType.other,
             data: {
               stream: name,
-              lifecycle_total_docs: totalCount,
-              lifecycle_degraded_docs: degradedCount,
-              lifecycle_degraded_pct: Math.round(degradedPct * 100) / 100,
+              total_docs: totalCount,
+              degraded_docs: degradedCount,
+              degraded_pct: Math.round(degradedPct * 100) / 100,
               recent_failed_docs: failedCount,
               recent_failed_pct: Math.round(failedPct * 100) / 100,
               recent_failed_time_range: { start, end },
               quality,
               failure_store_status: failureStoreStatus,
+              ...(interpretation.length > 0 && { interpretation }),
             },
           },
         ],
@@ -130,7 +150,7 @@ export const createGetDataQualityTool = ({
               message: `Failed to get data quality for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_data_quality',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],
@@ -178,7 +198,7 @@ export const detectFailureStoreStatus = (definition: Streams.all.Definition): st
     return 'not_applicable';
   }
   const failureStore = definition.ingest.failure_store;
-  if ('enabled' in failureStore) return 'enabled';
+  if ('lifecycle' in failureStore) return 'enabled';
   if ('disabled' in failureStore) return 'disabled';
   if ('inherit' in failureStore) return 'inherited';
   return 'not_applicable';

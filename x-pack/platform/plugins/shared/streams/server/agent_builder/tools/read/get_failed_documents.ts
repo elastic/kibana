@@ -12,21 +12,20 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getFlattenedObject } from '@kbn/std';
 import dateMath from '@kbn/datemath';
 import dedent from 'dedent';
-import type { GetScopedClients } from '../../routes/types';
-import { FAILURE_STORE_SELECTOR } from '../../../common/constants';
+import type { GetScopedClients } from '../../../routes/types';
+import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import {
   STREAMS_GET_FAILED_DOCUMENTS_TOOL_ID as GET_FAILED_DOCUMENTS,
   STREAMS_GET_DATA_QUALITY_TOOL_ID as GET_DATA_QUALITY,
-  STREAMS_LIST_STREAMS_TOOL_ID as LIST_STREAMS,
-} from './tool_ids';
-import { classifyError } from './error_utils';
+} from '../tool_ids';
+import { classifyError } from '../error_utils';
 
 const MAX_SAMPLE_SIZE = 50;
 const MAX_STACK_TRACE_LENGTH = 500;
 const MAX_SOURCE_STRING_LENGTH = 200;
 
 const getFailedDocumentsSchema = z.object({
-  name: z.string().describe('Exact stream name, e.g. "logs.nginx"'),
+  name: z.string().describe('Exact stream name, e.g. "logs.ecs.nginx"'),
   start: z
     .string()
     .optional()
@@ -61,6 +60,8 @@ export const createGetFailedDocumentsTool = ({
 
     **When NOT to use:**
     - User wants aggregate quality metrics (degraded %, failed %) — use ${GET_DATA_QUALITY}
+
+    **Formatting:** Show the error type breakdown first (e.g. "mapper_exception — 42 docs"). Then show each sample document with its error type, error message, and key fields from the original document. Group samples by error type when multiple types are present.
   `),
   tags: ['streams'],
   schema: getFailedDocumentsSchema,
@@ -130,6 +131,7 @@ export const createGetFailedDocumentsTool = ({
               error_type_breakdown: errorTypeBreakdown,
               sample_documents: sampleDocuments,
               returned_count: sampleDocuments.length,
+              error_source: 'stream_processing',
             },
           },
         ],
@@ -163,7 +165,7 @@ export const createGetFailedDocumentsTool = ({
               message: `Failed to get failed documents for stream "${name}": ${message}`,
               stream: name,
               operation: 'get_failed_documents',
-              likely_cause: classifyError(err, LIST_STREAMS),
+              likely_cause: classifyError(err),
             },
           },
         ],

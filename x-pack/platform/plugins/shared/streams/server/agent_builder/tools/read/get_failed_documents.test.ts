@@ -11,7 +11,7 @@ import {
   isNotFoundError,
   formatFailedDocuments,
 } from './get_failed_documents';
-import { createMockGetScopedClients, createMockToolContext } from './test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
 
 describe('createGetFailedDocumentsTool handler', () => {
   const setup = () => {
@@ -63,6 +63,7 @@ describe('createGetFailedDocumentsTool handler', () => {
         { type: 'illegal_argument_exception', count: 12 },
       ]);
       expect(data.returned_count).toBe(1);
+      expect(data.error_source).toBe('stream_processing');
       const samples = data.sample_documents as Array<Record<string, unknown>>;
       expect(samples[0].error_type).toBe('mapper_exception');
       expect(samples[0].error_message).toBe('failed to parse field');
