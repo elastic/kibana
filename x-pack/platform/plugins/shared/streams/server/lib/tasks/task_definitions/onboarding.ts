@@ -76,7 +76,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
               const { streamName, from, to, steps, saveQueries, connectors, _task } = runContext
                 .taskInstance.params as TaskParams<OnboardingTaskParams>;
 
-              const { taskClient, getQueryClient, streamsClient, uiSettingsClient } =
+              const { taskClient, getQueryClient, streamsClient, uiSettingsClient, tuningConfig } =
                 await taskContext.getScopedClients({
                   request: fakeRequest,
                 });
@@ -120,6 +120,7 @@ export function createStreamsOnboardingTask(taskContext: TaskContext) {
                             start: from,
                             end: to,
                             connectorId: connectors?.features,
+                            maxIterations: tuningConfig.max_iterations,
                           },
                           fakeRequest
                         );

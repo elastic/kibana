@@ -362,9 +362,10 @@ export const featuresTaskRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    telemetry,
     featuresIdentificationWorkflowClient: workflowClient,
   }): Promise<FeaturesIdentificationTaskResult> => {
-    const { streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+    const { streamsClient, licensing, uiSettingsClient, tuningConfig } = await getScopedClients({
       request,
     });
 
@@ -386,6 +387,7 @@ export const featuresTaskRoute = createServerRoute({
           streamName: name,
           start: body.from.getTime(),
           end: body.to.getTime(),
+          maxIterations: tuningConfig.max_iterations,
         },
         request
       );
@@ -395,6 +397,29 @@ export const featuresTaskRoute = createServerRoute({
     const activeExecution = await workflowClient.getActiveExecution(streamNamePredicate(name));
     if (activeExecution) {
       await workflowClient.cancel(activeExecution.executionId);
+
+      telemetry.trackFeaturesIdentified({
+        run_id: activeExecution.executionId,
+        iteration: 0,
+        stream_name: name,
+        stream_type: 'unknown',
+        state: 'canceled',
+        docs_count: 0,
+        features_new: 0,
+        features_updated: 0,
+        input_tokens_used: 0,
+        output_tokens_used: 0,
+        total_tokens_used: 0,
+        cached_tokens_used: 0,
+        duration_ms: 0,
+        total_filters: 0,
+        filters_capped: false,
+        has_filtered_documents: false,
+        excluded_features_count: 0,
+        llm_ignored_count: 0,
+        code_ignored_count: 0,
+      });
+
       return { status: TaskStatus.BeingCanceled };
     }
 

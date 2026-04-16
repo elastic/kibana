@@ -44,31 +44,24 @@ inputs:
     description: "Maximum number of LLM sampling iterations."
   - name: sampleSize
     type: number
-    default: 20
     description: "Number of documents sampled per iteration."
   - name: featureTtlDays
     type: number
-    default: 7
     description: "Number of days before a KI feature expires and is cleaned up."
   - name: entityFilteredRatio
     type: number
-    default: 0.4
-    description: "Fraction of sample allocated to entity-filtered (must_not) documents."
+    description: "Fraction (0–1) of sample allocated to entity-filtered (must_not) documents."
   - name: diverseRatio
     type: number
-    default: 0.4
-    description: "Fraction of sample allocated to diverse (unfiltered) documents."
+    description: "Fraction (0–1) of sample allocated to diverse (unfiltered) documents."
   - name: maxExcludedFeaturesInPrompt
     type: number
-    default: 10
     description: "Maximum number of excluded KI features sent in the LLM prompt."
   - name: maxEntityFilters
     type: number
-    default: 10
     description: "Maximum number of entity filters applied during sampling."
   - name: maxPreviouslyIdentifiedFeatures
     type: number
-    default: 100
     description: "Maximum number of previously identified features sent in the LLM prompt."
 steps:
   # -----------------------------------------------------------------------
