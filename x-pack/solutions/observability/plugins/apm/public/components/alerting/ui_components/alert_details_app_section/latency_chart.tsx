@@ -9,7 +9,7 @@ import type { Theme } from '@elastic/charts';
 import type { RecursivePartial } from '@elastic/eui';
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { getDurationFormatter } from '@kbn/observability-plugin/common';
@@ -27,7 +27,7 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { getChartAlertAnnotations, isLatencyThresholdRuleType } from './helpers';
+import { isLatencyThresholdRuleType, useGetChartAlertAnnotations } from './helpers';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT, THRESHOLD_SIDEBAR_MIN_WIDTH } from './constants';
@@ -77,7 +77,6 @@ export function LatencyChart({
   filters?: BoolQuery;
   ruleTypeId?: string;
 }) {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { uiSettings },
   } = useKibana();
@@ -134,17 +133,12 @@ export function LatencyChart({
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
 
-  const alertAnnotations = useMemo(
-    () =>
-      getChartAlertAnnotations({
-        alert,
-        customAlertEvaluationThreshold,
-        isMatchingRuleType: isLatencyThresholdRuleType,
-        dangerColor: euiTheme.colors.danger,
-        dateFormat,
-      }),
-    [alert, customAlertEvaluationThreshold, euiTheme.colors.danger, dateFormat]
-  );
+  const alertAnnotations = useGetChartAlertAnnotations({
+    alert,
+    customAlertEvaluationThreshold,
+    isMatchingRuleType: isLatencyThresholdRuleType,
+    dateFormat,
+  });
 
   const memoizedData = useMemo(
     () =>

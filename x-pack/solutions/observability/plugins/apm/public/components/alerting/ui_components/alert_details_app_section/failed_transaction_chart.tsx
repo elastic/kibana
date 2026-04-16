@@ -7,16 +7,9 @@
 /* Error Rate */
 
 import type { ReactElement } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { RecursivePartial } from '@elastic/eui';
-import {
-  EuiFlexItem,
-  EuiPanel,
-  EuiFlexGroup,
-  EuiTitle,
-  EuiIconTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -30,7 +23,11 @@ import * as get_timeseries_color from '../../../shared/charts/helper/get_timeser
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { getChartAlertAnnotations, isFailedTransactionRateRuleType, yLabelFormat } from './helpers';
+import {
+  isFailedTransactionRateRuleType,
+  useGetChartAlertAnnotations,
+  yLabelFormat,
+} from './helpers';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { TransactionTypeSelect } from './transaction_type_select';
@@ -85,7 +82,6 @@ export function FailedTransactionChart({
   threshold?: ReactElement;
   ruleTypeId?: string;
 }) {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { uiSettings },
   } = useKibana();
@@ -145,17 +141,12 @@ export function FailedTransactionChart({
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;
 
-  const alertAnnotations = useMemo(
-    () =>
-      getChartAlertAnnotations({
-        alert,
-        customAlertEvaluationThreshold,
-        isMatchingRuleType: isFailedTransactionRateRuleType,
-        dangerColor: euiTheme.colors.danger,
-        dateFormat,
-      }),
-    [alert, customAlertEvaluationThreshold, euiTheme.colors.danger, dateFormat]
-  );
+  const alertAnnotations = useGetChartAlertAnnotations({
+    alert,
+    customAlertEvaluationThreshold,
+    isMatchingRuleType: isFailedTransactionRateRuleType,
+    dateFormat,
+  });
 
   const timeseriesErrorRate = [
     {

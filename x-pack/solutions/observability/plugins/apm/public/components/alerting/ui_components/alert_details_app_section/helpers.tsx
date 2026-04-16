@@ -7,7 +7,6 @@
 import React from 'react';
 import moment from 'moment';
 import type { ReactElement } from 'react';
-import { transparentize } from '@elastic/eui';
 import { asPercent } from '@kbn/observability-plugin/common';
 import {
   ApmRuleType,
@@ -22,6 +21,7 @@ import {
   AlertThresholdAnnotation,
   AlertThresholdTimeRangeRect,
 } from '@kbn/observability-alert-details';
+import { useEuiTheme } from '@elastic/eui';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 
 export const getAggsTypeFromRule = (ruleAggType: string): LatencyAggregationType => {
@@ -40,41 +40,19 @@ export const yLabelFormat = (y?: number | null) => {
   return asPercent(y || 0, 1);
 };
 
-const getThresholdAnnotations = (
-  alertEvalThreshold: number | undefined,
-  dangerColor: string
-): ReactElement[] => {
-  if (alertEvalThreshold == null) return [];
-
-  return [
-    <AlertThresholdTimeRangeRect
-      key={'alertThresholdRect'}
-      id={'alertThresholdRect'}
-      threshold={alertEvalThreshold}
-      color={dangerColor}
-    />,
-    <AlertThresholdAnnotation
-      id={'alertThresholdAnnotation'}
-      key={'alertThresholdAnnotation'}
-      color={dangerColor}
-      threshold={alertEvalThreshold}
-    />,
-  ];
-};
-
-export const getChartAlertAnnotations = ({
+export const useGetChartAlertAnnotations = ({
   alert,
   customAlertEvaluationThreshold,
   isMatchingRuleType,
-  dangerColor,
   dateFormat,
 }: {
   alert: TopAlert;
   customAlertEvaluationThreshold?: number;
   isMatchingRuleType: (ruleTypeId: string) => boolean;
-  dangerColor: string;
   dateFormat: string;
 }): ReactElement[] | undefined => {
+  const { euiTheme } = useEuiTheme();
+
   if (!isMatchingRuleType(alert.fields[ALERT_RULE_TYPE_ID]) && !customAlertEvaluationThreshold) {
     return undefined;
   }
@@ -82,13 +60,31 @@ export const getChartAlertAnnotations = ({
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const alertEvalThreshold =
     customAlertEvaluationThreshold ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
-  const thresholdAnnotations = getThresholdAnnotations(alertEvalThreshold, dangerColor);
+
+  const thresholdAnnotations = (() => {
+    if (alertEvalThreshold == null) return [];
+
+    return [
+      <AlertThresholdTimeRangeRect
+        key={'alertThresholdRect'}
+        id={'alertThresholdRect'}
+        threshold={alertEvalThreshold}
+        color={euiTheme.colors.danger}
+      />,
+      <AlertThresholdAnnotation
+        id={'alertThresholdAnnotation'}
+        key={'alertThresholdAnnotation'}
+        color={euiTheme.colors.danger}
+        threshold={alertEvalThreshold}
+      />,
+    ];
+  })();
 
   return [
     <AlertActiveTimeRangeAnnotation
       alertStart={alert.start}
       alertEnd={alertEnd}
-      color={transparentize(dangerColor, 0.2)}
+      color={euiTheme.colors.danger}
       id={'alertActiveRect'}
       key={'alertActiveRect'}
     />,
@@ -96,7 +92,7 @@ export const getChartAlertAnnotations = ({
       key={'alertAnnotationStart'}
       id={'alertAnnotationStart'}
       alertStart={alert.start}
-      color={dangerColor}
+      color={euiTheme.colors.danger}
       dateFormat={dateFormat}
     />,
     ...thresholdAnnotations,
