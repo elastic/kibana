@@ -98,9 +98,7 @@ export async function cleanUpDuplicatedPackagePolicies(
       `Found ${expectedPackagePolicies.size} expected package policies that were not found.`
     );
     if (expectedPackagePolicies.size > 0) {
-      debugLog(
-        `Missing expected policies: [${[...expectedPackagePolicies].join(', ')}]`
-      );
+      debugLog(`Missing expected policies: [${[...expectedPackagePolicies].join(', ')}]`);
     }
 
     if (packagePoliciesToDelete.length > 0) {

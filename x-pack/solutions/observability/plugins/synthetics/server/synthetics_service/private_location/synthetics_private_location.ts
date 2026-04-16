@@ -456,7 +456,11 @@ export class SyntheticsPrivateLocation {
     const uniqueToDelete = [...new Set(policiesToDelete)];
 
     this.server.logger.debug(
-      `[editingMonitors] Creating ${policiesToCreate.length} policies (${policiesToCreate.map((p) => p.id).join(', ')}), updating ${policiesToUpdate.length} policies, deleting ${uniqueToDelete.length} policies (${uniqueToDelete.join(', ')})`
+      `[editingMonitors] Creating ${policiesToCreate.length} policies (${policiesToCreate
+        .map((p) => p.id)
+        .join(', ')}), updating ${policiesToUpdate.length} policies, deleting ${
+        uniqueToDelete.length
+      } policies (${uniqueToDelete.join(', ')})`
     );
 
     const createResponse = await this.packagePolicyService.bulkCreate({
@@ -466,7 +470,9 @@ export class SyntheticsPrivateLocation {
 
     if (createResponse.failed.length > 0) {
       this.server.logger.error(
-        `[editingMonitors] Failed to create ${createResponse.failed.length} package policies: ${JSON.stringify(
+        `[editingMonitors] Failed to create ${
+          createResponse.failed.length
+        } package policies: ${JSON.stringify(
           createResponse.failed.map(({ packagePolicy, error }) => ({
             id: (packagePolicy as NewPackagePolicyWithId).id,
             error: error?.message ?? error,
