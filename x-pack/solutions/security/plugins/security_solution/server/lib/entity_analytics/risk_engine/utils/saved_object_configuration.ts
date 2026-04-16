@@ -196,6 +196,7 @@ const getConfigurationSavedObject = async ({
 
 export const updateSavedObjectAttribute = async ({
   savedObjectsClient,
+  logger,
   namespace,
   attributes,
 }: SavedObjectsClientArg & {
@@ -227,6 +228,7 @@ export const updateSavedObjectAttribute = async ({
 export const initSavedObjects = async ({
   namespace,
   savedObjectsClient,
+  logger,
 }: SavedObjectsClientArg & { namespace: string }) => {
   const configuration = await getConfigurationSavedObject({
     savedObjectsClient,
@@ -245,6 +247,7 @@ export const initSavedObjects = async ({
 
 export const deleteSavedObjects = async ({
   savedObjectsClient,
+  logger,
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
@@ -276,6 +279,7 @@ export const deleteSavedObjects = async ({
 
 export const getConfiguration = async ({
   savedObjectsClient,
+  logger,
   namespace,
 }: SavedObjectsClientArg & {
   namespace: string;
