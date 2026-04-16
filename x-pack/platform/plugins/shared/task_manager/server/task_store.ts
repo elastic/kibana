@@ -534,7 +534,7 @@ export class TaskStore {
           ];
         } catch (e) {
           this.logger.error(
-            `[TaskStore] An error occured. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
+            `[TaskStore] An error occurred. Task ${taskInstance.id} will not be updated. Error: ${e.message}`
           );
           return acc;
         }
@@ -687,7 +687,7 @@ export class TaskStore {
           });
         } catch (e) {
           this.logger.error(
-            `[TaskStore] An error occured. Task ${doc.id} will not be updated. Error: ${e.message}`
+            `[TaskStore] An error occurred. Task ${doc.id} will not be updated. Error: ${e.message}`
           );
         }
         return acc;
