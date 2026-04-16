@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -49,6 +51,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Get agent binary download sources`,
+      description: `List all agent binary download sources.`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },
@@ -56,6 +59,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_download_sources.yaml'),
+        },
         validate: {
           request: getDownloadSourcesRequestSchema,
           response: {
@@ -97,6 +103,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_download_source.yaml'),
+        },
         validate: {
           request: GetOneDownloadSourcesRequestSchema,
           response: {
@@ -131,6 +140,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_download_source.yaml'),
+        },
         validate: {
           request: PutDownloadSourcesRequestSchema,
           response: {
@@ -157,6 +169,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: `Create an agent binary download source`,
+      description: `Create a new agent binary download source.`,
       options: {
         tags: ['oas-tag:Elastic Agent binary download sources'],
       },
@@ -164,6 +177,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_download_source.yaml'),
+        },
         validate: {
           request: PostDownloadSourcesRequestSchema,
           response: {
@@ -198,6 +214,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_download_source.yaml'),
+        },
         validate: {
           request: DeleteDownloadSourcesRequestSchema,
           response: {
