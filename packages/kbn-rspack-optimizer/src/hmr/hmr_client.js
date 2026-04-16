@@ -331,7 +331,6 @@ if (module.hot) {
   var reconnectTimer = null;
   var source = null;
   var wasDisconnected = false;
-  var navigationPending = false;
 
   function reloadWithBasePath(serverBasePath) {
     if (serverBasePath) {
@@ -347,13 +346,11 @@ if (module.hot) {
             serverBasePath +
             ', redirecting...'
         );
-        navigationPending = true;
         window.location.href = newUrl;
         return;
       }
     }
     console.log(LOG_PREFIX + ' Server restarted, reloading page...');
-    navigationPending = true;
     window.location.reload();
   }
 
@@ -361,7 +358,6 @@ if (module.hot) {
     source = new EventSource('http://localhost:' + __KBN_HMR_PORT__ + '/');
 
     source.onmessage = function (event) {
-      if (navigationPending) return;
       reconnectDelay = RECONNECT_INITIAL;
       try {
         var data = JSON.parse(event.data);
