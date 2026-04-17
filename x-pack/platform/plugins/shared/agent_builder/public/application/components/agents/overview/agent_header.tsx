@@ -57,7 +57,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <AgentAvatar agent={agent} size="l" innerPaddingSize="m" />
+            <AgentAvatar agent={agent} size="xl" iconSize="xl" iconPaddingSize="m" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
