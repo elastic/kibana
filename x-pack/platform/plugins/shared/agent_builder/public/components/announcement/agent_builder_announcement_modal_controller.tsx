@@ -41,7 +41,7 @@ export function AgentBuilderAnnouncementModalController() {
   const [isDismissed, setIsDismissed] = useState(false);
 
   if (!space) return null;
-  if (hideAnnouncements || isDismissed) return null;
+  if (hideAnnouncements || isDismissed || navigator.webdriver) return null;
   if (!isReady) return null;
   if (isSeen) return null;
 
