@@ -15,7 +15,7 @@ apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () 
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
-    cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
+    cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);

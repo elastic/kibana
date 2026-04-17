@@ -54,7 +54,7 @@ apiTest.describe('Maps - getTile', { tag: [...tags.stateful.classic] }, () => {
   };
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
-    cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
+    cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
