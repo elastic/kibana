@@ -17,7 +17,6 @@ import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
   FullTraceWaterfallOnErrorClick,
-  FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -151,11 +150,6 @@ interface ObservabilityFocusedTraceWaterfallFeature {
   render: (props: FocusedTraceWaterfallProps) => JSX.Element;
 }
 
-interface ObservabilityFullTraceWaterfallFeature {
-  id: 'observability-full-trace-waterfall';
-  render: (props: FullTraceWaterfallProps) => JSX.Element;
-}
-
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -287,7 +281,6 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
   | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
   | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityFullTraceWaterfallFeature
   | ObservabilityTraceWaterfallFlyoutFeature;
 
 /** ****************************************************************************************/
