@@ -131,8 +131,6 @@ export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
-export const OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID =
-  'observability:registerObservabilityAgent';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConnector';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
   'genAiSettings:defaultAIConnectorOnly';
@@ -179,6 +177,9 @@ export const COURIER_MAX_CONCURRENT_SHARD_REQUEST_ID = 'courier:maxConcurrentSha
 export const COURIER_SET_REQUEST_PREFERENCE_ID = 'courier:setRequestPreference';
 export const SEARCH_INCLUDE_FROZEN_ID = 'search:includeFrozen';
 export const SEARCH_TIMEOUT_ID = 'search:timeout';
+
+// Query activity settings
+export const QUERY_ACTIVITY_MIN_RUNNING_TIME_ID = 'query_activity:minRunningTime';
 
 // Security solution settings
 export const SECURITY_SOLUTION_REFRESH_INTERVAL_DEFAULTS_ID =

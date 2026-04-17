@@ -101,6 +101,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/kbn-client'
   - '@kbn/rule-data-utils'
+  - '@kbn/std'
 tags:
   - plugin
   - prod
