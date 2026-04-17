@@ -8,7 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
-import { makeObservation, extractIsPrivileged } from './utils';
+import { makeObservation, extractIsPrivileged, entityTypeLabel } from './utils';
 import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 const MODULE_ID = 'temporal_state_analysis';
@@ -137,6 +137,8 @@ const buildPrivilegeEscalationObservation = (entity: LeadEntity): Observation =>
     score: 85,
     severity: 'high' as ObservationSeverity,
     confidence: 0.85,
-    description: `Entity ${entity.name} transitioned from non-privileged to privileged access`,
+    description: `${entityTypeLabel(entity)} ${
+      entity.name
+    } transitioned from non-privileged to privileged access`,
     metadata: { entity_type: entity.type },
   });

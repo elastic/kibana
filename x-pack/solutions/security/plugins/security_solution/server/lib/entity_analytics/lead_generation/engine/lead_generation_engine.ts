@@ -306,7 +306,7 @@ const buildByline = (group: ScoredEntity[], observations: Observation[]): string
 
     const parts: string[] = [];
     if (riskScore > 0) {
-      parts.push(`risk score ${riskScore}`);
+      parts.push(`risk score ${riskScore.toFixed(1)}`);
     }
     if (totalAlerts > 0) {
       parts.push(`${totalAlerts} alerts`);

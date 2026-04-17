@@ -86,6 +86,7 @@ export const EntityAnalyticsHomePage = () => {
     isLoading: isLeadsLoading,
     isGenerating,
     hasGenerated,
+    lastRunTimestamp,
     generate,
     isScheduled,
     toggleSchedule,
@@ -199,12 +200,13 @@ export const EntityAnalyticsHomePage = () => {
                   isLoading={isLeadsLoading}
                   isGenerating={isGenerating}
                   hasGenerated={hasGenerated}
+                  lastRunTimestamp={lastRunTimestamp}
+                  isScheduled={isScheduled}
+                  onToggleSchedule={toggleSchedule}
                   onSeeAll={handleOpenFlyout}
                   onLeadClick={handleOpenLeadInChat}
                   onHuntInChat={handleHuntInChat}
                   onGenerate={generate}
-                  isScheduled={isScheduled}
-                  onToggleSchedule={toggleSchedule}
                   connectorId={connectorId}
                   onConnectorIdSelected={safeSetConnectorId}
                 />
