@@ -15,7 +15,7 @@ import type {
 import { escapeKuery } from '@kbn/es-query';
 import { ALL_VALUE, compositeSloDefinitionSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
-import { merge } from 'lodash';
+import { chunk, merge } from 'lodash';
 import { COMPOSITE_SUMMARY_INDEX_NAME } from '../../../../common/constants';
 import type {
   CompositeSLODefinition,
@@ -51,6 +51,9 @@ interface Dependencies {
 
 const COMPOSITE_SLOS_PER_PAGE = 100;
 const MAX_COMPOSITE_SLOS = 10_000;
+// Keep well under the dynamic ES bool.max_clause_count minimum (~1024).
+// Each chunk of N IDs produces N term clauses in the bool/should query.
+const MEMBER_ID_CHUNK_SIZE = 500;
 
 export async function computeAndPersistCompositeSummaries({
   esClient,
@@ -318,24 +321,28 @@ async function findMemberSLOs(
 ): Promise<SLODefinition[]> {
   if (ids.length === 0) return [];
 
-  // The KQL `field:(a or b or ... or N)` filter translates to a bool/should with N clauses
-  // (each `is(field, value)` becomes a nested bool/should:[term], so N IDs → ~2N total clauses).
+  // The KQL `field:(a or b or ... or N)` filter translates to a bool/should with N term clauses.
   // In ES 8.x, indices.query.bool.max_clause_count is deprecated and replaced by a dynamic
   // heuristic (minimum ~1024, higher based on JVM heap). Our worst-case of ~2500 unique member
-  // IDs per page (100 composites × 25 members, deduplicated) generates ~5000 total clauses and
-  // could approach the limit on constrained clusters. If that becomes a problem, chunk ids into
-  // batches of ≤500 and issue parallel soClient.find calls.
+  // IDs per page (100 composites × 25 members, deduplicated) exceeds the minimum on constrained
+  // clusters. Chunking to MEMBER_ID_CHUNK_SIZE keeps each query well under the limit.
   // soClient.bulkGet is not an option because SO ids are auto-generated and differ from
   // attributes.id — resolving them would require a find anyway.
-  const response = await soClient.find<StoredSLODefinition>({
-    type: SO_SLO_TYPE,
-    namespaces: [spaceId],
-    page: 1,
-    perPage: ids.length,
-    filter: `${SO_SLO_TYPE}.attributes.id:(${ids.map(escapeKuery).join(' or ')})`,
-  });
+  const chunks = chunk(ids, MEMBER_ID_CHUNK_SIZE);
+  const responses = await Promise.all(
+    chunks.map((chunkIds) =>
+      soClient.find<StoredSLODefinition>({
+        type: SO_SLO_TYPE,
+        namespaces: [spaceId],
+        page: 1,
+        perPage: chunkIds.length,
+        filter: `${SO_SLO_TYPE}.attributes.id:(${chunkIds.map(escapeKuery).join(' or ')})`,
+      })
+    )
+  );
 
-  return response.saved_objects
+  return responses
+    .flatMap((r) => r.saved_objects)
     .map((so) => decodeStoredSLO(so, logger))
     .filter((slo): slo is SLODefinition => slo !== undefined);
 }
