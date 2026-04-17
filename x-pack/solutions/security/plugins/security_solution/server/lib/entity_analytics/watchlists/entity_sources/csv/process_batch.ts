@@ -12,7 +12,7 @@ import type { WatchlistCsvUploadResponseItem } from '../../../../../../common/ap
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 import { getExistingEntitiesMap, getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
-import { CSV_SOURCE_ID } from './constants';
+import { MANUAL_SOURCE_ID } from '../manual/constants';
 import type { MatchedEntity, Watchlist } from './types';
 import { lookupEntitiesForRow } from './lookup';
 
@@ -64,7 +64,7 @@ const upsertToWatchlistIndex = async (
   const entities = matched.map((m) => ({
     euid: m.euid,
     type: m.type,
-    sourceId: CSV_SOURCE_ID,
+    sourceId: MANUAL_SOURCE_ID,
     currentWatchlists: m.currentWatchlists,
   }));
 
@@ -80,7 +80,7 @@ const upsertToWatchlistIndex = async (
     watchlist
   )({
     entities: enriched,
-    sourceLabel: CSV_SOURCE_ID,
+    sourceLabel: MANUAL_SOURCE_ID,
     targetIndex: watchlist.index,
   });
 
