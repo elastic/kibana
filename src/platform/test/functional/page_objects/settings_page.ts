@@ -979,6 +979,7 @@ export class SettingsPageObject extends FtrService {
     this.log.debug('toggling tow = ' + rowTestSubj);
     const row = await this.testSubjects.find(rowTestSubj);
     const rowToggle = (await row.findAllByCssSelector('[data-test-subj="toggle"]'))[0];
+    await rowToggle.scrollIntoViewIfNecessary();
     await rowToggle.click();
     return row;
   }
