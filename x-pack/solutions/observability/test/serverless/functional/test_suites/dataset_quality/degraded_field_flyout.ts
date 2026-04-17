@@ -692,11 +692,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
           );
 
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
-          );
-
           // Should display Edit/Create Component Template Link option
           await testSubjects.existOrFail(
             'datasetQualityManualMitigationsCustomComponentTemplateLink'
