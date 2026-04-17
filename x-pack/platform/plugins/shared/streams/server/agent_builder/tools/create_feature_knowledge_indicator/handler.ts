@@ -22,7 +22,7 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
   logger: Logger;
 }): Promise<{ id: string; uuid: string }> {
   logger.debug(
-    `create_feature_ki: creating feature KI for stream "${streamName}" with id "${featureInput.id}"`
+    `ki_feature_create: creating feature KI for stream "${streamName}" with id "${featureInput.id}"`
   );
 
   const feature = {
@@ -36,7 +36,7 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
   await featureClient.bulk(streamName, [{ index: { feature } }]);
 
   logger.debug(
-    `create_feature_ki: created feature KI for stream "${streamName}" with id "${feature.id}" and uuid "${feature.uuid}"`
+    `ki_feature_create: created feature KI for stream "${streamName}" with id "${feature.id}" and uuid "${feature.uuid}"`
   );
 
   return {

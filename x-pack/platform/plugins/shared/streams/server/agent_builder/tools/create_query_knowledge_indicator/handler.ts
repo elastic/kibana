@@ -32,7 +32,7 @@ export async function createQueryKnowledgeIndicatorToolHandler({
   logger: Logger;
 }): Promise<{ id: string }> {
   logger.debug(
-    `create_query_ki: creating query KI for stream "${definition.name}" with title "${queryInput.title}"`
+    `ki_query_create: creating query KI for stream "${definition.name}" with title "${queryInput.title}"`
   );
 
   validateEsqlQueryForStreamOrThrow({
@@ -53,7 +53,7 @@ export async function createQueryKnowledgeIndicatorToolHandler({
   await queryClient.upsert(definition, query);
 
   logger.debug(
-    `create_query_ki: created query KI for stream "${definition.name}" with id "${query.id}"`
+    `ki_query_create: created query KI for stream "${definition.name}" with id "${query.id}"`
   );
 
   return {

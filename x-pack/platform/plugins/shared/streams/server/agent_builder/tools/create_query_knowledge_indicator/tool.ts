@@ -131,7 +131,7 @@ export function createQueryKnowledgeIndicatorTool({
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
           ki_kind: 'query',
-          tool_id: 'create_query_ki',
+          tool_id: 'ki_query_create',
           success: true,
           stream_name: streamName,
           stream_type: streamType,
@@ -153,7 +153,7 @@ export function createQueryKnowledgeIndicatorTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running create_query_ki: ${message}`);
+        logger.error(`Error running ki_query_create: ${message}`);
         if (error instanceof Error) {
           logger.debug(error.stack ?? error.message);
         } else {
@@ -162,7 +162,7 @@ export function createQueryKnowledgeIndicatorTool({
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
           ki_kind: 'query',
-          tool_id: 'create_query_ki',
+          tool_id: 'ki_query_create',
           success: false,
           stream_name: streamName,
           stream_type: streamType,

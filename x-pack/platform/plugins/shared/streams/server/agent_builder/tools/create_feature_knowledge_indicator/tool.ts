@@ -120,7 +120,7 @@ export function createFeatureKnowledgeIndicatorTool({
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
           ki_kind: 'feature',
-          tool_id: 'create_feature_ki',
+          tool_id: 'ki_feature_create',
           success: true,
           stream_name: streamName,
           stream_type: streamType,
@@ -143,7 +143,7 @@ export function createFeatureKnowledgeIndicatorTool({
         };
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error';
-        logger.error(`Error running create_feature_ki: ${message}`);
+        logger.error(`Error running ki_feature_create: ${message}`);
         if (error instanceof Error) {
           logger.debug(error.stack ?? error.message);
         } else {
@@ -152,7 +152,7 @@ export function createFeatureKnowledgeIndicatorTool({
 
         telemetry.trackAgentBuilderKnowledgeIndicatorCreated({
           ki_kind: 'feature',
-          tool_id: 'create_feature_ki',
+          tool_id: 'ki_feature_create',
           success: false,
           stream_name: streamName,
           stream_type: streamType,

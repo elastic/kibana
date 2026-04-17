@@ -110,13 +110,13 @@ export function registerAgentBuilderTools({
     createFeatureKnowledgeIndicatorTool({
       getScopedClients,
       server,
-      logger: logger.get('create_feature_ki_tool'),
+      logger: logger.get('ki_feature_create_tool'),
       telemetry,
     }),
     createQueryKnowledgeIndicatorTool({
       getScopedClients,
       server,
-      logger: logger.get('create_query_ki_tool'),
+      logger: logger.get('ki_query_create_tool'),
       telemetry,
     }),
   ];

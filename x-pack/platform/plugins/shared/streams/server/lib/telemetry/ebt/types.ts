@@ -76,7 +76,7 @@ interface StreamsFeaturesIdentifiedProps {
 
 interface StreamsAgentBuilderKnowledgeIndicatorCreatedProps {
   ki_kind: 'feature' | 'query';
-  tool_id: 'create_feature_ki' | 'create_query_ki';
+  tool_id: 'ki_feature_create' | 'ki_query_create';
   success: boolean;
   stream_name: string;
   stream_type: StreamType | 'unknown';
