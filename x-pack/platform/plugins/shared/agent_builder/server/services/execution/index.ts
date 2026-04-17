@@ -5,19 +5,5 @@
  * 2.0.
  */
 
-export type {
-  AgentExecutionService,
-  AgentExecutionParams,
-  ConversationExecutionParams,
-  StandaloneExecutionParams,
-  ConversationAgentExecution,
-  StandaloneAgentExecution,
-  ExecuteAgentParams,
-  ExecuteAgentResult,
-  FollowExecutionOptions,
-  AgentExecution,
-  FindExecutionsOptions,
-  FindExecutionsFilter,
-} from '@kbn/agent-builder-server/execution';
 export { createAgentExecutionService, type AgentExecutionServiceDeps } from './execution_service';
 export { registerTaskDefinitions, createTaskHandler, type TaskHandler } from './task';

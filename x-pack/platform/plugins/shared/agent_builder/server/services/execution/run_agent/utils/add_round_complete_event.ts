@@ -22,6 +22,7 @@ import type {
   RuntimeAgentConfigurationOverrides,
   CompactionStep,
   BackgroundAgentCompleteEvent,
+  BackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -305,12 +306,7 @@ const createRound = ({
       }
     }
     if (isBackgroundAgentCompleteEvent(event)) {
-      return [
-        {
-          type: ConversationRoundStepType.backgroundAgentComplete,
-          ...event.data.execution,
-        },
-      ];
+      return [createBackgroundAgentStep(event)];
     }
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
@@ -379,6 +375,15 @@ const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
   };
 };
 
+const createBackgroundAgentStep = (
+  event: BackgroundAgentCompleteEvent
+): BackgroundAgentCompleteStep => {
+  return {
+    type: ConversationRoundStepType.backgroundAgentComplete,
+    ...event.data.execution,
+  };
+};
+
 const createToolCallStep = ({
   toolCall,
   toolResult,
@@ -395,7 +400,7 @@ const createToolCallStep = ({
     tool_call_id: toolCall.data.tool_call_id,
     progression: toolProgress.map(({ data: { message, metadata } }) => ({
       message,
-      ...(metadata ? { metadata } : {}),
+      metadata,
     })),
     results: toolResult?.data.results ?? [],
     tool_call_group_id: toolCall.data.tool_call_group_id,

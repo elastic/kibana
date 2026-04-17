@@ -22,6 +22,7 @@ import {
   createBadRequestError,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import {
   ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
@@ -29,7 +30,6 @@ import {
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
-import type { AgentExecutionService } from '../services/execution';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';

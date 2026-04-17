@@ -6,6 +6,7 @@
  */
 
 import type { Runner } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../config';
 import type {
   InternalSetupServices,
@@ -22,11 +23,7 @@ import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
-import {
-  type AgentExecutionService,
-  createAgentExecutionService,
-  createTaskHandler,
-} from './execution';
+import { createAgentExecutionService, createTaskHandler } from './execution';
 import {
   createMeteringService,
   type MeteringService,
