@@ -98,6 +98,7 @@ import {
   SlackApiGetChannelsParamsSchema,
   SlackApiGetUsersParamsSchema,
   SlackApiPostMessageParamsSchema,
+  SlackApiUpdateMessageParamsSchema,
   SlackApiResponseSchema,
   SlackParamsSchema,
   SlackResponseSchema,
@@ -232,6 +233,7 @@ export const ConnectorActionInputSchemas = new Map<string, Record<string, z.ZodS
     '.slack_api',
     {
       postMessage: SlackApiPostMessageParamsSchema,
+      updateMessage: SlackApiUpdateMessageParamsSchema,
       getChannels: SlackApiGetChannelsParamsSchema,
       getUsers: SlackApiGetUsersParamsSchema,
     },
@@ -390,6 +392,7 @@ export const ConnectorActionOutputSchemas = new Map<string, Record<string, z.Zod
     '.slack_api',
     {
       postMessage: SlackApiResponseSchema,
+      updateMessage: SlackApiResponseSchema,
       getChannels: SlackApiResponseSchema,
       getUsers: SlackApiResponseSchema,
     },

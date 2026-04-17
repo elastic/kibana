@@ -16,3 +16,7 @@ export const EncryptedSavedObjectsClientToken = Symbol.for(
 export const WorkflowsManagementApiToken = Symbol.for(
   'alerting_v2.WorkflowsManagementApi'
 ) as ServiceIdentifier<WorkflowsServerPluginSetup['management']>;
+
+export const KibanaBaseUrlToken = Symbol.for(
+  'alerting_v2.KibanaBaseUrl'
+) as ServiceIdentifier<string | undefined>;

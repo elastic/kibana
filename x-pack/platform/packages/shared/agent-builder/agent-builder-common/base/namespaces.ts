@@ -20,6 +20,7 @@ export const internalNamespaces = {
   security: 'security',
   streams: 'platform.streams',
   workflows: 'platform.workflows',
+  alerting: 'alerting',
 } as const;
 
 /**
@@ -36,6 +37,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.security,
   internalNamespaces.streams,
   internalNamespaces.workflows,
+  internalNamespaces.alerting,
 ];
 
 /**

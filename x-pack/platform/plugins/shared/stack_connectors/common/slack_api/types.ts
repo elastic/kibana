@@ -11,6 +11,7 @@ import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@k
 import type {
   PostBlockkitSubActionParams,
   PostMessageSubActionParams,
+  UpdateMessageSubActionParams,
   SlackApiConfig,
   SlackApiParams,
   SlackApiSecrets,
@@ -83,4 +84,7 @@ export interface SlackApiService {
     channelNames,
     text,
   }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
+  updateMessage: (
+    params: UpdateMessageSubActionParams
+  ) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

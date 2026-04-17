@@ -15,6 +15,8 @@ import type {
   PostBlockkitSubActionParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,
+  UpdateMessageSubActionParamsSchema,
+  UpdateMessageParamsSchema,
   SlackApiParamsSchema,
 } from '../schemas/v1';
 
@@ -24,6 +26,8 @@ export type PostMessageParams = z.infer<typeof PostMessageParamsSchema>;
 export type PostMessageSubActionParams = z.infer<typeof PostMessageSubActionParamsSchema>;
 export type PostBlockkitSubActionParams = z.infer<typeof PostBlockkitSubActionParamsSchema>;
 export type PostBlockkitParams = z.infer<typeof PostBlockkitParamsSchema>;
+export type UpdateMessageSubActionParams = z.infer<typeof UpdateMessageSubActionParamsSchema>;
+export type UpdateMessageParams = z.infer<typeof UpdateMessageParamsSchema>;
 export type ValidChannelIdSubActionParams = z.infer<typeof ValidChannelIdSubActionParamsSchema>;
 export type SlackApiParams = z.infer<typeof SlackApiParamsSchema>;
 export type SlackApiActionParams = z.infer<typeof SlackApiParamsSchema>;

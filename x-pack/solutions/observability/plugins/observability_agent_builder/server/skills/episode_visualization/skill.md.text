@@ -1,0 +1,190 @@
+## When to Use This Skill
+
+Use this skill when:
+- A user wants to chart, graph, or visualize data from an alert episode
+- A user asks about trends in episode metrics (latency, error counts, CPU, throughput, etc.)
+- A user wants to understand what values an episode captured and how they changed over time
+- You need to create a visualization from episode data
+
+Do **not** use this skill when:
+- The user is asking about raw source data (use direct ES|QL or the data exploration skill instead)
+- The user wants to investigate root cause (use the RCA skill instead)
+- The episode has no numeric data fields to visualize
+
+If the **visualization-creation** skill is available, load it as well — it provides chart type guidance and the `create_visualization` workflow. This skill focuses on building the right query for episode data visualization.
+
+---
+
+## The Core Problem: Flattened Data in .rule-events
+
+Alert episode data is stored in the `.rule-events` index under the `data` field, which is mapped as **`flattened`**. ES|QL **cannot access sub-fields** of flattened fields — queries like `data.avg_cpu` will fail with "Unknown column".
+
+The `alerting.get_episode_events` tool works around this by using `METADATA _source`, so it returns the full `data` object with actual values. But for **visualization**, you cannot build an ES|QL query against `.rule-events` that references `data.*` fields.
+
+**Solution**: Instead of querying `.rule-events`, re-run the rule's original ES|QL query against the **source index** with a time range covering the episode's active period. The source index has properly typed fields.
+
+---
+
+## Workflow
+
+Follow these steps in order to build a visualization from episode data.
+
+### Step 1: Fetch Episode Events
+
+Call `alerting.get_episode_events` with the episode ID.
+
+From the results, extract:
+- The `rule.id` value (you will need this in Step 2)
+- The `data.*` field names and sample values — these tell you what metrics the rule captures
+- The **time range** of the episode: note the earliest and latest `@timestamp` values from breached events
+- The **grouping field values** (e.g., `data.service.name = "checkout"`, `data.k8s.pod.name = "..."`) — these are the specific entity this episode is about
+- **Important**: Focus on events where `status == "breached"`. Events with `recovering` or `inactive` status have `data: {}` (empty).
+
+### Step 2: Fetch the Rule Definition
+
+Call `alerting.get_rule` with the rule ID from Step 1.
+
+From the result, extract:
+- The `query` field — this is the rule's ES|QL evaluation query
+- The `grouping_fields` array — these are the fields used to group episodes
+- The `schedule` — how often the rule runs (useful for understanding data granularity)
+
+### Step 3: Identify the Source Index
+
+Parse the `FROM` clause from the rule's ES|QL query to extract the source index name.
+
+Examples:
+- `FROM remote_cluster:traces-generic.otel-default | WHERE ...` → source is `remote_cluster:traces-generic.otel-default`
+- `FROM metrics-kubeletstatsreceiver.otel-default | WHERE ...` → source is `metrics-kubeletstatsreceiver.otel-default`
+
+The source index name is everything between `FROM ` and the first `|` (pipe) or end of line, trimmed of whitespace. If there are multiple comma-separated sources, use the first one.
+
+**CCS (Cross-Cluster Search)**: If the index name contains a `:` (e.g., `remote_cluster:traces-*`), keep the full name including the cluster prefix.
+
+### Step 4: Build the Visualization ES|QL Query
+
+Take the rule's original ES|QL query and modify it for visualization:
+
+1. **Keep the `FROM` clause** — same source index
+2. **Keep the `WHERE` filters** — same conditions the rule uses
+3. **Add a time range filter** using the episode timestamps from Step 1. Use the earliest timestamp minus a buffer and the latest timestamp plus a buffer (e.g., 10 minutes each way): `AND @timestamp >= "2026-04-08T17:00:00.000Z" AND @timestamp <= "2026-04-11T23:00:00.000Z"`
+4. **Add a filter for the specific entity** using the grouping field values from Step 1 (e.g., `AND k8s.pod.name == "opentelemetry-kube-stack-daemon-collector-p69f5"`)
+5. **Modify the STATS clause** to add time bucketing for a time-series chart. Replace `STATS metric = AGG(field) BY grouping_field` with `STATS metric = AGG(field) BY bucket = BUCKET(@timestamp, 50, "{start}", "{end}")`
+6. **Add a SORT** clause: `| SORT bucket ASC`
+
+**Template:**
+
+```
+FROM {source_index}
+| WHERE {original_where_conditions}
+  AND @timestamp >= "{episode_start}"
+  AND @timestamp <= "{episode_end}"
+  AND {grouping_field} == "{grouping_value}"
+| STATS {metric} = {AGG}({field}) BY bucket = BUCKET(@timestamp, 50, "{episode_start}", "{episode_end}")
+| SORT bucket ASC
+```
+
+**Example** — for a rule with query:
+```
+FROM remote_cluster:metrics-kubeletstatsreceiver.otel-default
+| WHERE k8s.namespace.name == "default" AND k8s.container.cpu_request_utilization IS NOT NULL
+| STATS avg_cpu = AVG(k8s.container.cpu_request_utilization) BY k8s.pod.name, k8s.container.name
+| WHERE avg_cpu > 4
+```
+
+The visualization query becomes:
+```
+FROM remote_cluster:metrics-kubeletstatsreceiver.otel-default
+| WHERE k8s.namespace.name == "default"
+  AND k8s.container.cpu_request_utilization IS NOT NULL
+  AND @timestamp >= "2026-04-08T17:00:00.000Z"
+  AND @timestamp <= "2026-04-12T00:00:00.000Z"
+  AND k8s.pod.name == "opentelemetry-kube-stack-daemon-collector-p69f5"
+| STATS avg_cpu = AVG(k8s.container.cpu_request_utilization) BY bucket = BUCKET(@timestamp, 50, "2026-04-08T17:00:00.000Z", "2026-04-12T00:00:00.000Z")
+| SORT bucket ASC
+```
+
+**Key differences from the original rule query:**
+- Added time range filter
+- Added entity filter (pinned to the specific grouping values from the episode)
+- Removed the threshold `WHERE` clause (e.g., `WHERE avg_cpu > 4`) — we want ALL data points, not just breaching ones
+- Changed `BY grouping_field` to `BY BUCKET(@timestamp, ...)` for time-series bucketing
+
+### Step 5: Create the Visualization
+
+Call `platform.core.create_visualization` with:
+- `query`: A natural language description of the visualization. **Important**: Include in the query description that the chart should have an annotation layer marking the alert start time (see below).
+- `index`: The source index from Step 3
+- `esql`: The modified ES|QL query from Step 4
+- `chartType` (optional): Use the guidance below
+
+**Chart type selection:**
+- **Numeric over time** (latency, CPU, error count trend) → `xy` (line chart)
+- **Numeric by category** (latency per service, CPU per pod) → `xy` (bar chart)
+- **Single numeric value** (current CPU, total errors) → `metric`
+- **Proportions** (error rate as %) → `metric` or `xy`
+
+### Step 6: Alert Start Annotation
+
+For time-series (`xy`) visualizations, **always** add an annotation marking when the alert episode started. This helps the user see exactly when the threshold was first breached.
+
+The alert start time is the `@timestamp` of the **first breached event** from Step 1.
+
+Include in your natural language `query` to `create_visualization` an instruction like:
+> "Add a manual point annotation at timestamp {first_breached_timestamp} with the 'alert' icon, colored red (#E7664C), labeled 'Alert started', with a dashed vertical line."
+
+The annotation layer config should look like:
+```json
+{
+  "type": "annotations",
+  "events": [
+    {
+      "type": "point",
+      "timestamp": "{first_breached_timestamp_iso}",
+      "label": "Alert started",
+      "icon": "alert",
+      "color": "#E7664C",
+      "visible": true,
+      "line": {
+        "stroke_width": 2,
+        "stroke_dash": "dashed"
+      },
+      "text": {
+        "visible": true
+      }
+    }
+  ]
+}
+```
+
+If the visualization tool does not include the annotation in its generated config, mention the alert start time prominently in your response text instead.
+
+---
+
+## Special Cases
+
+### Derived metrics (e.g., error rate)
+
+When the rule computes derived values like error rate (`errors / total`), build the visualization query to compute the same derivation from source fields:
+
+```
+FROM {source_index}
+| WHERE ...time range and entity filters...
+| STATS errors = SUM(CASE(event.outcome == "FAILURE", 1, 0)),
+        total = COUNT(*)
+  BY bucket = BUCKET(@timestamp, 50, "{start}", "{end}")
+| EVAL error_rate = errors * 100.0 / total
+| SORT bucket ASC
+```
+
+### Multiple grouping fields
+
+If the rule groups by multiple fields (e.g., `BY k8s.pod.name, k8s.container.name`), filter the visualization query by ALL grouping values from the episode data to isolate the specific entity.
+
+### Edge Cases
+
+- **No numeric fields**: If the episode data only contains keyword fields, suggest a count-based visualization: `STATS event_count = COUNT(*) BY BUCKET(@timestamp, ...)`
+- **Empty data on recovery events**: `recovering` and `inactive` events have `data: {}`. Use breached events for extracting field names and entity values.
+- **Multiple FROM sources in rule query**: If the rule queries multiple indices (comma-separated), keep all of them in the visualization query.
+- **CCS index names**: Keep the full CCS-prefixed name (e.g., `remote_cluster:traces-generic.otel-default`).
+- **Threshold WHERE clause**: Always remove the rule's threshold condition (e.g., `WHERE avg_cpu > 4`) from the visualization query. You want to see the full range of values, not just the breaching ones. This lets the user see the metric crossing above and below the threshold.

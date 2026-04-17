@@ -6,7 +6,8 @@
  */
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
-import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import { CoreStart, PluginInitializer, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -58,15 +59,20 @@ import {
 import { UserService } from '../lib/services/user_service/user_service';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
+  AGENTIC_ANALYSIS_SETTINGS_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
   NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
   EncryptedSavedObjectsClientToken,
+  KibanaBaseUrlToken,
   WorkflowsManagementApiToken,
 } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { MatcherSuggestionsService } from '../lib/services/matcher_suggestions_service/matcher_suggestions_service';
+import type { PluginConfig } from '../config';
+import { AgentBuilderExecutionToken, SlackEventsConfigToken } from '../lib/slack_events/tokens';
+import { AgenticAnalysisSavedObjectsClientToken } from '../routes/settings/agentic_analysis_tokens';
 import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
@@ -147,7 +153,9 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           'encryptedSavedObjects'
         )
       );
-      return eso.getClient({ includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE] });
+      return eso.getClient({
+        includedHiddenTypes: [NOTIFICATION_POLICY_SAVED_OBJECT_TYPE, AGENTIC_ANALYSIS_SETTINGS_TYPE],
+      });
     })
     .inSingletonScope();
 
@@ -225,6 +233,13 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     })
     .inSingletonScope();
 
+  bind(KibanaBaseUrlToken)
+    .toDynamicValue(({ get }) => {
+      const http = get(CoreStart('http'));
+      return http.basePath.publicBaseUrl;
+    })
+    .inSingletonScope();
+
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
 
   bind(DispatcherService).toSelf().inSingletonScope();
@@ -249,4 +264,33 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   // Order matters: specialized strategies first, fallback (BasicTransitionStrategy) last.
   bind(TransitionStrategyToken).to(CountTimeframeStrategy).inSingletonScope();
   bind(TransitionStrategyToken).to(BasicTransitionStrategy).inSingletonScope();
+
+  bind(SlackEventsConfigToken)
+    .toDynamicValue(({ get }) => {
+      const pluginConfig = get<PluginInitializerContext<PluginConfig>['config']>(
+        PluginInitializer('config')
+      ).get<PluginConfig>();
+      return pluginConfig.slackEvents;
+    })
+    .inSingletonScope();
+
+  bind(AgentBuilderExecutionToken)
+    .toDynamicValue(({ get }) => {
+      try {
+        const agentBuilder = get(
+          PluginStart<AlertingServerStartDependencies['agentBuilder']>('agentBuilder')
+        );
+        return agentBuilder?.execution as any;
+      } catch {
+        return undefined;
+      }
+    })
+    .inSingletonScope();
+
+  bind(AgenticAnalysisSavedObjectsClientToken)
+    .toDynamicValue(({ get }) => {
+      const savedObjects = get(CoreStart('savedObjects'));
+      return savedObjects.createInternalRepository([AGENTIC_ANALYSIS_SETTINGS_TYPE]);
+    })
+    .inSingletonScope();
 }

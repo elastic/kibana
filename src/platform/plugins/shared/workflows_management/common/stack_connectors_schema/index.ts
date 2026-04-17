@@ -116,6 +116,7 @@ export {
 // Slack API connector schemas
 export {
   SlackApiPostMessageParamsSchema,
+  SlackApiUpdateMessageParamsSchema,
   SlackApiGetChannelsParamsSchema,
   SlackApiGetUsersParamsSchema,
   SlackApiResponseSchema,

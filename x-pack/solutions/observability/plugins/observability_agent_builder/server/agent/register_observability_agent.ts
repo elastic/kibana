@@ -15,8 +15,9 @@ import { OBSERVABILITY_GET_INDEX_INFO_TOOL_ID } from '../tools';
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 import { OBSERVABILITY_AGENT_ID } from '../../common/constants';
 import { OBSERVABILITY_TOOL_IDS, PLATFORM_TOOL_IDS } from '../tools/register_tools';
+import { ALERTING_V2_TOOL_IDS } from '../tools/alerting_v2_tool_ids';
 
-const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
+const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS, ...ALERTING_V2_TOOL_IDS];
 
 export async function registerObservabilityAgent({
   core,

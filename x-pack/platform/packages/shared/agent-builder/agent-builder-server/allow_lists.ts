@@ -68,6 +68,10 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.workflow_modify_property`,
   `${internalNamespaces.workflows}.workflow_delete_step`,
   `${internalNamespaces.workflows}.workflow_replace_yaml`,
+
+  // Alerting v2
+  `${internalNamespaces.alerting}.get_episode_events`,
+  `${internalNamespaces.alerting}.get_rule`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -122,6 +126,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // O11Y
   'observability.rca',
+  'observability.episode-visualization',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

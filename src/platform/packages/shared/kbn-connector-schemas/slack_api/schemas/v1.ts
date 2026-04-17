@@ -124,8 +124,24 @@ export const PostBlockkitParamsSchema = z
   })
   .strict();
 
+export const UpdateMessageSubActionParamsSchema = z
+  .object({
+    channel: z.string().min(1),
+    ts: z.string().min(1),
+    text: z.string().min(1),
+  })
+  .strict();
+
+export const UpdateMessageParamsSchema = z
+  .object({
+    subAction: z.literal('updateMessage'),
+    subActionParams: UpdateMessageSubActionParamsSchema,
+  })
+  .strict();
+
 export const SlackApiParamsSchema = z.union([
   ValidChannelIdParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,
+  UpdateMessageParamsSchema,
 ]);

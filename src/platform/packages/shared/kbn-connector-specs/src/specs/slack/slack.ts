@@ -672,6 +672,61 @@ export const Slack: ConnectorSpec = {
       },
     },
 
+    // https://api.slack.com/methods/chat.update
+    updateMessage: {
+      isTool: false,
+      description:
+        'Update an existing Slack message. Requires a channel ID and the timestamp (ts) of the message to update. Returns the updated message timestamp.',
+      input: z.object({
+        channel: z
+          .string()
+          .min(1)
+          .describe('Conversation ID where the message exists (e.g. C... for channels)'),
+        ts: z.string().min(1).describe('Timestamp of the message to update'),
+        text: z.string().min(1).describe('The new message text'),
+      }),
+      handler: async (ctx, input) => {
+        const { channel, ts, text } = input as { channel: string; ts: string; text: string };
+
+        const payload: Record<string, unknown> = { channel, ts, text };
+
+        try {
+          ctx.log.debug(`Slack updateMessage request: channel=${channel}, ts=${ts}`);
+          const response = await slackRequestWithRateLimitRetry({
+            ctx,
+            action: 'updateMessage',
+            maxRetries: SLACK_MAX_RETRIES,
+            request: () =>
+              ctx.client.post(`${SLACK_API_BASE}/chat.update`, payload, {
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
+              }),
+          });
+
+          if (!response.data.ok) {
+            throw new Error(
+              formatSlackApiErrorMessage({
+                action: 'updateMessage',
+                responseData: response.data,
+                responseHeaders: response.headers,
+              })
+            );
+          }
+
+          return response.data;
+        } catch (error) {
+          const err = error as AxiosError<unknown>;
+          ctx.log.error(
+            `Slack updateMessage failed: ${err.message}, Status: ${
+              err.response?.status
+            }, Data: ${JSON.stringify(err.response?.data)}`
+          );
+          throw error;
+        }
+      },
+    },
+
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,

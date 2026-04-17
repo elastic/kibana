@@ -45,6 +45,7 @@ export class FetchRulesStep implements DispatcherStep {
         description: doc.attributes.metadata.owner ?? '',
         tags: doc.attributes.metadata.tags ?? [],
         enabled: doc.attributes.enabled,
+        groupingFields: doc.attributes.grouping?.fields ?? [],
         createdAt: doc.attributes.createdAt,
         updatedAt: doc.attributes.updatedAt,
       });

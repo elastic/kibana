@@ -25,6 +25,12 @@ export const SlackApiPostMessageParamsSchema = z.object({
   unfurl_media: z.boolean().optional(),
 });
 
+export const SlackApiUpdateMessageParamsSchema = z.object({
+  channel: z.string(),
+  ts: z.string(),
+  text: z.string(),
+});
+
 export const SlackApiGetChannelsParamsSchema = z.object({
   types: z.string().optional(),
   exclude_archived: z.boolean().optional(),

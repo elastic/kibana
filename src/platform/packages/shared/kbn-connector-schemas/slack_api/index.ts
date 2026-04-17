@@ -17,6 +17,8 @@ export {
   PostBlockkitSubActionParamsSchema,
   PostMessageParamsSchema,
   PostBlockkitParamsSchema,
+  UpdateMessageSubActionParamsSchema,
+  UpdateMessageParamsSchema,
   SlackApiParamsSchema,
 } from './schemas/latest';
 
@@ -27,6 +29,8 @@ export type {
   PostMessageSubActionParams,
   PostBlockkitSubActionParams,
   PostBlockkitParams,
+  UpdateMessageSubActionParams,
+  UpdateMessageParams,
   ValidChannelIdSubActionParams,
   SlackApiParams,
   SlackApiActionParams,

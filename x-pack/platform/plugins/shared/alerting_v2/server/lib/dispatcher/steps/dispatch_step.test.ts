@@ -9,9 +9,11 @@ import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
+  createAlertEpisode,
   createDispatcherPipelineState,
   createNotificationGroup,
   createNotificationPolicy,
+  createRule,
 } from '../fixtures/test_utils';
 import { DispatchStep } from './dispatch_step';
 
@@ -47,26 +49,40 @@ describe('DispatchStep', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('dispatches each group to its workflow destinations', async () => {
+  it('dispatches each group to its workflow destinations with enriched rule names and episode URLs', async () => {
     const { loggerService } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, 'https://my-kibana.example.com');
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
     mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
 
+    const episode = createAlertEpisode({
+      rule_id: 'rule-1',
+      episode_id: 'ep-abc',
+      data: { service: { name: 'frontend' }, event: { outcome: 'failure' }, count: 250 },
+    });
+    const rule = createRule({
+      id: 'rule-1',
+      name: 'Frontend error spike',
+      groupingFields: ['service.name'],
+    });
     const group = createNotificationGroup({
       id: 'g1',
       policyId: 'p1',
       destinations: [{ type: 'workflow', id: 'workflow-1' }],
+      episodes: [episode],
     });
     const policy = createNotificationPolicy({
       id: 'p1',
+      name: 'Astronomy Shop Per-Episode',
+      groupingMode: 'per_episode',
       apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
     const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
+      rules: new Map([['rule-1', rule]]),
     });
 
     const result = await step.execute(state);
@@ -79,8 +95,19 @@ describe('DispatchStep', () => {
       expect.objectContaining({
         id: 'g1',
         policyId: 'p1',
+        policyName: 'Astronomy Shop Per-Episode',
+        policyUrl: 'https://my-kibana.example.com/app/management/alertingV2/notification_policies/edit/p1',
+        groupingMode: 'per_episode',
+        workflowName: 'Test Workflow',
+        workflowUrl: 'https://my-kibana.example.com/app/workflows/workflow-1',
         groupKey: group.groupKey,
-        episodes: group.episodes,
+        episodes: [expect.objectContaining({
+          rule_id: 'rule-1',
+          rule_name: 'Frontend error spike',
+          rule_url: 'https://my-kibana.example.com/app/management/alertingV2/rules/rule-1',
+          group_values: { 'service.name': 'frontend' },
+          episode_url: 'https://my-kibana.example.com/app/management/alertingV2/episodes/ep-abc',
+        })],
       }),
       expect.objectContaining({
         headers: expect.objectContaining({
@@ -93,7 +120,7 @@ describe('DispatchStep', () => {
 
   it('skips dispatch when policy has no API key', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     const group = createNotificationGroup({ id: 'g1', policyId: 'p1' });
     const policy = createNotificationPolicy({ id: 'p1' });
@@ -113,7 +140,7 @@ describe('DispatchStep', () => {
 
   it('skips dispatch when workflow is not found', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     mockWfm.getWorkflow.mockResolvedValue(null);
 
@@ -141,7 +168,7 @@ describe('DispatchStep', () => {
 
   it('dispatches to multiple workflow destinations', async () => {
     const { loggerService } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
     mockWfm.scheduleWorkflow.mockResolvedValue('exec-1');
@@ -172,7 +199,7 @@ describe('DispatchStep', () => {
 
   it('continues with no-op when dispatch is empty', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     const state = createDispatcherPipelineState({ dispatch: [] });
     const result = await step.execute(state);
@@ -183,7 +210,7 @@ describe('DispatchStep', () => {
 
   it('continues when dispatch is undefined', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     const state = createDispatcherPipelineState({});
     const result = await step.execute(state);
@@ -194,7 +221,7 @@ describe('DispatchStep', () => {
 
   it('continues dispatching remaining groups when one group fails', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
     mockWfm.scheduleWorkflow
@@ -231,7 +258,7 @@ describe('DispatchStep', () => {
 
   it('logs error when scheduleWorkflow throws', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
     mockWfm.scheduleWorkflow.mockRejectedValue(new Error('service unavailable'));
@@ -265,7 +292,7 @@ describe('DispatchStep', () => {
 
   it('continues dispatching remaining destinations when one destination fails', async () => {
     const { loggerService, mockLogger } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
     mockWfm.scheduleWorkflow
@@ -300,7 +327,7 @@ describe('DispatchStep', () => {
   it('dispatches multiple groups concurrently with a max concurrency of 3', async () => {
     jest.useFakeTimers();
     const { loggerService } = createLoggerService();
-    const step = new DispatchStep(loggerService, mockWfm);
+    const step = new DispatchStep(loggerService, mockWfm, undefined);
 
     let inFlight = 0;
     let maxInFlight = 0;

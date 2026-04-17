@@ -18,6 +18,11 @@ export const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),
+  slackEvents: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    slackBotToken: schema.string({ defaultValue: '' }),
+    slackSigningSecret: schema.string({ defaultValue: '' }),
+  }),
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;

@@ -113,7 +113,7 @@ function buildDispatcherService(deps: {
     new EvaluateMatchersStep(),
     new BuildGroupsStep(),
     new ApplyThrottlingStep(deps.queryService, loggerService),
-    new DispatchStep(loggerService, deps.workflowsManagement),
+    new DispatchStep(loggerService, deps.workflowsManagement, undefined),
     new StoreActionsStep(deps.storageService),
   ]);
   return new DispatcherService(pipeline);

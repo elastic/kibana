@@ -106,11 +106,16 @@ export const resolveSelectedConnectorId = async ({
     }
     return defaultConnectorSetting;
   }
-  if (connectorId) return connectorId;
-  if (hasValidDefaultConnector) return defaultConnectorSetting;
+  if (connectorId) {
+    return connectorId;
+  }
+  if (hasValidDefaultConnector) {
+    return defaultConnectorSetting;
+  }
 
-  return (
-    (await tryGetInferenceDefault(inference, request)) ||
-    (await tryGetFallbackConnector(inference, request))
-  );
+  const inferenceDefault = await tryGetInferenceDefault(inference, request);
+  if (inferenceDefault) return inferenceDefault;
+
+  const fallback = await tryGetFallbackConnector(inference, request);
+  return fallback;
 };

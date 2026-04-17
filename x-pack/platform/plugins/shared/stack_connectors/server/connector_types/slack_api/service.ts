@@ -19,6 +19,7 @@ import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type {
   PostBlockkitSubActionParams,
   PostMessageSubActionParams,
+  UpdateMessageSubActionParams,
 } from '@kbn/connector-schemas/slack_api';
 import { CONNECTOR_ID, CONNECTOR_NAME, SLACK_URL } from '@kbn/connector-schemas/slack_api';
 import type {
@@ -295,9 +296,33 @@ export const createExternalService = (
     }
   };
 
+  const updateMessage = async ({
+    channel,
+    ts,
+    text,
+  }: UpdateMessageSubActionParams): Promise<ConnectorTypeExecutorResult<unknown>> => {
+    try {
+      const result: AxiosResponse<PostMessageResponse> = await request({
+        axios: axiosInstance,
+        method: 'post',
+        url: `${SLACK_URL}chat.update`,
+        logger,
+        data: { channel, ts, text },
+        headers,
+        configurationUtilities,
+        connectorUsageCollector,
+      });
+
+      return buildSlackExecutorSuccessResponse({ slackApiResponseData: result.data });
+    } catch (error) {
+      return buildSlackExecutorErrorResponse({ slackApiError: error, logger });
+    }
+  };
+
   return {
     validChannelId,
     postMessage,
     postBlockkit,
+    updateMessage,
   };
 };

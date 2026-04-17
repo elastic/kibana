@@ -20,6 +20,7 @@ import {
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_NOTIFICATION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_SETTINGS_APP_ID,
 } from './constants';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
@@ -105,6 +106,20 @@ export const module = new ContainerModule(({ bind }) => {
         return mountNotificationPoliciesApp({
           params,
           container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
+    alertingV2Section.registerApp({
+      id: ALERTING_V2_SETTINGS_APP_ID,
+      title: 'Settings',
+      order: 4,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountSettingsApp } = await import('./application/mount_settings');
+        return mountSettingsApp({
+          params,
           coreStart,
         });
       },

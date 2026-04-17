@@ -509,7 +509,7 @@ describe('DispatcherService integration tests', () => {
       new EvaluateMatchersStep(),
       new BuildGroupsStep(),
       new ApplyThrottlingStep(queryService, mockLoggerService),
-      new DispatchStep(mockLoggerService, mockWfm),
+      new DispatchStep(mockLoggerService, mockWfm, undefined),
       new StoreActionsStep(storageService),
     ]);
     dispatcherService = new DispatcherService(pipeline);

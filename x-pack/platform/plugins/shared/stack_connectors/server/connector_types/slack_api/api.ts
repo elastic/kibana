@@ -8,6 +8,7 @@
 import type {
   PostBlockkitSubActionParams,
   PostMessageSubActionParams,
+  UpdateMessageSubActionParams,
   ValidChannelIdSubActionParams,
 } from '@kbn/connector-schemas/slack_api';
 import type { SlackApiService } from '../../../common/slack_api/types';
@@ -36,8 +37,17 @@ const postBlockkitHandler = async ({
   params: PostBlockkitSubActionParams;
 }) => await externalService.postBlockkit({ channelIds, channels, channelNames, text });
 
+const updateMessageHandler = async ({
+  externalService,
+  params,
+}: {
+  externalService: SlackApiService;
+  params: UpdateMessageSubActionParams;
+}) => await externalService.updateMessage(params);
+
 export const api = {
   validChannelId: validChannelIdHandler,
   postMessage: postMessageHandler,
   postBlockkit: postBlockkitHandler,
+  updateMessage: updateMessageHandler,
 };

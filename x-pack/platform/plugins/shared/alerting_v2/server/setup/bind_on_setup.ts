@@ -8,7 +8,11 @@
 import { Logger, OnSetup, PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-server';
 import type { ContainerModuleLoadOptions } from 'inversify';
-import type { AlertingServerSetupDependencies, AlertingServerStartDependencies } from '../types';
+import type {
+  AgentBuilderPluginSetupContract,
+  AlertingServerSetupDependencies,
+  AlertingServerStartDependencies,
+} from '../types';
 import { registerTelemetryTask } from '../lib/usage/task_definition';
 import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import { registerFeaturePrivileges } from '../lib/security/privileges';
@@ -16,6 +20,8 @@ import { TaskDefinition } from '../lib/services/task_run_scope_service/create_ta
 import { registerSavedObjects } from '../saved_objects';
 import { dispatcherUiSettings } from '../lib/dispatcher/ui_settings';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
+import { getEpisodeEventsTool } from '../tools/get_episode_events_tool';
+import { getAlertingRuleTool } from '../tools/get_rule_tool';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -59,6 +65,14 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
       registerAlertingV2UsageCollector(getTaskManagerStart, usageCollection);
       registerTelemetryTask(logger, taskManager, getEsClient);
+    }
+
+    const agentBuilderToken = PluginSetup<AgentBuilderPluginSetupContract>('agentBuilder');
+    if (container.isBound(agentBuilderToken)) {
+      const agentBuilder = container.get(agentBuilderToken);
+      agentBuilder.tools.register(getEpisodeEventsTool);
+      agentBuilder.tools.register(getAlertingRuleTool);
+      logger.debug('Registered alerting v2 Agent Builder tools');
     }
   });
 }

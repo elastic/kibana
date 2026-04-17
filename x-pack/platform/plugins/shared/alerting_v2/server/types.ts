@@ -20,9 +20,20 @@ import type {
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 
 export type AlertingServerSetup = void;
 export type AlertingServerStart = void;
+
+/**
+ * Minimal shape of AgentBuilderPluginSetup used by this plugin.
+ * Declared locally to avoid a circular dependency on the agent_builder plugin.
+ */
+export interface AgentBuilderPluginSetupContract {
+  tools: {
+    register: (definition: StaticToolRegistration) => void;
+  };
+}
 
 export interface AlertingServerSetupDependencies {
   taskManager: TaskManagerSetupContract;
@@ -31,6 +42,7 @@ export interface AlertingServerSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  agentBuilder?: AgentBuilderPluginSetupContract;
 }
 
 export interface AlertingServerStartDependencies {
@@ -40,4 +52,5 @@ export interface AlertingServerStartDependencies {
   data: DataPluginStart;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  agentBuilder?: { execution: { executeAgent: (...args: any[]) => Promise<any> } };
 }

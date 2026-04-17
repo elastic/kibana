@@ -18,9 +18,13 @@ export interface NotificationPolicyDestination {
 export interface AlertEpisode {
   last_event_timestamp: string;
   rule_id: RuleId;
+  rule_name?: string;
+  rule_url?: string;
   group_hash: string;
+  group_values?: Record<string, unknown>;
   episode_id: string;
   episode_status: 'inactive' | 'pending' | 'active' | 'recovering';
+  episode_url?: string;
   data?: AlertEpisodeData;
 }
 
@@ -54,6 +58,7 @@ export interface Rule {
   description: string;
   tags: string[];
   enabled: boolean;
+  groupingFields: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -102,6 +107,11 @@ export interface NotificationGroup {
 export interface NotificationPolicyWorkflowPayload {
   id: NotificationGroupId;
   policyId: NotificationPolicyId;
+  policyName: string;
+  policyUrl?: string;
+  groupingMode: 'per_episode' | 'all' | 'per_field';
+  workflowName: string;
+  workflowUrl?: string;
   groupKey: Record<string, unknown>;
   episodes: AlertEpisode[];
 }

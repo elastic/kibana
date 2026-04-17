@@ -68,6 +68,7 @@ export function createRule(overrides: Partial<Rule> = {}): Rule {
     description: '',
     tags: [],
     enabled: true,
+    groupingFields: [],
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     ...overrides,

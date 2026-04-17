@@ -11,12 +11,14 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
+import { get } from 'lodash';
 import pLimit from 'p-limit';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import type {
+  AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -24,8 +26,10 @@ import type {
   NotificationPolicyId,
   NotificationPolicy,
   NotificationPolicyWorkflowPayload,
+  Rule,
+  RuleId,
 } from '../types';
-import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
+import { KibanaBaseUrlToken, WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
 const NOTIFICATION_POLICY_TRIGGER = 'notification_policy';
 const MAX_CONCURRENT_DISPATCHES = 3;
@@ -37,16 +41,17 @@ export class DispatchStep implements DispatcherStep {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(WorkflowsManagementApiToken)
-    private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
+    private readonly workflowsManagement: WorkflowsServerPluginSetup['management'],
+    @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string | undefined
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
+    const { dispatch = [], policies, rules } = state;
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
     await Promise.allSettled(
-      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies)))
+      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies, rules)))
     );
 
     return { type: 'continue' };
@@ -54,7 +59,8 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchGroup(
     group: NotificationGroup,
-    policies?: Map<NotificationPolicyId, NotificationPolicy>
+    policies?: Map<NotificationPolicyId, NotificationPolicy>,
+    rules?: ReadonlyMap<RuleId, Rule>
   ): Promise<void> {
     try {
       const policy = policies?.get(group.policyId);
@@ -76,7 +82,7 @@ export class DispatchStep implements DispatcherStep {
         }
 
         try {
-          await this.dispatchWorkflow(group, destination.id, fakeRequest);
+          await this.dispatchWorkflow(group, destination.id, fakeRequest, rules, policy);
         } catch (err) {
           this.logger.error({
             error:
@@ -115,10 +121,49 @@ export class DispatchStep implements DispatcherStep {
     return kibanaRequestFactory(fakeRawRequest);
   }
 
+  private buildKibanaUrl(path: string): string | undefined {
+    if (!this.kibanaBaseUrl) return undefined;
+    return `${this.kibanaBaseUrl}${path}`;
+  }
+
+  private extractGroupValues(
+    episode: AlertEpisode,
+    rule?: Rule
+  ): Record<string, unknown> | undefined {
+    const fields = rule?.groupingFields;
+    if (!fields || fields.length === 0 || !episode.data) return undefined;
+    const values: Record<string, unknown> = {};
+    for (const field of fields) {
+      const value = get(episode.data, field);
+      if (value !== undefined) {
+        values[field] = value;
+      }
+    }
+    return Object.keys(values).length > 0 ? values : undefined;
+  }
+
+  private enrichEpisodes(
+    episodes: AlertEpisode[],
+    rules?: ReadonlyMap<RuleId, Rule>
+  ): AlertEpisode[] {
+    return episodes.map((episode) => {
+      const rule = rules?.get(episode.rule_id);
+      return {
+        ...episode,
+        ...(rule ? { rule_name: rule.name } : {}),
+        rule_url: this.buildKibanaUrl(`/app/management/alertingV2/rules/${encodeURIComponent(episode.rule_id)}`),
+        group_values: this.extractGroupValues(episode, rule),
+        episode_url: this.buildKibanaUrl(`/app/management/alertingV2/episodes/${encodeURIComponent(episode.episode_id)}`),
+      };
+    });
+  }
+
   private async dispatchWorkflow(
     group: NotificationGroup,
     workflowId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    rules?: ReadonlyMap<RuleId, Rule>,
+    policy?: NotificationPolicy
   ): Promise<void> {
     const workflow = await this.workflowsManagement.getWorkflow(workflowId, group.spaceId);
 
@@ -145,11 +190,19 @@ export class DispatchStep implements DispatcherStep {
       yaml: workflow.yaml,
     };
 
+    const policyUrl = this.buildKibanaUrl(`/app/management/alertingV2/notification_policies/edit/${encodeURIComponent(group.policyId)}`);
+    const workflowUrl = this.buildKibanaUrl(`/app/workflows/${encodeURIComponent(workflowId)}`);
+
     const payload: NotificationPolicyWorkflowPayload = {
       id: group.id,
       policyId: group.policyId,
+      policyName: policy?.name ?? group.policyId,
+      policyUrl,
+      groupingMode: policy?.groupingMode ?? 'per_episode',
+      workflowName: workflow.name,
+      workflowUrl,
       groupKey: group.groupKey,
-      episodes: group.episodes,
+      episodes: this.enrichEpisodes(group.episodes, rules),
     };
 
     this.logger.debug({

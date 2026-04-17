@@ -32,7 +32,7 @@ import type {
 import { api } from './api';
 import { createExternalService } from './service';
 
-const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage', 'postBlockkit'];
+const supportedSubActions = ['getAllowedChannels', 'validChannelId', 'postMessage', 'postBlockkit', 'updateMessage'];
 
 export const getConnectorType = (): SlackApiConnectorType => {
   return {
@@ -98,6 +98,14 @@ const renderParameterTemplates = (
         text: renderMustacheString(logger, params.subActionParams.text, variables, 'json'),
       },
     };
+  } else if (params.subAction === 'updateMessage') {
+    return {
+      subAction: params.subAction,
+      subActionParams: {
+        ...params.subActionParams,
+        text: renderMustacheString(logger, params.subActionParams.text, variables, 'slack'),
+      },
+    };
   }
   return params;
 };
@@ -151,6 +159,13 @@ const slackApiExecutor = async ({
 
   if (subAction === 'postBlockkit') {
     return await api.postBlockkit({
+      externalService,
+      params: params.subActionParams,
+    });
+  }
+
+  if (subAction === 'updateMessage') {
+    return await api.updateMessage({
       externalService,
       params: params.subActionParams,
     });

@@ -986,12 +986,15 @@ const xyLayerUnionNoESQL = schema.oneOf(
   }
 );
 
-const xyLayerUnionESQL = schema.oneOf([xyDataLayerSchemaESQL, referenceLineLayerSchemaESQL], {
-  meta: {
-    id: 'xyLayersESQL',
-    description: 'XY chart layer types for ES|QL queries',
-  },
-});
+const xyLayerUnionESQL = schema.oneOf(
+  [xyDataLayerSchemaESQL, referenceLineLayerSchemaESQL, annotationLayerSchema],
+  {
+    meta: {
+      id: 'xyLayersESQL',
+      description: 'XY chart layer types for ES|QL queries',
+    },
+  }
+);
 
 /**
  * XY chart state for DSL layers
@@ -1063,7 +1066,7 @@ export type ReferenceLineLayerType = ReferenceLineLayerTypeNoESQL | ReferenceLin
 export type AnnotationLayerType = TypeOf<typeof annotationLayerSchema>;
 export type AnnotationLayerByRefType = TypeOf<typeof annotationByRefLayerSchema>;
 export type AnnotationLayerByValueType = TypeOf<typeof annotationLayerByValueSchema>;
-export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL;
+export type LayerTypeESQL = DataLayerTypeESQL | ReferenceLineLayerTypeESQL | AnnotationLayerType;
 export type LayerTypeNoESQL =
   | DataLayerTypeNoESQL
   | ReferenceLineLayerTypeNoESQL
