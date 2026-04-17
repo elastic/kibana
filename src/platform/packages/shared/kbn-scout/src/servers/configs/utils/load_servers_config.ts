@@ -42,6 +42,7 @@ export async function loadServersConfig(
 ): Promise<Config> {
   const configPath = getConfigFilePath(configRootDir, testTarget);
 
+  // Validate that the config file exists
   if (!fs.existsSync(configPath)) {
     throw new Error(`Config file not found: ${configPath}`);
   }
@@ -54,7 +55,9 @@ export async function loadServersConfig(
   }
 
   const clusterConfig = new Config(rawConfig);
+  // construct config for Playwright Test
   const scoutServerConfig = clusterConfig.getScoutTestConfig();
+  // save test config to the file
   saveScoutTestConfigOnDisk(scoutServerConfig, log);
   return clusterConfig;
 }
