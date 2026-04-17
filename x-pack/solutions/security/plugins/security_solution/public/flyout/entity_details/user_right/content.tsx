@@ -74,7 +74,10 @@ export const UserPanelContent = ({
   return (
     <>
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
-        <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+        <EntityHighlightsAccordion
+          entityIdentifier={entityRecord ? entityRecord.entity.id : userName}
+          entityType={EntityType.user}
+        />
       )}
       {!skipRiskAndCriticality &&
         riskScoreState.hasEngineBeenInstalled &&
