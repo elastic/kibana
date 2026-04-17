@@ -10,7 +10,14 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom-v5-compat';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 
-export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+interface BackButtonProps {
+  onBack?: () => void;
+}
+
+export const BackButton: React.FC<React.PropsWithChildren<BackButtonProps>> = ({
+  children,
+  onBack,
+}) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,7 +27,7 @@ export const BackButton: React.FC<React.PropsWithChildren<{}>> = ({ children }) 
         data-test-subj="observabilityOnboardingFlowBackToSelectionButton"
         iconType="chevronSingleLeft"
         flush="left"
-        onClick={() => navigate(`../${location.search}`)}
+        onClick={onBack ? onBack : () => navigate(`../${location.search}`)}
       >
         {children
           ? children

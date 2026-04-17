@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { Wrapper } from '../shared/test_wrapper';
 import { CustomHeader } from './custom_header';
@@ -48,5 +48,23 @@ describe('CustomHeaderSection', () => {
     expect(getByText('Return')).toBeInTheDocument();
     expect(getByText('Auto-detect logs and metrics')).toBeInTheDocument();
     expect(getByText('This installation scans your host and auto-detects log and metric files.'));
+  });
+
+  it('should invoke onBack when the return button is clicked', () => {
+    const onBack = jest.fn();
+    const { getByText } = render(
+      <CustomHeader
+        logo="kubernetes"
+        headlineCopy="Setting up Kubernetes with Elastic Agent"
+        captionCopy="This installation is tailored for configuring and collecting metrics and logs by deploying a new Elastic Agent within your host"
+        onBack={onBack}
+      />,
+      {
+        wrapper: Wrapper({ location: '/kubernetes' }),
+      }
+    );
+
+    fireEvent.click(getByText('Return'));
+    expect(onBack).toHaveBeenCalledTimes(1);
   });
 });

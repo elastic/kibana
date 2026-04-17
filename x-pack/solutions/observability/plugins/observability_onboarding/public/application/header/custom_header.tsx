@@ -30,6 +30,7 @@ interface Props {
   headlineCopy: string;
   captionCopy: string;
   isTechnicalPreview?: boolean;
+  onBack?: () => void;
 }
 
 export function CustomHeader({
@@ -38,6 +39,7 @@ export function CustomHeader({
   headlineCopy,
   captionCopy,
   isTechnicalPreview = false,
+  onBack,
 }: Props) {
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
@@ -50,7 +52,7 @@ export function CustomHeader({
       paddingSize="l"
       restrictWidth
     >
-      <BackButton>
+      <BackButton onBack={onBack}>
         {i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.button.returnButtonLabel',
           {
