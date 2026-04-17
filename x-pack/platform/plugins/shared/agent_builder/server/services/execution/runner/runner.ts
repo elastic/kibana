@@ -13,11 +13,8 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import {
-  isAgentBuilderError,
-  createInternalError,
-  AgentExecutionMode,
-} from '@kbn/agent-builder-common';
+import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
+import type { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
@@ -49,7 +46,12 @@ import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { ModelProviderFactoryFn } from './model_provider';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
-import { createEmptyRunContext, createConversationStateManager, createToolManager } from './utils';
+import {
+  createEmptyRunContext,
+  createConversationStateManager,
+  createToolManager,
+  createSubAgentExecutor,
+} from './utils';
 import { createPromptManager, getAgentPromptStorageState } from './utils/prompts';
 import { runTool, runInternalTool } from './run_tool';
 import { runAgent } from './run_agent';
@@ -212,27 +214,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
     const modelProvider = modelProviderFactory({ request, defaultConnectorId });
 
-    const subAgentExecutor: SubAgentExecutor = {
-      executeSubAgent: async (params) => {
-        const executionService = getExecutionService();
-        return executionService.executeAgent({
-          mode: AgentExecutionMode.standalone,
-          request,
-          params: {
-            agentId: params.agentId,
-            connectorId: params.connectorId,
-            capabilities: params.capabilities,
-            parentExecutionId: params.parentExecutionId,
-            nextInput: { message: params.prompt },
-          },
-          abortSignal: params.abortSignal,
-        });
-      },
-      getExecution: async (executionId) => {
-        const executionService = getExecutionService();
-        return executionService.getExecution(executionId);
-      },
-    };
+    const subAgentExecutor = createSubAgentExecutor({ request, getExecutionService });
 
     const allDeps = {
       ...runnerDeps,

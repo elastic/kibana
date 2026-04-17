@@ -368,20 +368,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 const getConversationState = ({
   promptManager,
   toolManager,
-  compactionSummary,
   backgroundExecutionService,
+  compactionSummary,
 }: {
   promptManager: PromptManager;
   toolManager: ToolManager;
+  backgroundExecutionService: BackgroundExecutionService;
   compactionSummary?: CompactionSummary;
-  backgroundExecutionService?: BackgroundExecutionService;
 }): ConversationInternalState => {
-  const bgState = backgroundExecutionService?.getPendingState();
+  const bgState = backgroundExecutionService.getPendingState();
   return {
     prompt: promptManager.dump(),
     dynamic_tool_ids: toolManager.getDynamicToolIds(),
     ...(compactionSummary ? { compaction_summary: compactionSummary } : {}),
-    ...(bgState && Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
+    ...(Object.keys(bgState).length > 0 ? { background_executions: bgState } : {}),
   };
 };
 

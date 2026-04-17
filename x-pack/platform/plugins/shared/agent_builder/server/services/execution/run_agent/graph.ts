@@ -105,8 +105,6 @@ export const createAgentGraph = ({
       toolCallGroupId: lastToolCallGroupId,
     });
 
-    if (completions.length === 0) return {};
-
     return {
       mainActions: completions.map(backgroundExecutionCompleteAction),
     };
