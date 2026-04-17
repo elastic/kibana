@@ -52,9 +52,18 @@ describe('useMetricsGridFullScreen', () => {
     expect(result.current.styles).toHaveProperty('metricsGrid--restrictBody');
   });
 
-  it('exports the fullscreen body styles helper class', () => {
+  it('exports the fullscreen body styles helper class bound to the z-index reset block', () => {
     expect(FULLSCREEN_BODY_STYLES_CLASS).toEqual(expect.any(String));
     expect(FULLSCREEN_BODY_STYLES_CLASS).not.toHaveLength(0);
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    expect(sourceCode).toMatch(
+      /export const FULLSCREEN_BODY_STYLES_CLASS\s*=\s*css`[^`]*z-index:\s*unset/
+    );
   });
 
   it('fullscreen styles use EUI push flyout CSS variable to prevent overlap with push flyouts', () => {

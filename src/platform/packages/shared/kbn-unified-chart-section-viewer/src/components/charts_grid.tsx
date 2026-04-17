@@ -52,13 +52,20 @@ export const ChartsGrid = ({
   `;
 
   useEffect(() => {
-    // When the metrics grid is fullscreen, we add a class to the body to remove the extra scrollbar and stay above any fixed headers
+    // When the metrics grid is fullscreen, we hide the chrome and reset competing
+    // stacking contexts so the grid can render above any embeddable panels or portals.
     if (isFullscreen) {
       const fullscreenBodyClasses = [
-        METRICS_GRID_RESTRICT_BODY_CLASS,
+        // Emotion-generated class that applies the restrict-body styles
+        // (body overflow hidden, flyout sizing, flyout/tooltip z-index overrides).
         restrictBodyClass,
-        METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
+        // Emotion-generated class that resets stacking contexts (`z-index: unset`)
+        // on elements outside the fullscreen grid (e.g., embeddable panels) so the
+        // grid can render above them.
         FULLSCREEN_BODY_STYLES_CLASS,
+        // Triggers Kibana's `handleEuiFullScreenChanges` side effect (same mechanism
+        // used by EUI DataGrid), which calls `chrome.setIsVisible(false)` to hide
+        // the chrome entirely.
         'euiDataGrid__restrictBody',
       ] as const;
 

@@ -15,7 +15,7 @@ import {
   METRICS_GRID_RESTRICT_BODY_CLASS,
 } from '../../../../common/constants';
 
-const fullScreenBodyStyles = css`
+export const FULLSCREEN_BODY_STYLES_CLASS = css`
   *:not(
       .euiFlyout,
       .${METRICS_GRID_FULL_SCREEN_CLASS}, .${METRICS_GRID_FULL_SCREEN_CLASS} *,
@@ -25,8 +25,6 @@ const fullScreenBodyStyles = css`
     z-index: unset;
   }
 `;
-
-export const FULLSCREEN_BODY_STYLES_CLASS = fullScreenBodyStyles;
 
 export const useMetricsGridFullScreen = ({ prefix }: { prefix: string }) => {
   const { euiTheme } = useEuiTheme();
