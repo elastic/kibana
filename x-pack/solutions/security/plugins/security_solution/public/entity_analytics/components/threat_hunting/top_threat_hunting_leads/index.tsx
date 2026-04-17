@@ -94,7 +94,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                 label="Tech Preview"
                 iconType="flask"
                 aria-hidden={true}
-                tooltipContent="This functionality is experimental and not supported. It may change or be removed at any time."
+                tooltipContent="This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."
               />
             </EuiFlexItem>
           </EuiFlexGroup>
