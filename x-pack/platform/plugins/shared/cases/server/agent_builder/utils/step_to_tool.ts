@@ -8,7 +8,7 @@
 import { ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 
 /**
  * Adapts a Cases ServerStepDefinition into an agent builder BuiltinToolDefinition.
