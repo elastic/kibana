@@ -134,7 +134,7 @@ test.beforeAll(async ({ esArchiver }) => {
 });
 
 test('shows metrics dashboard', async ({ page }) => {
-  // only uses large_metrics_archive — user_actions_archive is never referenced
+  // only uses large_metrics_archive; user_actions_archive is never referenced
 });
 ```
 
@@ -150,7 +150,7 @@ test.beforeAll(async ({ esArchiver }) => {
 
 ### Keep cleanup in hooks [put-cleanup-code-in-hooks-not-in-the-test-body]
 
-Cleanup in the test body doesn’t run after a failure. Prefer `afterEach` / `afterAll`.
+Cleanup in the test body doesn’t run after a failure. Prefer `afterEach` / `afterAll`. **Don’t duplicate** the same teardown in the test body when a hook already runs it; duplication invites unnecessary `try/catch` and drift between paths.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** put cleanup at the end of the test body (it’s skipped if the test fails):
@@ -282,6 +282,16 @@ await browserAuth.loginAsPlatformEngineer();
 For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth-extend).
 :::::
 
+### Contribute to Scout when possible [contribute-to-scout-when-possible]
+
+If you build a helper that will benefit other tests, consider upstreaming it:
+
+- **Reusable across many plugins/teams**: contribute to `@kbn/scout`
+- **Reusable but solution-scoped**: contribute to the relevant solution Scout package
+- **Plugin-specific**: keep it in your plugin’s `test/scout` tree
+
+For the full guidance, see [Scout](../scout.md#contribute-to-scout-when-possible).
+
 ---
 
 ## UI tests [ui-tests]
@@ -327,7 +337,7 @@ await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
 
 ### Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
 
-Use `test.step()` to structure a multi-step flow while keeping one browser context (faster, clearer reporting).
+Use `test.step()` to structure a multi-step flow while keeping one browser context (faster, clearer reporting). Group closely related actions into a single step when it keeps the report readable without hiding intent.
 
 :::::{dropdown} Example
 
@@ -344,6 +354,10 @@ test('navigates through pages', async ({ pageObjects }) => {
 ```
 
 :::::
+
+### Prefer realistic in-app navigation for user flows [prefer-realistic-in-app-navigation]
+
+When a test asserts **user flow** (not just “land on a page”), prefer navigation the way a user would: follow links and buttons, and use browser history (`page.goBack()`) instead of direct URL jumps where it matters for the scenario. Reserve `page.goto` / deep links for cheap setup when the test is not about navigation.
 
 ### Prefer APIs for setup and teardown [prefer-kibana-apis-over-ui-for-setup-and-teardown]
 
@@ -462,12 +476,13 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 
 :::::
 
-### Use Scout's default timeouts [use-scouts-default-timeouts]
+### Avoid unnecessary timeout overrides [use-scouts-default-timeouts]
 
 Scout configures Playwright timeouts ([source](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts)). Prefer defaults.
 
 - Don’t override suite-level timeouts/retries with `test.describe.configure()` unless you have a strong reason.
-- If you increase a timeout for one operation, keep it well below the test timeout and leave a short rationale. An assertion timeout that exceeds the test timeout is ignored.
+- If you increase a timeout for one operation, keep it well below the test timeout and **add a short code comment** explaining why (slow first load, CI variance, known heavy view, etc.). An assertion timeout that exceeds the test timeout is ignored.
+- After raising timeouts for flakiness, **re-run the flaky test runner** (or many local repeats) to confirm the new value is necessary.
 - Time spent in hooks (`beforeEach`, `afterEach`) counts toward the test timeout. If setup is slow, the test itself may time out even though its assertions are fast.
 
 :::::{dropdown} Example
@@ -484,6 +499,8 @@ await expect(downloadBtn).toBeEnabled({ timeout: 30_000 });
 ### Wait for complex UI to finish rendering [wait-for-complex-components-to-fully-render]
 
 Tables/maps/visualizations can appear before data is rendered. Prefer waiting on a component-specific **“loaded” signal** rather than global indicators like the Kibana chrome spinner (our data shows they are unreliable for confirming that a particular component has finished rendering).
+
+**Do not rely on helpers that only wait for a global “loading” indicator to disappear.** Each view should have an explicit readiness wait (or removal of such helpers in favor of those waits).
 
 :::::{dropdown} Example
 In source code, use a dynamic `data-test-subj`:
@@ -510,6 +527,8 @@ For Kibana Maps, `data-render-complete="true"` is often the right “ready” si
 
 Prefer existing page objects (and their methods) over rebuilding EUI interactions in test files.
 
+- Prefer **`readonly` locator fields** assigned in the constructor for stable selectors, and **methods** for parameterized locators, multi-step actions, or flows. Thin getter-only methods for every field add noise; match the patterns used by built-in page objects (for example `DashboardApp`).
+
 :::::{dropdown} Example
 
 ```ts
@@ -520,6 +539,10 @@ await pageObjects.datePicker.setAbsoluteRange({
 ```
 
 :::::
+
+### Keep mocks and non-UI setup out of page objects [keep-mocks-out-of-page-objects]
+
+Page objects should focus on real UI interaction. Put HTTP mocks, interceptors, and similar setup in dedicated fixtures (for example `fixtures/mocks.ts`) so tests and reviewers can find them in one place.
 
 ### Abstract common operations in page object methods [abstract-common-operations-in-page-object-methods]
 
@@ -566,6 +589,8 @@ async openEditMode() {
 ### Keep assertions explicit in tests, not hidden in page objects [keep-assertions-explicit-in-tests-not-hidden-in-page-objects]
 
 Prefer explicit `expect()` in the test file so reviewers can see intent and failure modes. Also prefer `expect()` over manual boolean checks, as Playwright’s error output includes the locator, call log, and a clear message, which `if`/`throw` patterns lose.
+
+**In page objects, avoid `expect()`.** Use `waitForSelector` / visibility waits to synchronize after navigation or actions (for example wait for a header to be visible). Assertions belong in specs.
 
 :::::{dropdown} Examples
 ❌ **Don’t:** hide assertions inside page objects:
@@ -661,16 +686,6 @@ test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
 
 :::::
 
-### Contribute to Scout when possible [contribute-to-scout-when-possible]
-
-If you build a helper that will benefit other tests, consider upstreaming it:
-
-- **Reusable across many plugins/teams**: contribute to `@kbn/scout`
-- **Reusable but solution-scoped**: contribute to the relevant solution Scout package
-- **Plugin-specific**: keep it in your plugin’s `test/scout` tree
-
-For the full guidance, see [Scout](../scout.md#contribute-to-scout-when-possible).
-
 ---
 
 ## API tests [api-tests]
@@ -713,6 +728,17 @@ apiTest('returns data for viewer', async ({ apiClient }) => {
 
 This pattern validates both endpoint behavior and the [permission model](#test-with-minimal-permissions-avoid-admin-when-possible).
 
+### Choose the right auth pattern [choose-the-right-auth-pattern]
+
+Scout supports two authentication methods for API tests. Choose based on endpoint type:
+
+| Endpoint type                | Auth method          | Fixture                        |
+| ---------------------------- | -------------------- | ------------------------------ |
+| Public APIs (`api/*`)        | API key              | `requestAuth` + `apiKeyHeader` |
+| Internal APIs (`internal/*`) | Cookie-based session | `samlAuth` + `cookieHeader`    |
+
+See [API authentication](./api-auth.md) for details and examples.
+
 ### Validate the response body (not just status) [dont-just-verify-the-status-code-validate-the-response-body]
 
 Status code assertions are necessary but not sufficient. Also validate shape and key fields.
@@ -748,16 +774,5 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
   });
 });
 ```
-
-### Choose the right auth pattern [choose-the-right-auth-pattern]
-
-Scout supports two authentication methods for API tests. Choose based on endpoint type:
-
-| Endpoint type                | Auth method          | Fixture                        |
-| ---------------------------- | -------------------- | ------------------------------ |
-| Public APIs (`api/*`)        | API key              | `requestAuth` + `apiKeyHeader` |
-| Internal APIs (`internal/*`) | Cookie-based session | `samlAuth` + `cookieHeader`    |
-
-See [API authentication](./api-auth.md) for details and examples.
 
 :::::
