@@ -50,7 +50,9 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('.index-card');
 
-      await find.clickByCssSelector('[data-test-subj="create-connector-flyout-back-btn"]');
+      await retry.try(async () => {
+        await find.clickByCssSelector('[data-test-subj="create-connector-flyout-back-btn"]');
+      });
 
       await testSubjects.click('.slack-card');
 
