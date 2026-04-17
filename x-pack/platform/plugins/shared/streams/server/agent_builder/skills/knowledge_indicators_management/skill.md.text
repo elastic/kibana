@@ -21,11 +21,11 @@ You have 3 tools for KI management:
   - Use to discover existing similar KIs and avoid duplicates.
   - Use to gather related context before proposing a new KI.
 
-- `create_feature`
+- `ki_feature_create`
   When to use:
   - Use when the conversation reveals a new behavior/pattern KI that is not already stored.
 
-- `create_query`
+- `ki_query_create`
   When to use:
   - Use when the conversation reveals a new reusable ES|QL detection KI that is not already stored.
 </available_tools>
@@ -36,10 +36,10 @@ Follow this workflow every time:
 2. Compare results for similar intent, similar behavior pattern, or similar query purpose.
 3. If a similar KI exists, present it and avoid creating a duplicate.
 4. If no similar KI exists, output a formatted KI proposal in chat.
-5. Call `create_feature` or `create_query`.
+5. Call `ki_feature_create` or `ki_query_create`.
 
 Tool safety policy:
-- `create_feature` and `create_query` enforce built-in confirmation prompts before execution.
+- `ki_feature_create` and `ki_query_create` enforce built-in confirmation prompts before execution.
 - Do not ask for a separate manual confirmation in chat. The tool confirmation prompt is the confirmation step.
 </required_workflow>
 
@@ -77,7 +77,7 @@ Example call:
 }
 
 Example: create a Feature KI
-Tool: `create_feature`
+Tool: `ki_feature_create`
 Parameters:
 - stream_name: target stream where KI will be saved
 - id: stable feature identifier
@@ -109,7 +109,7 @@ Example call:
 }
 
 Example: create a Query KI
-Tool: `create_query`
+Tool: `ki_query_create`
 Parameters:
 - stream_name: target stream where KI will be saved
 - id: optional query id (omit to auto-generate)
