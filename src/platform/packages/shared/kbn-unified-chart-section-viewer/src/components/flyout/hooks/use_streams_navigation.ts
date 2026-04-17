@@ -10,19 +10,31 @@
 import { useCallback, useMemo } from 'react';
 import { STREAMS_APP_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
 import type { ExternalServices } from '../../../types';
 
 /**
  * Encapsulates Streams app navigation logic: permission gating, CCS filtering,
  * and URL generation via the Streams locator.
  *
- * Returns `getStreamUrl(name)` which yields a URL when the user can navigate
- * to the given stream, or `undefined` when the name is invalid (wildcard, CCS)
+ * Returns `{ canNavigate, getStreamUrl }`. `getStreamUrl(name, isDataStream)`
+ * yields a URL when the user can navigate to the given stream, or `undefined`
+ * when the source isn't a data stream, the name is invalid (wildcard, CCS),
  * or the user lacks permissions.
  */
-export const useStreamsNavigation = (externalServices?: ExternalServices) => {
+export const useStreamsNavigation = (
+  externalServices?: ExternalServices
+): {
+  canNavigate: boolean;
+  getStreamUrl: (name: string, isDataStream: boolean) => string | undefined;
+} => {
   const canNavigate = useMemo(
-    () => Boolean(externalServices?.discoverShared?.features.registry.getById('streams')),
+    () =>
+      Boolean(
+        externalServices?.discoverShared?.features.registry.getById(
+          OBSERVABILITY_STREAMS_FEATURE_ID
+        )
+      ),
     [externalServices?.discoverShared]
   );
 
@@ -32,8 +44,14 @@ export const useStreamsNavigation = (externalServices?: ExternalServices) => {
   );
 
   const getStreamUrl = useCallback(
-    (name: string): string | undefined => {
-      if (!canNavigate || !name || name.includes('*') || isCCSRemoteIndexName(name)) {
+    (name: string, isDataStream: boolean): string | undefined => {
+      if (
+        !isDataStream ||
+        !canNavigate ||
+        !name ||
+        name.includes('*') ||
+        isCCSRemoteIndexName(name)
+      ) {
         return undefined;
       }
       return locator?.getRedirectUrl({ name });

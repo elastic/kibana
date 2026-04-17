@@ -27,3 +27,4 @@ export type {
   DiscoverFeaturesServiceSetup,
   DiscoverFeaturesServiceStart,
 } from './services/discover_features/types';
+export { OBSERVABILITY_STREAMS_FEATURE_ID } from './services/discover_features/types';

@@ -8,6 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { OBSERVABILITY_STREAMS_FEATURE_ID } from '@kbn/discover-shared-plugin/public';
 import type { ExternalServices } from '../../../types';
 import { useStreamsNavigation } from './use_streams_navigation';
 
@@ -34,7 +35,7 @@ const createMockExternalServices = ({
       features: {
         registry: {
           getById: jest.fn((id: string) =>
-            hasStreamsFeature && id === 'streams' ? {} : undefined
+            hasStreamsFeature && id === OBSERVABILITY_STREAMS_FEATURE_ID ? {} : undefined
           ),
         },
       },
@@ -70,9 +71,17 @@ describe('useStreamsNavigation', () => {
         useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
-      expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBe(
+      expect(result.current.getStreamUrl('metrics-system.cpu-default', true)).toBe(
         '/app/streams/metrics-system.cpu-default'
       );
+    });
+
+    it('returns undefined when isDataStream is false', () => {
+      const { result } = renderHook(() =>
+        useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
+      );
+
+      expect(result.current.getStreamUrl('metrics-system.cpu-default', false)).toBeUndefined();
     });
 
     it('returns undefined when user lacks permissions', () => {
@@ -80,7 +89,7 @@ describe('useStreamsNavigation', () => {
         useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: false }))
       );
 
-      expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBeUndefined();
+      expect(result.current.getStreamUrl('metrics-system.cpu-default', true)).toBeUndefined();
     });
 
     it('returns undefined when locator is unavailable', () => {
@@ -90,7 +99,7 @@ describe('useStreamsNavigation', () => {
         )
       );
 
-      expect(result.current.getStreamUrl('metrics-system.cpu-default')).toBeUndefined();
+      expect(result.current.getStreamUrl('metrics-system.cpu-default', true)).toBeUndefined();
     });
 
     it('returns undefined for an empty string', () => {
@@ -98,7 +107,7 @@ describe('useStreamsNavigation', () => {
         useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
-      expect(result.current.getStreamUrl('')).toBeUndefined();
+      expect(result.current.getStreamUrl('', true)).toBeUndefined();
     });
 
     it('returns undefined for wildcard patterns', () => {
@@ -106,7 +115,7 @@ describe('useStreamsNavigation', () => {
         useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
-      expect(result.current.getStreamUrl('metrics-*')).toBeUndefined();
+      expect(result.current.getStreamUrl('metrics-*', true)).toBeUndefined();
     });
 
     it('returns undefined for CCS remote index names', () => {
@@ -115,7 +124,7 @@ describe('useStreamsNavigation', () => {
       );
 
       expect(
-        result.current.getStreamUrl('remote_cluster:metrics-system.cpu-default')
+        result.current.getStreamUrl('remote_cluster:metrics-system.cpu-default', true)
       ).toBeUndefined();
     });
 
@@ -124,7 +133,7 @@ describe('useStreamsNavigation', () => {
         useStreamsNavigation(createMockExternalServices({ hasStreamsFeature: true }))
       );
 
-      expect(result.current.getStreamUrl('metrics-local-default')).toBe(
+      expect(result.current.getStreamUrl('metrics-local-default', true)).toBe(
         '/app/streams/metrics-local-default'
       );
     });

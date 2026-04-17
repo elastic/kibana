@@ -92,7 +92,7 @@ export const OverviewTab = ({ metricItem, description, externalServices }: Overv
         defaultMessage: 'Index',
       });
 
-  const streamUrl = metricItem.isDataStream ? getStreamUrl(metricItem.dataStream) : undefined;
+  const streamUrl = getStreamUrl(metricItem.dataStream, metricItem.isDataStream);
 
   const descriptionListItems = useMemo(
     () => [

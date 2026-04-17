@@ -44,8 +44,10 @@ export interface ObservabilityStreamsFeatureRenderDeps {
   renderCpsWarning?: boolean;
 }
 
+export const OBSERVABILITY_STREAMS_FEATURE_ID = 'streams' as const;
+
 export interface ObservabilityStreamsFeature {
-  id: 'streams';
+  id: typeof OBSERVABILITY_STREAMS_FEATURE_ID;
   renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
   renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }

@@ -21,9 +21,13 @@ const extractDataStreamNames = (items: MatchedItem[]): Set<string> =>
 /**
  * Best-effort enrichment of metric items with data stream classification.
  * Uses the resolve_index API via dataViews.getIndices to determine which
- * sources are actual data streams vs plain indices.
- * On failure, items are returned unchanged (isDataStream defaults to true)
- * so the UI gracefully degrades to treating everything as a data stream.
+ * sources are actual data streams vs plain indices, flipping `isDataStream`
+ * to `false` for plain indices.
+ *
+ * On failure (network error, permission denied, etc.) items are returned
+ * unchanged. Callers must therefore set a sensible `isDataStream` default
+ * on items before passing them in — see `parseMetricsWithTelemetry`, which
+ * defaults to `true` based on the real-world distribution of TSDB sources.
  */
 export const enrichWithDataStreamInfo = async (
   dataViews: DataViewsPublicPluginStart,
