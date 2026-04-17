@@ -10078,7 +10078,7 @@
           "24"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
-        "lineNumber": 96,
+        "lineNumber": 97,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -11255,7 +11255,7 @@
         "label": "defaultAgentToolIds",
         "description": [],
         "signature": [
-          "(\"platform.core.search\" | \"platform.core.list_indices\" | \"platform.core.get_index_mapping\" | \"platform.core.get_document_by_id\" | \"platform.core.get_workflow_execution_status\" | \"platform.core.sml_search\" | \"platform.core.sml_attach\" | \"platform.core.execute_connector_sub_action\")[]"
+          "(\"platform.core.search\" | \"platform.core.list_indices\" | \"platform.core.get_index_mapping\" | \"platform.core.get_document_by_id\" | \"platform.core.get_workflow_execution_status\" | \"platform.core.resume_workflow_execution\" | \"platform.core.sml_search\" | \"platform.core.sml_attach\" | \"platform.core.execute_connector_sub_action\")[]"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-common/tools/constants.ts",
         "lineNumber": 81,

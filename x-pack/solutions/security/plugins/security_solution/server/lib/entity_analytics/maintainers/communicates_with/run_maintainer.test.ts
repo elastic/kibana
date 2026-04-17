@@ -223,14 +223,14 @@ describe('communicates_with runMaintainer', () => {
         {
           entityId: 'user-0',
           entityType: 'user',
-          communicates_with: ['service:s3.amazonaws.com'],
+          communicates_with: { ids: ['service:s3.amazonaws.com'] },
         },
       ];
       const page2Records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-last',
           entityType: 'user',
-          communicates_with: ['service:Microsoft Teams'],
+          communicates_with: { ids: ['service:Microsoft Teams'] },
         },
       ];
 
@@ -304,14 +304,14 @@ describe('communicates_with runMaintainer', () => {
         {
           entityId: 'user-a',
           entityType: 'user',
-          communicates_with: ['service:s3.amazonaws.com'],
+          communicates_with: { ids: ['service:s3.amazonaws.com'] },
         },
       ];
       const records2: ProcessedEntityRecord[] = [
         {
           entityId: 'user-b',
           entityType: 'user',
-          communicates_with: ['host:JANE-MBP'],
+          communicates_with: { ids: ['host:JANE-MBP'] },
         },
       ];
 
@@ -430,7 +430,7 @@ describe('communicates_with runMaintainer', () => {
         {
           entityId: 'user-1',
           entityType: 'user',
-          communicates_with: ['service:s3.amazonaws.com'],
+          communicates_with: { ids: ['service:s3.amazonaws.com'] },
         },
       ];
       esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
@@ -533,7 +533,7 @@ describe('communicates_with runMaintainer', () => {
     it('skips bulk update when aborted after collecting records', async () => {
       const abortCtrl = new AbortController();
       const records: ProcessedEntityRecord[] = [
-        { entityId: 'user-1', entityType: 'user', communicates_with: ['service:s3'] },
+        { entityId: 'user-1', entityType: 'user', communicates_with: { ids: ['service:s3'] } },
       ];
 
       esClient.search.mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));

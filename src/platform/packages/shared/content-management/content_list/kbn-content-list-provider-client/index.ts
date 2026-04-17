@@ -12,7 +12,8 @@ export { ContentListClientProvider } from './src/provider';
 export type { ContentListClientProviderProps } from './src/provider';
 
 // Strategy.
-export { createFindItemsFn } from './src/strategy';
+export { createClientStrategy } from './src/strategy';
+export type { ClientStrategy } from './src/strategy';
 
 // Types.
 export type {
