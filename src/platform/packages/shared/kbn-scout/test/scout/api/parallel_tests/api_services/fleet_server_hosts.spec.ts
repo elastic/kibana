@@ -29,7 +29,7 @@ apiTest.describe(
       // Note: The get method doesn't return a value in current implementation
       // This test verifies it doesn't throw an error
       const resp = await apiServices.fleet.server_hosts.get();
-      expect(resp.status).toBe(200);
+      expect(resp).toHaveStatusCode(200);
     });
 
     apiTest('should create a fleet server host with parameters', async ({ apiServices }) => {
