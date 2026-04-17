@@ -659,13 +659,9 @@ test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
 
 ### Contribute to Scout when possible [contribute-to-scout-when-possible]
 
-If you build a helper that will benefit other tests, consider upstreaming it:
+If you build a helper that will benefit other tests, consider upstreaming it to `@kbn/scout` (platform-wide reuse), to a solution Scout package (solution-scoped reuse), or keep it in your plugin's `test/scout` tree (plugin-specific).
 
-- **Reusable across many plugins/teams**: contribute to `@kbn/scout`
-- **Reusable but solution-scoped**: contribute to the relevant solution Scout package
-- **Plugin-specific**: keep it in your plugin’s `test/scout` tree
-
-For the full guidance, see [Scout](../testing/scout.md#contribute-to-scout-when-possible).
+See [Contribute to Scout when possible](./scout.md#contribute-to-scout-when-possible) for the decision matrix.
 
 ---
 
