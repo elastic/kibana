@@ -112,9 +112,7 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
         />
       );
 
-      expect(
-        screen.getByRole('button', { name: 'Osquery config' })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Osquery config' })).toBeInTheDocument();
     });
 
     it('does not render navigation buttons', () => {
@@ -151,9 +149,7 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
       );
 
       await waitFor(() => {
-        expect(onChange).toHaveBeenCalledWith(
-          expect.objectContaining({ isValid: true })
-        );
+        expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ isValid: true }));
       });
     });
   });
@@ -169,9 +165,7 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
         />
       );
 
-      expect(
-        screen.getByRole('button', { name: 'Osquery config' })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Osquery config' })).toBeInTheDocument();
     });
 
     it('does not render navigation buttons', () => {
@@ -219,9 +213,7 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
         />
       );
 
-      expect(
-        screen.queryByRole('button', { name: 'Osquery config' })
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Osquery config' })).not.toBeInTheDocument();
     });
   });
 
@@ -240,9 +232,7 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
       expect(
         screen.getByText(/Using a custom Osquery package is an advanced configuration/)
       ).toBeInTheDocument();
-      expect(
-        screen.getByText('Select or drag and drop osquery config file')
-      ).toBeInTheDocument();
+      expect(screen.getByText('Select or drag and drop osquery config file')).toBeInTheDocument();
       expect(screen.getByText('Example config')).toBeInTheDocument();
     });
 
@@ -260,15 +250,10 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
       });
 
       renderWithProviders(
-        <OsqueryManagedPolicyCreateImportExtension
-          onChange={onChange}
-          newPolicy={newPolicy}
-        />
+        <OsqueryManagedPolicyCreateImportExtension onChange={onChange} newPolicy={newPolicy} />
       );
 
-      expect(
-        screen.getByRole('button', { name: 'Osquery config' })
-      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Osquery config' })).toBeInTheDocument();
     });
   });
 });
@@ -296,9 +281,7 @@ describe('configProtectedKeysValidator', () => {
   });
 
   it('returns undefined when options object exists but has no restricted keys', () => {
-    expect(
-      validate(JSON.stringify({ options: { custom_option: 'value' } }))
-    ).toBeUndefined();
+    expect(validate(JSON.stringify({ options: { custom_option: 'value' } }))).toBeUndefined();
   });
 });
 
@@ -307,9 +290,7 @@ describe('packConfigFilesValidator', () => {
     packConfigFilesValidator({ value, path: 'config', form: {} } as any);
 
   it('returns undefined for valid config with inline pack definitions', () => {
-    expect(
-      validate(JSON.stringify({ packs: { 'my-pack': { queries: {} } } }))
-    ).toBeUndefined();
+    expect(validate(JSON.stringify({ packs: { 'my-pack': { queries: {} } } }))).toBeUndefined();
   });
 
   it('returns undefined for invalid JSON', () => {
@@ -317,9 +298,7 @@ describe('packConfigFilesValidator', () => {
   });
 
   it('returns error when packs reference file paths', () => {
-    const result = validate(
-      JSON.stringify({ packs: { 'bad-pack': '/path/to/pack.conf' } })
-    );
+    const result = validate(JSON.stringify({ packs: { 'bad-pack': '/path/to/pack.conf' } }));
     expect(result).toEqual(
       expect.objectContaining({
         code: 'ERR_RESTRICTED_OPTIONS',
