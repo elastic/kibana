@@ -47,9 +47,16 @@ export function useInferenceFeatureConnectors(
     [query.data]
   );
 
+  // When an SO override is set, the API puts the configured connector first.
+  // Otherwise `useLoadConnectors` prepends `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR`
+  // ahead of the feature's recommended endpoints — so we skip it and pick the
+  // first entry flagged `isRecommended` for this feature.
+  const data = query.data ?? [];
+  const picked = query.soEntryFound ? data[0] : data.find((c) => c.isRecommended) ?? data[0];
+
   return {
     connectors,
-    resolvedConnectorId: query.data?.[0]?.id,
+    resolvedConnectorId: picked?.id,
     loading: query.isLoading,
     error: query.error ?? undefined,
   };
