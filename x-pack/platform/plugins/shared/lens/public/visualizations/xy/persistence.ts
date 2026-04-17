@@ -6,10 +6,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  EVENT_ANNOTATION_GROUP_TYPE,
-  getPersistedAnnotationColor,
-} from '@kbn/event-annotation-common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 
 import {
   isPersistedAnnotationsLayer,
@@ -30,12 +27,6 @@ import type {
   XYVisualizationState,
 } from './types';
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
-
-const persistAnnotationColors = <T extends { color?: string }>(annotations: T[]) =>
-  annotations.map((annotation) => ({
-    ...annotation,
-    color: getPersistedAnnotationColor(annotation.color),
-  }));
 
 /**
  * Converts persisted state to runtime state.
@@ -75,11 +66,7 @@ export function convertToPersistable(state: XYVisualizationState) {
         id: indexPatternId,
         name: getLayerReferenceName(layer.layerId),
       });
-      persistableLayers.push({
-        ...persistableLayer,
-        annotations: persistAnnotationColors(persistableLayer.annotations),
-        persistanceType: 'byValue',
-      });
+      persistableLayers.push({ ...persistableLayer, persistanceType: 'byValue' });
       return;
     }
 
@@ -119,7 +106,7 @@ export function convertToPersistable(state: XYVisualizationState) {
       layerId: layer.layerId,
       layerType: layer.layerType,
       annotationGroupRef: referenceName,
-      annotations: persistAnnotationColors(layer.annotations),
+      annotations: layer.annotations,
       ignoreGlobalFilters: layer.ignoreGlobalFilters,
     };
     persistableLayers.push(persistableLayer);
