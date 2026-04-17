@@ -56,6 +56,7 @@ export type LogsOverviewProps = DocViewRenderProps &
     indexes: ObservabilityIndexes;
     showTraceWaterfall?: boolean;
     docViewActions?: DocViewActions;
+    profileId: string;
   };
 
 export interface LogsOverviewApi {
@@ -82,6 +83,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       docViewActions,
       initialState,
       onInitialStateChange,
+      profileId,
     },
     ref
   ) => {
@@ -146,7 +148,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
           />
           <DataSourcesProvider indexes={indexes}>
             <DocViewerExtensionActionsProvider actions={docViewActions}>
-              {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
+              {showSimilarErrors ? <SimilarErrors hit={hit} profileId={profileId} /> : null}
               <div>
                 {renderFlyoutStreamField &&
                   renderFlyoutStreamField({ dataView, doc: hit, renderCpsWarning })}

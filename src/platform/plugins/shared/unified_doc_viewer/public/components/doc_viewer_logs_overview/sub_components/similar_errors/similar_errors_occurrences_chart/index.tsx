@@ -74,6 +74,7 @@ const defaultLensConfig: Omit<LensXYConfig, 'title' | 'dataset'> = {
 export interface SimilarErrorsOccurrencesChartProps {
   baseEsqlQuery: ReturnType<typeof import('../get_esql_query').getEsqlQuery>;
   currentDocumentTimestamp?: string;
+  profileId: string;
 }
 
 const currentDocumentLabel = i18n.translate(
@@ -86,6 +87,7 @@ const currentDocumentLabel = i18n.translate(
 export function SimilarErrorsOccurrencesChart({
   baseEsqlQuery,
   currentDocumentTimestamp,
+  profileId,
 }: SimilarErrorsOccurrencesChartProps) {
   const { data } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
@@ -130,6 +132,9 @@ export function SimilarErrorsOccurrencesChart({
 
   const getParentApi = useCallback(() => {
     return {
+      executionContext: {
+        meta: { profile_id: profileId, metric_id: 'similarErrors' },
+      },
       getSerializedStateForChild: () => ({
         attributes: lensAttributes,
         viewMode: 'view',
@@ -137,7 +142,7 @@ export function SimilarErrorsOccurrencesChart({
       }),
       noPadding: true,
     };
-  }, [lensAttributes, timeRange]);
+  }, [lensAttributes, timeRange, profileId]);
 
   useEffect(() => {
     if (!chartEsqlQuery || !data.dataViews) {
