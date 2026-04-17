@@ -53,9 +53,7 @@ paths:
                 aggregations:
                   $ref: '#/components/schemas/SearchRulesAggregations'
                 fields:
-                  description: >-
-                    Subset of rule attributes to return. When omitted, all
-                    attributes are returned.
+                  description: Subset of rule attributes to return.
                   items:
                     $ref: '#/components/schemas/SearchRulesField'
                   type: array
@@ -65,8 +63,8 @@ paths:
                   type: string
                 gap_auto_fill_scheduler_id:
                   description: >-
-                    Optional scheduler ID for scoping the "error" gap fill
-                    status (exhausted retries).
+                    Gap auto fill scheduler ID used to determine gap fill status
+                    for rules
                   type: string
                 gap_fill_statuses:
                   description: >
@@ -86,20 +84,18 @@ paths:
                     gap_fill_statuses is set.
                   type: string
                 gaps_range_start:
-                  description: >-
-                    Start of the gap range (ISO 8601). Required when
-                    gap_fill_statuses is set.
+                  description: Gap range start.
                   type: string
                 page:
                   default: 1
-                  description: >-
-                    Page number (1-based). Ignored when `search_after` is
-                    provided.
+                  description: Page number. Ignored when `search_after` is provided.
+                  example: 1
                   minimum: 1
                   type: integer
                 per_page:
                   default: 20
                   description: Page size.
+                  example: 20
                   maximum: 10000
                   minimum: 0
                   type: integer
@@ -107,16 +103,9 @@ paths:
                   $ref: '#/components/schemas/GranularRulesSearch'
                 search_after:
                   description: >
-                    Elasticsearch-style `search_after` tiebreaker values.
-                    Requires `sort_field` and
-
-                    `sort_order`. When set, `page` is ignored. `search_after`
-                    cannot be used together with gap filter parameters
-
-                    (`gap_fill_statuses`, `gaps_range_start`, `gaps_range_end`).
-                    Use `page` and `per_page`
-
-                    to paginate gap-filtered results instead.
+                    For pagination beyond elasticsearch's default 10,000 result
+                    window, requires `sort_field` and `sort_order`. When set,
+                    `page` is ignored.
                   items:
                     $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   minItems: 1
@@ -172,8 +161,8 @@ paths:
                       request. Only included when deep pagination applies
                       (offset
 
-                      at or past the default 10,000-result window) or the
-                      request used `search_after`.
+                      at or past the default 10,000-result max) or the request
+                      used `search_after`.
                     items:
                       $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                     type: array
@@ -210,11 +199,10 @@ paths:
             Request validation failed (for example invalid KQL, incompatible
             sort and
 
-            `search_after`, or gap filter constraints). The response body lists
-            human-readable errors.
+            `search_after`, or gap filter constraints).
       summary: >-
         Search detection rules with KQL filter, facet counts, and search_after
-        pagination (internal)
+        pagination
       tags:
         - Security Detections API
         - Rules API
