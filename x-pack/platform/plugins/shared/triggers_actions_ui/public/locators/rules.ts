@@ -7,7 +7,7 @@
 
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-management';
 
 export class RulesLocatorDefinition implements LocatorDefinition<RulesLocatorParams> {
   public readonly id = rulesLocatorID;

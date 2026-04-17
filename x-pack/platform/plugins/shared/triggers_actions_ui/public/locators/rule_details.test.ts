@@ -6,12 +6,7 @@
  */
 
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
-import {
-  RULE_DETAILS_EXECUTION_TAB,
-  RULE_DETAILS_ALERTS_TAB,
-} from '../pages/rule_details/constants';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
-import { RULES_PATH } from '../../common/locators/paths';
 
 describe('RuleDetailsLocator', () => {
   const locator = new RuleDetailsLocatorDefinition();
@@ -19,25 +14,27 @@ describe('RuleDetailsLocator', () => {
 
   it('should return correct url when only ruleId is provided', async () => {
     const location = await locator.getLocation({ ruleId: mockedRuleId });
-    expect(location.app).toEqual('observability');
+    expect(location.app).toEqual('rules');
     expect(location.path).toEqual(getRuleDetailsPath(mockedRuleId));
   });
 
   it('should return correct url when tabId is execution', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: RULE_DETAILS_EXECUTION_TAB,
+      tabId: 'execution',
     });
-    expect(location.path).toEqual(`${RULES_PATH}/${mockedRuleId}?tabId=execution`);
+    expect(location.app).toEqual('rules');
+    expect(location.path).toEqual(`${getRuleDetailsPath(mockedRuleId)}?tabId=execution`);
   });
 
   it('should return correct url when tabId is alerts without extra search params', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: RULE_DETAILS_ALERTS_TAB,
+      tabId: 'alerts',
     });
+    expect(location.app).toEqual('rules');
     expect(location.path).toEqual(
-      `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=alerts&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
     );
   });
@@ -45,13 +42,13 @@ describe('RuleDetailsLocator', () => {
   it('should return correct url when tabId is alerts with search params', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: RULE_DETAILS_ALERTS_TAB,
+      tabId: 'alerts',
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',
     });
     expect(location.path).toEqual(
-      `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=alerts&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
@@ -86,14 +83,14 @@ describe('RuleDetailsLocator', () => {
     ];
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: RULE_DETAILS_ALERTS_TAB,
+      tabId: 'alerts',
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',
       controlConfigs: mockedControlConfigs,
     });
     expect(location.path).toEqual(
-      `${RULES_PATH}/${mockedRuleId}?tabId=alerts&searchBarParams=(` +
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=alerts&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(untracked)` +
         `,title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group)` +
         `,(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`

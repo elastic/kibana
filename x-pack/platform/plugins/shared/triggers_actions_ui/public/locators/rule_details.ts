@@ -8,30 +8,19 @@
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
-import { ruleDetailsLocatorID } from '@kbn/deeplinks-observability';
-import { RULES_PATH } from '../../common/locators/paths';
 import {
-  RULE_DETAILS_ALERTS_TAB,
-  RULE_DETAILS_EXECUTION_TAB,
-  RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
-} from '../pages/rule_details/constants';
-import type { TabId } from '../pages/rule_details/rule_details';
+  ruleDetailsLocatorID,
+  type RuleDetailsLocatorParams,
+  type RuleDetailsTabId,
+} from '@kbn/deeplinks-management';
+import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 
-type RuleDetailsControlConfigs = Array<FilterControlConfig>;
-export interface RuleDetailsLocatorParams extends SerializableRecord {
-  ruleId: string;
-  tabId?: TabId;
-  rangeFrom?: string;
-  rangeTo?: string;
-  kuery?: string;
-  controlConfigs?: RuleDetailsControlConfigs;
-}
+const RULE_DETAILS_ALERTS_TAB: RuleDetailsTabId = 'alerts';
+const RULE_DETAILS_EXECUTION_TAB: RuleDetailsTabId = 'execution';
+const RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY = 'searchBarParams';
 
-export const getRuleDetailsPath = (ruleId: string) => {
-  return `${RULES_PATH}/${encodeURIComponent(ruleId)}`;
-};
+export const getRuleDetailsPath = (ruleId: string) => getRulesAppDetailsRoute(ruleId);
 
 export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetailsLocatorParams> {
   public readonly id = ruleDetailsLocatorID;
@@ -39,7 +28,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
   public readonly getLocation = async (params: RuleDetailsLocatorParams) => {
     const { controlConfigs, ruleId, kuery, rangeTo, tabId, rangeFrom } = params;
     const appState: {
-      tabId?: TabId;
+      tabId?: RuleDetailsTabId;
       rangeFrom?: string;
       rangeTo?: string;
       kuery?: string;
@@ -49,7 +38,8 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
     appState.rangeFrom = rangeFrom || 'now-15m';
     appState.rangeTo = rangeTo || 'now';
     appState.kuery = kuery || '';
-    appState.controlConfigs = controlConfigs ?? DEFAULT_CONTROLS;
+    appState.controlConfigs =
+      (controlConfigs as FilterControlConfig[] | undefined) ?? DEFAULT_CONTROLS;
 
     let path = getRuleDetailsPath(ruleId);
 
@@ -66,7 +56,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
     }
 
     return {
-      app: 'observability',
+      app: 'rules',
       path,
       state: {},
     };

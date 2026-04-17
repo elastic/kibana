@@ -93,6 +93,7 @@
     "@kbn/response-ops-oauth-hooks",
     "@kbn/kql",
     "@kbn/shared-ux-page-kibana-template",
+    "@kbn/deeplinks-management",
     "@kbn/deeplinks-observability",
     "@kbn/cps-utils",
     "@kbn/cps",
