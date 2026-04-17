@@ -80,8 +80,9 @@ export default ({ getService }: FtrProviderContext): void => {
       ): Promise<void> => {
         await retry.waitForWithTimeout(
           `resolution relationship ${aliasEuid} → ${targetEuid}`,
-          30_000,
+          60_000,
           async () => {
+            await es.indices.refresh({ index: entityStoreIndex });
             const response = await es.search({
               index: entityStoreIndex,
               size: 1,
@@ -237,6 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
           `entity store dual-write for ${targetUser.expectedEuid}`,
           60_000,
           async () => {
+            await es.indices.refresh({ index: entityStoreIndex });
             const response = await es.search({
               index: entityStoreIndex,
               size: 1,
@@ -476,8 +478,9 @@ export default ({ getService }: FtrProviderContext): void => {
           // Wait for entity store to reflect all modifier and relationship data
           await retry.waitForWithTimeout(
             'entity store modifiers and resolution materialized',
-            30_000,
+            60_000,
             async () => {
+              await es.indices.refresh({ index: entityStoreIndex });
               const [targetResp, aliasResp] = await Promise.all([
                 es.search({
                   index: entityStoreIndex,
