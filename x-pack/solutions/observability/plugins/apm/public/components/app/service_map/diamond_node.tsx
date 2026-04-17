@@ -174,7 +174,7 @@ export const DiamondNode = memo(
             data-test-subj="serviceMapNodeDiamondHit"
             css={diamondStyles}
             role="button"
-            tabIndex={0}
+            tabIndex={-1}
             aria-label={ariaLabel}
             aria-pressed={selected}
           >

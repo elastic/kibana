@@ -183,7 +183,7 @@ export const ServiceNode = memo(
             data-test-subj="serviceMapNodeServiceCircle"
             css={circleStyles}
             role="button"
-            tabIndex={0}
+            tabIndex={-1}
             aria-label={ariaLabel}
             aria-pressed={selected}
           >

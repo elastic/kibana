@@ -44,6 +44,7 @@ import { ServiceMapEdge } from './service_map_edge';
 import { useEdgeHighlighting } from './use_edge_highlighting';
 import { useReducedMotion } from './use_reduced_motion';
 import { useKeyboardNavigation } from './use_keyboard_navigation';
+import { useRovingTabIndex } from './use_roving_tab_index';
 import { MapPopover } from './popover';
 import { ServiceMapMinimap } from './service_map_minimap';
 import {
@@ -193,6 +194,8 @@ function GraphInner({
     getFitViewOptions,
   ]);
 
+  const { moveFocus } = useRovingTabIndex(nodes);
+
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
     (_, node) => {
       // Use ref so toggle logic always matches last committed selection without stale closure issues,
@@ -332,6 +335,7 @@ function GraphInner({
     onNodeSelect: handleKeyboardNodeSelect,
     onEdgeSelect: handleKeyboardEdgeSelect,
     onPopoverClose: handlePopoverClose,
+    onMoveFocus: moveFocus,
   });
 
   useEffect(() => {
@@ -511,7 +515,7 @@ function GraphInner({
   const screenReaderInstructions = i18n.translate('xpack.apm.serviceMap.screenReaderInstructions', {
     defaultMessage:
       'This is an interactive service map showing application services and their dependencies. ' +
-      'Use Tab to navigate between service nodes. Use Arrow keys to move between adjacent nodes. ' +
+      'Use Arrow keys to navigate between nodes. Press Tab to leave the map. ' +
       'Press Enter or Space to select a node and view its details including connections. ' +
       'Press Escape to close the details popover. ' +
       'When focus is in the map region or on the page background (no text field focused), press Command K or Control K to open find in page and focus the search field. ' +
@@ -524,7 +528,6 @@ function GraphInner({
       css={css(containerStyle)}
       data-test-subj="serviceMapGraph"
       role="group"
-      tabIndex={0}
       aria-label={i18n.translate('xpack.apm.serviceMap.regionLabel', {
         defaultMessage: 'Service map with {nodeCount} services and dependencies.',
         values: { nodeCount: nodes.length },
@@ -555,7 +558,7 @@ function GraphInner({
         proOptions={{ hideAttribution: true }}
         nodesDraggable={true}
         nodesConnectable={false}
-        nodesFocusable={true}
+        nodesFocusable={false}
         edgesFocusable={false}
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
