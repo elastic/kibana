@@ -31,6 +31,7 @@ export {
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
 export {
+  type ConfirmPromptColor,
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,
   type ConfirmationPromptResponse,
