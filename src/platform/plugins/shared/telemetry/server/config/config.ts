@@ -21,7 +21,6 @@ const clusterEnvSchema: [Type<'prod'>, Type<'staging'>] = [
 
 const configSchema = schema
   .object({
-    enabled: schema.boolean({ defaultValue: true }),
     allowChangingOptInStatus: schema.boolean({ defaultValue: true }),
     hidePrivacyStatement: schema.boolean({ defaultValue: false }),
     optIn: schema.boolean({ defaultValue: true }),
@@ -74,19 +73,16 @@ export const config: PluginConfigDescriptor<TelemetryConfigType> = {
   dynamicConfig: {
     labels: true,
   },
-  deprecations: () => [
-    (cfg) => {
-      if (cfg.telemetry?.enabled === false) {
-        return {
-          set: [
-            { path: 'telemetry.optIn', value: false },
-            { path: 'telemetry.allowChangingOptInStatus', value: false },
-            { path: 'telemetry.tracing.enabled', value: false },
-            { path: 'telemetry.metrics.enabled', value: false },
-          ],
-          unset: [{ path: 'telemetry.enabled' }],
-        };
-      }
+  metaSettings: {
+    'telemetry.enabled': {
+      schema: schema.literal(false),
+      config: {
+        'telemetry.optIn': false,
+        'telemetry.allowChangingOptInStatus': false,
+        'telemetry.tracing.enabled': false,
+        'telemetry.metrics.enabled': false,
+      },
+      priority: 100,
     },
-  ],
+  },
 };
