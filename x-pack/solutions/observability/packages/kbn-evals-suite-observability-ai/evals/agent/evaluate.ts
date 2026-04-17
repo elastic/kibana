@@ -20,7 +20,7 @@ import { AgentBuilderClient } from '../../src/clients/chat/agent_builder_client'
 import type { ConverseAttachment } from '../../src/clients/chat/types';
 import { createCriteriaEvaluator } from '../../src/criteria_evaluator';
 
-interface ObservabilityAgentExample extends Example {
+interface ElasticAgentBuilderEvalExample extends Example {
   input: {
     question: string;
     attachments?: ConverseAttachment[];
@@ -35,11 +35,11 @@ interface ObservabilityAgentExample extends Example {
   };
 }
 
-export type EvaluateObservabilityAgentDataset = (params: {
+export type EvaluateElasticAgentBuilderDataset = (params: {
   dataset: {
     name: string;
     description: string;
-    examples: ObservabilityAgentExample[];
+    examples: ElasticAgentBuilderEvalExample[];
   };
 }) => Promise<void>;
 
@@ -47,7 +47,7 @@ export const evaluate = base.extend<
   {},
   {
     chatClient: AgentBuilderClient;
-    evaluateDataset: EvaluateObservabilityAgentDataset;
+    evaluateDataset: EvaluateElasticAgentBuilderDataset;
   }
 >({
   chatClient: [

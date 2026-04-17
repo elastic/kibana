@@ -27,6 +27,9 @@ export class ServiceMapPage {
   public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
+  public serviceMapOptionsPanel: Locator;
+  public serviceMapFindInPageInput: Locator;
+  public serviceMapFindMatchSummary: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
@@ -52,6 +55,9 @@ export class ServiceMapPage {
     this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
       'apmEdgeContentsOpenInDiscoverButton'
     );
+    this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
+    this.serviceMapFindInPageInput = page.testSubj.locator('serviceMapControlsSearch');
+    this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
   }
 
   async gotoWithDateSelected(start: string, end: string, options?: { kuery?: string }) {
@@ -93,6 +99,23 @@ export class ServiceMapPage {
 
   async waitForMapToLoad() {
     await this.serviceMapGraph.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Blur focused controls and move focus to `document.body` so the service map Ctrl/Cmd+K handler
+   * treats the shortcut as in scope (see graph.tsx).
+   */
+  async focusBodyForMapShortcuts() {
+    await this.page.evaluate(() => {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+      document.body.focus();
+    });
+  }
+
+  /** Triggers find-in-page focus via the same shortcut as the in-app hint (Control+K / Meta+K). */
+  async openFindInPageWithKeyboardShortcut() {
+    await this.focusBodyForMapShortcuts();
+    await this.page.keyboard.press('Control+KeyK');
   }
 
   async clickZoom(direction: 'in' | 'out') {
