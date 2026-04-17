@@ -124,6 +124,13 @@ describe('executeFunctionAndCatchError', () => {
 
     await firstValueFrom(result$);
 
-    expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+      toolCallEventType,
+      expect.objectContaining({
+        toolName: 'tool_without_connector',
+        connector: undefined,
+        scopes: ['all'],
+      })
+    );
   });
 });
