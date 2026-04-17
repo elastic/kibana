@@ -28,6 +28,14 @@ source .buildkite/scripts/common/util.sh
   retry 5 15 docker_login
 }
 
+# Decide how Cypress should provision Elasticsearch based on whether the ES
+# Docker image matching the current Kibana version is published yet. This keeps
+# Cypress working during the post-version-bump window (e.g. right after bumping
+# to 9.5.0, 9.6.0, ...) when the unified release hasn't yet published the ES
+# Docker image. Sets CYPRESS_ES_FROM=snapshot iff the image is missing;
+# respects any explicit override.
+source .buildkite/scripts/common/detect_cypress_es_from.sh
+
 # Set up a custom ES Snapshot Manifest if one has been specified for this build
 {
   ES_SNAPSHOT_MANIFEST=${ES_SNAPSHOT_MANIFEST:-$(buildkite-agent meta-data get ES_SNAPSHOT_MANIFEST --default '')}
