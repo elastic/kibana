@@ -112,6 +112,23 @@ for arg in "$@"; do
   esac
 done
 
+# --- Logging ----------------------------------------------------------------
+LOG_DIR="${KBN_LOG_DIR:-$KBN_DIR/logs/kbn-dev}"
+mkdir -p "$LOG_DIR"
+
+# --- Kill previous instance -------------------------------------------------
+PIDFILE="$LOG_DIR/kbn_shared.pid"
+if [ -f "$PIDFILE" ]; then
+  OLD_PID=$(cat "$PIDFILE" 2>/dev/null)
+  if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
+    echo "Killing previous kbn-shared instance (PID $OLD_PID) and its children..."
+    pkill -P "$OLD_PID" 2>/dev/null || true
+    kill "$OLD_PID" 2>/dev/null || true
+    sleep 2
+  fi
+fi
+echo $$ > "$PIDFILE"
+
 # --- PID tracking -----------------------------------------------------------
 OPTIMIZER_PID=""
 ESSLS_PID=""
@@ -139,14 +156,11 @@ cleanup() {
     done
   fi
 
+  rm -f "$PIDFILE"
   echo "Cleanup complete."
   exit
 }
 trap cleanup SIGINT SIGTERM
-
-# --- Logging ----------------------------------------------------------------
-LOG_DIR="${KBN_LOG_DIR:-$KBN_DIR/logs/kbn-dev}"
-mkdir -p "$LOG_DIR"
 
 ESSLS_LOG="$LOG_DIR/essls.log"
 ESSTACK_LOG="$LOG_DIR/esstack.log"
@@ -218,6 +232,7 @@ log_step "Starting ES Stateful (snapshot)..." "$ESSTACK_LOG"
     --license trial --clean \
     -E http.port=9201 \
     -E transport.port=9301 \
+    -E xpack.ml.enabled=false \
     $INFERENCE_FLAG
 ) >> "$ESSTACK_LOG" 2>&1 &
 ESSTACK_PID=$!
@@ -254,28 +269,41 @@ done
 
 # ===== PHASE 3: Wait for ES → start Kibana =================================
 
+kill_port() {
+  local port="$1"
+  local pid
+  pid=$(lsof -ti "tcp:$port" 2>/dev/null)
+  if [ -n "$pid" ]; then
+    log_step "Killing stale process $pid on port $port"
+    kill -9 "$pid" 2>/dev/null || true
+    sleep 1
+  fi
+}
+
 start_kbnsls() {
+  kill_port 5601
   log_step "Starting Kibana Serverless (port 5601)..." "$KBNSLS_LOG"
   (
     cd "$KBN_DIR" || exit 1
     ensure_node
     export KBN_OPTIMIZER_USE_MAX_AVAILABLE_RESOURCES=false
     yarn serverless-es \
-      --config=config/kibana.serverless.dev.yml \
       --server.port=5601 \
       --no-optimizer
   ) >> "$KBNSLS_LOG" 2>&1
 }
 
 start_kbnstack() {
+  kill_port 5611
   log_step "Starting Kibana Stateful (port 5611)..." "$KBNSTACK_LOG"
   (
     cd "$KBN_DIR" || exit 1
     ensure_node
     export KBN_OPTIMIZER_USE_MAX_AVAILABLE_RESOURCES=false
     yarn start \
-      --config=config/kibana.stack.dev.yml \
+      --elasticsearch http://localhost:9201 \
       --server.port=5611 \
+      --xpack.security.cookieName=sid-stack \
       --no-optimizer
   ) >> "$KBNSTACK_LOG" 2>&1
 }
@@ -321,6 +349,10 @@ monitor_process() {
       echo "$!" > "$LOG_DIR/kbnsls.pid"
       break
     fi
+    if ! kill -0 "$ESSLS_PID" 2>/dev/null; then
+      log_step "ERROR: ES Serverless process died. Check $ESSLS_LOG"
+      break
+    fi
     sleep 2
   done
 ) &
@@ -333,6 +365,10 @@ monitor_process() {
       log_step "ES Stateful is ready!"
       monitor_process "kbnstack" start_kbnstack "$KBNSTACK_LOG" &
       echo "$!" > "$LOG_DIR/kbnstack.pid"
+      break
+    fi
+    if ! kill -0 "$ESSTACK_PID" 2>/dev/null; then
+      log_step "ERROR: ES Stateful process died. Check $ESSTACK_LOG"
       break
     fi
     sleep 2
