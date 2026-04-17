@@ -32,6 +32,10 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 const PAGE_SIZE = 10;
 const TABLE_WIDTH = 385;
 const TABLE_HEIGHT = 200;
+export const ATTACKS_LIST_PANEL_TEST_ID = 'attacksListPanel';
+export const ATTACKS_LIST_TABLE_TEST_ID = 'attacksListTable';
+export const ATTACKS_LIST_ATTACK_NAME_COLUMN_TEST_ID = 'attacksListAttackNameColumn';
+export const ATTACKS_LIST_ALERTS_COUNT_COLUMN_TEST_ID = 'attacksListAlertsCountColumn';
 
 const TableContainer = styled.div`
   flex: 1;
@@ -78,6 +82,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
       () => [
         {
           field: 'name',
+          'data-test-subj': ATTACKS_LIST_ATTACK_NAME_COLUMN_TEST_ID,
           name: i18n.translate(
             'xpack.securitySolution.attacksPage.attacksListPanel.attackNameColumn',
             {
@@ -110,6 +115,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
         },
         {
           field: 'alertsCount',
+          'data-test-subj': ATTACKS_LIST_ALERTS_COUNT_COLUMN_TEST_ID,
           name: i18n.translate(
             'xpack.securitySolution.attacksPage.attacksListPanel.alertCountColumn',
             {
@@ -149,6 +155,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
     return (
       <EuiPanel
         hasBorder
+        data-test-subj={ATTACKS_LIST_PANEL_TEST_ID}
         style={{
           width: TABLE_WIDTH,
           height: TABLE_HEIGHT,
@@ -170,6 +177,7 @@ export const AttacksListPanel = React.memo<AttacksListPanelProps>(
             <EuiLoadingChart size="xl" />
           ) : (
             <EuiBasicTable<AttacksListItem>
+              data-test-subj={ATTACKS_LIST_TABLE_TEST_ID}
               items={items}
               columns={columns}
               pagination={pagination}
