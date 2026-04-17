@@ -83,9 +83,13 @@ describe('installPrebuiltWatchlists', function () {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockWatchlistCreate.mockImplementation(async (_attrs, opts?: { id?: string }) => ({
-      id: opts?.id ?? 'generated-watchlist-id',
-    }));
+    mockWatchlistCreate.mockImplementation(async (_attrs, opts?: { id?: string }) => {
+      if (!opts?.id) {
+        throw new Error('Prebuilt watchlist creation must always pass a deterministic id');
+      }
+
+      return { id: opts.id };
+    });
     mockEntitySourceCreate.mockResolvedValue({ id: 'entity-source-id' });
     mockEntitySourceList.mockResolvedValue({ sources: [] });
     mockAddEntitySourceReference.mockResolvedValue(undefined);
