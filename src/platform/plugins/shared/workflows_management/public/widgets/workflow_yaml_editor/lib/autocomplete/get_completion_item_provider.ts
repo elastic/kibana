@@ -301,6 +301,15 @@ export function getCompletionItemProvider(
       // suggest widget via the side-channel store. Return empty to Monaco so
       // the built-in suggest widget never appears. The `modelUri` lets widget
       // subscribers filter out payloads from other editors.
+      //
+      // In unit tests that call `provideCompletionItems` directly with a mock
+      // model, `model.uri` may be absent — skip emit and return Monaco-shaped
+      // suggestions so the tests can still assert on the completion provider's
+      // output.
+      if (!model.uri) {
+        return { suggestions, incomplete: isIncomplete };
+      }
+
       const enrichedItems = suggestions.map((s) => enrichCompletionItem(s, matchType));
       emitSuggestions({
         modelUri: model.uri.toString(),

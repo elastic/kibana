@@ -12,6 +12,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { getSuggestWidgetStyles } from './suggest_widget_styles';
+import { compactTypeLabel, extractTopLevelKeys, summarizeKeyType } from './type_helpers';
 import type { EnrichedSuggestionItem } from './types';
 
 const EMPTY_MESSAGE = i18n.translate('workflows.yamlEditor.suggest.details.empty', {
@@ -48,98 +49,6 @@ const MORE_KEYS_MESSAGE = (n: number) =>
   });
 
 const MAX_INLINE_KEYS = 6;
-
-/**
- * Pull the first top-level keys and their type hints out of a Zod object-literal
- * dump like `{ a: string; b: { nested: number }; c: Array<string> }`. The dump
- * may be followed by a ` // description` suffix which we strip before parsing.
- * Bracket depth is tracked so a nested `{...}` or `Array<...>` counts as a
- * single type value and doesn't split on its internal `;` / `,`.
- */
-const extractTopLevelKeys = (type: string): Array<{ key: string; type: string }> => {
-  const trimmed = type.trim();
-  const openIdx = trimmed.indexOf('{');
-  if (openIdx === -1) return [];
-
-  // Find the matching closing brace for the first `{`, so a trailing
-  // ` // description` suffix doesn't break parsing.
-  let depth = 0;
-  let closeIdx = -1;
-  for (let i = openIdx; i < trimmed.length; i++) {
-    const ch = trimmed[i];
-    if (ch === '{') depth++;
-    else if (ch === '}') {
-      depth--;
-      if (depth === 0) {
-        closeIdx = i;
-        break;
-      }
-    }
-  }
-  if (closeIdx === -1) return [];
-
-  const body = trimmed.slice(openIdx + 1, closeIdx);
-  const entries: Array<{ key: string; type: string }> = [];
-  const pushEntry = (raw: string) => {
-    const colonIdx = raw.indexOf(':');
-    if (colonIdx === -1) return;
-    const key = raw.slice(0, colonIdx).trim().replace(/\?$/, '');
-    const typeStr = raw.slice(colonIdx + 1).trim();
-    if (key) entries.push({ key, type: typeStr });
-  };
-  let bodyDepth = 0;
-  let start = 0;
-  for (let i = 0; i < body.length; i++) {
-    const ch = body[i];
-    if (ch === '{' || ch === '<' || ch === '[' || ch === '(') bodyDepth++;
-    else if (ch === '}' || ch === '>' || ch === ']' || ch === ')') bodyDepth--;
-    else if (bodyDepth === 0 && (ch === ';' || ch === ',')) {
-      pushEntry(body.slice(start, i));
-      start = i + 1;
-    }
-  }
-  pushEntry(body.slice(start));
-  return entries;
-};
-
-const summarizeKeyType = (type: string): string => {
-  const t = type.trim();
-  if (!t) return '';
-  if (t.endsWith('[]') || t.startsWith('Array<')) return 'array';
-  if (t.startsWith('{') || t.startsWith('Record<')) return 'object';
-  if (t.length <= 20) return t;
-  const firstWord = t.split(/[<\s|]/)[0];
-  return firstWord || 'mixed';
-};
-
-/**
- * Collapse long Zod dumps into a short human-readable label. The full Zod
- * rendering adds no signal beyond "this is an object/array/etc." and drowns
- * the details panel — users who need the exact shape check the schema or
- * hover the variable.
- */
-const compactTypeLabel = (type: string): string => {
-  const trimmed = type.trim();
-  if (trimmed.length === 0) return trimmed;
-  // Short enough to read as-is.
-  if (trimmed.length <= 48 && !trimmed.includes('\n')) return trimmed;
-
-  // Array forms: `Foo[]`, `Array<Foo>`
-  if (trimmed.endsWith('[]') || trimmed.startsWith('Array<')) return 'array';
-  // Object-literal forms: `{ a: string; ... }` or `Record<...>`.
-  if (trimmed.startsWith('{') || trimmed.startsWith('Record<')) return 'object';
-  // Union forms with a common scalar.
-  if (trimmed.includes(' | ')) {
-    const parts = trimmed
-      .split('|')
-      .map((p) => p.trim())
-      .filter(Boolean);
-    if (parts.length <= 3 && parts.every((p) => p.length < 20)) return parts.join(' | ');
-    return 'mixed';
-  }
-  // Fallback: truncate with ellipsis; rare because the forms above cover most cases.
-  return `${trimmed.slice(0, 45)}…`;
-};
 
 interface SuggestDetailsPanelProps {
   item: EnrichedSuggestionItem | null;
