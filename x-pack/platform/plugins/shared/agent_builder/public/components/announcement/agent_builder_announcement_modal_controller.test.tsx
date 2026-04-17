@@ -117,6 +117,28 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
+  it('does not render the modal when running in an automated browser (navigator.webdriver)', async () => {
+    Object.defineProperty(navigator, 'webdriver', {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+    const { services } = buildServices();
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+
+    Object.defineProperty(navigator, 'webdriver', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+  });
+
   it('does not render the modal when the user has already seen it in their profile', async () => {
     const { services } = buildServices({ announcementSeenInProfile: true });
     renderController(services);

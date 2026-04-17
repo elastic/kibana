@@ -8,13 +8,12 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import type { StepDeprecationInfo } from '@kbn/workflows';
 import { buildAutocompleteContext } from './context/build_autocomplete_context';
 import { getAllYamlProviders } from './intercept_monaco_yaml_provider';
 import { getSuggestions, isInsideLoopBody } from './suggestions/get_suggestions';
 import { isInWorkflowOutputWithBlock } from './suggestions/workflow/get_workflow_outputs_suggestions';
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
-import { getDeprecatedStepMetadataMap } from '../../../../../common/schema';
+import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 
 // Unique identifier for the workflow completion provider
@@ -64,15 +63,14 @@ function getDeduplicationKey(suggestion: monaco.languages.CompletionItem): strin
  */
 function mapSuggestions(
   map: Map<string, monaco.languages.CompletionItem>,
-  suggestions: monaco.languages.CompletionItem[],
-  deprecatedStepMetadata: Readonly<Record<string, StepDeprecationInfo>>
+  suggestions: monaco.languages.CompletionItem[]
 ): void {
   for (const suggestion of suggestions) {
     const key = getDeduplicationKey(suggestion);
 
     // Skip deprecated step types - they still work for backward compatibility
     // but we don't want to suggest them to users
-    if (!deprecatedStepMetadata[key]) {
+    if (!isDeprecatedStepType(key)) {
       const existing = map.get(key);
 
       if (existing) {
@@ -121,7 +119,6 @@ export function getCompletionItemProvider(
 
       // Incremental deduplication accumulator
       const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
-      const deprecatedStepMetadata = getDeprecatedStepMetadataMap();
 
       // Inside workflow.output's with: block, show only declared output field names so the user
       // doesn't get generic YAML/JSON Schema keys; skip the YAML provider in that case.
@@ -150,7 +147,7 @@ export function getCompletionItemProvider(
               );
               if (result) {
                 // Deduplicate across YAML providers only (snippet beats plain)
-                mapSuggestions(deduplicatedMap, result.suggestions || [], deprecatedStepMetadata);
+                mapSuggestions(deduplicatedMap, result.suggestions || []);
                 if (result.incomplete) {
                   isIncomplete = true;
                 }
@@ -173,7 +170,7 @@ export function getCompletionItemProvider(
       // Workflow suggestions always win over YAML duplicates.
       for (const suggestion of workflowSuggestions) {
         const key = getDeduplicationKey(suggestion);
-        if (!deprecatedStepMetadata[key]) {
+        if (!isDeprecatedStepType(key)) {
           deduplicatedMap.set(key, suggestion);
         }
       }
