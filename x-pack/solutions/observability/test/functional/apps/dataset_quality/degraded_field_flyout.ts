@@ -680,11 +680,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
           );
 
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
-          );
-
           // Should display Edit/Create Component Template Link option
           await testSubjects.existOrFail(
             'datasetQualityManualMitigationsCustomComponentTemplateLink'
@@ -751,11 +746,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           // Possible Mitigation Section should exist
           await testSubjects.existOrFail(
             'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTitle'
-          );
-
-          // It's a technical preview
-          await testSubjects.existOrFail(
-            'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
           );
 
           // Should display Edit/Create Component Template Link option
@@ -1037,9 +1027,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
           const currentFieldLimitValue = await currentFieldLimitInput.getAttribute('value');
           const currentFieldLimit = parseInt(currentFieldLimitValue as string, 10);
-          const currentFieldLimitDisabledStatus = await currentFieldLimitInput.getAttribute(
-            'disabled'
-          );
+          const currentFieldLimitDisabledStatus =
+            await currentFieldLimitInput.getAttribute('disabled');
 
           expect(currentFieldLimit).to.be(43);
           expect(currentFieldLimitDisabledStatus).to.be('true');
@@ -1256,10 +1245,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         await testSubjects.existOrFail('datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist');
-
-        await testSubjects.existOrFail(
-          'datasetQualityDetailsDegradedFieldFlyoutPossibleMitigationTechPreviewBadge'
-        );
 
         await testSubjects.existOrFail(
           'datasetQualityManualMitigationsCustomComponentTemplateLink'
