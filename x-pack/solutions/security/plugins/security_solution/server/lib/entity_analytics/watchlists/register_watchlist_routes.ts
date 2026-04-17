@@ -17,6 +17,7 @@ import {
 import { registerEntitySourceRoutes } from './management/routes/entity_sources';
 import { syncWatchlistRoute } from './management/routes/sync';
 import { csvUploadRoute } from './management/routes/csv_upload';
+import { registerManualEntityRoutes } from './management/routes/entities';
 
 export const registerWatchlistRoutes = ({
   router,
@@ -32,4 +33,5 @@ export const registerWatchlistRoutes = ({
   registerEntitySourceRoutes(router, logger);
   syncWatchlistRoute(router, logger);
   csvUploadRoute({ router, logger, getStartServices });
+  registerManualEntityRoutes(router, logger);
 };
