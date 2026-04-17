@@ -41,4 +41,6 @@ export const casesAgentTools = {
   setCategory: casesTool('set_category'),
   updateObservable: casesTool('update_observable'),
   deleteObservable: casesTool('delete_observable'),
+  createCaseFromTemplate: casesTool('create_case_from_template'),
+  setCustomField: casesTool('set_custom_field'),
 } as const;

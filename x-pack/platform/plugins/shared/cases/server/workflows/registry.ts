@@ -29,6 +29,8 @@ import { getAllAttachmentsStepDefinition } from './steps/get_all_attachments';
 import { updateObservableStepDefinition } from './steps/update_observable';
 import { deleteObservableStepDefinition } from './steps/delete_observable';
 import { getCasesStepDefinition } from './steps/get_cases';
+import { createCaseFromTemplateStepDefinition } from './steps/create_case_from_template';
+import { setCustomFieldStepDefinition } from './steps/set_custom_field';
 import {
   assignCaseStepDefinition,
   closeCaseStepDefinition,
@@ -96,4 +98,6 @@ export const casesStepRegistry: CasesStepRegistryEntry[] = [
   { toolId: casesAgentTools.updateObservable, factory: updateObservableStepDefinition },
   { toolId: casesAgentTools.deleteObservable, factory: deleteObservableStepDefinition },
   { toolId: casesAgentTools.getCases, factory: getCasesStepDefinition },
+  { toolId: casesAgentTools.setCustomField, factory: setCustomFieldStepDefinition },
+  { toolId: casesAgentTools.createCaseFromTemplate, factory: createCaseFromTemplateStepDefinition },
 ];
