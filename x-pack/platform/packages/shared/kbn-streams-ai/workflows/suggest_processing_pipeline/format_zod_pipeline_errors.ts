@@ -49,7 +49,9 @@ export function formatZodPipelineErrors(
       results.push({
         stepIndex: i,
         action,
-        message: `Processor action "${action}" is not allowed in this pipeline schema. Allowed actions: ${[...allowedActions].join(', ')}`,
+        message: `Processor action "${action}" is not allowed in this pipeline schema. Allowed actions: ${[
+          ...allowedActions,
+        ].join(', ')}`,
       });
       continue;
     }
