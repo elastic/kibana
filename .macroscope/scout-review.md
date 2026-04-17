@@ -32,6 +32,8 @@ Skip all other changed files entirely.
 
 If no matching files were changed in this PR, report "No Scout files in this PR — nothing to review" and conclude with no comments.
 
+Do NOT post flaky test runner nudges. A separate agent will take care of this.
+
 ## Best practices reference
 
 Read `docs/extend/scout/best-practices.md` with `browse_code` and enforce all rules documented there. The sections below cover additional conventions NOT in that document.
@@ -40,7 +42,6 @@ Read `docs/extend/scout/best-practices.md` with `browse_code` and enforce all ru
 
 - Before creating new helpers, use `browse_code` to check what's already available in `@kbn/scout`, solution Scout packages (`@kbn/scout-oblt`, `@kbn/scout-search`, `@kbn/scout-security`), and plugin-local `test/scout/` directories.
 - When adding helpers, place them in the correct scope: plugin-local `test/scout/` for plugin-specific, solution Scout package for cross-plugin within a solution, `@kbn/scout` for cross-solution.
-- Flaky Test Runner nudges for PRs: `.macroscope/flaky-test-runner-nudge.md` (Scout and FTR).
 
 ## Output Format
 

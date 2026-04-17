@@ -415,7 +415,7 @@
         "label": "WiredStreamsStatus",
         "description": [],
         "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -431,7 +431,7 @@
               "boolean | \"unknown\" | \"conflict\""
             ],
             "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -447,7 +447,7 @@
               "boolean | \"unknown\" | \"conflict\""
             ],
             "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -463,7 +463,7 @@
               "boolean | \"unknown\" | \"conflict\""
             ],
             "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -476,7 +476,7 @@
             "label": "can_manage",
             "description": [],
             "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -531,7 +531,7 @@
       "label": "StreamsPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-      "lineNumber": 32,
+      "lineNumber": 33,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -547,7 +547,7 @@
       "label": "StreamsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-      "lineNumber": 34,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3882,7 +3882,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 35,
+          "lineNumber": 36,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3901,7 +3901,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 36,
+          "lineNumber": 37,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -3925,7 +3925,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 37,
+          "lineNumber": 38,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3945,7 +3945,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 38,
+          "lineNumber": 39,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3965,7 +3965,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 39,
+          "lineNumber": 40,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3981,7 +3981,7 @@
                 "AbortSignal"
               ],
               "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-              "lineNumber": 39,
+              "lineNumber": 40,
               "columnNumber": 21,
               "deprecated": false,
               "trackAdoption": false,
@@ -4003,7 +4003,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 40,
+          "lineNumber": 41,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -4019,7 +4019,7 @@
                 "AbortSignal"
               ],
               "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-              "lineNumber": 40,
+              "lineNumber": 41,
               "columnNumber": 22,
               "deprecated": false,
               "trackAdoption": false,
@@ -4042,7 +4042,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/streams/public/types.ts",
-          "lineNumber": 41,
+          "lineNumber": 42,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
