@@ -29,12 +29,12 @@ Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for 
 
 ## Output
 
-You may post a short **summary comment** with a `## Scout Test Review` header, but keep it concise (a short breakdown by severity / summary):
+Post a **brief summary comment** — a few lines with count, severity, and optionally a one-liner per finding. Keep it scannable; detailed explanations and fixes go in inline comments.
 
 ```
 ## Scout Test Review
 
-<a short breakdown by severity / summary>
+Found 2 issues (1 major, 1 minor). See inline comments for details.
 
 This review is experimental. Share your feedback in the #appex-qa channel.
 ```
