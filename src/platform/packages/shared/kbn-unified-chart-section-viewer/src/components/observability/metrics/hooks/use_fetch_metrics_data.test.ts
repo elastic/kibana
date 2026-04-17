@@ -517,5 +517,4 @@ describe('useFetchMetricsData', () => {
       );
     });
   });
-
 });

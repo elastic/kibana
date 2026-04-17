@@ -64,8 +64,19 @@ export const DimensionsSelector = ({
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+    const applicableNames = new Set(dimensions.map((d) => d.name));
 
-    const mappedOptions = dimensions.map<SelectableEntry>((dimension) => {
+    // Orphan selections are dimensions the user has already picked but that
+    // are not in the current applicable set (e.g. a filtered METRICS_INFO
+    // response dropped them). Per AC2/AC3 of ticket #263309 they must remain
+    // visible and toggleable so the count badge matches the rendered ticks
+    // and the user can always back out of an invalid combination.
+    const orphanSelections = localSelectedDimensions
+      .filter((dimension) => !applicableNames.has(dimension.name))
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    const toOption = (dimension: Dimension): SelectableEntry => {
       const isSelected = selectedNamesSet.has(dimension.name);
 
       const isDisabled = getOptionDisabledState({
@@ -113,9 +124,11 @@ export const DimensionsSelector = ({
       }
 
       return option;
-    });
+    };
 
-    return mappedOptions;
+    // Orphan selections are prepended so they stay easy to find; the
+    // applicable set keeps its caller-provided ordering below.
+    return [...orphanSelections.map(toOption), ...dimensions.map(toOption)];
   }, [
     dimensions,
     selectedNamesSet,
@@ -151,8 +164,18 @@ export const DimensionsSelector = ({
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
+      // Look up dimensions from both the applicable set and the current local
+      // selection: this lets us preserve orphan selections (those not in the
+      // current applicable set) when the user toggles another option.
+      const dimensionByName = new Map<string, Dimension>();
+      for (const dimension of localSelectedDimensions) {
+        dimensionByName.set(dimension.name, dimension);
+      }
+      for (const dimension of dimensions) {
+        dimensionByName.set(dimension.name, dimension);
+      }
       const newSelection = opts
-        .map((opt) => dimensions.find((d) => d.name === opt.value))
+        .map((opt) => dimensionByName.get(opt.value))
         .filter((d): d is Dimension => d !== undefined)
         .slice(0, MAX_DIMENSIONS_SELECTIONS);
 
@@ -166,7 +189,7 @@ export const DimensionsSelector = ({
         debouncedOnChange(newSelection);
       }
     },
-    [onChange, dimensions, singleSelection, debouncedOnChange]
+    [onChange, dimensions, localSelectedDimensions, singleSelection, debouncedOnChange]
   );
 
   const handleClearAll = useCallback(() => {
