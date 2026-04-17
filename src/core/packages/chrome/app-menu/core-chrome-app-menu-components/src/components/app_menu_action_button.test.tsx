@@ -156,6 +156,21 @@ describe('AppMenuActionButton', () => {
     expect(defaultProps.onPopoverToggle).toHaveBeenCalledTimes(1);
   });
 
+  it('should render labelAppend after the label when provided', () => {
+    render(
+      <AppMenuActionButton
+        {...defaultProps}
+        isSecondaryAction
+        labelAppend={<span data-test-subj="app-menu-label-append">42</span>}
+        testId="test-secondary-with-append"
+      />
+    );
+
+    expect(screen.getByTestId('test-secondary-with-append')).toBeInTheDocument();
+    expect(screen.getByText('Save')).toBeInTheDocument();
+    expect(screen.getByTestId('app-menu-label-append')).toHaveTextContent('42');
+  });
+
   it('should not call secondary run when split button secondary is disabled', async () => {
     const user = userEvent.setup();
     const splitButtonPropsDisabled = {

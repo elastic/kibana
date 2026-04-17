@@ -27,6 +27,7 @@ export const AppMenuItem = ({
   id,
   htmlId,
   label,
+  labelAppend,
   testId,
   iconType,
   disableButton,
@@ -46,6 +47,15 @@ export const AppMenuItem = ({
   const { euiTheme } = useEuiTheme();
 
   const itemText = upperFirst(label);
+  const labelContent =
+    labelAppend != null ? (
+      <>
+        {itemText}
+        {labelAppend}
+      </>
+    ) : (
+      itemText
+    );
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
   const hasItems = items && items.length > 0;
@@ -93,7 +103,7 @@ export const AppMenuItem = ({
         css={buttonCss}
         {...routerLinkProps}
       >
-        {itemText}
+        {labelContent}
       </EuiHeaderLink>
     </EuiHideFor>
   );

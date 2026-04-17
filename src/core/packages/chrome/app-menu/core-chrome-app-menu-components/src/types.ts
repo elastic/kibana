@@ -92,6 +92,10 @@ interface AppMenuItemBase {
    */
   label: string;
   /**
+   * Optional content rendered after the capitalized label (e.g. a count badge).
+   */
+  labelAppend?: ReactNode;
+  /**
    * The icon type for the item.
    */
   iconType: IconType;

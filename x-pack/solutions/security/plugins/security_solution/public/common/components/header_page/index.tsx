@@ -55,6 +55,11 @@ export interface HeaderPageProps extends HeaderProps {
   backComponent?: React.ReactNode;
   badgeOptions?: BadgeOptions;
   children?: React.ReactNode;
+  /**
+   * When true, omits the default large spacer under the header (e.g. project chrome where
+   * vertical rhythm is handled by the page template / app bar).
+   */
+  hideBottomSpacer?: boolean;
   rightSideItems?: React.ReactNode[];
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
@@ -118,6 +123,7 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   badgeOptions,
   border,
   children,
+  hideBottomSpacer = false,
   isLoading,
   rightSideItems,
   subtitle,
@@ -160,8 +166,12 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
         <Divider />
       </>
     )}
-    {/* Manually add a 'padding-bottom' to header */}
-    <EuiSpacer size="l" />
+    {!hideBottomSpacer ? (
+      <>
+        {/* Manually add a 'padding-bottom' to header */}
+        <EuiSpacer data-test-subj="header-page-bottom-spacer" size="l" />
+      </>
+    ) : null}
   </div>
 );
 

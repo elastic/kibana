@@ -44,6 +44,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     id,
     htmlId,
     label,
+    labelAppend,
     testId,
     iconType,
     disableButton,
@@ -63,6 +64,15 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   } = props;
 
   const itemText = upperFirst(label);
+  const labelContent =
+    labelAppend != null ? (
+      <>
+        {itemText}
+        {labelAppend}
+      </>
+    ) : (
+      itemText
+    );
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
 
@@ -169,7 +179,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         notificationIndicatorSize="m"
         notificationIndicatorColor="primary"
       >
-        {itemText}
+        {labelContent}
       </SplitButtonWithNotification>
     </EuiHideFor>
   ) : isSecondaryAction ? (
@@ -182,7 +192,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         css={buttonCss}
         color="text"
       >
-        {itemText}
+        {labelContent}
       </EuiButtonEmpty>
     </EuiHideFor>
   ) : (
@@ -197,7 +207,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
         minWidth={minWidthProp}
         fill={isFilledProp}
       >
-        {itemText}
+        {labelContent}
       </EuiButton>
     </EuiHideFor>
   );

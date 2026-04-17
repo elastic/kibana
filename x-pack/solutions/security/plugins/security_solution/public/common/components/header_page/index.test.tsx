@@ -123,6 +123,24 @@ describe('HeaderPage', () => {
     expect(screen.queryByTestId('header-page-supplements')).not.toBeInTheDocument();
   });
 
+  test('it omits the bottom spacer when hideBottomSpacer is true', () => {
+    const { rerender } = render(
+      <TestProviders>
+        <HeaderPage title="Test title" />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('header-page-bottom-spacer')).toBeInTheDocument();
+
+    rerender(
+      <TestProviders>
+        <HeaderPage hideBottomSpacer title="Test title" />
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('header-page-bottom-spacer')).not.toBeInTheDocument();
+  });
+
   test('it renders the right side items', () => {
     render(
       <TestProviders>

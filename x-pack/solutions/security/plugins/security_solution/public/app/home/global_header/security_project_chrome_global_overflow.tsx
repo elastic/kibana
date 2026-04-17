@@ -23,7 +23,8 @@ const ADD_INTEGRATIONS_LABEL = i18n.translate(
   }
 );
 
-const ADD_INTEGRATIONS_ORDER = 99;
+/** Lowest overflow order so "Add integrations" sorts before page items (often `0`) and ML (`98`). */
+const ADD_INTEGRATIONS_ORDER = -100;
 const ML_JOB_SETTINGS_ORDER = 98;
 
 /**

@@ -5,13 +5,28 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { AppMenu } from '@kbn/core-chrome-app-menu';
+import type { AppMenuConfig, AppMenuItemType } from '@kbn/core-chrome-app-menu-components';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
+import { useNavigateTo } from '@kbn/security-solution-navigation';
+import useObservable from 'react-use/lib/useObservable';
 import { APP_UI_ID } from '../../../../../common/constants';
 import { SecurityPageName } from '../../../../app/types';
-import { SecuritySolutionLinkButton } from '../../../../common/components/links';
+import {
+  SecuritySolutionLinkButton,
+  useGetSecuritySolutionLinkProps,
+} from '../../../../common/components/links';
 import { getDetectionEngineUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -21,6 +36,8 @@ import { MissingDetectionsPrivilegesCallOut } from '../../../../detections/compo
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
+import { ADD_ELASTIC_RULES } from '../../components/pre_packaged_rules/translations';
+import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -47,6 +64,10 @@ const RulesPageContent = () => {
   const [isRuleSettingsModalOpen, openRuleSettingsModal, closeRuleSettingsModal] = useBoolState();
   const kibanaServices = useKibana().services;
   const { navigateToApp } = kibanaServices.application;
+  const { chrome } = kibanaServices;
+  const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
+  const chromeStyle = useObservable(chromeStyle$, chrome.getChromeStyle());
+  const isProjectChrome = chromeStyle === 'project';
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
@@ -61,9 +82,137 @@ const RulesPageContent = () => {
   const loading = userInfoLoading || listsConfigLoading;
   const { canAccessGapAutoFill } = useGapAutoFillSchedulerContext();
 
+  // Value lists: disable when lists index is missing and user cannot create it, or when write/edit is blocked.
+  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
+  const isImportValueListDisabled =
+    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
+
+  const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+  const { navigateTo } = useNavigateTo();
+  const addElasticRulesLinkProps = useMemo(
+    () => getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.rulesAdd }),
+    [getSecuritySolutionLinkProps]
+  );
+  const { data: preBuiltRulesStatus } = usePrebuiltRulesStatus();
+  const newRulesCount = preBuiltRulesStatus?.stats.num_prebuilt_rules_to_install ?? 0;
+
   const aiRuleCreationEnabled = useIsExperimentalFeatureEnabled('aiRuleCreationEnabled');
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const isAiRuleCreationAvailable = aiRuleCreationEnabled && isAgentBuilderEnabled;
+
+  const addCreateRuleLinkProps = useMemo(
+    () => getSecuritySolutionLinkProps({ deepLinkId: SecurityPageName.rulesCreate }),
+    [getSecuritySolutionLinkProps]
+  );
+
+  const rulesProjectAppMenuConfig = useMemo((): AppMenuConfig | undefined => {
+    if (!isProjectChrome) {
+      return undefined;
+    }
+    const importRulesOverflowItem: AppMenuItemType = {
+      id: 'security-detection-rules-import-rules',
+      order: 0,
+      label: i18n.IMPORT_RULE,
+      iconType: 'importAction',
+      testId: 'rules-import-modal-button',
+      disableButton: !canEditRules || loading,
+      run: () => {
+        showImportModal();
+      },
+    };
+    return {
+      layout: 'chromeBarV2',
+      secondaryActionItems: [
+        {
+          id: 'security-detection-rules-add-elastic',
+          label: ADD_ELASTIC_RULES,
+          ...(newRulesCount > 0
+            ? {
+                labelAppend: (
+                  <EuiBadge
+                    color="#E0E5EE"
+                    css={css`
+                      margin-left: 5px;
+                    `}
+                  >
+                    {newRulesCount}
+                  </EuiBadge>
+                ),
+              }
+            : {}),
+          iconType: 'plusInCircle',
+          testId: 'addElasticRulesButton',
+          href: addElasticRulesLinkProps.href,
+          target: '_self',
+          disableButton: !canReadRules || loading,
+          run: () => {
+            navigateTo({ url: addElasticRulesLinkProps.href });
+          },
+        },
+        {
+          id: 'security-detection-rules-value-lists',
+          label: i18n.IMPORT_VALUE_LISTS,
+          iconType: 'importAction',
+          testId: 'open-value-lists-modal-button',
+          disableButton: isImportValueListDisabled,
+          tooltipContent: () =>
+            cantCreateNonExistentListIndex
+              ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
+              : i18n.UPLOAD_VALUE_LISTS_TOOLTIP,
+          run: () => {
+            showValueListFlyout();
+          },
+        },
+        ...(canAccessGapAutoFill
+          ? [
+              {
+                id: 'security-detection-rules-settings',
+                label: i18n.RULE_SETTINGS_TITLE,
+                iconType: 'gear',
+                testId: 'rules-settings-button',
+                run: () => {
+                  openRuleSettingsModal();
+                },
+              },
+            ]
+          : []),
+      ],
+      overflowOnlyItems: [importRulesOverflowItem],
+      ...(!isAiRuleCreationAvailable
+        ? {
+            primaryActionItem: {
+              id: 'security-detection-rules-create-new',
+              label: i18n.ADD_NEW_RULE,
+              iconType: 'plusInCircle',
+              testId: 'create-new-rule',
+              href: addCreateRuleLinkProps.href,
+              target: '_self',
+              disableButton: !canEditRules || loading,
+              isFilled: false,
+              run: () => {
+                navigateTo({ url: addCreateRuleLinkProps.href });
+              },
+            },
+          }
+        : {}),
+    };
+  }, [
+    isProjectChrome,
+    isAiRuleCreationAvailable,
+    newRulesCount,
+    addElasticRulesLinkProps.href,
+    addCreateRuleLinkProps.href,
+    canReadRules,
+    canEditRules,
+    loading,
+    showImportModal,
+    showValueListFlyout,
+    cantCreateNonExistentListIndex,
+    isImportValueListDisabled,
+    canAccessGapAutoFill,
+    openRuleSettingsModal,
+    navigateTo,
+  ]);
 
   if (
     redirectToDetections(
@@ -80,16 +229,11 @@ const RulesPageContent = () => {
     return null;
   }
 
-  // - if lists data stream does not exist and user doesn't have enough privileges to create it,
-  // lists button should be disabled
-  // - if data stream exists and user doesn't have enough privileges to create it,
-  // user still can import value lists, so button should not be disabled if user has enough other privileges
-  const cantCreateNonExistentListIndex = needsListsIndex && !canCreateListsIndex;
-  const isImportValueListDisabled =
-    cantCreateNonExistentListIndex || !canWriteListsIndex || !canEditRules || loading;
-
   return (
     <>
+      {isProjectChrome && rulesProjectAppMenuConfig ? (
+        <AppMenu config={rulesProjectAppMenuConfig} setAppMenu={chrome.setAppMenu} />
+      ) : null}
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
       <MlJobCompatibilityCallout />
@@ -101,71 +245,80 @@ const RulesPageContent = () => {
 
       <RulesTableContextProvider>
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={i18n.PAGE_TITLE}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-              {canAccessGapAutoFill && (
-                <EuiButtonEmpty
-                  data-test-subj="rules-settings-button"
-                  iconType="gear"
-                  onClick={openRuleSettingsModal}
-                >
-                  {i18n.RULE_SETTINGS_TITLE}
-                </EuiButtonEmpty>
-              )}
-              <EuiFlexItem grow={false}>
-                <AddElasticRulesButton isDisabled={!canReadRules || loading} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  position="top"
-                  content={
-                    cantCreateNonExistentListIndex
-                      ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
-                      : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
-                  }
-                >
+          {!isProjectChrome ? (
+            <HeaderPage title={i18n.PAGE_TITLE}>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+                {canAccessGapAutoFill && (
                   <EuiButtonEmpty
-                    data-test-subj="open-value-lists-modal-button"
-                    iconType="importAction"
-                    isDisabled={isImportValueListDisabled}
-                    onClick={showValueListFlyout}
+                    data-test-subj="rules-settings-button"
+                    iconType="gear"
+                    onClick={openRuleSettingsModal}
                   >
-                    {i18n.IMPORT_VALUE_LISTS}
+                    {i18n.RULE_SETTINGS_TITLE}
                   </EuiButtonEmpty>
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="rules-import-modal-button"
-                  iconType="importAction"
-                  isDisabled={!canEditRules || loading}
-                  onClick={showImportModal}
-                >
-                  {i18n.IMPORT_RULE}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {isAiRuleCreationAvailable ? (
-                  <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
-                ) : (
-                  <SecuritySolutionLinkButton
-                    data-test-subj="create-new-rule"
-                    fill
-                    iconType="plusInCircle"
-                    isDisabled={!canEditRules || loading}
-                    deepLinkId={SecurityPageName.rulesCreate}
-                  >
-                    {i18n.ADD_NEW_RULE}
-                  </SecuritySolutionLinkButton>
                 )}
+                <EuiFlexItem grow={false}>
+                  <AddElasticRulesButton isDisabled={!canReadRules || loading} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    position="top"
+                    content={
+                      cantCreateNonExistentListIndex
+                        ? i18n.UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP
+                        : i18n.UPLOAD_VALUE_LISTS_TOOLTIP
+                    }
+                  >
+                    <EuiButtonEmpty
+                      data-test-subj="open-value-lists-modal-button"
+                      iconType="importAction"
+                      isDisabled={isImportValueListDisabled}
+                      onClick={showValueListFlyout}
+                    >
+                      {i18n.IMPORT_VALUE_LISTS}
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="rules-import-modal-button"
+                    iconType="importAction"
+                    isDisabled={!canEditRules || loading}
+                    onClick={showImportModal}
+                  >
+                    {i18n.IMPORT_RULE}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {isAiRuleCreationAvailable ? (
+                    <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
+                  ) : (
+                    <SecuritySolutionLinkButton
+                      data-test-subj="create-new-rule"
+                      fill
+                      iconType="plusInCircle"
+                      isDisabled={!canEditRules || loading}
+                      deepLinkId={SecurityPageName.rulesCreate}
+                    >
+                      {i18n.ADD_NEW_RULE}
+                    </SecuritySolutionLinkButton>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </HeaderPage>
+          ) : null}
+          {isProjectChrome && isAiRuleCreationAvailable ? (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              <EuiFlexItem grow={false}>
+                <CreateRuleMenu loading={loading} isDisabled={!canEditRules || loading} />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </HeaderPage>
+          ) : null}
           {isRuleSettingsModalOpen && canAccessGapAutoFill && (
             <RuleSettingsModal isOpen={isRuleSettingsModalOpen} onClose={closeRuleSettingsModal} />
           )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
-          <EuiSpacer size="s" />
+          {!isProjectChrome ? <EuiSpacer size="s" /> : null}
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}
             categories={[DEFAULT_APP_CATEGORIES.security.id]}
