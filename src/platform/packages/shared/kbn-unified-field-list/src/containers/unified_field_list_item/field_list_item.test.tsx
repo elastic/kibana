@@ -51,7 +51,7 @@ async function getComponent({
   field?: DataViewField;
   canFilter?: boolean;
   isBreakdownSupported?: boolean;
-  searchMode?: 'documents' | 'text-based';
+  searchMode?: SearchMode;
 }) {
   const finalField =
     field ??
