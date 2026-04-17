@@ -25,18 +25,23 @@ import { useLanguage } from './use_language_hook';
 
 interface Props {
   closeModal: () => void;
+  configLocale: string;
 }
 
-export const LanguageModal: FC<Props> = ({ closeModal }) => {
+export const LanguageModal: FC<Props> = ({ closeModal, configLocale }) => {
   const modalTitleId = useGeneratedHtmlId();
   const selectId = useGeneratedHtmlId();
 
   const { value: locale, initialValue: initialLocaleValue, isLoading, onChange } = useLanguage();
 
+  const configLocaleLabel =
+    SUPPORTED_LOCALES.find(({ id }) => id.toLowerCase() === configLocale.toLowerCase())?.label ??
+    configLocale;
   const serverDefaultOption = {
     value: '',
     text: i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalServerDefaultOption', {
-      defaultMessage: 'Server default',
+      defaultMessage: 'Server default ({configLocaleLabel})',
+      values: { configLocaleLabel },
     }),
   };
   const localeOptions = [

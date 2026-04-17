@@ -328,6 +328,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          configLocale,
         },
         theme: {
           darkMode,
