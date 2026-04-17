@@ -127,4 +127,30 @@ describe('useMetricsGridFullScreen', () => {
 
     expect(sourceCode).toMatch(/\.embPanel\s*\{\s*z-index:\s*auto\s*!important;/);
   });
+
+  it('fullscreen styles constrain flyout height to prevent clipping', () => {
+    // The .euiFlyout CSS in fullscreen mode must set both top: 0 and bottom: 0
+    // to anchor the flyout to the full viewport height. Without bottom: 0,
+    // EUI's default flyout positioning can clip the flyout content (dimensions
+    // list, pagination) at the bottom of the screen.
+    // See: https://github.com/elastic/kibana/issues/259956
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    // Verify --euiFixedHeadersOffset is reset to 0 to remove header offset in fullscreen
+    expect(sourceCode).toMatch(/--euiFixedHeadersOffset:\s*0px/);
+
+    // Verify the .euiFlyout block sets bottom: 0 to prevent clipping in fullscreen
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]bottom['"]\s*,\s*['"]0\s*!important['"]\s*\)/
+    );
+
+    // Verify max-height is set to override any EUI-applied max-height constraint
+    expect(sourceCode).toMatch(
+      /logicalCSS\s*\(\s*['"]max-height['"]\s*,\s*['"]100vh\s*!important['"]\s*\)/
+    );
+  });
 });

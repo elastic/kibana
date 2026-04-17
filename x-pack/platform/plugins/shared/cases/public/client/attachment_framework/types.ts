@@ -47,13 +47,23 @@ export interface AttachmentViewObject<Props = {}> {
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
+  deleteSuccessTitle?: string;
   className?: string;
   css?: EuiCommentProps['css'];
+}
+
+export interface AttachmentTabViewObject<Props = {}> {
+  children?: React.ComponentType<Props>;
 }
 
 export interface CommonAttachmentViewProps {
   savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+}
+
+/** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
+export interface CommonAttachmentTabViewProps {
+  caseData: CaseUI;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
@@ -79,8 +89,11 @@ export interface RowContext {
  * These attachments reference external entities by ID
  */
 export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  attachmentId: string;
+  attachmentId: UnifiedReferenceAttachmentPayload['attachmentId'];
   metadata?: UnifiedReferenceAttachmentPayload['metadata'];
+  createdBy: CaseUser;
+  version: string;
+  rowContext: RowContext;
 }
 
 /**
@@ -100,6 +113,9 @@ export interface AttachmentType<Props> {
   displayName: string;
   getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
   getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
+  getAttachmentTabViewObject?: (
+    props?: CommonAttachmentTabViewProps
+  ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

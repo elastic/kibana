@@ -86,6 +86,11 @@ describe('DependencyNode', () => {
     expect(screen.getByTestId('serviceMapNode-dependency-test-dependency')).toBeInTheDocument();
   });
 
+  it('exposes a stable diamond hit target for e2e', () => {
+    renderDependencyNode();
+    expect(screen.getByTestId('serviceMapNodeDiamondHit')).toBeInTheDocument();
+  });
+
   it('applies primary color when selected', () => {
     renderDependencyNode(createDependencyNodeData(), true);
     const label = screen.getByText('postgresql:5432');

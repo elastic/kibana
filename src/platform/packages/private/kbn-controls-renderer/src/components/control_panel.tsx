@@ -36,7 +36,7 @@ import { FloatingActions } from './floating_actions';
 
 export const ControlPanel = ({
   parentApi,
-  control: { uid, grow, width, type },
+  control: { id, grow, width, type },
   setControlPanelRef,
 }: {
   parentApi: ControlsRendererParentApi;
@@ -48,7 +48,7 @@ export const ControlPanel = ({
   const [api, setApi] = useState<(DefaultEmbeddableApi & Partial<HasCustomPrepend>) | null>(null);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: uid,
+    id,
   });
 
   const [viewMode, disabledActionIds] = useBatchedPublishingSubjects(
@@ -80,9 +80,9 @@ export const ControlPanel = ({
   const setRefs = useCallback(
     (ref: HTMLElement | null) => {
       setNodeRef(ref);
-      setControlPanelRef(uid, ref);
+      setControlPanelRef(id, ref);
     },
-    [uid, setNodeRef, setControlPanelRef]
+    [id, setNodeRef, setControlPanelRef]
   );
 
   const onApiAvailable = useCallback(
@@ -110,7 +110,7 @@ export const ControlPanel = ({
       <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
-        uuid={uid}
+        uuid={id}
         viewMode={viewMode}
         disabledActions={disabledActionIds}
         prependWrapperRef={prependWrapperRef}
@@ -118,7 +118,7 @@ export const ControlPanel = ({
         <EuiFormRow
           data-test-subj="control-frame-title"
           fullWidth
-          id={`control-title-${uid}`}
+          id={`control-title-${id}`}
           aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
             defaultMessage: 'Control for ${controlTitle}',
             values: { controlTitle: panelLabel },
@@ -169,8 +169,8 @@ export const ControlPanel = ({
             compressed={parentApi.isCompressed ? parentApi.isCompressed() : true}
           >
             <EmbeddableRenderer
-              key={uid}
-              maybeId={uid}
+              key={id}
+              maybeId={id}
               type={type}
               getParentApi={() => parentApi}
               onApiAvailable={onApiAvailable}

@@ -37,7 +37,7 @@ import { registerBeforeAgentWorkflowsHook } from './hooks/agent_workflows/regist
 import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tools_loader_hook';
 import { createConnectorLifecycleHandler } from './services/connector_lifecycle/connector_lifecycle_handler';
 import { registerTaskDefinitions } from './services/execution';
-import { createModelProviderFactory } from './services/runner/model_provider';
+import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { registerSmlCrawlerTaskDefinition, scheduleSmlCrawlerTasks } from './services/sml';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
@@ -257,6 +257,7 @@ export class AgentBuilderPlugin
       sml: {
         registerType: serviceSetups.sml.registerType.bind(serviceSetups.sml),
       },
+      topSnippets: this.config.topSnippets,
     };
   }
 
@@ -354,7 +355,6 @@ export class AgentBuilderPlugin
             esClient: elasticsearch.client.asInternalUser,
             savedObjectsClient: soClient,
             logger: this.logger.get('services.sml'),
-            request: params.request,
           });
         },
       },

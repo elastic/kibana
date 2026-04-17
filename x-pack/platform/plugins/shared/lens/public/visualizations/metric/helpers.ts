@@ -132,7 +132,7 @@ export function isSecondaryTrendConfigInvalid(
   isPrimaryMetricNumeric: boolean
 ): boolean {
   return (
-    colorMode !== secondaryTrend?.type ||
+    colorMode !== (secondaryTrend?.type ?? 'none') ||
     (secondaryTrend?.type === 'dynamic' &&
       secondaryTrend?.baselineValue === 'primary' &&
       !isPrimaryMetricNumeric)

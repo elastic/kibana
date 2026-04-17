@@ -6,6 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { DatatableState } from './datatable';
 import { datatableStateSchema } from './datatable';
@@ -16,9 +17,9 @@ type DatatableWithoutDefaultsConfig = Omit<DatatableState, 'sampling' | 'ignore_
 describe('Datatable Schema', () => {
   const baseDatatableConfig: Omit<DatatableWithoutDefaultsConfig, 'metrics'> = {
     type: 'data_table',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   };
 
@@ -117,10 +118,12 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'metric',
-          index: 1,
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'metric',
+            index: 1,
+            direction: 'desc',
+          },
         },
       };
 
@@ -162,10 +165,12 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'row',
-          index: 1,
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'row',
+            index: 1,
+            direction: 'desc',
+          },
         },
       };
 
@@ -207,11 +212,13 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'pivoted_metric',
-          index: 1,
-          values: ['success'],
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 1,
+            values: ['success'],
+            direction: 'desc',
+          },
         },
       };
 
@@ -258,11 +265,13 @@ describe('Datatable Schema', () => {
             limit: 3,
           },
         ],
-        sort_by: {
-          column_type: 'pivoted_metric',
-          index: 0,
-          values: ['success1', 'success2'],
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 0,
+            values: ['success1', 'success2'],
+            direction: 'desc',
+          },
         },
       };
 
@@ -358,8 +367,8 @@ describe('Datatable Schema', () => {
     });
 
     it('throws when using invalid density height type', () => {
-      const input: Omit<DatatableWithoutDefaultsConfig, 'density'> & {
-        density: { height: { header: { type: 'invalid' } } };
+      const input: Omit<DatatableWithoutDefaultsConfig, 'styling'> & {
+        styling: { density: { height: { header: { type: 'invalid' } } } };
       } = {
         ...baseDatatableConfig,
         metrics: [
@@ -372,9 +381,11 @@ describe('Datatable Schema', () => {
             field: 'bytes',
           },
         ],
-        density: {
-          height: {
-            header: { type: 'invalid' },
+        styling: {
+          density: {
+            height: {
+              header: { type: 'invalid' },
+            },
           },
         },
       };
@@ -383,8 +394,8 @@ describe('Datatable Schema', () => {
     });
 
     it('throws when using invalid density mode', () => {
-      const input: Omit<DatatableWithoutDefaultsConfig, 'density'> & {
-        density: { mode: 'invalid' };
+      const input: Omit<DatatableWithoutDefaultsConfig, 'styling'> & {
+        styling: { density: { mode: 'invalid' } };
       } = {
         ...baseDatatableConfig,
         metrics: [
@@ -397,8 +408,10 @@ describe('Datatable Schema', () => {
             field: 'bytes',
           },
         ],
-        density: {
-          mode: 'invalid',
+        styling: {
+          density: {
+            mode: 'invalid',
+          },
         },
       };
 
@@ -406,8 +419,8 @@ describe('Datatable Schema', () => {
     });
 
     it('throws when using invalid height type', () => {
-      const input: Omit<DatatableWithoutDefaultsConfig, 'density'> & {
-        density: { height: { header: { type: 'invalid' } } };
+      const input: Omit<DatatableWithoutDefaultsConfig, 'styling'> & {
+        styling: { density: { height: { header: { type: 'invalid' } } } };
       } = {
         ...baseDatatableConfig,
         metrics: [
@@ -420,7 +433,7 @@ describe('Datatable Schema', () => {
             field: 'bytes',
           },
         ],
-        density: { height: { header: { type: 'invalid' } } },
+        styling: { density: { height: { header: { type: 'invalid' } } } },
       };
 
       expect(() => datatableStateSchema.validate(input)).toThrow();
@@ -450,7 +463,7 @@ describe('Datatable Schema', () => {
     it('throws when using term buckets operation in an esql configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -473,7 +486,7 @@ describe('Datatable Schema', () => {
     it('throws when esql datatable has no metrics and no rows', () => {
       const input: Omit<DatatableWithoutDefaultsConfig, 'metrics' | 'rows'> = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -487,7 +500,7 @@ describe('Datatable Schema', () => {
     it('throws on empty metrics array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -505,7 +518,7 @@ describe('Datatable Schema', () => {
     it('throws on empty rows array for esql', () => {
       const input: DatatableWithoutDefaultsConfig = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
@@ -554,10 +567,12 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'metric',
-          index: 2,
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'metric',
+            index: 2,
+            direction: 'desc',
+          },
         },
       };
 
@@ -598,11 +613,13 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'pivoted_metric',
-          index: 2,
-          values: ['success'],
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 2,
+            values: ['success'],
+            direction: 'desc',
+          },
         },
       };
 
@@ -648,11 +665,13 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'pivoted_metric',
-          index: 2,
-          values: ['success'],
-          direction: 'desc',
+        styling: {
+          sort_by: {
+            column_type: 'pivoted_metric',
+            index: 2,
+            values: ['success'],
+            direction: 'desc',
+          },
         },
       };
 
@@ -664,11 +683,18 @@ describe('Datatable Schema', () => {
     it('validates full datatable configuration', () => {
       const input: DatatableWithoutDefaultsConfig = {
         ...baseDatatableConfig,
-        density: {
-          mode: 'compact',
-          height: {
-            header: { type: 'auto' },
-            value: { type: 'custom', lines: 2 },
+        styling: {
+          density: {
+            mode: 'compact',
+            height: {
+              header: { type: 'auto' },
+              value: { type: 'custom', lines: 2 },
+            },
+          },
+          sort_by: {
+            column_type: 'metric',
+            index: 0,
+            direction: 'asc',
           },
         },
         metrics: [
@@ -736,11 +762,6 @@ describe('Datatable Schema', () => {
             limit: 5,
           },
         ],
-        sort_by: {
-          column_type: 'metric',
-          index: 0,
-          direction: 'asc',
-        },
       };
 
       const validated = datatableStateSchema.validate(input);
@@ -752,15 +773,17 @@ describe('Datatable Schema', () => {
         type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table full configuration',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
-        density: {
-          mode: 'compact',
-          height: {
-            header: { type: 'auto' },
-            value: { type: 'custom', lines: 2 },
+        styling: {
+          density: {
+            mode: 'compact',
+            height: {
+              header: { type: 'auto' },
+              value: { type: 'custom', lines: 2 },
+            },
           },
         },
         metrics: [
@@ -838,7 +861,7 @@ describe('Datatable Schema', () => {
         type: 'data_table',
         title: 'Datatable',
         description: 'ESQL table without metrics',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },

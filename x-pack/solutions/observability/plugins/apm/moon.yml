@@ -79,6 +79,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/chart-icons'
   - '@kbn/observability-shared-plugin'
+  - '@kbn/observability-utils-server'
   - '@kbn/ml-anomaly-utils'
   - '@kbn/shared-ux-prompt-not-found'
   - '@kbn/ui-actions-plugin'
@@ -116,7 +117,6 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-context-theme'
-  - '@kbn/test-jest-helpers'
   - '@kbn/security-plugin-types-common'
   - '@kbn/server-route-repository-utils'
   - '@kbn/core-analytics-browser'
@@ -153,6 +153,8 @@ dependsOn:
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
   - '@kbn/shared-ux-column-presets'
+  - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

@@ -1,5 +1,5 @@
 {
-  "sha1": "0096d80e0560b7aef0b23ffccff5bd6ee5591a25",
+  "sha1": "9cada4fc510650932ed4b6f81ca37e0752be8af6",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -15,56 +15,56 @@
     {
       "id": "886ec55acce7b69-e0176e372fb48de",
       "title": "Attachments shows empty attachments prompt when navigating to attachments tab",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 139,
+        "line": 140,
         "column": 7
       }
     },
     {
       "id": "886ec55acce7b69-17f1921df3c07a9",
       "title": "Attachments opens add attachment flyout and shows available attachments",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 146,
+        "line": 147,
         "column": 7
       }
     },
     {
       "id": "886ec55acce7b69-78a107722ab10ab",
       "title": "Attachments adds and removes all attachments from the stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 161,
+        "line": 162,
         "column": 7
       }
     },
     {
       "id": "886ec55acce7b69-7bcc2f437dac5d2",
       "title": "Attachments opens attachment details flyout and verifies information for each type",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/attachments/attachments.spec.ts",
-        "line": 201,
+        "line": 202,
         "column": 7
       }
     },
@@ -78,7 +78,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 35,
+        "line": 37,
         "column": 7
       }
     },
@@ -92,7 +92,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 76,
+        "line": 78,
         "column": 7
       }
     },
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 23,
+        "line": 28,
         "column": 9
       }
     },
@@ -172,7 +172,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 31,
+        "line": 36,
         "column": 9
       }
     },
@@ -188,7 +188,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/permissions_wired.spec.ts",
-        "line": 39,
+        "line": 44,
         "column": 9
       }
     },
@@ -1373,7 +1373,7 @@
     {
       "id": "8431b9ecd24de8b-5410dfb47f53d9f",
       "title": "Stream data processing - simulation preview should display default samples when no processors are configured",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1382,14 +1382,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 39,
+        "line": 40,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-4d4434a7ddc103d",
       "title": "Stream data processing - simulation preview should automatically update the simulation preview when changing a new processor config",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1398,14 +1398,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-659f0680e911a10",
       "title": "Stream data processing - simulation preview should update the simulation preview to previous state when discarding a new processor",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1414,14 +1414,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-a7813857083cd20",
       "title": "Stream data processing - simulation preview should update the simulation preview with outcome of multiple new processors",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1430,14 +1430,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 122,
+        "line": 123,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-3346718a174e09f",
       "title": "Stream data processing - simulation preview should update the simulation preview with processed dates from another locale/timezone",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1446,14 +1446,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 176,
+        "line": 177,
         "column": 9
       }
     },
     {
       "id": "8431b9ecd24de8b-d4e223d8a2dab6e",
       "title": "Stream data processing - simulation preview should show dropped documents in the simulation preview",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1462,7 +1462,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/processing_simulation_preview.spec.ts",
-        "line": 220,
+        "line": 221,
         "column": 9
       }
     },
@@ -1778,7 +1778,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 60,
+        "line": 62,
         "column": 7
       }
     },
@@ -1794,7 +1794,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 76,
+        "line": 78,
         "column": 7
       }
     },
@@ -1810,7 +1810,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 89,
+        "line": 91,
         "column": 7
       }
     },
@@ -1824,7 +1824,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 105,
+        "line": 107,
         "column": 7
       }
     },
@@ -1840,7 +1840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 128,
+        "line": 130,
         "column": 7
       }
     },
@@ -1856,7 +1856,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 149,
+        "line": 151,
         "column": 7
       }
     },
@@ -1872,7 +1872,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 165,
+        "line": 167,
         "column": 7
       }
     },
@@ -1888,7 +1888,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 181,
+        "line": 183,
         "column": 7
       }
     },
@@ -1902,7 +1902,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 202,
+        "line": 204,
         "column": 7
       }
     },
@@ -1918,7 +1918,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 225,
+        "line": 227,
         "column": 7
       }
     },
@@ -1934,7 +1934,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 244,
+        "line": 246,
         "column": 7
       }
     },
@@ -1950,7 +1950,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 256,
+        "line": 258,
         "column": 7
       }
     },
@@ -1966,7 +1966,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 278,
+        "line": 280,
         "column": 7
       }
     },
@@ -1982,7 +1982,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 294,
+        "line": 296,
         "column": 7
       }
     },
@@ -1998,7 +1998,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 317,
+        "line": 319,
         "column": 7
       }
     },
@@ -2560,7 +2560,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 101,
+        "line": 108,
         "column": 9
       }
     },
@@ -2574,7 +2574,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 131,
+        "line": 138,
         "column": 9
       }
     },
@@ -2588,7 +2588,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 165,
+        "line": 172,
         "column": 9
       }
     },
@@ -3348,7 +3348,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 98,
+        "line": 100,
         "column": 9
       }
     },
@@ -3364,7 +3364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 122,
+        "line": 126,
         "column": 9
       }
     },
@@ -3399,15 +3399,15 @@
     {
       "id": "7ce2670a3e19b7c-0f0cfefb9e93b08",
       "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 76,
-        "column": 7
+        "line": 77,
+        "column": 8
       }
     },
     {
@@ -3422,6 +3422,62 @@
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/delete_query_stream.spec.ts",
         "line": 45,
         "column": 7
+      }
+    },
+    {
+      "id": "1e16afa035dea97-1cd2ae1f95337e5",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should edit a query stream inline from the classic stream partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "1e16afa035dea97-62d132f57e94ce4",
+      "title": "Query streams - Inline edit and delete on classic stream partitioning view should delete a query stream from the inline edit form on classic stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_classic_partitioning.spec.ts",
+        "line": 102,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f578c7e255c724-6d1781c1e9bac72",
+      "title": "Query streams - Inline edit and delete from partitioning view should edit a query stream inline from the partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "1f578c7e255c724-37017f1fb2cbbbd",
+      "title": "Query streams - Inline edit and delete from partitioning view should delete a query stream from the inline edit form in partitioning view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/edit_query_stream_partitioning.spec.ts",
+        "line": 93,
+        "column": 9
       }
     },
     {

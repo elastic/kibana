@@ -37,6 +37,11 @@ export const FieldsRenderer: FC<{
     [parsedTemplate.fields]
   );
 
+  const fieldControlMap = useMemo(
+    () => Object.fromEntries(parsedTemplate.fields.map((f) => [f.name, f.control])),
+    [parsedTemplate.fields]
+  );
+
   const allFieldPaths = useMemo(
     () => parsedTemplate.fields.map((f) => `${CASE_EXTENDED_FIELDS}.${f.name}_as_${f.type}`),
     [parsedTemplate.fields]
@@ -57,7 +62,12 @@ export const FieldsRenderer: FC<{
       {parsedTemplate.fields.map((field) => {
         // Evaluate display condition — skip rendering if false
         if (field.display?.show_when) {
-          const shouldShow = evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
+          const shouldShow = evaluateCondition(
+            field.display.show_when,
+            fieldValues,
+            fieldTypeMap,
+            fieldControlMap
+          );
           if (!shouldShow) return null;
         }
 
@@ -65,7 +75,12 @@ export const FieldsRenderer: FC<{
         const isRequired =
           field.validation?.required === true ||
           (field.validation?.required_when
-            ? evaluateCondition(field.validation.required_when, fieldValues, fieldTypeMap)
+            ? evaluateCondition(
+                field.validation.required_when,
+                fieldValues,
+                fieldTypeMap,
+                fieldControlMap
+              )
             : false);
 
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
@@ -103,32 +118,44 @@ export const TemplateFieldRenderer: FC<TemplateFieldRendererProps> = ({
   parsedTemplate,
   onFieldDefaultChange,
 }) => {
-  const templateKey = React.useMemo(
-    () => parsedTemplate.fields.map((f) => `${f.name}:${f.type}`).join('|'),
-    [parsedTemplate.fields]
-  );
+  // Derive a stable content key from field definitions. JSON.stringify covers all
+  // field properties (default, display, validation, etc.), so this string only changes
+  // when YAML content actually changes — not on every re-parse that produces a new
+  // array object with identical values.
+  const fieldsKey = parsedTemplate.fields.map((f) => JSON.stringify(f)).join('|');
+
+  // Stabilize the fields reference so useYamlFormSync's effect only fires when
+  // field definitions actually change (content-based equality), not on every
+  // re-parse of the same YAML which produces a new array object each time.
+  const stableFieldsRef = React.useRef(parsedTemplate.fields);
+  const prevKeyRef = React.useRef(fieldsKey);
+  if (prevKeyRef.current !== fieldsKey) {
+    prevKeyRef.current = fieldsKey;
+    stableFieldsRef.current = parsedTemplate.fields;
+  }
+  const stableFields = stableFieldsRef.current;
 
   const initialDefaultValues = React.useMemo(() => {
     const defaults: Record<string, Record<string, string>> = {
       [CASE_EXTENDED_FIELDS]: {},
     };
-    for (const field of parsedTemplate.fields) {
+    for (const field of stableFields) {
       const yamlDefault = getYamlDefaultAsString(field.metadata?.default);
       const fieldKey = `${field.name}_as_${field.type}`;
       defaults[CASE_EXTENDED_FIELDS][fieldKey] = yamlDefault;
     }
     return defaults;
-  }, [parsedTemplate.fields]);
+  }, [stableFields]);
 
   const { form } = useForm<{}>({
     defaultValue: initialDefaultValues,
     options: { stripEmptyFields: false },
   });
 
-  useYamlFormSync(form, parsedTemplate.fields, onFieldDefaultChange);
+  useYamlFormSync(form, stableFields, onFieldDefaultChange);
 
   return (
-    <FormProvider key={templateKey} form={form}>
+    <FormProvider key={parsedTemplate.name} form={form}>
       <FieldsRenderer parsedTemplate={parsedTemplate} form={form} />
     </FormProvider>
   );

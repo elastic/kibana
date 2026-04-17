@@ -235,6 +235,8 @@ export type DashboardApi = CanExpandPanels &
     createdBy?: string;
     user?: DashboardUser;
     isAccessControlEnabled?: boolean;
+
+    addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
 
 export interface DashboardInternalApi {

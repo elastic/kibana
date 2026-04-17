@@ -71,16 +71,6 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
-  GetRuleExecutionEventsRequestQueryInput,
-  GetRuleExecutionEventsRequestParamsInput,
-  GetRuleExecutionEventsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_events/get_rule_execution_events_route.gen';
-import type {
-  GetRuleExecutionResultsRequestQueryInput,
-  GetRuleExecutionResultsRequestParamsInput,
-  GetRuleExecutionResultsResponse,
-} from './detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
-import type {
   ReadRuleExecutionResultsRequestParamsInput,
   ReadRuleExecutionResultsRequestBodyInput,
   ReadRuleExecutionResultsResponse,
@@ -207,17 +197,6 @@ import type {
   GetEndpointSuggestionsRequestBodyInput,
   GetEndpointSuggestionsResponse,
 } from './endpoint/suggestions/get_suggestions.gen';
-import type {
-  CreateWorkflowInsightRequestBodyInput,
-  CreateWorkflowInsightResponse,
-  GetPendingWorkflowInsightsRequestQueryInput,
-  GetPendingWorkflowInsightsResponse,
-  GetWorkflowInsightsRequestQueryInput,
-  GetWorkflowInsightsResponse,
-  UpdateWorkflowInsightRequestParamsInput,
-  UpdateWorkflowInsightRequestBodyInput,
-  UpdateWorkflowInsightResponse,
-} from './endpoint/workflow_insights/workflow_insights.gen';
 import type {
   BulkUpsertAssetCriticalityRecordsRequestBodyInput,
   BulkUpsertAssetCriticalityRecordsResponse,
@@ -374,6 +353,10 @@ import type {
   PreviewRiskScoreRequestBodyInput,
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
+import type {
+  UploadWatchlistCsvRequestParamsInput,
+  UploadWatchlistCsvResponse,
+} from './entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import type {
   CreateWatchlistEntitySourceRequestParamsInput,
   CreateWatchlistEntitySourceRequestBodyInput,
@@ -1008,6 +991,9 @@ For detailed information on Kibana actions and alerting, and additional API call
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Create or update the protection updates note for a package policy.
+   */
   async createUpdateProtectionUpdatesNote(props: CreateUpdateProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateUpdateProtectionUpdatesNote`);
     return this.kbnClient
@@ -1047,19 +1033,6 @@ For detailed information on Kibana actions and alerting, and additional API call
         ),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'POST',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async createWorkflowInsight(props: CreateWorkflowInsightProps) {
-    this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowInsight`);
-    return this.kbnClient
-      .request<CreateWorkflowInsightResponse>({
-        path: '/internal/api/endpoint/workflow_insights',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'POST',
         body: props.body,
@@ -1885,6 +1858,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get a list of all endpoint host metadata.
+   */
   async getEndpointMetadataList(props: GetEndpointMetadataListProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEndpointMetadataList`);
     return this.kbnClient
@@ -1967,20 +1943,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async getPendingWorkflowInsights(props: GetPendingWorkflowInsightsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetPendingWorkflowInsights`);
-    return this.kbnClient
-      .request<GetPendingWorkflowInsightsResponse>({
-        path: '/internal/api/endpoint/workflow_insights/pending',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
+  /**
+   * Get the most recent policy response for an endpoint.
+   */
   async getPolicyResponse(props: GetPolicyResponseProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetPolicyResponse`);
     return this.kbnClient
@@ -2009,6 +1974,9 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Get the protection updates note for a package policy.
+   */
   async getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetProtectionUpdatesNote`);
     return this.kbnClient
@@ -2036,40 +2004,6 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getRuleExecutionEvents(props: GetRuleExecutionEventsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionEvents`);
-    return this.kbnClient
-      .request<GetRuleExecutionEventsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/events',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getRuleExecutionResults(props: GetRuleExecutionResultsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetRuleExecutionResults`);
-    return this.kbnClient
-      .request<GetRuleExecutionResultsResponse>({
-        path: replaceParams(
-          '/internal/detection_engine/rules/{ruleId}/execution/results',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2297,20 +2231,6 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'GET',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async getWorkflowInsights(props: GetWorkflowInsightsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API GetWorkflowInsights`);
-    return this.kbnClient
-      .request<GetWorkflowInsightsResponse>({
-        path: '/internal/api/endpoint/workflow_insights',
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'GET',
-
-        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -3493,19 +3413,6 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  async updateWorkflowInsight(props: UpdateWorkflowInsightProps) {
-    this.log.info(`${new Date().toISOString()} Calling API UpdateWorkflowInsight`);
-    return this.kbnClient
-      .request<UpdateWorkflowInsightResponse>({
-        path: replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'PUT',
-        body: props.body,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async uploadAssetCriticalityRecords(props: UploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API UploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -3513,6 +3420,33 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         path: '/api/asset_criticality/upload_csv',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.attachment,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+    * Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+with a "type" column (user, host, service, or generic) and one or more ECS identity
+fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
+
+Matched entities are added to the watchlist and their `entity.attributes.watchlists`
+field is updated in the entity store.
+
+Each row will match up to 10,000 entities.
+
+    */
+  async uploadWatchlistCsv(props: UploadWatchlistCsvProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UploadWatchlistCsv`);
+    return this.kbnClient
+      .request<UploadWatchlistCsvResponse>({
+        path: replaceParams(
+          '/api/entity_analytics/watchlists/{watchlist_id}/csv_upload',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
         body: props.attachment,
@@ -3668,9 +3602,6 @@ export interface CreateWatchlistEntitySourceProps {
   params: CreateWatchlistEntitySourceRequestParamsInput;
   body: CreateWatchlistEntitySourceRequestBodyInput;
 }
-export interface CreateWorkflowInsightProps {
-  body: CreateWorkflowInsightRequestBodyInput;
-}
 export interface DeleteAssetCriticalityRecordProps {
   query: DeleteAssetCriticalityRecordRequestQueryInput;
 }
@@ -3819,22 +3750,11 @@ export interface GetEntityStoreStatusProps {
 export interface GetNotesProps {
   query: GetNotesRequestQueryInput;
 }
-export interface GetPendingWorkflowInsightsProps {
-  query: GetPendingWorkflowInsightsRequestQueryInput;
-}
 export interface GetPolicyResponseProps {
   query: GetPolicyResponseRequestQueryInput;
 }
 export interface GetProtectionUpdatesNoteProps {
   params: GetProtectionUpdatesNoteRequestParamsInput;
-}
-export interface GetRuleExecutionEventsProps {
-  query: GetRuleExecutionEventsRequestQueryInput;
-  params: GetRuleExecutionEventsRequestParamsInput;
-}
-export interface GetRuleExecutionResultsProps {
-  query: GetRuleExecutionResultsRequestQueryInput;
-  params: GetRuleExecutionResultsRequestParamsInput;
 }
 export interface GetRuleMigrationProps {
   params: GetRuleMigrationRequestParamsInput;
@@ -3870,9 +3790,6 @@ export interface GetWatchlistProps {
 }
 export interface GetWatchlistEntitySourceProps {
   params: GetWatchlistEntitySourceRequestParamsInput;
-}
-export interface GetWorkflowInsightsProps {
-  query: GetWorkflowInsightsRequestQueryInput;
 }
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
@@ -4058,11 +3975,11 @@ export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
 }
-export interface UpdateWorkflowInsightProps {
-  params: UpdateWorkflowInsightRequestParamsInput;
-  body: UpdateWorkflowInsightRequestBodyInput;
-}
 export interface UploadAssetCriticalityRecordsProps {
+  attachment: FormData;
+}
+export interface UploadWatchlistCsvProps {
+  params: UploadWatchlistCsvRequestParamsInput;
   attachment: FormData;
 }
 export interface UpsertDashboardMigrationResourcesProps {

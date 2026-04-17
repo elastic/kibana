@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import type { JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
@@ -454,6 +455,8 @@ export interface BaseConnectorContract {
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
   stability?: StepStabilityLevel;
+  /** Deprecation metadata for this step type. */
+  deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
@@ -503,12 +506,16 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
-export interface StepPropertyHandler<T = unknown> {
+export interface StepPropertyHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Entity selection configuration for the property.
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  selection?: PropertySelectionHandler<Exclude<T, undefined>, TConfig, TInput>;
   /**
    * Connector ID selection configuration for the property.
    * Used to resolve connector IDs for custom steps.
@@ -518,19 +525,35 @@ export interface StepPropertyHandler<T = unknown> {
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
-export interface PropertySelectionHandler<T = unknown> {
+type DependsOnValuePath = `config.${string}` | `input.${string}`;
+export interface PropertySelectionHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /**
+   * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
+   * and included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`.
+   */
+  dependsOnValues?: DependsOnValuePath[];
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
    */
-  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+  search: (
+    input: string,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T>[]>;
 
   /**
    * Resolve an entity by its value.
    * Used when loading existing values or when a value is pasted.
    * Returns null if the entity is not found.
    */
-  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+  resolve: (
+    value: T,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T> | null>;
 
   /**
    * Get detailed information for the current value.
@@ -539,7 +562,7 @@ export interface PropertySelectionHandler<T = unknown> {
    */
   getDetails: (
     input: string,
-    context: SelectionContext,
+    context: SelectionContext<TConfig, TInput>,
     option: SelectionOption<T> | null
   ) => Promise<SelectionDetails>;
 }
@@ -567,13 +590,35 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface SelectionContext {
+/**
+ * Structured values of the current step, split by scope.
+ *
+ * Built from scalar leaf properties in the YAML step definition.
+ * Intermediate map nodes that have no scalar value are **not** represented;
+ * a missing key means "not yet defined in the YAML", not "empty object".
+ */
+export interface StepSelectionValues<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: RecursivePartial<TConfig>;
+  /** Properties nested under the `with` block. */
+  input: RecursivePartial<TInput>;
+}
+
+export interface SelectionContext<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope (only paths listed in `dependsOnValues` are populated). */
+  values: StepSelectionValues<TConfig, TInput>;
 }
 
 export interface ConnectorIdSelectionHandler {

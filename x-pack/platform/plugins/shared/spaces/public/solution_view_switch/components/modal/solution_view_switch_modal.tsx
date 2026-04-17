@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiLink,
   EuiModal,
   EuiModalBody,
@@ -26,7 +25,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import spaceSelectorImage from './assets/space_selector.png';
 import { BenefitRow } from './benefit_row';
 import { SolutionSelector } from './solution_selector';
 import { SOLUTION_VIEW_CONFIG } from '../../constants';
@@ -155,13 +153,6 @@ export const SolutionViewSwitchModal = ({
                   }}
                 />
               </EuiText>
-              <EuiImage
-                src={spaceSelectorImage}
-                alt={i18n.translate('xpack.spaces.solutionViewSwitch.modal.spaceSelectorImageAlt', {
-                  defaultMessage: 'Space selector showing different space types',
-                })}
-                size="fullWidth"
-              />
               <SolutionSelector
                 selectedSolution={selectedSolution}
                 onSolutionChange={setSelectedSolution}

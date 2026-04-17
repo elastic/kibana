@@ -54,6 +54,8 @@ interface NewBaseOutput {
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
   type: OutputType['Elasticsearch'];
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
 }
 
 export interface NewRemoteElasticsearchOutput extends NewBaseOutput {

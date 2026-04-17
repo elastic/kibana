@@ -89,43 +89,6 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Save')).toBeInTheDocument();
     });
-
-    it('should render secondary action item', () => {
-      const configWithSecondary: AppMenuConfig = {
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      };
-
-      render(<AppMenuComponent config={configWithSecondary} />);
-
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
-
-    it('should render both primary and secondary action items', () => {
-      const configWithBoth: AppMenuConfig = {
-        primaryActionItem: {
-          id: 'save',
-          label: 'Save',
-          run: jest.fn(),
-          iconType: 'save',
-        },
-        secondaryActionItem: {
-          id: 'cancel',
-          label: 'Cancel',
-          run: jest.fn(),
-          iconType: 'cross',
-        },
-      };
-
-      render(<AppMenuComponent config={configWithBoth} />);
-
-      expect(screen.getByText('Save')).toBeInTheDocument();
-      expect(screen.getByText('Cancel')).toBeInTheDocument();
-    });
   });
 
   describe('responsive behavior', () => {
@@ -158,6 +121,31 @@ describe('AppMenu', () => {
 
       expect(screen.getByText('Item 1')).toBeInTheDocument();
       expect(screen.getByText('Item 2')).toBeInTheDocument();
+    });
+
+    it('should render overflow button at xl breakpoint when item is marked as overflow', () => {
+      mockUseIsWithinBreakpoints.mockImplementation((breakpoints: string[]) => {
+        if (breakpoints.includes('xl')) return true;
+        return false;
+      });
+
+      const forcedOverflowConfig: AppMenuConfig = {
+        items: [
+          {
+            id: 'singleOverflowItem',
+            label: 'Single overflow item',
+            run: jest.fn(),
+            iconType: 'gear',
+            order: 1,
+            overflow: true,
+          },
+        ],
+      };
+
+      render(<AppMenuComponent config={forcedOverflowConfig} />);
+
+      expect(screen.getByTestId('app-menu-overflow-button')).toBeInTheDocument();
+      expect(screen.queryByText('Single overflow item')).not.toBeInTheDocument();
     });
   });
 });
