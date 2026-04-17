@@ -78,29 +78,33 @@ export const getConnectorList = async (
       .map((c) => [c.config?.inferenceId as string, c])
   );
 
-  const inferenceEndpointConnectors: InferenceConnector[] = endpoints.map((ep) => ({
-    type: InferenceConnectorType.Inference,
-    name:
-      ep.metadata.display?.name ??
-      stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
-      ep.inferenceId,
-    connectorId: ep.inferenceId,
-    config: {
-      inferenceId: ep.inferenceId,
-      providerConfig: {
-        model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+  const inferenceEndpointConnectors: (InferenceConnector & { creator?: string })[] = endpoints.map(
+    (ep) => ({
+      ...ep,
+      type: InferenceConnectorType.Inference,
+      name:
+        ep.metadata.display?.name ??
+        stackConnectorByInferenceId.get(ep.inferenceId)?.name ??
+        ep.inferenceId,
+      creator: ep.metadata.display?.creator,
+      connectorId: ep.inferenceId,
+      config: {
+        inferenceId: ep.inferenceId,
+        providerConfig: {
+          model_id: ep.serviceSettings?.model_id, // for backwards compatibility, consider removing in future
+        },
+        taskType: ep.taskType,
+        service: ep.service,
+        serviceSettings: ep.serviceSettings,
+        // temporary any until types are propagated in ES client
+        modelCreator: (ep.metadata as Record<string, any>)?.display?.model_creator,
       },
-      taskType: ep.taskType,
-      service: ep.service,
-      serviceSettings: ep.serviceSettings,
-      // temporary any until types are propagated in ES client
-      modelCreator: (ep.metadata as Record<string, any>)?.display?.model_creator,
-    },
-    capabilities: {},
-    isInferenceEndpoint: true,
-    isPreconfigured: !!ep.metadata.display?.name,
-    isEis: ep.service === 'elastic',
-  }));
+      capabilities: {},
+      isInferenceEndpoint: true,
+      isPreconfigured: !!ep.metadata.display?.name,
+      isEis: ep.service === 'elastic',
+    })
+  );
 
   // Exclude .inference stack connectors that have a corresponding ES inference endpoint,
   // since the endpoint representation is preferred (includes native endpoints too).
