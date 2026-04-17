@@ -8,4 +8,3 @@
  */
 
 export { plugin } from './plugin';
-export type { DesignerToolbarStart } from './plugin';

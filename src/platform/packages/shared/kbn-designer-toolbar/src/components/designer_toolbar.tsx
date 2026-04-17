@@ -23,7 +23,6 @@ import {
 import { css, keyframes } from '@emotion/react';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useDesignerMinimized } from '../hooks/use_designer_minimized';
-import { useDesignerToolbarState } from '../hooks/use_designer_toolbar_state';
 
 const HEIGHT = 32;
 const TOOLBAR_BACKGROUND_COLOR = 'rgb(92, 61, 110)';
@@ -46,7 +45,6 @@ export interface DesignerToolbarProps {
   onRemoveAllAnnotations: () => void;
   onToggleCanvasVisible: () => void;
   canvasVisible: boolean;
-  onHeightChange?: (height: number) => void;
 }
 
 const minimizedAttentionPop = keyframes`
@@ -153,20 +151,13 @@ const DesignerToolbarInternal: React.FC<DesignerToolbarProps> = ({
   onRemoveAllAnnotations,
   onToggleCanvasVisible,
   canvasVisible,
-  onHeightChange,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { isMinimized, toggleMinimized } = useDesignerMinimized();
   const [isHidden, setIsHidden] = useState(false);
-  const state = useDesignerToolbarState();
 
   const keyboardShortcutLabel = isMac ? '⌘+/' : 'Ctrl+/';
 
-  useEffect(() => {
-    if (onHeightChange) {
-      onHeightChange(isMinimized ? 0 : HEIGHT);
-    }
-  }, [onHeightChange, isMinimized]);
 
   const handleShortcut = (
     <EuiWindowEvent
@@ -280,31 +271,6 @@ const DesignerToolbarInternal: React.FC<DesignerToolbarProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-
-          {state.items.length > 0 && (
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                min-width: 0;
-              `}
-            >
-              <EuiFlexGroup
-                gutterSize="s"
-                alignItems="center"
-                responsive={false}
-                css={css`
-                  overflow-x: auto;
-                  scrollbar-width: none;
-                `}
-              >
-                {state.items.map((item) => (
-                  <EuiFlexItem key={item.id} grow={false}>
-                    {item.children}
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiPanel>
     </div>

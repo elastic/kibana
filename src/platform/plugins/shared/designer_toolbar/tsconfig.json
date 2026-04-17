@@ -13,8 +13,6 @@
     "@kbn/core-chrome-browser-internal-types",
     "@kbn/core-chrome-layout-components",
     "@kbn/designer-toolbar",
-    "@kbn/i18n",
-    "@kbn/i18n-react",
     "@kbn/saved-objects-plugin"
   ]
 }

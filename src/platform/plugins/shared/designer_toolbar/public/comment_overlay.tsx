@@ -49,8 +49,6 @@ import {
 import { designerAnnotationStore } from './designer_annotation_store';
 import { isEditableKeyboardTarget, isPrimaryModifier } from './designer_shortcut_helpers';
 
-const LEGACY_IDENTITY_KEYS: string[] = [];
-
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type AnchorType = 'testSubj' | 'id' | 'ariaLabel' | 'cssPath';
@@ -113,9 +111,6 @@ const soToAnnotation = (so: { id: string; attributes: SavedObjectAttributes }): 
   replies: so.attributes.replies ?? [],
   pathname: so.attributes.pathname ?? '',
 });
-
-const isLegacyAnnotation = (so: { attributes: Record<string, unknown> }): boolean =>
-  !so.attributes.anchor && (so.attributes.clientX != null || so.attributes.selector != null);
 
 const MAX_ANCHOR_AREA_RATIO = 0.4;
 
@@ -577,14 +572,6 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
   const currentUserRef = useRef<string | null>(currentUser);
   currentUserRef.current = currentUser;
 
-  useEffect(() => {
-    try {
-      for (const key of LEGACY_IDENTITY_KEYS) {
-        window.localStorage.removeItem(key);
-      }
-    } catch { /* ignore */ }
-  }, []);
-
   // Annotation mode state
   const [isAnnotationMode, setIsAnnotationMode] = useState(false);
   const [hoveredRect, setHoveredRect] = useState<DOMRect | null>(null);
@@ -695,10 +682,11 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
         { query: { type: DESIGNER_UI_COMMENT_SO_TYPE, per_page: 500 } }
       )
       .then(({ saved_objects }) => {
-        const list = saved_objects
-          .filter((so) => !isLegacyAnnotation(so))
-          .map((so) => soToAnnotation(so as unknown as { id: string; attributes: SavedObjectAttributes }));
-        setAnnotations(list);
+        setAnnotations(
+          saved_objects.map((so) =>
+            soToAnnotation(so as unknown as { id: string; attributes: SavedObjectAttributes })
+          )
+        );
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -973,9 +961,9 @@ export const CommentOverlay: React.FC<CommentOverlayProps> = ({ http }) => {
         query: { type: DESIGNER_UI_COMMENT_SO_TYPE, per_page: 500 },
       });
       setAnnotations(
-        saved_objects
-          .filter((so) => !isLegacyAnnotation(so))
-          .map((so) => soToAnnotation(so as unknown as { id: string; attributes: SavedObjectAttributes }))
+        saved_objects.map((so) =>
+          soToAnnotation(so as unknown as { id: string; attributes: SavedObjectAttributes })
+        )
       );
       setOpenAnnotationId(null);
       setReplyText('');

@@ -11,19 +11,13 @@ import React, { Suspense, lazy } from 'react';
 import { first } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
-import type { DesignerToolbarItemProps } from '@kbn/designer-toolbar';
-
-export interface DesignerToolbarStart {
-  registerItem: (item: DesignerToolbarItemProps) => () => void;
-}
 
 const LazyCombinedFooter = lazy(() =>
   import('./combined_footer').then((m) => ({ default: m.CombinedFooter }))
 );
 
-export class DesignerToolbarPlugin implements Plugin<void, DesignerToolbarStart> {
+export class DesignerToolbarPlugin implements Plugin<void, void> {
   private readonly context: PluginInitializerContext;
-  private registeredItems: DesignerToolbarItemProps[] = [];
 
   constructor(context: PluginInitializerContext) {
     this.context = context;
@@ -31,16 +25,13 @@ export class DesignerToolbarPlugin implements Plugin<void, DesignerToolbarStart>
 
   public setup(_core: CoreSetup): void {}
 
-  public start(core: CoreStart): DesignerToolbarStart {
+  public start(core: CoreStart): void {
     const config = this.context.config.get<{ enabled: boolean }>();
 
     if (config.enabled) {
       const internalChrome = core.chrome as unknown as InternalChromeStart;
       const { http } = core;
 
-      // Defer so the developer toolbar (and any other footer consumer) sets its
-      // content first. We then grab that content, wrap it together with ours,
-      // and set the combined tree as the single global footer.
       queueMicrotask(() => {
         internalChrome
           .getGlobalFooter$()
@@ -54,15 +45,6 @@ export class DesignerToolbarPlugin implements Plugin<void, DesignerToolbarStart>
           });
       });
     }
-
-    return {
-      registerItem: (item: DesignerToolbarItemProps) => {
-        this.registeredItems.push(item);
-        return () => {
-          this.registeredItems = this.registeredItems.filter((i) => i.id !== item.id);
-        };
-      },
-    };
   }
 
   public stop(): void {}

@@ -8,10 +8,6 @@
  */
 
 export {
-  DesignerToolbarItem,
-  type DesignerToolbarItemProps,
-} from './src/components/designer_toolbar_item';
-export {
   DesignerToolbar,
   type DesignerToolbarProps,
   type DesignerToolbarLabels,
