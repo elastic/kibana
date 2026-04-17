@@ -13,14 +13,24 @@ import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
 import type { Group, TimeRange } from '../../../common/typings';
 import { generateSourceLink } from './get_alert_source_links';
 
+export const ALERT_SOURCE_TELEMETRY = {
+  ALERT_DETAILS: 'alertDetailsSource',
+  ALERT_FLYOUT: 'alertFlyoutSource',
+} as const;
+
+export type AlertSourceTelemetry =
+  (typeof ALERT_SOURCE_TELEMETRY)[keyof typeof ALERT_SOURCE_TELEMETRY];
+
 export function Groups({
   groups,
   timeRange,
   alertRuleTypeId,
+  source,
 }: {
   groups: Group[];
   timeRange: TimeRange;
   alertRuleTypeId: string;
+  source: AlertSourceTelemetry;
 }) {
   const {
     http: {
@@ -67,7 +77,7 @@ export function Groups({
               {sourceLinks[group.field] ? (
                 <EuiLink
                   data-test-subj="o11yAlertSourceLink"
-                  data-source={`alertDetailsSource-${alertRuleTypeId}`}
+                  data-source={`${source}-${alertRuleTypeId}`}
                   data-action={`navigateTo-${group.field}`}
                   href={sourceLinks[group.field]}
                 >
