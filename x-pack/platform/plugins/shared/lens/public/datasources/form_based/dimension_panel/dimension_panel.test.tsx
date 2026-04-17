@@ -179,8 +179,7 @@ const lastValueColumn = (
  * - Dimension trigger: Not tested here
  * - Dimension editor component: First half of the tests
  */
-// Failing: See https://github.com/elastic/kibana/issues/253327
-describe.skip('FormBasedDimensionEditor', () => {
+describe('FormBasedDimensionEditor', () => {
   let state: FormBasedPrivateState;
   let setState: jest.Mock;
   let defaultProps: FormBasedDimensionEditorProps;
@@ -338,7 +337,8 @@ describe.skip('FormBasedDimensionEditor', () => {
     await userEvent.click(screen.getByRole('button', { name: /open list of options/i }));
     expect(screen.getByText(/There aren't any options available/)).toBeInTheDocument();
   });
-  test('should list all field names and document as a whole in prioritized order', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/253327
+  test.skip('should list all field names and document as a whole in prioritized order', async () => {
     const { getVisibleFieldSelectOptions } = renderDimensionPanel();
 
     const comboBoxButton = screen.getAllByRole('button', { name: /open list of options/i })[0];
@@ -2531,11 +2531,11 @@ describe.skip('FormBasedDimensionEditor', () => {
       renderDimensionPanel({
         state: getStateWithColumns({ col1: lastValueColumn('string') }),
         activeData: {
-            first: {
-              type: 'datatable',
-              columns: [{ id: 'col1', name: 'source', meta: { type: 'number' } }],
-              rows: [],
-            },
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'number' } }],
+            rows: [],
+          },
         },
       });
 
@@ -2546,11 +2546,11 @@ describe.skip('FormBasedDimensionEditor', () => {
       renderDimensionPanel({
         state: getStateWithColumns({ col1: lastValueColumn('number') }),
         activeData: {
-            first: {
-              type: 'datatable',
-              columns: [{ id: 'col1', name: 'source', meta: { type: 'string' } }],
-              rows: [],
-            },
+          first: {
+            type: 'datatable',
+            columns: [{ id: 'col1', name: 'source', meta: { type: 'string' } }],
+            rows: [],
+          },
         },
       });
 
