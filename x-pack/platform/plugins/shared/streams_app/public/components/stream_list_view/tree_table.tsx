@@ -135,6 +135,10 @@ export function StreamsTreeTable({
     return map;
   }, [streams]);
 
+  const hasFailureStoreAccess = React.useMemo(() => {
+    return [...privilegeMap.values()].some((v) => v);
+  }, [privilegeMap]);
+
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     getCanReadFailureStore: (streamName: string) => privilegeMap.get(streamName) ?? false,
@@ -510,7 +514,7 @@ export function StreamsTreeTable({
                 />
               )}
               {DOCUMENTS_COLUMN_HEADER}
-              {privilegeMap.size === 0 && (
+              {!hasFailureStoreAccess && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
@@ -539,7 +543,7 @@ export function StreamsTreeTable({
           name: (
             <EuiFlexGroup alignItems="center" gutterSize="s">
               {DATA_QUALITY_COLUMN_HEADER}
-              {privilegeMap.size === 0 && (
+              {!hasFailureStoreAccess && (
                 <EuiIconTip
                   content={FAILURE_STORE_PERMISSIONS_ERROR}
                   type="warning"
@@ -636,7 +640,7 @@ export function StreamsTreeTable({
           </div>
         ),
         filters:
-          qualityLoaded && privilegeMap.size > 0
+          qualityLoaded && hasFailureStoreAccess
             ? [
                 {
                   type: 'field_value_selection',
