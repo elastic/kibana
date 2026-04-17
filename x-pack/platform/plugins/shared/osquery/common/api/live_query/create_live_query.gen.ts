@@ -70,39 +70,76 @@ export const CreateLiveQueryRequestBody = z.object({
  */
 export type CreateLiveQueryResponse = z.infer<typeof CreateLiveQueryResponse>;
 export const CreateLiveQueryResponse = z.object({
-  /**
-   * The live query action data.
-   */
-  data: z
-    .object({
-      /**
-       * The ID of the live query action.
-       */
-      action_id: z.string().optional(),
-      /**
-       * The expiration date and time of the live query.
-       */
-      expiration: z.string().optional(),
-      /**
-       * The action type.
-       */
-      type: z.string().optional(),
-      /**
-       * The input type for the action.
-       */
-      input_type: z.string().optional(),
-      /**
-       * A list of agent IDs targeted by the live query.
-       */
-      agents: z.array(z.string()).optional(),
-      /**
-       * The ID of the user who created the live query.
-       */
-      user_id: z.string().optional(),
-      /**
-       * The list of queries in the live query action.
-       */
-      queries: z.array(z.object({})).optional(),
-    })
-    .optional(),
+  data: z.object({
+    /**
+     * The ID of the action.
+     */
+    action_id: z.string(),
+    /**
+     * The timestamp when the action was created.
+     */
+    '@timestamp': z.string().datetime().optional(),
+    /**
+     * The expiration date of the action.
+     */
+    expiration: z.string().datetime().optional(),
+    /**
+     * The action type.
+     */
+    type: z.string().optional(),
+    /**
+     * The input type.
+     */
+    input_type: z.string().optional(),
+    /**
+     * The agent IDs targeted by the action.
+     */
+    agent_ids: z.array(z.string()).optional(),
+    /**
+     * Whether the query targets all agents.
+     */
+    agent_all: z.boolean().optional(),
+    /**
+     * The agent platforms targeted.
+     */
+    agent_platforms: z.array(z.string()).optional(),
+    /**
+     * The agent policy IDs targeted.
+     */
+    agent_policy_ids: z.array(z.string()).optional(),
+    /**
+     * The resolved list of agent IDs.
+     */
+    agents: z.array(z.string()).optional(),
+    /**
+     * The user who created the action.
+     */
+    user_id: z.string().optional(),
+    /**
+     * The pack ID if the query was run from a pack.
+     */
+    pack_id: z.string().optional(),
+    /**
+     * Custom metadata associated with the action.
+     */
+    metadata: z.object({}).optional(),
+    /**
+     * The queries in this action.
+     */
+    queries: z
+      .array(
+        z.object({
+          action_id: z.string().optional(),
+          id: z.string().optional(),
+          query: z.string().optional(),
+          timeout: z.number().int().optional(),
+          ecs_mapping: ECSMappingOrUndefined.optional(),
+          agents: z.array(z.string()).optional(),
+          saved_query_id: z.string().optional(),
+          version: z.string().optional(),
+          platform: z.string().optional(),
+        })
+      )
+      .optional(),
+  }),
 });
