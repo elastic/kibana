@@ -41,6 +41,7 @@ Prefer doing this locally first (faster feedback), and use the Flaky Test Runner
 - Keep **one top-level suite** per file (`test.describe`).
 - Avoid nested `describe` blocks. Use `test.step` for structure inside a test.
 - Don’t rely on test file execution order (it’s [not guaranteed](https://playwright.dev/docs/test-parallel#control-test-order)).
+- Don’t assume a previous test in the suite already set up the data you need (if that test fails or is skipped, the test will break with a misleading error).
 
 ### Write descriptive test names [write-descriptive-test-names]
 
@@ -122,7 +123,11 @@ Global setup hooks have **no corresponding teardown**. Keep operations that requ
 
 It’s common for test suites to load Elasticsearch or Kibana archives that are barely used (or not used at all). Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Check if your tests ingest the data they actually need.
 
-Use `esArchiver.loadIfNeeded()`, which skips ingestion if the index and documents already exist (useful when multiple suites share the same data).
+Use `esArchiver.loadIfNeeded()`, which skips ingestion if the index already exists (useful when multiple suites share the same data).
+
+::::::{warning}
+`loadIfNeeded()` checks at the **index level**, not individual documents. If a test deletes specific documents, subsequent runs or retries won't restore them. Reindex documents that were deleted.
+::::::
 
 :::::{dropdown} Examples
 ❌ **Don’t:** load archives that no test in the suite relies on:
@@ -481,8 +486,9 @@ await page.testSubj.locator('confirmDeleteModal').getByRole('button', { name: 'D
 Scout configures Playwright timeouts ([source](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts)). Prefer defaults.
 
 - Don’t override suite-level timeouts/retries with `test.describe.configure()` unless you have a strong reason.
-- If you increase a timeout for one operation, keep it well below the test timeout and **add a short code comment** explaining why (slow first load, CI variance, known heavy view, etc.). An assertion timeout that exceeds the test timeout is ignored.
+- If you increase a timeout for one operation, keep it well below the test timeout and **add a short code comment** explaining why (slow first load, CI variance, known heavy view, etc.).
 - After raising timeouts for flakiness, **re-run the flaky test runner** (or many local repeats) to confirm the new value is necessary.
+- Keep in mind that an assertion timeout that exceeds the test timeout is ignored.
 - Time spent in hooks (`beforeEach`, `afterEach`) counts toward the test timeout. If setup is slow, the test itself may time out even though its assertions are fast.
 
 :::::{dropdown} Example
