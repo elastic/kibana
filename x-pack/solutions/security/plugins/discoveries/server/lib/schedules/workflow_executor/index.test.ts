@@ -128,6 +128,7 @@ describe('workflowExecutor', () => {
     params,
     rule: {
       id: 'rule-1',
+      name: 'Test Rule',
       schedule: { interval: '24h' },
       actions: [{ actionTypeId: '.slack' }],
     },
@@ -182,7 +183,7 @@ describe('workflowExecutor', () => {
     await expect(workflowExecutor({ deps, options })).rejects.toBeInstanceOf(AlertsClientError);
   });
 
-  it('calls executeGenerationWorkflow with mapped params including persist: false', async () => {
+  it('calls executeGenerationWorkflow with mapped params', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await workflowExecutor({ deps, options });
@@ -208,18 +209,52 @@ describe('workflowExecutor', () => {
           trace: expect.any(Function),
           warn: expect.any(Function),
         }),
-        persist: false,
         request: mockRequest,
+        scheduleInfo: {
+          actions: ['.slack'],
+          id: 'rule-1',
+          interval: '24h',
+        },
         size: params.size,
+        source: 'scheduled',
+        sourceMetadata: {
+          actionExecutionUuid: expect.any(String),
+          ruleId: 'rule-1',
+          ruleName: 'Test Rule',
+        },
         start: params.start,
         type: 'attack_discovery',
         workflowConfig: {
           alert_retrieval_workflow_ids: [],
-          default_alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_mode: 'custom_query' as const,
           validation_workflow_id: 'default',
         },
         workflowInitService: mockWorkflowInitService,
         workflowsManagementApi: mockWorkflowsManagementApi,
+      })
+    );
+  });
+
+  it('constructs scheduleInfo from rule context and passes it to executeGenerationWorkflow', async () => {
+    const options = {
+      ...executorOptions,
+      rule: {
+        ...executorOptions.rule,
+        actions: [{ actionTypeId: '.slack' }, { actionTypeId: '.email' }],
+        id: 'rule-abc',
+        schedule: { interval: '12h' },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await workflowExecutor({ deps, options });
+
+    expect(executeGenerationWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scheduleInfo: {
+          actions: ['.slack', '.email'],
+          id: 'rule-abc',
+          interval: '12h',
+        },
       })
     );
   });
@@ -281,9 +316,6 @@ describe('workflowExecutor', () => {
 
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.stringContaining('Workflow executor completed successfully')
-    );
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('outcome: validation_succeeded')
     );
   });
 
@@ -480,13 +512,15 @@ describe('workflowExecutor', () => {
       });
     });
 
-    it('does not call alertsClient.report() when outcome is validation_failed', async () => {
+    it('throws when outcome is validation_failed', async () => {
       (executeGenerationWorkflow as jest.Mock).mockResolvedValueOnce({
         outcome: 'validation_failed',
       });
       const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
-      await workflowExecutor({ deps, options });
+      await expect(workflowExecutor({ deps, options })).rejects.toThrow(
+        'Attack discovery validation step failed'
+      );
 
       expect(ruleExecutorServices.alertsClient.report).not.toHaveBeenCalled();
       expect(ruleExecutorServices.alertsClient.setAlertData).not.toHaveBeenCalled();
@@ -601,7 +635,9 @@ describe('workflowExecutor', () => {
 
       const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
-      await workflowExecutor({ deps, options });
+      await expect(workflowExecutor({ deps, options })).rejects.toThrow(
+        'Attack discovery validation step failed'
+      );
 
       expect(mockUpdateAlertsWithAttackIds).not.toHaveBeenCalled();
     });
