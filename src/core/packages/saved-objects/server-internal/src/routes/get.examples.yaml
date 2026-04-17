@@ -1,0 +1,39 @@
+responses:
+  '200':
+    description: A saved object.
+    content:
+      application/json:
+        examples:
+          getSavedObjectResponse:
+            summary: A saved object
+            value:
+              id: example-dashboard-1
+              type: dashboard
+              attributes:
+                title: Example dashboard 1
+              references: []
+              namespaces:
+                - default
+              managed: false
+              updated_at: '2026-04-17T12:00:00.000Z'
+              version: WzEsMV0=
+  '400':
+    description: A bad request.
+    content:
+      application/json:
+        examples:
+          badRequestResponse:
+            summary: A bad request error
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: 'Unsupported saved object type(s): unknownType'
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/saved_objects/dashboard/example-dashboard-1" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/saved_objects/dashboard/example-dashboard-1
