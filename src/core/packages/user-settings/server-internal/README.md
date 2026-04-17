@@ -9,6 +9,6 @@ The `UserSettingsService` reads per-user settings from the user profile at rende
 It exposes the following methods via its setup contract (`InternalUserSettingsServiceSetup`):
 
 - `getUserSettingDarkMode(request)` — Returns the user's preferred dark mode value (`DarkModeValue | undefined`), used by the rendering service to determine the initial theme.
-- `getUserSettingLocale(request)` — Returns the user's preferred locale (`string | undefined`), used by the rendering service to inject `userLocale` into the page metadata so the browser can load the correct translation bundle.
+- `getUserSettingLocale(request)` — Returns the user's preferred locale (`string | undefined`), used by the rendering service to resolve the effective locale and build the correct translations URL for the current page load.
 
 Both methods read from the `userSettings` data path of the authenticated user's profile via the `userProfile` core service.

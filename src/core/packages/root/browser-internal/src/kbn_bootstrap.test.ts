@@ -10,13 +10,9 @@
 import { apmSystem, fatalErrorMock, i18nLoad } from './kbn_bootstrap.test.mocks';
 import { __kbnBootstrap__ } from '.';
 
-const setMetadata = (i18nOverrides: Record<string, unknown> = {}) => {
+const setMetadata = (translationsUrl = '/translations/abc123/en.json') => {
   const metadata = {
-    i18n: {
-      translationsUrl: '/translations/abc123/en.json',
-      translationHashes: { en: 'abc123', 'fr-FR': 'def456', 'ja-JP': 'ghi789' },
-      ...i18nOverrides,
-    },
+    i18n: { translationsUrl },
     vars: { apmConfig: null },
   };
   // eslint-disable-next-line no-unsanitized/property
@@ -49,41 +45,11 @@ describe('kbn_bootstrap', () => {
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(1);
   });
 
-  describe('locale resolution priority', () => {
-    it('uses the default translationsUrl when no overrides are present', async () => {
-      setMetadata();
+  it('loads the translationsUrl verbatim from injected metadata', async () => {
+    setMetadata('/translations/ghi789/ja-JP.json');
 
-      await __kbnBootstrap__();
+    await __kbnBootstrap__();
 
-      expect(i18nLoad).toHaveBeenCalledWith('/translations/abc123/en.json');
-    });
-
-    it('userLocale overrides the default translationsUrl', async () => {
-      setMetadata({ userLocale: 'ja-JP' });
-
-      await __kbnBootstrap__();
-
-      expect(i18nLoad).toHaveBeenCalledWith('/translations/ghi789/ja-JP.json');
-    });
-
-    it('userLocale overrides even when translationsUrl targets a non-default locale', async () => {
-      setMetadata({
-        translationsUrl: '/translations/def456/fr-FR.json',
-        userLocale: 'ja-JP',
-      });
-
-      await __kbnBootstrap__();
-
-      expect(i18nLoad).toHaveBeenCalledWith('/translations/ghi789/ja-JP.json');
-    });
-
-    it('does not override when resolvedLocale has no matching translationHash', async () => {
-      setMetadata({ userLocale: 'unknown-LOCALE' });
-
-      await __kbnBootstrap__();
-
-      // No hash for 'unknown-LOCALE', so translationsUrl stays unchanged
-      expect(i18nLoad).toHaveBeenCalledWith('/translations/abc123/en.json');
-    });
+    expect(i18nLoad).toHaveBeenCalledWith('/translations/ghi789/ja-JP.json');
   });
 });

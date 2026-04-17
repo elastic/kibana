@@ -73,8 +73,6 @@ export interface InjectedMetadata {
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;
-    translationHashes: Record<string, string>;
-    userLocale?: string;
   };
   theme: InjectedMetadataTheme;
   csp: {

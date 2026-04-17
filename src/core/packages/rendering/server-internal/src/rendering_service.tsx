@@ -274,14 +274,20 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const locale = i18nLib.getLocale();
+    const configLocale = i18nLib.getLocale();
     const translationHashes = i18n.getTranslationHashes();
+    // Resolve the effective locale server-side using the priority chain:
+    // 1. User profile setting
+    // 2. kibana.yml i18n.locale (configLocale)
+    const effectiveLocale =
+      userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
     let translationsUrl: string;
     if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+      translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
     } else {
-      const translationHash = translationHashes[locale] ?? i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+      const translationHash =
+        translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
@@ -293,7 +299,7 @@ export class RenderingService {
       hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      locale,
+      locale: effectiveLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
@@ -323,10 +329,6 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
-          // Per-locale content hashes for cache-busting URLs. Currently 5 locales (~60 bytes);
-          // if the supported locale list grows significantly, consider lazy injection.
-          translationHashes,
-          ...(userSettingLocale ? { userLocale: userSettingLocale } : {}),
         },
         theme: {
           darkMode,

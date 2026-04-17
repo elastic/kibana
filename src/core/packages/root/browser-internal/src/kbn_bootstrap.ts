@@ -25,22 +25,6 @@ export async function __kbnBootstrap__() {
     document.querySelector('kbn-injected-metadata')!.getAttribute('data')!
   );
 
-  // Resolve the user's preferred locale using the priority chain:
-  // 1. User profile setting (injected as injectedMetadata.i18n.userLocale)
-  // 2. kibana.yml config (already embedded in injectedMetadata.i18n.translationsUrl)
-  let translationsUrl = injectedMetadata.i18n.translationsUrl;
-  const resolvedLocale = injectedMetadata.i18n.userLocale;
-  const resolvedHash = resolvedLocale
-    ? injectedMetadata.i18n.translationHashes?.[resolvedLocale]
-    : undefined;
-  if (resolvedLocale && resolvedHash) {
-    // Replace both the hash and filename segments with the correct per-locale values
-    const localeUrl = `/translations/${resolvedHash}/${resolvedLocale}.json`;
-    translationsUrl = translationsUrl
-      .replace(/\/translations\/[^/]+\/[^/]+\.json$/, localeUrl)
-      .replace(/\/translations\/[^/]+\.json$/, localeUrl);
-  }
-
   let i18nError: Error | undefined;
   const apmSystem = new ApmSystem(
     injectedMetadata.apmConfig ?? undefined,
@@ -50,7 +34,7 @@ export async function __kbnBootstrap__() {
   await Promise.all([
     // eslint-disable-next-line no-console
     apmSystem.setup().catch(console.warn),
-    i18n.load(translationsUrl).catch((error) => {
+    i18n.load(injectedMetadata.i18n.translationsUrl).catch((error) => {
       i18nError = error;
     }),
   ]);
