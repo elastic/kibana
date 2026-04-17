@@ -28,7 +28,7 @@ export function registerUpdate(router: EntityStorePluginRouter) {
       summary: 'Update the Entity Store',
       description: 'Update the Entity Store log extraction configuration.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

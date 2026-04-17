@@ -33,7 +33,7 @@ export function registerResolutionUnlink(router: EntityStorePluginRouter) {
       description:
         'Remove one or more entities from their resolution group. Requires an enterprise license.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,

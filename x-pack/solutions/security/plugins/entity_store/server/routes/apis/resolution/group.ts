@@ -29,7 +29,7 @@ export function registerResolutionGroup(router: EntityStorePluginRouter) {
       description:
         'Get the resolution group for a given entity, returning all linked entities. Requires an enterprise license.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: RESOLUTION_ENTITY_STORE_PERMISSIONS,

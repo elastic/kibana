@@ -24,7 +24,7 @@ export function registerInstall(router: EntityStorePluginRouter) {
       description:
         'Install the Entity Store, creating engines for the specified entity types and configuring log extraction.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

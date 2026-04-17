@@ -28,7 +28,7 @@ export function registerCRUDDelete(router: EntityStorePluginRouter) {
       description:
         'Delete a single entity record from the Entity Store. The entity is immediately removed from the latest index.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

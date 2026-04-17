@@ -33,7 +33,7 @@ export function registerStart(router: EntityStorePluginRouter) {
       description:
         'Start previously stopped entity engines, resuming data processing for the specified entity types.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

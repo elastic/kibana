@@ -35,7 +35,7 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
       summary: 'Create an entity',
       description: 'Create a new entity record in the Entity Store for the specified entity type.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

@@ -40,9 +40,9 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
       access: 'public',
       summary: 'Update an entity',
       description:
-        'Update an existing entity record in the Entity Store. By default only certain fields can be updated. Set the force query parameter to true to update protected fields.',
+        'Update an existing entity record in the Entity Store. By default only certain fields can be updated. Set the `force` query parameter to `true` to update protected fields.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

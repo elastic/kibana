@@ -33,7 +33,7 @@ export function registerStop(router: EntityStorePluginRouter) {
       description:
         'Stop running entity engines, pausing data processing for the specified entity types.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

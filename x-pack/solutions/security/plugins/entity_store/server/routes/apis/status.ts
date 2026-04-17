@@ -87,7 +87,7 @@ export function registerStatus(router: EntityStorePluginRouter) {
       description:
         'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

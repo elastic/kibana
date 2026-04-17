@@ -42,7 +42,7 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
       summary: 'Bulk update entities',
       description: 'Update multiple entity records in the Entity Store in a single request.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

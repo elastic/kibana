@@ -31,7 +31,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
       description:
         'Uninstall the Entity Store, removing engines and associated resources for the specified entity types.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

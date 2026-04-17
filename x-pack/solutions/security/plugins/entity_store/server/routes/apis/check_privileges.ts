@@ -26,7 +26,7 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
       description:
         'Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.',
       options: {
-        tags: ['oas-tag:Security Entity Store'],
+        tags: ['oas-tag:Security entity store'],
       },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
