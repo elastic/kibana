@@ -12,7 +12,7 @@ conclusion: neutral
 
 Review this PR for compliance with Kibana Scout test best practices.
 
-**Scope**: Focus exclusively on **Scout tests and their building blocks**: spec files (`*.spec.ts`), page objects, API services, fixtures, and constants. Do NOT review Scout framework implementation code (e.g., internal utilities in `kbn-scout`) for general code quality, unit test coverage, or architectural concerns: that's out of scope for this review.
+**Scope**: Focus on **Scout test behavior and best practices** — things that affect test reliability, coverage, and maintainability. Do NOT flag general code quality issues (unused imports/exports, naming conventions, code style) unless they directly impact test behavior. The goal is actionable feedback on tests, not code correctness nitpicks.
 
 Only review files that are:
 
