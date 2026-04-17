@@ -29,7 +29,7 @@ Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for 
 
 ## Output
 
-You may post a short **summary comment** with a `## Scout Test Review` header, but keep it concise (a short breakdown by severity / summary). All detailed findings must go in **inline GitHub PR comments** on the specific line where each issue occurs. Example:
+You may post a short **summary comment** with a `## Scout Test Review` header, but keep it concise (a short breakdown by severity / summary):
 
 ```
 ## Scout Test Review
@@ -39,7 +39,7 @@ You may post a short **summary comment** with a `## Scout Test Review` header, b
 This review is experimental. Share your feedback in the #appex-qa channel.
 ```
 
-For each inline comment:
+All detailed findings must go in **inline GitHub PR comments** on the specific line where each issue occurs. For each inline comment:
 
 - Start with the severity emoji (🔴 Blocker, 🟡 Major, 🔵 Minor, or ⚪ Nit)
 - State the rule violated (use the section heading from `docs/extend/scout/best-practices.md`)

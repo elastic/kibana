@@ -46,14 +46,6 @@ Important: Do not post GitHub comments unless explicitly stated.
 - **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
 - **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
-### Verify context before suggesting changes
-
-Before recommending a pattern change, verify the code matches the pattern's preconditions:
-
-- **Auth patterns**: Check endpoint type (`api/*` vs `internal/*`) before suggesting auth changes. `requestAuth` + `apiKeyHeader` is for public APIs; `samlAuth` + `cookieHeader` is correct for internal endpoints. See `docs/extend/scout/api-auth.md`.
-- **Global setup hooks**: Only suggest moving setup to global hooks when cleanup isn't required. Operations like `kbnClient.importExport.load()` need corresponding `.unload()` calls, which require `afterAll` hooks (no global teardown exists).
-- **esArchiver.loadIfNeeded()**: This is idempotent — only the first call ingests data, subsequent calls skip (fast index-exists check). For sequential runs, there's ~0% benefit from moving it to global setup. For parallel runs, move it to global setup so ES isn't handling ingestion while workers are running (can affect Kibana performance).
-
 ### Severity classification
 
 Use these definitions when assigning severity:
