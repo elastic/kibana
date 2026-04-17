@@ -38,10 +38,11 @@ export const UnifiedHostPanel: React.FC<UnifiedHostPanelProps> = ({
   platform,
   defaultCollector = 'agent',
 }) => {
-  // No Elastic Agent auto-detect flow exists for Windows today, so lock to OTel there.
+  const [selectedCollector, setSelectedCollector] = useState<HostCollector>(defaultCollector);
+
+  // No Elastic Agent auto-detect flow exists for Windows today, so force OTel there.
   const isWindows = platform === 'windows';
-  const initialCollector: HostCollector = isWindows ? 'otel' : defaultCollector;
-  const [collector, setCollector] = useState<HostCollector>(initialCollector);
+  const collector: HostCollector = isWindows ? 'otel' : selectedCollector;
 
   return (
     <>
@@ -53,7 +54,7 @@ export const UnifiedHostPanel: React.FC<UnifiedHostPanelProps> = ({
               { defaultMessage: 'Select collection method' }
             )}
             idSelected={collector}
-            onChange={(optionId) => setCollector(optionId as HostCollector)}
+            onChange={(optionId) => setSelectedCollector(optionId as HostCollector)}
             options={COLLECTOR_OPTIONS}
             buttonSize="m"
             isFullWidth

@@ -9,6 +9,7 @@ import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { Wrapper } from '../../shared/test_wrapper';
 import { UnifiedHostPanel } from './unified_host_panel';
+import type { HostPlatform } from './unified_host_panel';
 
 jest.mock('../auto_detect', () => ({
   AutoDetectPanel: ({ suppressBreadcrumb }: { suppressBreadcrumb?: boolean }) => (
@@ -109,6 +110,28 @@ describe('UnifiedHostPanel', () => {
 
       expect(screen.getByTestId('mockOtelLogsPanel')).toBeInTheDocument();
       expect(screen.queryByTestId('mockAutoDetectPanel')).not.toBeInTheDocument();
+    });
+
+    it('forces OTel when platform changes from a non-Windows platform to windows', () => {
+      const { rerender } = render(<UnifiedHostPanel platform="linux" />, {
+        wrapper: Wrapper({ location: '/' }),
+      });
+
+      expect(screen.getByTestId('mockAutoDetectPanel')).toBeInTheDocument();
+
+      const rerenderWithPlatform = (platform: HostPlatform) =>
+        rerender(<UnifiedHostPanel platform={platform} />);
+
+      rerenderWithPlatform('windows');
+
+      expect(screen.queryByTestId('mockAutoDetectPanel')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockOtelLogsPanel')).toHaveAttribute(
+        'data-locked-platform',
+        'windows'
+      );
+      expect(
+        screen.queryByRole('group', { name: 'Select collection method' })
+      ).not.toBeInTheDocument();
     });
   });
 });
