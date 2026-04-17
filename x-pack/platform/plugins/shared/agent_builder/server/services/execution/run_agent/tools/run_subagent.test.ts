@@ -9,7 +9,7 @@ import { Subject, ReplaySubject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { ChatEvent, ConversationRound } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { createSubagentTool } from './start_subagent';
+import { createSubagentTool } from './run_subagent';
 
 // Mock context with events emitter for tool handler calls.
 const mockContext = {

@@ -30,7 +30,7 @@ export class BackgroundExecutionService {
     this.state = { ...initialState };
   }
 
-  /** Register a new background execution (called by the start_subagent tool). */
+  /** Register a new background execution (called by the run_subagent tool). */
   registerExecution(executionId: string): void {
     this.state[executionId] = {
       execution_id: executionId,

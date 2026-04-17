@@ -46,7 +46,7 @@ import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from './run_agent';
 import { steps } from './constants';
 import { createPromptFactory } from './prompts';
-import { createSubagentTool } from './tools/start_subagent';
+import { createSubagentTool } from './tools/run_subagent';
 import { createSleepTool } from './tools/sleep';
 import { BackgroundExecutionService } from './background_execution_service';
 import { builtinToolToExecutable } from './utils/select_tools';

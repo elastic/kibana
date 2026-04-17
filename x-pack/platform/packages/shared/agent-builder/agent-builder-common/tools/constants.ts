@@ -58,7 +58,7 @@ export const filestoreTools = {
 };
 
 export const internalTools = {
-  subAgentTool: 'start_subagent',
+  subAgentTool: 'run_subagent',
   sleepTool: 'sleep',
 } as const;
 

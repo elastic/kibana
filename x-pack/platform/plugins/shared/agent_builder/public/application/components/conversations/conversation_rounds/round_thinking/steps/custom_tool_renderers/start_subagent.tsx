@@ -44,7 +44,7 @@ const getExecutionId = (step: ToolCallStep): string | undefined => {
 };
 
 /**
- * Returns thinking items for a start_subagent tool call.
+ * Returns thinking items for a run_subagent tool call.
  */
 export const getSubAgentThinkingItems = ({
   step,
@@ -93,7 +93,7 @@ const isBackgroundExecution = (step: ToolCallStep): boolean => {
 };
 
 /**
- * Display component for start_subagent tool calls — includes "Watch" button and flyout.
+ * Display component for run_subagent tool calls — includes "Watch" button and flyout.
  */
 const SubAgentToolCallDisplay: React.FC<{
   step: ToolCallStep;
