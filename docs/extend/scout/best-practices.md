@@ -24,6 +24,15 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 - Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early. See [Run tests on Elastic Cloud](./run-tests.md#scout-run-tests-cloud) for setup instructions.
 
+### Keep tests close to the code they test [keep-tests-close-to-source-code]
+
+Scout uses selective testing to run only the tests for modules affected by a PR. For this to work, tests must live in the same plugin or package as the code they cover, otherwise changes won't trigger the relevant tests.
+
+- **API tests**: place them in the plugin that defines the routes being tested.
+- **UI tests**: place them in the plugin that owns the UI components or pages.
+
+If a plugin has no Scout tests and no downstream dependents, changes to it won't trigger any Scout tests in CI, creating a coverage gap.
+
 ### Prefer runtime feature flags [prefer-runtime-feature-flags]
 
 When a feature is gated behind a flag, enable it at runtime with `apiServices.core.settings()` rather than creating a custom server config. Runtime flags work locally and on Cloud, don’t require a server restart, and avoid the CI cost of a dedicated server instance.
