@@ -33,7 +33,7 @@ export const BackgroundExecutionDisplay: React.FC<BackgroundExecutionDisplayProp
         <p role="status">
           {isError ? (
             <FormattedMessage
-              id="xpack.agentBuilder.thinking.backgroundExecutionFailed"
+              id="xpack.agentBuilder.thinking.subagent.backgroundExecutionFailed"
               defaultMessage="Background agent execution {status}. {inspectResponse}"
               values={{
                 status: <EuiBadge color="danger">{step.status}</EuiBadge>,
@@ -49,8 +49,8 @@ export const BackgroundExecutionDisplay: React.FC<BackgroundExecutionDisplayProp
             />
           ) : (
             <FormattedMessage
-              id="xpack.agentBuilder.thinking.backgroundExecutionCompleted"
-              defaultMessage="Background agent execution completed. {inspectResponse}"
+              id="xpack.agentBuilder.thinking.subagent.backgroundExecutionCompleted"
+              defaultMessage="Background agent completed. {inspectResponse}"
               values={{
                 inspectResponse: (
                   <EuiLink onClick={onInspect} role="button">
