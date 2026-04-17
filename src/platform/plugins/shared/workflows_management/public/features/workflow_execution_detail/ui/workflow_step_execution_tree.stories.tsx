@@ -13,7 +13,10 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
+import {
+  parseWorkflowYamlToJSON,
+  parseYamlToJSONWithoutValidation,
+} from '../../../../common/lib/yaml';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 
 const meta: Meta<typeof WorkflowStepExecutionTree> = {
