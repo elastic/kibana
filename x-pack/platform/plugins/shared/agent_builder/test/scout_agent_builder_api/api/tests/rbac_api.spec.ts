@@ -6,7 +6,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { publicApiPath } from '../../../../common/constants';
@@ -117,14 +116,7 @@ apiTest.describe(
       username: `${RBAC_TEST_PREFIX}-all-user-${testRunId}`,
     };
 
-    let adminCredentials: RoleApiCredentials;
     let adminInteractiveCookieHeader: Record<string, string>;
-
-    const adminHeaders = () => ({
-      ...COMMON_HEADERS,
-      ...adminCredentials.apiKeyHeader,
-      'elastic-api-version': ELASTIC_API_VERSION,
-    });
 
     const adminInternalSecurityHeaders = () => ({
       ...COMMON_HEADERS,
@@ -138,15 +130,18 @@ apiTest.describe(
       'elastic-api-version': ELASTIC_API_VERSION,
     });
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth, kbnClient, esClient }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    const adminKibanaRequestHeaders = () => ({
+      'elastic-api-version': ELASTIC_API_VERSION,
+    });
+
+    apiTest.beforeAll(async ({ samlAuth, kbnClient, esClient }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;
 
       await kbnClient.request({
         method: 'POST',
         path: '/api/spaces/space',
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: { id: rbacSpaceId, name: rbacSpaceId, disabledFeatures: [] },
       });
 
@@ -155,21 +150,21 @@ apiTest.describe(
       await kbnClient.request({
         method: 'POST',
         path: `${rbacApiBase}/tools`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: mockToolIndexSearch(fixtureToolId, rbacTestIndex),
       });
 
       await kbnClient.request({
         method: 'POST',
         path: `${rbacApiBase}/agents`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: mockAgent(fixtureAgentId, [fixtureToolId]),
       });
 
       await kbnClient.request({
         method: 'PUT',
         path: `/api/security/role/${encodeURIComponent(readOnlyPrincipal.roleName)}`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: agentBuilderRole(rbacSpaceId, ['minimal_read']),
       });
       await kbnClient.request({
@@ -188,7 +183,7 @@ apiTest.describe(
       await kbnClient.request({
         method: 'PUT',
         path: `/api/security/role/${encodeURIComponent(manageAgentsPrincipal.roleName)}`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: agentBuilderRole(rbacSpaceId, ['minimal_read', 'manage_agents']),
       });
       await kbnClient.request({
@@ -207,7 +202,7 @@ apiTest.describe(
       await kbnClient.request({
         method: 'PUT',
         path: `/api/security/role/${encodeURIComponent(manageToolsPrincipal.roleName)}`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: agentBuilderRole(rbacSpaceId, ['minimal_read', 'manage_tools']),
       });
       await kbnClient.request({
@@ -226,7 +221,7 @@ apiTest.describe(
       await kbnClient.request({
         method: 'PUT',
         path: `/api/security/role/${encodeURIComponent(allPrincipal.roleName)}`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
         body: agentBuilderRole(rbacSpaceId, ['all']),
       });
       await kbnClient.request({
@@ -243,12 +238,12 @@ apiTest.describe(
       });
     });
 
-    apiTest.afterAll(async ({ kbnClient, esClient, apiClient }) => {
-      await apiClient.delete(`${rbacApiBase}/agents/${encodeURIComponent(fixtureAgentId)}`, {
-        headers: adminHeaders(),
+    apiTest.afterAll(async ({ kbnClient, esClient, asAdmin }) => {
+      await asAdmin.delete(`${rbacApiBase}/agents/${encodeURIComponent(fixtureAgentId)}`, {
+        headers: adminKibanaRequestHeaders(),
       });
-      await apiClient.delete(`${rbacApiBase}/tools/${encodeURIComponent(fixtureToolId)}`, {
-        headers: adminHeaders(),
+      await asAdmin.delete(`${rbacApiBase}/tools/${encodeURIComponent(fixtureToolId)}`, {
+        headers: adminKibanaRequestHeaders(),
       });
 
       for (const { username, roleName } of [
@@ -265,7 +260,7 @@ apiTest.describe(
         await kbnClient.request({
           method: 'DELETE',
           path: `/api/security/role/${encodeURIComponent(roleName)}`,
-          headers: adminHeaders(),
+          headers: adminKibanaRequestHeaders(),
         });
       }
 
@@ -273,7 +268,7 @@ apiTest.describe(
       await kbnClient.request({
         method: 'DELETE',
         path: `/api/spaces/space/${encodeURIComponent(rbacSpaceId)}`,
-        headers: adminHeaders(),
+        headers: adminKibanaRequestHeaders(),
       });
     });
 

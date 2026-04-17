@@ -7,18 +7,16 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — legacy ES|QL tool type migration API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let sysEsClient: Client;
     const legacyToolId = 'legacy-esql-tool-types-migration';
     const dummyToolId = `dummy-tool-${Date.now()}`;
@@ -52,11 +50,9 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, esClient, config }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ asAdmin, esClient, config }) => {
       sysEsClient = await createSystemIndicesEsClient(esClient, config);
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: {
           id: dummyToolId,
           type: 'esql',
@@ -84,13 +80,9 @@ apiTest.describe(
       await sysEsClient.indices.refresh({ index: toolIndex });
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      await apiClient.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(legacyToolId)}`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-      });
-      await apiClient.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(dummyToolId)}`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-      });
+    apiTest.afterAll(async ({ asAdmin }) => {
+      await asAdmin.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(legacyToolId)}`);
+      await asAdmin.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(dummyToolId)}`);
       try {
         await sysEsClient.delete({ index: toolIndex, id: legacyToolId, refresh: true });
       } catch {
@@ -98,9 +90,8 @@ apiTest.describe(
       }
     });
 
-    apiTest('GET migrates legacy types for single tool', async ({ apiClient }) => {
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/tools/${legacyToolId}`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+    apiTest('GET migrates legacy types for single tool', async ({ asAdmin }) => {
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools/${legacyToolId}`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -136,9 +127,8 @@ apiTest.describe(
       });
     });
 
-    apiTest('GET list includes migrated legacy tool params', async ({ apiClient }) => {
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/tools`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+    apiTest('GET list includes migrated legacy tool params', async ({ asAdmin }) => {
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);

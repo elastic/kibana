@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -16,26 +15,24 @@ import type {
   ListAttachmentsResponse,
 } from '../../../../common/http_api/attachments';
 import type { ChatResponse } from '../../../../common/http_api/chat';
+import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
-import { postConverse, type ScoutAgentBuilderApiClient } from '../fixtures/converse_http';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — conversation attachments API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;
     let connectorId: string;
     const createdConversationIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, log, kbnClient }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ log, kbnClient }) => {
       llmProxy = await createLlmProxy(log);
       const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
       connectorId = id;
@@ -45,31 +42,26 @@ apiTest.describe(
       llmProxy.clear();
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
       for (const conversationId of createdConversationIds) {
-        await apiClient.delete(
-          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-          { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader } }
+        await asAdmin.delete(
+          `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
         );
       }
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
     });
 
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-
-    async function createConversation(apiClient: ScoutAgentBuilderApiClient): Promise<string> {
+    async function createConversation(asAdmin: AuthedApiClient): Promise<string> {
       await setupAgentDirectAnswer({
         proxy: llmProxy,
         title: 'Test Conversation',
         response: 'Test response',
       });
-      const res = await postConverse(
-        apiClient,
-        adminCredentials.apiKeyHeader,
-        { input: 'Hello', connector_id: connectorId },
-        'local'
-      );
+      const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+        body: { input: 'Hello', connector_id: connectorId, _execution_mode: 'local' },
+        responseType: 'json',
+      });
       expect(res).toHaveStatusCode(200);
       const body = res.body as ChatResponse;
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -78,13 +70,12 @@ apiTest.describe(
     }
 
     async function createTextAttachment(
-      apiClient: ScoutAgentBuilderApiClient,
+      asAdmin: AuthedApiClient,
       conversationId: string
     ): Promise<VersionedAttachment> {
-      const response = await apiClient.post(
+      const response = await asAdmin.post(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}/attachments`,
         {
-          headers: h(),
           body: { type: 'text', data: { content: 'test content' } },
           responseType: 'json',
         }
@@ -93,16 +84,15 @@ apiTest.describe(
       return (response.body as CreateAttachmentResponse).attachment;
     }
 
-    apiTest('PUT origin updates attachment', async ({ apiClient }) => {
-      const conversationId = await createConversation(apiClient);
-      const attachment = await createTextAttachment(apiClient, conversationId);
+    apiTest('PUT origin updates attachment', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const attachment = await createTextAttachment(asAdmin, conversationId);
 
-      const response = await apiClient.put(
+      const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(
           conversationId
         )}/attachments/${encodeURIComponent(attachment.id)}/origin`,
         {
-          headers: h(),
           body: { origin: 'saved-object-123' },
           responseType: 'json',
         }
@@ -114,23 +104,22 @@ apiTest.describe(
       expect(body.attachment.origin).toBe('saved-object-123');
     });
 
-    apiTest('GET list attachments reflects origin', async ({ apiClient }) => {
-      const conversationId = await createConversation(apiClient);
-      const attachment = await createTextAttachment(apiClient, conversationId);
-      await apiClient.put(
+    apiTest('GET list attachments reflects origin', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const attachment = await createTextAttachment(asAdmin, conversationId);
+      await asAdmin.put(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(
           conversationId
         )}/attachments/${encodeURIComponent(attachment.id)}/origin`,
         {
-          headers: h(),
           body: { origin: 'persisted-saved-object-456' },
           responseType: 'json',
         }
       );
 
-      const listResponse = await apiClient.get(
+      const listResponse = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}/attachments`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(listResponse).toHaveStatusCode(200);
       const listBody = listResponse.body as ListAttachmentsResponse;
@@ -138,14 +127,14 @@ apiTest.describe(
       expect(updated?.origin).toBe('persisted-saved-object-456');
     });
 
-    apiTest('stale check for text without origin', async ({ apiClient }) => {
-      const conversationId = await createConversation(apiClient);
-      const attachment = await createTextAttachment(apiClient, conversationId);
-      const response = await apiClient.get(
+    apiTest('stale check for text without origin', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const attachment = await createTextAttachment(asAdmin, conversationId);
+      const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(
           conversationId
         )}/attachments/stale`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(200);
       const body = response.body as CheckStaleAttachmentsResponse;
@@ -154,13 +143,13 @@ apiTest.describe(
       expect(resultsForAttachment[0].is_stale).toBe(false);
     });
 
-    apiTest('stale check empty when no attachments', async ({ apiClient }) => {
-      const conversationId = await createConversation(apiClient);
-      const response = await apiClient.get(
+    apiTest('stale check empty when no attachments', async ({ asAdmin }) => {
+      const conversationId = await createConversation(asAdmin);
+      const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(
           conversationId
         )}/attachments/stale`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(200);
       expect((response.body as CheckStaleAttachmentsResponse).attachments).toStrictEqual([]);

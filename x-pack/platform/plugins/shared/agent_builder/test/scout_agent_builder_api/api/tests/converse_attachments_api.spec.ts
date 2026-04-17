@@ -15,7 +15,7 @@ import {
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 import { getConversation, postConverse, type ExecutionMode } from '../fixtures/converse_http';
 
 const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
@@ -40,20 +40,17 @@ apiTest.describe(
       llmProxy.clear();
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
       for (const id of conversationIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`);
       }
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);
     });
 
     for (const mode of EXECUTION_MODES) {
-      apiTest(`[${mode}] rejects unknown attachment type`, async ({ apiClient }) => {
-        const res = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      apiTest(`[${mode}] rejects unknown attachment type`, async ({ asAdmin }) => {
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: 'Hello AgentBuilder',
             attachments: [{ type: 'unknown', data: { foo: 'bar' } }],
@@ -68,9 +65,8 @@ apiTest.describe(
         );
       });
 
-      apiTest(`[${mode}] rejects invalid attachment payload`, async ({ apiClient }) => {
-        const res = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      apiTest(`[${mode}] rejects invalid attachment payload`, async ({ asAdmin }) => {
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: 'Hello AgentBuilder',
             attachments: [{ type: 'text', data: {} }],
@@ -112,9 +108,8 @@ apiTest.describe(
         expect(allMessageContent).toContain('some text content');
       });
 
-      apiTest(`[${mode}] rejects attachment without data or origin`, async ({ apiClient }) => {
-        const res = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      apiTest(`[${mode}] rejects attachment without data or origin`, async ({ asAdmin }) => {
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: 'Hello AgentBuilder',
             attachments: [{ type: 'text' }],
@@ -129,9 +124,8 @@ apiTest.describe(
         );
       });
 
-      apiTest(`[${mode}] rejects origin-only for text attachments`, async ({ apiClient }) => {
-        const res = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      apiTest(`[${mode}] rejects origin-only for text attachments`, async ({ asAdmin }) => {
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: 'Hello AgentBuilder',
             attachments: [{ type: 'text', origin: 'some-origin-id' }],

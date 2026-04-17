@@ -15,7 +15,7 @@ import {
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 import { getConversation, postConverse, type ExecutionMode } from '../fixtures/converse_http';
 
 const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
@@ -37,11 +37,9 @@ for (const mode of EXECUTION_MODES) {
         connectorId = id;
       });
 
-      apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+      apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
         for (const id of conversationIds) {
-          await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-          });
+          await asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`);
         }
         llmProxy.close();
         await deleteConnectorById(kbnClient, connectorId);
@@ -129,9 +127,8 @@ for (const mode of EXECUTION_MODES) {
         expect(conversation.rounds[1].response.message).toBe(MOCKED_LLM_RESPONSE_2);
       });
 
-      apiTest(`invalid converse payload returns 400`, async ({ apiClient }) => {
-        const res = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      apiTest(`invalid converse payload returns 400`, async ({ asAdmin }) => {
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: { _execution_mode: mode },
           responseType: 'json',
         });

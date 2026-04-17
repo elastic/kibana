@@ -5,37 +5,26 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — skills validation API (stateful)',
   { tag: [...tags.stateful.classic] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     const createdSkillIds: string[] = [];
     const BUILTIN_SKILL_ID = 'data-exploration';
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-    });
-
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const skillId of createdSkillIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/skills/${encodeURIComponent(skillId)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/skills/${encodeURIComponent(skillId)}`);
       }
     });
 
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-
-    apiTest('POST rejects invalid skill id', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+    apiTest('POST rejects invalid skill id', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: {
           id: 'Invalid ID With Spaces',
           name: 'invalid-skill',
@@ -49,10 +38,9 @@ apiTest.describe(
       expect(response.body.message).toBeDefined();
     });
 
-    apiTest('POST rejects duplicate skill id', async ({ apiClient }) => {
+    apiTest('POST rejects duplicate skill id', async ({ asAdmin }) => {
       const skillId = 'duplicate-test-skill';
-      await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: {
           id: skillId,
           name: 'first-skill',
@@ -64,8 +52,7 @@ apiTest.describe(
       });
       createdSkillIds.push(skillId);
 
-      const dup = await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+      const dup = await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: {
           id: skillId,
           name: 'second-skill',
@@ -78,11 +65,10 @@ apiTest.describe(
       expect(dup).toHaveStatusCode(409);
     });
 
-    apiTest('PUT rejects updating built-in skill', async ({ apiClient }) => {
-      const response = await apiClient.put(
+    apiTest('PUT rejects updating built-in skill', async ({ asAdmin }) => {
+      const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/skills/${encodeURIComponent(BUILTIN_SKILL_ID)}`,
         {
-          headers: h(),
           body: {
             name: 'hacked-name',
             description: 'Attempted modification',
@@ -95,9 +81,8 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('PUT rejects updating missing skill', async ({ apiClient }) => {
-      const response = await apiClient.put(`${API_AGENT_BUILDER}/skills/non-existent-skill-id`, {
-        headers: h(),
+    apiTest('PUT rejects updating missing skill', async ({ asAdmin }) => {
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/skills/non-existent-skill-id`, {
         body: {
           name: 'attempted-update',
           description: 'Should fail',
@@ -109,17 +94,16 @@ apiTest.describe(
       expect(response).toHaveStatusCode(404);
     });
 
-    apiTest('DELETE rejects built-in skill', async ({ apiClient }) => {
-      const response = await apiClient.delete(
+    apiTest('DELETE rejects built-in skill', async ({ asAdmin }) => {
+      const response = await asAdmin.delete(
         `${API_AGENT_BUILDER}/skills/${encodeURIComponent(BUILTIN_SKILL_ID)}`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response.statusCode).not.toBe(200);
     });
 
-    apiTest('DELETE rejects missing skill', async ({ apiClient }) => {
-      const response = await apiClient.delete(`${API_AGENT_BUILDER}/skills/non-existent-skill-id`, {
-        headers: h(),
+    apiTest('DELETE rejects missing skill', async ({ asAdmin }) => {
+      const response = await asAdmin.delete(`${API_AGENT_BUILDER}/skills/non-existent-skill-id`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(404);

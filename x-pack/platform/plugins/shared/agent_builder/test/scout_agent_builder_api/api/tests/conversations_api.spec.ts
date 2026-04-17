@@ -6,7 +6,6 @@
  */
 
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy, type LlmProxy } from '@kbn/ftr-llm-proxy';
@@ -15,41 +14,34 @@ import type {
   DeleteConversationResponse,
   ListConversationsResponse,
 } from '../../../../common/http_api/conversations';
+import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import {
   createGenAiConnectorForProxy,
   deleteConnectorById,
 } from '../../../scout_agent_builder_shared/lib/connector_kbn';
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, CHAT_CONVERSATIONS_INDEX, COMMON_HEADERS } from '../fixtures/constants';
-import { postConverse, type ScoutAgentBuilderApiClient } from '../fixtures/converse_http';
+import { API_AGENT_BUILDER, CHAT_CONVERSATIONS_INDEX } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — conversations API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let llmProxy: LlmProxy;
     let connectorId: string;
     const createdConversationIds: string[] = [];
-    let conversationApiClient: ScoutAgentBuilderApiClient;
 
-    apiTest.beforeAll(async ({ requestAuth, log, kbnClient }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ log, kbnClient }) => {
       llmProxy = await createLlmProxy(log);
       const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
       connectorId = id;
     });
 
-    apiTest.beforeEach(async ({ apiClient }) => {
-      conversationApiClient = apiClient;
-    });
-
-    apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
+    apiTest.afterAll(async ({ asAdmin, kbnClient, esClient }) => {
       for (const conversationId of createdConversationIds) {
-        await apiClient.delete(
+        await asAdmin.delete(
           `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-          { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+          { responseType: 'json' }
         );
       }
       llmProxy.close();
@@ -64,18 +56,20 @@ apiTest.describe(
       });
     });
 
-    async function createConversation(input: string, title: string): Promise<string> {
+    async function createConversation(
+      asAdmin: AuthedApiClient,
+      input: string,
+      title: string
+    ): Promise<string> {
       await setupAgentDirectAnswer({
         proxy: llmProxy,
         title,
         response: `Response to: ${input}`,
       });
-      const res = await postConverse(
-        conversationApiClient,
-        adminCredentials.apiKeyHeader,
-        { input, connector_id: connectorId },
-        'local'
-      );
+      const res = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
+        body: { input, connector_id: connectorId, _execution_mode: 'local' },
+        responseType: 'json',
+      });
       expect(res).toHaveStatusCode(200);
       const body = res.body as ChatResponse;
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
@@ -90,12 +84,11 @@ apiTest.describe(
       }
     }
 
-    apiTest('GET /conversations lists conversations with expected shape', async ({ apiClient }) => {
+    apiTest('GET /conversations lists conversations with expected shape', async ({ asAdmin }) => {
       for (let i = 0; i < 3; i++) {
-        await createConversation(`Test message ${i}`, `Test Conversation ${i}`);
+        await createConversation(asAdmin, `Test message ${i}`, `Test Conversation ${i}`);
       }
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/conversations`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/conversations`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -114,15 +107,14 @@ apiTest.describe(
       expect('rounds' in conversation).toBe(false);
     });
 
-    apiTest('GET /conversations includes created conversations', async ({ apiClient }) => {
+    apiTest('GET /conversations includes created conversations', async ({ asAdmin }) => {
       const testConversationIds: string[] = [];
       for (let i = 0; i < 3; i++) {
         testConversationIds.push(
-          await createConversation(`Verify message ${i}`, `Verify Conversation ${i}`)
+          await createConversation(asAdmin, `Verify message ${i}`, `Verify Conversation ${i}`)
         );
       }
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/conversations`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/conversations`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -133,19 +125,22 @@ apiTest.describe(
       }
     });
 
-    apiTest('GET /conversations filters by agent_id', async ({ apiClient }) => {
-      const conversationId = await createConversation('Agent filter test', 'Agent Filter Test');
-      const conversationRes = await apiClient.get(
+    apiTest('GET /conversations filters by agent_id', async ({ asAdmin }) => {
+      const conversationId = await createConversation(
+        asAdmin,
+        'Agent filter test',
+        'Agent Filter Test'
+      );
+      const conversationRes = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(conversationRes).toHaveStatusCode(200);
       const agentId = (conversationRes.body as Conversation).agent_id;
 
-      const response = await apiClient.get(
+      const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations?${new URLSearchParams({ agent_id: agentId })}`,
         {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           responseType: 'json',
         }
       );
@@ -158,13 +153,12 @@ apiTest.describe(
 
     apiTest(
       'GET /conversations returns empty when filtering unknown agent_id',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(
+      async ({ asAdmin }) => {
+        const response = await asAdmin.get(
           `${API_AGENT_BUILDER}/conversations?${new URLSearchParams({
             agent_id: 'non-existent-agent-id',
           })}`,
           {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
             responseType: 'json',
           }
         );
@@ -174,14 +168,14 @@ apiTest.describe(
       }
     );
 
-    apiTest('GET /conversations/:id returns conversation with rounds', async ({ apiClient }) => {
+    apiTest('GET /conversations/:id returns conversation with rounds', async ({ asAdmin }) => {
       const testInput = 'Test message for get endpoint';
       const testTitle = 'Get Test Conversation';
-      const testConversationId = await createConversation(testInput, testTitle);
+      const testConversationId = await createConversation(asAdmin, testInput, testTitle);
 
-      const response = await apiClient.get(
+      const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(testConversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(200);
       const conversation = response.body as Conversation;
@@ -191,15 +185,15 @@ apiTest.describe(
       expect(conversation.rounds.length).toBeGreaterThan(0);
     });
 
-    apiTest('GET /conversations/:id includes round messages', async ({ apiClient }) => {
+    apiTest('GET /conversations/:id includes round messages', async ({ asAdmin }) => {
       const testConversationId = await createConversation(
+        asAdmin,
         'Test message for get endpoint',
         'Get Test Conversation'
       );
-      const response = await apiClient.get(
+      const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(testConversationId)}`,
         {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           responseType: 'json',
         }
       );
@@ -219,96 +213,96 @@ apiTest.describe(
       expect(Array.isArray(firstRound.steps)).toBe(true);
     });
 
-    apiTest('GET /conversations/:id returns 404 for missing id', async ({ apiClient }) => {
-      const response = await apiClient.get(
+    apiTest('GET /conversations/:id returns 404 for missing id', async ({ asAdmin }) => {
+      const response = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/non-existent-conversation-id-12345`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(404);
       expect(String((response.body as { message?: string }).message)).toContain('not found');
     });
 
-    apiTest('DELETE /conversations/:id deletes then GET 404', async ({ apiClient }) => {
+    apiTest('DELETE /conversations/:id deletes then GET 404', async ({ asAdmin }) => {
       const conversationToDelete = await createConversation(
+        asAdmin,
         'Message for delete test',
         'Delete Test Conversation'
       );
-      const del = await apiClient.delete(
+      const del = await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationToDelete)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(del).toHaveStatusCode(200);
       expect((del.body as DeleteConversationResponse).success).toBe(true);
-      const getRes = await apiClient.get(
+      const getRes = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationToDelete)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(404);
       removeTrackedConversationId(conversationToDelete);
     });
 
-    apiTest('DELETE /conversations/:id returns 404 when missing', async ({ apiClient }) => {
-      const response = await apiClient.delete(
+    apiTest('DELETE /conversations/:id returns 404 when missing', async ({ asAdmin }) => {
+      const response = await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/non-existent-conversation-to-delete`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(404);
       expect(String((response.body as { message?: string }).message)).toContain('not found');
     });
 
-    apiTest('DELETE cannot delete same conversation twice', async ({ apiClient }) => {
+    apiTest('DELETE cannot delete same conversation twice', async ({ asAdmin }) => {
       const conversationToDelete = await createConversation(
+        asAdmin,
         'Message for double delete',
         'Double Delete Conversation'
       );
-      const first = await apiClient.delete(
+      const first = await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationToDelete)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(first).toHaveStatusCode(200);
-      const second = await apiClient.delete(
+      const second = await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationToDelete)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(second).toHaveStatusCode(404);
       removeTrackedConversationId(conversationToDelete);
     });
 
-    apiTest('conversation lifecycle: create, list, get, delete', async ({ apiClient }) => {
+    apiTest('conversation lifecycle: create, list, get, delete', async ({ asAdmin }) => {
       const testTitle = 'Lifecycle Test Conversation';
-      const conversationId = await createConversation('Lifecycle test message', testTitle);
+      const conversationId = await createConversation(asAdmin, 'Lifecycle test message', testTitle);
 
-      const list1 = await apiClient.get(`${API_AGENT_BUILDER}/conversations`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const list1 = await asAdmin.get(`${API_AGENT_BUILDER}/conversations`, {
         responseType: 'json',
       });
       expect(list1).toHaveStatusCode(200);
       let ids = (list1.body as ListConversationsResponse).results.map((c) => c.id);
       expect(ids).toContain(conversationId);
 
-      const getRes = await apiClient.get(
+      const getRes = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(200);
       expect((getRes.body as Conversation).title).toBe(testTitle);
 
-      await apiClient.delete(
+      await asAdmin.delete(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
 
-      const list2 = await apiClient.get(`${API_AGENT_BUILDER}/conversations`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const list2 = await asAdmin.get(`${API_AGENT_BUILDER}/conversations`, {
         responseType: 'json',
       });
       expect(list2).toHaveStatusCode(200);
       ids = (list2.body as ListConversationsResponse).results.map((c) => c.id);
       expect(ids).not.toContain(conversationId);
 
-      const get404 = await apiClient.get(
+      const get404 = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(get404).toHaveStatusCode(404);
       removeTrackedConversationId(conversationId);

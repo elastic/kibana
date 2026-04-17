@@ -16,7 +16,7 @@ import {
 import { setupAgentDirectAnswer } from '../../../scout_agent_builder_shared/lib/proxy_scenario';
 import { setupAnswerAgentCallsInvalidTool } from '../fixtures/setup_answer_agent_invalid_tool';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 import { getConversation, postConverse, type ExecutionMode } from '../fixtures/converse_http';
 
 const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
@@ -50,11 +50,9 @@ apiTest.describe(
       connectorId = id;
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+    apiTest.afterAll(async ({ asAdmin, kbnClient }) => {
       for (const id of conversationIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`);
       }
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);

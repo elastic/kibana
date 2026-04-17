@@ -6,17 +6,15 @@
  */
 
 import { AgentVisibility } from '@kbn/agent-builder-common';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — agents API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     const createdAgentIds: string[] = [];
 
     const mockAgent = {
@@ -33,21 +31,14 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-    });
-
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const agentId of createdAgentIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`);
       }
     });
 
-    apiTest('POST /api/agent_builder/agents creates agent', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+    apiTest('POST /api/agent_builder/agents creates agent', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: mockAgent,
         responseType: 'json',
       });
@@ -65,13 +56,12 @@ apiTest.describe(
       createdAgentIds.push(mockAgent.id);
     });
 
-    apiTest('POST /api/agent_builder/agents validates agent ID format', async ({ apiClient }) => {
+    apiTest('POST /api/agent_builder/agents validates agent ID format', async ({ asAdmin }) => {
       const invalidAgent = {
         ...mockAgent,
         id: 'invalid agent id!',
       };
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: invalidAgent,
         responseType: 'json',
       });
@@ -80,45 +70,39 @@ apiTest.describe(
       expect(String(response.body.message)).toContain('Invalid agent id');
     });
 
-    apiTest('POST /api/agent_builder/agents requires required fields', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+    apiTest('POST /api/agent_builder/agents requires required fields', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: { id: 'incomplete-agent' },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest(
-      'POST /api/agent_builder/agents validates tool configuration',
-      async ({ apiClient }) => {
-        const agentWithInvalidTools = {
-          ...mockAgent,
-          id: 'invalid-tools-agent',
-          configuration: {
-            instructions: 'Test agent with invalid tools',
-            tools: [
-              {
-                tool_ids: ['non-existent-tool'],
-              },
-            ],
-          },
-        };
-        const response = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-          body: agentWithInvalidTools,
-          responseType: 'json',
-        });
-        expect(response).toHaveStatusCode(400);
-      }
-    );
+    apiTest('POST /api/agent_builder/agents validates tool configuration', async ({ asAdmin }) => {
+      const agentWithInvalidTools = {
+        ...mockAgent,
+        id: 'invalid-tools-agent',
+        configuration: {
+          instructions: 'Test agent with invalid tools',
+          tools: [
+            {
+              tool_ids: ['non-existent-tool'],
+            },
+          ],
+        },
+      };
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+        body: agentWithInvalidTools,
+        responseType: 'json',
+      });
+      expect(response).toHaveStatusCode(400);
+    });
 
     apiTest(
       'POST /api/agent_builder/agents defaults visibility to public with created_by',
-      async ({ apiClient }) => {
+      async ({ asAdmin }) => {
         const agentId = `visibility-default-agent-${Date.now()}`;
-        const response = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
           body: { ...mockAgent, id: agentId },
           responseType: 'json',
         });
@@ -130,18 +114,16 @@ apiTest.describe(
       }
     );
 
-    apiTest('GET /api/agent_builder/agents/:id retrieves existing agent', async ({ apiClient }) => {
+    apiTest('GET /api/agent_builder/agents/:id retrieves existing agent', async ({ asAdmin }) => {
       const testAgent = { ...mockAgent, id: 'get-test-agent' };
-      const createRes = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const createRes = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: testAgent,
         responseType: 'json',
       });
       expect(createRes).toHaveStatusCode(200);
       createdAgentIds.push(createRes.body.id as string);
 
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/agents/get-test-agent`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/agents/get-test-agent`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -156,9 +138,8 @@ apiTest.describe(
 
     apiTest(
       'GET /api/agent_builder/agents/:id returns 404 for missing agent',
-      async ({ apiClient }) => {
-        const response = await apiClient.get(`${API_AGENT_BUILDER}/agents/non-existent-agent`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      async ({ asAdmin }) => {
+        const response = await asAdmin.get(`${API_AGENT_BUILDER}/agents/non-existent-agent`, {
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(404);
@@ -167,7 +148,7 @@ apiTest.describe(
       }
     );
 
-    apiTest('GET /api/agent_builder/agents lists agents', async ({ apiClient }) => {
+    apiTest('GET /api/agent_builder/agents lists agents', async ({ asAdmin }) => {
       const testAgentIds: string[] = [];
       for (let i = 0; i < 3; i++) {
         const testAgent = {
@@ -175,8 +156,7 @@ apiTest.describe(
           id: `list-test-agent-${i}`,
           name: `List Test Agent ${i}`,
         };
-        const res = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        const res = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
           body: testAgent,
           responseType: 'json',
         });
@@ -185,8 +165,7 @@ apiTest.describe(
         createdAgentIds.push(testAgent.id);
       }
 
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/agents`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -195,18 +174,16 @@ apiTest.describe(
       expect(response.body.results.length).toBeGreaterThan(1);
     });
 
-    apiTest('PUT /api/agent_builder/agents/:id updates agent fields', async ({ apiClient }) => {
+    apiTest('PUT /api/agent_builder/agents/:id updates agent fields', async ({ asAdmin }) => {
       const testAgent = { ...mockAgent, id: 'update-test-agent' };
-      await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: testAgent,
         responseType: 'json',
       });
       createdAgentIds.push(testAgent.id);
 
       const updates = { name: 'Updated Test Agent', description: 'Updated description' };
-      const response = await apiClient.put(`${API_AGENT_BUILDER}/agents/update-test-agent`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/update-test-agent`, {
         body: updates,
         responseType: 'json',
       });
@@ -218,15 +195,14 @@ apiTest.describe(
       });
     });
 
-    apiTest('PUT /api/agent_builder/agents/:id updates configuration', async ({ apiClient }) => {
+    apiTest('PUT /api/agent_builder/agents/:id updates configuration', async ({ asAdmin }) => {
       const configUpdates = {
         configuration: {
           instructions: 'Updated instructions for the agent',
           tools: [],
         },
       };
-      const response = await apiClient.put(`${API_AGENT_BUILDER}/agents/update-test-agent`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/update-test-agent`, {
         body: configUpdates,
         responseType: 'json',
       });
@@ -240,9 +216,8 @@ apiTest.describe(
 
     apiTest(
       'PUT /api/agent_builder/agents/:id returns 404 for missing agent',
-      async ({ apiClient }) => {
-        const response = await apiClient.put(`${API_AGENT_BUILDER}/agents/non-existent-agent`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      async ({ asAdmin }) => {
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/agents/non-existent-agent`, {
           body: { name: 'Updated name' },
           responseType: 'json',
         });
@@ -250,17 +225,15 @@ apiTest.describe(
       }
     );
 
-    apiTest('DELETE /api/agent_builder/agents/:id deletes agent', async ({ apiClient }) => {
+    apiTest('DELETE /api/agent_builder/agents/:id deletes agent', async ({ asAdmin }) => {
       const testAgent = { ...mockAgent, id: 'delete-test-agent' };
-      await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: testAgent,
         responseType: 'json',
       });
       createdAgentIds.push(testAgent.id);
 
-      const response = await apiClient.delete(`${API_AGENT_BUILDER}/agents/delete-test-agent`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.delete(`${API_AGENT_BUILDER}/agents/delete-test-agent`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -273,9 +246,8 @@ apiTest.describe(
 
     apiTest(
       'DELETE /api/agent_builder/agents/:id returns 404 for missing agent',
-      async ({ apiClient }) => {
-        const response = await apiClient.delete(`${API_AGENT_BUILDER}/agents/non-existent-agent`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      async ({ asAdmin }) => {
+        const response = await asAdmin.delete(`${API_AGENT_BUILDER}/agents/non-existent-agent`, {
           responseType: 'json',
         });
         expect(response).toHaveStatusCode(404);

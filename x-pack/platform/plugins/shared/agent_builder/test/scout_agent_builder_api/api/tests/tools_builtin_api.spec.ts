@@ -6,41 +6,31 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — builtin tools API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
-
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-    });
-
-    const headers = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-
-    apiTest('DELETE read-only builtin tool returns 400', async ({ apiClient }) => {
+    apiTest('DELETE read-only builtin tool returns 400', async ({ asAdmin }) => {
       const toolId = platformCoreTools.generateEsql;
-      const response = await apiClient.delete(
+      const response = await asAdmin.delete(
         `${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}`,
-        { headers: headers(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(400);
       expect(String(response.body.message)).toContain('read-only');
       expect(String(response.body.message)).toContain("can't be deleted");
     });
 
-    apiTest('PUT builtin tool returns 400', async ({ apiClient }) => {
+    apiTest('PUT builtin tool returns 400', async ({ asAdmin }) => {
       const searchTool = platformCoreTools.search;
-      const response = await apiClient.put(
+      const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/tools/${encodeURIComponent(searchTool)}`,
         {
-          headers: headers(),
           body: { description: 'Updated description' },
           responseType: 'json',
         }
@@ -48,7 +38,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('POST cannot create tool with builtin id namespace', async ({ apiClient }) => {
+    apiTest('POST cannot create tool with builtin id namespace', async ({ asAdmin }) => {
       const searchTool = platformCoreTools.search;
       const toolData = {
         id: searchTool,
@@ -59,8 +49,7 @@ apiTest.describe(
           params: {},
         },
       };
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: headers(),
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: toolData,
         responseType: 'json',
       });
@@ -69,9 +58,8 @@ apiTest.describe(
       expect(String(response.body.message)).toContain('protected namespace');
     });
 
-    apiTest('POST /tools/_execute runs builtin list_indices', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools/_execute`, {
-        headers: headers(),
+    apiTest('POST /tools/_execute runs builtin list_indices', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools/_execute`, {
         body: { tool_id: platformCoreTools.listIndices, tool_params: {} },
         responseType: 'json',
       });

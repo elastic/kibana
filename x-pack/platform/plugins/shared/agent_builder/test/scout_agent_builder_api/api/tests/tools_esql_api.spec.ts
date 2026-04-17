@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — ES|QL tools API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     const createdToolIds: string[] = [];
     const mockTool = {
       id: 'cases-tool',
@@ -28,23 +26,14 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-    });
-
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const toolId of createdToolIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}`);
       }
     });
 
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-
-    apiTest('POST creates ES|QL tool', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+    apiTest('POST creates ES|QL tool', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: mockTool,
         responseType: 'json',
       });
@@ -55,7 +44,7 @@ apiTest.describe(
       createdToolIds.push(mockTool.id);
     });
 
-    apiTest('POST accepts all supported parameter types', async ({ apiClient }) => {
+    apiTest('POST accepts all supported parameter types', async ({ asAdmin }) => {
       const toolWithAllParamTypes = {
         id: 'all-param-types-tool',
         type: 'esql',
@@ -74,8 +63,7 @@ apiTest.describe(
           },
         },
       };
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: toolWithAllParamTypes,
         responseType: 'json',
       });
@@ -86,9 +74,8 @@ apiTest.describe(
       createdToolIds.push(toolWithAllParamTypes.id);
     });
 
-    apiTest('POST validates tool id format', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+    apiTest('POST validates tool id format', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: { ...mockTool, id: 'invalid tool id!' },
         responseType: 'json',
       });
@@ -96,18 +83,16 @@ apiTest.describe(
       expect(String(response.body.message)).toContain('Invalid tool id: "invalid tool id!"');
     });
 
-    apiTest('POST requires required fields', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+    apiTest('POST requires required fields', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: { id: 'incomplete-tool' },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('POST validates parameter types', async ({ apiClient }) => {
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+    apiTest('POST validates parameter types', async ({ asAdmin }) => {
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: {
           ...mockTool,
           id: 'invalid-params-tool',
@@ -121,7 +106,7 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('POST /tools/_execute executes indexed ES|QL tool', async ({ apiClient, esClient }) => {
+    apiTest('POST /tools/_execute executes indexed ES|QL tool', async ({ asAdmin, esClient }) => {
       const testIndex = 'test-agent-builder-index';
       await esClient.indices.delete({ index: testIndex }, { ignore: [404] });
       await esClient.indices.create({
@@ -156,15 +141,13 @@ apiTest.describe(
         },
         id: 'execute-test-tool',
       };
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: testTool,
         responseType: 'json',
       });
       createdToolIds.push(testTool.id);
 
-      const executeResponse = await apiClient.post(`${API_AGENT_BUILDER}/tools/_execute`, {
-        headers: h(),
+      const executeResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools/_execute`, {
         body: { tool_id: 'execute-test-tool', tool_params: {} },
         responseType: 'json',
       });
@@ -174,17 +157,15 @@ apiTest.describe(
       await esClient.indices.delete({ index: testIndex });
     });
 
-    apiTest('GET returns existing ES|QL tool', async ({ apiClient }) => {
+    apiTest('GET returns existing ES|QL tool', async ({ asAdmin }) => {
       const testTool = { ...mockTool, id: 'get-test-tool' };
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: testTool,
         responseType: 'json',
       });
       createdToolIds.push(testTool.id);
 
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/tools/get-test-tool`, {
-        headers: h(),
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools/get-test-tool`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -192,44 +173,39 @@ apiTest.describe(
       expect(response.body.configuration.params).toStrictEqual(mockTool.configuration.params);
     });
 
-    apiTest('GET returns 404 for missing tool', async ({ apiClient }) => {
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/tools/non-existent-tool`, {
-        headers: h(),
+    apiTest('GET returns 404 for missing tool', async ({ asAdmin }) => {
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools/non-existent-tool`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(404);
       expect(String(response.body.message)).toContain('not found');
     });
 
-    apiTest('GET lists tools', async ({ apiClient }) => {
+    apiTest('GET lists tools', async ({ asAdmin }) => {
       for (let i = 0; i < 3; i++) {
         const testTool = { ...mockTool, id: `list-test-tool-${i}` };
-        await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-          headers: h(),
+        await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
           body: testTool,
           responseType: 'json',
         });
         createdToolIds.push(testTool.id);
       }
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/tools`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
       expect(response.body.results.length).toBeGreaterThan(1);
     });
 
-    apiTest('PUT updates ES|QL tool', async ({ apiClient }) => {
+    apiTest('PUT updates ES|QL tool', async ({ asAdmin }) => {
       const testTool = { ...mockTool, id: 'update-test-tool' };
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: testTool,
         responseType: 'json',
       });
       createdToolIds.push(testTool.id);
 
-      const response = await apiClient.put(`${API_AGENT_BUILDER}/tools/update-test-tool`, {
-        headers: h(),
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/update-test-tool`, {
         body: { description: 'Updated description' },
         responseType: 'json',
       });
@@ -237,25 +213,22 @@ apiTest.describe(
       expect(response.body.description).toBe('Updated description');
     });
 
-    apiTest('PUT returns 404 for missing tool', async ({ apiClient }) => {
-      const response = await apiClient.put(`${API_AGENT_BUILDER}/tools/non-existent-tool`, {
-        headers: h(),
+    apiTest('PUT returns 404 for missing tool', async ({ asAdmin }) => {
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/non-existent-tool`, {
         body: { description: 'Updated description' },
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(404);
     });
 
-    apiTest('DELETE removes ES|QL tool', async ({ apiClient }) => {
+    apiTest('DELETE removes ES|QL tool', async ({ asAdmin }) => {
       const testTool = { ...mockTool, id: 'delete-test-tool' };
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: testTool,
         responseType: 'json',
       });
       createdToolIds.push(testTool.id);
-      const del = await apiClient.delete(`${API_AGENT_BUILDER}/tools/delete-test-tool`, {
-        headers: h(),
+      const del = await asAdmin.delete(`${API_AGENT_BUILDER}/tools/delete-test-tool`, {
         responseType: 'json',
       });
       expect(del).toHaveStatusCode(200);
@@ -266,9 +239,8 @@ apiTest.describe(
       createdToolIds.splice(removeIdx, 1);
     });
 
-    apiTest('DELETE missing tool returns expected 404 body', async ({ apiClient }) => {
-      const response = await apiClient.delete(`${API_AGENT_BUILDER}/tools/non-existent-tool`, {
-        headers: h(),
+    apiTest('DELETE missing tool returns expected 404 body', async ({ asAdmin }) => {
+      const response = await asAdmin.delete(`${API_AGENT_BUILDER}/tools/non-existent-tool`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(404);

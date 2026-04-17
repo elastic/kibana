@@ -7,7 +7,6 @@
 
 import { randomUUID } from 'crypto';
 import type { Client } from '@elastic/elasticsearch';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
@@ -27,7 +26,6 @@ import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fi
 import { postConverse } from '../fixtures/converse_http';
 
 apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.classic] }, () => {
-  let adminCredentials: RoleApiCredentials;
   let adminInteractiveCookieHeader: Record<string, string>;
   let sysEsClient: Client;
 
@@ -38,8 +36,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const searchOriginId = `sml-origin-${searchRunId}`;
   const searchIndexedTitle = `sml autocomplete pacific bluefin ${searchRunId}`;
 
-  apiTest.beforeAll(async ({ requestAuth, samlAuth, esClient, config }) => {
-    adminCredentials = await requestAuth.getApiKeyForAdmin();
+  apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
     sysEsClient = await createSystemIndicesEsClient(esClient, config);
@@ -170,7 +167,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
   apiTest(
     'POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs',
-    async ({ apiClient, log, kbnClient }) => {
+    async ({ apiClient, asAdmin, log, kbnClient }) => {
       const runId = randomUUID();
       const chunkId = `sml-scout-attach-${runId}`;
       const indexedTitle = `sml scout attach ${runId}`;
@@ -201,8 +198,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         response: 'SML attach response',
       });
       const converseRes = await postConverse(
-        apiClient,
-        adminCredentials.apiKeyHeader,
+        asAdmin,
+        {},
         {
           input: 'Create round for SML attach',
           attachments: [{ type: 'text', data: { content: `existing text attachment ${runId}` } }],
@@ -224,9 +221,9 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       expect(attachBody.results).toHaveLength(1);
       expect(attachBody.results[0].success).toBe(true);
 
-      const conversation = await apiClient.get(
+      const conversation = await asAdmin.get(
         `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(conversation).toHaveStatusCode(200);
       const conv = conversation.body as {
@@ -240,9 +237,8 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       expect(lastRound.input.attachment_refs?.[0].attachment_id).toBe(attachments[0].id);
       expect(lastRound.input.attachment_refs?.[1].attachment_id).toBe(attachments[1].id);
 
-      await apiClient.delete(
-        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader } }
+      await asAdmin.delete(
+        `${API_AGENT_BUILDER}/conversations/${encodeURIComponent(conversationId)}`
       );
       llmProxy.close();
       await deleteConnectorById(kbnClient, connectorId);

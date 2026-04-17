@@ -8,13 +8,12 @@
 import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../../../common/http_api/chat';
 
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 import {
   enableCcmForScoutSmokeTests,
   getPreDiscoveredEisModelsForScout,
@@ -65,13 +64,10 @@ apiTest.describe(
   () => {
     apiTest.setTimeout(300_000);
 
-    let adminCredentials: RoleApiCredentials;
     let selectedStaticConnectorIds: ReadonlySet<string> = new Set();
     let selectedEisModelIds: ReadonlySet<string> = new Set();
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-
+    apiTest.beforeAll(async () => {
       const sampledStaticConnectors = takeRandomLlmSample(allStaticConnectors);
       const sampledEisModels = takeRandomLlmSample(allEisModels);
       selectedStaticConnectorIds = new Set(sampledStaticConnectors.map((c) => c.id));
@@ -90,10 +86,9 @@ apiTest.describe(
     });
 
     for (const connector of allStaticConnectors) {
-      apiTest(`static connector ${connector.id} — simple message`, async ({ apiClient }) => {
+      apiTest(`static connector ${connector.id} — simple message`, async ({ asAdmin }) => {
         apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
-        const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: 'Hello',
             connector_id: connector.id,
@@ -104,11 +99,10 @@ apiTest.describe(
         expectNonEmptyReply(response.body as ChatResponse);
       });
 
-      apiTest(`static connector ${connector.id} — tool call`, async ({ apiClient }) => {
+      apiTest(`static connector ${connector.id} — tool call`, async ({ asAdmin }) => {
         // eslint-disable-next-line playwright/no-skipped-test
         apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
-        const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
             connector_id: connector.id,
@@ -121,12 +115,11 @@ apiTest.describe(
         expectListIndicesToolCalled(body);
       });
 
-      apiTest(`static connector ${connector.id} — conversation continue`, async ({ apiClient }) => {
+      apiTest(`static connector ${connector.id} — conversation continue`, async ({ asAdmin }) => {
         // eslint-disable-next-line playwright/no-skipped-test
         apiTest.skip(!selectedStaticConnectorIds.has(connector.id), 'not in FTR_GEN_AI_LLM_SAMPLE');
         const id = connector.id;
-        const response1 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        const response1 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             input: 'Please say "hello"',
             connector_id: id,
@@ -136,8 +129,7 @@ apiTest.describe(
         expect(response1).toHaveStatusCode(200);
         expectNonEmptyReply(response1.body as ChatResponse);
 
-        const response2 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+        const response2 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
           body: {
             conversation_id: (response1.body as ChatResponse).conversation_id,
             input: 'Please say it again.',
@@ -167,12 +159,11 @@ apiTest.describe(
       for (const model of allEisModels) {
         const connectorId = `eis-${model.modelId}`;
 
-        apiTest(`EIS ${model.modelId} — simple message`, async ({ apiClient, esClient }) => {
+        apiTest(`EIS ${model.modelId} — simple message`, async ({ asAdmin, esClient }) => {
           // eslint-disable-next-line playwright/no-skipped-test
           apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
           await ensureEisCcmIfNeeded(esClient);
-          const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
             body: {
               input: 'Hello',
               connector_id: connectorId,
@@ -183,12 +174,11 @@ apiTest.describe(
           expectNonEmptyReply(response.body as ChatResponse);
         });
 
-        apiTest(`EIS ${model.modelId} — tool call`, async ({ apiClient, esClient }) => {
+        apiTest(`EIS ${model.modelId} — tool call`, async ({ asAdmin, esClient }) => {
           // eslint-disable-next-line playwright/no-skipped-test
           apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
           await ensureEisCcmIfNeeded(esClient);
-          const response = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          const response = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
             body: {
               input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
               connector_id: connectorId,
@@ -201,12 +191,11 @@ apiTest.describe(
           expectListIndicesToolCalled(body);
         });
 
-        apiTest(`EIS ${model.modelId} — conversation continue`, async ({ apiClient, esClient }) => {
+        apiTest(`EIS ${model.modelId} — conversation continue`, async ({ asAdmin, esClient }) => {
           // eslint-disable-next-line playwright/no-skipped-test
           apiTest.skip(!selectedEisModelIds.has(model.modelId), 'not in FTR_GEN_AI_LLM_SAMPLE');
           await ensureEisCcmIfNeeded(esClient);
-          const response1 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          const response1 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
             body: {
               input: 'Please say "hello"',
               connector_id: connectorId,
@@ -216,8 +205,7 @@ apiTest.describe(
           expect(response1).toHaveStatusCode(200);
           expectNonEmptyReply(response1.body as ChatResponse);
 
-          const response2 = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
-            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+          const response2 = await asAdmin.post(`${API_AGENT_BUILDER}/converse`, {
             body: {
               conversation_id: (response1.body as ChatResponse).conversation_id,
               input: 'Please say it again.',

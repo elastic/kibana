@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — skills CRUD API (stateful)',
   { tag: [...tags.stateful.classic] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     const createdSkillIds: string[] = [];
     const BUILTIN_SKILL_ID = 'data-exploration';
     const mockSkill = {
@@ -26,23 +24,14 @@ apiTest.describe(
       tool_ids: [] as string[],
     };
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-    });
-
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const skillId of createdSkillIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/skills/${encodeURIComponent(skillId)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/skills/${encodeURIComponent(skillId)}`);
       }
     });
 
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
-
-    apiTest('GET lists built-in data-exploration skill', async ({ apiClient }) => {
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+    apiTest('GET lists built-in data-exploration skill', async ({ asAdmin }) => {
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/skills`, {
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
@@ -53,17 +42,15 @@ apiTest.describe(
       expect(builtinSkill.readonly).toBe(true);
     });
 
-    apiTest('GET list includes user-created skills', async ({ apiClient }) => {
+    apiTest('GET list includes user-created skills', async ({ asAdmin }) => {
       const testSkill = { ...mockSkill, id: 'list-test-skill', name: 'list-test-skill' };
-      await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: testSkill,
         responseType: 'json',
       });
       createdSkillIds.push(testSkill.id);
 
-      const response = await apiClient.get(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+      const response = await asAdmin.get(`${API_AGENT_BUILDER}/skills`, {
         responseType: 'json',
       });
       const found = response.body.results.find(
@@ -73,10 +60,9 @@ apiTest.describe(
       expect(found.readonly).toBe(false);
     });
 
-    apiTest('POST creates skill', async ({ apiClient }) => {
+    apiTest('POST creates skill', async ({ asAdmin }) => {
       const testSkill = { ...mockSkill, id: 'create-test-skill', name: 'create-test-skill' };
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: testSkill,
         responseType: 'json',
       });
@@ -90,39 +76,35 @@ apiTest.describe(
       createdSkillIds.push(testSkill.id);
     });
 
-    apiTest('GET retrieves user skill and built-in skill', async ({ apiClient }) => {
-      await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+    apiTest('GET retrieves user skill and built-in skill', async ({ asAdmin }) => {
+      await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: { ...mockSkill, id: 'get-test-skill', name: 'get-test-skill' },
         responseType: 'json',
       });
       createdSkillIds.push('get-test-skill');
 
-      const userSkill = await apiClient.get(`${API_AGENT_BUILDER}/skills/get-test-skill`, {
-        headers: h(),
+      const userSkill = await asAdmin.get(`${API_AGENT_BUILDER}/skills/get-test-skill`, {
         responseType: 'json',
       });
       expect(userSkill).toHaveStatusCode(200);
       expect(userSkill.body.id).toBe('get-test-skill');
 
-      const builtin = await apiClient.get(
+      const builtin = await asAdmin.get(
         `${API_AGENT_BUILDER}/skills/${encodeURIComponent(BUILTIN_SKILL_ID)}`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(builtin).toHaveStatusCode(200);
       expect(builtin.body.id).toBe(BUILTIN_SKILL_ID);
     });
 
-    apiTest('PUT updates skill', async ({ apiClient }) => {
-      await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+    apiTest('PUT updates skill', async ({ asAdmin }) => {
+      await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: { ...mockSkill, id: 'update-test-skill', name: 'update-test-skill' },
         responseType: 'json',
       });
       createdSkillIds.push('update-test-skill');
 
-      const response = await apiClient.put(`${API_AGENT_BUILDER}/skills/update-test-skill`, {
-        headers: h(),
+      const response = await asAdmin.put(`${API_AGENT_BUILDER}/skills/update-test-skill`, {
         body: {
           name: 'updated-name',
           description: 'Updated description',
@@ -137,20 +119,17 @@ apiTest.describe(
       expect(response.body.content).toBe('Updated content.');
     });
 
-    apiTest('DELETE removes user skill', async ({ apiClient }) => {
-      await apiClient.post(`${API_AGENT_BUILDER}/skills`, {
-        headers: h(),
+    apiTest('DELETE removes user skill', async ({ asAdmin }) => {
+      await asAdmin.post(`${API_AGENT_BUILDER}/skills`, {
         body: { ...mockSkill, id: 'delete-test-skill', name: 'delete-test-skill' },
         responseType: 'json',
       });
-      const del = await apiClient.delete(`${API_AGENT_BUILDER}/skills/delete-test-skill`, {
-        headers: h(),
+      const del = await asAdmin.delete(`${API_AGENT_BUILDER}/skills/delete-test-skill`, {
         responseType: 'json',
       });
       expect(del).toHaveStatusCode(200);
       expect(del.body.success).toBe(true);
-      const get404 = await apiClient.get(`${API_AGENT_BUILDER}/skills/delete-test-skill`, {
-        headers: h(),
+      const get404 = await asAdmin.get(`${API_AGENT_BUILDER}/skills/delete-test-skill`, {
         responseType: 'json',
       });
       expect(get404).toHaveStatusCode(404);

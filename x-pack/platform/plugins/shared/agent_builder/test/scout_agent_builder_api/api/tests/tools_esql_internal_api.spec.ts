@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
@@ -15,7 +14,6 @@ apiTest.describe(
   'Agent Builder — ES|QL tools internal API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     const createdToolIds: string[] = [];
 
     const mockTool = {
@@ -31,28 +29,23 @@ apiTest.describe(
 
     let adminInteractiveCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const toolId of createdToolIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}`);
       }
     });
 
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
     const ih = () => ({ ...COMMON_HEADERS, ...adminInteractiveCookieHeader });
 
-    apiTest('bulk delete removes created tools', async ({ apiClient }) => {
+    apiTest('bulk delete removes created tools', async ({ asAdmin, apiClient }) => {
       for (let i = 0; i < 4; i++) {
         const testTool = { ...mockTool, id: `bulk-delete-test-tool-${i}` };
-        const response = await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-          headers: h(),
+        const response = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
           body: testTool,
           responseType: 'json',
         });

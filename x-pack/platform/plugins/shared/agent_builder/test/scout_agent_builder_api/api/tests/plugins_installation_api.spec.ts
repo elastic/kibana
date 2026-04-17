@@ -7,14 +7,12 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { PluginsTestServer } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/plugins_server/plugins_server';
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
-  COMMON_HEADERS,
   ELASTIC_API_VERSION,
   SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT,
 } from '../fixtures/constants';
@@ -32,13 +30,11 @@ apiTest.describe(
   'Agent Builder — plugin installation API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let pluginsServer: PluginsTestServer;
     let serverUrl: string;
     let createdPluginIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, log }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ log }) => {
       pluginsServer = new PluginsTestServer({
         port: SCOUT_AGENT_BUILDER_GITHUB_MOCK_PORT,
         assetsDir: ASSETS_DIR,
@@ -48,12 +44,10 @@ apiTest.describe(
       serverUrl = pluginsServer.getUrl();
     });
 
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const pluginId of createdPluginIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/plugins/${encodeURIComponent(pluginId)}`, {
+        await asAdmin.delete(`${API_AGENT_BUILDER}/plugins/${encodeURIComponent(pluginId)}`, {
           headers: {
-            ...COMMON_HEADERS,
-            ...adminCredentials.apiKeyHeader,
             'elastic-api-version': ELASTIC_API_VERSION,
           },
         });
@@ -62,13 +56,12 @@ apiTest.describe(
     });
 
     const v = () => ({ 'elastic-api-version': ELASTIC_API_VERSION });
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader, ...v() });
 
     const expectedSkillId = (pluginName: string = PLUGIN_NAME) => `${pluginName}-${SKILL_DIR_NAME}`;
 
-    apiTest('install from remote zip URL lifecycle', async ({ apiClient }) => {
-      const install = await apiClient.post(`${API_AGENT_BUILDER}/plugins/install`, {
-        headers: h(),
+    apiTest('install from remote zip URL lifecycle', async ({ asAdmin }) => {
+      const install = await asAdmin.post(`${API_AGENT_BUILDER}/plugins/install`, {
+        headers: v(),
         body: { url: `${serverUrl}/plugins/${PLUGIN_NAME}.zip` },
         responseType: 'json',
       });
@@ -76,10 +69,10 @@ apiTest.describe(
       const pluginId = (install.body as { id: string }).id;
       createdPluginIds.push(pluginId);
 
-      const skills = await apiClient.get(
+      const skills = await asAdmin.get(
         `${API_AGENT_BUILDER}/skills?${new URLSearchParams({ include_plugins: 'true' })}`,
         {
-          headers: h(),
+          headers: v(),
           responseType: 'json',
         }
       );
@@ -88,8 +81,8 @@ apiTest.describe(
       expect(skill?.name).toBe(EXPECTED_SKILL_NAME);
       expect(skill?.readonly).toBe(true);
 
-      await apiClient.delete(`${API_AGENT_BUILDER}/plugins/${encodeURIComponent(pluginId)}`, {
-        headers: h(),
+      await asAdmin.delete(`${API_AGENT_BUILDER}/plugins/${encodeURIComponent(pluginId)}`, {
+        headers: v(),
         responseType: 'json',
       });
       createdPluginIds = createdPluginIds.filter((id) => id !== pluginId);

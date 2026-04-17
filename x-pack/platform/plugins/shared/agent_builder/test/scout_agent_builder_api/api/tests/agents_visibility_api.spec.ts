@@ -6,17 +6,15 @@
  */
 
 import { agentBuilderDefaultAgentId, AgentVisibility } from '@kbn/agent-builder-common';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
+import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — agents visibility API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     const createdAgentIds: string[] = [];
 
     const mockAgent = {
@@ -29,22 +27,15 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-    });
-
-    apiTest.afterAll(async ({ apiClient }) => {
+    apiTest.afterAll(async ({ asAdmin }) => {
       for (const agentId of createdAgentIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
+        await asAdmin.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`);
       }
     });
 
-    apiTest('POST allows explicit private visibility', async ({ apiClient }) => {
+    apiTest('POST allows explicit private visibility', async ({ asAdmin }) => {
       const agentId = `visibility-private-agent-${Date.now()}`;
-      const response = await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      const response = await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: { ...mockAgent, id: agentId, visibility: AgentVisibility.Private },
         responseType: 'json',
       });
@@ -53,19 +44,17 @@ apiTest.describe(
       createdAgentIds.push(agentId);
     });
 
-    apiTest('PUT updates visibility explicitly', async ({ apiClient }) => {
+    apiTest('PUT updates visibility explicitly', async ({ asAdmin }) => {
       const agentId = `visibility-update-agent-${Date.now()}`;
-      await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+      await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: { ...mockAgent, id: agentId },
         responseType: 'json',
       });
       createdAgentIds.push(agentId);
 
-      const response = await apiClient.put(
+      const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`,
         {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           body: { visibility: AgentVisibility.Shared },
           responseType: 'json',
         }
@@ -74,17 +63,16 @@ apiTest.describe(
       expect(response.body).toMatchObject({ id: agentId, visibility: AgentVisibility.Shared });
     });
 
-    apiTest('PUT rejects visibility change for default agent (404)', async ({ apiClient }) => {
-      const getRes = await apiClient.get(
+    apiTest('PUT rejects visibility change for default agent (404)', async ({ asAdmin }) => {
+      const getRes = await asAdmin.get(
         `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
-        { headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader }, responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(200);
 
-      const response = await apiClient.put(
+      const response = await asAdmin.put(
         `${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentBuilderDefaultAgentId)}`,
         {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           body: { visibility: AgentVisibility.Private },
           responseType: 'json',
         }

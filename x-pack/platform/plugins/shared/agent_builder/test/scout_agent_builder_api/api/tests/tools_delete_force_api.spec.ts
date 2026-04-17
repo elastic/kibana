@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER, COMMON_HEADERS, INTERNAL_AGENT_BUILDER } from '../fixtures/constants';
-import type { ScoutAgentBuilderApiClient } from '../fixtures/converse_http';
 
 const TOOL_USED_BY_AGENTS_ERROR_CODE = 'TOOL_USED_BY_AGENTS';
 
@@ -43,56 +42,45 @@ apiTest.describe(
   'Agent Builder — tool delete force API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let adminInteractiveCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;
     });
 
-    const h = () => ({ ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader });
     const ih = () => ({ ...COMMON_HEADERS, ...adminInteractiveCookieHeader });
 
-    async function deleteAgent(apiClient: ScoutAgentBuilderApiClient, agentId: string) {
-      await apiClient.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`, {
-        headers: h(),
-      });
+    async function deleteAgent(asAdmin: AuthedApiClient, agentId: string) {
+      await asAdmin.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`);
     }
 
-    async function deleteToolForce(apiClient: ScoutAgentBuilderApiClient, toolId: string) {
-      await apiClient.delete(
-        `${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}?force=true`,
-        { headers: h() }
-      );
+    async function deleteToolForce(asAdmin: AuthedApiClient, toolId: string) {
+      await asAdmin.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(toolId)}?force=true`);
     }
 
-    apiTest.afterAll(async ({ apiClient }) => {
-      await deleteAgent(apiClient, IDS.public.agent);
-      await deleteAgent(apiClient, IDS.bulk.agent);
+    apiTest.afterAll(async ({ asAdmin }) => {
+      await deleteAgent(asAdmin, IDS.public.agent);
+      await deleteAgent(asAdmin, IDS.bulk.agent);
       for (const id of [IDS.public.toolInUse, IDS.public.toolUnused, ...IDS.bulk.tools]) {
-        await deleteToolForce(apiClient, id);
+        await deleteToolForce(asAdmin, id);
       }
     });
 
-    apiTest('DELETE public: unused tool without force succeeds', async ({ apiClient }) => {
-      await deleteAgent(apiClient, IDS.public.agent);
+    apiTest('DELETE public: unused tool without force succeeds', async ({ asAdmin }) => {
+      await deleteAgent(asAdmin, IDS.public.agent);
       for (const id of [IDS.public.toolInUse, IDS.public.toolUnused]) {
-        await deleteToolForce(apiClient, id);
+        await deleteToolForce(asAdmin, id);
       }
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: esqlToolPayload(IDS.public.toolInUse, 'FTR tool for delete force tests'),
         responseType: 'json',
       });
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
         body: esqlToolPayload(IDS.public.toolUnused, 'FTR tool not used by any agent'),
         responseType: 'json',
       });
-      await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: h(),
+      await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
         body: {
           id: IDS.public.agent,
           name: 'FTR Agent Using Tool',
@@ -105,92 +93,95 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      const response = await apiClient.delete(
+      const response = await asAdmin.delete(
         `${API_AGENT_BUILDER}/tools/${encodeURIComponent(IDS.public.toolUnused)}`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(200);
       expect(response.body.success).toBe(true);
     });
 
-    apiTest('DELETE public: in-use tool without force returns 409', async ({ apiClient }) => {
-      const response = await apiClient.delete(
+    apiTest('DELETE public: in-use tool without force returns 409', async ({ asAdmin }) => {
+      const response = await asAdmin.delete(
         `${API_AGENT_BUILDER}/tools/${encodeURIComponent(IDS.public.toolInUse)}`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(409);
       expect(response.body.attributes.code).toBe(TOOL_USED_BY_AGENTS_ERROR_CODE);
       expect(response.body.attributes.agents.length).toBeGreaterThan(0);
     });
 
-    apiTest('DELETE public: force=true deletes in-use tool', async ({ apiClient }) => {
-      const response = await apiClient.delete(
+    apiTest('DELETE public: force=true deletes in-use tool', async ({ asAdmin }) => {
+      const response = await asAdmin.delete(
         `${API_AGENT_BUILDER}/tools/${encodeURIComponent(IDS.public.toolInUse)}?force=true`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(response).toHaveStatusCode(200);
       expect(response.body.success).toBe(true);
-      const getRes = await apiClient.get(
+      const getRes = await asAdmin.get(
         `${API_AGENT_BUILDER}/tools/${encodeURIComponent(IDS.public.toolInUse)}`,
-        { headers: h(), responseType: 'json' }
+        { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(404);
     });
 
-    apiTest('POST internal bulk_delete without force returns 409', async ({ apiClient }) => {
-      await deleteAgent(apiClient, IDS.bulk.agent);
-      for (const id of IDS.bulk.tools) {
-        await deleteToolForce(apiClient, id);
-      }
-      for (const id of IDS.bulk.tools) {
-        await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-          headers: h(),
-          body: esqlToolPayload(id, `FTR bulk delete tool ${id}`),
-          responseType: 'json',
-        });
-      }
-      await apiClient.post(`${API_AGENT_BUILDER}/agents`, {
-        headers: h(),
-        body: {
-          id: IDS.bulk.agent,
-          name: 'FTR Agent Using Bulk Tools',
-          description: 'FTR agent',
-          configuration: {
-            instructions: 'Test',
-            tools: [{ tool_ids: [...IDS.bulk.tools] }],
+    apiTest(
+      'POST internal bulk_delete without force returns 409',
+      async ({ asAdmin, apiClient }) => {
+        await deleteAgent(asAdmin, IDS.bulk.agent);
+        for (const id of IDS.bulk.tools) {
+          await deleteToolForce(asAdmin, id);
+        }
+        for (const id of IDS.bulk.tools) {
+          await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+            body: esqlToolPayload(id, `FTR bulk delete tool ${id}`),
+            responseType: 'json',
+          });
+        }
+        await asAdmin.post(`${API_AGENT_BUILDER}/agents`, {
+          body: {
+            id: IDS.bulk.agent,
+            name: 'FTR Agent Using Bulk Tools',
+            description: 'FTR agent',
+            configuration: {
+              instructions: 'Test',
+              tools: [{ tool_ids: [...IDS.bulk.tools] }],
+            },
           },
-        },
-        responseType: 'json',
-      });
-
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/tools/_bulk_delete`, {
-        headers: ih(),
-        body: { ids: IDS.bulk.tools, force: false },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(409);
-      expect(response.body.attributes.code).toBe(TOOL_USED_BY_AGENTS_ERROR_CODE);
-    });
-
-    apiTest('POST internal bulk_delete with force deletes tools', async ({ apiClient }) => {
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/tools/_bulk_delete`, {
-        headers: ih(),
-        body: { ids: IDS.bulk.tools, force: true },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.results).toHaveLength(IDS.bulk.tools.length);
-      for (let i = 0; i < IDS.bulk.tools.length; i++) {
-        expect(response.body.results[i].toolId).toBe(IDS.bulk.tools[i]);
-        expect(response.body.results[i].success).toBe(true);
-      }
-      for (const id of IDS.bulk.tools) {
-        const getRes = await apiClient.get(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(id)}`, {
-          headers: h(),
           responseType: 'json',
         });
-        expect(getRes).toHaveStatusCode(404);
+
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/tools/_bulk_delete`, {
+          headers: ih(),
+          body: { ids: IDS.bulk.tools, force: false },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(409);
+        expect(response.body.attributes.code).toBe(TOOL_USED_BY_AGENTS_ERROR_CODE);
       }
-    });
+    );
+
+    apiTest(
+      'POST internal bulk_delete with force deletes tools',
+      async ({ asAdmin, apiClient }) => {
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/tools/_bulk_delete`, {
+          headers: ih(),
+          body: { ids: IDS.bulk.tools, force: true },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.results).toHaveLength(IDS.bulk.tools.length);
+        for (let i = 0; i < IDS.bulk.tools.length; i++) {
+          expect(response.body.results[i].toolId).toBe(IDS.bulk.tools[i]);
+          expect(response.body.results[i].success).toBe(true);
+        }
+        for (const id of IDS.bulk.tools) {
+          const getRes = await asAdmin.get(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(id)}`, {
+            responseType: 'json',
+          });
+          expect(getRes).toHaveStatusCode(404);
+        }
+      }
+    );
   }
 );

@@ -6,7 +6,6 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
@@ -16,11 +15,9 @@ apiTest.describe(
   'Agent Builder — builtin tools internal API',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    let adminCredentials: RoleApiCredentials;
     let adminInteractiveCookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ requestAuth, samlAuth }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
+    apiTest.beforeAll(async ({ samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminInteractiveCookieHeader = cookieHeader;
     });
@@ -47,38 +44,40 @@ apiTest.describe(
       }
     });
 
-    apiTest('POST /internal/tools/_bulk_delete mixed builtin and custom', async ({ apiClient }) => {
-      const searchTool = platformCoreTools.search;
-      const customTool = {
-        id: 'test-custom-tool',
-        type: 'esql',
-        description: 'A test custom tool',
-        tags: ['test'],
-        configuration: {
-          query: 'FROM test_index | LIMIT 10',
-          params: {},
-        },
-      };
-      await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
-        headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        body: customTool,
-        responseType: 'json',
-      });
+    apiTest(
+      'POST /internal/tools/_bulk_delete mixed builtin and custom',
+      async ({ apiClient, asAdmin }) => {
+        const searchTool = platformCoreTools.search;
+        const customTool = {
+          id: 'test-custom-tool',
+          type: 'esql',
+          description: 'A test custom tool',
+          tags: ['test'],
+          configuration: {
+            query: 'FROM test_index | LIMIT 10',
+            params: {},
+          },
+        };
+        await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+          body: customTool,
+          responseType: 'json',
+        });
 
-      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/tools/_bulk_delete`, {
-        headers: internalHeaders(),
-        body: { ids: [searchTool, 'test-custom-tool'] },
-        responseType: 'json',
-      });
-      expect(response).toHaveStatusCode(200);
-      const builtinResult = response.body.results.find(
-        (r: { toolId: string }) => r.toolId === searchTool
-      );
-      expect(builtinResult.success).toBe(false);
-      const customResult = response.body.results.find(
-        (r: { toolId: string }) => r.toolId === 'test-custom-tool'
-      );
-      expect(customResult.success).toBe(true);
-    });
+        const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/tools/_bulk_delete`, {
+          headers: internalHeaders(),
+          body: { ids: [searchTool, 'test-custom-tool'] },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        const builtinResult = response.body.results.find(
+          (r: { toolId: string }) => r.toolId === searchTool
+        );
+        expect(builtinResult.success).toBe(false);
+        const customResult = response.body.results.find(
+          (r: { toolId: string }) => r.toolId === 'test-custom-tool'
+        );
+        expect(customResult.success).toBe(true);
+      }
+    );
   }
 );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function spacePrefix(spaceId: string): string {
+function spacePrefix(spaceId: string): string {
   return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '';
 }
 
