@@ -21,7 +21,7 @@ import {
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { RoundSteps } from './round_steps';
-import { useFollowExecution } from './use_follow_execution';
+import { useFollowExecution } from '../../../../../hooks/use_follow_execution';
 
 interface SubAgentExecutionFlyoutProps {
   executionId: string;

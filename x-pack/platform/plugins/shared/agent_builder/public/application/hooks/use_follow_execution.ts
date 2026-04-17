@@ -22,7 +22,7 @@ import {
   isRoundCompleteEvent,
   isBackgroundAgentCompleteEvent,
 } from '@kbn/agent-builder-common';
-import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useAgentBuilderServices } from './use_agent_builder_service';
 
 interface UseFollowExecutionResult {
   steps: ConversationRoundStep[];
