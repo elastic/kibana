@@ -177,13 +177,11 @@ describe('rule_details', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByTestId('disableButton'));
 
-      await waitFor(async () => {
-        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
-      });
+      await screen.findByTestId('untrackAlertsModal');
+      expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
       });
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
@@ -198,13 +196,11 @@ describe('rule_details', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByTestId('disableButton'));
 
-      await waitFor(async () => {
-        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
-        expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
-      });
+      await screen.findByTestId('untrackAlertsModal');
+      expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-      await waitFor(async () => {
+      await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
       });
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
@@ -219,14 +215,13 @@ describe('rule_details', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByTestId('disableButton'));
 
-      await waitFor(async () => {
-        expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
-
+      await waitFor(() => {
         expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-        expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
-          expect.objectContaining({ untrack: false })
-        );
       });
+      expect(screen.queryByTestId('untrackAlertsModal')).not.toBeInTheDocument();
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith(
+        expect.objectContaining({ untrack: false })
+      );
     });
   });
 

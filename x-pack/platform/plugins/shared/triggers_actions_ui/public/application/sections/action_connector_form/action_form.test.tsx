@@ -14,7 +14,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { lazy } from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen, waitFor, act, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useKibana } from '../../../common/lib/kibana';
 import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
@@ -450,8 +450,8 @@ describe('action_form', () => {
     );
 
     // Wait for async data to load
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+    await waitFor(() => {
+      expect(loadAllActions).toHaveBeenCalled();
     });
 
     return result;
@@ -578,12 +578,11 @@ describe('action_form', () => {
       // Open the combobox to render the options list (portal-rendered, react-window mocked)
       const combobox = screen.getByTestId(`selectActionConnector-${actionType.id}-0`);
       await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
-      // Options render in a portal (EuiComboBox), use document to find them
+      // Options render in a portal (EuiComboBox)
       await waitFor(() => {
-        const connectorOptions = document.querySelectorAll(
-          '[data-test-subj^="dropdown-connector-"]'
+        expect(screen.getAllByTestId(/^dropdown-connector-/)).toHaveLength(
+          numConnectors - numConnectorsWithMissingSecrets
         );
-        expect(connectorOptions.length).toEqual(numConnectors - numConnectorsWithMissingSecrets);
       });
     });
 
@@ -591,29 +590,18 @@ describe('action_form', () => {
       await setup();
       await screen.findByTestId('preconfigured-alerting-ActionTypeSelectOption');
       await userEvent.click(screen.getByTestId('preconfigured-alerting-ActionTypeSelectOption'));
-      await screen.findByTestId('selectActionConnector-preconfigured-1');
-      // Flush all pending React effects (e.g. validateParams, getDefaultParams) before interacting
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 0));
-      });
+      const combobox = await screen.findByTestId('selectActionConnector-preconfigured-1');
       // Verify the combobox shows only 1 option for preconfigured-only type
       // (only isPreconfigured=true connectors pass the filter)
-      const combobox = screen.getByTestId('selectActionConnector-preconfigured-1');
-      // Open the combobox dropdown. EuiPortal renders null initially then re-renders after
-      // componentDidMount sets portalNode - use async act to flush the second render cycle.
-      await act(async () => {
-        await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
-      });
+      // Open the combobox dropdown
+      await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
       // When the preconfigured-only action type is selected, only test3 (isPreconfigured=true)
       // passes the filter. test3 is auto-selected, so areAllOptionsSelected()=true and
       // EuiComboBox renders "You've selected all available options" instead of option buttons.
       // This confirms that test4 (isPreconfigured=false) was correctly filtered out.
       await waitFor(() => {
-        expect(document.querySelector('.euiComboBoxOptionsList__empty')).toBeInTheDocument();
+        expect(screen.getByText("You've selected all available options")).toBeInTheDocument();
       });
-      expect(document.querySelector('.euiComboBoxOptionsList__empty')).toHaveTextContent(
-        "You've selected all available options"
-      );
       // Confirm the selected connector is test3 (Preconfigured Only), not test4
       expect(within(combobox).getByRole('combobox')).toHaveValue('Preconfigured Only');
       expect(screen.queryByTestId('dropdown-connector-test4')).not.toBeInTheDocument();

@@ -8,6 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import TeamsParamsFields from './teams_params';
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 
@@ -25,9 +26,8 @@ describe('TeamsParamsFields renders', () => {
         index={0}
       />
     );
-    const messageTextArea = screen.getByTestId('messageTextArea') as HTMLTextAreaElement;
-    expect(messageTextArea).toBeInTheDocument();
-    expect(messageTextArea.value).toStrictEqual('test message');
+    expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('test message');
   });
 
   test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
@@ -48,14 +48,16 @@ describe('TeamsParamsFields renders', () => {
     expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
-      <TeamsParamsFields
-        actionParams={actionParams}
-        errors={{ message: [] }}
-        editAction={editAction}
-        useDefaultMessage={true}
-        defaultMessage={'Some different default message'}
-        index={0}
-      />
+      <I18nProvider>
+        <TeamsParamsFields
+          actionParams={actionParams}
+          errors={{ message: [] }}
+          editAction={editAction}
+          useDefaultMessage={true}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
@@ -79,14 +81,16 @@ describe('TeamsParamsFields renders', () => {
     expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
-      <TeamsParamsFields
-        actionParams={actionParams}
-        errors={{ message: [] }}
-        editAction={editAction}
-        useDefaultMessage={false}
-        defaultMessage={'Some different default message'}
-        index={0}
-      />
+      <I18nProvider>
+        <TeamsParamsFields
+          actionParams={actionParams}
+          errors={{ message: [] }}
+          editAction={editAction}
+          useDefaultMessage={false}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     expect(editAction).not.toHaveBeenCalled();

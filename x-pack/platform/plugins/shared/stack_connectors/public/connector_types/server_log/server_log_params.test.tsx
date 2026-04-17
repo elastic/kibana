@@ -9,6 +9,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ServerLogLevelOptions } from '../types';
 import ServerLogParamsFields from './server_log_params';
 
@@ -29,9 +30,8 @@ describe('ServerLogParamsFields renders', () => {
       />
     );
     expect(editAction).not.toHaveBeenCalled();
-    const loggingLevelSelect = screen.getByTestId('loggingLevelSelect') as HTMLSelectElement;
-    expect(loggingLevelSelect).toBeInTheDocument();
-    expect(loggingLevelSelect.value).toStrictEqual('trace');
+    expect(screen.getByTestId('loggingLevelSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('loggingLevelSelect')).toHaveValue('trace');
     expect(screen.getByTestId('messageTextArea')).toBeInTheDocument();
   });
 
@@ -92,13 +92,15 @@ describe('ServerLogParamsFields renders', () => {
     expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
 
     rerender(
-      <ServerLogParamsFields
-        actionParams={actionParams}
-        defaultMessage={'Some different default message'}
-        errors={{ message: [] }}
-        editAction={editAction}
-        index={0}
-      />
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={actionParams}
+          defaultMessage={'Some different default message'}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
@@ -129,24 +131,28 @@ describe('ServerLogParamsFields renders', () => {
     expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
 
     rerender(
-      <ServerLogParamsFields
-        actionParams={{ ...actionParams, message: valueToSimulate }}
-        defaultMessage={'Some default message'}
-        errors={{ message: [] }}
-        editAction={editAction}
-        index={0}
-      />
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: valueToSimulate }}
+          defaultMessage={'Some default message'}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     // simulate default changing
     rerender(
-      <ServerLogParamsFields
-        actionParams={{ ...actionParams, message: valueToSimulate }}
-        defaultMessage={'Some different default message'}
-        errors={{ message: [] }}
-        editAction={editAction}
-        index={0}
-      />
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: valueToSimulate }}
+          defaultMessage={'Some different default message'}
+          errors={{ message: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     expect(editAction).not.toHaveBeenCalledWith('message', 'Some different default message', 0);
@@ -170,14 +176,16 @@ describe('ServerLogParamsFields renders', () => {
     expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
-      <ServerLogParamsFields
-        actionParams={{ ...actionParams, message: 'not the default message' }}
-        errors={{ message: [] }}
-        editAction={editAction}
-        defaultMessage={'Some different default message'}
-        useDefaultMessage={true}
-        index={0}
-      />
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: 'not the default message' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          defaultMessage={'Some different default message'}
+          useDefaultMessage={true}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
@@ -201,14 +209,16 @@ describe('ServerLogParamsFields renders', () => {
     expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
     rerender(
-      <ServerLogParamsFields
-        actionParams={{ ...actionParams, message: 'not the default message' }}
-        errors={{ message: [] }}
-        editAction={editAction}
-        defaultMessage={'Some different default message'}
-        useDefaultMessage={false}
-        index={0}
-      />
+      <I18nProvider>
+        <ServerLogParamsFields
+          actionParams={{ ...actionParams, message: 'not the default message' }}
+          errors={{ message: [] }}
+          editAction={editAction}
+          defaultMessage={'Some different default message'}
+          useDefaultMessage={false}
+          index={0}
+        />
+      </I18nProvider>
     );
 
     expect(editAction).not.toHaveBeenCalled();

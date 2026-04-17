@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { screen, waitFor, render, within } from '@testing-library/react';
+import { act, screen, waitFor, render, within } from '@testing-library/react';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import IndexActionConnectorFields from './es_index_connector';
 import type { AppMockRenderer } from '../lib/test_utils';
@@ -192,12 +191,9 @@ describe('IndexActionConnectorFields', () => {
       </ConnectorFormTestProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connectorIndexesComboBox')).toBeInTheDocument();
-      expect(screen.getByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
-    });
-
+    expect(await screen.findByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
+    expect(screen.getByTestId('connectorIndexesComboBox')).toBeInTheDocument();
+    expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
     expect(screen.getByTestId('hasTimeFieldCheckbox')).not.toBeChecked();
   });
 
@@ -226,11 +222,9 @@ describe('IndexActionConnectorFields', () => {
       </ConnectorFormTestProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connectorIndexesComboBox')).toBeInTheDocument();
-      expect(screen.getByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
-      expect(screen.getByTestId('executionTimeFieldSelect')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
+    expect(screen.getByTestId('connectorIndexesComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('executionTimeFieldSelect')).toBeInTheDocument();
 
     const switchEl = screen.getByTestId('hasTimeFieldCheckbox');
     expect(switchEl).toBeChecked();

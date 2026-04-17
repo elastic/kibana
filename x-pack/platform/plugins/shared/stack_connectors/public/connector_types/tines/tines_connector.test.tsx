@@ -45,12 +45,10 @@ describe('TinesConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    const urlInput = screen.getByTestId('config.url-input') as HTMLInputElement;
-    const emailInput = screen.getByTestId('secrets.email-input') as HTMLInputElement;
-    expect(urlInput).toBeInTheDocument();
-    expect(urlInput).toHaveValue(url);
-    expect(emailInput).toBeInTheDocument();
-    expect(emailInput).toHaveValue(email);
+    expect(screen.getByTestId('config.url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('config.url-input')).toHaveValue(url);
+    expect(screen.getByTestId('secrets.email-input')).toBeInTheDocument();
+    expect(screen.getByTestId('secrets.email-input')).toHaveValue(email);
     expect(screen.getByTestId('secrets.token-input')).toBeInTheDocument();
   });
 

@@ -24,7 +24,6 @@ describe('RuleStatusFilter', () => {
       <RuleStatusFilter selectedStatuses={[]} onChange={onChangeMock} />
     );
 
-    // Popover not open — selectable list items not visible
     expect(screen.queryByTestId('ruleStatusFilterSelect')).not.toBeInTheDocument();
     expect(screen.getByTestId('ruleStatusFilterButton')).toBeInTheDocument();
 
@@ -51,26 +50,22 @@ describe('RuleStatusFilter', () => {
 
     await userEvent.click(screen.getByTestId('ruleStatusFilterButton'));
 
-    // Click first option (enabled)
     await userEvent.click(screen.getByTestId('ruleStatusFilterOption-enabled'), {
       pointerEventsCheck: 0,
     });
     expect(onChangeMock).toHaveBeenCalledWith(['enabled']);
 
-    // Re-render with updated props (simulates parent state update after selection)
     rerender(
       <I18nProvider>
         <RuleStatusFilter selectedStatuses={['enabled']} onChange={onChangeMock} />
       </I18nProvider>
     );
 
-    // Click first option again to deselect
     await userEvent.click(screen.getByTestId('ruleStatusFilterOption-enabled'), {
       pointerEventsCheck: 0,
     });
     expect(onChangeMock).toHaveBeenCalledWith([]);
 
-    // Click second option (disabled) — 'enabled' is still checked in DOM from last rerender
     await userEvent.click(screen.getByTestId('ruleStatusFilterOption-disabled'), {
       pointerEventsCheck: 0,
     });

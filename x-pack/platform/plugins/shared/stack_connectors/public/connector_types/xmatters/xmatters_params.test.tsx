@@ -52,12 +52,10 @@ describe('XmattersParamsFields renders', () => {
         ]}
       />
     );
-    const severitySelect = screen.getByTestId('severitySelect') as HTMLSelectElement;
-    const tagsInput = screen.getByTestId('tagsInput') as HTMLInputElement;
-    expect(severitySelect).toBeInTheDocument();
-    expect(tagsInput).toBeInTheDocument();
-    expect(severitySelect.value).toStrictEqual('high');
-    expect(tagsInput.value).toStrictEqual('test1, test2');
+    expect(screen.getByTestId('severitySelect')).toBeInTheDocument();
+    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+    expect(screen.getByTestId('severitySelect')).toHaveValue('high');
+    expect(screen.getByTestId('tagsInput')).toHaveValue('test1, test2');
   });
 
   test('default params for testing', () => {

@@ -13,7 +13,7 @@ import type { ActionConnector, ActionParamsProps, GenericValidationResult } from
 import { ActionConnectorMode } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { EuiFormRow, EuiFieldText, EuiText, EuiLink, EuiForm, EuiSelect } from '@elastic/eui';
-import { waitFor, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 jest.mock('../../../common/lib/kibana');
 
@@ -151,11 +151,9 @@ describe('test_connector_form', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
-    });
+    await screen.findByTestId('executionModeFieldTest');
+    expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
 
   it('renders successful results', async () => {

@@ -18,7 +18,7 @@ import type {
 import { ActionConnectorMode } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, waitFor, screen, act } from '@testing-library/react';
+import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import { ALERTING_FEATURE_ID, RuleNotifyWhen } from '@kbn/alerting-plugin/common';
@@ -251,11 +251,9 @@ describe('action_type_form', () => {
       </IntlProvider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('executionModeFieldActionForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
-    });
+    await screen.findByTestId('executionModeFieldActionForm');
+    expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
 
   it('renders the alerts filters with the producerId set to SIEM', async () => {
@@ -354,11 +352,9 @@ describe('action_type_form', () => {
     );
 
     // Give the component time to settle; setActionParamsProperty should not be called
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+    await waitFor(() => {
+      expect(setActionParamsProperty).toBeCalledTimes(0);
     });
-
-    expect(setActionParamsProperty).toBeCalledTimes(0);
   });
 
   it('shows an error icon when there is a form error and the action accordion is closed ', async () => {
@@ -405,12 +401,10 @@ describe('action_type_form', () => {
       </IntlProvider>
     );
 
-    // Wait for validation to settle
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0));
+    // Wait for validation to settle — error icon should not show while accordion is expanded
+    await waitFor(() => {
+      expect(screen.queryByTestId('action-group-error-icon')).not.toBeInTheDocument();
     });
-
-    expect(screen.queryByTestId('action-group-error-icon')).not.toBeInTheDocument();
 
     // Click the accordion button to collapse it
     const accordionButton = container.querySelector('.euiAccordion__button');
