@@ -45,7 +45,7 @@ export function registerUpdateRoute(
         request: {
           params: schema.object({
             // Can not validate id at route level
-            // existing dashboards may have invalid "as code" ids 
+            // existing dashboards may have invalid "as code" ids
             id: schema.string(),
           }),
           body: getUpdateRequestBodySchema(isDashboardAppRequest),

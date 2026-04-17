@@ -88,41 +88,46 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe(title);
   });
 
-  apiTest('validation - returns 400 when creating a new dashboard with an invalid id', async ({ apiClient }) => {
-    const id = '(new)dashboard-id';
-    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title: `I'm a new dashboard`,
-      },
-      responseType: 'json',
-    });
+  apiTest(
+    'validation - returns 400 when creating a new dashboard with an invalid id',
+    async ({ apiClient }) => {
+      const id = '(new)dashboard-id';
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: {
+          title: `I'm a new dashboard`,
+        },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
-    );
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+      );
+    }
+  );
 
+  apiTest(
+    'validation - returns 400 when body is not valid dashboard shape',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: {},
+        responseType: 'json',
+      });
 
-  apiTest('validation - returns 400 when body is not valid dashboard shape', async ({ apiClient }) => {
-    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {},
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.title]: expected value of type [string] but got [undefined]'
-    );
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        '[request body.title]: expected value of type [string] but got [undefined]'
+      );
+    }
+  );
 
   apiTest('validation - returns 400 when access_control is provided', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
