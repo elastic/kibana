@@ -25,7 +25,6 @@ export function useBrowseIntegrationHook({
   const {
     initialSelectedCategory,
     allCategories,
-    mainCategories,
     isLoading,
     isLoadingCategories,
     isLoadingAllPackages,
