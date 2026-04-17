@@ -13,7 +13,7 @@ import {
   RANK_SEPARATION,
   NODE_SEPARATION,
   GRAPH_MARGIN,
-} from './constants';
+} from '../../../../common/service_map/constants';
 
 export interface LayoutOptions {
   /** Direction of the graph layout */

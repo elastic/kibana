@@ -14,7 +14,7 @@ import {
   GRAPH_MARGIN,
   NODE_SEPARATION,
   RANK_SEPARATION,
-} from './constants';
+} from '../../../../common/service_map/constants';
 
 interface TestNodeData extends Record<string, unknown> {
   label: string;
