@@ -19,7 +19,7 @@ import type { BehaviorSubject } from 'rxjs';
 import { SHORT_CONTAINER_QUERY, FOOTER_HELP_TEXT, MarkdownFooter } from './markdown_footer';
 import { MarkdownRenderer } from './markdown_renderer';
 import { MarkdownEditorSettingsPopover } from './markdown_editor_settings_popover';
-import type { MarkdownSettingsState } from '../../server/schemas';
+import type { MarkdownSettingsState } from '../../server/embeddable/schemas';
 
 interface EuiMarkdownEditorRef {
   textarea: HTMLTextAreaElement;
@@ -139,8 +139,10 @@ export const MarkdownEditor = ({
                   settings={settings}
                   updateSettings={updateSettings}
                 />
-                {/* TODO: Add tooltipPosition: bottom when https://github.com/elastic/eui/pull/9546 merges */}
-                <EuiMarkdownEditorHelpButton uiPlugins={uiPlugins} />
+                <EuiMarkdownEditorHelpButton
+                  uiPlugins={uiPlugins}
+                  tooltipProps={{ position: 'bottom', delay: 'regular' }}
+                />
               </>
             ),
           }}
