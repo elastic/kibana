@@ -79,7 +79,7 @@ Supported operations:
 - \`remove_panels\`: remove existing panels by \`id\`.
 
 After a successful call:
-- Render the dashboard attachment inline so the user can see and interact with the dashboard card. Do NOT render individual visualization attachments inline during dashboard composition - only the final dashboard attachment should be rendered.
+- Render only the final dashboard attachment inline, as the LAST token of your response (no text after it). Never render individual visualization attachments during dashboard composition.
 - Remember \`data.dashboardAttachment.id\` for follow-up updates.
 - Use returned \`id\` values for future panel removals.
 - Use returned \`sectionId\` values for future section-targeted changes.
