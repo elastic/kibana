@@ -103,8 +103,6 @@ export const MetricsExperienceGrid = ({
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     allDimensions,
-    // Pass the unfiltered metricItems, not filteredMetricItems: the picker's
-    // applicable-dimension set should not shrink because of a search term.
     metricItems,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,

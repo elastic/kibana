@@ -32,6 +32,21 @@ import {
 } from '../../common/constants';
 import { getOptionDisabledState } from './dimensions_selector_helpers';
 
+const getApplicableDimensionNames = (
+  metricItems: ParsedMetricItem[],
+  selectedNames: string[]
+): Set<string> => {
+  const carriesAllSelected = (item: ParsedMetricItem) => {
+    const itemDimNames = new Set(item.dimensionFields.map((d) => d.name));
+    return selectedNames.every((name) => itemDimNames.has(name));
+  };
+  return new Set(
+    metricItems
+      .filter(carriesAllSelected)
+      .flatMap((item) => item.dimensionFields.map((d) => d.name))
+  );
+};
+
 interface DimensionsSelectorProps {
   dimensions: Dimension[];
   selectedDimensions: Dimension[];
@@ -77,19 +92,7 @@ export const DimensionsSelector = ({
     if (!metricItems || localSelectedDimensions.length === 0) {
       return null;
     }
-    const selectedNames = [...selectedNamesSet];
-    const names = new Set<string>();
-    for (const item of metricItems) {
-      const itemDimNames = new Set(item.dimensionFields.map((d) => d.name));
-      const hasAllSelected = selectedNames.every((name) => itemDimNames.has(name));
-      if (!hasAllSelected) {
-        continue;
-      }
-      for (const dim of item.dimensionFields) {
-        names.add(dim.name);
-      }
-    }
-    return names;
+    return getApplicableDimensionNames(metricItems, [...selectedNamesSet]);
   }, [metricItems, localSelectedDimensions, selectedNamesSet]);
 
   const options: SelectableEntry[] = useMemo(() => {
