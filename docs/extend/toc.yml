@@ -22,7 +22,6 @@ toc:
       - file: guidelines-for-terraform-friendly-http-apis.md
       - file: how-we-use-github.md
       - file: development-pull-request.md
-      - file: submitting-a-kibana-pull-request.md
       - file: pr-review.md
       - file: kibana-issue-reporting.md
       - file: ci.md

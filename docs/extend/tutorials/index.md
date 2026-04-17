@@ -47,4 +47,4 @@ Hands-on guides for specific Kibana plugin development tasks. If you're new to K
 
 - [Build a Kibana distributable](../contributing/building-a-kibana-distributable.md) — package Kibana for distribution
 - [CI](../contributing/ci.md) — understand Kibana's BuildKite CI pipeline and comment triggers
-- [Submit a pull request](../contributing/submitting-a-kibana-pull-request.md) — fork, branch, and open a PR against the Kibana repository
+- [Submit a pull request](../contributing/development-pull-request.md) — fork, branch, and open a PR against the Kibana repository
