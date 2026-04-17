@@ -75,8 +75,13 @@ export class WorkflowExecutionState {
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
     private workflowStepExecutionRepository: StepExecutionRepository,
-    /** Minimum output size in bytes for a step to be eligible for eviction. 0 = evict all. */
-    private readonly evictionMinBytes: number = 0,
+    /**
+     * Minimum output size in bytes for a step to be eligible for eviction.
+     * 0 = evict all. Infinity = disable eviction.
+     * Defaults to Infinity (disabled) so callers that omit the config value
+     * don't accidentally trigger aggressive eviction.
+     */
+    private readonly evictionMinBytes: number = Infinity,
     private readonly logger?: Logger
   ) {
     this.workflowExecution = initialWorkflowExecution;
@@ -278,7 +283,25 @@ export class WorkflowExecutionState {
         existing.output = doc.output;
         restoredCount++;
       }
+      const previousBytes = this.evictedOutputIdsAndBytes.get(doc.id) ?? 0;
       this.evictedOutputIdsAndBytes.delete(doc.id);
+      // Restore size tracking so that:
+      // 1. getOutputSizeStats() remains accurate after rehydration
+      // 2. The step is eligible for re-eviction (isEvictionCandidate checks outputSizes)
+      // On the resume path, the original size is unknown (stored as 0), so we measure
+      // the rehydrated output. For steps evicted during live execution, the original
+      // recorded size is preserved.
+      if (previousBytes > 0) {
+        this.outputSizes.set(doc.id, previousBytes);
+      } else if (doc.output != null) {
+        try {
+          this.outputSizes.set(doc.id, Buffer.byteLength(JSON.stringify(doc.output)));
+        } catch {
+          // If serialization fails, record 0 — the step won't be re-evicted but
+          // that's safer than leaving it out of size tracking entirely.
+          this.outputSizes.set(doc.id, 0);
+        }
+      }
     }
 
     // Defensive: remove IDs that were not found in ES so we don't retry forever
@@ -363,9 +386,15 @@ export class WorkflowExecutionState {
       return false;
     }
 
-    const isTerminal =
-      step.status === ExecutionStatus.COMPLETED || step.status === ExecutionStatus.FAILED;
-    if (!isTerminal) {
+    // Only evict COMPLETED steps. Failed steps have `output: null` (not a large payload)
+    // and evicting them would shift the semantic from null ("no output") to undefined
+    // ("output evicted"), which downstream code (e.g. getVariables) can distinguish.
+    if (step.status !== ExecutionStatus.COMPLETED) {
+      return false;
+    }
+
+    // Guard against steps whose output was already cleared by evictStaleLoopOutputs
+    if (step.output === undefined) {
       return false;
     }
 

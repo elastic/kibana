@@ -764,7 +764,7 @@ describe('WorkflowExecutionState', () => {
         expect(evictableState.hasEvictedOutputs()).toBe(false);
       });
 
-      it('should evict output from failed steps above threshold', () => {
+      it('should not evict failed steps (output: null is semantic, not a large payload)', () => {
         evictableState.upsertStep({
           id: 'step-1',
           stepId: 'myStep',
@@ -776,8 +776,8 @@ describe('WorkflowExecutionState', () => {
 
         evictableState.evictCompletedStepOutputs(['step-1']);
 
-        expect(evictableState.getStepExecution('step-1')?.output).toBeUndefined();
-        expect(evictableState.hasEvictedOutputs()).toBe(true);
+        expect(evictableState.getStepExecution('step-1')?.output).toBeNull();
+        expect(evictableState.hasEvictedOutputs()).toBe(false);
       });
     });
 

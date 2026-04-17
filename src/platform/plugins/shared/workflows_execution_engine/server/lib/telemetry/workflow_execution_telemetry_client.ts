@@ -25,6 +25,7 @@ import {
 import {
   type EventDrivenExecutionSuppressedParams,
   type OutputSizeStats,
+  type OutputSizeTelemetryFields,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
@@ -36,6 +37,18 @@ import {
   type WorkflowExecutionTelemetryMetadata,
 } from './utils/extract_execution_metadata';
 import { extractWorkflowMetadata } from './utils/extract_workflow_metadata';
+
+/** Picks the output-size telemetry fields from execution metadata, omitting undefined entries. */
+const pickOutputSizeFields = (
+  metadata: WorkflowExecutionTelemetryMetadata
+): OutputSizeTelemetryFields => ({
+  ...(metadata.totalOutputSizeBytes !== undefined && {
+    totalOutputSizeBytes: metadata.totalOutputSizeBytes,
+  }),
+  ...(metadata.averageOutputSizeBytes !== undefined && {
+    averageOutputSizeBytes: metadata.averageOutputSizeBytes,
+  }),
+});
 
 function resolveExecutionTriggerTelemetry(triggeredBy: string | undefined): {
   triggerType: WellKnownWorkflowTriggerSource | 'event';
@@ -230,12 +243,7 @@ export class WorkflowExecutionTelemetryClient {
         Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
           stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
-      ...(executionMetadata.totalOutputSizeBytes !== undefined && {
-        totalOutputSizeBytes: executionMetadata.totalOutputSizeBytes,
-      }),
-      ...(executionMetadata.averageOutputSizeBytes !== undefined && {
-        averageOutputSizeBytes: executionMetadata.averageOutputSizeBytes,
-      }),
+      ...pickOutputSizeFields(executionMetadata),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted, eventData);
@@ -321,12 +329,7 @@ export class WorkflowExecutionTelemetryClient {
         Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
           stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
-      ...(executionMetadata.totalOutputSizeBytes !== undefined && {
-        totalOutputSizeBytes: executionMetadata.totalOutputSizeBytes,
-      }),
-      ...(executionMetadata.averageOutputSizeBytes !== undefined && {
-        averageOutputSizeBytes: executionMetadata.averageOutputSizeBytes,
-      }),
+      ...pickOutputSizeFields(executionMetadata),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionFailed, eventData);
@@ -404,12 +407,7 @@ export class WorkflowExecutionTelemetryClient {
         Object.keys(executionMetadata.stepAvgDurationsByType).length > 0 && {
           stepAvgDurationsByType: executionMetadata.stepAvgDurationsByType,
         }),
-      ...(executionMetadata.totalOutputSizeBytes !== undefined && {
-        totalOutputSizeBytes: executionMetadata.totalOutputSizeBytes,
-      }),
-      ...(executionMetadata.averageOutputSizeBytes !== undefined && {
-        averageOutputSizeBytes: executionMetadata.averageOutputSizeBytes,
-      }),
+      ...pickOutputSizeFields(executionMetadata),
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled, eventData);
