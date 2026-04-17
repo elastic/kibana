@@ -427,8 +427,7 @@ ${JSON.stringify(
           // or `unknown setting [serverless.search.enable_replicas_for_instant_failover]`).
           const esFromEnv = process.env.CYPRESS_ES_FROM;
           const configEsFrom = config.get('esTestCluster.from');
-          const esFrom =
-            configEsFrom === 'serverless' ? 'serverless' : esFromEnv || 'docker';
+          const esFrom = configEsFrom === 'serverless' ? 'serverless' : esFromEnv || 'docker';
 
           try {
             shutdownEs = await pRetry(
