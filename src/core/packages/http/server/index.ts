@@ -190,3 +190,5 @@ export type {
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';
+
+export { DEFAULT_SPACE_ID } from './src/constants';
