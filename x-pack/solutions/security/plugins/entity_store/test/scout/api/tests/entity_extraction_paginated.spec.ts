@@ -71,7 +71,7 @@ apiTest.describe(
     apiTest(
       'Should extract host with entity pagination (docsLimit 5, wide log slices)',
       async ({ apiClient, esClient, log }) => {
-        const expectedPageCount = 4;
+        const expectedPageCount = 5;
 
         const extractionResponse = await apiClient.post(
           ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
