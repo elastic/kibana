@@ -56,13 +56,13 @@ const renderVarsWithSections = (
       }
       varsBySectionName.get(sectionName)!.push(varDef);
     } else {
-      ungroupedVars.push(varDef);
+      varsWithoutSection.push(varDef);
     }
   }
 
   return (
     <>
-      {ungroupedVars.map((varDef) => renderVarItem(varDef))}
+      {varsWithoutSection.map((varDef) => renderVarItem(varDef))}
       {sectionDefs.map((section) => {
         const sectionVars = varsBySectionName.get(section.name);
         if (!sectionVars?.length) return null;
