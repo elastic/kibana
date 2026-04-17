@@ -49,19 +49,20 @@ export const DiamondNode = memo(
     ariaLabel: customAriaLabel,
     groupedCount,
   }: DiamondNodeProps) => {
-    const { euiTheme } = useEuiTheme();
+    const { euiTheme, colorMode } = useEuiTheme();
 
     const borderColor = selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade;
     const diamondBorderWidth = selected
       ? `${NODE_BORDER_WIDTH_SELECTED}px`
       : `${NODE_BORDER_WIDTH_DEFAULT}px`;
 
+    const isDarkMode = colorMode === 'DARK';
     const iconUrl = useMemo(() => {
       if (spanType || spanSubtype) {
-        return getSpanIcon(spanType, spanSubtype);
+        return getSpanIcon(spanType, spanSubtype, isDarkMode);
       }
       return null;
-    }, [spanType, spanSubtype]);
+    }, [spanType, spanSubtype, isDarkMode]);
 
     const ariaLabel = useMemo(() => {
       if (customAriaLabel) {
