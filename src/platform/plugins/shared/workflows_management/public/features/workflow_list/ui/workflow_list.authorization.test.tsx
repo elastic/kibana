@@ -11,7 +11,9 @@ import { EuiProvider } from '@elastic/eui';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowList } from './workflow_list';
@@ -131,6 +133,18 @@ function setKibanaCapabilities(workflowsManagement: {
         },
       },
       http: {},
+      triggersActionsUi: {
+        actionTypeRegistry: new TypeRegistry<ActionTypeModel>(),
+      },
+      workflowsExtensions: {
+        getStepDefinition: () => undefined,
+        getAllStepDefinitions: () => [],
+        hasStepDefinition: () => false,
+        getTriggerDefinition: () => undefined,
+        getAllTriggerDefinitions: () => [],
+        hasTriggerDefinition: () => false,
+        isReady: () => true,
+      },
     },
   } as ReturnType<typeof useKibana>);
 }
