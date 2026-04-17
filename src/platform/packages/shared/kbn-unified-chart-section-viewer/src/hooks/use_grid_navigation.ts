@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useLayoutEffect, useState } from 'react';
 import { keys } from '@elastic/eui';
 
 interface GridNavigationOptions {
@@ -27,6 +27,15 @@ export const useGridNavigation = ({
     rowIndex: 0,
     colIndex: 0,
   });
+
+  useLayoutEffect(() => {
+    if (totalRows <= 0) {
+      return;
+    }
+    setFocusedCell((prev) =>
+      prev.rowIndex === 0 && prev.colIndex === 0 ? prev : { rowIndex: 0, colIndex: 0 }
+    );
+  }, [totalRows, gridColumns]);
 
   const getRowColFromIndex = useCallback(
     (index: number) => ({
@@ -75,10 +84,15 @@ export const useGridNavigation = ({
           newRowIndex = Math.max(0, rowIndex - 1);
           break;
 
-        case keys.ARROW_DOWN:
+        case keys.ARROW_DOWN: {
           event.preventDefault();
-          newRowIndex = Math.min(gridRows - 1, rowIndex + 1);
+          if (rowIndex < gridRows - 1) {
+            newRowIndex = rowIndex + 1;
+            const itemsInTargetRow = Math.min(gridColumns, totalRows - newRowIndex * gridColumns);
+            newColIndex = Math.min(colIndex, itemsInTargetRow - 1);
+          }
           break;
+        }
 
         case keys.ARROW_LEFT:
           event.preventDefault();
