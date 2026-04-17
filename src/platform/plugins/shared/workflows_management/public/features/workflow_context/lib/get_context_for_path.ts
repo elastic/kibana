@@ -49,6 +49,14 @@ export function getContextSchemaForStep(
 
   const extension: Record<string, z.ZodType> = {};
 
+  // Zod's .extend() replaces fields entirely, dropping any .describe() text
+  // from the base. Re-apply descriptions so the suggest widget can render
+  // human-friendly hover text for dynamically-built fields.
+  const STEP_FIELD_DESCRIBE: Record<string, string> = {
+    steps: 'Outputs of previously executed steps in this run, keyed by step name.',
+    variables: 'Step-scoped variables defined via set/var steps during this run.',
+  };
+
   const stepsCollectionSchema = getStepsCollectionSchema(
     baseSchema,
     workflowGraph,
@@ -56,10 +64,12 @@ export function getContextSchemaForStep(
     predecessors
   );
   if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    extension.steps = stepsCollectionSchema;
+    extension.steps = stepsCollectionSchema.describe(STEP_FIELD_DESCRIBE.steps);
   }
 
-  extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors);
+  extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors).describe(
+    STEP_FIELD_DESCRIBE.variables
+  );
 
   let schema = baseSchema.extend(extension) as typeof DynamicStepContextSchema;
 
@@ -121,20 +131,31 @@ function getStepContextSchemaEnrichmentEntries(
   const enrichments: { key: 'foreach' | 'while' | 'item' | 'index'; value: z.ZodType }[] = [];
   const stack = workflowExecutionGraph.getNodeStack(stepId);
 
+  // Hover-text for dynamically-added enrichment fields. Matches the wording
+  // used on StepContextSchema in @kbn/workflows/spec/schema.ts.
+  const ENRICHMENT_DESCRIBE = {
+    foreach: 'Current iteration state inside a foreach step (item, index, total).',
+    while: 'Current iteration count inside a while step.',
+    item: 'The current item from the foreach collection.',
+    index: 'Zero-based position of the current item in the foreach collection.',
+  } as const;
+
   for (const nodeId of stack) {
     const node = workflowExecutionGraph.getNode(nodeId);
 
     if (isEnterForeach(node)) {
       enrichments.push({
         key: 'foreach',
-        value: getForeachStateSchema(stepContextSchema, node.configuration),
+        value: getForeachStateSchema(stepContextSchema, node.configuration).describe(
+          ENRICHMENT_DESCRIBE.foreach
+        ),
       });
     }
 
     if (isEnterWhile(node)) {
       enrichments.push({
         key: 'while',
-        value: WhileContextSchema,
+        value: WhileContextSchema.describe(ENRICHMENT_DESCRIBE.while),
       });
     }
   }
@@ -147,7 +168,10 @@ function getStepContextSchemaEnrichmentEntries(
   const selfNode = workflowExecutionGraph.getStepNode(stepId);
   if (selfNode) {
     if (isEnterWhile(selfNode) && !enrichments.some((e) => e.key === 'while')) {
-      enrichments.push({ key: 'while', value: WhileContextSchema });
+      enrichments.push({
+        key: 'while',
+        value: WhileContextSchema.describe(ENRICHMENT_DESCRIBE.while),
+      });
     }
 
     if (selfNode.stepType === DataMapStepTypeId && isAtomic(selfNode)) {
@@ -155,8 +179,8 @@ function getStepContextSchemaEnrichmentEntries(
         stepContextSchema,
         selfNode.configuration?.items
       );
-      enrichments.push({ key: 'item', value: item });
-      enrichments.push({ key: 'index', value: index });
+      enrichments.push({ key: 'item', value: item.describe(ENRICHMENT_DESCRIBE.item) });
+      enrichments.push({ key: 'index', value: index.describe(ENRICHMENT_DESCRIBE.index) });
     }
   }
 

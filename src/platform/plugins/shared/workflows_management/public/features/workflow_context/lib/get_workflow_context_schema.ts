@@ -101,17 +101,25 @@ export function getWorkflowContextSchema(
 
   const eventSchema = buildEventSchemaFromTriggers(definition.triggers ?? []);
 
+  // Re-apply .describe() from the base schema because Zod's .extend() replaces
+  // the field entirely, dropping the description metadata that the autocomplete
+  // uses to populate the suggest widget's DESCRIPTION panel.
+  const describeFrom = (key: keyof typeof DynamicWorkflowContextSchema.shape): string | undefined =>
+    (DynamicWorkflowContextSchema.shape[key] as { description?: string }).description;
+
   return DynamicWorkflowContextSchema.extend({
-    inputs: buildFieldsZodValidator(normalizedInputs),
-    output: buildFieldsZodValidator(normalizedOutputs),
-    consts: z.object({
-      ...Object.fromEntries(
-        Object.entries(definition.consts ?? {}).map(([key, value]) => [
-          key,
-          inferZodType(value, { isConst: true }),
-        ])
-      ),
-    }),
-    event: eventSchema,
+    inputs: buildFieldsZodValidator(normalizedInputs).describe(describeFrom('inputs') ?? ''),
+    output: buildFieldsZodValidator(normalizedOutputs).describe(describeFrom('output') ?? ''),
+    consts: z
+      .object({
+        ...Object.fromEntries(
+          Object.entries(definition.consts ?? {}).map(([key, value]) => [
+            key,
+            inferZodType(value, { isConst: true }),
+          ])
+        ),
+      })
+      .describe(describeFrom('consts') ?? ''),
+    event: eventSchema.describe(describeFrom('event') ?? ''),
   }) as typeof DynamicWorkflowContextSchema;
 }

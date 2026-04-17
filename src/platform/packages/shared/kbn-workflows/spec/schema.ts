@@ -946,11 +946,22 @@ const WorkflowInputValueSchema: z.ZodType<unknown> = z.lazy(() =>
 );
 
 export const WorkflowContextSchema = z.object({
-  event: AlertEventSchema.optional(),
-  execution: WorkflowExecutionContextSchema,
-  workflow: WorkflowDataContextSchema,
-  kibanaUrl: z.string(),
-  inputs: z.record(z.string(), WorkflowInputValueSchema).optional(),
+  event: AlertEventSchema.optional().describe(
+    'The event that triggered this run — for alert triggers includes the matched alerts and rule details.'
+  ),
+  execution: WorkflowExecutionContextSchema.describe(
+    'Metadata about the current execution: id, start time, the Kibana URL for this run, and who or what triggered it.'
+  ),
+  workflow: WorkflowDataContextSchema.describe(
+    'The workflow being executed: id, name, enabled flag, space, and tags.'
+  ),
+  kibanaUrl: z
+    .string()
+    .describe('Public Kibana URL, useful for deep links back into the UI from notifications.'),
+  inputs: z
+    .record(z.string(), WorkflowInputValueSchema)
+    .optional()
+    .describe('User-provided inputs defined at the top of the workflow, keyed by input name.'),
   output: z
     .record(
       z.string(),
@@ -961,29 +972,50 @@ export const WorkflowContextSchema = z.object({
         z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]),
       ])
     )
-    .optional(),
-  consts: z.record(z.string(), z.any()).optional(),
-  now: z.date().optional(),
+    .optional()
+    .describe('Named outputs declared by the workflow that callers or subsequent steps can read.'),
+  consts: z
+    .record(z.string(), z.any())
+    .optional()
+    .describe('Constants declared at the top of the workflow — fixed values reused across steps.'),
+  now: z
+    .date()
+    .optional()
+    .describe('Timestamp captured when the expression is evaluated; handy for time-aware logic.'),
   parent: z
     .object({
       workflowId: z.string(),
       executionId: z.string(),
       depth: z.number().optional(),
     })
-    .optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+    .optional()
+    .describe('The parent workflow when this run was triggered by another workflow.'),
+  metadata: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Free-form metadata attached to the execution (reserved for internal tooling).'),
 });
 export type WorkflowContext = z.infer<typeof WorkflowContextSchema>;
 
 export const DynamicWorkflowContextSchema = WorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual inputs, outputs and consts of different types
-  inputs: z.object({}),
-  output: z.object({}),
-  consts: z.object({}),
+  // extending with actual inputs, outputs and consts of different types.
+  // Descriptions are repeated on the overrides because .extend() replaces
+  // the field entirely, dropping the base .describe() metadata.
+  inputs: z
+    .object({})
+    .describe('User-provided inputs defined at the top of the workflow, keyed by input name.'),
+  output: z
+    .object({})
+    .describe('Named outputs declared by the workflow that callers or subsequent steps can read.'),
+  consts: z
+    .object({})
+    .describe('Constants declared at the top of the workflow — fixed values reused across steps.'),
   // overriding event with base event schema (spaceId only) so it can be
   // dynamically extended with trigger-specific properties (e.g., alerts, rule)
-  event: BaseEventSchema.optional(),
+  event: BaseEventSchema.optional().describe(
+    'The event that triggered this run — trigger-specific properties (alerts, rule, …) are added dynamically.'
+  ),
 });
 export type DynamicWorkflowContext = z.infer<typeof DynamicWorkflowContextSchema>;
 
@@ -1015,17 +1047,29 @@ export const WhileContextSchema = z.object({
 export type WhileContext = z.infer<typeof WhileContextSchema>;
 
 export const StepContextSchema = WorkflowContextSchema.extend({
-  steps: z.record(z.string(), StepDataSchema),
-  foreach: ForEachContextSchema.optional(),
-  while: WhileContextSchema.optional(),
-  variables: z.record(z.string(), z.unknown()).optional(),
-  error: BaseSerializedErrorSchema.optional(),
+  steps: z
+    .record(z.string(), StepDataSchema)
+    .describe('Outputs of previously executed steps in this run, keyed by step name.'),
+  foreach: ForEachContextSchema.optional().describe(
+    'Current iteration state inside a foreach step (item, index, total).'
+  ),
+  while: WhileContextSchema.optional().describe('Current iteration count inside a while step.'),
+  variables: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe('Step-scoped variables defined via set/var steps during this run.'),
+  error: BaseSerializedErrorSchema.optional().describe(
+    'Error details from the most recent step — available inside on-failure branches.'
+  ),
 });
 export type StepContext = z.infer<typeof StepContextSchema>;
 
 export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   // overriding record with object to avoid type mismatch when
-  // extending with actual step ids and different output types
-  steps: z.object({}),
+  // extending with actual step ids and different output types.
+  // Description repeated because .extend() drops the base describe metadata.
+  steps: z
+    .object({})
+    .describe('Outputs of previously executed steps in this run, keyed by step name.'),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
