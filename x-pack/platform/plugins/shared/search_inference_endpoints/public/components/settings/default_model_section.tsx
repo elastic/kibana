@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiIcon,
   EuiSplitPanel,
   EuiSwitch,
   EuiText,
@@ -78,6 +79,8 @@ const isAiFeaturesDisabled = (state: {
   defaultModelId: string;
   disallowOtherModels: boolean;
 }): boolean => state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL;
+
+const aiFeaturesDisabledIconStyles = { verticalAlign: 'text-top' } as const;
 
 const getDisallowDescription = (state: {
   defaultModelId: string;
@@ -159,11 +162,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        grow={false}
-        color={isAiFeaturesDisabled(state) ? 'warning' : 'subdued'}
-        paddingSize="l"
-      >
+      <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="l">
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
@@ -181,6 +180,17 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued" data-test-subj="disallowOtherModelsDescription">
+              {isAiFeaturesDisabled(state) && (
+                <>
+                  <EuiIcon
+                    type="warning"
+                    color="warning"
+                    css={aiFeaturesDisabledIconStyles}
+                    data-test-subj="aiFeaturesDisabledIcon"
+                  />
+                  &nbsp;
+                </>
+              )}
               {getDisallowDescription(state)}
             </EuiText>
           </EuiFlexItem>

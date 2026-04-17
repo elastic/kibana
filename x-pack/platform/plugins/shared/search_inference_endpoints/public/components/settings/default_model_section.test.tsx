@@ -91,7 +91,7 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('defaultModelComboBox')).not.toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('shows the AI-features-disabled description when disallow is on and no default is selected', () => {
+  it('shows the AI-features-disabled description and warning icon when disallow is on and no default is selected', () => {
     const settings = createMockSettings({
       state: { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: true },
     });
@@ -105,6 +105,21 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('disallowOtherModelsDescription')).toHaveTextContent(
       'Model selection is hidden and no models will be used.'
     );
+    expect(screen.getByTestId('aiFeaturesDisabledIcon')).toBeInTheDocument();
+  });
+
+  it('does not show the warning icon when a default model is selected', () => {
+    const settings = createMockSettings({
+      state: { defaultModelId: 'pre-1', disallowOtherModels: true },
+    });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} />
+      </Wrapper>
+    );
+
+    expect(screen.queryByTestId('aiFeaturesDisabledIcon')).not.toBeInTheDocument();
   });
 
   it('shows validation error when selected connector does not exist', () => {
