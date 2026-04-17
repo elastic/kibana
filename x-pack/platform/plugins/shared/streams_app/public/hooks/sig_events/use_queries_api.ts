@@ -100,7 +100,7 @@ export function useQueriesApi(): QueriesApi {
         streamName: string;
       }) => {
         await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
-          signal,
+          signal: null,
           params: {
             path: {
               name: streamName,

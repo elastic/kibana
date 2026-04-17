@@ -41,7 +41,6 @@ interface TopThreatHuntingLeadsProps {
   onSeeAll: () => void;
   onLeadClick: (lead: HuntingLead) => void;
   onHuntInChat: () => void;
-  onLeadInfoClick?: (lead: HuntingLead) => void;
   onGenerate: () => void;
   isScheduled?: boolean;
   onToggleSchedule?: (enabled: boolean) => void;
@@ -58,7 +57,6 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
   onSeeAll,
   onLeadClick,
   onHuntInChat,
-  onLeadInfoClick,
   onGenerate,
   isScheduled,
   onToggleSchedule,
@@ -215,7 +213,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
         <EuiFlexGroup gutterSize="m" wrap responsive style={{ marginTop: 12 }}>
           {leads.slice(0, MAX_VISIBLE_CARDS).map((lead) => (
             <EuiFlexItem key={lead.id} grow={1}>
-              <LeadCard lead={lead} onClick={onLeadClick} onInfoClick={onLeadInfoClick} />
+              <LeadCard lead={lead} onClick={onLeadClick} />
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>

@@ -16,7 +16,6 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPanel,
   EuiSpacer,
   EuiSuperDatePicker,
 } from '@elastic/eui';
@@ -257,35 +256,30 @@ export const PrevalenceDetailsView: React.FC<PrevalenceDetailsViewProps> = ({
   return (
     <>
       {!error && !isPlatinumPlus && upsell}
-      <EuiPanel>
-        {!isServerless && !isColdFrozenTierCalloutDismissed && coldFrozenTierCallout}
-        <EuiSuperDatePicker
-          start={start}
-          end={end}
-          onTimeChange={onTimeChange}
-          data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
-          width="full"
-        />
-        <EuiSpacer size="m" />
-        <EuiInMemoryTable
-          items={error ? [] : items}
-          columns={columns}
-          loading={loading}
-          data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
-          tableCaption={i18n.translate(
-            'xpack.securitySolution.flyout.prevalence.prevalenceCaption',
-            {
-              defaultMessage: 'Prevalence insights',
-            }
-          )}
-          noItemsMessage={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.prevalence.noDataDescription"
-              defaultMessage="No prevalence data available."
-            />
-          }
-        />
-      </EuiPanel>
+      {!isServerless && !isColdFrozenTierCalloutDismissed && coldFrozenTierCallout}
+      <EuiSuperDatePicker
+        start={start}
+        end={end}
+        onTimeChange={onTimeChange}
+        data-test-subj={PREVALENCE_DETAILS_DATE_PICKER_TEST_ID}
+        width="full"
+      />
+      <EuiSpacer size="m" />
+      <EuiInMemoryTable
+        items={error ? [] : items}
+        columns={columns}
+        loading={loading}
+        data-test-subj={PREVALENCE_DETAILS_TABLE_TEST_ID}
+        tableCaption={i18n.translate('xpack.securitySolution.flyout.prevalence.prevalenceCaption', {
+          defaultMessage: 'Prevalence insights',
+        })}
+        noItemsMessage={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.prevalence.noDataDescription"
+            defaultMessage="No prevalence data available."
+          />
+        }
+      />
     </>
   );
 };
