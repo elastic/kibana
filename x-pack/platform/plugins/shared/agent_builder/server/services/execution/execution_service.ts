@@ -212,6 +212,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     abortMonitor.start();
 
     try {
+      // Build the live event stream
       const rawEvents$ = await handleAgentExecution({
         deps: this.deps,
         request,
