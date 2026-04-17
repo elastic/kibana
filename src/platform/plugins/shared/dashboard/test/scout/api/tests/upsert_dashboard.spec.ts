@@ -18,7 +18,7 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe.only('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
@@ -88,7 +88,7 @@ apiTest.describe.only('dashboards - upsert', { tag: tags.deploymentAgnostic }, (
     expect(response.body.data.title).toBe(title);
   });
 
-  apiTest.only('validation - returns 400 when creating a new dashboard with an invalid id', async ({ apiClient }) => {
+  apiTest('validation - returns 400 when creating a new dashboard with an invalid id', async ({ apiClient }) => {
     const id = '(new)dashboard-id';
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
