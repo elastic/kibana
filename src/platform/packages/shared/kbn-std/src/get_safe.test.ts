@@ -9,7 +9,7 @@
 
 import { getSafe } from './get_safe';
 
-const obj = {
+const obj: Record<string, any> = {
   bar: {
     quux: 123,
   },
