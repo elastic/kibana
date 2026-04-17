@@ -46,14 +46,14 @@ export function useInferenceFeatureConnectors(
   featureId: string
 ): UseInferenceFeatureConnectorsResult {
   const { core } = useKibana();
-  const { http, settings } = core;
+  const { http, notifications } = core;
 
   const {
     data: aiConnectors,
     isLoading,
     error,
     soEntryFound,
-  } = useLoadConnectors({ http, featureId, settings });
+  } = useLoadConnectors({ http, toasts: notifications.toasts, featureId });
 
   const orderedAiConnectors = useMemo<AIConnector[]>(() => {
     if (!aiConnectors?.length) return [];
