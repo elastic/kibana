@@ -19,10 +19,6 @@ export function registerCaseWorkflowSteps(
     return;
   }
 
-  // TODO: enable once https://github.com/elastic/security-team/issues/15982 has been resolved
-  // workflowsExtensions.registerStepDefinition(createCaseFromTemplateStepDefinition(getCasesClient));
-  // workflowsExtensions.registerStepDefinition(setCustomFieldStepDefinition(getCasesClient));
-
   for (const { factory } of casesStepRegistry) {
     workflowsExtensions.registerStepDefinition(factory(getCasesClient));
   }
