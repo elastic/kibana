@@ -95,7 +95,9 @@ export const SearchGettingStartedHeader: React.FC = () => {
                 docLink={
                   cloud?.isServerlessEnabled
                     ? docLinks.serverlessReleaseNotes
-                    : docLinks.hostedCloudReleaseNotes
+                    : cloud?.isCloudEnabled
+                    ? docLinks.hostedCloudReleaseNotes
+                    : docLinks.releaseNotes
                 }
                 kibanaVersion={
                   !cloud?.isServerlessEnabled

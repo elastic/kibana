@@ -13,7 +13,7 @@ import { ALL_ENTITY_TYPES, API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../..
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
-import { BadCRUDRequestError } from '../../../domain/errors';
+import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../domain/errors';
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const bodySchema = z.object({
@@ -67,6 +67,9 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
             },
           });
         } catch (error) {
+          if (error instanceof EntityStoreNotInstalledError) {
+            return res.badRequest({ body: error });
+          }
           if (error instanceof BadCRUDRequestError) {
             return res.badRequest({ body: error });
           }
