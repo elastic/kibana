@@ -14,35 +14,49 @@ import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 describe('createApiKeyStrategy', () => {
   const logger = loggingSystemMock.createLogger();
 
+  const uiamAvailable = () => {
+    const coreStart = coreMock.createStart();
+    coreStart.security.authc.apiKeys.uiam = {
+      grant: jest.fn(),
+      invalidate: jest.fn(),
+      convert: jest.fn(),
+    } as never;
+    return coreStart;
+  };
+
   test('returns EsApiKeyStrategy when UIAM is not available', () => {
     const coreStart = coreMock.createStart();
     coreStart.security.authc.apiKeys.uiam = null as never;
 
-    const strategy = createApiKeyStrategy(ApiKeyType.ES, coreStart.security, logger);
+    const strategy = createApiKeyStrategy(ApiKeyType.ES, true, coreStart.security, logger);
     expect(strategy).toBeInstanceOf(EsApiKeyStrategy);
   });
 
-  test('returns EsAndUiamApiKeyStrategy when UIAM is available', () => {
-    const coreStart = coreMock.createStart();
-    coreStart.security.authc.apiKeys.uiam = {
-      grant: jest.fn(),
-      invalidate: jest.fn(),
-      convert: jest.fn(),
-    } as never;
+  test('returns EsApiKeyStrategy when UIAM is available but grantUiamApiKeys is false', () => {
+    const coreStart = uiamAvailable();
 
-    const strategy = createApiKeyStrategy(ApiKeyType.ES, coreStart.security, logger);
+    const strategy = createApiKeyStrategy(ApiKeyType.ES, false, coreStart.security, logger);
+    expect(strategy).toBeInstanceOf(EsApiKeyStrategy);
+  });
+
+  test('returns EsApiKeyStrategy when UIAM is available, grantUiamApiKeys is false, even if api_key_type is uiam', () => {
+    const coreStart = uiamAvailable();
+
+    const strategy = createApiKeyStrategy(ApiKeyType.UIAM, false, coreStart.security, logger);
+    expect(strategy).toBeInstanceOf(EsApiKeyStrategy);
+  });
+
+  test('returns EsAndUiamApiKeyStrategy when UIAM is available and grantUiamApiKeys is true', () => {
+    const coreStart = uiamAvailable();
+
+    const strategy = createApiKeyStrategy(ApiKeyType.ES, true, coreStart.security, logger);
     expect(strategy).toBeInstanceOf(EsAndUiamApiKeyStrategy);
   });
 
   test('passes apiKeyType to EsAndUiamApiKeyStrategy', () => {
-    const coreStart = coreMock.createStart();
-    coreStart.security.authc.apiKeys.uiam = {
-      grant: jest.fn(),
-      invalidate: jest.fn(),
-      convert: jest.fn(),
-    } as never;
+    const coreStart = uiamAvailable();
 
-    const strategy = createApiKeyStrategy(ApiKeyType.UIAM, coreStart.security, logger);
+    const strategy = createApiKeyStrategy(ApiKeyType.UIAM, true, coreStart.security, logger);
     expect(strategy.typeToUse).toBe(ApiKeyType.UIAM);
   });
 });

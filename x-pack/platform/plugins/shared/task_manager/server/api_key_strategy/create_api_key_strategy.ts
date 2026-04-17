@@ -13,10 +13,11 @@ import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
 
 export const createApiKeyStrategy = (
   apiKeyType: ApiKeyType,
+  grantUiamApiKeys: boolean,
   security: SecurityServiceStart,
   logger: Logger
 ): ApiKeyStrategy => {
-  if (security.authc.apiKeys.uiam) {
+  if (grantUiamApiKeys && security.authc.apiKeys.uiam) {
     return new EsAndUiamApiKeyStrategy(apiKeyType, security, logger);
   }
   return new EsApiKeyStrategy();
