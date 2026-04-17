@@ -23,7 +23,8 @@ const serviceOverview = url.format({
   },
 });
 
-describe('When navigating between pages', () => {
+// Failing: See https://github.com/elastic/kibana/issues/262820
+describe.skip('When navigating between pages', () => {
   before(() => {
     synthtrace.index(
       opbeans({

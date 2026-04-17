@@ -27,6 +27,11 @@ export const SuggestIngestPipelinePrompt = createPrompt({
      * Empty when the agent may propose grok/dissect (full pipeline schema).
      */
     upstream_extraction_context: z.string(),
+<<<<<<< HEAD
+=======
+    /** Conditional field examples for ECS or OTel, injected into system prompt based on stream type */
+    field_examples: z.string(),
+>>>>>>> upstream/main
   }),
 })
   .version({
@@ -49,8 +54,16 @@ export const SuggestIngestPipelinePrompt = createPrompt({
           properties: {
             pipeline: {
               type: 'object',
-              description: 'The pipeline definition object containing processing steps',
-              properties: {},
+              description:
+                'The pipeline definition object containing processing steps. Always include `steps` (array of processors). For a first candidate with no processors yet, use { "steps": [] }; never send {}.',
+              properties: {
+                steps: {
+                  type: 'array',
+                  description:
+                    'Ordered list of processors that transform documents. Shapes must match the Pipeline schema in the system prompt.',
+                },
+              },
+              required: ['steps'],
             },
           },
           required: ['pipeline'],
@@ -64,8 +77,21 @@ export const SuggestIngestPipelinePrompt = createPrompt({
           properties: {
             pipeline: {
               type: 'object',
+<<<<<<< HEAD
               description: 'The pipeline definition object containing processing steps.',
               properties: {},
+=======
+              description:
+                'The pipeline definition object containing processing steps. Use { "steps": [] } if no processing is needed.',
+              properties: {
+                steps: {
+                  type: 'array',
+                  description:
+                    'Ordered list of processors that transform documents. Shapes must match the Pipeline schema in the system prompt.',
+                },
+              },
+              required: ['steps'],
+>>>>>>> upstream/main
             },
           },
           required: ['pipeline'],

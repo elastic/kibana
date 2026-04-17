@@ -53,6 +53,7 @@ export async function suggestProcessingPipeline({
   inferenceClient,
   agentPipelineSchema,
   maxSteps,
+  maxDurationMs,
   signal,
   simulatePipeline,
   documents,
@@ -66,6 +67,7 @@ export async function suggestProcessingPipeline({
   inferenceClient: BoundInferenceClient;
   agentPipelineSchema: SuggestPipelineAgentSchema;
   maxSteps?: number | undefined;
+  maxDurationMs?: number | undefined;
   signal: AbortSignal;
   simulatePipeline(pipeline: StreamlangDSL): Promise<ProcessingSimulationResponse>;
   documents: FlattenRecord[];
@@ -100,6 +102,11 @@ export async function suggestProcessingPipeline({
       ? POST_PARSE_PIPELINE_ACTIONS
       : FULL_PIPELINE_ACTIONS;
 
+  // Conditionally include field examples based on stream type to reduce LLM decision space
+  const fieldExamples = isOtel
+    ? `**OTel:** \`severity_text\`, \`resource.attributes.service.name\`, \`body.text\`, \`attributes.*\``
+    : `**ECS:** \`log.level\`, \`service.name\`, \`host.name\`, \`@timestamp\``;
+
   const input = {
     stream: definition,
     fields_schema: isOtel
@@ -110,6 +117,7 @@ export async function suggestProcessingPipeline({
     pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(agentPipelineSchema)),
     initial_dataset_analysis: initialDatasetAnalysisJson,
     upstream_extraction_context: upstreamSeedParsingContextMarkdown ?? '',
+<<<<<<< HEAD
   };
 
   // Invoke the reasoning agent to suggest the ingest pipeline
@@ -195,14 +203,129 @@ export async function suggestProcessingPipeline({
             errors: undefined,
           },
         };
+=======
+    field_examples: fieldExamples,
+  };
+
+  // Invoke the reasoning agent to suggest the ingest pipeline
+  let response;
+  try {
+    response = await executeAsReasoningAgent({
+      inferenceClient,
+      prompt: SuggestIngestPipelinePrompt,
+      input,
+      maxSteps: effectiveMaxSteps,
+      maxDurationMs,
+      // `low` skips injecting `reason` / `complete` planning tools (only `simulate_pipeline` +
+      // `commit_pipeline` from the prompt). `ReasoningPower` is `'low' | 'medium' | 'high'` only.
+      power: 'low',
+      toolCallbacks: {
+        simulate_pipeline: async (toolCall) => {
+          // 1. Validate the pipeline schema
+          const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
+          if (!pipeline.success) {
+            return {
+              response: {
+                valid: false,
+                errors: pipeline.error.issues,
+                metrics: undefined,
+              },
+            };
+          }
+
+          // 2. Add customIdentifiers to steps for proper tracking in simulation results
+          const pipelineWithIdentifiers = addDeterministicCustomIdentifiers(
+            pipeline.data as StreamlangDSL
+          );
+
+          // 3. Simulate the pipeline and collect metrics
+          const simulateResult = await simulatePipeline(pipelineWithIdentifiers);
+          const metrics = await getSimulationMetrics(
+            simulateResult,
+            fieldsMetadataClient,
+            isOtel,
+            mappedFields
+          );
+
+          // Collect unique errors from simulation
+          const uniqueErrors = getUniqueDocumentErrors(simulateResult);
+
+          // 3. Validate parse rate - if below 80%, mark as invalid
+          const parseRate = metrics.parse_rate;
+          if (parseRate < 80) {
+            return {
+              response: {
+                valid: false,
+                errors: [
+                  `Parse rate is too low: ${parseRate.toFixed(
+                    2
+                  )}% (minimum required: 80%). The pipeline is not extracting fields from enough documents. Review the processors and ensure they handle the document structure correctly.`,
+                  ...uniqueErrors,
+                ],
+                metrics,
+              },
+            };
+          }
+
+          // 4. Validate processor failure rates - each processor should have < 20% failure rate
+          const processorFailures = validateProcessorFailureRates(simulateResult);
+          if (processorFailures.length > 0) {
+            return {
+              response: {
+                valid: false,
+                errors: [...processorFailures, ...uniqueErrors],
+                metrics,
+              },
+            };
+          }
+
+          return {
+            response: {
+              valid: true,
+              errors: uniqueErrors.length > 0 ? uniqueErrors : undefined,
+              metrics,
+            },
+          };
+        },
+        commit_pipeline: async (toolCall) => {
+          const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
+          if (!pipeline.success) {
+            return {
+              response: {
+                committed: false,
+                errors: pipeline.error.issues,
+              },
+            };
+          }
+
+          return {
+            response: {
+              committed: true,
+              errors: undefined,
+            },
+          };
+        },
       },
-    },
-    finalToolChoice: {
-      type: 'function',
-      function: 'commit_pipeline',
-    },
-    abortSignal: signal,
-  });
+      finalToolChoice: {
+        type: 'function',
+        function: 'commit_pipeline',
+>>>>>>> upstream/main
+      },
+      abortSignal: signal,
+    });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    // Check if it's a timeout/abort error
+    if (errorMessage.includes('abort') || errorMessage.includes('timeout')) {
+      throw new Error(
+        i18n.translate('xpack.streams.ai.suggestProcessingPipeline.timeoutError', {
+          defaultMessage:
+            'Pipeline suggestion generation took too long and was stopped. Try with fewer or simpler log samples, or select a different LLM model.',
+        })
+      );
+    }
+    throw error;
+  }
 
   // Count assistant messages to determine steps used
   const stepsUsed = response.input.filter(
@@ -248,12 +371,15 @@ export {
 } from './schema';
 export { mergeSeedParsingProcessorIntoSuggestedPipeline } from './merge_seed_parsing_into_suggested_pipeline';
 export { formatUpstreamSeedParsingContextForPromptMarkdown } from './upstream_seed_parsing_prompt';
+<<<<<<< HEAD
 export { formatZodPipelineErrors } from './format_zod_pipeline_errors';
 export {
   buildSimulationFeedback,
   detectTemporaryFields,
   type SimulationFeedback,
 } from './build_simulation_feedback';
+=======
+>>>>>>> upstream/main
 
 /**
  * Builds a JSON-serializable overview of sample document structure (fields, example values, schema hints)
@@ -283,6 +409,34 @@ export async function fetchMappedFieldsForStreamProcessingSuggestions(
   streamIndexName: string
 ) {
   return getMappedFields(esClient, streamIndexName);
+<<<<<<< HEAD
+=======
+}
+
+/**
+ * Validates that each processor has a failure rate below 20%.
+ * Returns an array of error messages for processors that exceed the threshold.
+ */
+function validateProcessorFailureRates(simulationResult: ProcessingSimulationResponse): string[] {
+  const errors: string[] = [];
+  const maxFailureRate = 0.2; // 20%
+
+  if (!simulationResult.processors_metrics) {
+    return errors;
+  }
+
+  for (const [processorId, metrics] of Object.entries(simulationResult.processors_metrics)) {
+    if (!metrics) continue;
+    if (metrics.failed_rate > maxFailureRate) {
+      const failurePercentage = (metrics.failed_rate * 100).toFixed(2);
+      errors.push(
+        `Processor "${processorId}" has a failure rate of ${failurePercentage}% (maximum allowed: 20%). This processor is failing on too many documents. Review the processor configuration and ensure it handles the document structure correctly.`
+      );
+    }
+  }
+
+  return errors;
+>>>>>>> upstream/main
 }
 
 export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
@@ -363,7 +517,11 @@ async function getMappedFields(esClient: ElasticsearchClient, index: string) {
     }, {});
 }
 
+<<<<<<< HEAD
 export async function buildFieldSummaryLinesFromDocumentValues(
+=======
+async function buildFieldSummaryLinesFromDocumentValues(
+>>>>>>> upstream/main
   documents: FlattenRecord[],
   fieldsMetadataClient: IFieldsMetadataClient,
   isOtel: boolean,
@@ -424,4 +582,43 @@ export async function buildFieldSummaryLinesFromDocumentValues(
 
     return `${fieldName} (${typeIndicator}) - ${valuesDescription}`;
   });
+<<<<<<< HEAD
+=======
+}
+
+async function getSimulationMetrics(
+  simulationResult: ProcessingSimulationResponse,
+  fieldsMetadataClient: IFieldsMetadataClient,
+  isOtel: boolean,
+  mappedFields: Record<string, string>
+) {
+  if (simulationResult.definition_error || simulationResult.documents.length === 0) {
+    return {
+      sampled: 0,
+      fields: [],
+      parse_rate: 0,
+    };
+  }
+
+  const documents = simulationResult.documents;
+  const sampled = documents.length;
+  const parseRate = simulationResult.documents_metrics.parsed_rate * 100;
+
+  const flattenedDocs = documents
+    .map((d) => d.value)
+    .filter((v): v is FlattenRecord => v != null && typeof v === 'object');
+
+  const fields = await buildFieldSummaryLinesFromDocumentValues(
+    flattenedDocs,
+    fieldsMetadataClient,
+    isOtel,
+    mappedFields
+  );
+
+  return {
+    sampled,
+    fields,
+    parse_rate: parseFloat(parseRate.toFixed(2)),
+  };
+>>>>>>> upstream/main
 }

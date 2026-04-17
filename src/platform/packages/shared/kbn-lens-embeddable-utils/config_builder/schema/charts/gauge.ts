@@ -14,53 +14,62 @@ import {
   esqlColumnSchema,
   metricOperationDefinitionSchema,
 } from '../metric_ops';
-import { colorByValueSchema } from '../color';
+import { colorByValueSchema, noColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 import { builderEnums } from '../enums';
 import { objectUnion } from './utils/object_union';
 
-const gaugeStateSharedOptionsSchema = {
-  shape: schema.maybe(
-    schema.oneOf(
-      [
-        schema.object(
-          {
-            type: schema.literal('bullet'),
-            orientation: builderEnums.simpleOrientation({
-              defaultValue: 'horizontal',
-            }),
-          },
-          {
-            meta: {
-              id: 'gaugeShapeBullet',
-              title: 'Shape (Bullet)',
-              description: 'Bullet gauge shape',
+const gaugeStylingSchema = schema.object(
+  {
+    shape: schema.maybe(
+      schema.oneOf(
+        [
+          schema.object(
+            {
+              type: schema.literal('bullet'),
+              orientation: builderEnums.simpleOrientation({
+                defaultValue: 'horizontal',
+              }),
             },
-          }
-        ),
-        schema.object(
-          {
-            type: schema.oneOf([
-              schema.literal('circle'),
-              schema.literal('semi_circle'),
-              schema.literal('arc'),
-            ]),
-          },
-          {
-            meta: {
-              id: 'gaugeShapeCircular',
-              title: 'Shape (Circular)',
-              description: 'Circular gauge shape',
+            {
+              meta: {
+                id: 'gaugeShapeBullet',
+                title: 'Shape (Bullet)',
+                description: 'Bullet gauge shape',
+              },
+            }
+          ),
+          schema.object(
+            {
+              type: schema.oneOf([
+                schema.literal('circle'),
+                schema.literal('semi_circle'),
+                schema.literal('arc'),
+              ]),
             },
-          }
-        ),
-      ],
-      { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
-    )
-  ),
-};
+            {
+              meta: {
+                id: 'gaugeShapeCircular',
+                title: 'Shape (Circular)',
+                description: 'Circular gauge shape',
+              },
+            }
+          ),
+        ],
+        { defaultValue: { type: 'bullet', orientation: 'horizontal' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'gaugeStyling',
+      title: 'Gauge styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const gaugeStateMetricInnerNoESQLOpsSchema = {
   /**
@@ -122,7 +131,11 @@ const gaugeStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(colorByValueSchema),
+  color: schema.maybe(
+    schema.oneOf([colorByValueSchema, noColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
   /**
    * Tick marks configuration
    */
@@ -138,7 +151,7 @@ const gaugeStateMetricOptionsSchema = {
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
             meta: { description: 'Tick placement mode' },
-            defaultValue: 'auto',
+            defaultValue: 'bands',
           })
         ),
       },
@@ -154,7 +167,7 @@ export const gaugeStateSchemaNoESQL = schema.object(
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...gaugeStateSharedOptionsSchema,
+    styling: schema.maybe(gaugeStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
@@ -172,7 +185,7 @@ export const gaugeStateSchemaESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...gaugeStateSharedOptionsSchema,
+    styling: schema.maybe(gaugeStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
