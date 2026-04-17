@@ -20,10 +20,13 @@ export const createServiceMapAttachmentType = (): AttachmentTypeDefinition<
     id: SERVICE_MAP_ATTACHMENT_TYPE,
     validate: (input) => {
       const parseResult = serviceMapAttachmentDataSchema.safeParse(input);
-      if (parseResult.success) {
-        return { valid: true, data: parseResult.data };
+      if (!parseResult.success) {
+        return { valid: false, error: parseResult.error.message };
       }
-      return { valid: false, error: parseResult.error.message };
+      if (parseResult.data.connections.length === 0) {
+        return { valid: false, error: 'Service map has no connections to display.' };
+      }
+      return { valid: true, data: parseResult.data };
     },
     format: (attachment) => {
       return {

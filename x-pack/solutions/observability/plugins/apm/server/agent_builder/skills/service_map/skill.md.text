@@ -64,6 +64,7 @@ After creating the attachment, render it inline:
 
 ## Important Notes
 
+- If `get_service_topology` returns an empty `connections` array, do NOT create a service map attachment. Instead, tell the user that no topology data was found for the requested service or time range.
 - Do NOT compute node positions or build React Flow JSON — the attachment renderer handles all layout and styling
 - Do NOT use the generic graph attachment (`type: "graph"`) for service maps — use `type: "observability.service-map"`
 - The `serviceName` field in the data is optional but helps label the map when scoped to a specific service
