@@ -95,11 +95,6 @@ describe('TraceWaterfall', () => {
                   ),
                 };
               }
-              if (id === 'observability-full-trace-waterfall') {
-                return {
-                  render: () => <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>,
-                };
-              }
               return undefined;
             },
           },
