@@ -114,6 +114,10 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 
 :::::
 
+::::::{note}
+Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook — When to use](./global-setup-hook.md#when-to-use) for guidance.
+::::::
+
 ### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
 
 It’s common for test suites to load Elasticsearch or Kibana archives that are barely used (or not used at all). Unused archives slow down setup, waste resources, and make it harder to understand what a test actually depends on. Check if your tests ingest the data they actually need.
@@ -744,5 +748,16 @@ apiTest('returns autocomplete definitions', async ({ apiClient }) => {
   });
 });
 ```
+
+### Choose the right auth pattern [choose-the-right-auth-pattern]
+
+Scout supports two authentication methods for API tests. Choose based on endpoint type:
+
+| Endpoint type                | Auth method          | Fixture                        |
+| ---------------------------- | -------------------- | ------------------------------ |
+| Public APIs (`api/*`)        | API key              | `requestAuth` + `apiKeyHeader` |
+| Internal APIs (`internal/*`) | Cookie-based session | `samlAuth` + `cookieHeader`    |
+
+See [API authentication](./api-auth.md) for details and examples.
 
 :::::

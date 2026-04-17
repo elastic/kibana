@@ -46,6 +46,25 @@ Important: Do not post GitHub comments unless explicitly stated.
 - **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
 - **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
+### Verify context before suggesting changes
+
+Before recommending a pattern change, verify the code matches the pattern's preconditions:
+
+- **Auth patterns**: Check endpoint type (`api/*` vs `internal/*`) before suggesting auth changes. `requestAuth` + `apiKeyHeader` is for public APIs; `samlAuth` + `cookieHeader` is correct for internal endpoints. See `docs/extend/scout/api-auth.md`.
+- **Global setup hooks**: Only suggest moving setup to global hooks when cleanup isn't required. Operations like `kbnClient.importExport.load()` need corresponding `.unload()` calls, which require `afterAll` hooks (no global teardown exists).
+- **esArchiver.loadIfNeeded()**: This is idempotent — only the first call ingests data, subsequent calls skip (fast index-exists check). For sequential runs, there's ~0% benefit from moving it to global setup. For parallel runs, move it to global setup so ES isn't handling ingestion while workers are running (can affect Kibana performance).
+
+### Severity classification
+
+Use these definitions when assigning severity:
+
+- **Blocker**: Will cause test failures, breaks CI, missing required coverage (migration parity gaps), security or data leak risks
+- **Major**: Likely to cause flakiness, incorrect test coverage, permission/auth errors, violates core best practices in ways that affect correctness
+- **Minor**: Suboptimal patterns, missed reuse opportunities, efficiency improvements, style inconsistencies that don't affect correctness
+- **Nit**: Cosmetic issues, naming suggestions, optional improvements, "nice to have" changes
+
+When in doubt, prefer a lower severity. Optimization suggestions (efficiency improvements) should be `minor` or `nit`, not `major`.
+
 ### Migration parity analysis (required when migration is detected)
 
 - **Detect migration** when the PR removes/changes FTR tests (for example `test/functional/**`, `loadTestFile()`, FTR configs) alongside new/changed Scout specs.
