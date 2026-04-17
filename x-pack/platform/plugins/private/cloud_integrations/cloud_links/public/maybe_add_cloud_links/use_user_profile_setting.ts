@@ -20,7 +20,7 @@ interface UseUserProfileSettingOptions<T> {
   };
 }
 
-interface UseUserProfileSettingResult<T> {
+export interface UseUserProfileSettingResult<T> {
   value: T;
   initialValue: T;
   isVisible: boolean;

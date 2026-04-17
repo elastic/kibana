@@ -19,6 +19,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n, SUPPORTED_LOCALES } from '@kbn/i18n';
+import type { LocaleValue } from '@kbn/user-profile-components';
 
 import { useLanguage } from './use_language_hook';
 
@@ -31,6 +32,17 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
   const selectId = useGeneratedHtmlId();
 
   const { value: locale, initialValue: initialLocaleValue, isLoading, onChange } = useLanguage();
+
+  const serverDefaultOption = {
+    value: '',
+    text: i18n.translate('xpack.cloudLinks.userMenuLinks.languageModalServerDefaultOption', {
+      defaultMessage: 'Server default',
+    }),
+  };
+  const localeOptions = [
+    serverDefaultOption,
+    ...SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label })),
+  ];
 
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={closeModal}>
@@ -51,9 +63,9 @@ export const LanguageModal: FC<Props> = ({ closeModal }) => {
         >
           <EuiSelect
             id={selectId}
-            options={SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }))}
+            options={localeOptions}
             value={locale}
-            onChange={(e) => onChange(e.target.value, false)}
+            onChange={(e) => onChange(e.target.value as LocaleValue, false)}
             data-test-subj="languageSelect"
             fullWidth
           />

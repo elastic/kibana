@@ -282,6 +282,17 @@ const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) 
     return null;
   }
 
+  const serverDefaultOption = {
+    value: '',
+    text: i18n.translate('xpack.security.accountManagement.userProfile.localeServerDefaultOption', {
+      defaultMessage: 'Server default',
+    }),
+  };
+  const localeOptions = [
+    serverDefaultOption,
+    ...SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label })),
+  ];
+
   return (
     <EuiDescribedFormGroup
       fullWidth
@@ -296,7 +307,7 @@ const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) 
       description={
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.localeGroupDescription"
-          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data."
+          defaultMessage="Select your preferred language for displaying dates, times, and other locale-specific data. Leave as “Server default” to use the language configured by your Kibana administrator."
         />
       }
     >
@@ -315,7 +326,7 @@ const UserLocaleEditor: FunctionComponent<UserLocaleEditorProps> = ({ formik }) 
         <FormField
           as={EuiSelect}
           name="data.userSettings.locale"
-          options={SUPPORTED_LOCALES.map(({ id, label }) => ({ value: id, text: label }))}
+          options={localeOptions}
           data-test-subj="localeSelect"
           fullWidth
         />
@@ -858,7 +869,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
           userSettings: {
             darkMode: data.userSettings?.darkMode || 'space_default',
             contrastMode: data.userSettings?.contrastMode || 'system',
-            locale: data.userSettings?.locale || 'en',
+            locale: data.userSettings?.locale ?? '',
           },
         }
       : undefined,

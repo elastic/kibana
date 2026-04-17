@@ -7,15 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const LOCALE_IDS = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'] as const;
+
+/**
+ * A supported locale code (e.g., `"en"`, `"fr-FR"`).
+ */
+export type SupportedLocaleId = (typeof LOCALE_IDS)[number];
+
 /**
  * List of all locales that are officially supported by Kibana.
+ * Widened to `readonly string[]` so it can be used with `Array.prototype.includes`
+ * and similar methods that take an unnarrowed string argument.
  */
-export const SUPPORTED_LOCALE_IDS: readonly string[] = ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'];
+export const SUPPORTED_LOCALE_IDS: readonly string[] = LOCALE_IDS;
 
 /**
  * Supported locales with human-readable labels.
  */
-export const SUPPORTED_LOCALES: ReadonlyArray<{ id: string; label: string }> = [
+export const SUPPORTED_LOCALES: ReadonlyArray<{ id: SupportedLocaleId; label: string }> = [
   { id: 'en', label: 'English' },
   { id: 'fr-FR', label: 'Français' },
   { id: 'ja-JP', label: '日本語' },

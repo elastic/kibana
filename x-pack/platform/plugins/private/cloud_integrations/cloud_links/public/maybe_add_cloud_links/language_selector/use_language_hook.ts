@@ -12,7 +12,7 @@ import { useUserProfileSetting } from '../use_user_profile_setting';
 export const useLanguage = () => {
   return useUserProfileSetting<Locale>({
     settingKey: 'locale',
-    defaultValue: 'en',
+    defaultValue: '',
     notification: {
       title: i18n.translate('xpack.cloudLinks.userMenuLinks.language.successNotificationTitle', {
         defaultMessage: 'Language settings updated',
