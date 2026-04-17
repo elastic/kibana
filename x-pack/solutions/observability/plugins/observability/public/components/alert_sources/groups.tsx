@@ -13,7 +13,15 @@ import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
 import type { Group, TimeRange } from '../../../common/typings';
 import { generateSourceLink } from './get_alert_source_links';
 
-export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: TimeRange }) {
+export function Groups({
+  groups,
+  timeRange,
+  alertRuleTypeId,
+}: {
+  groups: Group[];
+  timeRange: TimeRange;
+  alertRuleTypeId: string;
+}) {
   const {
     http: {
       basePath: { prepend },
@@ -57,7 +65,12 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
             <EuiText key={group.field}>
               {group.field}:{' '}
               {sourceLinks[group.field] ? (
-                <EuiLink data-test-subj="o11yAlertSourceLink" href={sourceLinks[group.field]}>
+                <EuiLink
+                  data-test-subj="o11yAlertSourceLink"
+                  data-source={`alertDetailsSource-${alertRuleTypeId}`}
+                  data-action={`navigateTo-${group.field}`}
+                  href={sourceLinks[group.field]}
+                >
                   {group.value}
                 </EuiLink>
               ) : (

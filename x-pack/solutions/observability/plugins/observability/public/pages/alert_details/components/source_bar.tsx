@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiTitle, EuiPanel, EuiFlexItem, EuiText } from '@elastic/eui';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import { ALERT_START, ALERT_END } from '@kbn/rule-data-utils';
+import { ALERT_START, ALERT_END, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { AlertDetailsSource } from '../types';
 import type { TopAlert } from '../../..';
@@ -24,8 +24,10 @@ export interface SourceBarProps {
 export function SourceBar({ alert, sources = [] }: SourceBarProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>({ from: 'now-15m', to: 'now' });
 
+  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
+
   const groups = getSources(alert);
 
   useEffect(() => {
@@ -45,7 +47,11 @@ export function SourceBar({ alert, sources = [] }: SourceBarProps) {
               />
             </h5>
           </EuiTitle>
-          <Groups groups={groups} timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }} />
+          <Groups
+            groups={groups}
+            timeRange={alertEnd ? timeRange : { ...timeRange, to: 'now' }}
+            alertRuleTypeId={alertRuleTypeId}
+          />
           {sources.map((field, idx) => {
             return (
               <EuiFlexItem key={`sources-${idx}`} grow={false}>
