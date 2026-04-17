@@ -11,6 +11,7 @@ import React, { lazy, Suspense } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useFetchRule } from '../hooks/use_fetch_rule';
 import { Skeleton } from '../components/rule_details/skeleton';
+import { RuleProvider } from '../components/rule_details/rule_context';
 
 const LazyRuleDetailPage = lazy(async () => {
   const module = await import('../components/rule_details/rule_detail_page');
@@ -63,8 +64,10 @@ export const RuleDetailsRoute: React.FunctionComponent = () => {
   }
 
   return (
-    <Suspense fallback={<Skeleton />}>
-      <LazyRuleDetailPage rule={rule} />
-    </Suspense>
+    <RuleProvider rule={rule}>
+      <Suspense fallback={<Skeleton />}>
+        <LazyRuleDetailPage />
+      </Suspense>
+    </RuleProvider>
   );
 };
