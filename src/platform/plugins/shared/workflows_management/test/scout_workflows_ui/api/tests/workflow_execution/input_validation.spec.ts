@@ -150,24 +150,26 @@ spaceTest.describe('Input validation', { tag: tags.stateful.classic }, () => {
     expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
   });
 
-  spaceTest('validates nested object required fields', async () => {
+  spaceTest('nested object with all required fields succeeds', async () => {
     const workflow = await workflowsApi.create(NESTED_OBJECT_INPUTS_YAML);
 
-    const successExec = await workflowsApi.run(workflow.id, {
+    const { workflowExecutionId } = await workflowsApi.run(workflow.id, {
       config: { endpoint: 'https://example.com', retries: 3 },
     });
-    const successResult = await workflowsApi.waitForTermination({
-      workflowExecutionId: successExec.workflowExecutionId,
-    });
-    expect(successResult?.status).toBe(ExecutionStatus.COMPLETED);
+    const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
 
-    const failExec = await workflowsApi.run(workflow.id, {
+    expect(execution?.status).toBe(ExecutionStatus.COMPLETED);
+  });
+
+  spaceTest('nested object missing required field fails', async () => {
+    const workflow = await workflowsApi.create(NESTED_OBJECT_INPUTS_YAML);
+
+    const { workflowExecutionId } = await workflowsApi.run(workflow.id, {
       config: { retries: 3 },
     });
-    const failResult = await workflowsApi.waitForTermination({
-      workflowExecutionId: failExec.workflowExecutionId,
-    });
-    expect(failResult?.status).toBe(ExecutionStatus.FAILED);
+    const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
+
+    expect(execution?.status).toBe(ExecutionStatus.FAILED);
   });
 
   spaceTest('fails on type mismatch — string provided for number field', async () => {

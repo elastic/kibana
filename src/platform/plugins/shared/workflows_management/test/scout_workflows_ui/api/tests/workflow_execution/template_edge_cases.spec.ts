@@ -152,6 +152,9 @@ spaceTest.describe('Template engine edge cases', { tag: tags.stateful.classic },
       const execution = await workflowsApi.waitForTermination({ workflowExecutionId });
 
       expect(execution).toBeDefined();
+      // Smoke check: either outcome is acceptable as long as the engine terminates
+      // gracefully (no hang/crash). Both empty-resolution and template-error are
+      // valid behaviors for an unresolved step reference.
       expect([ExecutionStatus.COMPLETED, ExecutionStatus.FAILED]).toContain(execution?.status);
     }
   );
