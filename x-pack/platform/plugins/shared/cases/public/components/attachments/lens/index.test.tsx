@@ -130,7 +130,7 @@ describe('getVisualizationAttachmentType', () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByTestId('embeddableComponent')).toBeInTheDocument();
+        expect(screen.getByTestId('embeddableComponent'));
       });
     });
   });
