@@ -24,6 +24,12 @@ import {
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SerializedExecutionError } from '@kbn/agent-builder-common';
+import type {
+  AgentExecution,
+  ConversationAgentExecution,
+  StandaloneAgentExecution,
+} from '@kbn/agent-builder-server/execution';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -41,12 +47,6 @@ import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
-import type {
-  AgentExecution,
-  ConversationAgentExecution,
-  StandaloneAgentExecution,
-  SerializedExecutionError,
-} from './types';
 import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';

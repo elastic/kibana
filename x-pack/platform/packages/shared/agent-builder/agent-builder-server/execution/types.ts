@@ -8,19 +8,16 @@
 import type { Observable } from 'rxjs';
 import type {
   AgentCapabilities,
+  AgentExecutionMode,
   ChatEvent,
   ConverseInput,
   AgentConfigurationOverrides,
   BrowserApiToolMetadata,
   ConversationAction,
+  ExecutionStatus,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import type { AgentExecutionMode } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-
-export { ExecutionStatus };
-export type { SerializedExecutionError };
 
 /**
  * Common execution parameters shared between conversation and standalone modes.
@@ -119,6 +116,20 @@ export interface StandaloneAgentExecution extends BaseAgentExecution {
 export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecution;
 
 /**
+ * Result of executing an agent.
+ */
+export interface ExecuteAgentResult {
+  /** The unique execution ID. */
+  executionId: string;
+  /**
+   * Observable of events for this execution.
+   * - Local mode: the live agent event stream (multicasted).
+   * - TM mode: polls the data stream (equivalent to followExecution).
+   */
+  events$: Observable<ChatEvent>;
+}
+
+/**
  * Base parameters for {@link AgentExecutionService.executeAgent}.
  */
 interface ExecuteAgentBaseParams {
@@ -150,20 +161,6 @@ export interface ExecuteStandaloneAgentParams extends ExecuteAgentBaseParams {
 }
 
 export type ExecuteAgentParams = ExecuteConversationAgentParams | ExecuteStandaloneAgentParams;
-
-/**
- * Result of {@link AgentExecutionService.executeAgent}.
- */
-export interface ExecuteAgentResult {
-  /** The unique execution ID. */
-  executionId: string;
-  /**
-   * Observable of events for this execution.
-   * - Local mode: the live agent event stream (multicasted).
-   * - TM mode: polls the data stream (equivalent to followExecution).
-   */
-  events$: Observable<ChatEvent>;
-}
 
 /**
  * Options for {@link AgentExecutionService.followExecution}.

@@ -56,7 +56,7 @@ export const getSubAgentThinkingItems = ({
   const items: ItemFactoryEntry[] = [];
   const hasResults = step.results.length > 0;
 
-  // Tool call item with "Watch" button (manages its own flyout state)
+  // "Run subagent" item with the watch button
   items.push({
     key: `step-${stepIndex}-tool-call`,
     isExecuting: !hasResults,

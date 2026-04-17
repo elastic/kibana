@@ -43,6 +43,7 @@ import type {
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
@@ -55,7 +56,6 @@ import { runAgent } from './run_agent';
 import { createStore } from './store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
-import type { AgentExecutionService } from '../types';
 
 export interface CreateScopedRunnerDeps {
   // core services

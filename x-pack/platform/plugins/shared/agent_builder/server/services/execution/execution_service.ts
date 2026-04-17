@@ -16,8 +16,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AttachmentServiceStart } from '../attachments';
 import type {
   AgentExecutionService,
   AgentExecution,
@@ -25,8 +23,10 @@ import type {
   ExecuteAgentResult,
   FollowExecutionOptions,
   FindExecutionsOptions,
-} from './types';
-import { ExecutionStatus } from './types';
+} from '@kbn/agent-builder-server/execution';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
+import { getCurrentSpaceId } from '../../utils/spaces';
+import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
 import {

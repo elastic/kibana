@@ -7,7 +7,7 @@
 
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '../types';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from '../persistence';
 import { AbortMonitor } from './abort_monitor';
 

@@ -7,10 +7,9 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
-import type { AgentExecution, SerializedExecutionError, FindExecutionsOptions } from '../types';
-import { ExecutionStatus } from '../types';
+import type { ChatEvent, SerializedExecutionError } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import type { AgentExecution, FindExecutionsOptions } from '@kbn/agent-builder-server/execution';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
 import { agentExecutionIndexName, createStorage } from './agent_execution_storage';
 

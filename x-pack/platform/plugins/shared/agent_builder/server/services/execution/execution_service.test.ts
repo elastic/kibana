@@ -11,7 +11,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from './types';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
 

@@ -14,13 +14,13 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
 import type { AttachmentServiceStart } from '../../attachments';
 import type { AnalyticsService, TrackingService } from '../../../telemetry';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
-import type { AgentExecutionService } from '../types';
 
 export interface RunnerFactoryDeps {
   // core services

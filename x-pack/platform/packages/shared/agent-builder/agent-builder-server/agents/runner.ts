@@ -19,6 +19,10 @@ export interface RunAgentReturn {
  */
 export interface RunAgentParams {
   /**
+   * Execution mode for this run. When 'standalone', HITL is disabled.
+   **/
+  executionMode?: AgentExecutionMode;
+  /**
    * ID of the agent to call.
    */
   agentId: string;
@@ -47,8 +51,6 @@ export interface RunAgentParams {
    * If unspecified, will use internal logic to use the default connector
    */
   defaultConnectorId?: string;
-  /** Execution mode for this run. When 'standalone', HITL is disabled. */
-  executionMode?: AgentExecutionMode;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;
