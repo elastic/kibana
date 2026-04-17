@@ -42,8 +42,12 @@ export interface GenericMatchers {
   toStrictEqual(expected: unknown): void;
   /** Ensures that `value > expected` for number or big integer values */
   toBeGreaterThan(expected: number): void;
+  /** Ensures that `value >= expected` for number or big integer values */
+  toBeGreaterThanOrEqual(expected: number): void;
   /** Ensures that `value < expected` for number or big integer values */
   toBeLessThan(expected: number): void;
+  /** Ensures that `value <= expected` for number or big integer values */
+  toBeLessThanOrEqual(expected: number): void;
   /** Compares contents of the value with contents of `expected`, performing "deep equality" check. Allows extra properties to be present in the value */
   toMatchObject(expected: unknown): void;
   /** Ensures that string value matches a regular expression or string */
