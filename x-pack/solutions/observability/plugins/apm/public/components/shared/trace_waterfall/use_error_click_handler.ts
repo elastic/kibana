@@ -23,7 +23,6 @@ export function useErrorClickHandler(traceItems: TraceItem[]): OnErrorClick {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer',
     '/dependencies/operation'
   );
   const {

@@ -115,6 +115,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ipv6: true,
                       fields: {
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 300,
                       },
                       fields_under_root: true,
                       spaces: ['default'],
@@ -184,6 +185,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       original_space: 'default',
                       fields: {
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 600,
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                         'monitor.project.id': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                       },
@@ -276,6 +278,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {
                 meta: { space_id: 'default' },
                 'monitor.fleet_managed': true,
+                'monitor.interval': 300,
               },
             },
           },
