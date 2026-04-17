@@ -98,6 +98,10 @@ export async function computeAndPersistCompositeSummaries({
       const bulkOps = buildBulkOps(bySpace, memberMapBySpace, summaryResultBySpace, logger, stats);
 
       if (bulkOps.length > 0) {
+        // refresh: false — rely on the index refresh_interval (default 1s) for visibility.
+        // Acceptable for an hourly background task. If the index refresh_interval is set to
+        // -1 or a very long value, docs will not be visible until the next manual refresh.
+        // The inline persist path on create/update uses refresh: true for read-your-writes.
         const bulkResponse = await esClient.bulk(
           { operations: bulkOps, refresh: false },
           { signal: abortController.signal }
