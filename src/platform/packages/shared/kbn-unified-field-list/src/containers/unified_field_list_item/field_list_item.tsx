@@ -248,7 +248,7 @@ function UnifiedFieldListItemComponent({
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
 
-  const allowsSourceFieldInteractions = searchMode === 'text-based' || field.type !== '_source';
+  const allowTogglingOfFieldPopover = searchMode === 'text-based' || field.type !== '_source';
 
   const isBreakdownSupported =
     searchMode === 'documents' ? fieldSupportsBreakdown(field) : isESQLFieldGroupable(field);
@@ -400,7 +400,7 @@ function UnifiedFieldListItemComponent({
             withDragIcon={!isDragDisabled}
             flush={alwaysShowActionButton ? 'both' : undefined}
             shouldAlwaysShowAction={alwaysShowActionButton}
-            onClick={allowsSourceFieldInteractions ? togglePopover : undefined}
+            onClick={allowTogglingOfFieldPopover ? togglePopover : undefined}
             {...getCommonFieldItemButtonProps({
               stateService,
               field,

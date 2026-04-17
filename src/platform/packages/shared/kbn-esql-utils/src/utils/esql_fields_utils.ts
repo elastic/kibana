@@ -73,6 +73,8 @@ export const isESQLColumnGroupable = (column: DatatableColumn): boolean => {
 
 export const isESQLFieldGroupable = (field: FieldSpec): boolean => {
   if (field.timeSeriesMetric === 'counter') return false;
+  if (field.type === '_source') return false;
+
   return isGroupable(field.type, field.esTypes?.[0]);
 };
 

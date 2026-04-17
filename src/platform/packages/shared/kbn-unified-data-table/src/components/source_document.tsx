@@ -18,7 +18,7 @@ import type {
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { formatFieldValue, formatHit } from '@kbn/discover-utils';
+import { buildDataTableRecord, formatFieldValue, formatHit } from '@kbn/discover-utils';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
@@ -61,6 +61,15 @@ export function SourceDocument({
   columnsMeta: DataTableColumnsMeta | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
+  const esqlSourceValue =
+    isPlainRecord && columnId === '_source' && typeof row.flattened?.[columnId] === 'object'
+      ? (row.flattened[columnId] as Record<string, unknown>)
+      : undefined;
+
+  const effectiveRow = esqlSourceValue
+    ? buildDataTableRecord({ _source: esqlSourceValue }, dataView)
+    : row;
+
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(
         row.raw,
@@ -70,7 +79,14 @@ export function SourceDocument({
         fieldFormats,
         columnsMeta
       ).slice(0, maxEntries)
-    : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
+    : formatHit(
+        effectiveRow,
+        dataView,
+        shouldShowFieldHandler,
+        maxEntries,
+        fieldFormats,
+        columnsMeta
+      );
 
   return (
     <EuiDescriptionList
@@ -83,7 +99,8 @@ export function SourceDocument({
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
         // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
+        if (isPlainRecord && fieldName && (effectiveRow.flattened[fieldName] ?? null) === null)
+          return null;
         return (
           <Fragment key={fieldDisplayName}>
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">

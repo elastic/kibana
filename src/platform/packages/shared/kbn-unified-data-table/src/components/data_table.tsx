@@ -601,7 +601,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
-    const defaultColumns = displayedColumns.includes('_source');
+    const defaultColumns = !isPlainRecord && displayedColumns.includes('_source');
     const docMap = useMemo(
       () =>
         new Map<string, { doc: DataTableRecord; docIndex: number }>(
