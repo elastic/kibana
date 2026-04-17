@@ -16,7 +16,6 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
-  FullTraceWaterfallOnErrorClick,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -257,7 +256,17 @@ export interface ObservabilityTraceWaterfallFlyoutFeature {
     activeSection?: 'errors-table';
     skipOpenAnimation?: boolean;
     historyKey?: symbol;
-    renderDetailFlyout?: (props: {
+    onNodeClick: (nodeSpanId: string) => void;
+    onErrorClick: (params: {
+      traceId: string;
+      docId: string;
+      errorCount: number;
+      errorDocId?: string;
+      docIndex?: string;
+    }) => void;
+    onCloseFlyout: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
+    onExitFullScreen: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
+    renderDetailFlyout: (props: {
       docId: string;
       docIndex?: string;
       traceId: string;
@@ -266,10 +275,6 @@ export interface ObservabilityTraceWaterfallFlyoutFeature {
       onClose: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
       activeSection?: 'errors-table';
     }) => React.ReactNode;
-    onNodeClick: (nodeSpanId: string) => void;
-    onErrorClick: FullTraceWaterfallOnErrorClick;
-    onCloseFlyout: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
-    onExitFullScreen: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
   }) => React.ReactNode;
 }
 

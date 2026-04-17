@@ -48,11 +48,11 @@ export interface TraceWaterfallFlyoutProps {
   activeSection?: TraceWaterfallActiveSection;
   skipOpenAnimation?: boolean;
   historyKey?: EuiFlyoutProps['historyKey'];
-  renderDetailFlyout?: (props: TraceWaterfallDetailFlyoutProps) => React.ReactNode;
   onNodeClick: (nodeSpanId: string) => void;
   onErrorClick: FullTraceWaterfallOnErrorClick;
   onCloseFlyout: EuiFlyoutProps['onClose'];
   onExitFullScreen: EuiFlyoutProps['onClose'];
+  renderDetailFlyout: (props: TraceWaterfallDetailFlyoutProps) => React.ReactNode;
 }
 
 export function TraceWaterfallFlyout({

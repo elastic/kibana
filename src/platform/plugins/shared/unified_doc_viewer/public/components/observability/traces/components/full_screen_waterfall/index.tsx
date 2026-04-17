@@ -10,7 +10,7 @@
 import { type EuiFlyoutProps } from '@elastic/eui';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
@@ -59,14 +59,15 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const historyKey = useFlyoutHistoryKey();
   const { analytics, discoverShared } = getUnifiedDocViewerServices();
-  const TraceWaterfallFlyout = discoverShared.features.registry.getById(
-    'observability-trace-waterfall-flyout'
-  )?.render;
+  const TraceWaterfallFlyout = useMemo(
+    () => discoverShared.features.registry.getById('observability-trace-waterfall-flyout')?.render,
+    [discoverShared.features.registry]
+  );
 
   useDocViewerViewedEvent({
     reportEvent: analytics.reportEvent,
     contentId: FlyoutContentId.TRACE_TIMELINE,
-    skipNextReport: skipNextEventReport,
+    skipNextReport: skipNextEventReport || !TraceWaterfallFlyout,
   });
 
   if (!TraceWaterfallFlyout) {
@@ -98,6 +99,7 @@ export const FullScreenWaterfall = ({
           docIndex={props.docIndex}
           traceId={props.traceId}
           dataView={dataView}
+          dataTestSubj="traceWaterfallDocumentFlyout"
           hasAnimation={props.hasAnimation}
           onCloseFlyout={props.onClose}
           activeSection={props.activeSection}

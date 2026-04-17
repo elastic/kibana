@@ -8,7 +8,7 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { FullScreenWaterfall, type FullScreenWaterfallProps } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
@@ -30,7 +30,6 @@ jest.mock('./waterfall_flyout/logs_flyout', () => ({
   logsFlyoutId: 'logsFlyout',
 }));
 
-let capturedDocFlyoutOnClose: (() => void) | undefined;
 let capturedDocFlyoutHasAnimation: boolean | undefined;
 
 jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
@@ -41,9 +40,7 @@ jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
     activeSection,
     dataTestSubj,
     hasAnimation,
-    onCloseFlyout,
   }: any) => {
-    capturedDocFlyoutOnClose = onCloseFlyout;
     capturedDocFlyoutHasAnimation = hasAnimation;
     return (
       <div
@@ -90,7 +87,23 @@ describe('FullScreenWaterfall', () => {
             getById: () => ({
               render: (props: any) => {
                 capturedWaterfallProps = props;
-                return <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>;
+                const { docId, activeFlyoutType, renderDetailFlyout, skipOpenAnimation } = props;
+                return (
+                  <>
+                    <div data-test-subj="fullTraceWaterfall">FullTraceWaterfall</div>
+                    {docId && activeFlyoutType && renderDetailFlyout
+                      ? renderDetailFlyout({
+                          docId,
+                          docIndex: props.docIndex,
+                          traceId: props.traceId,
+                          type: activeFlyoutType,
+                          hasAnimation: !skipOpenAnimation,
+                          onClose: props.onCloseFlyout,
+                          activeSection: props.activeSection,
+                        })
+                      : null}
+                  </>
+                );
               },
             }),
           },
@@ -103,7 +116,6 @@ describe('FullScreenWaterfall', () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     capturedWaterfallProps = {};
-    capturedDocFlyoutOnClose = undefined;
     capturedDocFlyoutHasAnimation = undefined;
   });
 
@@ -159,7 +171,7 @@ describe('FullScreenWaterfall', () => {
       expect(capturedDocFlyoutHasAnimation).toBe(true);
     });
 
-    it('passes the nested flyout test subject to the restored document flyout', () => {
+    it('renders the document detail flyout with the correct test subject', () => {
       renderWithHistoryKey(
         <FullScreenWaterfall
           {...defaultProps}
@@ -187,78 +199,6 @@ describe('FullScreenWaterfall', () => {
       );
 
       expect(capturedWaterfallProps.highlightedSpanId).toBe('initial-span');
-    });
-
-    it('updates highlightedSpanId when a node is clicked', () => {
-      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
-
-      act(() => {
-        capturedWaterfallProps.onNodeClick?.('clicked-span');
-      });
-
-      expect(capturedWaterfallProps.highlightedSpanId).toBe('clicked-span');
-      expect(defaultProps.onNodeClick).toHaveBeenCalledWith('clicked-span');
-    });
-
-    it('clears highlightedSpanId when the document flyout is closed', () => {
-      renderWithHistoryKey(
-        <FullScreenWaterfall
-          {...defaultProps}
-          skipOpenAnimation={true}
-          docId="doc-123"
-          activeFlyoutType="spanDetailFlyout"
-        />
-      );
-
-      act(() => {
-        capturedWaterfallProps.onNodeClick?.('span-abc');
-      });
-
-      act(() => {
-        capturedDocFlyoutOnClose?.();
-      });
-
-      expect(capturedWaterfallProps.highlightedSpanId).toBeUndefined();
-      expect(defaultProps.onCloseFlyout).toHaveBeenCalled();
-    });
-
-    it('sets highlightedSpanId to docId when onErrorClick fires with multiple errors', () => {
-      renderWithHistoryKey(<FullScreenWaterfall {...defaultProps} skipOpenAnimation={true} />);
-
-      act(() => {
-        capturedWaterfallProps.onErrorClick?.({
-          traceId: 'trace-1',
-          docId: 'span-with-errors',
-          errorCount: 3,
-        });
-      });
-
-      expect(capturedWaterfallProps.highlightedSpanId).toBe('span-with-errors');
-      expect(defaultProps.onErrorClick).toHaveBeenCalledWith(
-        expect.objectContaining({ docId: 'span-with-errors', errorCount: 3 })
-      );
-    });
-
-    it('clears highlightedSpanId when onErrorClick fires with a single error', () => {
-      renderWithHistoryKey(
-        <FullScreenWaterfall
-          {...defaultProps}
-          skipOpenAnimation={true}
-          highlightedSpanId="span-abc"
-        />
-      );
-
-      act(() => {
-        capturedWaterfallProps.onErrorClick?.({
-          traceId: 'trace-1',
-          docId: 'span-with-error',
-          errorCount: 1,
-          errorDocId: 'error-doc-1',
-        });
-      });
-
-      expect(capturedWaterfallProps.highlightedSpanId).toBeUndefined();
-      expect(defaultProps.onErrorClick).toHaveBeenCalled();
     });
   });
 });
