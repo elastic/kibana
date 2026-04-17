@@ -12,8 +12,25 @@ Use a global setup hook to run code **once** before any tests start (even with m
 - Run one-time API setup with `apiServices`
 - Apply shared Kibana settings via `kbnClient`
 
+## When to use [when-to-use]
+
+Global setup is most valuable when:
+
+- **Running parallel suites**: shared data must exist before workers start
+- **Heavy one-time ingestion**: data that takes significant time to load
+- **Shared, immutable data**: data that all suites read but none modify
+
+**Keep in `beforeAll`/`afterAll` instead** when:
+
+- **Cleanup is required**: `kbnClient.importExport.load()` creates saved objects that should be removed with `.unload()` after tests. Since there's no global teardown, these operations belong in hooks.
+- **Data isolation matters**: suites that create/modify data should manage their own setup and cleanup.
+
+::::::{tip}
+`esArchiver.loadIfNeeded()` is idempotent: only the first call ingests data; subsequent calls do a fast index-exists check and skip. For **sequential runs**, keeping it in `beforeAll` is fine (no benefit from global setup). For **parallel runs**, move it to global setup so ES isn't handling ingestion while workers are running (ingestion can affect Kibana performance).
+::::::
+
 ::::::{note}
-Scout doesn’t currently have a global teardown hook. Most environments are ephemeral and are shut down after the run.
+Scout doesn't currently have a global teardown hook. Most environments are ephemeral and shut down after the run, but tests running on shared servers (like Cloud) can leave orphaned data if cleanup is skipped.
 ::::::
 
 ## Enable it [enable-global-setup-hook]
