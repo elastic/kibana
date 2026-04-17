@@ -61,7 +61,7 @@ export const GridColumn = ({
     rowMeasurementCache?.current?.clearAll();
     windowScrollerRef.current?.updatePosition();
     listRef.current?.recomputeRowHeights(0);
-  }, [list.length, columnCount, isLoading]);
+  }, [list, columnCount, isLoading]);
 
   // Use to work on small screen when categories are loaded
   useEffect(() => {
