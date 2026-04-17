@@ -850,12 +850,17 @@ export class WorkflowsService {
         };
       });
 
-    const disabledIds: string[] = disableOperations.map((op) => op.index._id);
     if (disableOperations.length > 0) {
-      await client.bulk({ operations: disableOperations, refresh: true });
+      const response = await client.bulk({ operations: disableOperations, refresh: true });
+      return disableOperations
+        .filter((_, i) => {
+          const status = response.items[i]?.index?.status ?? 0;
+          return status >= 200 && status < 300;
+        })
+        .map((op) => op.index._id);
     }
 
-    return disabledIds;
+    return [];
   }
 
   /**
