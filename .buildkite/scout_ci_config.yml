@@ -55,6 +55,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
     - kbn-streamlang-tests
   disabled:
