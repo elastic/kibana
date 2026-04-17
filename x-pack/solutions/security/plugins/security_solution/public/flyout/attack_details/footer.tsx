@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AttacksGroupTakeActionItems } from '../../detections/components/attacks/table/attacks_group_take_action_items';
+import { AttackAiAssistantButton } from '../../detections/components/attacks/table/attack_details/attack_ai_assistant_button';
 import {
   FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID,
   FLYOUT_FOOTER_TEST_ID,
@@ -63,30 +64,34 @@ export const PanelFooter = () => {
     [togglePopover]
   );
 
+  if (!attack) return null;
+
   return (
     <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            {attack ? (
-              <EuiPopover
-                id="AttackDetailsTakeActionPanel"
-                button={takeActionButton}
-                isOpen={isPopoverOpen}
+            <AttackAiAssistantButton attack={attack} pathway="attacks_page_flyout_take_action" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              id="AttackDetailsTakeActionPanel"
+              button={takeActionButton}
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+              repositionOnScroll
+            >
+              <AttacksGroupTakeActionItems
+                attack={attack}
+                onActionSuccess={onActionSuccess}
                 closePopover={closePopover}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-                repositionOnScroll
-              >
-                <AttacksGroupTakeActionItems
-                  attack={attack}
-                  onActionSuccess={onActionSuccess}
-                  closePopover={closePopover}
-                  size="s"
-                  telemetrySource="attacks_page_flyout_take_action"
-                />
-              </EuiPopover>
-            ) : null}
+                size="s"
+                telemetrySource="attacks_page_flyout_take_action"
+                showAiAssistantAction={false}
+              />
+            </EuiPopover>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

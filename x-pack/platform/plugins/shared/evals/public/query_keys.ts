@@ -29,6 +29,8 @@ export const queryKeys = {
     scores: (runId: string) => ['evals', 'runs', 'scores', runId] as const,
     datasetExamples: (runId: string, datasetId: string) =>
       ['evals', 'runs', 'datasets', 'examples', runId, datasetId] as const,
+    compare: (runIdA: string, runIdB: string) =>
+      ['evals', 'runs', 'compare', runIdA, runIdB] as const,
   },
   examples: {
     all: ['evals', 'examples'] as const,

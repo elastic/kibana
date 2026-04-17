@@ -355,6 +355,25 @@ describe('enable()', () => {
     expect(taskManager.bulkEnable).toHaveBeenCalledWith(['task-123']);
   });
 
+  test('does not leak stale uiamApiKey when enabling a rule without API key', async () => {
+    const ruleWithStaleUiam = {
+      ...existingRuleWithoutApiKey,
+      attributes: {
+        ...existingRuleWithoutApiKey.attributes,
+        uiamApiKey: Buffer.from('stale-uiam:stale-key').toString('base64'),
+      },
+    };
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(ruleWithStaleUiam);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '123', name: '123', api_key: 'abc' },
+    });
+    await rulesClient.enableRule({ id: '1' });
+
+    const writtenAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
+  });
+
   test(`doesn't update already enabled alerts but ensures task is enabled`, async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValueOnce({
       ...existingRuleWithoutApiKey,
