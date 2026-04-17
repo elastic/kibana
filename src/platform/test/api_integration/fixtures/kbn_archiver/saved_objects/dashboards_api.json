@@ -6,7 +6,7 @@
       "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"highlightAll\":true,\"version\":true}"
     },
     "optionsJSON": "{\"darkTheme\":false}",
-    "panelsJSON": "[]",
+    "panelsJSON": "{}",
     "refreshInterval": {
       "display": "Off",
       "pause": false,
