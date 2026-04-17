@@ -171,7 +171,7 @@ export const HeaderHelpMenu = () => {
 
   let customContent: React.ReactNode = null;
   if (helpExtension) {
-    const { appName, links, content } = helpExtension;
+    const { appName, links } = helpExtension;
 
     const customLinks =
       links &&
@@ -195,10 +195,17 @@ export const HeaderHelpMenu = () => {
             );
           }
           case 'custom': {
-            const { linkType, content: text, href, external, ...rest } = link;
+            const { linkType, content: text, href, external, onClick: _onClick, ...rest } = link;
             return createCustomLink(index, text, addSpacer, {
-              href,
-              onClick: createOnClickHandler(href),
+              ...(href ? { href } : {}),
+              onClick: _onClick
+                ? () => {
+                    _onClick();
+                    closeMenu();
+                  }
+                : href
+                ? createOnClickHandler(href)
+                : undefined,
               ...rest,
             });
           }
@@ -207,20 +214,12 @@ export const HeaderHelpMenu = () => {
         }
       });
 
-    const extensionContent = content?.({ hideHelpMenu: closeMenu }) ?? null;
-
     customContent = (
       <>
         <EuiPopoverTitle>
           <h3>{appName}</h3>
         </EuiPopoverTitle>
         {customLinks}
-        {extensionContent && (
-          <>
-            {customLinks && <EuiSpacer size="xs" />}
-            {extensionContent}
-          </>
-        )}
       </>
     );
   }

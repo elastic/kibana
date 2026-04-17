@@ -53,22 +53,31 @@ describe('HeaderHelpMenu', () => {
     expect(component.find('[data-test-subj="kbnVersionString"]').exists()).toBeFalsy();
   });
 
-  test('it renders content and passes hideHelpMenu action', () => {
-    const content = jest.fn(() => <span data-test-subj="react-content-node">React Content</span>);
+  test('it renders custom link with onClick and closes menu', () => {
+    const onClick = jest.fn();
     const chrome = chromeServiceMock.createStartContract();
     chrome.getHelpExtension$.mockReturnValue(
       new BehaviorSubject<ChromeHelpExtension | undefined>({
         appName: 'Test App',
-        content,
+        links: [
+          {
+            linkType: 'custom',
+            content: 'Keyboard shortcuts',
+            iconType: 'keyboard',
+            onClick,
+          },
+        ],
       })
     );
 
     const component = renderAndOpenMenu({ chrome });
 
-    expect(component.find('[data-test-subj="react-content-node"]').exists()).toBeTruthy();
-    expect(content).toHaveBeenCalledWith(
-      expect.objectContaining({ hideHelpMenu: expect.any(Function) })
+    const customButton = component.findWhere(
+      (node) => node.type() === 'button' && node.text() === 'Keyboard shortcuts'
     );
+    expect(customButton.exists()).toBeTruthy();
+    customButton.simulate('click');
+    expect(onClick).toHaveBeenCalled();
   });
 
   test('it renders the global custom content + the default content', () => {

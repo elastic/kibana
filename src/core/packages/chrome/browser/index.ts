@@ -23,7 +23,6 @@ export type {
   ChromeHelpExtensionMenuCustomLink,
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuLink,
-  ChromeHelpMenuActions,
   ChromeNavControl,
   ChromeNavControls,
   ChromeNavLink,
