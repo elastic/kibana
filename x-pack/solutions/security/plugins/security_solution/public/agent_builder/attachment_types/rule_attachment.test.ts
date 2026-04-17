@@ -48,6 +48,7 @@ const makeActionButtonsParams = (ruleJson: string) => ({
   isSidebar: false,
   isCanvas: false,
   updateOrigin: jest.fn(),
+  openSidebarConversation: jest.fn(),
 });
 
 describe('isOnRuleFormPage', () => {
@@ -223,9 +224,8 @@ describe('createRuleAttachmentDefinition', () => {
       (window as { location: unknown }).location = { pathname: '/app/security/overview' };
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
+      const params = makeActionButtonsParams(JSON.stringify(validRule));
+      const buttons = definition.getActionButtons!(params as never);
 
       buttons[0].handler();
 
@@ -234,19 +234,44 @@ describe('createRuleAttachmentDefinition', () => {
       });
     });
 
+    it('handler opens sidebar conversation when navigating to rule creation', () => {
+      (window as { location: unknown }).location = { pathname: '/app/security/overview' };
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const params = makeActionButtonsParams(JSON.stringify(validRule));
+      const buttons = definition.getActionButtons!(params as never);
+
+      buttons[0].handler();
+
+      expect(params.openSidebarConversation).toHaveBeenCalled();
+    });
+
     it('handler does not navigate when already on a rule form page', () => {
       (window as { location: unknown }).location = {
         pathname: '/app/security/rules/create',
       };
       const application = makeApplication(true);
       const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
-      const buttons = definition.getActionButtons!(
-        makeActionButtonsParams(JSON.stringify(validRule)) as never
-      );
+      const params = makeActionButtonsParams(JSON.stringify(validRule));
+      const buttons = definition.getActionButtons!(params as never);
 
       buttons[0].handler();
 
       expect(application.navigateToApp).not.toHaveBeenCalled();
+    });
+
+    it('handler does not open sidebar conversation when already on a rule form page', () => {
+      (window as { location: unknown }).location = {
+        pathname: '/app/security/rules/create',
+      };
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const params = makeActionButtonsParams(JSON.stringify(validRule));
+      const buttons = definition.getActionButtons!(params as never);
+
+      buttons[0].handler();
+
+      expect(params.openSidebarConversation).not.toHaveBeenCalled();
     });
   });
 

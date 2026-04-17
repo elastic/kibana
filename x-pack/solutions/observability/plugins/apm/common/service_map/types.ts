@@ -6,6 +6,7 @@
  */
 
 import type { Node, Edge, EdgeMarker as ReactFlowEdgeMarker } from '@xyflow/react';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from '@kbn/apm-types';
@@ -171,9 +172,11 @@ export interface ServiceMapExitSpan extends ServiceMapService {
 export type ServiceMapSpan = ServiceMapExitSpan & {
   destinationService?: ServiceMapService;
 };
-interface BaseNodeData extends Record<string, unknown> {
+interface BaseNodeData {
   id: string;
   label: string;
+  /** Allows `Node<ServiceMapNodeData>` to satisfy React Flow's `Record<string, unknown>` node data constraint. */
+  [key: string]: unknown;
 }
 
 export interface ServiceNodeData extends BaseNodeData {
@@ -182,6 +185,8 @@ export interface ServiceNodeData extends BaseNodeData {
   serviceAnomalyStats?: ServiceAnomalyStats;
   /** Active alerts count for service map badges (merged client-side). */
   alertsCount?: number;
+  /** Per-status counts when badge merge supplies a breakdown. */
+  alertsByStatus?: Partial<Record<AlertStatus, number>>;
   sloStatus?: SloStatus | 'noSLOs';
   sloCount?: number;
 }
