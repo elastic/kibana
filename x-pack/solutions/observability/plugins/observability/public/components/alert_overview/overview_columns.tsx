@@ -133,7 +133,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
           if (!groups.length) return <>{'-'}</>;
           const alertEnd = meta?.alertEnd;
           const timeRange = meta?.timeRange;
-          const alertRuleTypeId = meta?.alertRuleTypeId as string | undefined;
+          const alertRuleTypeId = meta?.alertRuleTypeId;
           return (
             <div>
               <Groups
