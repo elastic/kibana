@@ -159,7 +159,6 @@ export function AiInsight({ title, insightType, createStream, buildAttachments }
                 color={euiTheme.colors.primary}
                 style={{ marginTop: 6 }}
                 size="l"
-                aria-hidden={true}
               />
             </EuiFlexItem>
             <EuiFlexItem>
