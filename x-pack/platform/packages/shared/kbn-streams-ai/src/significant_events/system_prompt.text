@@ -182,13 +182,18 @@ query. This is a genuinely new signal dimension.
 - **Functional equivalence counts as Case 1 (SKIP).** Two queries are
   functionally equivalent when they match the same documents, regardless of
   syntax. Treat the following as the same query and do not re-emit:
-  - `MATCH_PHRASE(f, "a b c")` vs `f:"a" AND f:"b" AND f:"c"` (same text match)
   - `f:"x" AND f:"y"` vs `f:"y" AND f:"x"` (operand order in AND/OR)
   - `f IN ("a", "b")` vs `f == "a" OR f == "b"` (IN vs equality OR chain)
   - Same predicate with a redundant filter added or removed (e.g., scoping to
     `service.name == "X"` when the stream only contains service "X")
   - Threshold rewording that doesn't change intent (`> 50` vs `>= 50`,
     `error_rate > 5` vs `error_rate > 5.0`)
+- **Strict subset/superset is also a SKIP.** If your candidate query adds a
+  filter to an existing query (or removes one), it matches a subset/superset
+  of the existing documents — not a new signal. In particular,
+  `MATCH_PHRASE(f, "a b c")` is a strict subset of `f:"a" AND f:"b" AND f:"c"`
+  (the phrase requires adjacency and order; the AND chain does not). Pick one
+  form per concept and do not emit both.
 - **Prefer SKIP over REPLACE when uncertain.** Use `replaces` only when you
   are confident the new query preserves the same detection intent AND the
   existing ES|QL is clearly outdated. When unsure, skip (Case 1) rather than
@@ -505,7 +510,7 @@ Alternatively, you can use the function form `MATCH(field, "query")` which is eq
 - **All terms required (3+ terms):** `MATCH(body.text, "connection timeout error", {"operator": "AND"})` — cleaner for many terms.
 - **Exact phrase (word order matters):** `MATCH_PHRASE(body.text, "connection timeout")` — use only for well-known phrases where word order and adjacency are semantically important (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
 
-**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where word order is semantic (e.g., `"Failed password for"`, `"Out of memory"`). **Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries; they are functionally equivalent duplicates.
+**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where word order is semantic (e.g., `"Failed password for"`, `"Out of memory"`). **Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal — pick the form that matches the detection intent and skip the other.
 
 **On keyword fields**, `:` performs exact matching (the field is not analyzed):
 - `log.level:"ERROR"` → exact match on keyword field
