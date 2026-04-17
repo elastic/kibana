@@ -6,6 +6,7 @@
  */
 
 import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-plugin/common';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -14,6 +15,53 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
+
+  async function parseRow(row: WebElementWrapper) {
+    const $ = await row.parseDomContent();
+    const viewCell = await row.findByTestSubject('sessionManagementNameCol');
+    const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
+
+    return {
+      id: ((await row.getAttribute('data-test-search-session-id')) ?? '').split('id-')[1],
+      name: $.findTestSubject('sessionManagementNameCol').text().trim(),
+      status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
+      mainUrl: $.findTestSubject('sessionManagementNameLink').attr('href'),
+      created: $.findTestSubject('sessionManagementCreatedCol').text(),
+      expires: $.findTestSubject('sessionManagementExpiresCol').text(),
+      searchesCount: Number($.findTestSubject('sessionManagementNumSearchesCol').text()),
+      app: $.findTestSubject('sessionManagementAppIcon').attr('data-test-app-id'),
+      view: async () => {
+        log.debug('management ui: view the session');
+        await viewCell.click();
+      },
+      reload: async () => {
+        log.debug('management ui: reload the status');
+        await actionsCell.click();
+        await testSubjects.click('sessionManagementPopoverAction-reload');
+      },
+      delete: async () => {
+        log.debug('management ui: delete the session');
+        await actionsCell.click();
+        await find.clickByCssSelector('[data-test-subj="sessionManagementPopoverAction-delete"]');
+        await PageObjects.common.clickConfirmOnModal();
+      },
+      extend: async () => {
+        log.debug('management ui: extend the session');
+        await actionsCell.click();
+        await find.clickByCssSelector('[data-test-subj="sessionManagementPopoverAction-extend"]');
+        await PageObjects.common.clickConfirmOnModal();
+      },
+      rename: async (newName: string) => {
+        log.debug('management ui: rename the session');
+        await actionsCell.click();
+        await find.clickByCssSelector('[data-test-subj="sessionManagementPopoverAction-rename"]');
+        await testSubjects.setValue('editNameInput', newName, {
+          clearWithKeyboard: true,
+        });
+        await testSubjects.click('confirmEditName');
+      },
+    };
+  }
 
   return {
     async goTo() {
@@ -28,73 +76,26 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
       const table = await testSubjects.find(SEARCH_SESSIONS_TABLE_ID);
       const allRows = await table.findAllByTestSubject('searchSessionsRow');
 
-      return Promise.all(
-        allRows.map(async (row) => {
-          const $ = await row.parseDomContent();
-          const viewCell = await row.findByTestSubject('sessionManagementNameCol');
-          const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
-
-          return {
-            id: ((await row.getAttribute('data-test-search-session-id')) ?? '').split('id-')[1],
-            name: $.findTestSubject('sessionManagementNameCol').text().trim(),
-            status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
-            mainUrl: $.findTestSubject('sessionManagementNameLink').attr('href'),
-            created: $.findTestSubject('sessionManagementCreatedCol').text(),
-            expires: $.findTestSubject('sessionManagementExpiresCol').text(),
-            searchesCount: Number($.findTestSubject('sessionManagementNumSearchesCol').text()),
-            app: $.findTestSubject('sessionManagementAppIcon').attr('data-test-app-id'),
-            view: async () => {
-              log.debug('management ui: view the session');
-              await viewCell.click();
-            },
-            reload: async () => {
-              log.debug('management ui: reload the status');
-              await actionsCell.click();
-              await testSubjects.click('sessionManagementPopoverAction-reload');
-            },
-            delete: async () => {
-              log.debug('management ui: delete the session');
-              await actionsCell.click();
-              await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-delete"]'
-              );
-              await PageObjects.common.clickConfirmOnModal();
-            },
-            extend: async () => {
-              log.debug('management ui: extend the session');
-              await actionsCell.click();
-              await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-extend"]'
-              );
-              await PageObjects.common.clickConfirmOnModal();
-            },
-            rename: async (newName: string) => {
-              log.debug('management ui: rename the session');
-              await actionsCell.click();
-              await find.clickByCssSelector(
-                '[data-test-subj="sessionManagementPopoverAction-rename"]'
-              );
-              await testSubjects.setValue('editNameInput', newName, {
-                clearWithKeyboard: true,
-              });
-              await testSubjects.click('confirmEditName');
-            },
-            waitForCompleteStatus: async () => {
-              await retry.waitFor('session should be in a completed status', async () => {
-                const status = $.findTestSubject('sessionManagementStatusLabel').attr(
-                  'data-test-status'
-                );
-                return status === 'complete';
-              });
-            },
-          };
-        })
-      );
+      return Promise.all(allRows.map(async (row) => parseRow(row)));
     },
 
-    async getById(id: string) {
-      const list = await this.getList();
-      return list.find((session) => session.id === id);
+    async getById(id: string | null) {
+      const table = await testSubjects.find(SEARCH_SESSIONS_TABLE_ID);
+      const row = await table.findByCssSelector(`[data-test-search-session-id="id-${id}"]`);
+      return parseRow(row);
+    },
+
+    /**
+     * This method is not part of the item interface from getList because the data generated by the list is stale, the
+     * DOM is read once and after that it's not updated anymore, so we need to refetch that DOM tree each time instead.
+     */
+    async waitForItemToBeComplete(id: string | null) {
+      let item: Awaited<ReturnType<typeof this.getById>>;
+      await retry.waitFor('session should be in a completed status', async () => {
+        item = await this.getById(id);
+        return item.status === 'complete';
+      });
+      return item!;
     },
   };
 }

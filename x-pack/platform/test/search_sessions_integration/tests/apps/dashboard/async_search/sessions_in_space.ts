@@ -39,15 +39,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
           'A Pie in another space '
         );
-        if (!savedSessionId)
-          throw new Error(`Can\'t find session with title = A Pie in another space`);
 
         await searchSessions.openFlyout();
-        const searchSessionItem = await searchSessionsManagement.getById(savedSessionId);
-        if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
 
         // navigate to discover
-        await searchSessionItem.waitForCompleteStatus();
+        const searchSessionItem = await searchSessionsManagement.waitForItemToBeComplete(
+          savedSessionId
+        );
         await searchSessionItem.view();
 
         await header.waitUntilLoadingHasFinished();
