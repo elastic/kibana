@@ -68,7 +68,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     }
 
     // Fetch from ES, process, and cache
-    const promise = this.computeUserProvided<T>(bypassCache);
+    const promise = this.computeUserProvided<T>();
 
     if (!bypassCache) {
       // Register in-flight promise for deduplication
