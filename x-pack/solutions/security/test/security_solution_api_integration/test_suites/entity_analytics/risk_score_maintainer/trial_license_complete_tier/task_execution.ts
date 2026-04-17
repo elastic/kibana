@@ -16,6 +16,7 @@ import {
   waitForRiskScoreForId,
   EntityStoreUtils,
   entityMaintainerRouteHelpersFactory,
+  waitForMaintainerRun,
   cleanUpRiskScoreMaintainer,
   riskScoreMaintainerScenarioFactory,
   riskScoreMaintainerEntityBuilders,
@@ -146,6 +147,39 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(hostScores.length).to.be.greaterThan(1);
       });
 
+      it('@skipInServerlessMKI produces additional scores after manual trigger', async () => {
+        const hostName = `host-manual-${uuidv4().slice(0, 8)}`;
+        const { documentIds, testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.host({ hostName }),
+        ]);
+        const [host] = testEntities;
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds,
+          alerts: 1,
+          riskScore: 40,
+        });
+
+        await maintainerScenario.installAndRunMaintainer({
+          dataViewPattern: testLogsIndex,
+          runMode: 'async',
+        });
+        await waitForRiskScoreForId({
+          es,
+          log,
+          idValue: host.expectedEuid,
+          expectedCalculatedScore: 40,
+        });
+
+        const preManualScores = await readRiskScores(es);
+        const preManualCount = preManualScores.length;
+
+        await waitForMaintainerRun({ retry, routes: maintainerRoutes, minRuns: 1 });
+
+        await waitForRiskScoresToBePresent({ es, log, scoreCount: preManualCount + 1 });
+        const postManualScores = await readRiskScores(es);
+        expect(postManualScores.length).to.be.greaterThan(preManualCount);
+      });
     });
   });
 };
