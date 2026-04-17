@@ -776,7 +776,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
           ),
           realm,
         },
-        stateCookieOptions: { sameSite: 'None', isSecure: true },
+        // `isSecure` is `true` everywhere except localhost: Safari
+        // (unlike Chrome) refuses to set or send Secure cookies over plain HTTP even on localhost,
+        // which caused the session cookie to be lost between the SAML handshake and the ACS
+        // callback, resulting in an empty `ids` array sent to Elasticsearch.
+        stateCookieOptions: { sameSite: 'None', isSecure: !this.isLocalhost() },
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
@@ -868,6 +872,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
     this.logger.debug('User session has been successfully invalidated.');
 
     return redirect;
+  }
+
+  /**
+   * Returns true if the Kibana server is running on localhost.
+   */
+  private isLocalhost() {
+    const { hostname } = new URL(this.options.getServerBaseURL());
+
+    return ['localhost', '127.0.0.1', '::1'].includes(hostname.toLowerCase());
   }
 
   /**
