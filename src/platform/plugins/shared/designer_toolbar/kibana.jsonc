@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/designer-toolbar-plugin",
+  "plugin": {
+    "id": "designerToolbar",
+    "browser": true,
+    "server": true,
+    "configPath": ["designerToolbar"],
+    "requiredBundles": [],
+    "requiredPlugins": []
+  },
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared"
+}
