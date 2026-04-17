@@ -540,8 +540,9 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
-  const { editorMessages, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } = useQueryValidation(
-    {
+  const { editorMessages, onLookupIndexCreate, onNewFieldsAddedToLookupIndex, onQuickFixClick } =
+    useQueryValidation({
+      core,
       code,
       codeWhenSubmitted,
       editorRef,
@@ -563,8 +564,7 @@ const ESQLEditorInternal = function ESQLEditor({
         trackValidationLatencyEnd,
         resetValidationTracking,
       },
-    }
-  );
+    });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
@@ -853,6 +853,7 @@ const ESQLEditorInternal = function ESQLEditor({
         queryStats={queryStats}
         {...editorMessages}
         onErrorClick={onErrorClick}
+        onQuickFixClick={onQuickFixClick}
       />
       {createPortal(
         Object.keys(popoverPosition).length > 0 && (

@@ -12,10 +12,13 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { ESQLLang, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { MapCache } from 'lodash';
+import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import {
   filterDataErrors,
   filterDuplicatedWarnings,
   filterOutWarningsOverlappingWithErrors,
+  filterQuickFixes,
   parseErrors,
   parseWarning,
   useDebounceWithOptions,
@@ -31,6 +34,7 @@ interface ValidationLatencyTracking {
 }
 
 interface UseQueryValidationParams {
+  core: CoreStart;
   code: string;
   codeWhenSubmitted: string;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -51,6 +55,7 @@ interface UseQueryValidationParams {
 }
 
 export const useQueryValidation = ({
+  core,
   code,
   codeWhenSubmitted,
   editorRef,
@@ -87,7 +92,15 @@ export const useQueryValidation = ({
         const { callbacks: timedCallbacks, getCallbacksDuration } =
           createTimedCallbacks(esqlCallbacks);
         const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
-        return { ...result, callbacksDuration: getCallbacksDuration() };
+        const [errors, warnings] = await Promise.all([
+          filterQuickFixes(result.errors, code, esqlCallbacks),
+          filterQuickFixes(result.warnings, code, esqlCallbacks),
+        ]);
+        return {
+          errors,
+          warnings,
+          callbacksDuration: getCallbacksDuration(),
+        };
       }
       return {
         errors: [],
@@ -281,10 +294,33 @@ export const useQueryValidation = ({
     [serverErrors, serverWarning, code, codeWhenSubmitted, queryValidation]
   );
 
+  const onQuickFixClick = useCallback(
+    ({ quickFix }: MonacoMessage) => {
+      try {
+        const editor = editorRef.current;
+        const model = editor?.getModel();
+        if (editor && model && quickFix?.fixQuery) {
+          const currentQuery = model.getValue();
+          const fixed = quickFix.fixQuery(currentQuery);
+          const fullRange = model.getFullModelRange();
+          editor.executeEdits('standaloneQuery', [{ range: fullRange, text: fixed }]);
+        }
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('esqlEditor.quickFix.genericError', {
+            defaultMessage: 'Failed to apply quick fix',
+          }),
+        });
+      }
+    },
+    [core.notifications.toasts, editorRef]
+  );
+
   return {
     editorMessages,
     queryValidation,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,
+    onQuickFixClick,
   };
 };
