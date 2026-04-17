@@ -38,6 +38,4 @@ When a user sets a preferred language, it is stored in their user profile and ta
 
 1. **User profile setting** — The language selected by the user in their profile or the user menu.
 2. **`i18n.locale` config** — The server-wide locale set in `kibana.yml`.
-3. **Browser `Accept-Language` header** — The browser's preferred language. This is only used as a fallback when `i18n.locale` is not explicitly set (i.e., the default `en`).
-
 
