@@ -16,6 +16,7 @@ import { ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER } from '@kbn/rule-data-utils';
 import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names/fetch_alerts_index_names';
 import type { HttpStart } from '@kbn/core-http-browser';
 import moment from 'moment';
+import { REPORTING_MANAGEMENT_HOME, INTERNAL_ROUTES } from '@kbn/reporting-common';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
 const createSuccessToastText = (http: HttpStart): MountPoint => {
@@ -45,8 +46,6 @@ const createSuccessToastText = (http: HttpStart): MountPoint => {
     };
   };
 };
-
-const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
 
 const CSV_EXPORT_LABEL = i18n.translate('responseOpsAlertsTable.csvExport.buttonLabel', {
   defaultMessage: 'CSV export',
@@ -125,7 +124,7 @@ export const CsvExportButton: React.FC = () => {
       };
 
       const jobParamsRison = risonEncode(jobParams);
-      await http.post('/internal/reporting/generate/csv_searchsource', {
+      await http.post(`${INTERNAL_ROUTES.GENERATE_PREFIX}/csv_searchsource`, {
         body: JSON.stringify({ jobParams: jobParamsRison }),
       });
 
