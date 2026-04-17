@@ -618,7 +618,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     // closes the dimension editor flyout
     async closeDimensionEditor() {
       await retry.try(async () => {
-        await testSubjects.click('lns-indexPattern-dimensionContainerClose');
+        await browser.execute(() => {
+          const btn = document.querySelector(
+            '[data-test-subj="lns-indexPattern-dimensionContainerClose"]'
+          ) as HTMLElement;
+          if (btn) btn.click();
+        });
         await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerClose');
       });
     },
