@@ -6,7 +6,7 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { type ConfigSchema } from '../common/constants/app';
+import { type ConfigSchema } from '@kbn/ml-common-constants/app_config';
 import { configSchema } from './config_schema';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type { DatafeedStats as MlDatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';

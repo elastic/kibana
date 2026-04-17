@@ -35,7 +35,7 @@ import type {
   RecognizeResult,
 } from '@kbn/ml-common-types/modules';
 import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 
 import type { FieldHistogramRequestConfig } from '../../datavisualizer/index_based/common/request';
 

@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { Annotation, GetAnnotationsResponse } from '@kbn/ml-common-types/annotations';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 

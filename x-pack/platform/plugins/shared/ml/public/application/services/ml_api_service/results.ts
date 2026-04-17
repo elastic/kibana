@@ -28,9 +28,9 @@ import type {
 } from '@kbn/ml-common-types/results';
 
 import type { CriteriaField } from '@kbn/ml-common-types/results';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 
 export interface CategoryDefinition {

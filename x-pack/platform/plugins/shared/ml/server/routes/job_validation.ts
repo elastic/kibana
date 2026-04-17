@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
 import type { AnalysisConfig } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import { ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization } from '../types';
 import {

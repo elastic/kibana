@@ -15,9 +15,9 @@ import type {
   MlAnomalyDetectionAlertRule,
   MlAnomalyDetectionAlertParams,
 } from '@kbn/ml-common-types/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import { useMlKibana } from '../application/contexts/kibana';
-import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { PLUGIN_ID } from '../../common/constants/app';
 import type { FocusTrapProps } from '../application/util/create_focus_trap_props';
 import { createJobActionFocusTrapProps } from '../application/util/create_focus_trap_props';
 

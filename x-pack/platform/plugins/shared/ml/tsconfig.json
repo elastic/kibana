@@ -139,6 +139,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/presentation-util",
     "@kbn/licensing-types",
+    "@kbn/ml-common-constants",
     "@kbn/ml-common-types",
     "@kbn/file-upload-plugin",
     "@kbn/file-upload",

@@ -16,17 +16,17 @@ import { parseInterval } from '@kbn/ml-parse-interval';
 
 import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
-import type { MlClient } from '../ml_client';
-import type { JobSelection } from '../../routes/schemas/alerting_schema';
-import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import {
   ALERT_DATAFEED_RESULTS,
   ALERT_DELAYED_DATA_RESULTS,
   ALERT_JOB_ERRORS_RESULTS,
   ALERT_MML_RESULTS,
   ALL_JOBS_SELECTION,
-  HEALTH_CHECK_NAMES,
-} from '../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
+import type { MlClient } from '../ml_client';
+import type { JobSelection } from '../../routes/schemas/alerting_schema';
+import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
+import { HEALTH_CHECK_NAMES } from '../../../common/alerts/health_check_names';
 import type { GetGuards } from '../../shared_services/shared_services';
 import type {
   AnomalyDetectionJobHealthAlertPayload,

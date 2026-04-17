@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-plugin/common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { Module } from '@kbn/ml-common-types/modules';
 import { rootRequest } from './common';
 

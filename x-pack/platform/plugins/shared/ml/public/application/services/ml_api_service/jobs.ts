@@ -31,11 +31,11 @@ import type {
   BulkCreateResults,
   ResetJobsResponse,
 } from '@kbn/ml-common-types/job_service';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 export const jobsApiProvider = (httpService: HttpService) => ({
   jobsSummary(jobIds: string[]) {

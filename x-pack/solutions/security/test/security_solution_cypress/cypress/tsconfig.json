@@ -39,6 +39,7 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/security-plugin-types-common",
     "@kbn/securitysolution-utils",
+    "@kbn/ml-common-constants",
     "@kbn/ml-common-types",
     "@kbn/maintenance-windows-plugin",
     "@kbn/test-saml-auth",

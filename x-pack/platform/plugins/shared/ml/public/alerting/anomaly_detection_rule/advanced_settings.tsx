@@ -19,8 +19,8 @@ import { isDefined } from '@kbn/ml-is-defined';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { type MlAnomalyDetectionAlertAdvancedSettings } from '@kbn/ml-common-types/alerts';
+import { TOP_N_BUCKETS_COUNT } from '@kbn/ml-common-constants/alerts';
 import { validateTopNBucket } from '../validators';
-import { TOP_N_BUCKETS_COUNT } from '../../../common/constants/alerts';
 import { TimeIntervalControl } from '../time_interval_control';
 
 interface AdvancedSettingsProps {

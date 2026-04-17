@@ -31,7 +31,7 @@ import type {
   DeleteModelParams,
   UpdateAllocationParams,
 } from '@kbn/ml-common-types/trained_models';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
 

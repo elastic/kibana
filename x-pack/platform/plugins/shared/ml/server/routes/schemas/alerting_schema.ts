@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
 import type { anomalyDetectionJobsHealthRuleParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection_jobs_health';
 
-import { ALERT_PREVIEW_SAMPLE_SIZE } from '../../../common/constants/alerts';
+import { ALERT_PREVIEW_SAMPLE_SIZE } from '@kbn/ml-common-constants/alerts';
 
 export const mlAnomalyDetectionAlertPreviewRequest = schema.object({
   alertParams: mlAnomalyDetectionAlertParamsSchema,

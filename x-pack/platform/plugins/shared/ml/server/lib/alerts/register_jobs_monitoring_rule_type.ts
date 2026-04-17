@@ -36,8 +36,8 @@ import {
   ALERT_JOB_ERRORS_RESULTS,
   ALERT_MML_RESULTS,
   ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
-import { PLUGIN_ID } from '../../../common/constants/app';
+} from '@kbn/ml-common-constants/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import { assertUserError } from './utils';
 import type { AnomalyDetectionJobsHealthRuleParams } from '../../routes/schemas/alerting_schema';

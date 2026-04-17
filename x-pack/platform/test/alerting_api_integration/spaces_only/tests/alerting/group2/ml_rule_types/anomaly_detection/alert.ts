@@ -12,7 +12,7 @@ import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/dataf
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
-import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';

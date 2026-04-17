@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '@kbn/ml-common-types/locator_deprecated_routes';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { PLUGIN_ID } from '../../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
 

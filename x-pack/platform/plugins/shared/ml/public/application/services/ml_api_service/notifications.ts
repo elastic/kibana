@@ -15,7 +15,7 @@ import type {
   NotificationsCountQueryParams,
   NotificationsCountResponse,
 } from '@kbn/ml-common-types/notifications';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { HttpService } from '../http_service';
 
 export function notificationsProvider(httpService: HttpService) {

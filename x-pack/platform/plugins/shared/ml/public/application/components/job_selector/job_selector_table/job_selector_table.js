@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../../../contexts/kibana';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import { MlNodeAvailableWarningShared } from '../../node_available_warning';
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];

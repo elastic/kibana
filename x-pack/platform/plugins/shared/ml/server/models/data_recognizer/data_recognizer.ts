@@ -43,7 +43,7 @@ import type {
 import { isGeneralJobOverride } from '@kbn/ml-common-types/modules';
 import type { JobExistResult, JobStat } from '@kbn/ml-common-types/data_recognizer';
 import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
-import type { CompatibleModule } from '../../../common/constants/app';
+import type { CompatibleModule } from '@kbn/ml-common-constants/app_config';
 import type { MlClient } from '../../lib/ml_client';
 import {
   getLatestDataOrBucketTimestamp,

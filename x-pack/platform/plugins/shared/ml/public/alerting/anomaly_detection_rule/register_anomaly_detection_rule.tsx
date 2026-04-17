@@ -15,8 +15,8 @@ import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
 import { fromKueryExpression } from '@kbn/es-query';
 import { validateCustomFilterFields } from '@kbn/ml-anomaly-utils';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
 import type { MlCoreSetup } from '../../plugin';
-import { ML_ALERT_TYPES } from '../../../common';
 import { validateLookbackInterval, validateTopNBucket } from '../validators';
 
 export function registerAnomalyDetectionRule(

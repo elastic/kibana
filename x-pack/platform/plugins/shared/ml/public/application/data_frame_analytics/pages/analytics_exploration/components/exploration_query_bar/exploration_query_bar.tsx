@@ -19,7 +19,7 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 
 import type { Dictionary } from '@kbn/ml-common-types/common';
-import { PLUGIN_ID } from '../../../../../../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 

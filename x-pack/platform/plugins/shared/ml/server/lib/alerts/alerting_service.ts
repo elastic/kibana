@@ -44,7 +44,7 @@ import type {
   TopRecordAADDoc,
 } from '@kbn/ml-common-types/alerts';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
-import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
+import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '@kbn/ml-common-constants/alerts';
 import { formatTimeValue } from '../../../common/util/format_time_value';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';

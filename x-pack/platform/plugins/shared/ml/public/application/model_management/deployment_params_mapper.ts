@@ -11,7 +11,7 @@ import type {
   StartAllocationParams,
 } from '@kbn/ml-common-types/trained_models';
 import type { CloudInfo, MlServerLimits } from '@kbn/ml-common-types/ml_server_info';
-import type { NLPSettings } from '../../../common/constants/app';
+import type { NLPSettings } from '@kbn/ml-common-constants/app_config';
 import type { AdaptiveAllocations } from '../../../server/lib/ml_client/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 

@@ -6,7 +6,7 @@
  */
 
 import type { MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
-import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
+import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import { wrapError } from '../client/error_wrapper';
 import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';

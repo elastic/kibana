@@ -18,7 +18,7 @@ import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { CoreAuditService } from '@kbn/core-security-server';
 import type { ResolveMlCapabilities, MlCapabilitiesKey } from '@kbn/ml-common-types/capabilities';
 import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
-import type { CompatibleModule, MlFeatures } from '../../common/constants/app';
+import type { CompatibleModule, MlFeatures } from '@kbn/ml-common-constants/app_config';
 import type { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';

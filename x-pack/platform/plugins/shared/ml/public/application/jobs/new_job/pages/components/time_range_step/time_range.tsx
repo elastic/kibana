@@ -19,7 +19,7 @@ import {
   type MlStorageKey,
   type TMlStorageMapped,
 } from '@kbn/ml-common-types/storage';
-import { ML_INTERNAL_BASE_PATH } from '../../../../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';

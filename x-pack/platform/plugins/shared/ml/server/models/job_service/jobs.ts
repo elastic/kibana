@@ -28,6 +28,7 @@ import type {
   BulkCreateResults,
   ResetJobsResponse,
 } from '@kbn/ml-common-types/job_service';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
 import {
   getJobActionString,
   JOB_ACTION_TASK,
@@ -54,7 +55,6 @@ import {
 } from '../../../common/util/job_utils';
 import { groupsProvider } from './groups';
 import type { MlClient } from '../../lib/ml_client';
-import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 
 interface Results {

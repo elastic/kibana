@@ -13,7 +13,7 @@ import type {
   NotificationsCountResponse,
   NotificationsSearchResponse,
 } from '@kbn/ml-common-types/notifications';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app_config';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { ML_NOTIFICATION_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import type {

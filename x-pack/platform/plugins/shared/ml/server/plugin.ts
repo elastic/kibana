@@ -28,15 +28,15 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import { type MlCapabilities, alertingFeatures } from '@kbn/ml-common-types/capabilities';
 import { getPluginPrivileges } from '@kbn/ml-common-types/capabilities';
-import type { PluginsSetup, PluginsStart, RouteInitialization, ServerlessInfo } from './types';
-import { notificationsRoutes } from './routes/notifications';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import {
   type MlFeatures,
-  PLUGIN_ID,
   type ConfigSchema,
   initEnabledFeatures,
   type CompatibleModule,
-} from '../common/constants/app';
+} from '@kbn/ml-common-constants/app_config';
+import type { PluginsSetup, PluginsStart, RouteInitialization, ServerlessInfo } from './types';
+import { notificationsRoutes } from './routes/notifications';
 import { initMlServerLog } from './lib/log';
 import { annotationRoutes } from './routes/annotations';
 import { calendars } from './routes/calendars';

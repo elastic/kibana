@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import type { MlAnomalyDetectionAlertParams, PreviewResponse } from '@kbn/ml-common-types/alerts';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 export const alertingApiProvider = (httpService: HttpService) => {
   return {

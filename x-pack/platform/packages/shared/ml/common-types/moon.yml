@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/core-http-browser'
   - '@kbn/ml-server-schemas'
+  - '@kbn/ml-common-constants'
 tags:
   - shared-common
   - package

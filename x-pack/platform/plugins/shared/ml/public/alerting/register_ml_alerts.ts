@@ -9,9 +9,9 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-common-types/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
+import { ML_APP_ROUTE, PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 import type { MlCoreSetup } from '../plugin';
-import { ML_ALERT_TYPES } from '../../common/constants/alerts';
-import { ML_APP_ROUTE, PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { registerJobsHealthAlertingRule } from './jobs_health_rule';
 import { registerAnomalyDetectionRule } from './anomaly_detection_rule';

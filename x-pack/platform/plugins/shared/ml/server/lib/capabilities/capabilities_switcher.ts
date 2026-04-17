@@ -15,7 +15,7 @@ import {
   basicLicenseMlCapabilities,
   featureCapabilities,
 } from '@kbn/ml-common-types/capabilities';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app_config';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 
 export const setupCapabilitiesSwitcher = (

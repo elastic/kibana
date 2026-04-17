@@ -21,8 +21,8 @@ import type {
   NodeDeploymentStatsResponse,
   NodesOverviewResponse,
 } from '@kbn/ml-common-types/trained_models';
+import type { MlFeatures } from '@kbn/ml-common-constants/app_config';
 import type { MlClient } from '../../lib/ml_client';
-import type { MlFeatures } from '../../../common/constants/app';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();

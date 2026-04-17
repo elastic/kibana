@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export enum LICENSE_TYPE {
-  BASIC,
-  FULL, // >= platinum
-}
-
-export const VALID_FULL_LICENSE_MODES = ['platinum', 'enterprise', 'trial'];
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/ml/common-constants'],
+};

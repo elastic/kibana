@@ -8,12 +8,8 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { AlertConsumers, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-
-import { ML_ALERT_TYPES } from './alerts';
-
-// cannot import because of cyclic dependency
-// import { PLUGIN_ID } from '@kbn/ml-common-constants/app';
-const PLUGIN_ID = 'ml';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 
 import {
   ML_JOB_SAVED_OBJECT_TYPE,

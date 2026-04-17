@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { PLUGIN_ID } from '../../common/constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 
 export function spacesUtilsProvider(
   getSpacesPlugin: (() => Promise<SpacesPluginStart>) | undefined,
