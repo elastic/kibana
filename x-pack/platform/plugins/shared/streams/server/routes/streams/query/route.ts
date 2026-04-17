@@ -12,9 +12,9 @@ import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-sett
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 import { getEsqlView } from '../../../lib/streams/esql_views/manage_esql_views';
 import { upsertQueryStreamRequest } from '../../../oas_examples';
+import { getStreamAssets } from '../../../lib/streams/helpers/ingest_upsert';
 
 /**
  * Schema for API request body - accepts esql for UX simplicity.
@@ -177,24 +177,12 @@ const upsertQueryStreamRoute = createServerRoute({
       throw badData(`The stream "${name}" already exists and is not a query stream.`);
     }
 
-    // Get existing assets and attachments to preserve them
     const queryClient = await getQueryClient();
-    const [assets, attachments] = await Promise.all([
-      queryClient.getAssets(name),
-      attachmentClient.getAttachments(name),
-    ]);
-
-    const dashboards = attachments
-      .filter((attachment) => attachment.type === 'dashboard')
-      .map((attachment) => attachment.id);
-
-    const rules = attachments
-      .filter((attachment) => attachment.type === 'rule')
-      .map((attachment) => attachment.id);
-
-    const queries = assets
-      .filter((asset) => asset[ASSET_TYPE] === 'query')
-      .map((asset) => asset.query);
+    const { dashboards, queries, rules } = await getStreamAssets({
+      name,
+      queryClient,
+      attachmentClient,
+    });
 
     // Remove name and updated_at from definition - these are not allowed in UpsertRequest
     const { name: _name, updated_at: _updatedAt, ...stream } = definition;
