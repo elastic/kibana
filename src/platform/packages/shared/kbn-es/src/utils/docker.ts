@@ -220,7 +220,11 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
   ['ES_JAVA_OPTS', '-Xms1536m -Xmx1536m'],
 ];
 
-export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
+// kibana-ci is only managing x64 images, so we're using the release versions for development
+// aarch64 images should be added in the future to make sure environments match
+export const DOCKER_REPO = `${DOCKER_REGISTRY}/${
+  process.env.CI ? 'kibana-ci' : 'elasticsearch'
+}/elasticsearch`;
 export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
