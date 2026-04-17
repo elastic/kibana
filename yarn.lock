@@ -36341,6 +36341,10 @@ zod@4.3.6, zod@^3.24.1, zod@^3.24.2, "zod@^3.25 || ^4.0", "zod@^3.25.76 || ^4", 
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
   integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
 
+"zod@file:./local_deps/zod_4.3.6.tgz":
+  version "4.3.6"
+  resolved "file:./local_deps/zod_4.3.6.tgz#8ee65a512aa442692e5478940bfd743c4debd5d0"
+
 zustand@^4.4.0:
   version "4.5.5"
   resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.5.5.tgz#f8c713041543715ec81a2adda0610e1dc82d4ad1"
