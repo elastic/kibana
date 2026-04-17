@@ -8,11 +8,15 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { defaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { Footer } from '../../flyout_v2/document/footer';
+import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { NotesDetails } from '../../flyout_v2/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 
 export interface AlertFlyoutFooterProps {
   /**
@@ -42,6 +46,9 @@ export const AlertFlyoutFooter = ({
   const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const isSecurityApp = useIsInSecurityApp();
+  const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+
   const openNotesFlyout = useCallback(() => {
     if (!services || !store) {
       return;
@@ -55,13 +62,11 @@ export const AlertFlyoutFooter = ({
         children: <NotesDetails hit={hit} />,
       }),
       {
-        ownFocus: false,
-        resizable: true,
-        size: 'm',
-        type: 'overlay',
+        ...defaultToolsFlyoutProperties,
+        historyKey,
       }
     );
-  }, [history, hit, services, store]);
+  }, [history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;

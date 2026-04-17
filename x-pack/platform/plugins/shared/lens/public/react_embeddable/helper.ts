@@ -41,10 +41,12 @@ import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/co
 import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
 
 import type { StrippedLensState } from '../../common/transforms/helpers';
+import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../common/transforms/utils';
 import { getLensBuilder } from '../lazy_builder';
 import type { ESQLStartServices } from './esql';
 import { loadESQLAttributes } from './esql';
 import type { LensEmbeddableStartServices } from './types';
+import type { FlattenedLensByValuePanelSchema } from '../../server/types';
 
 export function createEmptyLensState(
   visualizationType: null | string = null,
@@ -177,7 +179,16 @@ export function getStructuredDatasourceStates(
   };
 }
 
-export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSerializedState {
+export function transformFromApiConfig(
+  rawState: LensSerializedAPIConfig | FlattenedLensByValuePanelSchema
+): LensSerializedState {
+  // The dashboard may provide state in the flat API format (from server-side transforms)
+  // where chart props sit at the top level without an `attributes` wrapper.
+  // Normalize to the nested format before proceeding.
+  const state: LensSerializedAPIConfig = isFlattenedAPIConfig(rawState)
+    ? unflattenAPIConfig(rawState)
+    : rawState;
+
   const builder = getLensBuilder();
 
   if (!builder?.isEnabled) {
@@ -199,7 +210,6 @@ export function transformFromApiConfig(state: LensSerializedAPIConfig): LensSeri
   }
 
   if (!state.attributes) {
-    // Not sure if this is possible
     throw new Error('attributes are missing');
   }
 
@@ -243,7 +253,6 @@ export function transformToApiConfig(state: StrippedLensState): LensSerializedAP
   }
 
   if (!attributes) {
-    // This should only ever handle by-value state.
     throw new Error('attributes are missing');
   }
 

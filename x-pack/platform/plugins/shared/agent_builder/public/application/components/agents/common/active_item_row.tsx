@@ -18,6 +18,7 @@ export interface ActiveItemRowProps {
   isRemoving?: boolean;
   removeAriaLabel: string;
   readOnlyContent?: React.ReactNode;
+  canEditAgent: boolean;
 }
 
 export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
@@ -28,6 +29,7 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
   isRemoving = false,
   removeAriaLabel,
   readOnlyContent,
+  canEditAgent,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -70,17 +72,18 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
       </EuiFlexItem>
       {isSelected && (
         <EuiFlexItem grow={false}>
-          {readOnlyContent ?? (
-            <EuiButtonIcon
-              iconType="cross"
-              aria-label={removeAriaLabel}
-              disabled={isRemoving}
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                onRemove();
-              }}
-            />
-          )}
+          {readOnlyContent ??
+            (canEditAgent ? (
+              <EuiButtonIcon
+                iconType="cross"
+                aria-label={removeAriaLabel}
+                disabled={isRemoving}
+                onClick={(event: React.MouseEvent) => {
+                  event.stopPropagation();
+                  onRemove();
+                }}
+              />
+            ) : null)}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

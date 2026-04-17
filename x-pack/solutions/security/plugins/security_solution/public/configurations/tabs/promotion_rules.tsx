@@ -8,16 +8,19 @@
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { GapAutoFillSchedulerProvider } from '../../detection_engine/rule_gaps/context/gap_auto_fill_scheduler_context';
 import { RulesTableContextProvider } from '../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { PromotionRulesTable } from './promotion_rules/promotion_rules_table';
 
 export const PromotionRules: React.FC = () => {
   return (
-    <RulesTableContextProvider>
-      <SecuritySolutionPageWrapper>
-        <EuiSpacer />
-        <PromotionRulesTable />
-      </SecuritySolutionPageWrapper>
-    </RulesTableContextProvider>
+    <GapAutoFillSchedulerProvider>
+      <RulesTableContextProvider>
+        <SecuritySolutionPageWrapper>
+          <EuiSpacer />
+          <PromotionRulesTable />
+        </SecuritySolutionPageWrapper>
+      </RulesTableContextProvider>
+    </GapAutoFillSchedulerProvider>
   );
 };

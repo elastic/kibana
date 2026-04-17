@@ -20,14 +20,14 @@ export const findPanelById = (
 ): AttachmentPanel | undefined => {
   for (const widget of widgets) {
     if (isSection(widget)) {
-      const sectionPanel = widget.panels.find((panel) => panel.uid === panelId);
+      const sectionPanel = widget.panels.find((panel) => panel.id === panelId);
       if (sectionPanel) {
         return sectionPanel;
       }
       continue;
     }
 
-    if (widget.uid === panelId) {
+    if (widget.id === panelId) {
       return widget;
     }
   }
@@ -53,7 +53,7 @@ export const getWidgetsBottomY = (widgets: DashboardWidget[]): number => {
 };
 
 export const findSectionIndex = (panels: DashboardWidget[], sectionId: string): number => {
-  return panels.findIndex((widget) => isSection(widget) && widget.uid === sectionId);
+  return panels.findIndex((widget) => isSection(widget) && widget.id === sectionId);
 };
 
 export const appendPanelsToDashboard = ({
@@ -84,7 +84,7 @@ export const appendPanelsToDashboard = ({
   return {
     ...dashboardData,
     panels: dashboardData.panels.map((widget) => {
-      if (!isSection(widget) || widget.uid !== sectionId) {
+      if (!isSection(widget) || widget.id !== sectionId) {
         return widget;
       }
 
@@ -115,7 +115,7 @@ export const updatePanelInDashboard = ({
     if (isSection(widget)) {
       let sectionUpdated = false;
       const nextSectionPanels = widget.panels.map((panel) => {
-        if (panel.uid !== panelId) {
+        if (panel.id !== panelId) {
           return panel;
         }
 
@@ -127,7 +127,7 @@ export const updatePanelInDashboard = ({
       return sectionUpdated ? { ...widget, panels: nextSectionPanels } : widget;
     }
 
-    if (widget.uid !== panelId) {
+    if (widget.id !== panelId) {
       return widget;
     }
 
@@ -159,7 +159,7 @@ export const removePanelsFromDashboard = ({
     if (isSection(widget)) {
       const sectionPanelsToKeep: AttachmentPanel[] = [];
       for (const panel of widget.panels) {
-        if (panelIdsToRemoveSet.has(panel.uid)) {
+        if (panelIdsToRemoveSet.has(panel.id)) {
           removedPanels.push(panel);
         } else {
           sectionPanelsToKeep.push(panel);
@@ -169,7 +169,7 @@ export const removePanelsFromDashboard = ({
       continue;
     }
 
-    if (panelIdsToRemoveSet.has(widget.uid)) {
+    if (panelIdsToRemoveSet.has(widget.id)) {
       removedPanels.push(widget);
     } else {
       nextPanels.push(widget);

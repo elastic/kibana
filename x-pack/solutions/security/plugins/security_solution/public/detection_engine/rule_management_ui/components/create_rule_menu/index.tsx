@@ -45,6 +45,7 @@ const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name
 You can review and edit everything before enabling the rule. 
 Desired behavior or activity to detect:
 
+==== YOUR DESCRIPTION HERE====
 `;
 
 const AI_RULE_CREATION_MENU_TOUR_SUBTITLE = i18n.translate(

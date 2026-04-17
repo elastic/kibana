@@ -143,10 +143,26 @@ describe('cloud connector integration helpers', () => {
     });
 
     describe('GCP account type extraction', () => {
-      it('should default to single-account for GCP (not yet supported)', () => {
+      it('should extract and validate GCP single-account', () => {
         const packagePolicy = createMockPackagePolicy({
-          'gcp.account_type': { value: 'single-project' },
+          'gcp.account_type': { value: SINGLE_ACCOUNT },
         });
+
+        expect(extractAccountType('gcp', packagePolicy, mockPackageInfo)).toBe(SINGLE_ACCOUNT);
+      });
+
+      it('should extract and validate GCP organization-account', () => {
+        const packagePolicy = createMockPackagePolicy({
+          'gcp.account_type': { value: ORGANIZATION_ACCOUNT },
+        });
+
+        expect(extractAccountType('gcp', packagePolicy, mockPackageInfo)).toBe(
+          ORGANIZATION_ACCOUNT
+        );
+      });
+
+      it('should default to single-account when gcp.account_type is not present', () => {
+        const packagePolicy = createMockPackagePolicy({});
 
         expect(extractAccountType('gcp', packagePolicy, mockPackageInfo)).toBe(
           CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE

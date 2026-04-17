@@ -22,7 +22,7 @@ import {
 
 export interface DocumentMatchFilterControlsProps {
   onFilterChange: (filter: DocumentMatchFilterOptions) => void;
-  matchedDocumentPercentage?: number | null;
+  matchedDocumentRatio?: number | null;
   isDisabled?: boolean;
 }
 
@@ -30,7 +30,7 @@ const percentageFormatter = getPercentageFormatter({ precision: 1 });
 
 export const DocumentMatchFilterControls = ({
   onFilterChange,
-  matchedDocumentPercentage,
+  matchedDocumentRatio,
   isDisabled = false,
 }: DocumentMatchFilterControlsProps) => {
   const documentMatchFilter = useStreamSamplesSelector(
@@ -47,7 +47,7 @@ export const DocumentMatchFilterControls = ({
   );
 
   const hasNoValue =
-    isDisabled || matchedDocumentPercentage === undefined || matchedDocumentPercentage === null;
+    isDisabled || matchedDocumentRatio === undefined || matchedDocumentRatio === null;
 
   if (hasNoValue) {
     return null;
@@ -70,7 +70,7 @@ export const DocumentMatchFilterControls = ({
               badgeColor="success"
               grow={false}
               isToggle
-              numActiveFilters={percentageFormatter.format(matchedDocumentPercentage)}
+              numActiveFilters={percentageFormatter.format(matchedDocumentRatio)}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.matched', {
                 defaultMessage: 'Matched',
@@ -88,9 +88,7 @@ export const DocumentMatchFilterControls = ({
               badgeColor="accent"
               grow={false}
               isToggle
-              numActiveFilters={percentageFormatter.format(
-                Math.max(1 - matchedDocumentPercentage, 0)
-              )}
+              numActiveFilters={percentageFormatter.format(Math.max(1 - matchedDocumentRatio, 0))}
             >
               {i18n.translate('xpack.streams.streamDetail.preview.filter.unmatched', {
                 defaultMessage: 'Unmatched',

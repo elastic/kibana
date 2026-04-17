@@ -242,6 +242,10 @@ export function TableSortSelect({
       panelPaddingSize="none"
       anchorPosition="downCenter"
       panelProps={{ css: { width: euiTheme.base * 18 } }}
+      aria-label={i18n.translate(
+        'contentManagement.tableList.listing.tableSortSelect.popoverAriaLabel',
+        { defaultMessage: 'Sort options' }
+      )}
     >
       <>
         <EuiText css={panelHeaderCSS}>{i18nText.headerSort}</EuiText>

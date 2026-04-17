@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
@@ -13,8 +13,7 @@ import { fromApiLead } from './types';
 import * as i18n from './translations';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
-const POLL_INTERVAL_MS = 2_000;
-const POLL_TIMEOUT_MS = 120_000;
+const INDEX_REFRESH_DELAY_MS = 2_000;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -30,7 +29,7 @@ const FETCH_LEADS_PARAMS = {
   },
 };
 
-export const useHuntingLeads = () => {
+export const useHuntingLeads = (isEnabled: boolean = true) => {
   const {
     fetchLeads,
     generateLeads: generateLeadsApi,
@@ -41,6 +40,7 @@ export const useHuntingLeads = () => {
   const queryClient = useQueryClient();
   const { addSuccess, addError } = useAppToasts();
   const abortCtrl = useRef(new AbortController());
+  const [hasGenerated, setHasGenerated] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -48,9 +48,15 @@ export const useHuntingLeads = () => {
     };
   }, []);
 
-  const { data, isLoading, refetch } = useQuery({
+  const {
+    data,
+    isLoading: isLeadsLoading,
+    refetch,
+  } = useQuery({
     queryKey: [HUNTING_LEADS_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeads({ signal, ...FETCH_LEADS_PARAMS }),
+    enabled: isEnabled,
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_LEADS_ERROR }),
   });
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
@@ -58,22 +64,17 @@ export const useHuntingLeads = () => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
-      await generateLeadsApi({ params: {} });
+      await generateLeadsApi({ params: {}, signal });
 
-      const deadline = Date.now() + POLL_TIMEOUT_MS;
-      while (Date.now() < deadline) {
-        if (signal.aborted) return;
-        await delay(POLL_INTERVAL_MS);
-        if (signal.aborted) return;
-        const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
-        if (result.leads && result.leads.length > 0) {
-          queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
-          return;
-        }
-      }
-      await queryClient.invalidateQueries({ queryKey: [HUNTING_LEADS_QUERY_KEY] });
+      if (signal.aborted) return;
+      await delay(INDEX_REFRESH_DELAY_MS);
+      if (signal.aborted) return;
+
+      const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
+      queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
     },
     onSuccess: () => {
+      setHasGenerated(true);
       addSuccess(i18n.GENERATE_SUCCESS);
     },
     onError: (error: Error) => {
@@ -81,9 +82,11 @@ export const useHuntingLeads = () => {
     },
   });
 
-  const { data: statusData } = useQuery({
+  const { data: statusData, isLoading: isStatusLoading } = useQuery({
     queryKey: [LEAD_SCHEDULE_QUERY_KEY],
     queryFn: ({ signal }) => fetchLeadGenerationStatus({ signal }),
+    enabled: isEnabled,
+    onError: (error: Error) => addError(error, { title: i18n.FETCH_STATUS_ERROR }),
   });
 
   const { mutate: toggleSchedule } = useMutation({
@@ -92,11 +95,15 @@ export const useHuntingLeads = () => {
     onError: (error: Error) => addError(error, { title: i18n.SCHEDULE_UPDATE_ERROR }),
   });
 
+  const isLoading = isLeadsLoading || isStatusLoading;
+
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
     totalCount: data?.total ?? 0,
     isLoading,
     isGenerating,
+    hasGenerated,
+    lastRunTimestamp: statusData?.lastRun ?? null,
     generate,
     refetch,
     isScheduled: statusData?.isEnabled ?? false,
