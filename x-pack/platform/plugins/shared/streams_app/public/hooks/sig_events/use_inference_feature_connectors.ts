@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../use_kibana';
 import { toInferenceConnector } from '../to_inference_connector';
 
@@ -15,15 +15,13 @@ const EMPTY_CONNECTORS: InferenceConnector[] = [];
 
 export interface UseInferenceFeatureConnectorsResult {
   /**
-   * Connector list scoped to the inference feature, ordered so that the
-   * feature's recommended endpoints (registry order) are listed first and the
-   * rest of the catalog follows. This is what per-step model dropdowns render.
+   * Connector list for the inference feature, returned verbatim in the order
+   * the backend delivered it. This is what per-step model dropdowns render.
    */
   connectors: InferenceConnector[];
   /**
-   * Connector that should be pre-selected and badged as "Default" — the
-   * feature's first recommended endpoint, falling back to the first connector
-   * the API returns when nothing is recommended.
+   * Connector to pre-select and badge as "Default" — the first entry of the
+   * backend-supplied list.
    */
   resolvedConnectorId: string | undefined;
   loading: boolean;
@@ -34,13 +32,10 @@ export interface UseInferenceFeatureConnectorsResult {
  * Loads the connector list for a Significant Events inference feature.
  *
  * Delegates fetching, caching and error handling to the inference plugin's
- * {@link useLoadConnectors}. The backend already merges the per-feature
- * recommended endpoints with the rest of the catalog and flags the
- * recommended ones with `isRecommended`. The route additionally prepends the
- * user's `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR` (without the recommended
- * flag) when no admin override is set, so we stable-sort recommended entries
- * back to the top so the step's recommended models stay at the top of the
- * dropdown.
+ * {@link useLoadConnectors}. The backend route is the single source of truth
+ * for ordering (admin SO override > global default > feature recommendeds >
+ * rest of catalog), so we render its response verbatim and pick the first
+ * entry as the pre-selected model.
  */
 export function useInferenceFeatureConnectors(
   featureId: string
@@ -52,28 +47,14 @@ export function useInferenceFeatureConnectors(
     data: aiConnectors,
     isLoading,
     error,
-    soEntryFound,
   } = useLoadConnectors({ http, toasts: notifications.toasts, featureId });
 
-  const orderedAiConnectors = useMemo<AIConnector[]>(() => {
-    if (!aiConnectors?.length) return [];
-    if (soEntryFound) return aiConnectors;
-    return [...aiConnectors].sort((a, b) => Number(!!b.isRecommended) - Number(!!a.isRecommended));
-  }, [aiConnectors, soEntryFound]);
-
   const connectors = useMemo<InferenceConnector[]>(
-    () =>
-      orderedAiConnectors.length === 0
-        ? EMPTY_CONNECTORS
-        : orderedAiConnectors.map(toInferenceConnector),
-    [orderedAiConnectors]
+    () => (aiConnectors?.length ? aiConnectors.map(toInferenceConnector) : EMPTY_CONNECTORS),
+    [aiConnectors]
   );
 
-  const resolvedConnectorId = useMemo<string | undefined>(() => {
-    if (!aiConnectors?.length) return undefined;
-    if (soEntryFound) return aiConnectors[0]?.id;
-    return aiConnectors.find((c) => c.isRecommended)?.id ?? aiConnectors[0]?.id;
-  }, [aiConnectors, soEntryFound]);
+  const resolvedConnectorId = aiConnectors?.[0]?.id;
 
   return {
     connectors,

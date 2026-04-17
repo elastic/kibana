@@ -15,8 +15,10 @@ import { StatusError } from '../../lib/streams/errors/status_error';
  *
  * Resolution order (delegated to `getForFeature`):
  *   1. Admin override in the `inference_settings` SO (set via Model Settings page)
- *   2. `recommendedEndpoints` from the feature registration
- *   3. Platform default connector
+ *   2. Kibana global default (`GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR`), or the
+ *      strict-default short-circuit when `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY=true`
+ *   3. `recommendedEndpoints` from the feature registration
+ *   4. Platform default connector
  *
  * @throws StatusError(503) if the searchInferenceEndpoints plugin is unavailable.
  * @throws StatusError(400) if no connector resolves for the feature.
