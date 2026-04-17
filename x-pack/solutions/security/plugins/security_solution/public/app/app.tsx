@@ -19,8 +19,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -120,16 +119,10 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
     const isSidebarOpen = services.chrome.sidebar.isOpen();
-
+        
     if (services.agentBuilder?.setChatConfig && !isSidebarOpen) {
-      const skillsEnabled = services.uiSettings.get<boolean>(
-        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-        false
-      );
-
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
-        ...(skillsEnabled ? {} : { agentId: THREAT_HUNTING_AGENT_ID }),
         newConversation: false,
       });
     }

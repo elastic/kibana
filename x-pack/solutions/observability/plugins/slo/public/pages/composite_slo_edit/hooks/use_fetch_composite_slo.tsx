@@ -27,7 +27,7 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
         { signal }
       );
 
-      const uniqueSloIds = [...new Set(response.members.map((m) => m.sloId))];
+      const uniqueSloIds = [...new Set(response.members.map((m) => m.id))];
       const definitions = await Promise.all(
         uniqueSloIds.map((id) =>
           http
@@ -57,12 +57,12 @@ function toFormValues(
   return {
     name: response.name,
     description: response.description,
-    members: response.members.map(({ sloId, instanceId, weight }) => {
-      const def = defMap.get(sloId);
+    members: response.members.map(({ id, instanceId, weight }) => {
+      const def = defMap.get(id);
       const groupBy = def?.groupBy ?? ALL_VALUE;
       return {
-        sloId,
-        sloName: def?.name ?? sloId,
+        sloId: id,
+        sloName: def?.name ?? id,
         groupBy,
         instanceId: instanceId ?? ALL_VALUE,
         weight,
