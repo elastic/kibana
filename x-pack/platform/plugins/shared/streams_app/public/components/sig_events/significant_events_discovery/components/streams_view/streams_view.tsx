@@ -10,10 +10,12 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@el
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { TaskStatus } from '@kbn/streams-schema';
+import { STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID, TaskStatus } from '@kbn/streams-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
+import { useInferenceFeatureConnectors } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
+import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -31,6 +33,8 @@ import {
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
+
+const IN_PROGRESS_STATUSES = new Set<TaskStatus>([TaskStatus.InProgress, TaskStatus.BeingCanceled]);
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -56,23 +60,38 @@ export function StreamsView() {
     isScheduling,
     onboardingConfig,
     setOnboardingConfig,
-    allConnectors,
-    connectorError,
     featuresConnectors,
     queriesConnectors,
-    discoveryConnectors,
-    isConnectorCatalogUnavailable,
-    discoveryConnectorOverride,
-    setDiscoveryConnectorOverride,
-    displayDiscoveryConnectorId,
     streamStatusMap,
     cancelOnboardingTask,
     bulkScheduleOnboardingTask,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,
-    isStreamActionable,
   } = useKiGeneration();
+
+  const discoveryConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID
+  );
+  const aiFeatures = useAIFeatures();
+  const allConnectors = aiFeatures?.genAiConnectors?.connectors ?? [];
+  const connectorError = aiFeatures?.genAiConnectors?.error;
+  const isConnectorCatalogUnavailable =
+    !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
+
+  const [discoveryConnectorOverride, setDiscoveryConnectorOverride] = useState<
+    string | undefined
+  >();
+  const displayDiscoveryConnectorId =
+    discoveryConnectorOverride ?? discoveryConnectors.resolvedConnectorId;
+
+  const isStreamActionable = useCallback(
+    (streamName: string) => {
+      const result = streamStatusMap[streamName];
+      return !!result && !IN_PROGRESS_STATUSES.has(result.status);
+    },
+    [streamStatusMap]
+  );
 
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const router = useStreamsAppRouter();

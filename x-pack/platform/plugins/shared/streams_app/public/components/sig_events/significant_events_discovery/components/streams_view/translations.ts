@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export { CONNECTOR_LOAD_ERROR } from '../shared/translations';
-
 export const NAME_COLUMN_HEADER = i18n.translate('xpack.streams.streamsTreeTable.nameColumnName', {
   defaultMessage: 'Name',
 });

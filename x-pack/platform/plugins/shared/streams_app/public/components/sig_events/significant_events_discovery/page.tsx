@@ -15,8 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { TaskStatus } from '@kbn/streams-schema';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useIsMutating } from '@kbn/react-query';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
@@ -31,7 +30,6 @@ import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
-  useKiGeneration,
 } from './components/knowledge_indicators_table';
 import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
@@ -54,47 +52,32 @@ function isValidDiscoveryTab(value: string): value is DiscoveryTab {
   return discoveryTabs.includes(value as DiscoveryTab);
 }
 
-function KiGenerationEffects({
-  refreshUnbackedQueriesCount,
-}: {
-  refreshUnbackedQueriesCount: () => void;
-}) {
-  const { registerStatusCallback } = useKiGeneration();
-  const {
-    core: {
-      notifications: { toasts },
-    },
-  } = useKibana();
-
-  useEffect(() => {
-    return registerStatusCallback((_streamName, taskResult) => {
-      if (taskResult.status === TaskStatus.Failed) {
-        toasts.addError(getFormattedError(new Error(taskResult.error)), {
-          title: ONBOARDING_FAILURE_TITLE,
-        });
-      }
-
-      if (taskResult.status === TaskStatus.Completed) {
-        refreshUnbackedQueriesCount();
-      }
-    });
-  }, [registerStatusCallback, toasts, refreshUnbackedQueriesCount]);
-
-  return null;
-}
-
 export function SignificantEventsDiscoveryPage() {
   const {
     path: { tab },
   } = useStreamsAppParams('/_discovery/{tab}');
 
   const router = useStreamsAppRouter();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
 
   const {
     features: { significantEventsDiscovery },
   } = useStreamsPrivileges();
   const { euiTheme } = useEuiTheme();
   const { count: unbackedQueriesCount, refetch } = useUnbackedQueriesCount();
+
+  const onTaskFailed = useCallback(
+    (error: string) => {
+      toasts.addError(getFormattedError(new Error(error)), {
+        title: ONBOARDING_FAILURE_TITLE,
+      });
+    },
+    [toasts]
+  );
 
   const { isMemoryEnabled, isLoading: isSettingsLoading } = useDiscoverySettings();
   const isPromotingQueries = useIsMutating({ mutationKey: ['promoteAll'] }) > 0;
@@ -219,8 +202,7 @@ export function SignificantEventsDiscoveryPage() {
         }
         tabs={tabs}
       />
-      <KiGenerationProvider>
-        <KiGenerationEffects refreshUnbackedQueriesCount={refetch} />
+      <KiGenerationProvider onTaskCompleted={refetch} onTaskFailed={onTaskFailed}>
         <StreamsAppPageTemplate.Body grow>
           {tab === 'streams' && <StreamsView />}
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}

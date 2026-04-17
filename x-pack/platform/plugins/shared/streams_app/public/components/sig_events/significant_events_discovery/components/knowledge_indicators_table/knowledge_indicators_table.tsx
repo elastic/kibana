@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useAIFeatures } from '../../../../../hooks/use_ai_features';
 import { AssetImage } from '../../../../asset_image';
 import { LoadingPanel } from '../../../../loading_panel';
 import { KnowledgeIndicatorDetailsFlyout } from '../../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
@@ -54,18 +55,20 @@ export function KnowledgeIndicatorsTable() {
     isGenerating,
     isInitialGenerationStatusLoading,
     isScheduling,
-    generationCompletedAt,
     onboardingConfig,
     setOnboardingConfig,
-    allConnectors,
-    connectorError,
     featuresConnectors,
     queriesConnectors,
-    isConnectorCatalogUnavailable,
     bulkOnboardAll,
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,
   } = useKiGeneration();
+
+  const aiFeatures = useAIFeatures();
+  const allConnectors = aiFeatures?.genAiConnectors?.connectors ?? [];
+  const connectorError = aiFeatures?.genAiConnectors?.error;
+  const isConnectorCatalogUnavailable =
+    !allConnectors.length || !!aiFeatures?.genAiConnectors?.loading || !!connectorError;
 
   const runAndClearPicker = useCallback(
     async (action: (names: string[]) => Promise<string[]>) => {
@@ -135,16 +138,18 @@ export function KnowledgeIndicatorsTable() {
     deleteKnowledgeIndicatorsInBulk,
   } = useKnowledgeIndicatorsTable();
 
-  const lastHandledGenerationCompletedAt = useRef<number | undefined>(undefined);
+  const wasGeneratingRef = useRef(false);
   useEffect(() => {
-    if (
-      generationCompletedAt !== undefined &&
-      generationCompletedAt !== lastHandledGenerationCompletedAt.current
-    ) {
-      lastHandledGenerationCompletedAt.current = generationCompletedAt;
+    if (isGenerating) {
+      wasGeneratingRef.current = true;
+      const id = setInterval(() => refetch(), 10_000);
+      return () => clearInterval(id);
+    }
+    if (wasGeneratingRef.current) {
+      wasGeneratingRef.current = false;
       refetch();
     }
-  }, [generationCompletedAt, refetch]);
+  }, [isGenerating, refetch]);
 
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,

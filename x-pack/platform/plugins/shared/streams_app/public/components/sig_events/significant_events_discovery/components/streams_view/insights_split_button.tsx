@@ -8,10 +8,10 @@
 import type { InferenceConnector } from '@kbn/inference-common';
 import React, { useCallback, useMemo } from 'react';
 import {
-  CONNECTOR_LOAD_ERROR,
   DISCOVER_INSIGHTS_BUTTON_LABEL,
   DISCOVER_INSIGHTS_CONFIG_ARIA_LABEL,
 } from './translations';
+import { CONNECTOR_LOAD_ERROR } from '../shared/translations';
 import {
   buildConnectorMenuItem,
   buildConnectorSelectionPanel,

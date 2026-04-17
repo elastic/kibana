@@ -79,34 +79,26 @@ export function useBulkOnboarding({
   );
 
   const bulkOnboardAll = useCallback(
-    async (streamNames: string[]): Promise<string[]> => {
-      return bulkScheduleOnboardingTask(streamNames, onboardingConfig);
-    },
+    (streamNames: string[]) => bulkScheduleOnboardingTask(streamNames, onboardingConfig),
     [bulkScheduleOnboardingTask, onboardingConfig]
   );
 
-  const bulkOnboardStep = useCallback(
-    async (streamNames: string[], step: OnboardingStep): Promise<string[]> => {
-      return bulkScheduleOnboardingTask(streamNames, {
-        steps: [step],
+  const bulkOnboardFeaturesOnly = useCallback(
+    (streamNames: string[]) =>
+      bulkScheduleOnboardingTask(streamNames, {
+        steps: [OnboardingStep.FeaturesIdentification],
         connectors: onboardingConfig.connectors,
-      });
-    },
+      }),
     [bulkScheduleOnboardingTask, onboardingConfig.connectors]
   );
 
-  const bulkOnboardFeaturesOnly = useCallback(
-    async (streamNames: string[]): Promise<string[]> => {
-      return bulkOnboardStep(streamNames, OnboardingStep.FeaturesIdentification);
-    },
-    [bulkOnboardStep]
-  );
-
   const bulkOnboardQueriesOnly = useCallback(
-    async (streamNames: string[]): Promise<string[]> => {
-      return bulkOnboardStep(streamNames, OnboardingStep.QueriesGeneration);
-    },
-    [bulkOnboardStep]
+    (streamNames: string[]) =>
+      bulkScheduleOnboardingTask(streamNames, {
+        steps: [OnboardingStep.QueriesGeneration],
+        connectors: onboardingConfig.connectors,
+      }),
+    [bulkScheduleOnboardingTask, onboardingConfig.connectors]
   );
 
   return {

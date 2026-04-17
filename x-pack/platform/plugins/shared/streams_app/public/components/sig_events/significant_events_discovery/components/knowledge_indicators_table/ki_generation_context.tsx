@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import type { InferenceConnector } from '@kbn/inference-common';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import {
+  OnboardingStep,
+  STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  TaskStatus,
+} from '@kbn/streams-schema';
 import React, {
   createContext,
   useCallback,
@@ -18,19 +22,14 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useConnectorConfig } from '../../../../../hooks/sig_events/use_connector_config';
+import { useInferenceFeatureConnectors } from '../../../../../hooks/sig_events/use_inference_feature_connectors';
 import { useIndexPatternsConfig } from '../../../../../hooks/use_index_patterns_config';
 import type { ScheduleOnboardingOptions } from '../../../../../hooks/use_onboarding_api';
 import { useBulkOnboarding } from '../../hooks/use_bulk_onboarding';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
 import type { OnboardingConfig } from '../shared/types';
 
-const IN_PROGRESS_STATUSES: readonly TaskStatus[] = [
-  TaskStatus.InProgress,
-  TaskStatus.BeingCanceled,
-];
-
-type StreamStatusCallback = (streamName: string, taskResult: TaskResult<OnboardingResult>) => void;
+const IN_PROGRESS_STATUSES = new Set<TaskStatus>([TaskStatus.InProgress, TaskStatus.BeingCanceled]);
 
 interface ConnectorState {
   resolvedConnectorId: string | undefined;
@@ -45,18 +44,10 @@ interface KiGenerationContextValue {
   isGenerating: boolean;
   isScheduling: boolean;
   streamStatusMap: Record<string, TaskResult<OnboardingResult>>;
-  generationCompletedAt: number | undefined;
   onboardingConfig: OnboardingConfig;
   setOnboardingConfig: (config: OnboardingConfig) => void;
-  allConnectors: InferenceConnector[];
-  connectorError: Error | undefined;
   featuresConnectors: ConnectorState;
   queriesConnectors: ConnectorState;
-  discoveryConnectors: ConnectorState;
-  isConnectorCatalogUnavailable: boolean;
-  discoveryConnectorOverride: string | undefined;
-  setDiscoveryConnectorOverride: (id: string | undefined) => void;
-  displayDiscoveryConnectorId: string | undefined;
   bulkOnboardAll: (streamNames: string[]) => Promise<string[]>;
   bulkOnboardFeaturesOnly: (streamNames: string[]) => Promise<string[]>;
   bulkOnboardQueriesOnly: (streamNames: string[]) => Promise<string[]>;
@@ -65,40 +56,56 @@ interface KiGenerationContextValue {
     options?: ScheduleOnboardingOptions
   ) => Promise<string[]>;
   cancelOnboardingTask: (streamName: string) => Promise<void>;
-  isStreamActionable: (streamName: string) => boolean;
-  registerStatusCallback: (cb: StreamStatusCallback) => () => void;
 }
 
 const KiGenerationReactContext = createContext<KiGenerationContextValue | null>(null);
 
-export function KiGenerationProvider({ children }: { children: React.ReactNode }) {
+interface KiGenerationProviderProps {
+  children: React.ReactNode;
+  onTaskCompleted?: () => void;
+  onTaskFailed?: (error: string) => void;
+}
+
+export function KiGenerationProvider({
+  children,
+  onTaskCompleted,
+  onTaskFailed,
+}: KiGenerationProviderProps) {
   const [generatingStreams, setGeneratingStreams] = useState<Set<string>>(new Set());
   const [streamStatusMap, setStreamStatusMap] = useState<
     Record<string, TaskResult<OnboardingResult>>
   >({});
-  const [generationCompletedAt, setGenerationCompletedAt] = useState<number | undefined>(undefined);
-  const statusCallbacksRef = useRef<Set<StreamStatusCallback>>(new Set());
-  const prevGeneratingSizeRef = useRef(0);
-  // Ref gates callback forwarding without stale closures; state flag drives
-  // useMemo reactivity for isInitialGenerationStatusLoading.
   const initialStatusFetchDoneRef = useRef(false);
-  const [initialStatusFetchDone, setInitialStatusFetchDone] = useState(false);
+  // Dedup guard: filteredStreams gets a new array reference on every render
+  // (due to the select transform), which re-fires the status-fetch effect.
+  // This ref tracks already-enqueued names so only truly new streams trigger
+  // network calls.
   const enqueuedStreamNamesRef = useRef<Set<string>>(new Set());
 
   const { filterStreamsByIndexPatterns } = useIndexPatternsConfig();
-  const {
-    onboardingConfig,
-    setOnboardingConfig,
-    allConnectors,
-    connectorError,
-    featuresConnectors,
-    queriesConnectors,
-    discoveryConnectors,
-    isConnectorCatalogUnavailable,
-    discoveryConnectorOverride,
-    setDiscoveryConnectorOverride,
-    displayDiscoveryConnectorId,
-  } = useConnectorConfig();
+
+  const featuresConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID
+  );
+  const queriesConnectors = useInferenceFeatureConnectors(
+    STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID
+  );
+
+  const [onboardingConfig, setOnboardingConfig] = useState<OnboardingConfig>({
+    steps: [OnboardingStep.FeaturesIdentification, OnboardingStep.QueriesGeneration],
+    connectors: {},
+  });
+
+  useEffect(() => {
+    setOnboardingConfig((prev) => {
+      const features = prev.connectors.features ?? featuresConnectors.resolvedConnectorId;
+      const queries = prev.connectors.queries ?? queriesConnectors.resolvedConnectorId;
+      if (features === prev.connectors.features && queries === prev.connectors.queries) {
+        return prev;
+      }
+      return { ...prev, connectors: { features, queries } };
+    });
+  }, [featuresConnectors.resolvedConnectorId, queriesConnectors.resolvedConnectorId]);
 
   const streamsListFetch = useFetchStreams({
     select: (result) => ({
@@ -109,38 +116,15 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
   const filteredStreams = streamsListFetch.data?.streams;
   const isStreamsLoading = streamsListFetch.isLoading;
 
-  const registerStatusCallback = useCallback((cb: StreamStatusCallback) => {
-    statusCallbacksRef.current.add(cb);
-    return () => {
-      statusCallbacksRef.current.delete(cb);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (prevGeneratingSizeRef.current > 0 && generatingStreams.size === 0) {
-      setGenerationCompletedAt(Date.now());
-    }
-    prevGeneratingSizeRef.current = generatingStreams.size;
-  }, [generatingStreams]);
-
-  const markAsGenerating = useCallback((streamNames: string[]) => {
-    if (streamNames.length === 0) return;
-    setGeneratingStreams((current) => {
-      const next = new Set(current);
-      streamNames.forEach((s) => next.add(s));
-      return next;
-    });
-  }, []);
-
-  // Bidirectional: adds streams discovered as InProgress (e.g. on initial status
-  // fetch after page refresh) and removes streams that reach a terminal state.
-  // Callback forwarding is gated on the initial-fetch flag so initial-load
-  // updates don't trigger consumer side effects (like error toasts).
+  // Adds streams discovered as InProgress (e.g. on initial status fetch after
+  // page refresh) and removes streams that reach a terminal state. Callback
+  // forwarding is gated on the initial-fetch flag so initial-load updates
+  // don't trigger consumer side effects (like error toasts).
   const onStreamStatusUpdate = useCallback(
     (streamName: string, taskResult: TaskResult<OnboardingResult>) => {
       setStreamStatusMap((current) => ({ ...current, [streamName]: taskResult }));
 
-      const isInProgress = IN_PROGRESS_STATUSES.includes(taskResult.status);
+      const isInProgress = IN_PROGRESS_STATUSES.has(taskResult.status);
 
       setGeneratingStreams((current) => {
         const has = current.has(streamName);
@@ -155,10 +139,15 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       });
 
       if (initialStatusFetchDoneRef.current) {
-        statusCallbacksRef.current.forEach((cb) => cb(streamName, taskResult));
+        if (taskResult.status === TaskStatus.Failed) {
+          onTaskFailed?.(taskResult.error ?? 'Unknown error');
+        }
+        if (taskResult.status === TaskStatus.Completed) {
+          onTaskCompleted?.();
+        }
       }
     },
-    []
+    [onTaskCompleted, onTaskFailed]
   );
 
   const bulkOnboarding = useBulkOnboarding({ onboardingConfig, onStreamStatusUpdate });
@@ -185,7 +174,6 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
     if (hasNew) {
       processStatusUpdateQueue().finally(() => {
         initialStatusFetchDoneRef.current = true;
-        setInitialStatusFetchDone(true);
       });
     }
   }, [filteredStreams, onboardingStatusUpdateQueue, processStatusUpdateQueue]);
@@ -198,70 +186,48 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
   // generating set is known. Once false, stays false — transient refetches of
   // the streams list must not flash the loading panel again.
   const isInitialGenerationStatusLoading = useMemo(() => {
-    if (initialStatusFetchDone) return false;
+    if (initialStatusFetchDoneRef.current) return false;
     if (isStreamsLoading || !filteredStreams) return true;
     return filteredStreams.some((item) => !(item.stream.name in streamStatusMap));
-  }, [initialStatusFetchDone, isStreamsLoading, filteredStreams, streamStatusMap]);
+  }, [isStreamsLoading, filteredStreams, streamStatusMap]);
 
-  const unmarkFailedStreams = useCallback((requested: string[], succeeded: string[]) => {
-    if (succeeded.length === requested.length) return;
-    const succeededSet = new Set(succeeded);
-    const failed = requested.filter((s) => !succeededSet.has(s));
-    if (failed.length === 0) return;
-    setGeneratingStreams((current) => {
-      const next = new Set(current);
-      failed.forEach((s) => next.delete(s));
-      return next;
-    });
-  }, []);
-
-  const bulkOnboardAll = useCallback(
-    async (streamNames: string[]): Promise<string[]> => {
-      markAsGenerating(streamNames);
-      const succeeded = await rawBulkOnboardAll(streamNames);
-      unmarkFailedStreams(streamNames, succeeded);
-      return succeeded;
-    },
-    [markAsGenerating, rawBulkOnboardAll, unmarkFailedStreams]
+  const withGeneratingTracking = useCallback(
+    (action: (streamNames: string[]) => Promise<string[]>) =>
+      async (streamNames: string[]): Promise<string[]> => {
+        if (streamNames.length > 0) {
+          setGeneratingStreams((current) => new Set([...current, ...streamNames]));
+        }
+        const succeeded = await action(streamNames);
+        if (succeeded.length < streamNames.length) {
+          const succeededSet = new Set(succeeded);
+          const failed = streamNames.filter((s) => !succeededSet.has(s));
+          setGeneratingStreams((current) => {
+            const next = new Set(current);
+            failed.forEach((s) => next.delete(s));
+            return next;
+          });
+        }
+        return succeeded;
+      },
+    []
   );
 
-  const bulkOnboardFeaturesOnly = useCallback(
-    async (streamNames: string[]): Promise<string[]> => {
-      markAsGenerating(streamNames);
-      const succeeded = await rawBulkOnboardFeaturesOnly(streamNames);
-      unmarkFailedStreams(streamNames, succeeded);
-      return succeeded;
-    },
-    [markAsGenerating, rawBulkOnboardFeaturesOnly, unmarkFailedStreams]
+  const bulkOnboardAll = useMemo(
+    () => withGeneratingTracking(rawBulkOnboardAll),
+    [withGeneratingTracking, rawBulkOnboardAll]
   );
-
-  const bulkOnboardQueriesOnly = useCallback(
-    async (streamNames: string[]): Promise<string[]> => {
-      markAsGenerating(streamNames);
-      const succeeded = await rawBulkOnboardQueriesOnly(streamNames);
-      unmarkFailedStreams(streamNames, succeeded);
-      return succeeded;
-    },
-    [markAsGenerating, rawBulkOnboardQueriesOnly, unmarkFailedStreams]
+  const bulkOnboardFeaturesOnly = useMemo(
+    () => withGeneratingTracking(rawBulkOnboardFeaturesOnly),
+    [withGeneratingTracking, rawBulkOnboardFeaturesOnly]
   );
-
+  const bulkOnboardQueriesOnly = useMemo(
+    () => withGeneratingTracking(rawBulkOnboardQueriesOnly),
+    [withGeneratingTracking, rawBulkOnboardQueriesOnly]
+  );
   const bulkScheduleOnboardingTask = useCallback(
-    async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
-      markAsGenerating(streamNames);
-      const succeeded = await rawBulkScheduleOnboardingTask(streamNames, options);
-      unmarkFailedStreams(streamNames, succeeded);
-      return succeeded;
-    },
-    [markAsGenerating, rawBulkScheduleOnboardingTask, unmarkFailedStreams]
-  );
-
-  const isStreamActionable = useCallback(
-    (streamName: string) => {
-      const result = streamStatusMap[streamName];
-      if (!result) return false;
-      return !IN_PROGRESS_STATUSES.includes(result.status);
-    },
-    [streamStatusMap]
+    (streamNames: string[], options?: ScheduleOnboardingOptions) =>
+      withGeneratingTracking((names) => rawBulkScheduleOnboardingTask(names, options))(streamNames),
+    [withGeneratingTracking, rawBulkScheduleOnboardingTask]
   );
 
   const value = useMemo<KiGenerationContextValue>(
@@ -274,24 +240,14 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       generatingStreamNames,
       isGenerating,
       streamStatusMap,
-      generationCompletedAt,
       onboardingConfig,
       setOnboardingConfig,
-      allConnectors,
-      connectorError,
       featuresConnectors,
       queriesConnectors,
-      discoveryConnectors,
-      isConnectorCatalogUnavailable,
-      discoveryConnectorOverride,
-      setDiscoveryConnectorOverride,
-      displayDiscoveryConnectorId,
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,
       bulkScheduleOnboardingTask,
-      isStreamActionable,
-      registerStatusCallback,
     }),
     [
       bulkOnboarding.isScheduling,
@@ -302,24 +258,14 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       generatingStreamNames,
       isGenerating,
       streamStatusMap,
-      generationCompletedAt,
       onboardingConfig,
       setOnboardingConfig,
-      allConnectors,
-      connectorError,
       featuresConnectors,
       queriesConnectors,
-      discoveryConnectors,
-      isConnectorCatalogUnavailable,
-      discoveryConnectorOverride,
-      setDiscoveryConnectorOverride,
-      displayDiscoveryConnectorId,
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,
       bulkScheduleOnboardingTask,
-      isStreamActionable,
-      registerStatusCallback,
     ]
   );
 
