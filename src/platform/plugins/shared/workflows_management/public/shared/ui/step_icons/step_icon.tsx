@@ -97,8 +97,8 @@ export const StepIcon = React.memo(
             mask-position: center;
             background-color: ${statusColor ?? euiTheme.colors.textParagraph};
           `}
+          title={rest.title}
           onClick={onClick}
-          {...rest}
           aria-hidden={true}
         />
       );
