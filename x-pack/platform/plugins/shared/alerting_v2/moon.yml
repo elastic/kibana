@@ -97,6 +97,8 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/utility-types'
   - '@kbn/usage-collection-plugin'
+  - '@kbn/share-plugin'
+  - '@kbn/deeplinks-analytics'
 tags:
   - plugin
   - prod

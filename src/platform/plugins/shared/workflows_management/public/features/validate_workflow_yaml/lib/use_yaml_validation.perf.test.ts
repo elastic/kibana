@@ -295,7 +295,8 @@ const SUITES = [
 ] as const;
 
 for (const suite of SUITES) {
-  describe(`YAML validation performance: ${suite.name}`, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/261389
+  describe.skip(`YAML validation performance: ${suite.name}`, () => {
     let yamlContent: string;
 
     beforeAll(() => {
