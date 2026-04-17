@@ -55,21 +55,21 @@ export function AppRoot({
       <StreamsTourProvider>
         <QueryClientProvider client={queryClient}>
           {/* @ts-expect-error upgrade typescript v5.4.5 */}
-           <RouterProvider history={history} router={streamsAppRouter}>
-             <UpdateExecutionContextOnRouteChange>
-               <DiscoverySettingsProvider>
-                 <DateRangeRedirect>
-                   <PerformanceContextProvider>
-                     <KbnUrlStateStorageFromRouterProvider>
-                       <BreadcrumbsContextProvider>
-                         <RouteRenderer />
-                       </BreadcrumbsContextProvider>
-                     </KbnUrlStateStorageFromRouterProvider>
-                   </PerformanceContextProvider>
-                 </DateRangeRedirect>
-               </DiscoverySettingsProvider>
-             </UpdateExecutionContextOnRouteChange>
-           </RouterProvider>
+          <RouterProvider history={history} router={streamsAppRouter}>
+            <UpdateExecutionContextOnRouteChange>
+              <DiscoverySettingsProvider>
+                <DateRangeRedirect>
+                  <PerformanceContextProvider>
+                    <KbnUrlStateStorageFromRouterProvider>
+                      <BreadcrumbsContextProvider>
+                        <RouteRenderer />
+                      </BreadcrumbsContextProvider>
+                    </KbnUrlStateStorageFromRouterProvider>
+                  </PerformanceContextProvider>
+                </DateRangeRedirect>
+              </DiscoverySettingsProvider>
+            </UpdateExecutionContextOnRouteChange>
+          </RouterProvider>
         </QueryClientProvider>
       </StreamsTourProvider>
     </StreamsAppContextProvider>
