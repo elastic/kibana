@@ -61,11 +61,11 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
   });
 
   const pollForCompletion = useCallback(
-    async (executionUuid: string, signal: AbortSignal) => {
+    async (executionUuid: string, signal: AbortSignal): Promise<'success' | 'timeout'> => {
       for (let i = 0; i < MAX_POLLS; i++) {
-        if (signal.aborted) return;
+        if (signal.aborted) return 'timeout';
         await delay(POLL_INTERVAL_MS);
-        if (signal.aborted) return;
+        if (signal.aborted) return 'timeout';
 
         const status = await fetchLeadGenerationStatus({ signal });
         if (status.lastExecutionUuid === executionUuid) {
@@ -75,12 +75,12 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
 
           const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
           queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
-          return;
+          return 'success';
         }
       }
-      addWarning(i18n.GENERATE_TIMEOUT);
+      return 'timeout';
     },
-    [fetchLeadGenerationStatus, fetchLeads, queryClient, addWarning]
+    [fetchLeadGenerationStatus, fetchLeads, queryClient]
   );
 
   const { mutate: generate, isLoading: isGenerating } = useMutation({
@@ -88,12 +88,16 @@ export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) 
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
-      const { executionUuid } = await generateLeadsApi({ params: { connectorId } });
-      await pollForCompletion(executionUuid, signal);
+      const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
+      return pollForCompletion(executionUuid, signal);
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       setHasGenerated(true);
-      addSuccess(i18n.GENERATE_SUCCESS);
+      if (result === 'timeout') {
+        addWarning(i18n.GENERATE_TIMEOUT);
+      } else {
+        addSuccess(i18n.GENERATE_SUCCESS);
+      }
     },
     onError: (error: Error) => {
       addError(error, { title: i18n.GENERATE_ERROR });

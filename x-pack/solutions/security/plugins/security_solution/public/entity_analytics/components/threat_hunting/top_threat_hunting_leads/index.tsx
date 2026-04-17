@@ -231,6 +231,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     label={i18n.AUTO_GENERATE_LABEL}
                     checked={isScheduled}
                     onChange={(e) => onToggleSchedule(e.target.checked)}
+                    disabled={!connectorId}
                     data-test-subj="autoGenerateSwitch"
                   />
                 </div>

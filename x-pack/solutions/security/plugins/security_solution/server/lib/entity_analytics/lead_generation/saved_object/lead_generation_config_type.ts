@@ -66,3 +66,15 @@ export const upsertLeadGenerationConfig = async (
     overwrite: true,
   });
 };
+
+export const updateLeadGenerationConfig = async (
+  soClient: SavedObjectsClientContract,
+  namespace: string,
+  attrs: Partial<LeadGenerationConfigAttributes>
+): Promise<void> => {
+  await soClient.update<LeadGenerationConfigAttributes>(
+    leadGenerationConfigTypeName,
+    getConfigId(namespace),
+    attrs
+  );
+};

@@ -89,7 +89,11 @@ export const generateLeadsRoute = (
                 connectorId,
                 lastExecutionUuid: executionUuid,
                 lastError: null,
-              });
+              }).catch((soErr: Error) =>
+                logger.warn(
+                  `[LeadGeneration] Failed to persist success status (executionUuid=${executionUuid}): ${soErr.message}`
+                )
+              );
               logger.info(
                 `[LeadGeneration] Background generation completed (connectorId=${connectorId}, executionUuid=${executionUuid})`
               );

@@ -10,5 +10,6 @@ export {
   leadGenerationConfigTypeName,
   getLeadGenerationConfig,
   upsertLeadGenerationConfig,
+  updateLeadGenerationConfig,
 } from './lead_generation_config_type';
 export type { LeadGenerationConfigAttributes } from './lead_generation_config_type';

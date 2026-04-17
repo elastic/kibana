@@ -297,6 +297,9 @@ export const createLeadDataClient = ({
     id: string,
     updates: Partial<Pick<Lead, 'status'>>
   ): Promise<boolean> => {
+    if (updates.status === undefined) {
+      return false;
+    }
     try {
       const resp = await esClient.updateByQuery({
         index: allIndices,

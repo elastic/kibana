@@ -13,9 +13,14 @@ import type {
   TaskManagerStartContract,
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
-import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import {
+  createTaskRunError,
+  TaskErrorSource,
+  getErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import moment from 'moment';
 
+import { v4 as uuidv4 } from 'uuid';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
@@ -30,7 +35,7 @@ import {
 } from './state';
 import { runLeadGenerationPipeline } from '../run_pipeline';
 import { fetchCandidateEntities } from '../entity_conversion';
-import { getLeadGenerationConfig } from '../saved_object';
+import { getLeadGenerationConfig, updateLeadGenerationConfig } from '../saved_object';
 import { resolveChatModel } from '../utils';
 
 // ---------------------------------------------------------------------------
@@ -170,22 +175,25 @@ const runLeadGenerationTask = async ({
     return { state: updatedState };
   }
 
+  const executionUuid = uuidv4();
+  const soClient = buildScopedInternalSavedObjectsClientUnsafe({
+    coreStart: core,
+    namespace: state.namespace,
+  });
+
   try {
     logger.info('[LeadGeneration] Running scheduled lead generation task');
 
     if (!fakeRequest) {
-      throw new Error(
-        'No fakeRequest available in task context; cannot resolve inference connector'
+      throw createTaskRunError(
+        new Error('No fakeRequest available in task context; cannot resolve inference connector'),
+        TaskErrorSource.FRAMEWORK
       );
     }
 
     // Use the scoped client so the task runs with the user's privileges.
     // Entity Store indices (entities-latest-*) are not accessible to kibana_system.
     const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({
-      coreStart: core,
-      namespace: state.namespace,
-    });
     const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
     const riskScoreDataClient = new RiskScoreDataClient({
       logger,
@@ -217,11 +225,32 @@ const runLeadGenerationTask = async ({
       logger,
       spaceId: state.namespace,
       riskScoreDataClient,
+      executionId: executionUuid,
       sourceType: 'scheduled',
       chatModel,
     });
+
+    await updateLeadGenerationConfig(soClient, state.namespace, {
+      lastExecutionUuid: executionUuid,
+      lastError: null,
+    }).catch((soErr: Error) =>
+      logger.warn(`[LeadGeneration] Failed to persist execution success: ${soErr.message}`)
+    );
   } catch (e) {
-    logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${e.message}`);
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${errorMessage}`);
+
+    await updateLeadGenerationConfig(soClient, state.namespace, {
+      lastExecutionUuid: executionUuid,
+      lastError: errorMessage,
+    }).catch((soErr: Error) =>
+      logger.warn(`[LeadGeneration] Failed to persist execution error: ${soErr.message}`)
+    );
+
+    // Re-throw decorated errors so Task Manager correctly tracks USER vs FRAMEWORK failures.
+    if (getErrorSource(e)) {
+      throw e;
+    }
   }
 
   logger.info('[LeadGeneration] Finished running scheduled lead generation task');
