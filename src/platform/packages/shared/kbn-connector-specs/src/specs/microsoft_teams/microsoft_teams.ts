@@ -150,7 +150,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     listJoinedTeams: {
       isTool: true,
       description:
-        "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
+        "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token or OAuth authorization code), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
       input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
@@ -222,7 +222,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     listChats: {
       isTool: true,
       description:
-        'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token), omit userId. With app-only auth (client credentials), userId is required.',
+        'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token or OAuth authorization code), omit userId. With app-only auth (client credentials), userId is required.',
       input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
@@ -269,7 +269,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     searchMessages: {
       isTool: true,
       description:
-        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
+        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
       output: z
         .object({
