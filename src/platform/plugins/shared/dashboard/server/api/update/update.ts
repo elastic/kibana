@@ -8,12 +8,14 @@
  */
 
 import type { RequestHandlerContext } from '@kbn/core/server';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { readJsonWithComments } from '@kbn/moon/src/util';
 
 export async function update(
   requestCtx: RequestHandlerContext,
@@ -28,6 +30,23 @@ export async function update(
     updateBody,
     isDashboardAppRequest
   );
+
+  let isCreateRequest = false;
+  try {
+    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+  } catch (resolveError) {
+    if (resolveError.isBoom && resolveError.output.statusCode === 404) {
+      isCreateRequest = true;
+    }
+  }
+
+  // Validate id at handler level for create routes
+  if (isCreateRequest) {
+    asCodeIdSchema.validate(id);
+  }
 
   const savedObject = await core.savedObjects.client.update<DashboardSavedObjectAttributes>(
     DASHBOARD_SAVED_OBJECT_TYPE,

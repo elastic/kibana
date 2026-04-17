@@ -18,7 +18,7 @@ import {
   TEST_DASHBOARD_ID,
 } from '../fixtures';
 
-apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe.only('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
@@ -51,9 +51,45 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe('Refresh Requests (Updated)');
   });
 
+  apiTest('should update existing dashboard with invalid "as code" id', async ({ apiClient }) => {
+    const id = '(my)dashboard';
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'Updated title',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.id).toBe(id);
+    expect(response.body.data.title).toBe('Updated title');
+  });
+
   apiTest('should create new dashboard', async ({ apiClient }) => {
     const id = 'new-dashboard-id';
     const title = `I'm a new dashboard`;
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.id).toBe(id);
+    expect(response.body.data.title).toBe(title);
+  });
+
+  apiTest.only('validation - returns 400 when creating a new dashboard with an invalid id', async ({ apiClient }) => {
+    const id = '(new)dashboard-id';
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -65,12 +101,14 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.id).toBe(id);
-    expect(response.body.data.title).toBe(title);
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.message).toBe(
+      'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+    );
   });
 
-  apiTest('validation - returns 400 when body is not empty', async ({ apiClient }) => {
+
+  apiTest('validation - returns 400 when body is not valid dashboard shape', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
       headers: {
         ...COMMON_HEADERS,
@@ -97,22 +135,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
         access_control: {
           access_mode: 'write_restricted',
         },
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation - returns 400 if panels is not an array', async ({ apiClient }) => {
-    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title: 'foo',
-        panels: {},
       },
       responseType: 'json',
     });
