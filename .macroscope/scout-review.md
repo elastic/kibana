@@ -23,7 +23,7 @@ Do NOT post flaky test runner nudges. A separate agent handles this.
 
 ## Review instructions
 
-Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules and migration parity. The output format below applies to this agent. Ignore any output formatting instructions in the skill file. You can use the `browse_code` tool to explore the codebase.
+Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules, and migration parity. The output format below applies to this agent; ignore any output formatting instructions in the skill file. You can use the `browse_code` tool to explore the codebase.
 
 ## Output
 
@@ -38,12 +38,12 @@ Group findings by severity: 🔴 Blocker → 🟡 Major → 🔵 Minor → ⚪ N
 
 ### Positive reinforcement
 
-If a PR is adding or updating Scout tests following our best practices particularly well, post a single extra comment highlighting all the good practices it's already following.
+If a PR adds or updates Scout tests that follow our best practices particularly well, post a single extra comment highlighting what it does right.
 
-### Link to a specific section of the Best practices document when possible
+### Link to specific sections of the Best Practices document when possible
 
-When possible, link to a specific section of the [Best practices for Scout tests document](https://www.elastic.co/docs/extend/kibana/scout/best-practices) so developers can learn more about a specific best practice. A link scoped to a specific section looks like this: https://www.elastic.co/docs/extend/kibana/scout/best-practices#avoid-conditional-logic-in-page-objects. You can infer the #anchor by looking at the `docs/extend/scout/best-practices.md` file (e.g., `[avoid-conditional-logic-in-page-objects]`).
+Where applicable, link to a specific section of the [Best Practices for Scout Tests](https://www.elastic.co/docs/extend/kibana/scout/best-practices) document so developers can learn more. A section-scoped link looks like this: `https://www.elastic.co/docs/extend/kibana/scout/best-practices#avoid-conditional-logic-in-page-objects`. You can infer the `#anchor` from the `docs/extend/scout/best-practices.md` file (e.g., `[avoid-conditional-logic-in-page-objects]`).
 
-### New updates
+### Updates to the PR
 
-If the developer makes updates to PR contents, suggest improvements on the newer code blocks while keeping in mind to keep the review high signal and not too nitpicky.
+When a developer updates the PR, review the newer code blocks and suggest improvements while keeping the review high-signal and focused — avoid being overly nitpicky.
