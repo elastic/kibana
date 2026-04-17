@@ -833,14 +833,12 @@ export class WorkflowsService {
     hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
     client: WorkflowStorageClient
   ): Promise<string[]> {
-    const disabledIds: string[] = [];
     const disableOperations = hits
       .filter(
         (hit): hit is { _id: string; _source: WorkflowProperties } =>
           Boolean(hit._id) && Boolean(hit._source) && hit._source?.enabled === true
       )
       .map((hit) => {
-        disabledIds.push(hit._id);
         return {
           index: {
             _id: hit._id,
@@ -852,6 +850,7 @@ export class WorkflowsService {
         };
       });
 
+    const disabledIds: string[] = disableOperations.map((op) => op.index._id);
     if (disableOperations.length > 0) {
       await client.bulk({ operations: disableOperations, refresh: true });
     }
