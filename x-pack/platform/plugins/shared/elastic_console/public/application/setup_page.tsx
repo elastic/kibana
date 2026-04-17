@@ -31,12 +31,14 @@ interface SetupResponse {
   apiKeyEncoded: string;
 }
 
+
+
 export const SetupPage: React.FC = () => {
   const { services } = useKibana<CoreStart>();
   const [setupData, setSetupData] = useState<SetupResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
+   const [isLoading, setIsLoading] = useState(false);
+   const [error, setError] = useState<string | null>(null);
+   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSetup = useCallback(async () => {
     setIsLoading(true);
@@ -52,64 +54,65 @@ export const SetupPage: React.FC = () => {
     }
   }, [services.http]);
 
-  return (
-    <EuiPageTemplate>
-      <EuiPageTemplate.Header
-        pageTitle={<>{'🍜 Elastic Ramen Setup'}</>}
-        rightSideItems={[<EuiBetaBadge label="Experimental" color="hollow" />]}
-      />
-      <EuiPageTemplate.Section>
-        <EuiCallOut
-          title="Experimental feature — proceed with caution"
-          color="warning"
-          iconType="beaker"
-        >
-          <p>
-            Elastic Ramen is an <strong>experimental</strong> feature under active development. It
-            may change, break, or be removed without notice. Use at your own risk — it can expose AI
-            connectors to external tools and may produce unexpected behavior. Do not rely on it for
-            production workloads.
-          </p>
-        </EuiCallOut>
 
-        <EuiSpacer />
 
-        <EuiText>
+   return (
+     <EuiPageTemplate>
+       <EuiPageTemplate.Header
+         pageTitle={<>{'🍜 Elastic Ramen Setup'}</>}
+         rightSideItems={[<EuiBetaBadge label="Experimental" color="hollow" />]}
+       />
+       <EuiPageTemplate.Section>
+         <EuiCallOut
+           title="Experimental feature — proceed with caution"
+           color="warning"
+           iconType="beaker"
+         >
+           <p>
+             Elastic Ramen is an <strong>experimental</strong> feature under active development. It
+             may change, break, or be removed without notice. Use at your own risk — it can expose AI
+             connectors to external tools and may produce unexpected behavior. Do not rely on it for
+             production workloads.
+           </p>
+         </EuiCallOut>
+
+         <EuiSpacer />
+
+         <EuiText>
           <p>
-            Generate connection credentials for external tools to use Kibana-configured AI
-            connectors via an OpenAI-compatible API.
+            Generate credentials for the local <code>elastic-console</code> agent or any
+            MCP-compatible tool.
           </p>
         </EuiText>
+         <EuiSpacer />
 
-        <EuiSpacer />
+         <EuiFlexGroup gutterSize="m" alignItems="center">
+           <EuiFlexItem grow={false}>
+             <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
+               Generate credentials
+             </EuiButton>
+           </EuiFlexItem>
+           {setupData && (
+             <EuiFlexItem grow={false}>
+               <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
+                 Connect local agent
+               </EuiButton>
+             </EuiFlexItem>
+           )}
+         </EuiFlexGroup>
 
-        <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleSetup} isLoading={isLoading}>
-              Generate credentials
-            </EuiButton>
-          </EuiFlexItem>
-          {setupData && (
-            <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => formRef.current?.submit()} iconType="popout">
-                Connect local agent
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+         <EuiSpacer />
 
-        <EuiSpacer />
+         {error && (
+           <>
+             <EuiCallOut announceOnMount title="Setup failed" color="danger" iconType="error">
+               <p>{error}</p>
+             </EuiCallOut>
+             <EuiSpacer />
+           </>
+         )}
 
-        {error && (
-          <>
-            <EuiCallOut announceOnMount title="Setup failed" color="danger" iconType="error">
-              <p>{error}</p>
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
-        )}
-
-        {setupData && (
+         {setupData && (
           <>
             {/* Hidden form for POST-based navigation — keeps credentials out of browser history */}
             <form
@@ -197,7 +200,7 @@ export const SetupPage: React.FC = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
-        )}
+         )}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

@@ -28,6 +28,7 @@ export interface ConversationDocument {
   conversation_rounds: ConversationRound[];
   attachments?: VersionedAttachment[];
   state?: Record<string, unknown>;
+  slack_state?: Record<string, unknown>;
 }
 
 /**

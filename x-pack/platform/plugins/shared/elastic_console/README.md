@@ -237,6 +237,52 @@ console.log(response.choices[0].message.content);
 
 Set the base URL to `https://my-kibana:5601/internal/elastic_ramen/v1` and use the API key from the setup endpoint. Include `x-elastic-internal-origin: kibana` in all requests, and include `kbn-xsrf: true` for non-GET requests.
 
+## Slack Integration
+
+Elastic Console can connect to a Slack workspace so users can interact with their AI agents directly from Slack. Mentioning the bot (`@elastic-console hello`) creates or continues a conversation thread backed by Kibana's inference API.
+
+Events flow through an Elastic-hosted relay service that verifies Slack's request signatures before forwarding them to Kibana.
+
+### Configuration
+
+Add to `kibana.yml`:
+
+```yaml
+xpack.elastic_console.slack:
+  client_id: "<slack-app-client-id>"
+  # redirect_uri: "https://..."  # optional, defaults to the Elastic-hosted relay
+```
+
+Contact the Elastic Console team for the `client_id` value.
+
+### Connecting a workspace
+
+1. Open the Elastic Console setup page (`/app/elasticConsole`) and click **Connect Slack**.
+2. Authorize the app in the Slack OAuth screen that opens.
+3. Once redirected back, the setup page shows **Connected**.
+
+To reconnect (e.g. after a revoked token), repeat the same steps — old credentials are replaced automatically.
+
+To disconnect, click **Disconnect** on the setup page.
+
+### Linking your Slack account
+
+Each user must link their Kibana account to their Slack identity once. On the setup page, enter your Slack Member ID and click **Link Account**. After linking, the bot will respond in Slack on your behalf.
+
+### Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `GET` | `/internal/elastic_console/slack/connect` | Kibana session | Starts the OAuth flow; returns the Slack authorization URL |
+| `GET` | `/internal/elastic_console/slack/status` | Kibana session | Returns `connected`, `disconnected`, or `not_connected` |
+| `DELETE` | `/internal/elastic_console/slack/disconnect` | Kibana session | Revokes credentials and disconnects the workspace |
+| `POST` | `/internal/elastic_console/slack/link_user` | Kibana session | Links the current Kibana user to a Slack Member ID |
+| `GET` | `/internal/elastic_console/slack/link_user` | Kibana session | Returns the Slack user ID linked to the current user |
+| `POST` | `/api/elastic_console/slack/token` | API key | Called by the relay after OAuth; stores the bot token |
+| `POST` | `/api/elastic_console/slack/events` | API key | Receives forwarded Slack events from the relay |
+
+The `/api/*` endpoints are called by the Elastic relay service, not the browser. All `/internal/*` endpoints require the `x-elastic-internal-origin: kibana` header.
+
 ## Development
 
 The plugin lives at `x-pack/platform/plugins/shared/elastic_console/`.

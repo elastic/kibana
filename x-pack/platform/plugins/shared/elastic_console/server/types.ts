@@ -7,15 +7,21 @@
 
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export interface ElasticConsoleSetupDependencies {
   cloud?: CloudSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface ElasticConsoleStartDependencies {
   inference: InferenceServerStart;
   actions: ActionsPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
 export type ElasticConsolePluginSetup = Record<string, never>;
