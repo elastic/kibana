@@ -28,7 +28,7 @@
         "label": "AsCodeGroupFilterRecursive",
         "description": [],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 235,
+        "lineNumber": 261,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               "\"or\" | \"and\""
             ],
             "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-            "lineNumber": 236,
+            "lineNumber": 262,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -68,7 +68,7 @@
               ")[]"
             ],
             "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-            "lineNumber": 237,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -299,7 +299,7 @@
           "<Readonly<{ negate?: boolean | undefined; } & { value: string | number | boolean; field: string; operator: \"is\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: string[] | boolean[] | number[]; field: string; operator: \"is_one_of\"; }> | Readonly<{ negate?: boolean | undefined; } & { value: Readonly<{ format?: string | undefined; gte?: string | number | undefined; lte?: string | number | undefined; gt?: string | number | undefined; lt?: string | number | undefined; } & {}>; field: string; operator: \"range\"; }> | Readonly<{ negate?: boolean | undefined; } & { field: string; operator: \"exists\"; }>>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 243,
+        "lineNumber": 269,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -405,7 +405,7 @@
           "<any>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 299,
+        "lineNumber": 341,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -439,7 +439,7 @@
           ")[]; }>; }> | Readonly<{ params?: any; label?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"dsl\"; dsl: Record<string, any>; }> | Readonly<{ label?: string | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; data_view_id?: string | undefined; controlled_by?: string | undefined; is_multi_index?: boolean | undefined; } & { type: \"spatial\"; dsl: Record<string, any>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 355,
+        "lineNumber": 399,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -551,7 +551,7 @@
           ")[]>; }>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 262,
+        "lineNumber": 289,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -641,7 +641,7 @@
           "<Record<string, any>>; }>>"
         ],
         "path": "src/platform/packages/shared/as-code/filters-schema/src/schemas/filter.ts",
-        "lineNumber": 335,
+        "lineNumber": 378,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
