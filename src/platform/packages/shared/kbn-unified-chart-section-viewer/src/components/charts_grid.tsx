@@ -17,7 +17,6 @@ import {
   useMetricsGridFullScreen,
 } from './observability/metrics/hooks';
 import {
-  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
   METRICS_GRID_FULL_SCREEN_CLASS,
   METRICS_GRID_CLASS,
   METRICS_GRID_RESTRICT_BODY_CLASS,
@@ -89,9 +88,7 @@ export const ChartsGrid = ({
     >
       <div
         data-test-subj={`metricsGridWrapper${isFullscreen ? '-fullScreen' : ''}`}
-        className={cx('metricsGridWrapper', {
-          [METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
-        })}
+        className="metricsGridWrapper"
         onKeyDown={onKeyDown}
         css={fullHeightCss}
       >
