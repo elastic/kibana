@@ -21,6 +21,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_osquery.sh
     label: 'Osquery Cypress Tests on Serverless'
     key: osquery-serverless
+    if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
       machineType: n2-highmem-4
       diskSizeGb: 120
