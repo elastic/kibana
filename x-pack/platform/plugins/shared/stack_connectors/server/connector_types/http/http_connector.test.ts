@@ -26,7 +26,9 @@ import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server
 
 import type { HttpConnectorType, HttpConnectorTypeExecutorOptions } from './types';
 
-import { getConnectorType, getSystemConnectorType } from '.';
+import { safeJsonStringify } from '@kbn/std';
+import { getErrorResponseMessage } from './errors';
+import { getConnectorType, getSystemConnectorType } from './http_connector';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 jest.mock('axios', () => ({
@@ -35,6 +37,24 @@ jest.mock('axios', () => ({
   AxiosError: jest.requireActual('axios').AxiosError,
 }));
 import axios from 'axios';
+import type { AxiosError } from 'axios';
+
+function axiosErrorWithResponseData(
+  data: unknown,
+  headers?: Record<string, string>
+): AxiosError<unknown> {
+  return {
+    isAxiosError: true,
+    name: 'AxiosError',
+    message: 'Request failed with status code 400',
+    response: {
+      status: 400,
+      statusText: 'Bad Request',
+      data,
+      headers: headers ?? {},
+    },
+  } as AxiosError<unknown>;
+}
 import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
 import { AuthType, SSLCertType } from '@kbn/connector-schemas/common/auth';
 import type {
@@ -553,6 +573,26 @@ describe('params validation', () => {
     });
   });
 
+  test('params validation passes when body is a JSON object', () => {
+    const params = {
+      body: { key: 'value', nested: { n: 1 } },
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
+  test('params validation passes when body is a JSON array', () => {
+    const params = {
+      body: [{ a: 1 }, 'b'],
+    };
+    expect(validateParams(connectorType, params, { configurationUtilities })).toEqual({
+      method: 'GET',
+      ...params,
+    });
+  });
+
   test('params validation passes when valid method is provided', () => {
     const params: Record<string, string> = {
       method: 'POST',
@@ -863,6 +903,84 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].url).toBe('https://abc.def/my-endpoint');
   });
 
+  test('execute stringifies object body before sending', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = { foo: 'bar', n: 42 };
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body,
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].data).toBe(JSON.stringify(body));
+  });
+
+  test('execute stringifies array body before sending', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = [1, { two: true }];
+    await connectorType.executor?.({
+      actionId: 'some-id',
+      services,
+      config,
+      secrets: { ...emptySecrets, user: 'abc', password: '123' },
+      params: {
+        method: 'POST',
+        path: '/my-endpoint',
+        body,
+      },
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    });
+
+    expect(requestMock.mock.calls[0][0].data).toBe(JSON.stringify(body));
+  });
+
+  test('execute throws error if body is not serializable', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = {
+      foo: {
+        toJSON() {
+          throw new Error('foo is not serializable');
+        },
+      },
+    };
+    await expect(
+      connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/my-endpoint',
+          body: body as any,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).rejects.toThrow('Error serializing request body: foo is not serializable');
+  });
+
   test('renders parameter templates as expected', async () => {
     const rogue = `double-quote:"; line-break->\n`;
 
@@ -905,6 +1023,17 @@ describe('execute()', () => {
     expect(params.path).toBe('/api/v1');
     expect(params.query?.key).toBe('test-value');
     expect(params.headers?.['X-Custom']).toBe('test-header');
+  });
+
+  test('does not apply mustache to non-string body', () => {
+    const paramsWithObjectBody = {
+      body: { x: '{{not_a_template}}' },
+      method: 'POST' as const,
+    };
+    const params = connectorType.renderParameterTemplates!(mockedLogger, paramsWithObjectBody, {
+      not_a_template: 'replaced',
+    });
+    expect(params.body).toEqual({ x: '{{not_a_template}}' });
   });
 
   test('execute combines base URL and path correctly', async () => {
@@ -1288,6 +1417,95 @@ describe('execute()', () => {
         expect(result?.errorSource).toBe('user');
       }
     );
+
+    it('should return undefined when responseData is null or undefined', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(null))).toBeUndefined();
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(undefined))).toBeUndefined();
+    });
+
+    it('should return string bodies as-is', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData('plain text error'))).toBe(
+        'plain text error'
+      );
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(''))).toBeUndefined();
+    });
+
+    it('should return top-level string message when present on objects', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData({ message: 'not found' }))).toBe(
+        'not found'
+      );
+    });
+
+    it('should prefer RFC 7807 detail when present on objects', () => {
+      const data = { code: 123, detail: 'x' };
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe('x');
+    });
+
+    it('should stringify objects when message is present but not a string', () => {
+      const data = { message: 500, hint: 'check id' };
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe(
+        safeJsonStringify(data)
+      );
+    });
+
+    it('should summarize arrays of errors when possible', () => {
+      const data = [{ e: 'a' }, 'b'];
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe('b');
+    });
+
+    it('should extract nested error.message when no top-level string message exists', () => {
+      const data = { error: { message: 'Invalid client or Invalid client credentials' } };
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(data))).toBe(
+        'Invalid client or Invalid client credentials'
+      );
+    });
+
+    it('should return string representation for number and boolean bodies', () => {
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(42))).toBe('42');
+      expect(getErrorResponseMessage(axiosErrorWithResponseData(true))).toBe('true');
+    });
+
+    it('includes nested API error message in serviceMessage when body uses error.message shape', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 400',
+        response: {
+          status: 400,
+          statusText: 'Bad Request',
+          data: {
+            error: {
+              message: 'Invalid client or Invalid client credentials',
+            },
+          },
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/my-endpoint',
+          body: 'some data',
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe(
+        '[400] Bad Request: Invalid client or Invalid client credentials'
+      );
+    });
 
     it('should log an error if refreshing access token fails', async () => {
       const errorMessage = 'Invalid client or Invalid client credentials';
