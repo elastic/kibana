@@ -150,4 +150,43 @@ describe('useGetChartAlertAnnotations', () => {
     const activeRange = result.current!.find((el) => el.key === 'alertActiveRect');
     expect(activeRange?.props.alertEnd).toBeUndefined();
   });
+
+  it('applies normalizeThreshold to the threshold value', () => {
+    const alert = createMockAlert({
+      [ALERT_EVALUATION_THRESHOLD]: 50,
+    });
+
+    const { result } = renderHook(() =>
+      useGetChartAlertAnnotations({
+        alert,
+        isMatchingRuleType: isLatencyRule,
+        dateFormat: DATE_FORMAT,
+        normalizeThreshold: (value) => value / 100,
+      })
+    );
+
+    expect(result.current).toBeDefined();
+    const thresholdRect = result.current!.find((el) => el.key === 'alertThresholdRect');
+    expect(thresholdRect?.props.threshold).toBe(0.5);
+    const thresholdAnnotation = result.current!.find((el) => el.key === 'alertThresholdAnnotation');
+    expect(thresholdAnnotation?.props.threshold).toBe(0.5);
+  });
+
+  it('returns annotations when customAlertEvaluationThreshold is 0', () => {
+    const alert = createMockAlert({
+      [ALERT_RULE_TYPE_ID]: 'apm.transaction_error_rate',
+    });
+
+    const { result } = renderHook(() =>
+      useGetChartAlertAnnotations({
+        alert,
+        isMatchingRuleType: isLatencyRule,
+        customAlertEvaluationThreshold: 0,
+        dateFormat: DATE_FORMAT,
+      })
+    );
+
+    expect(result.current).toBeDefined();
+    expect(result.current).toHaveLength(4);
+  });
 });

@@ -17,20 +17,27 @@ import {
 } from '@kbn/observability-alert-details';
 import { useEuiTheme } from '@elastic/eui';
 
-export const useGetChartAlertAnnotations = ({
-  alert,
-  customAlertEvaluationThreshold,
-  isMatchingRuleType,
-  dateFormat,
-}: {
+interface UseGetChartAlertAnnotationsProps {
   alert: TopAlert;
+  dateFormat: string;
   customAlertEvaluationThreshold?: number;
   isMatchingRuleType: (ruleTypeId: string) => boolean;
-  dateFormat: string;
-}): ReactElement[] | undefined => {
+  normalizeThreshold?: (value: number) => number;
+}
+
+export const useGetChartAlertAnnotations = ({
+  alert,
+  dateFormat,
+  customAlertEvaluationThreshold,
+  isMatchingRuleType,
+  normalizeThreshold,
+}: UseGetChartAlertAnnotationsProps): ReactElement[] | undefined => {
   const { euiTheme } = useEuiTheme();
 
-  if (!isMatchingRuleType(alert.fields[ALERT_RULE_TYPE_ID]) && !customAlertEvaluationThreshold) {
+  if (
+    !isMatchingRuleType(alert.fields[ALERT_RULE_TYPE_ID]) &&
+    customAlertEvaluationThreshold == null
+  ) {
     return undefined;
   }
 
@@ -42,18 +49,22 @@ export const useGetChartAlertAnnotations = ({
 
     if (alertEvalThreshold == null) return [];
 
+    const normalizedThreshold = normalizeThreshold
+      ? normalizeThreshold(alertEvalThreshold)
+      : alertEvalThreshold;
+
     return [
       <AlertThresholdTimeRangeRect
         key={'alertThresholdRect'}
         id={'alertThresholdRect'}
-        threshold={alertEvalThreshold}
+        threshold={normalizedThreshold}
         color={euiTheme.colors.danger}
       />,
       <AlertThresholdAnnotation
         id={'alertThresholdAnnotation'}
         key={'alertThresholdAnnotation'}
         color={euiTheme.colors.danger}
-        threshold={alertEvalThreshold}
+        threshold={normalizedThreshold}
       />,
     ];
   })();

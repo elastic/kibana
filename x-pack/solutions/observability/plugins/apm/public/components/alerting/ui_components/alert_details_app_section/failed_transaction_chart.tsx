@@ -140,9 +140,10 @@ export function FailedTransactionChart({
 
   const alertAnnotations = useGetChartAlertAnnotations({
     alert,
+    dateFormat,
     customAlertEvaluationThreshold,
     isMatchingRuleType: isFailedTransactionRateRuleType,
-    dateFormat,
+    normalizeThreshold: (value) => value / 100,
   });
 
   const timeseriesErrorRate = [
