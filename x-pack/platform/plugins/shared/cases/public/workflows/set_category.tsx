@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCategories } from '../containers/api';
 import { setCategoryStepCommonDefinition } from '../../common/workflows/steps/set_category';
 import * as i18n from '../../common/workflows/translations';
+import { collectSelectionSearchOptions } from './selection_search';
 import { createPublicCaseStepDefinition } from './shared';
 import { isValidOwner } from '../../common/utils/owner';
-
-const MAX_CATEGORIES_FOR_SELECTION = 15;
 
 export const setCategoryStepDefinition = createPublicCaseStepDefinition({
   ...setCategoryStepCommonDefinition,
@@ -30,18 +28,14 @@ export const setCategoryStepDefinition = createPublicCaseStepDefinition({
             const query = input.trim().toLowerCase();
             const categories = await getCategories({ owner: [owner] });
 
-            const options: SelectionOption<string>[] = [];
-            const categoryLimit = Math.min(categories.length, MAX_CATEGORIES_FOR_SELECTION);
             const queryIsEmpty = query.length === 0;
 
-            for (let i = 0; i < categoryLimit; i++) {
-              const category = categories[i];
-              if (queryIsEmpty || category.toLowerCase().includes(query)) {
-                options.push({ value: category, label: category });
-              }
-            }
-
-            return options;
+            return collectSelectionSearchOptions({
+              items: categories,
+              hasEmptyQuery: queryIsEmpty,
+              matchesQuery: (category) => category.toLowerCase().includes(query),
+              toOption: (category) => ({ value: category, label: category }),
+            });
           },
           resolve: async (value, ctx) => {
             const owner = ctx.values.input.owner;

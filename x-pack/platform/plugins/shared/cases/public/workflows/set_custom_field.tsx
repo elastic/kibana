@@ -11,6 +11,7 @@ import { setCustomFieldStepCommonDefinition } from '../../common/workflows/steps
 import type { Owner } from '../../common/bundled-types.gen';
 import type { CasesConfigurationUICustomField } from '../../common/ui';
 import * as i18n from '../../common/workflows/translations';
+import { collectSelectionSearchOptions } from './selection_search';
 import { createPublicCaseStepDefinition } from './shared';
 import { isValidOwner } from '../../common/utils/owner';
 
@@ -21,8 +22,6 @@ const toSelectionOption = (
   label: customField.label,
   description: customField.type,
 });
-
-const MAX_CUSTOM_FIELDS_FOR_SELECTION = 15;
 
 const getCustomFieldsForWorkflowOwner = async (owner: Owner) => {
   const configurations = (await getCaseConfigure({})) ?? [];
@@ -48,21 +47,18 @@ export const setCustomFieldStepDefinition = createPublicCaseStepDefinition({
             const query = input.trim().toLowerCase();
             const customFields = await getCustomFieldsForWorkflowOwner(owner);
 
-            const options: SelectionOption<string>[] = [];
-            const fieldLimit = Math.min(customFields.length, MAX_CUSTOM_FIELDS_FOR_SELECTION);
             const queryIsEmpty = query.length === 0;
 
-            for (let i = 0; i < fieldLimit; i++) {
-              const customField = customFields[i];
-              const fieldKey = customField.key.toLowerCase();
-              const fieldLabel = customField.label.toLowerCase();
-
-              if (queryIsEmpty || fieldKey.includes(query) || fieldLabel.includes(query)) {
-                options.push(toSelectionOption(customField));
-              }
-            }
-
-            return options;
+            return collectSelectionSearchOptions({
+              items: customFields,
+              hasEmptyQuery: queryIsEmpty,
+              matchesQuery: (customField) => {
+                const fieldKey = customField.key.toLowerCase();
+                const fieldLabel = customField.label.toLowerCase();
+                return fieldKey.includes(query) || fieldLabel.includes(query);
+              },
+              toOption: (customField) => toSelectionOption(customField),
+            });
           },
           resolve: async (value, ctx) => {
             const owner = ctx.values.input.owner;

@@ -175,6 +175,45 @@ describe('setCustomFieldStepDefinition', () => {
     });
   });
 
+  it('finds a custom field beyond the first 15 when the search query is non-empty', async () => {
+    const manyCustomFields = [
+      ...Array.from({ length: 15 }, (_, index) => ({
+        key: `no_match_${index}`,
+        label: `Plain ${index}`,
+        type: 'text' as const,
+        required: false,
+        defaultValue: null,
+      })),
+      {
+        key: 'only_uniquetail_field',
+        label: 'Only uniquetail field',
+        type: 'text' as const,
+        required: false,
+        defaultValue: null,
+      },
+    ];
+
+    const { fieldNameSelection } = setup([
+      {
+        owner: 'securitySolution',
+        customFields: manyCustomFields,
+      },
+    ] as CasesConfigurationUI[]);
+
+    const searchResults = await fieldNameSelection!.search(
+      'uniquetail',
+      createSelectionContext('securitySolution')
+    );
+
+    expect(searchResults).toEqual([
+      {
+        value: 'only_uniquetail_field',
+        label: 'Only uniquetail field',
+        description: 'text',
+      },
+    ]);
+  });
+
   it('returns no options when input owner is invalid', async () => {
     const { fieldNameSelection } = setup();
 

@@ -176,6 +176,43 @@ describe('createCreateCaseFromTemplateStepDefinition', () => {
     });
   });
 
+  it('finds a template beyond the first 15 when the search query is non-empty', async () => {
+    const manyTemplates = [
+      ...Array.from({ length: 15 }, (_, index) => ({
+        key: `tmpl_${index}`,
+        name: `Plain ${index}`,
+        description: '',
+        caseFields: { title: `T ${index}` },
+      })),
+      {
+        key: 'only_uniquetail',
+        name: 'Only uniquetail template',
+        description: 'Last',
+        caseFields: { title: 'X' },
+      },
+    ];
+
+    const { templateSelection } = setup([
+      {
+        owner: 'securitySolution',
+        templates: manyTemplates,
+      },
+    ] as CasesConfigurationUI[]);
+
+    const searchResults = await templateSelection!.search(
+      'uniquetail',
+      createSelectionContext('securitySolution')
+    );
+
+    expect(searchResults).toEqual([
+      {
+        value: 'only_uniquetail',
+        label: 'Only uniquetail template',
+        description: 'Last',
+      },
+    ]);
+  });
+
   it('returns no options when input owner is invalid', async () => {
     const { templateSelection } = setup();
 

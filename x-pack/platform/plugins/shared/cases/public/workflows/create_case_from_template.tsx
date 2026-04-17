@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { SelectionOption } from '@kbn/workflows/types/latest';
 import { getCaseConfigure } from '../containers/configure/api';
 import { createCaseFromTemplateStepCommonDefinition } from '../../common/workflows/steps/create_case_from_template';
 import * as i18n from '../../common/workflows/translations';
+import { collectSelectionSearchOptions } from './selection_search';
 import { createPublicCaseStepDefinition } from './shared';
 import { isValidOwner } from '../../common/utils/owner';
 import type { Owner } from '../../common/bundled-types.gen';
-
-const MAX_TEMPLATES_FOR_SELECTION = 15;
 
 const getTemplatesForWorkflowOwner = async (owner: Owner) => {
   const configurations = (await getCaseConfigure({})) ?? [];
@@ -38,26 +36,20 @@ export const createCreateCaseFromTemplateStepDefinition = createPublicCaseStepDe
             const query = input.trim().toLowerCase();
             const templates = await getTemplatesForWorkflowOwner(owner);
 
-            const options: SelectionOption<string>[] = [];
-            const templateLimit = Math.min(templates.length, MAX_TEMPLATES_FOR_SELECTION);
             const queryIsEmpty = query.length === 0;
 
-            for (let i = 0; i < templateLimit; i++) {
-              const template = templates[i];
-              if (
-                queryIsEmpty ||
+            return collectSelectionSearchOptions({
+              items: templates,
+              hasEmptyQuery: queryIsEmpty,
+              matchesQuery: (template) =>
                 template.key.toLowerCase().includes(query) ||
-                template.name.toLowerCase().includes(query)
-              ) {
-                options.push({
-                  value: template.key,
-                  label: template.name,
-                  description: template.description,
-                });
-              }
-            }
-
-            return options;
+                template.name.toLowerCase().includes(query),
+              toOption: (template) => ({
+                value: template.key,
+                label: template.name,
+                description: template.description,
+              }),
+            });
           },
           resolve: async (value, ctx) => {
             const owner = ctx.values.input.owner;

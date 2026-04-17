@@ -113,13 +113,28 @@ describe('setCategoryStepDefinition', () => {
     expect(resolved).toBeNull();
   });
 
-  it('returns at most 15 categories', async () => {
+  it('returns at most 15 categories when the search query is empty', async () => {
     const manyCategories = Array.from({ length: 16 }, (_, i) => `Category ${i}`);
     const { categorySelection } = setup(manyCategories);
 
     const results = await categorySelection!.search('', createSelectionContext('securitySolution'));
 
     expect(results).toHaveLength(15);
+  });
+
+  it('finds a category after index 14 when the search query is non-empty', async () => {
+    const manyCategories = [
+      ...Array.from({ length: 15 }, (_, i) => `Unrelated ${i}`),
+      'OnlyUniqueTailMatch',
+    ];
+    const { categorySelection } = setup(manyCategories);
+
+    const results = await categorySelection!.search(
+      'uniquetail',
+      createSelectionContext('securitySolution')
+    );
+
+    expect(results).toEqual([{ value: 'OnlyUniqueTailMatch', label: 'OnlyUniqueTailMatch' }]);
   });
 
   it('does not fetch categories when owner is not provided', async () => {
