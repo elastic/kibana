@@ -165,6 +165,34 @@ describe('matcher_quick_filter_utils', () => {
     });
   });
 
+  describe('escaping', () => {
+    it('escapes double quotes in values', () => {
+      expect(mergeRuleIdsIntoMatcher('', ['foo"bar'])).toBe('rule.id : "foo\\"bar"');
+    });
+
+    it('escapes backslashes in values', () => {
+      expect(mergeRuleTagsIntoMatcher('', ['C:\\path'])).toBe('rule.tags : "C:\\\\path"');
+    });
+
+    it('round-trips values with double quotes', () => {
+      const ids = ['id-with-"quotes"'];
+      const merged = mergeRuleIdsIntoMatcher('', ids);
+      expect(parseRuleIdsFromMatcher(merged)).toEqual(ids);
+    });
+
+    it('round-trips values with backslashes', () => {
+      const tags = ['path\\to\\thing'];
+      const merged = mergeRuleTagsIntoMatcher('', tags);
+      expect(parseRuleTagsFromMatcher(merged)).toEqual(tags);
+    });
+
+    it('round-trips values with both quotes and backslashes', () => {
+      const ids = ['val\\"complex'];
+      const merged = mergeRuleIdsIntoMatcher('', ids);
+      expect(parseRuleIdsFromMatcher(merged)).toEqual(ids);
+    });
+  });
+
   describe('round-trip', () => {
     it('merge then parse returns the same rule ids', () => {
       const ids = ['id-1', 'id-2', 'id-3'];

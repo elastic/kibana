@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+const escapeKqlValue = (v: string): string => v.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+const unescapeKqlValue = (v: string): string => v.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+
 /**
  * Extracts all quoted values for a given KQL field from a matcher string.
  * Handles both single-value (`field : "v"`) and multi-value OR groups
@@ -12,11 +16,11 @@
  */
 const parseFieldValues = (matcher: string, fieldName: string): string[] => {
   const escaped = fieldName.replace(/\./g, '\\.');
-  const re = new RegExp(`${escaped}\\s*:\\s*"([^"]*)"`, 'gi');
+  const re = new RegExp(`${escaped}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 'gi');
   const found = new Set<string>();
   let m: RegExpExecArray | null = re.exec(matcher);
   while (m !== null) {
-    found.add(m[1]);
+    found.add(unescapeKqlValue(m[1]));
     m = re.exec(matcher);
   }
   return [...found];
@@ -51,8 +55,8 @@ const stripFieldClauses = (matcher: string, fieldName: string): string => {
  */
 const buildFieldClause = (fieldName: string, values: readonly string[]): string | null => {
   if (values.length === 0) return null;
-  if (values.length === 1) return `${fieldName} : "${values[0]}"`;
-  return `(${values.map((v) => `${fieldName} : "${v}"`).join(' or ')})`;
+  if (values.length === 1) return `${fieldName} : "${escapeKqlValue(values[0])}"`;
+  return `(${values.map((v) => `${fieldName} : "${escapeKqlValue(v)}"`).join(' or ')})`;
 };
 
 /**
