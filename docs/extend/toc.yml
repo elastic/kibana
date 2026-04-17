@@ -25,9 +25,7 @@ toc:
       - file: submitting-a-kibana-pull-request.md
       - file: pr-review.md
       - file: kibana-issue-reporting.md
-      - file: interpreting-ci-failures.md
       - file: ci.md
-      - file: ci-metrics.md
       - file: kibana-linting.md
       - file: managing-third-party-dependencies.md
       - file: upgrading-nodejs.md
