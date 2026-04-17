@@ -2738,6 +2738,14 @@
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
               },
               {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
+                "plugin": "automaticImport",
+                "path": "x-pack/platform/plugins/shared/automatic_import/server/services/task_manager/task_manager_telemetry.test.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/trial_companion/services/trial_companion_milestone_service.test.ts"
               },
