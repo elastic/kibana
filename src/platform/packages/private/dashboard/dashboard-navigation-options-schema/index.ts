@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '../../common/page_bundle_constants';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 export const dashboardNavigationOptionsSchema = schema.object({
   use_filters: schema.boolean({
@@ -30,3 +31,5 @@ export const dashboardNavigationOptionsSchema = schema.object({
     },
   }),
 });
+
+export type DashboardNavigationOptions = TypeOf<typeof dashboardNavigationOptionsSchema>;

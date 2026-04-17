@@ -7,5 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { dashboardNavigationOptionsSchema } from './schemas';
-export type { DashboardNavigationOptions } from './types';
+export const DEFAULT_DASHBOARD_NAVIGATION_OPTIONS = {
+  open_in_new_tab: false,
+  use_time_range: true,
+  use_filters: true,
+};

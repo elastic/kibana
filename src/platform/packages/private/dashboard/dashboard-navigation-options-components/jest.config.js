@@ -7,7 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf } from '@kbn/config-schema';
-import type { dashboardNavigationOptionsSchema } from './schemas';
-
-export type DashboardNavigationOptions = TypeOf<typeof dashboardNavigationOptionsSchema>;
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../..',
+  roots: [
+    '<rootDir>/src/platform/packages/private/dashboard/dashboard-navigation-options-components',
+  ],
+};

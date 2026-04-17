@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
-import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
-
-export const dashboardDrilldownSchema = dashboardNavigationOptionsSchema.extends({
-  dashboard_id: schema.string(),
-});
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/dashboard/dashboard-navigation-options-common'],
+};
