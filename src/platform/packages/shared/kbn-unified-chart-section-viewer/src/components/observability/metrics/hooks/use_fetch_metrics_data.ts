@@ -112,7 +112,7 @@ export function useFetchMetricsData({
         metricItems: [...parsed.metricItems].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: mergedDimensions,
+        allDimensions: [...mergedDimensions].sort((a, b) => a.name.localeCompare(b.name)),
       };
 
       if (!signal.aborted) {

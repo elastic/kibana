@@ -17,9 +17,13 @@ import type { Dimension } from '../../../../types';
  * multiple breakdown dimensions, which causes the METRICS_INFO query to add
  * WHERE filters that narrow the result set.
  *
+ * Ordering of the returned list is not guaranteed. Callers that need a
+ * specific order (e.g. alphabetical for a picker) are expected to sort the
+ * result themselves.
+ *
  * @param accumulated - Previously accumulated dimensions (the "high-water mark")
  * @param incoming - Dimensions from the latest METRICS_INFO response
- * @returns Merged dimension list with no duplicates, sorted alphabetically
+ * @returns Merged dimension list with no duplicates
  */
 export const mergeDimensions = (accumulated: Dimension[], incoming: Dimension[]): Dimension[] => {
   const merged = new Map<string, Dimension>();
@@ -33,5 +37,5 @@ export const mergeDimensions = (accumulated: Dimension[], incoming: Dimension[])
     merged.set(dim.name, dim);
   }
 
-  return Array.from(merged.values()).sort((a, b) => a.name.localeCompare(b.name));
+  return Array.from(merged.values());
 };

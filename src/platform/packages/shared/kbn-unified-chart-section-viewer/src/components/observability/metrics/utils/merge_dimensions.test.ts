@@ -10,17 +10,25 @@
 import { mergeDimensions } from './merge_dimensions';
 import type { Dimension } from '../../../../types';
 
+// Helpers to compare results as sets (mergeDimensions does not guarantee
+// ordering; sorting is the caller's responsibility).
+const byName = (a: Dimension, b: Dimension) => a.name.localeCompare(b.name);
+const sorted = (list: Dimension[]) => [...list].sort(byName);
+
 describe('mergeDimensions', () => {
   const dim = (name: string, type?: string): Dimension => ({ name, type });
 
   it('returns incoming dimensions when accumulated is empty', () => {
     const incoming = [dim('host.name'), dim('environment')];
-    expect(mergeDimensions([], incoming)).toEqual([dim('environment'), dim('host.name')]);
+    expect(sorted(mergeDimensions([], incoming))).toEqual([dim('environment'), dim('host.name')]);
   });
 
   it('returns accumulated dimensions when incoming is empty', () => {
     const accumulated = [dim('host.name'), dim('environment')];
-    expect(mergeDimensions(accumulated, [])).toEqual([dim('environment'), dim('host.name')]);
+    expect(sorted(mergeDimensions(accumulated, []))).toEqual([
+      dim('environment'),
+      dim('host.name'),
+    ]);
   });
 
   it('returns empty array when both are empty', () => {
@@ -37,7 +45,7 @@ describe('mergeDimensions', () => {
     const result = mergeDimensions(allDimensions, filteredDimensions);
 
     // region should still be present
-    expect(result).toEqual([dim('environment'), dim('host.name'), dim('region')]);
+    expect(sorted(result)).toEqual([dim('environment'), dim('host.name'), dim('region')]);
     expect(result.map((d) => d.name)).toContain('region');
   });
 
@@ -46,7 +54,7 @@ describe('mergeDimensions', () => {
     const incoming = [dim('host.name'), dim('region')];
 
     const result = mergeDimensions(accumulated, incoming);
-    expect(result).toEqual([dim('environment'), dim('host.name'), dim('region')]);
+    expect(sorted(result)).toEqual([dim('environment'), dim('host.name'), dim('region')]);
 
     // No duplicates
     const names = result.map((d) => d.name);
@@ -63,29 +71,21 @@ describe('mergeDimensions', () => {
     expect(hostDim?.type).toBe('ip');
   });
 
-  it('sorts results alphabetically by name', () => {
-    const accumulated = [dim('z_field'), dim('a_field')];
-    const incoming = [dim('m_field')];
-
-    const result = mergeDimensions(accumulated, incoming);
-    expect(result.map((d) => d.name)).toEqual(['a_field', 'm_field', 'z_field']);
-  });
-
   it('handles the full multi-step selection scenario', () => {
     // Step 1: initial unfiltered query
     const step1 = [dim('environment'), dim('host.name'), dim('region')];
     let accumulated = mergeDimensions([], step1);
-    expect(accumulated.map((d) => d.name)).toEqual(['environment', 'host.name', 'region']);
+    expect(sorted(accumulated).map((d) => d.name)).toEqual(['environment', 'host.name', 'region']);
 
     // Step 2: user selects environment, filtered query returns environment + host.name
     // (region is on a metric that may not have environment)
     const step2 = [dim('environment'), dim('host.name')];
     accumulated = mergeDimensions(accumulated, step2);
-    expect(accumulated.map((d) => d.name)).toEqual(['environment', 'host.name', 'region']);
+    expect(sorted(accumulated).map((d) => d.name)).toEqual(['environment', 'host.name', 'region']);
 
     // Step 3: user also selects host.name, filtered query returns only environment + host.name
     const step3 = [dim('environment'), dim('host.name')];
     accumulated = mergeDimensions(accumulated, step3);
-    expect(accumulated.map((d) => d.name)).toEqual(['environment', 'host.name', 'region']);
+    expect(sorted(accumulated).map((d) => d.name)).toEqual(['environment', 'host.name', 'region']);
   });
 });
