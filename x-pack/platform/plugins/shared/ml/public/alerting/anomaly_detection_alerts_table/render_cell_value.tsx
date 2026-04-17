@@ -17,11 +17,8 @@ import type { GetAlertsTableProp } from '@kbn/response-ops-alerts-table/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Alert } from '@kbn/alerting-types';
 import { useAlertsTableContext } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
-import {
-  alertFieldNameMap,
-  ALERT_ANOMALY_SCORE,
-  ALERT_ANOMALY_TIMESTAMP,
-} from '../../../common/constants/alerts';
+import { ALERT_ANOMALY_SCORE, ALERT_ANOMALY_TIMESTAMP } from '@kbn/ml-common-constants/alerts';
+import { alertFieldNameMap } from './alert_field_name_map';
 import { getFieldFormatterProvider } from '../../application/contexts/kibana/use_field_formatter';
 
 const getAlertFieldValue = (alert: Alert, fieldName: string) => {

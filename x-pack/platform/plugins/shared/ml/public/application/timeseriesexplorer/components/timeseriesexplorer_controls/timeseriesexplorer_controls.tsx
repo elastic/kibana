@@ -27,15 +27,15 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { MlJobState } from '@elastic/elasticsearch/lib/api/types';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import { CASES_TOAST_MESSAGES_TITLES } from '../../../../cases/constants';
-import type { CombinedJobWithStats } from '../../../../../server/shared';
-import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { MlEntity } from '../../../../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
-import type { SingleMetricViewerEmbeddableState } from '../../../../embeddables/types';
 import { ForecastingModal } from '../forecasting_modal/forecasting_modal';
 import type { Entity } from '../entity_control/entity_control';
 

@@ -53,10 +53,21 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { MlCapabilities } from '@kbn/ml-common-types/capabilities';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
+import { ML_APP_ROUTE, PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
+import {
+  initEnabledFeatures,
+  type MlFeatures,
+  type ConfigSchema,
+  type ExperimentalFeatures,
+  initExperimentalFeatures,
+  initModelDeploymentSettings,
+  type NLPSettings,
+} from '@kbn/ml-common-constants/app_config';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSections } from './application/management';
@@ -64,21 +75,8 @@ import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { registerHomeFeature } from './register_home_feature';
 import { isFullLicense, isMlEnabled } from '../common/license';
-import {
-  initEnabledFeatures,
-  type MlFeatures,
-  ML_APP_ROUTE,
-  PLUGIN_ICON_SOLUTION,
-  PLUGIN_ID,
-  type ConfigSchema,
-  type ExperimentalFeatures,
-  initExperimentalFeatures,
-  initModelDeploymentSettings,
-  type NLPSettings,
-} from '../common/constants/app';
 import type { ElasticModels } from './application/services/elastic_models_service';
 import type { MlApi } from './application/services/ml_api_service';
-import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
 import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 import { TelemetryService } from './application/services/telemetry/telemetry_service';

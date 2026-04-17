@@ -13,7 +13,7 @@ import { type FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
 
-import { ALERT_ANOMALY_SCORE } from '../../../common/constants/alerts';
+import { ALERT_ANOMALY_SCORE } from '@kbn/ml-common-constants/alerts';
 
 import { getAlertFormatters } from './render_cell_value';
 

@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-common-constants/plugin';
 import type { HttpService } from '../http_service';
-import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 
 export function inferenceModelsApiProvider(httpService: HttpService) {
   return {

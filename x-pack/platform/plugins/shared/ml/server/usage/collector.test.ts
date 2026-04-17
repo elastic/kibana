@@ -9,7 +9,7 @@ import {
   createCollectorFetchContextMock,
   createUsageCollectionSetupMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { ML_ALERT_TYPES } from '../../common/constants/alerts';
+import { ML_ALERT_TYPES } from '@kbn/ml-common-constants/alerts';
 import { registerCollector } from './collector';
 import { ML_DETECTOR_RULE_ACTION } from '@kbn/ml-anomaly-utils';
 import { emptyCustomRulesUsage } from './custom_rules_usage_aggregation';

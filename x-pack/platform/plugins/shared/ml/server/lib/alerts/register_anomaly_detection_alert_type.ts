@@ -19,10 +19,14 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { IRuleTypeAlerts, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ALERT_URL, ML_ANOMALY_DETECTION_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import type { MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { mlAnomalyDetectionAlertParamsSchema } from '@kbn/response-ops-rule-params/anomaly_detection';
+import type {
+  InfluencerAnomalyAlertDoc,
+  FormattedRecordAnomalyAlertDoc,
+} from '@kbn/ml-common-types/alerts';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_IS_INTERIM,
@@ -31,15 +35,22 @@ import {
   ALERT_TOP_INFLUENCERS,
   ALERT_TOP_RECORDS,
   ML_ALERT_TYPES,
-} from '../../../common/constants/alerts';
-import { PLUGIN_ID } from '../../../common/constants/app';
+} from '@kbn/ml-common-constants/alerts';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
+
+// The package @kbn/ml-common-constants/alerts hardcodes ML_ALERT_TYPES.ANOMALY_DETECTION
+// to avoid pulling @kbn/rule-data-utils into its runtime dependencies. This
+// bidirectional type check fails at compile time if the hardcoded value diverges
+// from the canonical ML_ANOMALY_DETECTION_RULE_TYPE_ID exported by @kbn/rule-data-utils.
+const _canonicalToHardcoded: typeof ML_ALERT_TYPES.ANOMALY_DETECTION =
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID;
+const _hardcodedToCanonical: typeof ML_ANOMALY_DETECTION_RULE_TYPE_ID =
+  ML_ALERT_TYPES.ANOMALY_DETECTION;
+void _canonicalToHardcoded;
+void _hardcodedToCanonical;
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import type { MlAnomalyDetectionAlertParams } from '../../routes/schemas/alerting_schema';
 import type { RegisterAlertParams } from './register_ml_alerts';
-import type {
-  FormattedRecordAnomalyAlertDoc,
-  InfluencerAnomalyAlertDoc,
-} from '../../../common/types/alerts';
 import type { AnomalyDetectionRuleState } from './alerting_service';
 
 /**

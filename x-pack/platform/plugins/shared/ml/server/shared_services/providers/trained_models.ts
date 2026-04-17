@@ -12,7 +12,7 @@ import type {
   GetModelDownloadConfigOptions,
   ModelDefinitionResponse,
 } from '@kbn/ml-trained-models-utils';
-import type { MlFeatures } from '../../../common/constants/app';
+import type { MlFeatures } from '@kbn/ml-common-constants/app_config';
 import type {
   MlInferTrainedModelRequest,
   MlStopTrainedModelDeploymentRequest,

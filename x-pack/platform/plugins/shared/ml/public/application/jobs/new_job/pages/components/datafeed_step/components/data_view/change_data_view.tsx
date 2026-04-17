@@ -28,15 +28,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 
+import type { CombinedJob } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { DatafeedValidationResponse } from '@kbn/ml-common-types/job_validation';
 import { useNavigateToManagementMlLink } from '../../../../../../../contexts/kibana/use_create_url';
 import { JobCreatorContext } from '../../../job_creator_context';
 import type { AdvancedJobCreator } from '../../../../../common/job_creator';
 import { resetAdvancedJob } from '../../../../../common/job_creator/util/general';
-import type {
-  CombinedJob,
-  Datafeed,
-} from '../../../../../../../../../common/types/anomaly_detection_jobs';
-import type { DatafeedValidationResponse } from '../../../../../../../../../common/types/job_validation';
 
 import { useMlKibana, useMlApi } from '../../../../../../../contexts/kibana';
 

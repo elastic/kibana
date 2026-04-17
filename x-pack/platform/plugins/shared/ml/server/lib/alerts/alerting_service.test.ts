@@ -12,7 +12,7 @@ import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import type { DeepPartial } from '@kbn/utility-types';
 import type { MlClient } from '../ml_client';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
+import type { FieldFormatsRegistryProvider } from '@kbn/ml-common-types/kibana';
 import type { GetDataViewsService } from '../data_views_utils';
 import { alertingServiceProvider } from './alerting_service';
 import type { MlAnomalyDetectionAlertPreviewRequest } from '../../routes/schemas/alerting_schema';

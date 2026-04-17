@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
-import type { CombinedJobWithStats } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { getJobs } from '../api/get_jobs';
 
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';

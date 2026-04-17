@@ -17,9 +17,9 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../../../common/types/alerts';
+import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '@kbn/ml-common-types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
-import { HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
+import { HEALTH_CHECK_NAMES } from '../../../common/alerts/health_check_names';
 import { TimeIntervalControl } from '../time_interval_control';
 
 interface TestsSelectionControlProps {

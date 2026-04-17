@@ -6,8 +6,8 @@
  */
 
 import { usePageUrlState } from '@kbn/ml-url-state';
-import type { TimeSeriesExplorerAppState } from '../../../../common/types/locator';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import type { TimeSeriesExplorerAppState } from '@kbn/ml-common-types/locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 interface TimeSeriesExplorerPageUrlState {
   pageKey: typeof ML_PAGES.SINGLE_METRIC_VIEWER;

@@ -30,8 +30,8 @@ import {
   ALERT_ANOMALY_TIMESTAMP,
   ML_ALERT_TYPES,
   ML_RULE_TYPE_IDS,
-  ML_VALID_CONSUMERS,
-} from '../../../../common/constants/alerts';
+} from '@kbn/ml-common-constants/alerts';
+import { ML_VALID_CONSUMERS } from './valid_consumers';
 import { StateService } from '../../services/state_service';
 import type { AnomalyTimelineStateService } from '../anomaly_timeline_state_service';
 

@@ -32,6 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { context } from '@kbn/kibana-react-plugin/public';
 import { type MlPartitionFieldsType, ML_PARTITION_FIELDS } from '@kbn/ml-anomaly-utils';
+import { getAnnotationFieldName, getAnnotationFieldValue } from '@kbn/ml-common-types/annotations';
 import {
   ANNOTATION_MAX_LENGTH_CHARS,
   ANNOTATION_EVENT_USER,
@@ -43,10 +44,6 @@ import type {
 import { annotationsRefreshed } from '../../../services/annotations_service';
 import { AnnotationDescriptionList } from '../annotation_description_list';
 import { DeleteAnnotationModal } from '../delete_annotation_modal';
-import {
-  getAnnotationFieldName,
-  getAnnotationFieldValue,
-} from '../../../../../common/types/annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { MlKibanaReactContextValue } from '../../../contexts/kibana';
 

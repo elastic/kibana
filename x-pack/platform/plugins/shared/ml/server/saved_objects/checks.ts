@@ -9,18 +9,18 @@ import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from '@kbn/core/server';
 import type {
+  JobType,
+  DeleteMLSpaceAwareItemsCheckResponse,
+  MlSavedObjectType,
+} from '@kbn/ml-common-types/saved_objects';
+
+import type { ResolveMlCapabilities } from '@kbn/ml-common-types/capabilities';
+import type {
   MLSavedObjectService,
   TrainedModelJob,
   JobObject,
   TrainedModelObject,
 } from './service';
-import type {
-  JobType,
-  DeleteMLSpaceAwareItemsCheckResponse,
-  MlSavedObjectType,
-} from '../../common/types/saved_objects';
-
-import type { ResolveMlCapabilities } from '../../common/types/capabilities';
 import { getJobDetailsFromTrainedModel, getJobsAndModels } from './util';
 
 export interface JobSavedObjectStatus {

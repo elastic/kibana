@@ -12,10 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import {
   getDataViewAndSavedSearchCallback,
   isCcsIndexPattern,

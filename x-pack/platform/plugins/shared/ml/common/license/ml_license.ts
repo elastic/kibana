@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
 import { distinctUntilChanged, map } from 'rxjs';
 import { isEqual } from 'lodash';
-import { PLUGIN_ID } from '../constants/app';
+import { PLUGIN_ID } from '@kbn/ml-common-constants/plugin';
 
 export const MINIMUM_LICENSE = 'basic';
 export const MINIMUM_FULL_LICENSE = 'platinum';

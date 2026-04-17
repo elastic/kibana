@@ -15,7 +15,7 @@ import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
-import type { SingleMetricViewerEmbeddableState } from '../embeddables/types';
+import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import type { SingleMetricViewerSharedComponent } from '../shared_components/single_metric_viewer';
 
 export const initComponent = memoize(
