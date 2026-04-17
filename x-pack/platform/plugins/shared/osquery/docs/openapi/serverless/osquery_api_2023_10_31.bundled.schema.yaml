@@ -428,6 +428,32 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                copyPackExample:
+                  summary: Example response for copying a pack
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: My pack
+                      enabled: false
+                      name: my_pack_copy
+                      policy_ids: []
+                      queries:
+                        - ecs_mapping:
+                            - key: client.port
+                              value:
+                                field: port
+                          id: ports
+                          interval: 60
+                          query: SELECT * FROM listening_ports;
+                          removed: false
+                          snapshot: true
+                          timeout: 120
+                      saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+                      shards: []
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
               schema:
                 $ref: '#/components/schemas/CopyPacksResponse'
           description: Indicates a successful call.
@@ -581,6 +607,27 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                copySavedQueryExample:
+                  summary: Example response for copying a saved query
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: Saved query description
+                      ecs_mapping:
+                        host.uptime:
+                          field: total_seconds
+                      id: my_saved_query_copy
+                      interval: '60'
+                      platform: linux,darwin
+                      query: select * from uptime;
+                      removed: false
+                      saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+                      snapshot: true
+                      timeout: 120
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
               schema:
                 $ref: '#/components/schemas/CopySavedQueryResponse'
           description: Indicates a successful call.
@@ -801,66 +848,98 @@ components:
           description: My pack
           enabled: false
           name: my_pack_copy
+          policy_ids: []
           queries:
-            ports:
-              ecs_mapping:
-                client.port:
-                  field: port
+            - ecs_mapping:
+                - key: client.port
+                  value:
+                    field: port
+              id: ports
               interval: 60
               query: SELECT * FROM listening_ports;
               removed: false
               snapshot: true
               timeout: 120
           saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
-          shards: {}
+          shards: []
           updated_at: '2025-02-26T13:37:30.452Z'
           updated_by: elastic
       type: object
       properties:
         data:
-          description: The copied pack.
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              format: date-time
               type: string
             created_by:
-              description: The user who created the copy.
+              nullable: true
+              type: string
+            created_by_profile_uid:
               type: string
             description:
-              description: The pack description.
-              type: string
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
             enabled:
-              description: Whether the pack is enabled. Always false for copies.
-              type: boolean
+              $ref: '#/components/schemas/EnabledOrUndefined'
             name:
-              description: The name of the copied pack.
-              type: string
+              $ref: '#/components/schemas/PackName'
             policy_ids:
-              description: >-
-                A list of agent policy IDs associated with the pack. Always
-                empty for copies.
-              items:
-                type: string
-              type: array
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
             queries:
-              description: The queries in the copied pack.
-              type: object
+              description: >-
+                Pack queries in saved-object storage format (array). Note: the
+                read endpoint returns object format.
+              items:
+                type: object
+                properties:
+                  ecs_mapping:
+                    $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                  id:
+                    type: string
+                  interval:
+                    type: integer
+                  platform:
+                    type: string
+                  query:
+                    type: string
+                  removed:
+                    type: boolean
+                  snapshot:
+                    type: boolean
+                  timeout:
+                    type: integer
+                  version:
+                    type: string
+              type: array
             saved_object_id:
               description: The saved object ID of the copied pack.
               type: string
             shards:
-              description: Shard configuration for the pack.
-              type: object
+              description: Shard configuration as an array of key-value pairs.
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
+              type: array
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the pack.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
               type: string
             version:
-              description: The pack version.
+              description: The pack version number.
               type: integer
+          required:
+            - saved_object_id
+            - name
+      required:
+        - data
     CopySavedQueryResponse:
       description: The response for copying a saved query.
       example:
@@ -884,51 +963,51 @@ components:
       type: object
       properties:
         data:
-          description: The copied saved query.
           type: object
           properties:
             created_at:
-              description: The creation timestamp.
+              format: date-time
               type: string
             created_by:
-              description: The user who created the copy.
+              nullable: true
+              type: string
+            created_by_profile_uid:
               type: string
             description:
-              description: The saved query description.
-              type: string
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
             ecs_mapping:
-              description: The ECS mapping configuration.
-              type: object
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
             id:
-              description: The saved query ID.
-              type: string
+              $ref: '#/components/schemas/SavedQueryId'
             interval:
-              description: The query interval in seconds.
-              type: string
+              oneOf:
+                - type: integer
+                - type: string
             platform:
-              description: The target platform(s).
-              type: string
+              $ref: '#/components/schemas/PlatformOrUndefined'
             query:
-              description: The SQL query.
-              type: string
+              $ref: '#/components/schemas/Query'
             removed:
-              description: Whether to include results for removed processes.
-              type: boolean
+              $ref: '#/components/schemas/RemovedOrUndefined'
             saved_object_id:
-              description: The saved object ID of the copied saved query.
               type: string
             snapshot:
-              description: Whether the query is a snapshot query.
-              type: boolean
+              $ref: '#/components/schemas/SnapshotOrUndefined'
             timeout:
-              description: The query timeout in seconds.
               type: integer
             updated_at:
-              description: The last update timestamp.
+              format: date-time
               type: string
             updated_by:
-              description: The user who last updated the saved query.
+              nullable: true
               type: string
+            updated_by_profile_uid:
+              type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     CreateLiveQueryRequestBody:
       example:
         agent_all: true
