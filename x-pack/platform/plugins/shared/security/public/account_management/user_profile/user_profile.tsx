@@ -988,7 +988,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="dot" color="success" />
+            <EuiIcon type="dot" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage
