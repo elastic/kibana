@@ -658,7 +658,7 @@ export class StreamsApp {
   async getConditionAddStepMenuButton(pos: number) {
     const conditions = await this.getConditionsListItems();
     const targetCondition = conditions[pos];
-    return targetCondition.getByRole('button', { name: 'Create nested step' });
+    return targetCondition.getByRole('button', { name: 'Create nested step' }).first();
   }
 
   async getConditionContextMenuButton(pos: number) {

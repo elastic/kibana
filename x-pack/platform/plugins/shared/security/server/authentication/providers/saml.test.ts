@@ -1991,7 +1991,10 @@ describe('SAMLAuthenticationProvider', () => {
 
         await expect(provider.authenticate(request, sessionValue)).resolves.toEqual(
           AuthenticationResult.succeeded(mockUser, {
-            authHeaders: { authorization: 'Bearer essu_dev_new-access-token' },
+            authHeaders: {
+              authorization: 'Bearer essu_dev_new-access-token',
+              [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret',
+            },
             userProfileGrant: {
               type: 'uiamAccessToken',
               accessToken: 'essu_dev_new-access-token',
