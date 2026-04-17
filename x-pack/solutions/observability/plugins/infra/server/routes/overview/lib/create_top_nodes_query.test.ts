@@ -57,7 +57,6 @@ describe('createTopNodesQuery', () => {
       const query = createTopNodesQuery(baseOptions, source, 'ecs');
       expect(query.aggs.nodes.terms.order).toEqual({ uptime: 'asc' });
     });
-
   });
 
   describe('semconv schema', () => {
