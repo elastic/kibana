@@ -159,11 +159,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('editDataRetentionModal');
 
           // Wait for and verify the success toast appears
-          await toasts.assertCount(1);
-          const successToastContent = await toasts.getContentByIndex(1);
-          expect(successToastContent).to.contain(
-            'Data retention has been updated for 2 data streams.'
-          );
+          await retry.try(async () => {
+            await toasts.assertCount(1);
+            const successToastContent = await toasts.getContentByIndex(1);
+            expect(successToastContent).to.contain(
+              'Data retention has been updated for 2 data streams.'
+            );
+          });
           // Clear up toasts for next test
           await toasts.dismissAll();
         });
@@ -182,11 +184,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.missingOrFail('editDataRetentionModal');
 
           // Wait for and verify the success toast appears
-          await toasts.assertCount(1);
-          const successToastContent = await toasts.getContentByIndex(1);
-          expect(successToastContent).to.contain(
-            'Data retention has been updated for 2 data streams.'
-          );
+          await retry.try(async () => {
+            await toasts.assertCount(1);
+            const successToastContent = await toasts.getContentByIndex(1);
+            expect(successToastContent).to.contain(
+              'Data retention has been updated for 2 data streams.'
+            );
+          });
           // Clear up toasts for next test
           await toasts.dismissAll();
         });

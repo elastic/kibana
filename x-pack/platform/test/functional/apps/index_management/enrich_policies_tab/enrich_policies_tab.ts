@@ -115,8 +115,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
 
-      const successToast = await toasts.getElementByIndex(1);
-      expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
+      await retry.try(async () => {
+        const successToast = await toasts.getElementByIndex(1);
+        expect(await successToast.getVisibleText()).to.contain(`Deleted ${ENRICH_POLICY_NAME}`);
+      });
     });
 
     describe('access', function () {

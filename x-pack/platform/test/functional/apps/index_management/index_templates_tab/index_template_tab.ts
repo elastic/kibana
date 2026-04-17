@@ -34,7 +34,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       if (await testSubjects.exists('reloadButton')) {
-        await testSubjects.click('reloadButton');
+        await browser.execute(() => {
+          const btn = document.querySelector('[data-test-subj="reloadButton"]') as HTMLElement;
+          if (btn) btn.click();
+        });
       }
     });
 
@@ -100,6 +103,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         });
 
+        await testSubjects.scrollIntoView('reloadButton');
         await testSubjects.click('reloadButton');
         await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
         await testSubjects.click('manageTemplateButton');
