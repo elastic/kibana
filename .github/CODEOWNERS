@@ -2428,6 +2428,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
@@ -3149,11 +3150,11 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inven
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/contextual-security-apps
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/contextual-security-apps
 
-# Security Service Integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
+# Security integrations
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/integration-experience
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -3243,6 +3244,9 @@ oas_docs/output                               @elastic/ski-docs
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
 
+# Side navigation title glossary
+src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
+
 /x-pack/platform/test/serverless/functional/test_suites/strip_unknown_config_workaround @elastic/kibana-core
 
 # Plugin manifests for test plugins
@@ -3274,6 +3278,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Appex QA to own auto-generated scout metadata
 /**/scout/.meta/**
 /**/scout_*/.meta/**
+
+# Macroscope Check Run Agents
+/.macroscope/scout-review.md @elastic/appex-qa
+/.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require
