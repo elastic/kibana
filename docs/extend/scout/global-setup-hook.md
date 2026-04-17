@@ -24,7 +24,7 @@ Global setup is most valuable when:
 ::::::
 
 ::::::{note}
-Scout doesn't currently have a global teardown hook. Most environments are ephemeral and shut down after the run, but tests running on shared servers (like Cloud) can leave orphaned data if cleanup is skipped.
+Scout doesn’t currently have a global teardown hook. Most environments are ephemeral and are shut down after the run.
 ::::::
 
 ## Enable it [enable-global-setup-hook]
