@@ -105,6 +105,7 @@ toc:
       - file: home-tutorials.md
       - file: configuring-your-plugin.md
       - file: ui-settings.md
+      - file: i18n.md
       - file: logging-service.md
       - file: reporting-integration.md
       - file: adding-performance-metrics.md
@@ -117,8 +118,6 @@ toc:
         children:
           - file: plugin-tooling.md
           - file: external-plugin-functional-tests.md
-          - file: external-plugin-localization.md
-          - file: translations-plugin.md
           - file: testing-kibana-plugin.md
   - folder: testing
     children:

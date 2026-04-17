@@ -15,7 +15,7 @@ Most developers who contribute code directly to the {{kib}} repo are writing cod
 
 * [Plugin tooling](/extend/tutorials/plugin-tooling.md)
 * [Functional Tests for Plugins outside the {{kib}} repo](/extend/tutorials/external-plugin-functional-tests.md)
-* [Localization for plugins outside the {{kib}} repo](/extend/tutorials/external-plugin-localization.md)
+* [Internationalization (i18n)](/extend/tutorials/i18n.md)
 * [Testing {{kib}} Plugins](/extend/tutorials/testing-kibana-plugin.md)
 
 
