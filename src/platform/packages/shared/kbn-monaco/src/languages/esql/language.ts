@@ -16,6 +16,7 @@ import {
   inlineSuggest,
   suggest,
   validateQuery,
+  getIndexSourcesFromQuery,
 } from '@kbn/esql-language';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
 import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
@@ -165,12 +166,29 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     return provider;
   },
   getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
+    const itemContext = new WeakMap<
+      monaco.languages.CompletionItem,
+      {
+        streamNames: string[];
+        getFieldsMetadata: ESQLDependencies['getFieldsMetadata'];
+      }
+    >();
+
     return {
       triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position
       ): Promise<monaco.languages.CompletionList> {
+        // Avoid returning suggestions for unfocused editors sharing the same model.
+        const editors = monaco.editor.getEditors().filter((editor) => editor.getModel() === model);
+        const modelHasTextFocus =
+          editors.length === 0 || editors.some((editor) => editor.hasTextFocus());
+
+        if (!modelHasTextFocus) {
+          return { suggestions: [] };
+        }
+
         const resolvedCallbacks = deps?.getModelDependencies?.(model) ?? deps;
         const resolvedDeps = resolvedCallbacks
           ? ({ ...deps, ...resolvedCallbacks } as ESQLDependencies)
@@ -198,43 +216,79 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
           model.getLineCount()
         );
 
+        const streamNames = getIndexSourcesFromQuery(fullText).filter(
+          (name) => !name.includes('*')
+        );
+        for (const suggestion of result.suggestions) {
+          itemContext.set(suggestion, {
+            streamNames,
+            getFieldsMetadata: resolvedDeps?.getFieldsMetadata,
+          });
+        }
+
         return result;
       },
       async resolveCompletionItem(item, token): Promise<monaco.languages.CompletionItem> {
-        if (!deps?.getFieldsMetadata) return item;
-        const fieldsMetadataClient = await deps?.getFieldsMetadata;
+        const context = itemContext.get(item);
+        if (!context?.getFieldsMetadata) return item;
 
-        const fullEcsMetadataList = await fieldsMetadataClient?.find({
-          attributes: ['type'],
-        });
-        if (!fullEcsMetadataList || !fieldsMetadataClient || typeof item.label !== 'string')
-          return item;
+        const fieldsMetadataClient = await context.getFieldsMetadata;
+        if (!fieldsMetadataClient) return item;
+
+        // Fetch the full ECS field list upfront as a single lightweight check.
+        // The client caches this result, so subsequent calls are free.
+        const fullEcsMetadataList = await fieldsMetadataClient.find({ attributes: ['type'] });
+
+        if (item.kind !== monaco.languages.CompletionItemKind.Variable) return item;
+        if (typeof item.label !== 'string') return item;
 
         const strippedFieldName = removeKeywordSuffix(item.label);
-        if (
-          // If item is not a field, no need to fetch metadata
-          item.kind === monaco.languages.CompletionItemKind.Variable &&
-          // If not ECS, no need to fetch description
-          Object.hasOwn(fullEcsMetadataList?.fields, strippedFieldName)
-        ) {
+        const { streamNames } = context;
+        const documentationParts: string[] = [];
+
+        // 1. ECS description
+        if (fullEcsMetadataList && Object.hasOwn(fullEcsMetadataList.fields, strippedFieldName)) {
           const ecsMetadata = await fieldsMetadataClient.find({
             fieldNames: [strippedFieldName],
             attributes: ['description'],
           });
-
-          const fieldMetadata = ecsMetadata.fields[strippedFieldName];
-          if (fieldMetadata && fieldMetadata.description) {
-            const completionItem: monaco.languages.CompletionItem = {
-              ...item,
-              documentation: {
-                value: fieldMetadata.description,
-              },
-            };
-            return completionItem;
+          const ecsDescription = ecsMetadata.fields[strippedFieldName]?.description;
+          if (ecsDescription) {
+            documentationParts.push(ecsDescription);
           }
         }
 
-        return item;
+        // 2. Stream descriptions
+        if (streamNames?.length) {
+          const streamMetadata = await fieldsMetadataClient.find({
+            fieldNames: [strippedFieldName],
+            attributes: ['description'],
+            streamNames,
+            source: ['streams'],
+          });
+          const streamParts = streamNames.flatMap((streamName) => {
+            const streamDescription =
+              streamMetadata.streamFields[streamName]?.[strippedFieldName]?.description;
+            return streamDescription ? [`Per **${streamName}** stream: ${streamDescription}`] : [];
+          });
+          if (streamParts.length > 0) {
+            if (documentationParts.length > 0) {
+              documentationParts.push('---');
+            }
+            documentationParts.push(streamParts.join('\n\n'));
+          }
+        }
+
+        if (documentationParts.length === 0) {
+          return item;
+        }
+
+        return {
+          ...item,
+          documentation: {
+            value: documentationParts.join('\n\n'),
+          },
+        };
       },
     };
   },

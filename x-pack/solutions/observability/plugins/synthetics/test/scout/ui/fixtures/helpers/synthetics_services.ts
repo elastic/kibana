@@ -303,7 +303,7 @@ function createSyntheticsServices(
         document = { ...makeUpSummary(commonData), ...document };
     }
 
-    await esClient.index({ index, document });
+    await esClient.index({ index, document, refresh: 'wait_for' });
   };
 
   const cleanUp = async () => {

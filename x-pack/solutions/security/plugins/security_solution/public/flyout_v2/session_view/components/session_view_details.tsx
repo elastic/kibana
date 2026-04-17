@@ -81,7 +81,7 @@ export const SessionViewDetails = memo(
 
     const onShowAlertDetails = useCallback(
       (alertId: string, alertIndex: string) => {
-        overlays?.openSystemFlyout(
+        overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
@@ -95,7 +95,10 @@ export const SessionViewDetails = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         );
       },
       [

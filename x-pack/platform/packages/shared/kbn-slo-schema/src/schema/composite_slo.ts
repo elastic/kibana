@@ -5,49 +5,113 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { dateType } from './common';
-import { rollingTimeWindowSchema } from './time_window';
-import { occurrencesBudgetingMethodSchema, sloIdSchema, tagsSchema, targetSchema } from './slo';
+import { z } from '@kbn/zod';
 
-const compositeSloMemberSchema = t.intersection([
-  t.type({
-    sloId: sloIdSchema,
-    weight: t.number,
-  }),
-  t.partial({
-    instanceId: t.string,
-  }),
+const compositeSloIdSchema = z
+  .string()
+  .min(8)
+  .max(48)
+  .regex(
+    /^[a-z0-9-_]+$/,
+    'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
+  );
+
+const compositeTagsSchema = z.array(z.string()).max(30);
+
+const compositeTargetSchema = z.object({ target: z.number() });
+
+const compositeOccurrencesBudgetingMethodSchema = z.literal('occurrences');
+
+const compositeRollingTimeWindowSchema = z.object({
+  duration: z.string(),
+  type: z.literal('rolling'),
+});
+
+const compositeSloMemberSchema = z.object({
+  sloId: compositeSloIdSchema,
+  weight: z.number(),
+  instanceId: z.string().optional(),
+});
+
+const compositeMethodSchema = z.literal('weightedAverage');
+
+const compositeErrorBudgetSchema = z.object({
+  initial: z.number(),
+  consumed: z.number(),
+  remaining: z.number(),
+  isEstimated: z.boolean(),
+});
+
+const compositeStatusSchema = z.union([
+  z.literal('NO_DATA'),
+  z.literal('HEALTHY'),
+  z.literal('DEGRADING'),
+  z.literal('VIOLATED'),
 ]);
 
-const compositeMethodSchema = t.literal('weightedAverage');
-
-const compositeSloDefinitionSchema = t.type({
-  id: sloIdSchema,
-  name: t.string,
-  description: t.string,
-  members: t.array(compositeSloMemberSchema),
+const compositeSloBaseDefinitionSchema = z.object({
+  id: compositeSloIdSchema,
+  name: z.string(),
+  description: z.string(),
   compositeMethod: compositeMethodSchema,
-  timeWindow: rollingTimeWindowSchema,
-  budgetingMethod: occurrencesBudgetingMethodSchema,
-  objective: targetSchema,
-  tags: tagsSchema,
-  enabled: t.boolean,
-  createdAt: dateType,
-  updatedAt: dateType,
-  createdBy: t.string,
-  updatedBy: t.string,
-  version: t.number,
+  timeWindow: compositeRollingTimeWindowSchema,
+  budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
+  objective: compositeTargetSchema,
+  tags: compositeTagsSchema,
+  enabled: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  createdBy: z.string(),
+  updatedBy: z.string(),
+  version: z.number(),
+});
+
+const compositeSloDefinitionSchema = compositeSloBaseDefinitionSchema.extend({
+  members: z.array(compositeSloMemberSchema).min(2).max(25),
 });
 
 const storedCompositeSloDefinitionSchema = compositeSloDefinitionSchema;
 
-export type CompositeSLOMember = t.TypeOf<typeof compositeSloMemberSchema>;
-export type CompositeMethod = t.TypeOf<typeof compositeMethodSchema>;
+const compositeSloMemberSummarySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  weight: z.number(),
+  normalisedWeight: z.number(),
+  sliValue: z.number(),
+  contribution: z.number(),
+  status: compositeStatusSchema,
+  instanceId: z.string().optional(),
+});
+
+const compositeSloSummarySchema = z.object({
+  sliValue: z.number(),
+  errorBudget: compositeErrorBudgetSchema,
+  status: compositeStatusSchema,
+  fiveMinuteBurnRate: z.number(),
+  oneHourBurnRate: z.number(),
+  oneDayBurnRate: z.number(),
+});
+
+type CompositeSLOMember = z.infer<typeof compositeSloMemberSchema>;
+type CompositeMethod = z.infer<typeof compositeMethodSchema>;
+type CompositeSLOMemberSummary = z.infer<typeof compositeSloMemberSummarySchema>;
+type CompositeSLOSummary = z.infer<typeof compositeSloSummarySchema>;
+
+export type { CompositeSLOMember, CompositeMethod, CompositeSLOMemberSummary, CompositeSLOSummary };
 
 export {
+  compositeSloIdSchema,
+  compositeTagsSchema,
+  compositeTargetSchema,
+  compositeOccurrencesBudgetingMethodSchema,
+  compositeRollingTimeWindowSchema,
   compositeSloMemberSchema,
   compositeMethodSchema,
+  compositeErrorBudgetSchema,
+  compositeStatusSchema,
+  compositeSloBaseDefinitionSchema,
   compositeSloDefinitionSchema,
   storedCompositeSloDefinitionSchema,
+  compositeSloMemberSummarySchema,
+  compositeSloSummarySchema,
 };

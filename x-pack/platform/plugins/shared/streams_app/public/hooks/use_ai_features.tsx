@@ -28,7 +28,7 @@ export interface AIFeatures {
 export function useAIFeatures(): AIFeatures | null {
   const {
     dependencies: {
-      start: { licensing, streams },
+      start: { licensing },
     },
     core,
   } = useKibana();
@@ -36,8 +36,8 @@ export function useAIFeatures(): AIFeatures | null {
   const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
 
   const genAiConnectors = useGenAIConnectors({
-    streamsRepositoryClient: streams.streamsRepositoryClient,
-    uiSettings: core.uiSettings,
+    http: core.http,
+    settings: core.settings,
   });
   const license = useObservable(licensing.license$);
   const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
