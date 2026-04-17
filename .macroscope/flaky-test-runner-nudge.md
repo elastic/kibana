@@ -1,56 +1,53 @@
-`````markdown
 ---
 title: Flaky Test Runner nudge
 model: claude-opus-4-6
 reasoning: high
 effort: high
 input: full_diff
-exclude:
-  - 'api_docs/**'
-  - 'config/**'
-  - 'dev_docs/**'
-  - 'docs/**'
-  - 'legacy_rfcs/**'
-  - 'licenses/**'
-  - 'node_modules/**'
-  - 'oas_docs/**'
-  - 'typings/**'
-  - '.buildkite/**'
+include:
+  - '**/test/scout*/**'
+  - 'src/platform/test/**'
+  - 'x-pack/**/test/**'
 conclusion: neutral
 ---
 
 Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
 
+**Important:**
+
+- Never post the flaky test runner comment more than once on the same PR.
+- Do not run this check on backport PRs.
+
 ## Step 1: Are any in-scope files changed?
 
-- **Scout:** `**/test/scout*/**` or `**/kbn-scout*/**`
-- **FTR:** `src/platform/test/**`, `x-pack/platform/test/**`, `x-pack/solutions/*/test/**`
+- **Scout:** `**/test/scout*/**`
+- **FTR:** `src/platform/test/**`, `x-pack/**/test/**`
 
 If nothing matches, stop.
 
 ## Step 2: Do the changes affect stability?
 
-**Nudge if:** test logic, assertions, selectors, fixtures, page objects, config files, hooks, timeouts, waits, API calls, new/removed/skipped tests.
+**Nudge if:** test logic, assertions, selectors, fixtures, page objects, test config files, hooks, timeouts, waits, API calls, new/updated/unskipped tests.
 
 **Skip if:** comments only, pure formatting, import reorder, trivial copy changes.
 
 Evaluate Scout and FTR independently. Only nudge the side(s) that qualify.
 
-## Step 3: Resolve the config path
+## Step 3: Resolve the config paths
 
-**FTR:** Walk up from the changed file to the nearest leaf `config*.ts` (skip `*.base.ts`). If none found, use `browse_code` to find which config's `testFiles`/`loadTestFile` includes the changed file.
+**FTR:** Walk up from the changed file and collect all leaf `config*.ts` files (skip `*.base.ts`). For each candidate, use `browse_code` to verify it actually references the changed file via `testFiles` or `loadTestFile` (directly or via glob). Only include configs that pass this check. If no candidate is found walking up, use `browse_code` to search for which config includes the changed file.
 
 Example: `x-pack/platform/test/serverless/functional/configs/search/config.group7.ts`
 
-**Scout — changed file is under `**/test/scout\*/**`:** Walk up to the nearest `playwright.config.ts` or `parallel.playwright.config.ts` (prefer `parallel` if the path contains `parallel_tests/`).
+**Scout:** Walk up from the changed file to the nearest `playwright.config.ts` or `parallel.playwright.config.ts` (prefer `parallel` if the path contains `parallel_tests/`). Verify the config actually runs the changed file.
 
 Example: `x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts`
 
-**Scout — changed file is under `**/kbn-scout*/**`:** Search the repo for imports of the changed module, prioritising hits under `\*\*/test/scout*/\*\*`. From each hit, walk up to the nearest Playwright config as above. If no config can be linked after tracing imports, tell the author to pick a suite manually using the UI.
+If multiple changed files resolve to the same config, include it only once.
 
 ## Output
 
-Post one comment on the PR. Include only the `/flaky` line(s) for the runner(s) that qualify:
+Post one comment on the PR with a single `/flaky` command. Include tokens only for runner types that qualify. All configs — any number, any mix of Scout and FTR — go space-separated on the same line. Format:
 
 ````markdown
 ## Catch flakiness early (recommended)
@@ -60,23 +57,40 @@ Post one comment on the PR. Include only the `/flaky` line(s) for the runner(s) 
 Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) or post this comment on the PR:
 
 ```
-/flaky <scoutConfig or ftrConfig>:<resolved-ftr-config-path>:30
+/flaky <type>:<path>:30 [<type>:<path>:30 ...]
 ```
+
+This check is experimental. Share your feedback in the #appex-qa channel.
 ````
-`````
 
-Replace the example paths with the resolved paths from Step 3. Drop whichever line doesn't apply. If Scout config could not be resolved (shared `kbn-scout*` package with no traceable imports), replace the `scoutConfig` line with a note asking the author to pick a suite manually in the UI. Sample commands:
+Examples:
 
-Scout:
+Scout-only:
 
 ```
 /flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:30
 ```
 
-FTR:
+FTR-only (multiple configs):
 
 ```
-/flaky ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:30
+/flaky ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:30 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group8.ts:30
 ```
 
-Always use 30: this tells the runner to execute the test config 30 times.
+Mixed Scout + FTR:
+
+```
+/flaky scoutConfig:x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.config.ts:30 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group7.ts:30 ftrConfig:x-pack/platform/test/serverless/functional/configs/search/config.group8.ts:30
+```
+
+**Rules:**
+
+- Always use `:30` on every token.
+- Only include config paths that are verified to exist and run the changed tests.
+- Always post a single `/flaky` line — never multiple.
+- Deduplicate: include each config path only once.
+- If no valid config can be resolved for a runner after walking up and searching, include a note in the comment asking the author to identify the correct config path manually, rather than omitting the runner entirely:
+
+```
+> ⚠️ Could not resolve a config for [Scout/FTR] — please identify the correct config path and run manually via the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner).
+```
