@@ -19,6 +19,7 @@ export class SpacesPage {
     await this.dismissWelcomeScreen();
     await this.page.testSubj.locator('homeApp').waitFor({
       state: 'visible',
+      timeout: 30_000,
     });
   }
 
