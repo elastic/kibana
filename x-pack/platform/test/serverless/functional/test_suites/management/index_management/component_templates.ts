@@ -13,7 +13,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common', 'indexManagement', 'header']);
   const browser = getService('browser');
-  const samlAuth = getService('samlAuth');
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
