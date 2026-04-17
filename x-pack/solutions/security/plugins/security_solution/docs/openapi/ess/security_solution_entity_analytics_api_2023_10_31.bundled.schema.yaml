@@ -1286,7 +1286,7 @@ paths:
         configuration and current status.
       operationId: GetEntityEngine
       parameters:
-        - description: The entity type of the engine (user, host, service, or generic).
+        - description: The entity type of the engine.
           example: host
           in: path
           name: entityType
