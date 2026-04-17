@@ -1,0 +1,41 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postDryRunPackagePoliciesRequestExample:
+          description: 'Dry run an upgrade of a package policy'
+          value:
+            packagePolicyIds:
+              - 'package-policy-id-1'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postDryRunPackagePoliciesExample:
+            description: 'Preview of the package policy upgrade diff'
+            value:
+              - name: 'nginx-1'
+                hasErrors: false
+                diff:
+                  - id: 'package-policy-id-1'
+                    name: 'nginx-1'
+                    package:
+                      name: 'nginx'
+                      version: '1.20.0'
+                  - name: 'nginx-1'
+                    package:
+                      name: 'nginx'
+                      version: '1.21.0'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
