@@ -100,7 +100,8 @@ export class ChatService {
       });
     }).pipe(
       // @ts-expect-error SseEvent mixin issue
-      httpResponseIntoObservable<ChatEvent>()
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapAgentBuilderErrors()
     );
   }
 
