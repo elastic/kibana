@@ -30,19 +30,19 @@ describe('workflow schema size benchmarks', () => {
   describe('connector counts', () => {
     it('elasticsearch connectors stay within budget', () => {
       const connectors = getElasticsearchConnectors();
-      expect(connectors.length).toBeGreaterThan(0);
+      expect(connectors.length).toBeGreaterThan(5);
       expect(connectors.length).toBeLessThanOrEqual(100);
     });
 
     it('kibana connectors stay within budget', () => {
       const connectors = getKibanaConnectors();
-      expect(connectors.length).toBeGreaterThan(0);
+      expect(connectors.length).toBeGreaterThan(5);
       expect(connectors.length).toBeLessThanOrEqual(100);
     });
 
     it('total internal connectors stay within budget', () => {
       const connectors = getAllConnectors();
-      expect(connectors.length).toBeGreaterThan(0);
+      expect(connectors.length).toBeGreaterThan(10);
       expect(connectors.length).toBeLessThanOrEqual(250);
     });
   });
