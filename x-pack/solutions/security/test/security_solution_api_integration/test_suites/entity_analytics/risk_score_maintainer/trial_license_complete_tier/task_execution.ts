@@ -145,7 +145,6 @@ export default ({ getService }: FtrProviderContext): void => {
         const hostScores = normalized.filter((s) => s.id_value === host.expectedEuid);
         expect(hostScores.length).to.be.greaterThan(1);
       });
-
     });
   });
 };
