@@ -256,38 +256,6 @@ export async function getPackagePolicySavedObjectType() {
 }
 
 /**
- * Returns the union of all agent version keys stored in inputs_for_versions across every
- * package policy that belongs to the given agent policy. Used by deployPolicies to ensure
- * non-default agent versions (e.g. 9.1 from an enrolled agent) get updated .fleet-policies
- * documents when the agent policy changes, not just the common default versions.
- */
-export async function getCompiledVersionsForAgentPolicy(
-  soClient: SavedObjectsClientContract,
-  agentPolicyId: string
-): Promise<string[]> {
-  if (!appContextService.getExperimentalFeatures().enableVersionSpecificPolicies) {
-    return [];
-  }
-  const savedObjectType = await getPackagePolicySavedObjectType();
-  const packagePolicySOs = await soClient.find<PackagePolicySOAttributes>({
-    type: savedObjectType,
-    filter: buildCurrentRevisionFilter(
-      savedObjectType,
-      `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)}`
-    ),
-    perPage: SO_SEARCH_LIMIT,
-  });
-
-  const versionKeys = new Set<string>();
-  for (const so of packagePolicySOs.saved_objects) {
-    for (const version of Object.keys(so.attributes.inputs_for_versions ?? {})) {
-      versionKeys.add(version);
-    }
-  }
-  return [...versionKeys];
-}
-
-/**
  * Returns a kuery string that excludes package policies with latest_revision:false,
  * optionally AND-ing with an additional kuery clause.
  */
