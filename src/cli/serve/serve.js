@@ -118,7 +118,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   delete extraCliOptions.env;
 
   let isServerlessSamlSupported = false;
-  let isStatefulSamlSupported = false;
   if (opts.dev) {
     if (opts.serverless) {
       setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
@@ -128,7 +127,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
         extraCliOptions
       );
     } else {
-      isStatefulSamlSupported = tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
+      tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -305,8 +304,7 @@ export default function (program) {
     );
 
     const isServerlessSamlSupported = isServerlessMode && opts.ssl !== false;
-    const isStatefulSamlSupported =
-      !isServerlessMode && !!opts.dev && MOCK_IDP_PLUGIN_SUPPORTED;
+    const isStatefulSamlSupported = !isServerlessMode && !!opts.dev && MOCK_IDP_PLUGIN_SUPPORTED;
     const isSamlSupported = isServerlessSamlSupported || isStatefulSamlSupported;
     const cliArgs = {
       dev: !!opts.dev,
