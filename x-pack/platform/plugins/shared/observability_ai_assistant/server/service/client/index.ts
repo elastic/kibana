@@ -295,7 +295,7 @@ export class ObservabilityAIAssistantClient {
               `Failed to fetch connector for analytics: ${error.message}`
             );
             return of(undefined);
-          }),z
+          }),
           shareReplay()
         )
       );
