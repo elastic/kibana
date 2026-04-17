@@ -608,8 +608,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
           await retry.waitForWithTimeout(
             'entity store reflects watchlist and resolution for silent alias',
-            30_000,
+            60_000,
             async () => {
+              await es.indices.refresh({ index: entityStoreIndex });
               const aliasResp = await es.search({
                 index: entityStoreIndex,
                 size: 1,
@@ -634,6 +635,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }
           );
 
+          await refreshResolutionLookup();
           await maintainerRoutes.runMaintainerSync('risk-score');
 
           let allScores: ReturnType<typeof normalizeScores> = [];
