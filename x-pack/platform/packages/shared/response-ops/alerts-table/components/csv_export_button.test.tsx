@@ -66,9 +66,9 @@ describe('CsvExportButton', () => {
       expect(http.post).toHaveBeenCalledTimes(1);
     });
 
-    const [url, options] = http.post.mock.calls[0];
+    const [url, options] = http.post.mock.calls[0] as unknown as [string, { body: string }];
     expect(url).toContain('/csv_searchsource');
-    const body = JSON.parse(options.body as string);
+    const body = JSON.parse(options.body);
     expect(body.jobParams).toBeDefined();
   });
 
@@ -140,7 +140,9 @@ describe('CsvExportButton', () => {
       expect(http.post).toHaveBeenCalledTimes(1);
     });
 
-    const body = JSON.parse(http.post.mock.calls[0][1].body as string);
+    const body = JSON.parse(
+      (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+    );
     const jobParams = JSON.parse(body.jobParams);
     const filterQueries = jobParams.searchSource.filter.map(
       (f: { query: Record<string, unknown> }) => f.query
@@ -167,7 +169,9 @@ describe('CsvExportButton', () => {
       expect(http.post).toHaveBeenCalledTimes(1);
     });
 
-    const body = JSON.parse(http.post.mock.calls[0][1].body as string);
+    const body = JSON.parse(
+      (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+    );
     const jobParams = JSON.parse(body.jobParams);
     const filterQueries = jobParams.searchSource.filter.map(
       (f: { query: Record<string, unknown> }) => f.query
@@ -189,10 +193,13 @@ describe('CsvExportButton', () => {
       expect(http.post).toHaveBeenCalledTimes(1);
     });
 
-    const body = JSON.parse(http.post.mock.calls[0][1].body as string);
+    const body = JSON.parse(
+      (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+    );
     const jobParams = JSON.parse(body.jobParams);
     const hasConsumerFilter = jobParams.searchSource.filter.some(
-      (f: { query: Record<string, unknown> }) => f.query.terms?.['kibana.alert.rule.consumer']
+      (f: { query: Record<string, unknown> }) =>
+        (f.query.terms as Record<string, unknown> | undefined)?.['kibana.alert.rule.consumer']
     );
 
     expect(hasConsumerFilter).toBe(false);
@@ -206,7 +213,9 @@ describe('CsvExportButton', () => {
       expect(http.post).toHaveBeenCalledTimes(1);
     });
 
-    const body = JSON.parse(http.post.mock.calls[0][1].body as string);
+    const body = JSON.parse(
+      (http.post.mock.calls[0] as unknown as [string, { body: string }])[1].body
+    );
     const jobParams = JSON.parse(body.jobParams);
 
     expect(jobParams.columns).toEqual(['kibana.alert.rule.name', '@timestamp']);
