@@ -103,13 +103,11 @@ export function executeFunctionAndCatchError({
     return executeFunctionResponse$.pipe(
       tap(() => {
         const connectorInfo = getInferenceConnectorInfo(connector);
-        if (connectorInfo) {
-          analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
-            toolName: name,
-            connector: connectorInfo,
-            scopes,
-          });
-        }
+        analytics.reportEvent<ToolCallEvent>(toolCallEventType, {
+          toolName: name,
+          connector: connectorInfo,
+          scopes,
+        });
       }),
       catchError((error) => {
         span?.recordException(error);
