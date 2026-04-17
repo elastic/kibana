@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const BACKGROUND_CHECK_CYCLE_INTERVAL = 5;
+// check for background executions and other background work every X agent cycles.
+export const BACKGROUND_CHECK_CYCLE_INTERVAL = 3;
 
 export const steps = {
   init: 'init',
