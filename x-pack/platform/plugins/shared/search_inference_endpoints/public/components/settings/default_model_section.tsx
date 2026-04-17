@@ -92,11 +92,8 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
     if (!connectorExists && !connectorExistsLoading && state.defaultModelId !== NO_DEFAULT_MODEL) {
       errors.push(i18n.DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR);
     }
-    if (state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL) {
-      errors.push(i18n.DEFAULT_MODEL_DISALLOW_NO_DEFAULT_ERROR);
-    }
     return errors;
-  }, [connectorExists, connectorExistsLoading, state.defaultModelId, state.disallowOtherModels]);
+  }, [connectorExists, connectorExistsLoading, state.defaultModelId]);
 
   const onChangeDefaultModel = (selected: EuiComboBoxOptionOption<string>[]) => {
     const value = selected[0]?.value ?? NO_DEFAULT_MODEL;
@@ -144,11 +141,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner
-        grow={false}
-        color={state.disallowOtherModels ? 'danger' : 'subdued'}
-        paddingSize="l"
-      >
+      <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="l">
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"

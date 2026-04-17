@@ -291,13 +291,6 @@ export const DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR = i18n.translate(
   }
 );
 
-export const DEFAULT_MODEL_DISALLOW_NO_DEFAULT_ERROR = i18n.translate(
-  'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
-  {
-    defaultMessage: 'When disallowing all other models, a default model must be selected.',
-  }
-);
-
 export const DEFAULT_MODEL_SAVE_SUCCESS = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess',
   {

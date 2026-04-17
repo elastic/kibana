@@ -74,7 +74,7 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('disallowOtherModelsCheckbox')).toBeInTheDocument();
   });
 
-  it('shows validation error when disallow is checked without a default model', () => {
+  it('does not show a validation error when disallow is checked without a default model', () => {
     const settings = createMockSettings({
       state: { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: true },
     });
@@ -86,8 +86,9 @@ describe('DefaultModelSection', () => {
     );
 
     expect(
-      screen.getByText(/When disallowing all other models, a default model must be selected/)
-    ).toBeInTheDocument();
+      screen.queryByText(/When disallowing all other models, a default model must be selected/)
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('defaultModelComboBox')).not.toHaveAttribute('aria-invalid', 'true');
   });
 
   it('shows validation error when selected connector does not exist', () => {
@@ -182,7 +183,7 @@ describe('DefaultModelSection', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not show validation errors when connector exists and no disallow conflict', () => {
+  it('does not show validation errors when connector exists and disallow is on', () => {
     mockUseConnectorExists.mockReturnValue({ exists: true, loading: false });
 
     const settings = createMockSettings({
@@ -197,9 +198,6 @@ describe('DefaultModelSection', () => {
 
     expect(
       screen.queryByText(/The model previously selected is not available/)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/When disallowing all other models, a default model must be selected/)
     ).not.toBeInTheDocument();
   });
 });

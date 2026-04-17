@@ -62,16 +62,24 @@ test.describe(
     });
 
     test('toggling disallow other models hides and restores feature sections', async ({
+      page,
       pageObjects,
     }) => {
       const { featureSettings } = pageObjects;
 
-      await test.step('enable disallow other models', async () => {
+      await test.step('enable disallow other models with no default selected', async () => {
         await featureSettings.disallowOtherModelsCheckbox.click();
       });
 
       await test.step('feature sections are hidden', async () => {
         await expect(featureSettings.allFeatureSections).toHaveCount(0);
+      });
+
+      await test.step('no validation error is shown and save is enabled', async () => {
+        await expect(featureSettings.saveButton).toBeEnabled();
+        await expect(
+          page.getByText(/When disallowing all other models, a default model must be selected/)
+        ).toHaveCount(0);
       });
 
       await test.step('disable disallow other models', async () => {
