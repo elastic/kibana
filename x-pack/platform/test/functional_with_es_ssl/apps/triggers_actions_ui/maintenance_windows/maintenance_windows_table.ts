@@ -21,6 +21,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
 
   describe('Maintenance windows table', function () {
+    async function clickTableAction(action: string) {
+      await retry.try(async () => {
+        if (!(await testSubjects.exists(action, { timeout: 1000 }))) {
+          await testSubjects.click('table-actions-popover');
+        }
+        await testSubjects.click(action);
+      });
+    }
+
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('maintenanceWindows');
     });
@@ -44,8 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list.length).to.eql(1);
       expect(list[0].status).to.eql('Running');
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-cancel');
+      await clickTableAction('table-actions-cancel');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -77,8 +85,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list.length).to.eql(1);
       expect(list[0].status).to.eql('Finished');
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-archive');
+      await clickTableAction('table-actions-archive');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -108,8 +115,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list.length).to.eql(1);
       expect(list[0].status).to.eql('Running');
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-cancel-and-archive');
+      await clickTableAction('table-actions-cancel-and-archive');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -141,8 +147,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list.length).to.eql(1);
       expect(list[0].status).to.eql('Finished');
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-archive');
+      await clickTableAction('table-actions-archive');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -156,8 +161,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list.length).to.eql(1);
       expect(list[0].status).to.eql('Archived');
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-unarchive');
+      await clickTableAction('table-actions-unarchive');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -241,8 +245,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(list.length).to.eql(3);
       expect(list[0].status).to.eql('Running');
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-cancel-and-archive');
+      await clickTableAction('table-actions-cancel-and-archive');
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
@@ -305,8 +308,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const listBefore = await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
       expect(listBefore.length).to.eql(1);
 
-      await testSubjects.click('table-actions-popover');
-      await testSubjects.click('table-actions-delete');
+      await clickTableAction('table-actions-delete');
 
       await testSubjects.click('confirmModalConfirmButton');
 
