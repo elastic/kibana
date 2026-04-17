@@ -13,6 +13,9 @@ import type {
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import type { EmbeddableEditorState, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { ControlPanelState, ControlPanelsState } from '@kbn/control-group-renderer';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { SearchEmbeddableByReferenceState } from '../../common/embeddable/types';
 import type { SearchEmbeddablePanelApiState } from '../embeddable/types';
 
@@ -44,11 +47,25 @@ interface TransferOptionsBase {
 }
 
 interface ByValueTransferOptions extends TransferOptionsBase {
-  state: SavedSearchByValueAttributes;
+  state: {
+    byValueState: SavedSearchByValueAttributes;
+    controlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+  };
 }
 
 interface ByReferenceTransferOptions extends TransferOptionsBase {
   state: SearchEmbeddableByReferenceState;
+}
+
+type CombinedTransferOptions = ByValueTransferOptions | ByReferenceTransferOptions;
+
+type DiscoverTransferSerializedState =
+  | ControlPanelState<OptionsListESQLControlState>
+  | SearchEmbeddablePanelApiState;
+
+interface GetSerializedStateResult {
+  serializedState: SearchEmbeddablePanelApiState | undefined;
+  controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
 }
 
 export class EmbeddableEditorService {
@@ -83,10 +100,7 @@ export class EmbeddableEditorService {
     }
   };
 
-  public transferBackToEditor(
-    action: TransferAction.Cancel | TransferAction.SaveSession,
-    options?: TransferOptionsBase
-  ): void;
+  public transferBackToEditor(action: TransferAction.Cancel | TransferAction.SaveSession): void;
   public transferBackToEditor(
     action: TransferAction.SaveByValue,
     options: ByValueTransferOptions
@@ -101,50 +115,59 @@ export class EmbeddableEditorService {
    *
    * **NOTE**: Cancelling will never pass an updated state, so the state param is ignored for cancel actions.
    */
-  public transferBackToEditor(
-    action: TransferAction,
-    options?: TransferOptionsBase & {
-      state?: SavedSearchByValueAttributes | SearchEmbeddableByReferenceState;
-    }
-  ) {
+  public transferBackToEditor(action: TransferAction, options?: CombinedTransferOptions) {
     const app = options?.app || this.embeddableState?.originatingApp;
     const path = options?.path || this.embeddableState?.originatingPath;
-    const serializedState = this.getSerializedState(action, options);
+    const { serializedState, controlGroupState } = this.getSerializedState(action, options);
+    const controlPackages = Object.entries(controlGroupState).map(
+      ([embeddableId, controlPanelState]) => ({
+        type: ESQL_CONTROL,
+        serializedState: controlPanelState,
+        embeddableId,
+      })
+    );
 
     if (app && path) {
       this.embeddableStateTransfer.clearEditorState('discover');
-      this.embeddableStateTransfer.navigateToWithEmbeddablePackages(app, {
-        path,
-        state:
-          action !== TransferAction.Cancel
+      this.embeddableStateTransfer.navigateToWithEmbeddablePackages<DiscoverTransferSerializedState>(
+        app,
+        {
+          path,
+          state: serializedState
             ? [
+                ...controlPackages,
                 {
                   type: SEARCH_EMBEDDABLE_TYPE,
-                  serializedState: serializedState ?? {},
+                  serializedState,
                   embeddableId: this.embeddableState?.embeddableId,
                 },
               ]
             : [],
-      });
+        }
+      );
     }
   }
 
   private getSerializedState(
     action: TransferAction,
-    options?: TransferOptionsBase & {
-      state?: SavedSearchByValueAttributes | SearchEmbeddableByReferenceState;
-    }
-  ): SearchEmbeddablePanelApiState | undefined {
+    options?: CombinedTransferOptions
+  ): GetSerializedStateResult {
     if (action === TransferAction.SaveByValue) {
       const { state } = options as ByValueTransferOptions;
-      return { attributes: state };
+      return {
+        serializedState: { attributes: state.byValueState },
+        controlGroupState: state.controlGroupState ?? {},
+      };
     }
 
     if (action === TransferAction.SaveByReference) {
       const { state } = options as ByReferenceTransferOptions;
-      return { ref_id: state.savedObjectId, overrides: {} };
+      return {
+        serializedState: { ref_id: state.savedObjectId, overrides: {} },
+        controlGroupState: {},
+      };
     }
 
-    return undefined;
+    return { serializedState: undefined, controlGroupState: {} };
   }
 }
