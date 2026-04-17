@@ -297,12 +297,8 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           inferenceClient: inferenceClient.bindTo({ connectorId }),
           agentPipelineSchema,
           maxSteps,
-<<<<<<< HEAD
-          signal: abortController.signal,
-=======
           maxDurationMs: 180_000, // 3 minutes - surface errors faster than infrastructure timeout
           signal: timeoutAbortController.signal,
->>>>>>> upstream/main
           documents: documentsForAgent,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
