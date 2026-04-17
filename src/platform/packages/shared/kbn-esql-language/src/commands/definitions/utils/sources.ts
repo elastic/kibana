@@ -113,14 +113,13 @@ export const buildSourcesDefinitions = (
     const documentation = parts.length > 0 ? { value: parts.join('\n') } : undefined;
 
     // Map type to Monaco CompletionItemKind for visual differentiation
-    let kind: ISuggestionItem['kind'];
-    if (type === SOURCES_TYPES.WIRED_STREAM) {
-      kind = 'Folder';
-    } else if (type === SOURCES_TYPES.CLASSIC_STREAM || isIntegration) {
-      kind = 'Class';
-    } else {
-      kind = 'Issue';
-    }
+    const kindByType = new Map<string, ISuggestionItem['kind']>([
+      [SOURCES_TYPES.WIRED_STREAM, 'Folder'],
+      [SOURCES_TYPES.CLASSIC_STREAM, 'Class'],
+    ]);
+
+    const kind: ISuggestionItem['kind'] =
+      kindByType.get(type ?? '') ?? (isIntegration ? 'Class' : 'Issue');
 
     return withAutoSuggest({
       label: title ?? name,

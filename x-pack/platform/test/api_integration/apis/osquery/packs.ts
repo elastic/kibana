@@ -505,6 +505,68 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('policy_ids validation', () => {
+      it('deduplicates duplicate policy_ids and returns 200', async () => {
+        const createResponse = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `DuplicatePolicyTest-${Date.now()}`,
+            description: 'Test deduplication',
+            enabled: false,
+            policy_ids: [hostedPolicy.id, hostedPolicy.id],
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(200);
+
+        const { data } = createResponse.body;
+        expect(data).to.be.ok();
+        expect(data.saved_object_id).to.be.ok();
+
+        // Verify via read that policy_ids is deduplicated
+        const readResponse = await withOsqueryHeaders(
+          supertest.get(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+
+        expect(readResponse.body.data.policy_ids).to.be.an(Array);
+        expect(readResponse.body.data.policy_ids.length).to.be(1);
+        expect(readResponse.body.data.policy_ids[0]).to.be(hostedPolicy.id);
+
+        // Clean up
+        await withOsqueryHeaders(
+          supertest.delete(`/api/osquery/packs/${data.saved_object_id}`)
+        ).expect(200);
+      });
+
+      it('returns 400 for a single non-existent policy_id', async () => {
+        const nonExistentId = 'non-existent-policy-id-12345';
+        const response = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `NonExistentPolicyTest-${Date.now()}`,
+            description: 'Test non-existent policy',
+            enabled: false,
+            policy_ids: [nonExistentId],
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(400);
+
+        expect(response.body.message).to.contain(nonExistentId);
+      });
+
+      it('returns 400 for mixed valid/invalid policy_ids', async () => {
+        const nonExistentId = 'invalid-policy-id-67890';
+        const response = await withOsqueryHeaders(supertest.post('/api/osquery/packs'))
+          .send({
+            name: `MixedPolicyTest-${Date.now()}`,
+            description: 'Test mixed policies',
+            enabled: false,
+            policy_ids: [hostedPolicy.id, nonExistentId],
+            queries: { q1: { query: 'select 1;', interval: 3600 } },
+          })
+          .expect(400);
+
+        expect(response.body.message).to.contain(nonExistentId);
+      });
+    });
+
     describe('404 for non-existent resources', () => {
       it('returns 404 when reading a non-existent pack', async () => {
         await withOsqueryHeaders(supertest.get('/api/osquery/packs/non-existent-id')).expect(404);
