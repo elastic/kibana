@@ -43,7 +43,7 @@ export async function update(
     }
   }
 
-  // Validate id at handler level for create routes
+  // Validate id at handler level for create requests
   if (isCreateRequest) {
     asCodeIdSchema.validate(id);
   }
