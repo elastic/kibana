@@ -66,6 +66,7 @@ apiTest.describe(
         headers: {
           ...cookieHeader,
           'elastic-api-version': '1',
+          'x-elastic-internal-origin': 'kibana',
         },
         body: {
           params: {
