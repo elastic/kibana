@@ -51,13 +51,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
-        expect(searchResults).to.eql([
-          {
-            name: connectorName,
-            actionType: 'Opsgenie',
-          },
-        ]);
+        await retry.try(async () => {
+          const searchResults = await pageObjects.triggersActionsUI.getConnectorsList();
+          expect(searchResults).to.eql([
+            {
+              name: connectorName,
+              actionType: 'Opsgenie',
+            },
+          ]);
+        });
         const connector = await getConnectorByName(connectorName, supertest);
         objectRemover.add(connector.id, 'connector', 'actions');
       });
@@ -71,8 +73,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-        expect(searchResultsBeforeEdit.length).to.eql(1);
+        await retry.try(async () => {
+          const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+          expect(searchResultsBeforeEdit.length).to.eql(1);
+        });
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
         await actions.opsgenie.updateConnectorFields({
@@ -87,13 +91,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('euiFlyoutCloseButton');
         await pageObjects.triggersActionsUI.searchConnectors(updatedConnectorName);
 
-        const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-        expect(searchResultsAfterEdit).to.eql([
-          {
-            name: updatedConnectorName,
-            actionType: 'Opsgenie',
-          },
-        ]);
+        await retry.try(async () => {
+          const searchResultsAfterEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+          expect(searchResultsAfterEdit).to.eql([
+            {
+              name: updatedConnectorName,
+              actionType: 'Opsgenie',
+            },
+          ]);
+        });
       });
 
       it('should reset connector when canceling an edit', async () => {
@@ -104,8 +110,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-        expect(searchResultsBeforeEdit.length).to.eql(1);
+        await retry.try(async () => {
+          const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+          expect(searchResultsBeforeEdit.length).to.eql(1);
+        });
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
@@ -132,12 +140,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
-        const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
-        expect(searchResultsBeforeEdit.length).to.eql(1);
+        await retry.try(async () => {
+          const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+          expect(searchResultsBeforeEdit.length).to.eql(1);
+        });
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-        await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+        await retry.try(async () => {
+          await testSubjects.click('testConnectorTab');
+          await testSubjects.existOrFail('executeActionButton');
+        });
 
         expect(await testSubjects.isEnabled('executeActionButton')).to.be(false);
       });
