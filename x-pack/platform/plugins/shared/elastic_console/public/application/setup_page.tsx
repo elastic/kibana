@@ -15,7 +15,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiCopy,
@@ -57,28 +56,23 @@ export const SetupPage: React.FC = () => {
 
 
    return (
-     <EuiPageTemplate>
-       <EuiPageTemplate.Header
-         pageTitle={<>{'🍜 Elastic Ramen Setup'}</>}
-         rightSideItems={[<EuiBetaBadge label="Experimental" color="hollow" />]}
-       />
-       <EuiPageTemplate.Section>
-         <EuiCallOut
-           title="Experimental feature — proceed with caution"
-           color="warning"
-           iconType="beaker"
-         >
-           <p>
-             Elastic Ramen is an <strong>experimental</strong> feature under active development. It
-             may change, break, or be removed without notice. Use at your own risk — it can expose AI
-             connectors to external tools and may produce unexpected behavior. Do not rely on it for
-             production workloads.
-           </p>
-         </EuiCallOut>
+     <>
+       <EuiCallOut
+         title="Experimental feature — proceed with caution"
+         color="warning"
+         iconType="beaker"
+       >
+         <p>
+           Elastic Ramen is an <strong>experimental</strong> feature under active development. It
+           may change, break, or be removed without notice. Use at your own risk — it can expose AI
+           connectors to external tools and may produce unexpected behavior. Do not rely on it for
+           production workloads.
+         </p>
+       </EuiCallOut>
 
-         <EuiSpacer />
+       <EuiSpacer />
 
-         <EuiText>
+       <EuiText>
           <p>
             Generate credentials for the local <code>elastic-console</code> agent or any
             MCP-compatible tool.
@@ -199,9 +193,8 @@ export const SetupPage: React.FC = () => {
                 </EuiCopy>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
+           </>
          )}
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
-  );
+     </>
+   );
 };

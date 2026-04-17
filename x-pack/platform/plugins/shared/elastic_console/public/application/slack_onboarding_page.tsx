@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -92,13 +91,15 @@ export const SlackOnboardingPage: React.FC = () => {
     }
   }, [services.http]);
 
-   return (
-     <EuiPageTemplate>
-       <EuiPageTemplate.Header
-         pageTitle="Slack Integration"
-         rightSideItems={slackStatusBadge ? [slackStatusBadge] : []}
-       />
-       <EuiPageTemplate.Section>
+    return (
+      <>
+        {/* Slack connection status badge */}
+        {slackStatusBadge && (
+          <>
+            {slackStatusBadge}
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         {/* ── Connect Slack ── */}
         <EuiTitle size="s">
@@ -220,9 +221,8 @@ export const SlackOnboardingPage: React.FC = () => {
                 Link account
               </EuiButton>
             </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageTemplate.Section>
-    </EuiPageTemplate>
-  );
+         </EuiFlexItem>
+         </EuiFlexGroup>
+     </>
+   );
 };

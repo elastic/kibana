@@ -5,14 +5,48 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { EuiTabbedContent, EuiPageTemplate } from '@elastic/eui';
 import { SetupPage } from './setup_page';
 import { SlackOnboardingPage } from './slack_onboarding_page';
 
 export { SetupPage, SlackOnboardingPage };
+
+interface AppProps {
+  coreStart: CoreStart;
+}
+
+const App: React.FC<AppProps> = ({ coreStart }) => {
+  const [selectedTab, setSelectedTab] = useState<'ramen' | 'slack'>('ramen');
+
+  const tabs = [
+    {
+      id: 'ramen',
+      name: '🍜 Elastic Ramen',
+      content: <SetupPage />,
+    },
+    {
+      id: 'slack',
+      name: 'Slack Integration',
+      content: <SlackOnboardingPage />,
+    },
+  ];
+
+  return (
+    <EuiPageTemplate>
+      <EuiPageTemplate.Section>
+        <EuiTabbedContent
+          tabs={tabs}
+          selectedTab={selectedTab}
+          onTabClick={(tab) => setSelectedTab(tab.id as 'ramen' | 'slack')}
+        />
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+  );
+};
 
 export const renderApp = ({
   coreStart,
@@ -26,7 +60,7 @@ export const renderApp = ({
   ReactDOM.render(
     coreStart.rendering.addContext(
       <KibanaContextProvider services={coreStart}>
-        <SetupPage />
+        <App coreStart={coreStart} />
       </KibanaContextProvider>
     ),
     element
