@@ -24,11 +24,18 @@ jest.mock('../hooks/use_field_name_validation', () => ({
   useFieldNameValidation: jest.fn(),
 }));
 
+jest.mock('../hooks/use_user_picker_validation', () => ({
+  useUserPickerValidation: jest.fn(),
+}));
+
 describe('TemplateFormFields', () => {
   const mockOnChange = jest.fn();
   const mockUseFieldNameValidation = jest.requireMock(
     '../hooks/use_field_name_validation'
   ).useFieldNameValidation;
+  const mockUseUserPickerValidation = jest.requireMock(
+    '../hooks/use_user_picker_validation'
+  ).useUserPickerValidation;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -97,6 +104,41 @@ describe('TemplateFormFields', () => {
 
     await waitFor(() => {
       expect(mockUseFieldNameValidation).toHaveBeenCalledWith(null, 'updated: value');
+    });
+  });
+
+  it('calls useUserPickerValidation hook with editor, value and security', () => {
+    const yamlValue = 'fields:\n  - name: assignee\n    control: USER_PICKER\n    type: keyword';
+    renderFields(yamlValue);
+
+    expect(mockUseUserPickerValidation).toHaveBeenCalledWith(null, yamlValue, expect.anything());
+  });
+
+  it('calls useUserPickerValidation hook when value changes', async () => {
+    const { rerender } = render(
+      <TestProviders>
+        <TemplateYamlEditor value="initial: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    expect(mockUseUserPickerValidation).toHaveBeenCalledWith(
+      null,
+      'initial: value',
+      expect.anything()
+    );
+
+    rerender(
+      <TestProviders>
+        <TemplateYamlEditor value="updated: value" onChange={mockOnChange} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(mockUseUserPickerValidation).toHaveBeenCalledWith(
+        null,
+        'updated: value',
+        expect.anything()
+      );
     });
   });
 });

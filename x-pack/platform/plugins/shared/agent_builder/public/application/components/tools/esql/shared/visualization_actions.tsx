@@ -6,14 +6,19 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   InlineEditLensEmbeddableContext,
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { EditVisualizationButton, saveButtonLabel } from './edit_visualization_button';
+import {
+  dashboardWriteControlsDisabledReason,
+  EditVisualizationButton,
+  saveButtonLabel,
+} from './edit_visualization_button';
 import { actionsContainer } from './styles';
 
 interface Props {
@@ -32,13 +37,33 @@ export function VisualizationActions({
   setLensInput,
 }: Props) {
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { application },
+  } = useKibana();
 
   if (!lensInput) {
     return null;
   }
 
+  const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
   const containerCss = css(actionsContainer(euiTheme));
   const iconCss = css({ marginLeft: '-1px' });
+  const saveButton = (
+    <EuiButtonIcon
+      display="base"
+      color="text"
+      size="s"
+      iconType="save"
+      aria-label={saveButtonLabel}
+      className={iconCss}
+      isDisabled={!canWriteDashboards}
+      onClick={() => {
+        if (canWriteDashboards) {
+          onSave();
+        }
+      }}
+    />
+  );
 
   return (
     <div
@@ -51,16 +76,14 @@ export function VisualizationActions({
         lensLoadEvent={lensLoadEvent}
         onAttributesChange={(attrs) => setLensInput({ ...lensInput, attributes: attrs })}
         onApply={onSave}
+        canWriteDashboards={canWriteDashboards}
       />
-      <EuiButtonIcon
-        display="base"
-        color="text"
-        size="s"
-        iconType="save"
-        aria-label={saveButtonLabel}
-        className={iconCss}
-        onClick={onSave}
-      />
+      <EuiToolTip
+        content={canWriteDashboards ? saveButtonLabel : dashboardWriteControlsDisabledReason}
+        disableScreenReaderOutput
+      >
+        {canWriteDashboards ? saveButton : <span tabIndex={0}>{saveButton}</span>}
+      </EuiToolTip>
     </div>
   );
 }

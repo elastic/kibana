@@ -9,7 +9,7 @@ pageLoadAssetSize:
   alertingVTwo: 47881
   apm: 25363
   apmSourcesAccess: 2278
-  automaticImport: 15269
+  automaticImport: 18629
   banners: 4006
   canvas: 14881
   cases: 177203
@@ -176,7 +176,7 @@ pageLoadAssetSize:
   spaces: 28871
   stackAlerts: 31499
   stackConnectors: 85421
-  streams: 12500
+  streams: 14000
   streamsApp: 25375
   synthetics: 31571
   telemetry: 25755
@@ -210,5 +210,5 @@ pageLoadAssetSize:
   visualizations: 52210
   watcher: 10485
   workflowsExtensions: 38894
-  workflowsManagement: 31215
+  workflowsManagement: 35010
   workplaceAIApp: 14056
