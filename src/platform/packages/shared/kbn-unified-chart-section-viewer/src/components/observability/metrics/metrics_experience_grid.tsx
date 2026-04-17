@@ -103,6 +103,10 @@ export const MetricsExperienceGrid = ({
 
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     allDimensions,
+    // Use the pre-search-filter metric set for the picker's optimistic filter:
+    // a user's typed search term shouldn't shrink the underlying applicable-
+    // dimension universe — only the actual selection should.
+    metricItems,
     renderToggleActions,
     onDimensionsChange: onToolbarDimensionsChange,
     isLoading: isDiscoverLoading,

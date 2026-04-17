@@ -24,7 +24,7 @@ import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-se
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
 import { debounce } from 'lodash';
-import type { Dimension } from '../../types';
+import type { Dimension, ParsedMetricItem } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -39,6 +39,18 @@ interface DimensionsSelectorProps {
   onChange: (dimensions: Dimension[]) => void;
   singleSelection?: boolean;
   isLoading?: boolean;
+  /**
+   * Full set of metric items currently in the grid. When provided, the picker
+   * performs an optimistic client-side filter: only dimensions carried by
+   * metrics that also carry every currently-selected dimension remain in the
+   * option list. This prevents a user from reaching an empty-grid state by
+   * rapidly selecting dimensions that belong to disjoint metrics (the server
+   * would filter them out on the next fetch, but the click already happened).
+   *
+   * When omitted, the applicable set is taken verbatim from `dimensions`
+   * (pre-Phase-6 behaviour).
+   */
+  metricItems?: ParsedMetricItem[];
 }
 
 export const DimensionsSelector = ({
@@ -48,6 +60,7 @@ export const DimensionsSelector = ({
   fullWidth = false,
   singleSelection = false,
   isLoading = false,
+  metricItems,
 }: DimensionsSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [localSelectedDimensions, setLocalSelectedDimensions] =
@@ -62,9 +75,44 @@ export const DimensionsSelector = ({
     [localSelectedDimensions]
   );
 
+  // Phase 6 optimistic filter: given the metric items currently in the grid
+  // and the user's selection so far, compute the set of dimension names that
+  // still has a non-empty intersection of metrics carrying every selected
+  // dimension. Returning `null` means "no client-side filter applies" — the
+  // caller should fall back to the full `dimensions` array.
+  const optimisticApplicableNames = useMemo(() => {
+    if (!metricItems || localSelectedDimensions.length === 0) {
+      return null;
+    }
+    const selectedNames = [...selectedNamesSet];
+    const names = new Set<string>();
+    for (const item of metricItems) {
+      const itemDimNames = new Set(item.dimensionFields.map((d) => d.name));
+      const hasAllSelected = selectedNames.every((name) => itemDimNames.has(name));
+      if (!hasAllSelected) {
+        continue;
+      }
+      for (const dim of item.dimensionFields) {
+        names.add(dim.name);
+      }
+    }
+    return names;
+  }, [metricItems, localSelectedDimensions, selectedNamesSet]);
+
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
-    const applicableNames = new Set(dimensions.map((d) => d.name));
+
+    // When the optimistic filter is active, narrow the applicable list to
+    // dimensions carried by at least one metric that still carries every
+    // current selection. The orphan path below continues to surface any
+    // already-selected dimension that falls outside this set, so the user
+    // never loses sight of their own picks.
+    const filteredDimensions =
+      optimisticApplicableNames == null
+        ? dimensions
+        : dimensions.filter((dimension) => optimisticApplicableNames.has(dimension.name));
+
+    const applicableNames = new Set(filteredDimensions.map((d) => d.name));
 
     // Orphan selections are dimensions the user has already picked but that
     // are not in the current applicable set (e.g. a filtered METRICS_INFO
@@ -128,13 +176,14 @@ export const DimensionsSelector = ({
 
     // Orphan selections are prepended so they stay easy to find; the
     // applicable set keeps its caller-provided ordering below.
-    return [...orphanSelections.map(toOption), ...dimensions.map(toOption)];
+    return [...orphanSelections.map(toOption), ...filteredDimensions.map(toOption)];
   }, [
     dimensions,
     selectedNamesSet,
     localSelectedDimensions,
     singleSelection,
     euiTheme.levels.menu,
+    optimisticApplicableNames,
   ]);
 
   const onChangeRef = useRef(onChange);

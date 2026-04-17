@@ -12,7 +12,7 @@ import { useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { css } from '@emotion/react';
-import type { Dimension, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 import { DimensionsSelector } from '../dimensions_selector';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
@@ -23,6 +23,13 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
   isLoading?: boolean;
+  /**
+   * Full (non-paginated, non-search-filtered) metric items currently in the
+   * grid. Forwarded to {@link DimensionsSelector} so it can compute an
+   * optimistic, client-side applicable-dimension set on each click — see
+   * PR #263629 Phase 6.
+   */
+  metricItems?: ParsedMetricItem[];
 }
 
 export const useToolbarActions = ({
@@ -32,6 +39,7 @@ export const useToolbarActions = ({
   hideDimensionsSelector = false,
   hideRightSideActions = false,
   isLoading = false,
+  metricItems,
 }: UseToolbarActionsProps) => {
   const { selectedDimensions, onDimensionsChange, isFullscreen, onToggleFullscreen } =
     useMetricsExperienceState();
@@ -56,6 +64,7 @@ export const useToolbarActions = ({
           singleSelection={MAX_DIMENSIONS_SELECTIONS <= 1}
           fullWidth={isSmallScreen}
           isLoading={isLoading}
+          metricItems={metricItems}
         />
       ),
     ],
@@ -66,6 +75,7 @@ export const useToolbarActions = ({
       onDimensionsSelectionChange,
       hideDimensionsSelector,
       isLoading,
+      metricItems,
     ]
   );
 

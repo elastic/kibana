@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { DimensionsSelector } from './dimensions_selector';
-import type { Dimension } from '../../types';
+import type { Dimension, ParsedMetricItem } from '../../types';
 import {
   MAX_DIMENSIONS_SELECTIONS,
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
@@ -536,6 +536,134 @@ describe('DimensionsSelector', () => {
       ).toBeInTheDocument();
       expect(
         screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-c`)
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('Optimistic filter via metricItems (Phase 6)', () => {
+    // These tests cover the client-side optimistic filtering that prevents the
+    // empty-grid dead-state described in PR #263629 review feedback: if the
+    // user clicks one dimension, the picker must immediately hide dimensions
+    // that no metric carrying that selection supports — without waiting for
+    // the server round-trip.
+    const environment = { name: 'environment' } as Dimension;
+    const region = { name: 'region' } as Dimension;
+    const hostName = { name: 'host.name' } as Dimension;
+
+    const buildMetricItem = (
+      metricName: string,
+      dimensionFields: Dimension[]
+    ): ParsedMetricItem => ({
+      metricName,
+      dataStream: 'metrics-test',
+      units: [],
+      metricTypes: [],
+      fieldTypes: [],
+      dimensionFields,
+    });
+
+    // cpu.usage carries `environment` + `host.name`.
+    // network.bytes_in carries `region` + `host.name`.
+    // No metric carries both `environment` and `region`.
+    const metricItems: ParsedMetricItem[] = [
+      buildMetricItem('cpu.usage', [environment, hostName]),
+      buildMetricItem('network.bytes_in', [region, hostName]),
+    ];
+
+    const applicableDimensions: Dimension[] = [environment, region, hostName];
+
+    it('hides dimensions not supported by any metric carrying the current selection', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[environment]}
+          metricItems={metricItems}
+        />
+      );
+
+      // `region` is disjoint from `environment` (no single metric carries
+      // both) so the picker must hide it optimistically, before the debounced
+      // onChange fires and the server responds.
+      expect(
+        screen.queryByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-region`)
+      ).not.toBeInTheDocument();
+
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-environment`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`)
+      ).toBeInTheDocument();
+    });
+
+    it('without metricItems, falls back to the full dimensions list', () => {
+      // Defensive check: the new prop must be optional and existing callers
+      // (URL-restore, any integration that hasn't been updated yet) should
+      // see the pre-Phase-6 behaviour unchanged.
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[environment]}
+        />
+      );
+
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-environment`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-region`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`)
+      ).toBeInTheDocument();
+    });
+
+    it('orphan selections still surface even with the optimistic filter', () => {
+      // The optimistic filter operates on applicable options only; any
+      // selected dimension that isn't present in metricItems must still be
+      // rendered (checked) via the pre-existing orphan-surfacing path so the
+      // count stays consistent and the user can back out.
+      const orphan = { name: 'orphan.field' } as Dimension;
+
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[environment, orphan]}
+          metricItems={metricItems}
+        />
+      );
+
+      const orphanOption = screen.getByTestId(
+        `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-orphan.field`
+      );
+      expect(orphanOption).toBeInTheDocument();
+      expect(orphanOption).toHaveAttribute('data-checked', 'on');
+    });
+
+    it('no selection means the full applicable list is shown', () => {
+      // When nothing is selected the optimistic filter is a no-op — we don't
+      // know which metric "group" to constrain to, so every applicable
+      // dimension must remain available.
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          dimensions={applicableDimensions}
+          selectedDimensions={[]}
+          metricItems={metricItems}
+        />
+      );
+
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-environment`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-region`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-host.name`)
       ).toBeInTheDocument();
     });
   });
