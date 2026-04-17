@@ -5,7 +5,7 @@ description: "Learn how to setup a development environment for contributing to t
 
 # Set up a Development Environment
 
-Kibana development is supported on Linux and macOS. We also support Windows development [using WSL](../tutorials/wsl-on-windows-development.md), but native Windows development is not supported.
+Kibana development is supported on Linux and macOS. We also support Windows development [using WSL](./wsl-on-windows-development.md), but native Windows development is not supported.
 
 ## Get the code
 

@@ -13,10 +13,10 @@ The {{kib}} plugin interfaces are in a state of constant development.  We cannot
 
 Most developers who contribute code directly to the {{kib}} repo are writing code inside plugins, so our [*Contributing*](/extend/contributing/developer-principles.md) docs are the best place to start. However, there are a few differences when developing plugins outside the {{kib}} repo. These differences are covered here.
 
-* [Plugin tooling](/extend/plugin-tooling.md)
-* [Functional Tests for Plugins outside the {{kib}} repo](/extend/external-plugin-functional-tests.md)
-* [Localization for plugins outside the {{kib}} repo](/extend/external-plugin-localization.md)
-* [Testing {{kib}} Plugins](/extend/testing-kibana-plugin.md)
+* [Plugin tooling](/extend/tutorials/plugin-tooling.md)
+* [Functional Tests for Plugins outside the {{kib}} repo](/extend/tutorials/external-plugin-functional-tests.md)
+* [Localization for plugins outside the {{kib}} repo](/extend/tutorials/external-plugin-localization.md)
+* [Testing {{kib}} Plugins](/extend/tutorials/testing-kibana-plugin.md)
 
 
 

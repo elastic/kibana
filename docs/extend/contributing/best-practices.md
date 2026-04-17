@@ -115,7 +115,7 @@ Don't export [public APIs](../key-concepts/plugins-packages-and-the-platform.md#
 
 ## Re-inventing the wheel
 
-Over-refactoring can be a problem in it's own right, but it's still important to be aware of the existing services that are out there and use them when it makes sense. Check out our [building blocks](../key-concepts/building-blocks.md) to see what high-level services are at your disposal. In addition, our [API documentation](../api-documentation/welcome.md) lists additional services.
+Over-refactoring can be a problem in it's own right, but it's still important to be aware of the existing services that are out there and use them when it makes sense. Check out our [building blocks](../key-concepts/building-blocks.md) to see what high-level services are at your disposal. In addition, our [API documentation](../key-concepts/api-documentation.md) lists additional services.
 
 Some commonly overlooked services worth knowing about:
 
@@ -243,7 +243,7 @@ Does the feature work efficiently on the below listed browsers
 - Kibana should be fully [cross cluster search](https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-cross-cluster-search.html) compatible (aside from admin UIs which only work on the local cluster).
 - How does your plugin behave when optional dependencies are disabled? Ensure all required dependencies are listed in your `kibana.jsonc` dependency list.
 - How does your app behave under anonymous access, with security disabled, or with users having restricted privileges?
-- Make sure to test your PR in a cloud environment. Read about the [ci:deploy cloud](../tutorials/ci.md#labels) label which makes this very easy.
+- Make sure to test your PR in a cloud environment. Read about the [ci:deploy cloud](./ci.md#labels) label which makes this very easy.
 - Does the feature work correctly with a custom Kibana index alias (`kibana.index` in `kibana.yml`)?
 - Does the feature work when multiple Kibana instances are running?
   - Pointing to the same index

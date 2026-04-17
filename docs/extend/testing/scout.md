@@ -11,7 +11,7 @@ Scout is Kibana's **modern UI and API test framework** built on [Playwright](htt
 
 - [Set up Scout in your plugin](./setup-scout.md)
 - [Run Scout tests](./run-scout-tests.md)
-- [Best practices](../contributing/scout-best-practices.md)
+- [Best practices](./scout-best-practices.md)
 - [Write UI tests](./write-ui-tests.md)
 - [Write API tests](./write-api-tests.md)
 
@@ -24,7 +24,7 @@ Scout is Kibana's **modern UI and API test framework** built on [Playwright](htt
 - **Better debugging**: use Playwright [UI Mode](https://playwright.dev/docs/test-ui-mode).
 - **Reporting**: we capture test events that power our dashboards (for example, skipped tests, flaky tests, and more).
 - **Reusability**: reuse or write reusable fixtures, page objects and API helpers to reduce duplication.
-- **Follows modern best practices**: check out our [Scout best practices](../contributing/scout-best-practices.md).
+- **Follows modern best practices**: check out our [Scout best practices](./scout-best-practices.md).
 
 ## Scout packages [scout-packages]
 

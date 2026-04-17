@@ -15,5 +15,5 @@ Recommended next reading:
 2. Create a [Hello World plugin](./hello-world.md).
 3. [Add data](./add-data.md).
 
-Check out our [API documentation](../api-documentation/welcome.md) to dig into the nitty gritty details of
+Check out our [API documentation](../key-concepts/api-documentation.md) to dig into the nitty gritty details of
 every public plugin API.

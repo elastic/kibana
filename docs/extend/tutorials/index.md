@@ -37,14 +37,14 @@ Hands-on guides for specific Kibana plugin development tasks. If you're new to K
 
 ## Development environment
 
-- [Debugging in development](./debugging-in-development.md) — debug the Kibana server and client using Chrome DevTools or VS Code
-- [Debugging FIPS test failures](./debugging-fips-test-failures.md) — investigate failures from the FIPS nightly pipeline
-- [Set up WSL on Windows](./wsl-on-windows-development.md) — configure a Windows development environment using WSL2
-- [Local cross-cluster search setup](./local-cross-cluster-search-setup.md) — run two Elasticsearch clusters locally for CCS testing
+- [Debugging in development](../contributing/debugging-in-development.md) — debug the Kibana server and client using Chrome DevTools or VS Code
+- [Debugging FIPS test failures](../contributing/debugging-fips-test-failures.md) — investigate failures from the FIPS nightly pipeline
+- [Set up WSL on Windows](../getting-started/wsl-on-windows-development.md) — configure a Windows development environment using WSL2
+- [Local cross-cluster search setup](../getting-started/local-cross-cluster-search-setup.md) — run two Elasticsearch clusters locally for CCS testing
 - [Screenshotting service](./screenshotting/kibana-screenshotting-service.md) — generate screenshots programmatically
 
 ## Build and ship
 
-- [Build a Kibana distributable](./building-a-kibana-distributable.md) — package Kibana for distribution
-- [CI](./ci.md) — understand Kibana's BuildKite CI pipeline and comment triggers
-- [Submit a pull request](./submitting-a-kibana-pull-request.md) — fork, branch, and open a PR against the Kibana repository
+- [Build a Kibana distributable](../contributing/building-a-kibana-distributable.md) — package Kibana for distribution
+- [CI](../contributing/ci.md) — understand Kibana's BuildKite CI pipeline and comment triggers
+- [Submit a pull request](../contributing/submitting-a-kibana-pull-request.md) — fork, branch, and open a PR against the Kibana repository
