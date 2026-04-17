@@ -91,6 +91,22 @@ describe('DefaultModelSection', () => {
     expect(screen.getByTestId('defaultModelComboBox')).not.toHaveAttribute('aria-invalid', 'true');
   });
 
+  it('shows the AI-features-disabled description when disallow is on and no default is selected', () => {
+    const settings = createMockSettings({
+      state: { defaultModelId: NO_DEFAULT_MODEL, disallowOtherModels: true },
+    });
+
+    render(
+      <Wrapper>
+        <DefaultModelSection defaultModelSettings={settings} />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('disallowOtherModelsDescription')).toHaveTextContent(
+      'Model selection is hidden and no models will be used.'
+    );
+  });
+
   it('shows validation error when selected connector does not exist', () => {
     mockUseConnectorExists.mockReturnValue({ exists: false, loading: false });
 

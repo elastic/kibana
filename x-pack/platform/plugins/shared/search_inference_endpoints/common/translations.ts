@@ -283,6 +283,13 @@ export const ALLOW_OTHER_MODELS_DESCRIPTION = i18n.translate(
   }
 );
 
+export const AI_FEATURES_DISABLED_DESCRIPTION = i18n.translate(
+  'xpack.searchInferenceEndpoints.settings.defaultModel.aiFeaturesDisabled.description',
+  {
+    defaultMessage: 'Model selection is hidden and no models will be used.',
+  }
+);
+
 export const DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR = i18n.translate(
   'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
   {

@@ -74,6 +74,24 @@ const getSelectedOptions = (
   return options.flatMap(findInOptions);
 };
 
+const isAiFeaturesDisabled = (state: {
+  defaultModelId: string;
+  disallowOtherModels: boolean;
+}): boolean => state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL;
+
+const getDisallowDescription = (state: {
+  defaultModelId: string;
+  disallowOtherModels: boolean;
+}): string => {
+  if (!state.disallowOtherModels) {
+    return i18n.ALLOW_OTHER_MODELS_DESCRIPTION;
+  }
+  if (isAiFeaturesDisabled(state)) {
+    return i18n.AI_FEATURES_DISABLED_DESCRIPTION;
+  }
+  return i18n.DISALLOW_OTHER_MODELS_DESCRIPTION;
+};
+
 export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) => {
   const { state, setDefaultModelId, setDisallowOtherModels } = defaultModelSettings;
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
@@ -141,7 +159,11 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           </EuiFormRow>
         </EuiDescribedFormGroup>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued" paddingSize="l">
+      <EuiSplitPanel.Inner
+        grow={false}
+        color={isAiFeaturesDisabled(state) ? 'warning' : 'subdued'}
+        paddingSize="l"
+      >
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
@@ -158,10 +180,8 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {state.disallowOtherModels
-                ? i18n.DISALLOW_OTHER_MODELS_DESCRIPTION
-                : i18n.ALLOW_OTHER_MODELS_DESCRIPTION}
+            <EuiText size="s" color="subdued" data-test-subj="disallowOtherModelsDescription">
+              {getDisallowDescription(state)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
