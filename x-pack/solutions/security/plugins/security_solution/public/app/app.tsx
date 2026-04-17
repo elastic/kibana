@@ -119,7 +119,7 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
     const isSidebarOpen = services.chrome.sidebar.isOpen();
-        
+
     if (services.agentBuilder?.setChatConfig && !isSidebarOpen) {
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
