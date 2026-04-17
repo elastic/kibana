@@ -12,7 +12,6 @@ export const SERVICE_MAP_ATTACHMENT_TYPE = 'observability.service-map' as const;
 const serviceNodeSchema = z.object({
   'service.name': z.string(),
   'agent.name': z.string().optional(),
-  alertsCount: z.number().optional(),
 });
 
 const externalNodeSchema = z.object({
