@@ -17,5 +17,6 @@ export const FAKE_ASYNC_ID = 'FkxOb21iV1g2VGR1S2QzaWVtRU9fMVEbc3JWeWc1VHlUdDZ6ME
 
 export const COMMON_HEADERS: Record<string, string> = {
   [ELASTIC_HTTP_VERSION_HEADER]: '1',
+  'x-elastic-internal-origin': 'kibana',
   'kbn-xsrf': 'foo',
 };
