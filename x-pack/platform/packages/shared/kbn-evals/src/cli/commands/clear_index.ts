@@ -12,6 +12,7 @@ import { isNotFoundError } from '@kbn/es-errors';
 import { createEsClientForTesting } from '@kbn/test';
 import { envFromExportProfile, defaultExportProfile } from '../profiles';
 import { isTTY } from '../prompts';
+import { isElasticCloudEsUrl } from '../../utils/es_url';
 
 const DEFAULT_PATTERN = 'kibana-evaluations*';
 const DEFAULT_DATA_STREAM = 'kibana-evaluations';
@@ -20,19 +21,6 @@ const DEFAULT_TEMPLATE = 'kibana-evaluations-template';
 const parseEsUrl = (esUrl: string): URL => {
   const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `http://${esUrl}`;
   return new URL(withProtocol);
-};
-
-const isElasticCloudEsUrl = (esUrl: string): boolean => {
-  try {
-    const hostname = parseEsUrl(esUrl).hostname.replace(/\.$/, '').toLowerCase();
-    return (
-      hostname === 'elastic-cloud.com' ||
-      hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
-    );
-  } catch {
-    return false;
-  }
 };
 
 export const clearIndexCmd: Command<void> = {

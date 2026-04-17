@@ -28,6 +28,7 @@ import {
   checkEvaluationsPluginEnabled,
 } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
+import { isElasticCloudEsUrl } from './utils/es_url';
 import {
   mapToEvaluationScoreDocuments,
   exportEvaluations,
@@ -55,20 +56,6 @@ import type {
   EvaluationSpecificWorkerFixtures,
   Example,
 } from './types';
-
-function isElasticCloudEsUrl(esUrl: string): boolean {
-  try {
-    const withProtocol = /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//.test(esUrl) ? esUrl : `https://${esUrl}`;
-    const hostname = new URL(withProtocol).hostname.replace(/\.$/, '').toLowerCase();
-    return (
-      hostname === 'elastic-cloud.com' ||
-      hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
-    );
-  } catch {
-    return false;
-  }
-}
 
 function isObjectRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

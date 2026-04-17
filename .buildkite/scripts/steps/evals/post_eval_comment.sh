@@ -42,30 +42,28 @@ for suite_id in "${SUITES[@]}"; do
 
   echo "--- Comparing suite: $suite_id"
 
+  SUITE_MD_FILE="$(mktemp)"
+
   COMPARE_ARGS=(
     compare "$RUN_ID"
     --baseline-branch "$BASELINE_BRANCH"
     --suite "$suite_id"
     --format markdown
+    --output "$SUITE_MD_FILE"
   )
 
   if [[ -n "$KIBANA_URL" ]]; then
     COMPARE_ARGS+=(--kibana-url "$KIBANA_URL")
   fi
 
-  COMPARE_STDERR="$(mktemp)"
-  SUITE_MD="$(node scripts/evals "${COMPARE_ARGS[@]}" 2>"$COMPARE_STDERR" || true)"
+  node scripts/evals "${COMPARE_ARGS[@]}" || true
 
-  if [[ -n "$SUITE_MD" ]]; then
-    MARKDOWN+="${SUITE_MD}"$'\n'
+  if [[ -s "$SUITE_MD_FILE" ]]; then
+    MARKDOWN+="$(cat "$SUITE_MD_FILE")"$'\n'
   else
     echo "No comparison output for suite $suite_id (no baseline or no results)."
-    if [[ -s "$COMPARE_STDERR" ]]; then
-      echo "Compare stderr:"
-      cat "$COMPARE_STDERR"
-    fi
   fi
-  rm -f "$COMPARE_STDERR"
+  rm -f "$SUITE_MD_FILE"
 done
 
 if [[ -z "$MARKDOWN" ]]; then

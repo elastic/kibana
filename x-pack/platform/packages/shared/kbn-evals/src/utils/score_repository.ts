@@ -735,9 +735,9 @@ export class EvaluationScoreRepository {
       });
       return parseLatestBaselineRun(response.aggregations as Record<string, unknown> | undefined);
     } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
       this.log.error(
-        `Failed to find baseline run for suite ${suiteId} on branch ${branch}:`,
-        error
+        `Failed to find baseline run for suite ${suiteId} on branch ${branch}: ${message}`
       );
       return undefined;
     }

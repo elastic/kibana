@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Fs from 'fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import type { Command } from '@kbn/dev-cli-runner';
 import { createEsClientForTesting } from '@kbn/test-es-server';
@@ -14,6 +15,7 @@ import {
   type EvaluationScoreDocument as CommonEvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { EvaluationScoreRepository } from '../../utils/score_repository';
+import { isElasticCloudEsUrl } from '../../utils/es_url';
 import { formatPairedTTestReport } from '../../utils/reporting/compare_report';
 import { formatMarkdownCompareReport } from '../../utils/reporting/compare_markdown_report';
 
@@ -33,12 +35,13 @@ export const compareCmd: Command<void> = {
     node scripts/evals compare <pr-run-id> --baseline-branch main --suite sigevents --format markdown
   `,
   flags: {
-    string: ['baseline-branch', 'suite', 'format', 'kibana-url'],
+    string: ['baseline-branch', 'suite', 'format', 'kibana-url', 'output'],
     help: `
       --baseline-branch <branch>  Branch to look up the latest baseline run (e.g. "main")
       --suite <id>                Suite ID to filter scores for (required with --baseline-branch)
       --format <type>             Output format: "terminal" (default) or "markdown"
       --kibana-url <url>          Kibana base URL for deep-links in markdown output
+      --output <file>             Write report to file instead of stdout (avoids mixing with log output)
     `,
   },
   run: async ({ log, flagsReader }) => {
@@ -48,6 +51,7 @@ export const compareCmd: Command<void> = {
     const suite = flagsReader.string('suite') ?? undefined;
     const format = (flagsReader.string('format') ?? 'terminal') as 'terminal' | 'markdown';
     const kibanaUrl = flagsReader.string('kibana-url') ?? undefined;
+    const outputFile = flagsReader.string('output') ?? undefined;
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
@@ -87,6 +91,7 @@ export const compareCmd: Command<void> = {
 
     const esClient = createEsClientForTesting({
       esUrl: evaluationsEsUrl,
+      isCloud: isElasticCloudEsUrl(evaluationsEsUrl),
       ...(evaluationsEsApiKey ? { auth: { apiKey: evaluationsEsApiKey } } : {}),
     });
     const scoreRepository = new EvaluationScoreRepository(esClient, log);
@@ -187,7 +192,12 @@ export const compareCmd: Command<void> = {
         results,
         kibanaUrl,
       });
-      process.stdout.write(markdown);
+      if (outputFile) {
+        Fs.writeFileSync(outputFile, markdown, 'utf-8');
+        log.info(`Markdown report written to ${outputFile}`);
+      } else {
+        process.stdout.write(markdown);
+      }
     } else {
       const report = formatPairedTTestReport({
         runIdA: firstRunId,
