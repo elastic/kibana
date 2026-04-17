@@ -47,7 +47,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     : useEmptyAllIntegrations;
   const {
     integrations,
-    isLoading: isLoadingCreatedIntegrations,
+    isInitialLoading: isLoadingCreatedIntegrations,
     isError: isCreatedIntegrationsError,
     refetch: refetchCreatedIntegrations,
   } = useGetAllIntegrationsHook();
@@ -174,7 +174,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 function useEmptyAllIntegrations() {
   return {
     integrations: [] as CreatedIntegrationRow[],
-    isLoading: false,
+    isInitialLoading: false,
     isError: false,
     error: null,
     refetch: () => {},
