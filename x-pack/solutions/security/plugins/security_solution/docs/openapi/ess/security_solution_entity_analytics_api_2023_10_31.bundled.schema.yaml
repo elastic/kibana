@@ -983,6 +983,196 @@ paths:
       tags:
         - Security Entity Analytics API
       x-state: Technical Preview
+  /api/entity_analytics/watchlists/{watchlist_id}/entities/assign:
+    post:
+      description: >
+        Assigns the provided entities to the specified watchlist using a
+        "manual" source label.
+
+        The entities must already exist in the entity store.
+
+
+        If an entity is already on the watchlist, no new document is created —
+        the "manual" label
+
+        is added to its existing source labels instead.
+      operationId: AssignWatchlistEntities
+      parameters:
+        - description: The ID of the watchlist to add entities to
+          example: high-risk-vendors
+          in: path
+          name: watchlist_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              assignEntities:
+                summary: Assign two entities to a watchlist
+                value:
+                  euids:
+                    - user:john.doe
+                    - host:web-01
+            schema:
+              type: object
+              properties:
+                euids:
+                  description: The EUIDs of the entities to assign
+                  example:
+                    - user:john.doe
+                    - host:web-01
+                  items:
+                    type: string
+                  type: array
+              required:
+                - euids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                assignEntitiesResponse:
+                  summary: Successful assignment of two entities
+                  value:
+                    failed: 0
+                    items:
+                      - euid: user:john.doe
+                        status: success
+                      - euid: host:web-01
+                        status: not_found
+                    not_found: 1
+                    successful: 1
+                    total: 2
+              schema:
+                type: object
+                properties:
+                  failed:
+                    description: Number of entities that failed to process
+                    example: 0
+                    type: integer
+                  items:
+                    items:
+                      $ref: '#/components/schemas/WatchlistEntityAssignResponseItem'
+                    type: array
+                  not_found:
+                    description: Number of entities not found in the entity store
+                    example: 1
+                    type: integer
+                  successful:
+                    description: Number of entities successfully assigned
+                    example: 1
+                    type: integer
+                  total:
+                    description: Total number of entities processed
+                    example: 2
+                    type: integer
+                required:
+                  - successful
+                  - failed
+                  - not_found
+                  - total
+                  - items
+          description: Assignment successful
+      summary: Manually assign entities to a watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview; added in 9.4.0
+  /api/entity_analytics/watchlists/{watchlist_id}/entities/unassign:
+    post:
+      description: |
+        Unassigns the provided entities from the specified watchlist.
+        This only removes the "manual" assignment. If the entity is also
+        assigned via other sources (for example, index or integration), it will
+        remain on the watchlist.
+      operationId: UnassignWatchlistEntities
+      parameters:
+        - description: The ID of the watchlist to remove entities from
+          example: high-risk-vendors
+          in: path
+          name: watchlist_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              unassignEntities:
+                summary: Unassign two entities from a watchlist
+                value:
+                  euids:
+                    - user:john.doe
+                    - host:web-01
+            schema:
+              type: object
+              properties:
+                euids:
+                  description: The EUIDs of the entities to unassign
+                  example:
+                    - user:john.doe
+                    - host:web-01
+                  items:
+                    type: string
+                  type: array
+              required:
+                - euids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                unassignEntitiesResponse:
+                  summary: Successful unassignment of two entities
+                  value:
+                    failed: 0
+                    items:
+                      - euid: user:john.doe
+                        status: success
+                      - euid: host:web-01
+                        status: not_found
+                    not_found: 1
+                    successful: 1
+                    total: 2
+              schema:
+                type: object
+                properties:
+                  failed:
+                    description: Number of entities that failed to process
+                    example: 0
+                    type: integer
+                  items:
+                    items:
+                      $ref: '#/components/schemas/WatchlistEntityUnassignResponseItem'
+                    type: array
+                  not_found:
+                    description: >-
+                      Number of entities not found in the manual watchlist
+                      assignment
+                    example: 1
+                    type: integer
+                  successful:
+                    description: Number of entities successfully unassigned
+                    example: 1
+                    type: integer
+                  total:
+                    description: Total number of entities processed
+                    example: 2
+                    type: integer
+                required:
+                  - successful
+                  - failed
+                  - not_found
+                  - total
+                  - items
+          description: Unassignment successful
+      summary: Manually unassign entities from a watchlist
+      tags:
+        - Security Entity Analytics API
+      x-state: Technical Preview; added in 9.4.0
   /api/entity_analytics/watchlists/list:
     get:
       operationId: ListWatchlists
@@ -3111,6 +3301,54 @@ components:
       required:
         - status
         - matchedEntities
+    WatchlistEntityAssignResponseItem:
+      example:
+        euid: user:john.doe
+        status: success
+      type: object
+      properties:
+        error:
+          description: Error message if the entity failed to process
+          example: Invalid entity type
+          type: string
+        euid:
+          description: The EUID of the entity
+          example: user:john.doe
+          type: string
+        status:
+          enum:
+            - success
+            - failure
+            - not_found
+          example: success
+          type: string
+      required:
+        - euid
+        - status
+    WatchlistEntityUnassignResponseItem:
+      example:
+        euid: user:john.doe
+        status: success
+      type: object
+      properties:
+        error:
+          description: Error message if the entity failed to process
+          example: Invalid entity type
+          type: string
+        euid:
+          description: The EUID of the entity
+          example: user:john.doe
+          type: string
+        status:
+          enum:
+            - success
+            - failure
+            - not_found
+          example: success
+          type: string
+      required:
+        - euid
+        - status
     WatchlistObject:
       example:
         createdAt: '2026-01-28T12:00:00.000Z'

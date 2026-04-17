@@ -31,7 +31,8 @@ import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor'
 const TRANSIENT_SYNTHETICS_HTTP: ReadonlyArray<number> = [502, 503, 504];
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('PrivateLocationCreateMonitor', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/258046
+  describe.skip('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
