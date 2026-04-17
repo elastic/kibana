@@ -96,6 +96,7 @@
     "@kbn/management-settings-ids",
     "@kbn/use-observable",
     "@kbn/cloud-plugin",
+    "@kbn/std",
     "@kbn/kbn-client"
   ],
   "exclude": ["target/**/*"]

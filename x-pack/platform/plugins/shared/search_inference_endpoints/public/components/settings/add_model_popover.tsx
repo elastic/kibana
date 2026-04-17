@@ -15,6 +15,12 @@ import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { getModelId } from '../../utils/get_model_id';
+import {
+  isEisEndpoint,
+  getModelName,
+  getModelCreator,
+  getProviderKeyForCreator,
+} from '../../utils/eis_utils';
 
 interface AddModelPopoverProps {
   existingEndpointIds: string[];
@@ -48,8 +54,19 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
     return available.map((endpoint) => {
       const modelId = getModelId(endpoint) ?? endpoint.inference_id;
       const count = modelToCount.get(modelId) ?? 1;
-      const label = count > 1 ? `${modelId} (${endpoint.inference_id})` : modelId;
-      const icon = SERVICE_PROVIDERS[endpoint.service as ServiceProviderKeys]?.icon ?? 'compute';
+      let icon: string;
+      let baseName: string;
+      if (isEisEndpoint(endpoint)) {
+        const creator = getModelCreator(endpoint);
+        const providerKey = getProviderKeyForCreator(creator);
+        icon = (providerKey && SERVICE_PROVIDERS[providerKey]?.icon) ?? 'compute';
+        baseName = getModelName(endpoint);
+      } else {
+        const provider = SERVICE_PROVIDERS[endpoint.service as ServiceProviderKeys];
+        icon = provider?.icon ?? 'compute';
+        baseName = modelId;
+      }
+      const label = count > 1 ? `${baseName} (${endpoint.inference_id})` : baseName;
       return {
         label,
         key: endpoint.inference_id,
