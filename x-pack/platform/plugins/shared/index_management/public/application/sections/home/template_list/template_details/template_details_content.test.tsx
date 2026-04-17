@@ -16,6 +16,7 @@ import {
 } from '../../../../../../common/constants';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { TemplateDetailsContent } from './template_details_content';
+import type { UseRequestResponse, Error as EsUiSharedError } from '../../../../../shared_imports';
 
 jest.mock('../../../../services/api', () => ({
   useLoadIndexTemplate: jest.fn(),
@@ -140,15 +141,20 @@ import { useAppContext, useServices } from '../../../../app_context';
 
 const mockTrackMetric = jest.fn();
 
+const createRequestError = (message: string): EsUiSharedError => ({ error: message, message });
+
 const getUseRequestMock = ({
+  isInitialRequest = false,
   isLoading,
   error,
   data,
 }: {
+  isInitialRequest?: boolean;
   isLoading: boolean;
-  error: { message: string } | null;
+  error: EsUiSharedError | null;
   data: TemplateDeserialized | null;
-}) => ({
+}): UseRequestResponse<TemplateDeserialized, EsUiSharedError> => ({
+  isInitialRequest,
   isLoading,
   error,
   data,
@@ -195,7 +201,7 @@ describe('TemplateDetailsContent', () => {
     mockTrackMetric.mockClear();
     mockedUseServices.mockReturnValue({
       uiMetricService: { trackMetric: mockTrackMetric },
-    } as ReturnType<typeof useServices>);
+    } as unknown as ReturnType<typeof useServices>);
     mockedUseAppContext.mockReturnValue({
       privs: {
         manageIndexTemplates: true,
@@ -208,7 +214,11 @@ describe('TemplateDetailsContent', () => {
 
   it('renders loading state while the template request is in flight', () => {
     mockedUseLoadIndexTemplate.mockReturnValue(
-      getUseRequestMock({ isLoading: true, error: null, data: null })
+      getUseRequestMock({
+        isLoading: true,
+        error: null,
+        data: null,
+      })
     );
 
     render(<TemplateDetailsContent {...defaultProps} />);
@@ -218,7 +228,11 @@ describe('TemplateDetailsContent', () => {
 
   it('renders an error section when loading the template fails', () => {
     mockedUseLoadIndexTemplate.mockReturnValue(
-      getUseRequestMock({ isLoading: false, error: { message: 'request failed' }, data: null })
+      getUseRequestMock({
+        isLoading: false,
+        error: createRequestError('request failed'),
+        data: null,
+      })
     );
 
     render(<TemplateDetailsContent {...defaultProps} />);
