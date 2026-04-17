@@ -48,6 +48,8 @@ export function KnowledgeIndicatorsTable() {
   const [generationStreamNames, setGenerationStreamNames] = useState<string[]>([]);
 
   const {
+    filteredStreams,
+    isStreamsLoading,
     generatingStreamNames,
     isGenerating,
     isInitialGenerationStatusLoading,
@@ -66,7 +68,7 @@ export function KnowledgeIndicatorsTable() {
   } = useKiGeneration();
 
   const runAndClearPicker = useCallback(
-    async (action: (names: string[]) => Promise<void>) => {
+    async (action: (names: string[]) => Promise<string[]>) => {
       const names = generationStreamNames;
       setGenerationStreamNames([]);
       await action(names);
@@ -155,6 +157,8 @@ export function KnowledgeIndicatorsTable() {
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem>
         <StreamPicker
+          streams={filteredStreams}
+          isStreamsLoading={isStreamsLoading}
           selectedStreamNames={generationStreamNames}
           onSelectedStreamNamesChange={setGenerationStreamNames}
           excludedStreamNames={generatingStreamNames}

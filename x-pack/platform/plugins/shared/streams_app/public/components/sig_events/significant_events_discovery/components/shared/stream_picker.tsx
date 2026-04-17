@@ -8,10 +8,12 @@
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import React, { useCallback, useMemo } from 'react';
-import { useKiGeneration } from '../knowledge_indicators_table/ki_generation_context';
 
 interface StreamPickerProps {
+  streams: ListStreamDetail[] | undefined;
+  isStreamsLoading: boolean;
   selectedStreamNames: string[];
   onSelectedStreamNamesChange: (streamNames: string[]) => void;
   excludedStreamNames?: string[];
@@ -20,25 +22,25 @@ interface StreamPickerProps {
 }
 
 export const StreamPicker = ({
+  streams,
+  isStreamsLoading,
   selectedStreamNames,
   onSelectedStreamNamesChange,
   excludedStreamNames,
   isDisabled,
   fullWidth,
 }: StreamPickerProps) => {
-  const { filteredStreams, isStreamsLoading } = useKiGeneration();
-
   const excludedSet = useMemo(() => new Set(excludedStreamNames ?? []), [excludedStreamNames]);
 
   const options = useMemo<Array<EuiComboBoxOptionOption<string>>>(
     () =>
-      (filteredStreams ?? [])
+      (streams ?? [])
         .filter((s) => !excludedSet.has(s.stream.name))
         .map((s) => ({
           label: s.stream.name,
           key: s.stream.name,
         })),
-    [filteredStreams, excludedSet]
+    [streams, excludedSet]
   );
 
   const selectedOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
