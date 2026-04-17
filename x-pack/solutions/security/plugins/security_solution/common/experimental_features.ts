@@ -86,23 +86,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
-  /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
-   */
-  entityDetailsHighlightsEnabled: true,
-
   /**
    * Enables the new Entity Analytics home page experience.
    */
-  entityAnalyticsNewHomePageEnabled: true,
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
    * Enables the lead generation pipeline for Entity Analytics.
    * When enabled, the lead generation engine, observation modules,
    * API routes, and persistence indices are activated.
    */
-  leadGenerationEnabled: true,
+  leadGenerationEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -238,7 +232,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Uses entity store v2 for entity analytics skill
    */
-  entityAnalyticsEntityStoreV2: true,
+  entityAnalyticsEntityStoreV2: false,
 
   /**
    * Enables the deprecated prebuilt rules UI
