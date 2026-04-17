@@ -173,9 +173,7 @@ describe('CsvExportButton', () => {
       (f: { query: Record<string, unknown> }) => f.query
     );
 
-    expect(filterQueries).toEqual(
-      expect.arrayContaining([{ ids: { values: ['id-1', 'id-2'] } }])
-    );
+    expect(filterQueries).toEqual(expect.arrayContaining([{ ids: { values: ['id-1', 'id-2'] } }]));
   });
 
   it('skips consumer filter when consumers is empty', async () => {
