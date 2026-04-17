@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { EuiAvatar, EuiIcon, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { EuiAvatarProps } from '@elastic/eui';
+import type { EuiAvatarProps, EuiPanelProps } from '@elastic/eui';
 import { agentBuilderDefaultAgentId, type AgentDefinition } from '@kbn/agent-builder-common';
 import { css } from '@emotion/react';
 import { roundedBorderRadiusStyles } from '../../../common.styles';
@@ -36,6 +36,7 @@ interface BaseAgentAvatarProps {
 
 interface AgentAvatarWithAgentProps extends BaseAgentAvatarProps {
   agent: AgentDefinition;
+  innerPaddingSize?: EuiPanelProps['paddingSize'];
   name?: never;
   symbol?: never;
   color?: 'subdued' | AgentDefinition['avatar_color'];
@@ -61,6 +62,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     readonly,
     icon,
     agentId,
+    innerPaddingSize,
   } = 'agent' in props && props.agent
     ? {
         name: props.agent.name,
@@ -70,6 +72,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
         agentId: props.agent.id,
+        innerPaddingSize: props.innerPaddingSize ?? 'xs',
       }
     : {
         agentId: props.agentId,
@@ -100,7 +103,12 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
       ${borderAndShapeStyles}
     `;
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        css={panelStyles}
+        paddingSize={innerPaddingSize}
+      >
         <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
       </EuiPanel>
     );
