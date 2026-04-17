@@ -147,9 +147,9 @@ export const AgentOverview: React.FC = () => {
           onEditDetails={() => setIsEditFlyoutOpen(true)}
         />
 
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="l" />
         <EuiHorizontalRule margin="none" />
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="l" />
 
         <CapabilitiesSection
           skillsCount={skillsCount}

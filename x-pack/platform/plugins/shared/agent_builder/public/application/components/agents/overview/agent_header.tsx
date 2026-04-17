@@ -144,6 +144,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           </EuiFlexGroup>
         </>
       )}
+      <EuiSpacer size="m" />
     </>
   );
 };
