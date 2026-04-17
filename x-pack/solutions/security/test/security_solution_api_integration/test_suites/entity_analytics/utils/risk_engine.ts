@@ -228,7 +228,8 @@ export const readRiskScores = async (
   try {
     await es.indices.refresh({ index: index.join(',') });
   } catch (e) {
-    // Data stream may not exist yet; callers retry on 404.
+    // eslint-disable-next-line no-console
+    console.warn(`readRiskScores: index refresh failed (non-fatal): ${e}`);
   }
   const results = await es.search({
     index,
