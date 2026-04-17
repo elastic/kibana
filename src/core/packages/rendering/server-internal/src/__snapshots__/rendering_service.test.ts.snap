@@ -46,7 +46,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -139,7 +138,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -228,7 +226,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -321,7 +318,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -410,7 +406,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -499,7 +494,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -592,7 +586,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -681,7 +674,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -770,7 +762,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -859,7 +850,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -953,7 +943,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1048,7 +1037,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1142,7 +1130,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1240,7 +1227,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1329,7 +1315,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1423,7 +1408,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1521,7 +1505,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1615,7 +1598,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1711,7 +1693,6 @@ Object {
     },
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },
@@ -1807,7 +1788,6 @@ Object {
     "overrides": Object {},
   },
   "i18n": Object {
-    "configLocale": "en",
     "translationHashes": Object {
       "en": "MOCK_HASH",
     },

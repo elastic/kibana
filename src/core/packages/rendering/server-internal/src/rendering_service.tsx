@@ -27,7 +27,6 @@ import {
   type UserProvidedValues,
   DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
-import { SUPPORTED_LOCALE_IDS } from '@kbn/i18n';
 import { Template } from './views';
 import type {
   IRenderOptions,
@@ -50,48 +49,6 @@ import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 import { isThemeBundled } from './theme';
-
-/**
- * Parse the Accept-Language header and return the best matching supported locale,
- * or undefined if no match is found.
- */
-function parseBrowserLocale(acceptLanguage: string | string[] | undefined): string | undefined {
-  if (!acceptLanguage || Array.isArray(acceptLanguage)) {
-    return undefined;
-  }
-
-  // Parse entries like "fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7"
-  const entries = acceptLanguage.split(',').map((entry) => {
-    const [langTag, qParam] = entry.trim().split(';');
-    const parsed = qParam ? parseFloat(qParam.replace('q=', '')) : 1.0;
-    const q = Number.isNaN(parsed) ? 0 : parsed;
-    return { lang: langTag.trim(), q };
-  });
-
-  // Sort by quality descending
-  entries.sort((a, b) => b.q - a.q);
-
-  for (const { lang } of entries) {
-    // Exact match (case-insensitive)
-    const exactMatch = SUPPORTED_LOCALE_IDS.find(
-      (supported) => supported.toLowerCase() === lang.toLowerCase()
-    );
-    if (exactMatch) return exactMatch;
-
-    // Language-only prefix match (e.g. "fr" matches "fr-FR").
-    // NOTE: If multiple supported locales share a prefix (e.g. "zh-CN" and "zh-TW"),
-    // this returns the first match in SUPPORTED_LOCALE_IDS order, which may not be
-    // the user's intent. Consider a more specific matching strategy if that happens.
-    const langPrefix = lang.split('-')[0].toLowerCase();
-    if (!langPrefix) continue;
-    const prefixMatch = SUPPORTED_LOCALE_IDS.find((supported) =>
-      supported.toLowerCase().startsWith(langPrefix)
-    );
-    if (prefixMatch) return prefixMatch;
-  }
-
-  return undefined;
-}
 
 type RenderOptions =
   | RenderingSetupDeps
@@ -327,9 +284,6 @@ export class RenderingService {
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
     }
 
-    // Parse Accept-Language header to find the best matching supported locale
-    const browserLocale = parseBrowserLocale(request.headers['accept-language']);
-
     const apmConfig = getApmConfig(request.url.pathname);
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
@@ -372,8 +326,6 @@ export class RenderingService {
           // Per-locale content hashes for cache-busting URLs. Currently 5 locales (~60 bytes);
           // if the supported locale list grows significantly, consider lazy injection.
           translationHashes,
-          configLocale: locale,
-          ...(browserLocale ? { browserLocale } : {}),
           ...(userSettingLocale ? { userLocale: userSettingLocale } : {}),
         },
         theme: {

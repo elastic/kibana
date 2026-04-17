@@ -15,7 +15,6 @@ const setMetadata = (i18nOverrides: Record<string, unknown> = {}) => {
     i18n: {
       translationsUrl: '/translations/abc123/en.json',
       translationHashes: { en: 'abc123', 'fr-FR': 'def456', 'ja-JP': 'ghi789' },
-      configLocale: 'en',
       ...i18nOverrides,
     },
     vars: { apmConfig: null },
@@ -59,39 +58,17 @@ describe('kbn_bootstrap', () => {
       expect(i18nLoad).toHaveBeenCalledWith('/translations/abc123/en.json');
     });
 
-    it('userLocale takes highest priority over browserLocale', async () => {
-      setMetadata({ userLocale: 'ja-JP', browserLocale: 'fr-FR' });
+    it('userLocale overrides the default translationsUrl', async () => {
+      setMetadata({ userLocale: 'ja-JP' });
 
       await __kbnBootstrap__();
 
       expect(i18nLoad).toHaveBeenCalledWith('/translations/ghi789/ja-JP.json');
     });
 
-    it('browserLocale is used as fallback when configLocale is the default (en)', async () => {
-      setMetadata({ browserLocale: 'fr-FR', configLocale: 'en' });
-
-      await __kbnBootstrap__();
-
-      expect(i18nLoad).toHaveBeenCalledWith('/translations/def456/fr-FR.json');
-    });
-
-    it('browserLocale is ignored when configLocale is explicitly set to a non-default locale', async () => {
+    it('userLocale overrides even when translationsUrl targets a non-default locale', async () => {
       setMetadata({
         translationsUrl: '/translations/def456/fr-FR.json',
-        configLocale: 'fr-FR',
-        browserLocale: 'ja-JP',
-      });
-
-      await __kbnBootstrap__();
-
-      // Should keep the kibana.yml configured fr-FR, not switch to ja-JP
-      expect(i18nLoad).toHaveBeenCalledWith('/translations/def456/fr-FR.json');
-    });
-
-    it('userLocale overrides even when configLocale is explicitly set', async () => {
-      setMetadata({
-        translationsUrl: '/translations/def456/fr-FR.json',
-        configLocale: 'fr-FR',
         userLocale: 'ja-JP',
       });
 
