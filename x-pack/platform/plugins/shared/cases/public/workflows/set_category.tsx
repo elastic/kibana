@@ -23,8 +23,9 @@ export const setCategoryStepDefinition = createPublicCaseStepDefinition({
           dependsOnValues: ['input.owner'],
           search: async (input, ctx) => {
             const owner = ctx.values.input.owner;
+            // If no owner is specified, keep the input, no need to verify categories
             if (!isValidOwner(owner)) {
-              return [];
+              return input.length ? [{ value: input, label: input }] : [];
             }
             const query = input.trim().toLowerCase();
             const categories = await getCategories({ owner: [owner] });
@@ -44,8 +45,11 @@ export const setCategoryStepDefinition = createPublicCaseStepDefinition({
           },
           resolve: async (value, ctx) => {
             const owner = ctx.values.input.owner;
-            const ownerFilter = isValidOwner(owner) ? [owner] : [];
-            const categories = await getCategories({ owner: ownerFilter });
+            // If no owner was specified, just accept the value. We do not need to verify categories.
+            if (!isValidOwner(owner)) {
+              return { value, label: value };
+            }
+            const categories = await getCategories({ owner: [owner] });
             const found = categories.find((cat) => cat === value);
 
             if (!found) {

@@ -63,7 +63,10 @@ describe('setCategoryStepDefinition', () => {
   it('searches all categories when query is empty', async () => {
     const { categorySelection } = setup();
 
-    const results = await categorySelection!.search('   ', createSelectionContext('securitySolution'));
+    const results = await categorySelection!.search(
+      '   ',
+      createSelectionContext('securitySolution')
+    );
 
     expect(results).toEqual([
       { value: 'Malware', label: 'Malware' },
@@ -77,7 +80,10 @@ describe('setCategoryStepDefinition', () => {
   it('filters categories by query text', async () => {
     const { categorySelection } = setup();
 
-    const results = await categorySelection!.search('ware', createSelectionContext('securitySolution'));
+    const results = await categorySelection!.search(
+      'ware',
+      createSelectionContext('securitySolution')
+    );
 
     expect(results).toEqual([
       { value: 'Malware', label: 'Malware' },
@@ -116,28 +122,61 @@ describe('setCategoryStepDefinition', () => {
     expect(results).toHaveLength(15);
   });
 
-  it('fetches all categories when owner is not provided', async () => {
+  it('does not fetch categories when owner is not provided', async () => {
     const { categorySelection } = setup();
 
-    await categorySelection!.search('', createSelectionContext());
+    const results = await categorySelection!.search('', createSelectionContext());
 
-    expect(getCategoriesMock).toHaveBeenCalledWith({ owner: [] });
+    expect(results).toEqual([]);
+    expect(getCategoriesMock).not.toHaveBeenCalled();
   });
 
-  it('fetches all categories when owner is invalid', async () => {
+  it('does not fetch categories when owner is invalid', async () => {
     const { categorySelection } = setup();
 
-    await categorySelection!.search('', createSelectionContext('notAValidOwner'));
+    const results = await categorySelection!.search('', createSelectionContext('notAValidOwner'));
 
-    expect(getCategoriesMock).toHaveBeenCalledWith({ owner: [] });
+    expect(results).toEqual([]);
+    expect(getCategoriesMock).not.toHaveBeenCalled();
   });
 
-  it('fetches all categories when owner is empty string', async () => {
+  it('does not fetch categories when owner is empty string', async () => {
     const { categorySelection } = setup();
 
-    await categorySelection!.search('', createSelectionContext(''));
+    const results = await categorySelection!.search('', createSelectionContext(''));
 
-    expect(getCategoriesMock).toHaveBeenCalledWith({ owner: [] });
+    expect(results).toEqual([]);
+    expect(getCategoriesMock).not.toHaveBeenCalled();
+  });
+
+  it('returns a freeform category option when owner is missing and search text is non-empty', async () => {
+    const { categorySelection } = setup();
+
+    const results = await categorySelection!.search('Custom Category', createSelectionContext());
+
+    expect(results).toEqual([{ value: 'Custom Category', label: 'Custom Category' }]);
+    expect(getCategoriesMock).not.toHaveBeenCalled();
+  });
+
+  it('resolves any category value when owner is missing', async () => {
+    const { categorySelection } = setup();
+
+    const resolved = await categorySelection!.resolve('Unknown', createSelectionContext());
+
+    expect(resolved).toEqual({ value: 'Unknown', label: 'Unknown' });
+    expect(getCategoriesMock).not.toHaveBeenCalled();
+  });
+
+  it('resolves any category value when owner is invalid', async () => {
+    const { categorySelection } = setup();
+
+    const resolved = await categorySelection!.resolve(
+      'NotInApi',
+      createSelectionContext('notAValidOwner')
+    );
+
+    expect(resolved).toEqual({ value: 'NotInApi', label: 'NotInApi' });
+    expect(getCategoriesMock).not.toHaveBeenCalled();
   });
 
   it('uses owner filter when a valid owner is provided', async () => {
@@ -151,11 +190,10 @@ describe('setCategoryStepDefinition', () => {
   it('returns details message for a resolved category', async () => {
     const { categorySelection } = setup();
 
-    const details = await categorySelection!.getDetails(
-      'Malware',
-      createSelectionContext(),
-      { value: 'Malware', label: 'Malware' }
-    );
+    const details = await categorySelection!.getDetails('Malware', createSelectionContext(), {
+      value: 'Malware',
+      label: 'Malware',
+    });
 
     expect(details.message).toContain('Malware');
     expect(details.message).toContain('can be set');
