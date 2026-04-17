@@ -24,10 +24,8 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
 import { EntitiesDetails } from '../components/entities_details';
-import {
-  THREAT_INTELLIGENCE_TAB_ID,
-  ThreatIntelligenceDetails,
-} from '../../../../flyout_v2/threat_intelligence';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/threat_intelligence';
+import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/threat_intelligence/components/threat_intelligence_details_view';
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
@@ -143,7 +141,9 @@ export const InsightsTab = memo(() => {
       />
       <EuiSpacer size="m" />
       {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}
-      {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && <ThreatIntelligenceDetails hit={hit} />}
+      {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && (
+        <ThreatIntelligenceDetailsView hit={hit} />
+      )}
       {activeInsightsId === PREVALENCE_TAB_ID && <PrevalenceDetails />}
       {activeInsightsId === CORRELATIONS_TAB_ID && <CorrelationsDetails />}
     </>

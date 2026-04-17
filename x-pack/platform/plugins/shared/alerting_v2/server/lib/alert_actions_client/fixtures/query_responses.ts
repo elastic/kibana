@@ -12,6 +12,7 @@ export function getAlertEventESQLResponse(overrides?: {
   group_hash?: string;
   episode_id?: string;
   rule_id?: string;
+  space_id?: string;
 }): EsqlQueryResponse {
   return {
     columns: [
@@ -19,6 +20,7 @@ export function getAlertEventESQLResponse(overrides?: {
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
       { name: 'rule_id', type: 'keyword' },
+      { name: 'space_id', type: 'keyword' },
     ],
     values: [
       [
@@ -26,6 +28,7 @@ export function getAlertEventESQLResponse(overrides?: {
         overrides?.group_hash ?? 'test-group-hash',
         overrides?.episode_id ?? 'episode-1',
         overrides?.rule_id ?? 'test-rule-id',
+        overrides?.space_id ?? 'default',
       ],
     ],
   };
@@ -80,6 +83,7 @@ export function getBulkAlertEventsESQLResponse(
     group_hash?: string;
     episode_id?: string;
     rule_id?: string;
+    space_id?: string;
   }>
 ): EsqlQueryResponse {
   return {
@@ -88,12 +92,14 @@ export function getBulkAlertEventsESQLResponse(
       { name: 'rule_id', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
       { name: 'episode_id', type: 'keyword' },
+      { name: 'space_id', type: 'keyword' },
     ],
     values: records.map((record) => [
       record['@timestamp'] ?? '2025-01-01T00:00:00.000Z',
       record.rule_id ?? 'test-rule-id',
       record.group_hash ?? 'test-group-hash',
       record.episode_id ?? 'episode-1',
+      record.space_id ?? 'default',
     ]),
   };
 }

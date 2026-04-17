@@ -44,42 +44,51 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
   const serializedPolicy = serializePolicy(policy);
   const { retention: serializedRetention } = serializedPolicy;
 
-  const EditStepTooltip = ({ step }: { step: number }) => (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip"
-          defaultMessage="Edit"
-        />
-      }
-    >
-      <EuiLink onClick={() => updateCurrentStep(step)}>
-        <EuiIcon
-          type="pencil"
-          aria-label={i18n.translate(
-            'xpack.snapshotRestore.policyForm.stepReview.editIconAriaLabel',
-            {
-              defaultMessage: 'Edit step',
-            }
-          )}
-        />
-      </EuiLink>
-    </EuiToolTip>
+  const logisticsSectionTitle = i18n.translate(
+    'xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionLogisticsTitle',
+    { defaultMessage: 'Logistics' }
   );
+  const snapshotSettingsSectionTitle = i18n.translate(
+    'xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionSettingsTitle',
+    { defaultMessage: 'Snapshot settings' }
+  );
+  const snapshotRetentionSectionTitle = i18n.translate(
+    'xpack.snapshotRestore.policyForm.stepReview.retentionTab.sectionRetentionTitle',
+    { defaultMessage: 'Snapshot retention' }
+  );
+
+  const EditStepTooltip = ({ step, sectionTitle }: { step: number; sectionTitle: string }) => {
+    const editLabel = i18n.translate(
+      'xpack.snapshotRestore.policyForm.stepReview.summaryTab.editStepTooltip',
+      {
+        defaultMessage: 'Edit {sectionTitle}',
+        values: { sectionTitle },
+      }
+    );
+
+    return (
+      <EuiToolTip content={editLabel} disableScreenReaderOutput>
+        <EuiLink aria-label={editLabel} onClick={() => updateCurrentStep(step)}>
+          <EuiIcon type="pencil" aria-hidden />
+        </EuiLink>
+      </EuiToolTip>
+    );
+  };
 
   const renderSummaryTab = () => (
     <Fragment>
       {/* Logistics summary */}
       <EuiSpacer size="m" />
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionLogisticsTitle"
-            defaultMessage="Logistics"
-          />{' '}
-          <EditStepTooltip step={1} />
-        </h3>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>{logisticsSectionTitle}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EditStepTooltip step={1} sectionTitle={logisticsSectionTitle} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       <EuiFlexGroup>
@@ -136,15 +145,16 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
       <EuiSpacer size="xxl" />
 
       {/* Snapshot settings summary */}
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.snapshotRestore.policyForm.stepReview.summaryTab.sectionSettingsTitle"
-            defaultMessage="Snapshot settings"
-          />{' '}
-          <EditStepTooltip step={2} />
-        </h3>
-      </EuiTitle>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h3>{snapshotSettingsSectionTitle}</h3>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EditStepTooltip step={2} sectionTitle={snapshotSettingsSectionTitle} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
 
       <EuiFlexGroup>
@@ -247,15 +257,16 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
       {serializedRetention ? (
         <Fragment>
           <EuiSpacer size="m" />
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.policyForm.stepReview.retentionTab.sectionRetentionTitle"
-                defaultMessage="Snapshot retention"
-              />{' '}
-              <EditStepTooltip step={3} />
-            </h3>
-          </EuiTitle>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h3>{snapshotRetentionSectionTitle}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EditStepTooltip step={3} sectionTitle={snapshotRetentionSectionTitle} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
 
           <EuiDescriptionList textStyle="reverse">

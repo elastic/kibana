@@ -497,10 +497,12 @@
         "label": "runInvalidate",
         "description": [],
         "signature": [
-          "(opts: RunInvalidateOpts) => Promise<number>"
+          "(opts: RunInvalidateOpts) => Promise<",
+          "RunInvalidateResult",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/invalidate_api_keys/lib/run_invalidate.ts",
-        "lineNumber": 33,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -516,7 +518,7 @@
               "RunInvalidateOpts"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/invalidate_api_keys/lib/run_invalidate.ts",
-            "lineNumber": 33,
+            "lineNumber": 39,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,

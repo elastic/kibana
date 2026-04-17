@@ -131,7 +131,6 @@ export class AutomaticImportService {
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
   private logger: Logger;
-
   constructor(
     loggerFactory: LoggerFactory,
     savedObjectsServiceSetup: SavedObjectsServiceSetup,
@@ -196,6 +195,9 @@ export class AutomaticImportService {
           last_updated_by: authenticatedUser.username,
           last_updated_at: new Date().toISOString(),
           status: wasApproved ? TASK_STATUSES.completed : existing.status,
+          ...(integrationParams.connectorId != null
+            ? { connector_id: integrationParams.connectorId }
+            : {}),
           metadata: {
             ...existing.metadata,
             version: newVersion,
@@ -238,6 +240,7 @@ export class AutomaticImportService {
       logo: integrationSO.metadata.logo,
       description: integrationSO.metadata.description,
       version: integrationSO.metadata.version,
+      connectorId: integrationSO.connector_id,
       createdBy: integrationSO.created_by,
       createdByProfileUid: integrationSO.created_by_profile_uid,
       status: deriveIntegrationStatus(integrationSO, dataStreamsSO),
@@ -268,6 +271,7 @@ export class AutomaticImportService {
           logo: integration.metadata.logo,
           description: integration.metadata.description,
           version: integration.metadata.version,
+          connectorId: integration.connector_id,
           createdBy: integration.created_by,
           createdByProfileUid: integration.created_by_profile_uid,
           status: deriveIntegrationStatus(integration, dataStreams),

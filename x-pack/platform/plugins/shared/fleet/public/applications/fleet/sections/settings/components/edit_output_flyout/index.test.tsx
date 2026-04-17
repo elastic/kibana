@@ -52,11 +52,16 @@ const mockUseStartServices = useStartServices as jest.Mock;
 
 const mockedUseFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
-function renderFlyout(output?: Output) {
+function renderFlyout(output?: Output, defaultOutput?: Output) {
   const renderer = createFleetTestRendererMock();
 
   const utils = renderer.render(
-    <EditOutputFlyout proxies={[]} output={output} onClose={() => {}} />
+    <EditOutputFlyout
+      proxies={[]}
+      output={output}
+      defaultOutput={defaultOutput}
+      onClose={() => {}}
+    />
   );
 
   return { utils };
@@ -85,8 +90,7 @@ const kafkaSectionsLabels = ['Partitioning', 'Topics', 'Headers', 'Compression',
 
 const remoteEsOutputLabels = ['Hosts', 'Service token'];
 
-// Failing: See https://github.com/elastic/kibana/issues/262076
-describe.skip('EditOutputFlyout', () => {
+describe('EditOutputFlyout', () => {
   const mockStartServices = (isServerlessEnabled?: boolean) => {
     mockUseStartServices.mockReturnValue({
       notifications: {
@@ -481,6 +485,154 @@ describe.skip('EditOutputFlyout', () => {
       );
     });
   });
+  it('should not disable hosts input for remote ES output in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'remote_elasticsearch',
+      name: 'remote es output',
+      id: 'outputR',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['https://remote-host:9200'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://remote-host:9200')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://remote-host:9200')).not.toBeDisabled();
+  });
+
+  it('should disable hosts input for ES output in serverless', async () => {
+    mockStartServices(true);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'output123',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['https://es-host:9200'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://es-host:9200')).toBeDisabled();
+  });
+
+  it('should show default host when creating new ES output in serverless', async () => {
+    mockStartServices(true);
+
+    const { utils } = renderFlyout(undefined, {
+      type: 'elasticsearch',
+      name: 'default output',
+      id: 'default-output',
+      is_default: true,
+      is_default_monitoring: true,
+      hosts: ['https://default-es-host:443'],
+    });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://default-es-host:443')).not.toBeNull();
+    });
+
+    expect(utils.getByDisplayValue('https://default-es-host:443')).toBeDisabled();
+  });
+
+  it('should show default ES hosts when switching from remote ES to ES in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout(
+      {
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://remote-host:9200'],
+      },
+      {
+        type: 'elasticsearch',
+        name: 'default output',
+        id: 'default-output',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://default-es-host:443'],
+      }
+    );
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://remote-host:9200')).not.toBeNull();
+    });
+
+    // Switch type from remote ES to ES
+    const typeSelect = utils.getByTestId('settingsOutputsFlyout.typeInput');
+    fireEvent.change(typeSelect, { target: { value: 'elasticsearch' } });
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://default-es-host:443')).not.toBeNull();
+    });
+  });
+
+  it('should show empty hosts when switching from ES to remote ES in serverless', async () => {
+    mockStartServices(true);
+    jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout(
+      {
+        type: 'elasticsearch',
+        name: 'es output',
+        id: 'output1',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://es-host:9200'],
+      },
+      {
+        type: 'elasticsearch',
+        name: 'default output',
+        id: 'default-output',
+        is_default: true,
+        is_default_monitoring: true,
+        hosts: ['https://default-es-host:443'],
+      }
+    );
+
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).not.toBeNull();
+    });
+
+    // Switch type from ES to remote ES
+    const typeSelect = utils.getByTestId('settingsOutputsFlyout.typeInput');
+    fireEvent.change(typeSelect, { target: { value: 'remote_elasticsearch' } });
+
+    // The old ES host should be gone — hosts should be empty for fresh remote ES entry
+    await waitFor(() => {
+      expect(utils.queryByDisplayValue('https://es-host:9200')).toBeNull();
+    });
+  });
 
   describe('OpenTelemetry Exporter section', () => {
     it('should show the OTel exporter configuration section for ES output', async () => {
@@ -611,22 +763,5 @@ describe.skip('EditOutputFlyout', () => {
         );
       });
     });
-  });
-
-  it('should not display remote ES output in type lists if serverless', async () => {
-    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
-    mockUseStartServices.mockReset();
-    mockStartServices(true);
-    const { utils } = renderFlyout({
-      type: 'elasticsearch',
-      name: 'dummy',
-      id: 'output',
-      is_default: false,
-      is_default_monitoring: false,
-    });
-
-    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).not.toContain(
-      'Remote Elasticsearch'
-    );
   });
 });

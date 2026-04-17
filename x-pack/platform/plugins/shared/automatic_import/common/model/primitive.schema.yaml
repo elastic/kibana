@@ -23,8 +23,8 @@ components:
       type: string
       minLength: 5
       maxLength: 20
-      pattern: '^\d+\.\d+\.\d+$'
-      description: A semantic version string (e.g. 1.0.0)
+      pattern: '^\d+\.\d+\.\d+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?$'
+      description: A semantic version string (e.g. 1.0.0 or 1.0.0-beta).
 
     UUID:
       type: string
