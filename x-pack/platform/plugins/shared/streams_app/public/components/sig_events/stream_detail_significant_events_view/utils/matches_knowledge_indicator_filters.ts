@@ -6,7 +6,7 @@
  */
 
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { isComputedFeature } from '@kbn/streams-schema';
+import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { getKnowledgeIndicatorStreamName } from './get_knowledge_indicator_stream_name';
 
 export interface KnowledgeIndicatorFilterCriteria {
@@ -30,7 +30,12 @@ export const matchesKnowledgeIndicatorFilters = (
   if (statusFilter === 'excluded' && isActive(ki)) return false;
 
   if (selectedTypes?.length) {
-    const type = ki.kind === 'feature' ? ki.feature.type : 'query';
+    const type =
+      ki.kind === 'feature'
+        ? ki.feature.type
+        : ki.query.type === QUERY_TYPE_STATS
+        ? 'stats_query'
+        : 'match_query';
     if (!selectedTypes.includes(type)) return false;
   }
 

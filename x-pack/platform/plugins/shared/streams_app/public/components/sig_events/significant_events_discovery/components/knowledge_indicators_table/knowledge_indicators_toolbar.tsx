@@ -31,6 +31,7 @@ import {
   RESTORE_SELECTED_LABEL,
   TABLE_LABEL,
   CANNOT_EXCLUDE_SELECTION_TOOLTIP,
+  PROMOTE_SELECTED_LABEL,
 } from './translations';
 
 const searchBarStyle = css`
@@ -50,9 +51,11 @@ interface KnowledgeIndicatorsToolbarProps {
   pagination: { pageIndex: number; pageSize: number };
   selectedKnowledgeIndicators: KnowledgeIndicator[];
   isBulkOperationInProgress: boolean;
+  isBulkPromoteInProgress: boolean;
   isDeleting: boolean;
   isSelectionActionsDisabled: boolean;
   selectionContainsNonExcludable: boolean;
+  hasPromotableSelected: boolean;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
@@ -61,6 +64,7 @@ interface KnowledgeIndicatorsToolbarProps {
   onClearSelection: () => void;
   onBulkExclude: () => void;
   onBulkRestore: () => void;
+  onBulkPromote: () => void;
   onDeleteSelected: () => void;
 }
 
@@ -76,9 +80,11 @@ export function KnowledgeIndicatorsToolbar({
   pagination,
   selectedKnowledgeIndicators,
   isBulkOperationInProgress,
+  isBulkPromoteInProgress,
   isDeleting,
   isSelectionActionsDisabled,
   selectionContainsNonExcludable,
+  hasPromotableSelected,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
@@ -87,6 +93,7 @@ export function KnowledgeIndicatorsToolbar({
   onClearSelection,
   onBulkExclude,
   onBulkRestore,
+  onBulkPromote,
   onDeleteSelected,
 }: KnowledgeIndicatorsToolbarProps) {
   return (
@@ -184,6 +191,21 @@ export function KnowledgeIndicatorsToolbar({
               onClick={onBulkRestore}
             >
               {RESTORE_SELECTED_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {selectedTypes.length === 1 && selectedTypes[0] === 'match_query' && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              size="xs"
+              isDisabled={
+                isSelectionActionsDisabled || !hasPromotableSelected || isBulkPromoteInProgress
+              }
+              isLoading={isBulkPromoteInProgress}
+              onClick={onBulkPromote}
+            >
+              {PROMOTE_SELECTED_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}

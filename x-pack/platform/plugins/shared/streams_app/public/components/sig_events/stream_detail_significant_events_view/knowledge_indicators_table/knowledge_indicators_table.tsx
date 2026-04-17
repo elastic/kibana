@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Streams } from '@kbn/streams-schema';
+import { type Streams, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
@@ -198,7 +198,13 @@ export function KnowledgeIndicatorsTable({
             );
           }
 
-          return <EuiBadge color="hollow">{SIGNIFICANT_EVENTS_TABLE_QUERY_TYPE_LABEL}</EuiBadge>;
+          return (
+            <EuiBadge color="hollow">
+              {knowledgeIndicator.query.type === QUERY_TYPE_STATS
+                ? SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL
+                : SIGNIFICANT_EVENTS_TABLE_MATCH_QUERY_TYPE_LABEL}
+            </EuiBadge>
+          );
         },
       },
       {
@@ -302,10 +308,17 @@ const SIGNIFICANT_EVENTS_TABLE_TYPE_COLUMN_LABEL = i18n.translate(
   }
 );
 
-const SIGNIFICANT_EVENTS_TABLE_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.columns.queryTypeLabel',
+const SIGNIFICANT_EVENTS_TABLE_MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.matchQueryTypeLabel',
   {
-    defaultMessage: 'Query',
+    defaultMessage: 'Match query',
+  }
+);
+
+const SIGNIFICANT_EVENTS_TABLE_STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.columns.statsQueryTypeLabel',
+  {
+    defaultMessage: 'Stats query',
   }
 );
 

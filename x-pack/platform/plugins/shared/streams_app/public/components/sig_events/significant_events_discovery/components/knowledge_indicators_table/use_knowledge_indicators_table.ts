@@ -8,13 +8,18 @@
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import { useIsMutating } from '@kbn/react-query';
-import { COMPUTED_FEATURE_TYPES, isComputedFeature } from '@kbn/streams-schema';
+import { COMPUTED_FEATURE_TYPES, isComputedFeature, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import type React from 'react';
 import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useQueryClient } from '@kbn/react-query';
 import { useFetchKnowledgeIndicators } from '../../../../../hooks/sig_events/use_fetch_knowledge_indicators';
+import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
+import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
+import { UNBACKED_QUERIES_COUNT_QUERY_KEY } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useDiscoveryFeaturesApi } from '../../../../../hooks/sig_events/use_discovery_features_api';
 import { useKnowledgeIndicatorsBulkDelete } from '../../../../../hooks/sig_events/use_knowledge_indicators_bulk_delete';
+import { useQueriesApi } from '../../../../../hooks/sig_events/use_queries_api';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { KI_ROW_ACTION_MUTATION_KEY } from '../../../stream_detail_significant_events_view/knowledge_indicator_actions_cell';
 import { getKnowledgeIndicatorItemId } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_item_id';
@@ -27,6 +32,8 @@ import {
   BULK_RESTORE_SUCCESS_TOAST_TITLE,
   BULK_RESTORE_PARTIAL_TOAST_TITLE,
   BULK_RESTORE_ERROR_TOAST_TITLE,
+  BULK_PROMOTE_SUCCESS_TOAST_TITLE,
+  BULK_PROMOTE_ERROR_TITLE,
 } from './translations';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -42,9 +49,11 @@ export function useKnowledgeIndicatorsTable() {
     },
   } = useKibana();
 
+  const queryClient = useQueryClient();
   const { knowledgeIndicators, occurrencesByQueryId, isLoading, isEmpty, refetch } =
     useFetchKnowledgeIndicators();
   const { excludeFeaturesInBulk, restoreFeaturesInBulk } = useDiscoveryFeaturesApi();
+  const { promote } = useQueriesApi();
 
   const [tableSearchValue, setTableSearchValue] = useState('');
   const debouncedSearchTerm = useDebouncedValue(tableSearchValue, SEARCH_DEBOUNCE_MS)
@@ -74,6 +83,7 @@ export function useKnowledgeIndicatorsTable() {
   });
 
   const [isBulkOperationInProgress, setIsBulkOperationInProgress] = useState(false);
+  const [isBulkPromoteInProgress, setIsBulkPromoteInProgress] = useState(false);
   const isRowActionInProgress = useIsMutating({ mutationKey: KI_ROW_ACTION_MUTATION_KEY }) > 0;
 
   const selectedKnowledgeIndicatorId = selectedKnowledgeIndicator
@@ -115,7 +125,13 @@ export function useKnowledgeIndicatorsTable() {
           hideComputedTypes,
         })
       ) {
-        availableTypes.add(ki.kind === 'feature' ? ki.feature.type : 'query');
+        availableTypes.add(
+          ki.kind === 'feature'
+            ? ki.feature.type
+            : ki.query.type === QUERY_TYPE_STATS
+            ? 'stats_query'
+            : 'match_query'
+        );
       }
       if (
         matchesKnowledgeIndicatorFilters(ki, {
@@ -295,18 +311,52 @@ export function useKnowledgeIndicatorsTable() {
     [executeBulkFeatureOperation, restoreFeaturesInBulk]
   );
 
-  const isOperationInProgress = isDeleting || isBulkOperationInProgress || isRowActionInProgress;
-
-  const { selectionContainsNonExcludable, isSelectionActionsDisabled } = useMemo(() => {
-    const containsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
-    const containsComputed = selectedKnowledgeIndicators.some(
-      (ki) => ki.kind === 'feature' && isComputedFeature(ki.feature)
+  const handleBulkPromote = useCallback(async () => {
+    const queryIds = selectedKnowledgeIndicators.flatMap((ki) =>
+      ki.kind === 'query' && !ki.rule.backed ? [ki.query.id] : []
     );
-    return {
-      selectionContainsNonExcludable: containsQueries || containsComputed,
-      isSelectionActionsDisabled: selectedKnowledgeIndicators.length === 0 || isOperationInProgress,
-    };
-  }, [selectedKnowledgeIndicators, isOperationInProgress]);
+
+    if (queryIds.length === 0) return;
+
+    setIsBulkPromoteInProgress(true);
+    try {
+      await promote({ queryIds });
+      toasts.addSuccess({ title: BULK_PROMOTE_SUCCESS_TOAST_TITLE });
+      setSelectedKnowledgeIndicators([]);
+      closeFlyout();
+    } catch (error) {
+      toasts.addError(error instanceof Error ? error : new Error(String(error)), {
+        title: BULK_PROMOTE_ERROR_TITLE,
+      });
+    } finally {
+      setIsBulkPromoteInProgress(false);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
+        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
+      ]);
+    }
+  }, [closeFlyout, selectedKnowledgeIndicators, promote, toasts, queryClient]);
+
+  const isOperationInProgress =
+    isDeleting || isBulkOperationInProgress || isBulkPromoteInProgress || isRowActionInProgress;
+
+  const { selectionContainsNonExcludable, isSelectionActionsDisabled, hasPromotableSelected } =
+    useMemo(() => {
+      const containsQueries = selectedKnowledgeIndicators.some((ki) => ki.kind === 'query');
+      const containsComputed = selectedKnowledgeIndicators.some(
+        (ki) => ki.kind === 'feature' && isComputedFeature(ki.feature)
+      );
+      const hasUnbackedQueries = selectedKnowledgeIndicators.some(
+        (ki) => ki.kind === 'query' && !ki.rule.backed
+      );
+      return {
+        selectionContainsNonExcludable: containsQueries || containsComputed,
+        isSelectionActionsDisabled:
+          selectedKnowledgeIndicators.length === 0 || isOperationInProgress,
+        hasPromotableSelected: hasUnbackedQueries,
+      };
+    }, [selectedKnowledgeIndicators, isOperationInProgress]);
 
   return {
     knowledgeIndicators,
@@ -323,8 +373,10 @@ export function useKnowledgeIndicatorsTable() {
     pagination,
     isDeleting,
     isBulkOperationInProgress,
+    isBulkPromoteInProgress,
     isOperationInProgress,
     selectionContainsNonExcludable,
+    hasPromotableSelected,
     isSelectionActionsDisabled,
     tableSearchValue,
     debouncedSearchTerm,
@@ -343,5 +395,6 @@ export function useKnowledgeIndicatorsTable() {
     closeFlyout,
     toggleSelectedKnowledgeIndicator,
     deleteKnowledgeIndicatorsInBulk,
+    handleBulkPromote,
   };
 }

@@ -8,13 +8,17 @@
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { i18n } from '@kbn/i18n';
 import { groupBy } from 'lodash';
-import { useRef } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY } from './use_fetch_discovery_queries';
 import { useKibana } from '../use_kibana';
 import { useQueriesApi } from './use_queries_api';
 import type { BulkOperationResult } from './use_discovery_features_api';
 import { useDiscoveryFeaturesApi } from './use_discovery_features_api';
+
+interface BulkDeleteResult {
+  succeeded: number;
+  failed: number;
+}
 
 interface UseKnowledgeIndicatorsBulkDeleteParams {
   onSuccess?: () => void;
@@ -32,12 +36,8 @@ export function useKnowledgeIndicatorsBulkDelete({
   const { deleteFeaturesInBulk } = useDiscoveryFeaturesApi();
   const { deleteQueriesInBulk } = useQueriesApi();
 
-  const hadPartialFailureRef = useRef(false);
-
-  const mutation = useMutation<void, Error, KnowledgeIndicator[]>({
+  const mutation = useMutation<BulkDeleteResult, Error, KnowledgeIndicator[]>({
     mutationFn: async (knowledgeIndicators) => {
-      hadPartialFailureRef.current = false;
-
       const features = knowledgeIndicators
         .filter((ki) => ki.kind === 'feature')
         .map((ki) => ki.feature);
@@ -46,16 +46,17 @@ export function useKnowledgeIndicatorsBulkDelete({
 
       const featuresPromise = features.length > 0 ? deleteFeaturesInBulk(features) : undefined;
 
-      const queryPromises: Array<Promise<void>> = [];
+      const queryPromises: Array<{ promise: Promise<void>; count: number }> = [];
       if (queries.length > 0) {
         const queriesByStream = groupBy(queries, 'stream_name');
         for (const [streamName, streamQueries] of Object.entries(queriesByStream)) {
-          queryPromises.push(
-            deleteQueriesInBulk({
+          queryPromises.push({
+            promise: deleteQueriesInBulk({
               queryIds: streamQueries.map((q) => q.query.id),
               streamName,
-            })
-          );
+            }),
+            count: streamQueries.length,
+          });
         }
       }
 
@@ -75,25 +76,39 @@ export function useKnowledgeIndicatorsBulkDelete({
                 })
               )
           : undefined,
-        Promise.allSettled(queryPromises),
+        Promise.allSettled(queryPromises.map((q) => q.promise)),
       ]);
 
-      const hasRejected =
-        featuresSettled?.status === 'rejected' || querySettled.some((r) => r.status === 'rejected');
-      const hasPartialFeatureFailure =
-        featuresSettled?.status === 'fulfilled' && featuresSettled.value.failedCount > 0;
+      let succeeded = 0;
+      let failed = 0;
 
-      if (hasRejected) {
+      if (featuresSettled?.status === 'fulfilled') {
+        succeeded += featuresSettled.value.succeededCount;
+        failed += featuresSettled.value.failedCount;
+      } else if (featuresSettled?.status === 'rejected') {
+        failed += features.length;
+      }
+
+      querySettled.forEach((result, index) => {
+        const count = queryPromises[index].count;
+        if (result.status === 'fulfilled') {
+          succeeded += count;
+        } else {
+          failed += count;
+        }
+      });
+
+      if (succeeded === 0 && failed > 0) {
         throw new Error(BULK_DELETE_REJECTED_ERROR_MESSAGE);
       }
 
-      hadPartialFailureRef.current = Boolean(hasPartialFeatureFailure);
+      return { succeeded, failed };
     },
-    onSuccess: () => {
-      if (hadPartialFailureRef.current) {
-        toasts.addWarning({ title: BULK_DELETE_PARTIAL_TOAST_TITLE });
+    onSuccess: ({ succeeded, failed }) => {
+      if (failed > 0) {
+        toasts.addWarning({ title: getBulkDeletePartialToastTitle(succeeded, failed) });
       } else {
-        toasts.addSuccess({ title: BULK_DELETE_SUCCESS_TOAST_TITLE });
+        toasts.addSuccess({ title: getBulkDeleteSuccessToastTitle(succeeded) });
       }
       onSuccess?.();
     },
@@ -133,16 +148,16 @@ const BULK_DELETE_ERROR_TOAST_TITLE = i18n.translate(
   }
 );
 
-const BULK_DELETE_PARTIAL_TOAST_TITLE = i18n.translate(
-  'xpack.streams.knowledgeIndicators.bulkDeletePartialToastTitle',
-  {
-    defaultMessage: 'Some knowledge indicators could not be deleted',
-  }
-);
+const getBulkDeletePartialToastTitle = (succeeded: number, failed: number) =>
+  i18n.translate('xpack.streams.knowledgeIndicators.bulkDeletePartialToastTitle', {
+    defaultMessage:
+      '{succeeded, plural, one {# knowledge indicator} other {# knowledge indicators}} deleted. {failed, plural, one {# knowledge indicator} other {# knowledge indicators}} failed.',
+    values: { succeeded, failed },
+  });
 
-const BULK_DELETE_SUCCESS_TOAST_TITLE = i18n.translate(
-  'xpack.streams.knowledgeIndicators.bulkDeleteSuccessToastTitle',
-  {
-    defaultMessage: 'Knowledge indicators deleted',
-  }
-);
+const getBulkDeleteSuccessToastTitle = (count: number) =>
+  i18n.translate('xpack.streams.knowledgeIndicators.bulkDeleteSuccessToastTitle', {
+    defaultMessage:
+      '{count, plural, one {# knowledge indicator} other {# knowledge indicators}} deleted',
+    values: { count },
+  });
