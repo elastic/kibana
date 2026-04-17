@@ -25,7 +25,6 @@ import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { CoreKibanaRequest, isSafeMethod } from '@kbn/core-http-router-server-internal';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type {
   AuthenticationHandler,
   HttpAuth,
@@ -55,6 +54,7 @@ import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
 import type { HttpConfig } from './http_config';
+import { getSpaceIdFromPath } from './spaces_url_parser';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
