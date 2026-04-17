@@ -13,16 +13,41 @@ import { generateLogsData } from '../../../fixtures/generators';
 // Note: Processor creation, conditional steps, and nested steps API correctness is covered by
 // API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
-// TODO: consistently fails on MKI - needs investigation: https://github.com/elastic/kibana/issues/258589
 test.describe(
   'Stream data processing - creating steps',
-  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
     });
 
-    test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
+    test.beforeEach(async ({ apiServices, browserAuth, pageObjects, page }, testInfo) => {
+      // DIAGNOSTIC (remove before merge): log every connectors/inference request for the
+      // Technical Preview badge test so MKI runs show the actual URL and response body.
+      if (testInfo.title.includes('Technical Preview')) {
+        page.on('request', (req) => {
+          const url = req.url();
+          if (url.includes('connector') || url.includes('inference')) {
+            // eslint-disable-next-line no-console
+            console.log(`[DIAG][request] ${req.method()} ${url}`);
+          }
+        });
+        page.on('response', async (res) => {
+          const url = res.url();
+          if (url.includes('connector') || url.includes('inference')) {
+            let bodyPreview = '';
+            try {
+              const text = await res.text();
+              bodyPreview = text.slice(0, 500);
+            } catch {
+              bodyPreview = '<unreadable>';
+            }
+            // eslint-disable-next-line no-console
+            console.log(`[DIAG][response] ${res.status()} ${url}\n  body: ${bodyPreview}`);
+          }
+        });
+      }
+
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
       await apiServices.streams.clearStreamProcessors('logs-generic-default');
@@ -40,9 +65,13 @@ test.describe(
     test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
       page,
     }) => {
+      let mockHitCount = 0;
       // Mock the connectors endpoint to return no connectors, ensuring AI features
       // are disabled regardless of the environment (local, ECH, serverless)
       await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+        mockHitCount++;
+        // eslint-disable-next-line no-console
+        console.log(`[DIAG][mock] hit #${mockHitCount} ${route.request().url()}`);
         await route.fulfill({
           status: 200,
           body: JSON.stringify({ connectors: [], soEntryFound: false }),
@@ -51,6 +80,8 @@ test.describe(
       await page.reload();
 
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
+      // eslint-disable-next-line no-console
+      console.log(`[DIAG][summary] mock invoked ${mockHitCount} times before assertion`);
       await expect(page.getByText('Technical Preview')).toBeHidden();
     });
 
