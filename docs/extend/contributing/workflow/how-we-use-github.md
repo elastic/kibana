@@ -115,7 +115,7 @@ Assuming you’ve successfully rebased and you’re happy with the code, you sho
 
 ## Creating a pull request
 
-See [Submitting a pull request](/extend/contributing/development-pull-request.md) for the next steps on getting your code changes merged into Kibana.
+See [Submitting a pull request](/extend/contributing/workflow/development-pull-request.md) for the next steps on getting your code changes merged into Kibana.
 
 ## Labels
 

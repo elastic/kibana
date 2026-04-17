@@ -15,7 +15,7 @@ Please read and abide by our Style guide. The majority of these items are linted
 
 ## Adding dependencies
 
-Please read and abide by our [third-party dependencies guide](./managing-third-party-dependencies.md).
+Please read and abide by our [third-party dependencies guide](../codebase/managing-third-party-dependencies.md).
 
 ## RESTful HTTP APIs
 

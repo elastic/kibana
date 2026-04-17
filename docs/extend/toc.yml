@@ -12,25 +12,35 @@ toc:
       - file: troubleshooting.md
   - folder: contributing
     children:
-      - file: developer-principles.md
-      - file: repository-structure.md
-      - file: standards-and-guidelines.md
-      - file: typescript-project-references.md
-      - file: best-practices.md
-      - file: documentation.md
-      - file: guidelines-for-http-api-design-in-kibana.md
-      - file: guidelines-for-terraform-friendly-http-apis.md
-      - file: how-we-use-github.md
-      - file: development-pull-request.md
-      - file: pr-review.md
-      - file: kibana-issue-reporting.md
-      - file: ci.md
-      - file: kibana-linting.md
-      - file: managing-third-party-dependencies.md
-      - file: upgrading-nodejs.md
-      - file: debugging-in-development.md
-      - file: debugging-fips-test-failures.md
-      - file: building-a-kibana-distributable.md
+      - folder: principles
+        children:
+          - file: developer-principles.md
+          - file: standards-and-guidelines.md
+          - file: best-practices.md
+      - folder: workflow
+        children:
+          - file: how-we-use-github.md
+          - file: development-pull-request.md
+          - file: pr-review.md
+          - file: kibana-issue-reporting.md
+      - folder: codebase
+        children:
+          - file: repository-structure.md
+          - file: typescript-project-references.md
+          - file: kibana-linting.md
+          - file: documentation.md
+          - file: managing-third-party-dependencies.md
+          - file: upgrading-nodejs.md
+      - folder: api-design
+        children:
+          - file: guidelines-for-http-api-design-in-kibana.md
+          - file: guidelines-for-terraform-friendly-http-apis.md
+      - folder: ci-and-build
+        children:
+          - file: ci.md
+          - file: building-a-kibana-distributable.md
+          - file: debugging-in-development.md
+          - file: debugging-fips-test-failures.md
   - folder: key-concepts
     children:
       - file: plugins-packages-and-the-platform.md

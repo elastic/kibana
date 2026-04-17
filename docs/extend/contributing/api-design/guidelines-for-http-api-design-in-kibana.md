@@ -69,7 +69,7 @@ We categorize HTTP APIs as either **internal** or **public** to further reinforc
 :::
 
 :::{note} Unit, Integration and E2E tests
-All HTTP APIs must have [E2E or integration test coverage](../testing/integration-tests.md) giving confidence the basic functionality works as intended.
+All HTTP APIs must have [E2E or integration test coverage](../../testing/integration-tests.md) giving confidence the basic functionality works as intended.
 :::
 
 ### Commitment
@@ -585,10 +585,10 @@ For questions about APM and telemetry please reach out to the Core team.
 
 ### Security
 
-User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../key-concepts/security/api-authorization.md)). This depends on the actions your API performs.
+User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../../key-concepts/security/api-authorization.md)). This depends on the actions your API performs.
 
 :::{warning} Do not expose sensitive information
-Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../key-concepts/security/audit-logging.md) that you can use to log sensitive information about user actions.
+Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../../key-concepts/security/audit-logging.md) that you can use to log sensitive information about user actions.
 :::
 
 Assigning specific privilege requirements to your API will surface them in the code-generated OpenAPI spec. See the [documentation section](#documentation).
@@ -621,7 +621,7 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 
 See our current reference documentation [here](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
 
-See [this tutorial](../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
+See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
 
 ## Versioning
 
@@ -643,7 +643,7 @@ You may see some routes using `router.get` instead of `router.versioned.get`. Ro
 
 Kibana's internal HTTP APIs can be versioned too, but for a very different purpose! With serverless, we continually roll out code changes _without_ asking browsers to refresh. That means, for a time, browser clients might expect old internal API behavior. It is up to route authors and UI developers to consider how to handle breaking changes of internal routes. Note: you are free to version internal APIs at will to mitigate any unfortunate browser client breakages!
 
-Please see the tutorial on [versioning HTTP APIs](../tutorials/versioning-http-apis.md) for more details.
+Please see the tutorial on [versioning HTTP APIs](../../tutorials/versioning-http-apis.md) for more details.
 
 ## Advanced concepts
 

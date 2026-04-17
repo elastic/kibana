@@ -94,7 +94,7 @@ to speed up the process by a little.
 At the end of the process a Kibana distributable was created in a `target` folder created relative to your repository checkout. 
 The folder will look like the following:
 
-![Target Folder Outlook With a Kibana Distributable](../assets/target_folder_with_simple_kibana_distributable.png)
+![Target Folder Outlook With a Kibana Distributable](../../assets/target_folder_with_simple_kibana_distributable.png)
 
 ## Controlling the log levels
 
@@ -129,4 +129,4 @@ yarn build --docker-images
 Again the distributable contents resulting from running the build command can be found in a `target` folder created relative to the repository after the build completes.
 It will look something like: 
 
-![Target Folder Outlook With a Kibana Distributable And OS Packages](../assets/target_folder_with_a_kibana_distributable_and_os_packages.png)
+![Target Folder Outlook With a Kibana Distributable And OS Packages](../../assets/target_folder_with_a_kibana_distributable_and_os_packages.png)

@@ -111,7 +111,7 @@ Clicking the link next to a check in the **Conversation** tab takes you to the l
 
 To view the results of a job execution in Buildkite, either click the link in the comment left by `@elasticmachine` or search for the `kibana-ci` check in the list at the bottom of the PR.
 
-![Buildkite pipeline view showing a few test failures](../images/job_view.png)
+![Buildkite pipeline view showing a few test failures](../../images/job_view.png)
 
 1. **Git commit:** the git commit that caused this build.
 2. **Test Results:** a link to the test results screen, plus shortcuts to the logs and jobs of the failed tests. Functional tests capture and store log output from each specific test.
@@ -121,7 +121,7 @@ To view the results of a job execution in Buildkite, either click the link in th
 
 The logs in **Pipeline Steps** contain `Info` level logging. To debug Functional UI tests it is usually helpful to see the debug logging — click through to the test failure details via the **logs** link.
 
-![Buildkite build screenshot](../images/test_results.png)
+![Buildkite build screenshot](../../images/test_results.png)
 
 Look at the error and stack trace first. In the example below, the test failed to find an element within the timeout: `Error: retry.try timeout: TimeoutError: Waiting for element to be located By(css selector, [data-test-subj="createSpace"])`
 
@@ -137,11 +137,11 @@ The stack trace shows the test file and line number. For example, line 50 of `te
 
 Stack trace alone doesn't tell you *why* the element wasn't found — it might be on the wrong page, or the element might have changed. Just above the `✖ fail:` line is `info Taking screenshot ...`, which names the screenshot to look for in the **Google Cloud Storage (GCS) Upload Report**.
 
-![Kibana spaces page meets a11y validations a11y test for click on create space page.png](../images/a11y_screenshot.png)
+![Kibana spaces page meets a11y validations a11y test for click on create space page.png](../../images/a11y_screenshot.png)
 
 Inspecting a running Kibana instance can confirm which page the `data-test-subj` attribute belongs to:
 
-![Kibana screenshot of Spaces page with developer tools open](../images/inspect_element.png)
+![Kibana screenshot of Spaces page with developer tools open](../../images/inspect_element.png)
 
 If the test arrived at the wrong page, scroll back through the debug log to the first action the test took. Often the failing test depended on a prior test to navigate, and that prior test was skipped:
 

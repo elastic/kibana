@@ -35,8 +35,8 @@ Internal plugin details can be kept alongside the code it describes. Information
 
 ### Structure
 
-The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../getting-started/welcome.md) and [Key concepts](../key-concepts/plugins-packages-and-the-platform.md) sections are _explanation_ oriented, while
-[Tutorials](./debugging-in-development.md) falls under both _tutorials_ and _how to_. The [API documentation](../key-concepts/api-documentation.md) section is _reference_ material.
+The high-level developer documentation located in the [docs/extend](https://github.com/elastic/kibana/tree/main/docs/extend) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../../getting-started/welcome.md) and [Key concepts](../../key-concepts/plugins-packages-and-the-platform.md) sections are _explanation_ oriented, while
+[Tutorials](../ci-and-build/debugging-in-development.md) falls under both _tutorials_ and _how to_. The [API documentation](../../key-concepts/api-documentation.md) section is _reference_ material.
 
 Developers may choose to keep information that is specific to a particular plugin or package alongside the code.
 
@@ -114,7 +114,7 @@ export getSearchService: (searchSpec: { username: string; password: string }) =>
 
 In the former, there will be a link to the `SearchSpec` interface with documentation for the `username` and `password` properties. In the latter the object will render inline, without comments:
 
-![prefer interfaces documentation](../assets/dev_docs_nested_object.png)
+![prefer interfaces documentation](../../assets/dev_docs_nested_object.png)
 
 ### Export every type used in a public API
 
@@ -138,7 +138,7 @@ export type foo: string | AnInterface;
 
 `Pick` not only ends up being unhelpful in our documentation system, but it's also of limited help in your IDE. For that reason, avoid `Pick` and other similarly complex types on your public API items. Using these semantics internally is fine.
 
-![pick api documentation](../assets/api_doc_pick.png)
+![pick api documentation](../../assets/api_doc_pick.png)
 
 ### Debugging tips
 
@@ -164,7 +164,7 @@ The code sandbox approach can be a lot faster to iterate compared to running it 
 
 ## Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../key-concepts/building-blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../../key-concepts/building-blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
 You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.2/app/home). Note that because anonymous access is enabled, some
 of the demos are currently not working.

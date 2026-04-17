@@ -10,7 +10,7 @@ If your route declares `access: 'public'` you **must** provide up-to-date OpenAP
 :::
 
 :::{warning} Designing good code-first APIs
-Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see [HTTP API Design](../contributing/guidelines-for-http-api-design-in-kibana.md).
+Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see [HTTP API Design](../contributing/api-design/guidelines-for-http-api-design-in-kibana.md).
 
   Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
 

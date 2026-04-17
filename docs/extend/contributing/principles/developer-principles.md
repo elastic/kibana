@@ -85,7 +85,7 @@ When the use of an external dependency is necessary, ensure there is sufficient 
 
 Except in specific cases where widespread consensus was gained and clear ownership is established, third party dependencies should not be exposed directly as features of {{kib}}, whether it be through the UI, HTTP API, or programmatic interfaces.
 
-See the [third-party dependencies guide](./managing-third-party-dependencies.md) for more information.
+See the [third-party dependencies guide](../codebase/managing-third-party-dependencies.md) for more information.
 
 ## Don't share code prematurely
 

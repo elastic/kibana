@@ -7,7 +7,7 @@ mapped_pages:
 
 # Submitting a pull request [development-pull-request]
 
-This page covers the end-to-end flow: forking the repo, creating a branch, opening a pull request, signing the CLA, and keeping your PR up to date. For the review philosophy, see [Pull request review guidelines](/extend/contributing/pr-review.md).
+This page covers the end-to-end flow: forking the repo, creating a branch, opening a pull request, signing the CLA, and keeping your PR up to date. For the review philosophy, see [Pull request review guidelines](/extend/contributing/workflow/pr-review.md).
 
 
 ## What goes into a pull request
@@ -74,11 +74,11 @@ In the PR description itself:
 - Do **not** assign a version label. Elastic staff will assign one when the PR is ready to be merged.
 - Target `main` unless the bug is only present in an older version. If the bug affects both `main` and another branch, say so.
 
-![Screenshot of Compare and pull request header](../assets/pr_header.png)
+![Screenshot of Compare and pull request header](../../assets/pr_header.png)
 
-![Screenshot of opening a pull request from the branch page](../assets/pr_open.png)
+![Screenshot of opening a pull request from the branch page](../../assets/pr_open.png)
 
-![Screenshot of pull request details](../assets/pr_details.png)
+![Screenshot of pull request details](../../assets/pr_details.png)
 
 
 ## Sign the Contributor Agreement
@@ -90,7 +90,7 @@ On your first pull request, a bot comments asking you to sign the [CLA / Contrib
 
 Most PRs go through several iterations of feedback and updates. Depending on scope and complexity, the process can take weeks. Please be patient — we hold the codebase to a high standard.
 
-See [Pull request review guidelines](/extend/contributing/pr-review.md) for the general review philosophy.
+See [Pull request review guidelines](/extend/contributing/workflow/pr-review.md) for the general review philosophy.
 
 
 ## Updating your PR with upstream
