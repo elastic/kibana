@@ -129,7 +129,7 @@ export function ESQLEditor({
     lensAdaptersRef.current = lensAdapters;
   }, [lensAdapters]);
 
-  /** Skips duplicate `getSuggestions` when chart reload follows a query submit (see `runQuery`). */
+  /** Skips duplicate `getSuggestions` when chart reload follows a query submit (see `runQuery`) */
   const suppressNextChartLoadGridRefreshRef = useRef(false);
   const submittedQueryRef = useRef(submittedQuery);
   submittedQueryRef.current = submittedQuery;
@@ -142,18 +142,18 @@ export function ESQLEditor({
   useEffect(() => {
     // React whenever the workspace reports chart data loading state
     const s = dataLoading$?.subscribe((isDataLoading) => {
-      // Only act when a load has fully finished (not undefined / not still loading).
+      // Only act when a load has fully finished (not undefined / not still loading)
       if (isDataLoading !== false) {
         return;
       }
-      // After submit, runQuery already refreshed the grid; skip the duplicate refresh from the chart reload.
+      // After submit, runQuery already refreshed the grid; skip the duplicate refresh from the chart reload
       if (suppressNextChartLoadGridRefreshRef.current) {
         suppressNextChartLoadGridRefreshRef.current = false;
         return;
       }
 
       const lastSubmittedQuery = submittedQueryRef.current;
-      // Refresh the ES|QL results table for the last submitted query (time/filters may have changed).
+      // Refresh the ES|QL results table for the last submitted query (time/filters may have changed)
       if (isOfAggregateQueryType(lastSubmittedQuery)) {
         void getSuggestions(
           lastSubmittedQuery,
