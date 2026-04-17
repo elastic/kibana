@@ -10,6 +10,37 @@ import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity } from './types';
 
+/**
+ * Entity prioritization for lead generation.
+ *
+ * TODO: This is a PoC-level heuristic. A production implementation should
+ * incorporate risk scores, alert recency, privilege status, and module-weighted
+ * observations into a proper pre-filter so the observation modules only process
+ * high-signal candidates from the outset.
+ */
+
+const CRITICALITY_RANK: Record<string, number> = {
+  extreme_impact: 4,
+  high_impact: 3,
+  medium_impact: 2,
+  low_impact: 1,
+};
+
+const getCriticalityRank = (entity: LeadEntity): number => {
+  const r = entity.record as Record<string, unknown>;
+  const entityField = r.entity as Record<string, unknown> | undefined;
+  const asset = entityField?.asset as { criticality?: string } | undefined;
+  return CRITICALITY_RANK[asset?.criticality ?? ''] ?? 0;
+};
+
+/**
+ * Sort entities so the highest asset criticality candidates are processed first.
+ * This ensures the observation modules and the LLM batch cap operate on the
+ * most important entities when the full corpus is too large to process entirely.
+ */
+export const sortEntitiesByCriticality = (entities: LeadEntity[]): LeadEntity[] =>
+  [...entities].sort((a, b) => getCriticalityRank(b) - getCriticalityRank(a));
+
 /** Row shape returned by {@link EntityStoreCRUDClient.listEntities}. */
 type EntityStoreEntity = Awaited<
   ReturnType<EntityStoreCRUDClient['listEntities']>

@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
@@ -17,6 +18,7 @@ import { createBehavioralAnalysisModule } from './observation_modules/behavioral
 import { createLeadDataClient } from './lead_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { LeadEntity } from './types';
+import { sortEntitiesByCriticality } from './entity_conversion';
 
 export interface RunPipelineParams {
   readonly listEntities: () => Promise<LeadEntity[]>;
@@ -26,6 +28,7 @@ export interface RunPipelineParams {
   readonly riskScoreDataClient: RiskScoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
+  readonly chatModel?: InferenceChatModel;
 }
 
 export interface RunPipelineResult {
@@ -44,12 +47,14 @@ export const runLeadGenerationPipeline = async ({
   riskScoreDataClient,
   executionId: providedExecutionId,
   sourceType,
+  chatModel,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
 
   const fetchStart = Date.now();
-  const leadEntities = await listEntities();
+  const rawEntities = await listEntities();
+  const leadEntities = sortEntitiesByCriticality(rawEntities);
   logger.info(
     `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
@@ -75,7 +80,7 @@ export const runLeadGenerationPipeline = async ({
   );
 
   const generateStart = Date.now();
-  const leads = await engine.generateLeads(leadEntities);
+  const leads = await engine.generateLeads(leadEntities, { chatModel });
   logger.info(
     `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
       leads.length

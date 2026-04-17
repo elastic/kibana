@@ -39,7 +39,7 @@ export const enableLeadGenerationRoute = (
         validate: {},
       },
 
-      withMinimumLicense(async (context, _request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
@@ -59,7 +59,7 @@ export const enableLeadGenerationRoute = (
           const indexService = createLeadIndexService({ esClient, logger, spaceId });
           await indexService.createIndices();
 
-          await startLeadGenerationTask({ taskManager, logger, namespace: spaceId });
+          await startLeadGenerationTask({ taskManager, logger, namespace: spaceId, request });
 
           logger.info(`[LeadGeneration] Enabled scheduled lead generation for space "${spaceId}"`);
           return response.ok({ body: { success: true } });

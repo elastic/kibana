@@ -17,7 +17,7 @@ import type {
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
 import { entityToKey } from '../observation_modules/utils';
-import { llmSynthesizeLeadContent } from './llm_synthesize';
+import { llmSynthesizeBatch, type LlmSynthesisResult } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
   readonly logger: Logger;
@@ -86,17 +86,17 @@ export const createLeadGenerationEngine = ({
         `[LeadGenerationEngine] Entity scoring: ${scoreMs}ms (${scoredEntities.length} entities scored)`
       );
 
-      // 3. Filter entities below threshold
-      const qualifyingEntities = scoredEntities.filter(
-        (e) => e.observations.length >= config.minObservations
-      );
+      // 3. Filter entities below threshold and cap to maxLeads before synthesis
+      const qualifyingEntities = scoredEntities
+        .filter((e) => e.observations.length >= config.minObservations)
+        .slice(0, config.maxLeads);
 
       if (qualifyingEntities.length === 0) {
         logger.debug('[LeadGenerationEngine] No entities met the threshold - no leads to generate');
         return [];
       }
 
-      // 4. Group related entities into leads
+      // 4. Group related entities into leads and synthesize content in a single LLM call
       const groupStart = Date.now();
       const leads = await groupIntoLeads(qualifyingEntities, config, logger, options?.chatModel);
       const groupMs = Date.now() - groupStart;
@@ -109,7 +109,7 @@ export const createLeadGenerationEngine = ({
         `[LeadGenerationEngine] Total pipeline: ${totalMs}ms | Collection: ${collectMs}ms | Scoring: ${scoreMs}ms | Synthesis: ${groupMs}ms | Entities: ${entities.length} | Observations: ${observations.length} | Leads: ${leads.length}`
       );
 
-      return leads.slice(0, config.maxLeads);
+      return leads;
     },
   };
 };
@@ -255,31 +255,53 @@ const groupIntoLeads = async (
 ): Promise<Lead[]> => {
   const usedTitleTracker = new Map<string, number>();
   const groups = groupByObservationPattern(scoredEntities);
-  const leads: Lead[] = [];
   const now = new Date();
 
-  for (let i = 0; i < groups.length; i++) {
-    const group = groups[i];
+  // Attempt a single-call batch LLM synthesis for all leads at once
+  let llmResults: LlmSynthesisResult[] | undefined;
+  if (chatModel) {
+    try {
+      const synthStart = Date.now();
+      llmResults = await llmSynthesizeBatch(chatModel, groups, logger);
+      logger.debug(
+        `[LeadGenerationEngine] Batch LLM synthesis: ${Date.now() - synthStart}ms (${
+          groups.length
+        } leads)`
+      );
+    } catch (error) {
+      logger.warn(
+        `[LeadGenerationEngine] Batch LLM synthesis failed, falling back to rule-based: ${error}`
+      );
+    }
+  }
+
+  const leads: Lead[] = groups.map((group, i) => {
     const allObservations = group.flatMap((e) => e.observations);
     const maxPriority = Math.max(...group.map((e) => e.priority));
 
-    const entityLabel = group.map((e) => e.entity.name).join(', ');
-    const synthStart = Date.now();
-    const { title, byline, description, tags, recommendations } = await synthesizeLeadContent(
-      group,
-      allObservations,
-      logger,
-      usedTitleTracker,
-      chatModel
-    );
-    const synthMs = Date.now() - synthStart;
-    logger.debug(
-      `[LeadGenerationEngine] Lead ${i + 1}/${
-        groups.length
-      } synthesis for [${entityLabel}]: ${synthMs}ms (${chatModel ? 'LLM' : 'rule-based'})`
-    );
+    let title: string;
+    let byline: string;
+    let description: string;
+    let tags: string[];
+    let recommendations: string[];
 
-    leads.push({
+    if (llmResults?.[i]) {
+      const llm = llmResults[i];
+      const dominantPattern = selectDominantPattern(allObservations, usedTitleTracker);
+      title = llm.title;
+      byline = buildByline(group, allObservations, dominantPattern);
+      description = llm.description;
+      tags = llm.tags;
+      recommendations = llm.recommendations;
+    } else {
+      ({ title, byline, description, tags, recommendations } = ruleSynthesizeLeadContent(
+        group,
+        allObservations,
+        usedTitleTracker
+      ));
+    }
+
+    return {
       id: uuidv4(),
       title,
       byline,
@@ -291,12 +313,10 @@ const groupIntoLeads = async (
       timestamp: now.toISOString(),
       staleness: computeStaleness(now, now),
       observations: allObservations,
-    });
-  }
+    };
+  });
 
-  // Sort leads by priority descending
   leads.sort((a, b) => b.priority - a.priority);
-
   return leads;
 };
 
@@ -307,42 +327,6 @@ const groupIntoLeads = async (
  */
 const groupByObservationPattern = (scoredEntities: ScoredEntity[]): ScoredEntity[][] => {
   return scoredEntities.map((entity) => [entity]);
-};
-
-const synthesizeLeadContent = async (
-  group: ScoredEntity[],
-  observations: Observation[],
-  logger: Logger,
-  usedTitleTracker: Map<string, number>,
-  chatModel?: InferenceChatModel
-): Promise<{
-  title: string;
-  byline: string;
-  description: string;
-  tags: string[];
-  recommendations: string[];
-}> => {
-  if (chatModel) {
-    try {
-      const llmResult = await llmSynthesizeLeadContent(chatModel, group, observations, logger);
-      const dominantPattern = selectDominantPattern(observations, usedTitleTracker);
-      const byline = buildByline(group, observations, dominantPattern);
-
-      return {
-        title: llmResult.title,
-        byline,
-        description: llmResult.description,
-        tags: llmResult.tags,
-        recommendations: llmResult.recommendations,
-      };
-    } catch (error) {
-      logger.warn(
-        `[LeadGenerationEngine] LLM synthesis failed, falling back to rule-based: ${error}`
-      );
-    }
-  }
-
-  return ruleSynthesizeLeadContent(group, observations, usedTitleTracker);
 };
 
 const ruleSynthesizeLeadContent = (

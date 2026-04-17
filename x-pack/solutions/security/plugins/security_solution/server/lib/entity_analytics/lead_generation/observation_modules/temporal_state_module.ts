@@ -6,9 +6,9 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import { makeObservation, extractIsPrivileged } from './utils';
-import { getEntitiesSnapshotIndexPattern } from '../../entity_store/utils/entity_utils';
 import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 const MODULE_ID = 'temporal_state_analysis';
@@ -78,7 +78,7 @@ const fetchPrivilegeEscalations = async (
     const ofType = privilegedEntities.filter((e) => e.type === entityType);
     if (ofType.length > 0) {
       const names = ofType.map((e) => e.name);
-      const historyPattern = getEntitiesSnapshotIndexPattern(entityType, spaceId);
+      const historyPattern = getHistorySnapshotIndexPattern(spaceId);
 
       try {
         const response = await esClient.search({

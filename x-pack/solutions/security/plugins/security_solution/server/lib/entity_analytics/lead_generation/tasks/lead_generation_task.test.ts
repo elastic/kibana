@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import {
@@ -84,25 +84,31 @@ describe('Lead Generation Task', () => {
     it('calls ensureScheduled with correct parameters', async () => {
       const mockTaskManager = taskManagerMock.createStart();
       const namespace = 'test-space';
+      const request = httpServerMock.createKibanaRequest();
 
       await startLeadGenerationTask({
         taskManager: mockTaskManager,
         logger,
         namespace,
+        request,
       });
 
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith({
-        id: `${TYPE}:${namespace}:${VERSION}`,
-        taskType: TYPE,
-        scope: SCOPE,
-        schedule: { interval: INTERVAL },
-        state: { ...defaultState, namespace },
-        params: { version: VERSION },
-      });
+      expect(mockTaskManager.ensureScheduled).toHaveBeenCalledWith(
+        {
+          id: `${TYPE}:${namespace}:${VERSION}`,
+          taskType: TYPE,
+          scope: SCOPE,
+          schedule: { interval: INTERVAL },
+          state: { ...defaultState, namespace },
+          params: { version: VERSION },
+        },
+        { request }
+      );
     });
 
     it('logs and rethrows on scheduling error', async () => {
       const mockTaskManager = taskManagerMock.createStart();
+      const request = httpServerMock.createKibanaRequest();
       mockTaskManager.ensureScheduled.mockRejectedValueOnce(new Error('scheduling failed'));
 
       await expect(
@@ -110,6 +116,7 @@ describe('Lead Generation Task', () => {
           taskManager: mockTaskManager,
           logger,
           namespace: 'default',
+          request,
         })
       ).rejects.toThrow('scheduling failed');
 
