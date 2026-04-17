@@ -5,10 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import { load } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
+
+import type { DocLinks } from '@kbn/doc-links';
+
+import { loadYaml } from '@kbn/yaml-loader';
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../constants';
 
@@ -26,11 +29,12 @@ export const zodStringWithDurationValidation = z
   });
 
 export const zodStringWithYamlValidation = z.string().refine(
-  (val) => {
+  async (val) => {
+    const yaml = await loadYaml();
     try {
-      load(val);
+      yaml.parse(val);
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   },
@@ -41,7 +45,7 @@ export const zodStringWithYamlValidation = z.string().refine(
   }
 );
 
-export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
+export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): SettingsConfig[] => [
   {
     name: 'agent.limits.go_max_procs',
     title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsTitle', {
@@ -51,8 +55,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.goMaxProcsDescription', {
         defaultMessage: 'Limits the maximum number of CPUs that can be executing simultaneously.',
       }),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-limit-cpu',
+    learnMoreLink: docLinks?.agentPolicyLimitCpu,
     api_field: {
       name: 'agent_limits_go_max_procs',
     },
@@ -69,8 +72,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
       i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.downloadTimeoutDescription', {
         defaultMessage: 'Timeout for downloading the agent binary.',
       }),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/enable-custom-policy-settings.html#configure-agent-download-timeout',
+    learnMoreLink: docLinks?.agentDownloadTimeout,
     api_field: {
       name: 'agent_download_timeout',
     },
@@ -96,8 +98,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
           defaultMessage: 'The disk path to which the agent binary will be downloaded.',
         }
       ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-download.html',
+    learnMoreLink: docLinks?.elasticAgentStandaloneDownload,
     schema: z.string(),
     example_value: '/tmp/test',
   },
@@ -120,8 +121,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
           defaultMessage: 'The frequency of logging the internal Elastic Agent metrics.',
         }
       ),
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
   },
@@ -140,8 +140,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_level',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/agent-policy.html#agent-policy-log-level',
+    learnMoreLink: docLinks?.agentPolicyLogLevel,
     schema: z.enum(AGENT_LOG_LEVELS).default(DEFAULT_LOG_LEVEL),
     example_value: 'info',
   },
@@ -159,8 +158,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_to_files',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.boolean().default(true),
     example_value: true,
   },
@@ -178,8 +176,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_files_rotateeverybytes',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.number().int().min(0),
     example_value: 10,
   },
@@ -197,8 +194,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_files_keepfiles',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: z.number().int().min(0),
     example_value: 10,
   },
@@ -219,8 +215,7 @@ export const AGENT_POLICY_ADVANCED_SETTINGS: SettingsConfig[] = [
     api_field: {
       name: 'agent_logging_files_interval',
     },
-    learnMoreLink:
-      'https://www.elastic.co/guide/en/fleet/current/elastic-agent-standalone-logging-config.html#elastic-agent-standalone-logging-settings',
+    learnMoreLink: docLinks?.elasticAgentLogFileRetention,
     schema: zodStringWithDurationValidation,
     example_value: '10m',
   },

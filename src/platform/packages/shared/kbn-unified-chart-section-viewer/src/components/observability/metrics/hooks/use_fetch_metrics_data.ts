@@ -12,14 +12,11 @@ import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
-import type {
-  Dimension,
-  MetricsESQLResponse,
-  ParsedMetricsResult,
-  MetricsInfoResponse,
-} from '../../../../types';
+import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
+import { useTelemetry } from '../../../../context/ebt_telemetry_context';
+import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { parseMetricsResponse } from '../utils/parse_metrics_response';
+import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
 
 /**
@@ -38,7 +35,9 @@ export function useFetchMetricsData({
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
-}): MetricsInfoResponse {
+}): MetricsInfo {
+  const { trackMetricsInfo } = useTelemetry();
+  const { trackRequest } = useChartSectionInspector();
   const esql = getEsqlQuery(fetchParams.query);
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
@@ -54,42 +53,70 @@ export function useFetchMetricsData({
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (signal: AbortSignal): Promise<ParsedMetricsResult | null> => {
-      const result = await executeEsqlQuery<MetricsESQLResponse>({
-        esqlQuery: metricsInfoQuery,
-        search: services.data.search.search,
-        signal,
-        dataView: fetchParams.dataView,
-        timeRange: fetchParams.timeRange,
-        filters: fetchParams.filters ?? [],
-        variables: fetchParams.esqlVariables,
-        uiSettings: services.uiSettings,
-      });
+    async (
+      signal: AbortSignal
+    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
+      const documents = await trackRequest(
+        'Grid of metrics',
+        'This request queries Elasticsearch to fetch metrics info for the grid.',
+        async () => {
+          const {
+            documents: docs,
+            rawResponse,
+            requestParams,
+          } = await executeEsqlQuery<MetricsESQLResponse>({
+            esqlQuery: metricsInfoQuery,
+            search: services.data.search.search,
+            signal,
+            dataView: fetchParams.dataView,
+            timeRange: fetchParams.timeRange,
+            filters: fetchParams.filters ?? [],
+            variables: fetchParams.esqlVariables,
+            uiSettings: services.uiSettings,
+          });
+
+          return {
+            data: docs,
+            request: requestParams,
+            response: rawResponse,
+          };
+        }
+      );
 
       const getFieldType = (name: string) => {
         const field = fetchParams.dataView?.getFieldByName(name);
         return field ? getFieldIconType(field) : undefined;
       };
 
-      const parsed = parseMetricsResponse(result, getFieldType);
+      const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
-      return {
-        metricItems: [...(parsed?.metricItems ?? [])].sort((a, b) =>
+      const sortedMetrics: ParsedMetrics = {
+        metricItems: [...parsed.metricItems].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: [...(parsed?.allDimensions ?? [])].sort((a, b) =>
-          a.name.localeCompare(b.name)
-        ),
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+      };
+
+      if (!signal.aborted) {
+        trackMetricsInfo(parsed.telemetry);
+      }
+
+      return {
+        ...sortedMetrics,
+        activeDimensions: selectedDimensionNames ?? [],
       };
     },
     [
       metricsInfoQuery,
+      trackRequest,
       fetchParams.dataView,
       fetchParams.timeRange,
       fetchParams.filters,
       fetchParams.esqlVariables,
       services.data.search.search,
       services.uiSettings,
+      trackMetricsInfo,
+      selectedDimensionNames,
     ]
   );
 
@@ -118,5 +145,6 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
+    activeDimensions: value?.activeDimensions ?? [],
   };
 }

@@ -10,10 +10,10 @@
 import type { Subject } from 'rxjs';
 
 import type {
-  OptionsListControlState,
   OptionsListSelection,
   OptionsListSortingType,
   DataControlState,
+  OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { HasType, HasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
@@ -24,7 +24,7 @@ import type { SelectionsState } from './selections_manager';
 import type { TemporaryState } from './temporay_state_manager';
 import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../../types';
 
-export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
+export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListDSLControlState> &
   DataControlApi & {
     setSelectedOptions: (options: OptionsListSelection[]) => void;
     clearSelections: () => void;

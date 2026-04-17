@@ -105,21 +105,14 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: false,
 
   /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
 
   /**
-   * Enables the storing of gaps in the event log
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -246,6 +239,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Uses entity store v2 for entity analytics skill
    */
   entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

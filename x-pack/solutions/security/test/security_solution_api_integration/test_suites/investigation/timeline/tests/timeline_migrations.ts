@@ -37,7 +37,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
   let supertest: TestAgent;
 
-  describe('@skipInServerless Timeline migrations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/232221
+  describe.skip('@skipInServerless Timeline migrations', () => {
     before(async () => {
       supertest = await utils.createSuperTest();
     });
@@ -47,7 +48,8 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     const kibanaServer = getService('kibanaServer');
     const spacesService = getService('spaces');
 
-    describe('8.0 id migration', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/233580
+    describe.skip('8.0 id migration', () => {
       const resolveWithSpaceApi = '/s/awesome-space/api/timeline/resolve';
 
       before(async () => {

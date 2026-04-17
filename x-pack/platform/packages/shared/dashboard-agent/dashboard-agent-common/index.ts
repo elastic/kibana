@@ -10,8 +10,6 @@ export { DASHBOARD_ATTACHMENT_TYPE } from './constants';
 export {
   panelGridSchema,
   sectionGridSchema,
-  attachmentPanelSchema,
-  dashboardSectionSchema,
   dashboardAttachmentDataSchema,
   isSection,
 } from './types';
@@ -20,7 +18,14 @@ export type {
   AttachmentPanel,
   DashboardSection,
   DashboardAttachmentData,
-  DashboardAttachmentOrigin,
-  PanelAddedEventData,
-  PanelsRemovedEventData,
+  DashboardAttachment,
+  PendingDashboardAttachment,
 } from './types';
+
+export {
+  dashboardStateToAttachmentData,
+  attachmentDataToDashboardState,
+  DEFAULT_TIME_RANGE,
+} from './converters';
+
+export { isDashboardAttachment } from './is_dashboard_attachment';

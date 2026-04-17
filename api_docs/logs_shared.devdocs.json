@@ -1773,7 +1773,7 @@
                 "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              "; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1781,31 +1781,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context, {}>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2275,7 +2251,7 @@
               "CombinedJobWithStats",
               "[]>; groups(): Promise<",
               "Group",
-              "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
+              "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[], closeJobs?: boolean | undefined): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
               "ResetJobsResponse",
               ">; forceStopAndCloseJob(jobId: string): Promise<{ success: boolean; }>; jobAuditMessages({ jobId, from, start, end, }: { jobId: string; from?: number | undefined; start?: string | undefined; end?: string | undefined; }): Promise<{ messages: ",
               "JobMessage",

@@ -48,6 +48,7 @@ jest.mock('../../../../common/lib/kibana', () => {
         notifications: mockNotifications,
       },
     }),
+    useUiSetting: () => false,
   };
 });
 
@@ -73,6 +74,18 @@ jest.mock('../../../../common/mock', () => {
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
   useDeepEqualSelector: jest.fn(() => []),
+}));
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: () => ({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
 }));
 
 jest.mock('../utils/table_tab_columns', () => ({

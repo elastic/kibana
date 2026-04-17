@@ -7,6 +7,15 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { maxReferencedContentItems } from './referenced_content_shared';
+import {
+  collectReferencedContentRefineIssues,
+  REFERENCED_CONTENT_REFINE_ISSUE_CODE,
+  type ReferencedContentRefineIssueCode,
+} from './referenced_content_refine';
+
+export { maxReferencedContentItems } from './referenced_content_shared';
+
 /** Maximum allowed length for a skill ID. */
 export const skillIdMaxLength = 64;
 /** Maximum allowed length for a skill name. */
@@ -37,30 +46,44 @@ const skillContentSchema = z.string().min(1, 'Content must be non-empty');
 const referencedContentItemSchema = z.object({
   name: z
     .string()
-    .min(1, 'Name must be non-empty')
-    .max(64, 'Name must be at most 64 characters')
+    .trim()
+    .min(1, 'Reference file name must be non-empty')
+    .max(skillNameMaxLength, `Reference file name must be at most ${skillNameMaxLength} characters`)
     .regex(
-      /^[a-z0-9-_]+$/,
-      'Reference name must contain only lowercase letters, numbers, underscores, and hyphens'
+      skillNameRegexp,
+      'Reference file name must start and end with a letter or number, and contain only letters, numbers, spaces, hyphens, and underscores'
     ),
-  relativePath: z
-    .string()
-    .min(1, 'Relative path must be non-empty')
-    .regex(
-      /^(?:\.|\.\/[a-z0-9-_]+)$/,
-      'Relative path must start with a dot and contain only lowercase letters, numbers, underscores, and hyphens'
-    ),
-  content: z.string().min(1, 'Content must be non-empty'),
+  relativePath: z.string().trim().min(1, 'Relative path must be non-empty'),
+  content: z.string(),
 });
+
+const referencedContentSuperRefineMessages: Record<ReferencedContentRefineIssueCode, string> = {
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_PROTOCOL]: 'Folder path must start with ./.',
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.PATH_TRAVERSAL]: 'Folder path must not contain "../".',
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.DUPLICATE_PATH]:
+    'This file path is already used by another additional file.',
+  [REFERENCED_CONTENT_REFINE_ISSUE_CODE.RESERVED_SKILL_NAME]:
+    'This name is reserved for the main instructions file.',
+};
+
+const superRefineReferencedContent = (
+  items: Array<{ name: string; relativePath: string; content: string }>,
+  ctx: z.RefinementCtx
+): void => {
+  for (const issue of collectReferencedContentRefineIssues(items)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: referencedContentSuperRefineMessages[issue.code],
+      path: ['referenced_content', issue.itemIndex, issue.field],
+    });
+  }
+};
 
 const toolIdsSchema = z
   .array(z.string().min(1, 'Tool ID must be non-empty'))
   .max(maxToolsPerSkill, `A skill can reference at most ${maxToolsPerSkill} tools`);
 
-/**
- * Zod schema for validating skill create request bodies.
- */
-export const skillCreateRequestSchema = z.object({
+const skillCreateRequestObjectSchema = z.object({
   id: z
     .string()
     .min(1, 'ID must be non-empty')
@@ -72,19 +95,46 @@ export const skillCreateRequestSchema = z.object({
   name: skillNameSchema,
   description: skillDescriptionSchema,
   content: skillContentSchema,
-  referenced_content: z.array(referencedContentItemSchema).optional(),
+  referenced_content: z
+    .array(referencedContentItemSchema)
+    .max(
+      maxReferencedContentItems,
+      `A maximum of ${maxReferencedContentItems} additional files can be stored.`
+    )
+    .optional(),
   tool_ids: toolIdsSchema,
+});
+
+/**
+ * Zod schema for validating skill create request bodies.
+ */
+export const skillCreateRequestSchema = skillCreateRequestObjectSchema.superRefine((data, ctx) => {
+  if (data.referenced_content?.length) {
+    superRefineReferencedContent(data.referenced_content, ctx);
+  }
+});
+
+const skillUpdateRequestObjectSchema = z.object({
+  name: skillNameSchema.optional(),
+  description: skillDescriptionSchema.optional(),
+  content: skillContentSchema.optional(),
+  referenced_content: z
+    .array(referencedContentItemSchema)
+    .max(
+      maxReferencedContentItems,
+      `A maximum of ${maxReferencedContentItems} additional files can be stored.`
+    )
+    .optional(),
+  tool_ids: toolIdsSchema.optional(),
 });
 
 /**
  * Zod schema for validating skill update request bodies.
  */
-export const skillUpdateRequestSchema = z.object({
-  name: skillNameSchema.optional(),
-  description: skillDescriptionSchema.optional(),
-  content: skillContentSchema.optional(),
-  referenced_content: z.array(referencedContentItemSchema).optional(),
-  tool_ids: toolIdsSchema.optional(),
+export const skillUpdateRequestSchema = skillUpdateRequestObjectSchema.superRefine((data, ctx) => {
+  if (data.referenced_content?.length !== undefined) {
+    superRefineReferencedContent(data.referenced_content, ctx);
+  }
 });
 
 /**

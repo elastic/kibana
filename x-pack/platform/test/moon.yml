@@ -51,7 +51,6 @@ dependsOn:
   - '@kbn/index-management-plugin'
   - '@kbn/snapshot-restore-plugin'
   - '@kbn/monitoring-plugin'
-  - '@kbn/automatic-import-plugin'
   - '@kbn/core-saved-objects-base-server-internal'
   - '@kbn/utils'
   - '@kbn/core'
@@ -164,11 +163,15 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/streamlang'
   - '@kbn/dashboard-plugin'
-  - '@kbn/automatic-import-v2-plugin'
+  - '@kbn/automatic-import-plugin'
   - '@kbn/connector-specs'
+  - '@kbn/alerting-v2-plugin'
   - '@kbn/ftr-llm-proxy'
   - '@kbn/dev-cli-runner'
   - '@kbn/ui-actions-plugin'
+  - '@kbn/product-doc-common'
+  - '@kbn/lens-common'
+  - '@kbn/alerting-v2-episodes-ui'
 tags:
   - test-helper
   - package

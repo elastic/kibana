@@ -5,7 +5,12 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "requests_per_second": ""
+      "requests_per_second": "",
+      "group_by": [
+        "nodes",
+        "parents",
+        "none"
+      ]
     },
     "methods": [
       "POST"

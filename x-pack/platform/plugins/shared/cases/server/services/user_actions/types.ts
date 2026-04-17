@@ -49,7 +49,14 @@ export interface BuilderParameters {
     parameters: { payload: { description: string } };
   };
   status: {
-    parameters: { payload: { status: CaseStatuses } };
+    parameters: {
+      payload: {
+        status: CaseStatuses;
+        closeReason?: string;
+        syncAlerts?: boolean;
+        syncedAlertCount?: number;
+      };
+    };
   };
   severity: {
     parameters: { payload: { severity: CaseSeverity } };
@@ -120,7 +127,7 @@ export interface CommonArguments {
   user: User;
   caseId: string;
   owner: string;
-  attachmentId?: string;
+  savedObjectId?: string;
   connectorId?: string;
   action?: UserActionAction;
 }
@@ -362,6 +369,11 @@ export interface BuildUserActionsDictParams {
 }
 
 export type UserActionsDict = Record<string, UserActionEvent[]>;
+
+export interface AddSyncedAlertsCountToUserActionsParams {
+  userActionsDict: UserActionsDict;
+  syncedAlertCountCountByCaseId: Map<string, number>;
+}
 
 export interface BulkCreateBulkUpdateCaseUserActions extends IndexRefresh {
   builtUserActions: UserActionEvent[];

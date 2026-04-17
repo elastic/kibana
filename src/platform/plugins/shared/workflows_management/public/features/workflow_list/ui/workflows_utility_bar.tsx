@@ -70,6 +70,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
         css={css`
           margin-top: ${euiTheme.size.l};
           padding-bottom: ${euiTheme.size.m};
+          height: ${euiTheme.size.l};
         `}
       >
         <EuiFlexItem grow={false}>
@@ -110,7 +111,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
                             onClick={togglePopover}
                             size="s"
                             iconSide="right"
-                            iconType="arrowDown"
+                            iconType="chevronSingleDown"
                             flush="left"
                             data-test-subj="workflows-table-bulk-actions-button"
                             aria-label="Bulk actions"

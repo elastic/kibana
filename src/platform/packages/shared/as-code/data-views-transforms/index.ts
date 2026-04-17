@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export * from './src/from_stored_data_view';
 export * from './src/from_stored_runtime_fields';
+export * from './src/to_stored_data_view';
 export * from './src/to_stored_runtime_fields';

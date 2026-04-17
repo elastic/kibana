@@ -17,13 +17,13 @@ import type { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { DataViewType, isRunningResponse, pollSearch } from '../../../../common';
+import { DataViewType, pollSearch } from '../../../../common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
-import { toAsyncKibanaSearchResponse, toAsyncKibanaSearchStatusResponse } from './response_utils';
+import { toAsyncKibanaSearchResponse } from './response_utils';
 import type { SearchUsage } from '../../collectors/search';
 import { searchUsageObserver } from '../../collectors/search';
 import { getDefaultSearchParams, getShardTimeout } from '../es_search';
@@ -44,35 +44,12 @@ export const enhancedEsSearchStrategyProvider = (
     return client.asyncSearch.delete({ id });
   }
 
-  async function asyncSearchStatus(
-    { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
-    options: IAsyncSearchOptions,
-    { esClient }: Pick<SearchStrategyDependencies, 'esClient'>
-  ) {
-    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
-    const keepAlive =
-      request.params?.keep_alive ?? getDefaultAsyncGetParams(searchConfig, options).keep_alive;
-
-    const { body, headers } = await client.asyncSearch.status(
-      { id: id!, keep_alive: keepAlive },
-      { ...options.transport, signal: options.abortSignal, meta: true }
-    );
-    return toAsyncKibanaSearchStatusResponse(body, headers?.warning);
-  }
-
-  // Gets the current status of the async search request. If the request is complete, then queries for the results.
+  // Gets the current status of the async search request.
   async function getAsyncSearch(
     { id, ...request }: IEsSearchRequest<IAsyncSearchRequestParams>,
     options: IAsyncSearchOptions,
     { esClient }: SearchStrategyDependencies
   ) {
-    if (!options.retrieveResults) {
-      // First, request the status of the async search, and return the status if incomplete
-      const status = await asyncSearchStatus({ id, ...request }, options, { esClient });
-      if (isRunningResponse(status)) return status;
-    }
-
-    // Then, if the search is complete, request & return the final results
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
       ...getDefaultAsyncGetParams(searchConfig, options),
@@ -80,6 +57,7 @@ export const enhancedEsSearchStrategyProvider = (
       ...(request.params?.wait_for_completion_timeout
         ? { wait_for_completion_timeout: request.params.wait_for_completion_timeout }
         : {}),
+      return_intermediate_results: options.returnIntermediateResults ?? false,
     };
     const { body, headers, meta } = await client.asyncSearch.get(
       { ...params, id: id! },
@@ -88,6 +66,7 @@ export const enhancedEsSearchStrategyProvider = (
         signal: options.abortSignal,
         meta: true,
         asStream: options.stream,
+        requestTimeout: 600_000, // 10 minutes, making this huge enough that it should never interfere with the `wait_for_completion_timeout` param, which is what should be controlling the timeout of the search request.
       }
     );
 
@@ -218,7 +197,11 @@ export const enhancedEsSearchStrategyProvider = (
       if (request.indexType === DataViewType.ROLLUP && deps.rollupsEnabled) {
         return from(rollupSearch(request, options, deps));
       } else {
-        return asyncSearch(request, options, deps);
+        try {
+          return asyncSearch(request, options, deps);
+        } catch (e) {
+          throw getKbnSearchError(e);
+        }
       }
     },
     /**

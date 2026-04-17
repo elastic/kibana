@@ -56,8 +56,8 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-analytics-browser'
   - '@kbn/shared-ux-utility'
-  - '@kbn/shared-ux-ai-components'
   - '@kbn/inference-connectors'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - shared-browser
   - package
@@ -70,26 +70,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

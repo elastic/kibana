@@ -9,7 +9,15 @@ export { generateStreamDescription } from './src/description/generate_descriptio
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
   type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
 } from './workflows/suggest_processing_pipeline';
 export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
 export {
@@ -20,6 +28,7 @@ export { sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
   type IdentifyFeaturesOptions,
+  type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
 } from './src/features/identify_features';

@@ -92,6 +92,14 @@ export interface RelationshipEdge extends GraphEdge {
   targetIds: string[]; // All target entity IDs in this group
 }
 
+export interface EntityRecord {
+  id: string;
+  name: string;
+  type: string;
+  sub_type: string;
+  docData: string;
+}
+
 /**
  * Entity ID with type for relationship queries.
  */

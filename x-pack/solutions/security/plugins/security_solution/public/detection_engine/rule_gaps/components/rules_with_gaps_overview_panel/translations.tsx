@@ -134,6 +134,13 @@ export const GAP_STATUS_UNFILLED = i18n.translate(
   }
 );
 
+export const GAP_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.ruleGapsOverviewPanel.ruleGapSummary.error',
+  {
+    defaultMessage: 'Error',
+  }
+);
+
 // Table column headers
 export const TABLE_COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.table.status',

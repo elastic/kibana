@@ -112,6 +112,7 @@ dependsOn:
   - '@kbn/core-plugins-server'
   - '@kbn/config'
   - '@kbn/observability-utils-common'
+  - '@kbn/observability-utils-server'
   - '@kbn/charts-theme'
   - '@kbn/response-ops-rule-params'
   - '@kbn/core-test-helpers-model-versions'
@@ -141,6 +142,9 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/agent-builder-plugin'
   - '@kbn/controls-constants'
+  - '@kbn/cps-utils'
+  - '@kbn/es-query-constants'
+  - '@kbn/cps'
 tags:
   - plugin
   - prod
@@ -154,26 +158,6 @@ fileGroups:
     - server/**/*
     - types/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

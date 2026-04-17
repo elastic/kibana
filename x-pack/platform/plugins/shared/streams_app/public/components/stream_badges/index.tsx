@@ -55,7 +55,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          "Classic streams are based on existing data streams and don't support all Streams features like partitioning.",
+          "Classic streams are based on existing data streams and don't support all Streams features like ingest-time partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -65,7 +65,7 @@ export function ClassicStreamBadge() {
     >
       <EuiBadge
         color="hollow"
-        iconType="streamsClassic"
+        iconType="productStreamsClassic"
         iconSide="left"
         tabIndex={0}
         data-test-subj="classicStreamBadge"
@@ -82,7 +82,7 @@ export function WiredStreamBadge() {
   return (
     <EuiBadge
       color="hollow"
-      iconType="streamsWired"
+      iconType="productStreamsWired"
       iconSide="left"
       data-test-subj="wiredStreamBadge"
     >

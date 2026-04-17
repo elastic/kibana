@@ -16,6 +16,7 @@ import {
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { PaletteOutput } from '@kbn/coloring';
+import type { $Values } from 'utility-types';
 import type {
   PartitionState,
   PartitionStateESQL,
@@ -24,8 +25,8 @@ import type {
 import { type LensAttributes } from '../../types';
 import type { DataSourceStateLayer } from '../utils';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   buildDatasourceStates,
   generateLayer,
   isFormBasedLayer,
@@ -37,11 +38,13 @@ import {
   getDatasourceLayers,
   getDataViewsMetadata,
   getLegendTruncateAfterLines,
+  getReversibleMappings,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
   stripUndefined,
 } from './utils';
-import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataset } from '../../utils';
+import { legendSizeCompat } from './legend_sizes';
+import { addLayerColumn, groupIsNotCollapsed, isEsqlTableTypeDataSource } from '../../utils';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import { fromBucketLensApiToLensState } from '../columns/buckets';
 import { DEFAULT_LAYER_ID } from '../../constants';
@@ -53,12 +56,18 @@ import type { StaticColorType } from '../../schema/color';
 import type { CollapseBySchema } from '../../schema/shared';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import {
+  AUTO_COLOR,
+  DEFAULT_CATEGORICAL_COLOR_MAPPING,
   fromColorMappingAPIToLensState,
   fromColorMappingLensStateToAPI,
   fromStaticColorLensStateToAPI,
   isLegacyColorPalette,
 } from '../coloring';
 
+type PieStyling = NonNullable<NonNullable<NonNullable<PieState['styling']>>>;
+type PartitionStyling = NonNullable<
+  NonNullable<NonNullable<NonNullable<PartitionState>['styling']>>
+>;
 type PartitionLens = Extract<
   TypedLensSerializedState['attributes'],
   { visualizationType: 'lnsPie' }
@@ -81,16 +90,16 @@ function isAPIPartitionLayer(layer: unknown): layer is PartitionState {
     layer !== null &&
     'type' in layer &&
     typeof layer.type === 'string' &&
-    ['pie', 'donut', 'waffle', 'treemap', 'mosaic'].includes(layer.type)
+    ['pie', 'waffle', 'treemap', 'mosaic'].includes(layer.type)
   );
 }
 
 function isESQLPartitionLayer(layer: PartitionState): layer is PartitionStateESQL {
-  return isEsqlTableTypeDataset(layer.dataset);
+  return isEsqlTableTypeDataSource(layer.data_source);
 }
 
 function isAPIPieChartLayer(layer: PartitionState): layer is PieState {
-  return layer.type === 'pie' || layer.type === 'donut';
+  return layer.type === 'pie';
 }
 
 function isAPIWaffleChartLayer(layer: PartitionState): layer is WaffleState {
@@ -169,7 +178,7 @@ export function getValueColumns(layer: unknown) {
   return esqlMetricColumns.concat(esqlBucketColumns);
 }
 
-function convertAPINumberDisplayOption(option: PartitionState['values']): {
+function convertAPINumberDisplayOption(option: PartitionStyling['values']): {
   numberDisplay: NumberDisplayType;
   percentDecimals?: number;
 } {
@@ -191,7 +200,7 @@ function convertAPINumberDisplayOption(option: PartitionState['values']): {
 }
 
 function convertAPICategoryDisplayOption(
-  option: PieState['labels']
+  option: PieStyling['labels']
 ): PartitionLens['state']['visualization']['layers'][0]['categoryDisplay'] {
   if (option?.visible === false) {
     return 'hide';
@@ -212,7 +221,7 @@ function convertAPILegendDisplayOption(
   const legendOptions = legend
     ? stripUndefined({
         nestedLegend: 'nested' in legend ? legend?.nested : undefined,
-        legendSize: legend?.size,
+        legendSize: legendSizeCompat.toState(legend?.size),
         legendMaxLines: legend?.truncate_after_lines,
         truncateLegend: Boolean(legend?.truncate_after_lines),
       })
@@ -260,7 +269,7 @@ function computeSharedPartitionLayerState(config: PartitionState) {
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: LENS_LAYER_TYPES.DATA,
-    ...convertAPINumberDisplayOption(config.values),
+    ...convertAPINumberDisplayOption(config.styling?.values),
     ...convertAPILegendDisplayOption(config),
     ...convertAPIStaticColorToLensState(config),
     collapseFns: Object.fromEntries(
@@ -274,15 +283,22 @@ function computeSharedPartitionLayerState(config: PartitionState) {
   };
 }
 
+const donutHoleSizeCompat = getReversibleMappings<
+  NonNullable<PieStyling['donut_hole']>,
+  $Values<typeof PARTITION_EMPTY_SIZE_RADIUS>
+>([
+  ['s', PARTITION_EMPTY_SIZE_RADIUS.SMALL],
+  ['m', PARTITION_EMPTY_SIZE_RADIUS.MEDIUM],
+  ['l', PARTITION_EMPTY_SIZE_RADIUS.LARGE],
+]);
+
 function getEmptySizeRatioFromDonutHoleOption(
-  option: PieState['donut_hole']
+  option: PieStyling['donut_hole']
 ): { emptySizeRatio: number } | {} {
   if (!option || option === 'none') {
     return {};
   }
-  const partitionEmptySizeRadiusName =
-    option.toUpperCase() as keyof typeof PARTITION_EMPTY_SIZE_RADIUS;
-  return { emptySizeRatio: PARTITION_EMPTY_SIZE_RADIUS[partitionEmptySizeRadiusName] };
+  return { emptySizeRatio: donutHoleSizeCompat.toState(option) };
 }
 
 type PartitionMetricItem =
@@ -317,8 +333,10 @@ function buildVisualizationState(
   const isLegacyColor = isLegacyColorPalette(colorMapping);
 
   if (isAPIPieChartLayer(config)) {
+    const pieLensShape =
+      config.styling?.donut_hole != null && config.styling.donut_hole !== 'none' ? 'donut' : 'pie';
     return {
-      shape: config.type,
+      shape: pieLensShape,
       ...(isLegacyColor && { ...colorMapping }), // legacy colors are included outside of the layer
       layers: [
         {
@@ -327,8 +345,8 @@ function buildVisualizationState(
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
           ...(!isLegacyColor && { ...colorMapping }), // modern colors are included at the layer level
-          categoryDisplay: convertAPICategoryDisplayOption(config.labels),
-          ...getEmptySizeRatioFromDonutHoleOption(config.donut_hole),
+          categoryDisplay: convertAPICategoryDisplayOption(config.styling?.labels),
+          ...getEmptySizeRatioFromDonutHoleOption(config.styling?.donut_hole),
         },
       ],
     };
@@ -345,7 +363,7 @@ function buildVisualizationState(
           allowMultipleMetrics: shouldAllowMultipleMetrics(config),
           ...sharedState,
           ...(!isLegacyColor && { ...colorMapping }),
-          categoryDisplay: config.labels?.visible === false ? 'hide' : 'default',
+          categoryDisplay: config.styling?.labels?.visible === false ? 'hide' : 'default',
         },
       ],
     };
@@ -436,7 +454,7 @@ export function fromLensStateToAPI(config: LensAttributes): PartitionState {
 
 function fromLensStateToSharedPartitionAPI(
   visualization: PartitionLens['state']['visualization']
-): Pick<PartitionState, 'legend' | 'values'> | undefined {
+): Pick<PartitionState, 'legend'> | undefined {
   const layerState = visualization.layers[0];
   const legend = stripUndefined({
     visibility:
@@ -449,22 +467,11 @@ function fromLensStateToSharedPartitionAPI(
         : undefined,
     truncate_after_lines: getLegendTruncateAfterLines(layerState),
     nested: isStateWaffleChart(visualization) ? undefined : layerState.nestedLegend,
-    size: layerState.legendSize,
-  });
-  const valueDisplay = stripUndefined({
-    visible: layerState.numberDisplay !== 'hidden',
-    mode:
-      layerState.numberDisplay === 'percent'
-        ? ('percentage' as const)
-        : layerState.numberDisplay === 'value'
-        ? ('absolute' as const)
-        : undefined,
-    percent_decimals: layerState.percentDecimals,
+    size: legendSizeCompat.toAPI(layerState.legendSize),
   });
 
   return stripUndefined({
     legend: Object.keys(legend).length > 0 ? legend : undefined,
-    values: Object.keys(valueDisplay).length > 0 ? valueDisplay : undefined,
   });
 }
 
@@ -474,22 +481,22 @@ function fromLensStateToAPIDataset(
   adHocDataViews: Record<string, unknown>,
   references: SavedObjectReference[],
   adhocReferences: SavedObjectReference[]
-): Pick<PartitionState, 'dataset'> {
+): Pick<PartitionState, 'data_source'> {
   const layerId = visualization.layers[0].layerId;
 
   if (layer) {
     if (isTextBasedLayer(layer)) {
-      return { dataset: buildDatasetStateESQL(layer) as PartitionStateESQL['dataset'] };
+      return { data_source: buildDataSourceStateESQL(layer) as PartitionStateESQL['data_source'] };
     }
     if (isFormBasedLayer(layer)) {
       return {
-        dataset: buildDatasetStateNoESQL(
+        data_source: buildDataSourceStateNoESQL(
           layer,
           layerId,
           adHocDataViews,
           references,
           adhocReferences
-        ) as PartitionState['dataset'],
+        ) as PartitionState['data_source'],
       };
     }
   }
@@ -502,6 +509,7 @@ function fromLensStateToAPIMetrics(
   layer: DataSourceStateLayer
 ): PartitionMetricItem[] {
   const vizLayer = visualization.layers[0];
+  const hasActiveGroupBy = getGroups(vizLayer).some((id) => !vizLayer.collapseFns?.[id]);
   const staticColouring = vizLayer.colorsByDimension;
 
   if (isTextBasedLayer(layer)) {
@@ -509,7 +517,9 @@ function fromLensStateToAPIMetrics(
       (id) =>
         stripUndefined({
           ...getValueApiColumn(id, layer),
-          color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
+          color: hasActiveGroupBy
+            ? undefined
+            : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
         }) as PartitionMetricItem
     );
   }
@@ -521,7 +531,9 @@ function fromLensStateToAPIMetrics(
     (id) =>
       stripUndefined({
         ...operationFromColumn(id, layer),
-        color: staticColouring ? fromStaticColorLensStateToAPI(staticColouring[id]) : undefined,
+        color: hasActiveGroupBy
+          ? undefined
+          : fromStaticColorLensStateToAPI(staticColouring?.[id]) ?? AUTO_COLOR,
       }) as PartitionMetricItem
   );
 }
@@ -531,7 +543,7 @@ function getUniqueIds(array: string[]): string[] {
   return Array.from(new Set(array));
 }
 
-// Helper function to overcome the failure of partition chart migrations (found in integration dataset)
+// Helper function to overcome the failure of partition chart migrations (found in integration data_source)
 function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('groups' in vizLayer && Array.isArray(vizLayer.groups)) {
     return getUniqueIds(vizLayer.groups);
@@ -539,7 +551,7 @@ function getGroups(vizLayer: LensPartitionVisualizationState['layers'][0]): stri
   return getUniqueIds(vizLayer.primaryGroups ?? []);
 }
 
-// Helper function to overcome the failure of partition chart migrations (found in integration dataset)
+// Helper function to overcome the failure of partition chart migrations (found in integration data_source)
 function getMetrics(vizLayer: LensPartitionVisualizationState['layers'][0]): string[] {
   if ('metric' in vizLayer && typeof vizLayer.metric === 'string') {
     return [vizLayer.metric];
@@ -554,7 +566,9 @@ function convertLensStateToAPIGrouping(
   groupIndexForColorMapping: number,
   legacyPalette?: PaletteOutput
 ) {
-  const colorMapping = fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette);
+  const colorMapping =
+    fromColorMappingLensStateToAPI(vizLayer.colorMapping, legacyPalette) ??
+    DEFAULT_CATEGORICAL_COLOR_MAPPING;
   if (isTextBasedLayer(layer)) {
     return groupByAccessors.map(
       (id, index) =>
@@ -651,7 +665,7 @@ function isStateWaffleChart(
 
 function convertStateCategoryDisplayOption(
   categoryDisplay: LensPartitionVisualizationState['layers'][0]['categoryDisplay']
-): PieState['labels'] {
+): PieStyling['labels'] {
   if (categoryDisplay === 'default') {
     return { visible: true, position: 'outside' };
   }
@@ -664,15 +678,29 @@ function convertStateCategoryDisplayOption(
   return undefined;
 }
 
-function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualizationState) {
+function fromLensStateToChartSpecificStylingAPI(
+  visualization: LensPartitionVisualizationState
+): PartitionStyling {
+  const layerState = visualization.layers[0];
+  const valueDisplay = stripUndefined({
+    visible: layerState.numberDisplay !== 'hidden',
+    mode:
+      layerState.numberDisplay === 'percent'
+        ? ('percentage' as const)
+        : layerState.numberDisplay === 'value'
+        ? ('absolute' as const)
+        : undefined,
+    percent_decimals: layerState.percentDecimals,
+  });
+  const values = Object.keys(valueDisplay).length > 0 ? valueDisplay : undefined;
+
   const vizLayer = visualization.layers[0];
-  // Pie and Donut chart have the label_position and donut_hole options
+  // Pie chart has the label_position and donut_hole options
   if (isStatePieChart(visualization)) {
     return stripUndefined({
-      donut_hole: Object.entries(PARTITION_EMPTY_SIZE_RADIUS)
-        .find(([key, value]) => value === vizLayer.emptySizeRatio)?.[0]
-        .toLowerCase(),
+      donut_hole: donutHoleSizeCompat.toAPI(vizLayer.emptySizeRatio),
       labels: convertStateCategoryDisplayOption(vizLayer.categoryDisplay),
+      values,
     });
   }
 
@@ -680,8 +708,11 @@ function fromLensStateToPerChartSpecificAPI(visualization: LensPartitionVisualiz
     const labels = convertStateCategoryDisplayOption(vizLayer.categoryDisplay);
     return stripUndefined({
       labels: labels?.position === 'outside' ? undefined : labels,
+      values,
     });
   }
+
+  return stripUndefined({ values });
 }
 
 function buildVisualizationAPI(
@@ -696,12 +727,12 @@ function buildVisualizationAPI(
     ? { metric: metricsArray[0] }
     : { metrics: metricsArray };
   return stripUndefined({
-    type: visualization.shape,
+    type: isStatePieChart(visualization) ? 'pie' : visualization.shape,
     ...metricsField,
     group_by: fromLensStateToAPIGroups(visualization, layer),
     ...fromLensStateToAPISecondaryGroups(visualization, layer),
     ...fromLensStateToAPIDataset(visualization, layer, adHocDataViews, references, adhocReferences),
     ...fromLensStateToSharedPartitionAPI(visualization),
-    ...fromLensStateToPerChartSpecificAPI(visualization),
+    styling: fromLensStateToChartSpecificStylingAPI(visualization),
   }) as PartitionState;
 }

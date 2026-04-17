@@ -65,8 +65,8 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
     ? {
         name: props.agent.name,
         symbol: props.agent.avatar_symbol,
-        // Agent color can be overriden
-        color: props.color ?? props.agent.avatar_color,
+        // Agent color takes priority over the prop override
+        color: props.agent.avatar_color ?? props.color,
         readonly: props.agent.readonly,
         icon: props.agent.avatar_icon,
         agentId: props.agent.id,
@@ -86,21 +86,24 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   const isDefaultAgent = agentId === agentBuilderDefaultAgentId;
   const shouldUseIcon = !symbol && (isBuiltIn || isDefaultAgent || Boolean(icon));
 
+  const borderAndShapeStyles = css`
+    line-height: 1;
+    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
+    ${shape === 'circle' ? 'border-radius: 50%;' : roundedBorderRadiusStyles}
+  `;
+
   if (shouldUseIcon) {
     const iconType = icon ?? 'logoElastic';
     const iconSize = getIconSize({ size });
-    if (hasBackground) {
-      const panelStyles = css`
-        background-color: ${color};
-        ${roundedBorderRadiusStyles}
-      `;
-      return (
-        <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
-          <EuiIcon type={iconType} size={iconSize} />
-        </EuiPanel>
-      );
-    }
-    return <EuiIcon type={iconType} size={iconSize} />;
+    const panelStyles = css`
+      ${hasBackground ? `background-color: ${color};` : ''}
+      ${borderAndShapeStyles}
+    `;
+    return (
+      <EuiPanel hasBorder={false} hasShadow={false} css={panelStyles} paddingSize="xs">
+        <EuiIcon type={iconType} size={iconSize} aria-hidden={true} />
+      </EuiPanel>
+    );
   }
 
   let type: 'user' | 'space' | undefined;
@@ -109,7 +112,6 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
   } else if (shape === 'square') {
     type = 'space';
   }
-  const avatarStyles = shape === 'square' && roundedBorderRadiusStyles;
   return (
     <EuiAvatar
       size={size}
@@ -117,7 +119,7 @@ export const AgentAvatar: React.FC<AgentAvatarProps> = (props) => {
       initials={symbol}
       type={type}
       color={color}
-      css={avatarStyles}
+      css={borderAndShapeStyles}
     />
   );
 };

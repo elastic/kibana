@@ -55,7 +55,6 @@ export async function handleNullCheckOperator(
         text: name.toUpperCase(),
         kind: 'Operator',
         detail: def.description,
-        sortText: 'D',
       });
     }
   }

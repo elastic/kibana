@@ -25,7 +25,7 @@ exports[`Should render add form row when attribution not provided 1`] = `
         onChange={[Function]}
         popoverButtonAriaLabel="Add attribution"
         popoverButtonClassName="mapAttributionFormRow__addButton"
-        popoverButtonIcon="plusInCircleFilled"
+        popoverButtonIcon="plusCircle"
         popoverButtonLabel="Add attribution"
         url=""
       />

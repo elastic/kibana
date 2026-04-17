@@ -9,17 +9,31 @@ import type { Logger } from '@kbn/logging';
 import type {
   BulkOperationContainer,
   BulkUpdateAction,
+  QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   Result,
+  SearchHit,
+  SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
-import { getEuidFromObject } from '../../../common/domain/euid';
+import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
-import { BadCRUDRequestError, EntityNotFoundError, EntityAlreadyExistsError } from '../errors';
-import { hashEuid, validateAndTransformDoc } from './utils';
+import {
+  BadCRUDRequestError,
+  EntityNotFoundError,
+  EntityAlreadyExistsError,
+  EntityStoreNotInstalledError,
+} from '../errors';
+import { validateAndTransformDoc } from './utils';
 import { runWithSpan } from '../../telemetry/traces';
+import {
+  searchEntitiesV2,
+  type SearchEntitiesV2Inspect,
+  type SearchEntitiesV2Params,
+  type SearchEntitiesV2Result,
+} from '../search_entities/search_entities';
 
 const RETRY_ON_CONFLICT = 3;
 
@@ -30,14 +44,28 @@ interface CRUDClientDependencies {
 }
 
 export interface ListEntitiesParams {
-  filter?: QueryDslQueryContainer;
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   size?: number;
+  source?: string[] | undefined;
   searchAfter?: Array<string | number>;
+  fields?: (QueryDslFieldAndFormat | string)[];
+  /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
+  entityTypes?: EntityType[];
+  filterQuery?: string;
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: SortOrder;
 }
 
 export interface ListEntitiesResult {
   entities: Entity[];
+  fields?: Array<SearchHit['fields']>; // Only present if `fields` was specified in ListEntitiesParams
   nextSearchAfter?: Array<string | number>;
+  total?: number;
+  page?: number;
+  per_page?: number;
+  inspect?: SearchEntitiesV2Inspect;
 }
 
 export interface BulkObject {
@@ -172,6 +200,47 @@ export class CRUDClient {
       configurable: true,
       writable: true,
     });
+
+    const baseSearchLatestEntities = this.searchLatestEntities.bind(this);
+    const tracedSearchLatestEntities = (
+      params: SearchEntitiesV2Params
+    ): Promise<SearchEntitiesV2Result> =>
+      runWithSpan({
+        name: 'entityStore.crud.search_latest_entities',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'search_latest_entities',
+        },
+        cb: () => baseSearchLatestEntities(params),
+      });
+
+    Object.defineProperty(this, 'searchLatestEntities', {
+      value: tracedSearchLatestEntities,
+      configurable: true,
+      writable: true,
+    });
+  }
+
+  private async assertInstalled(): Promise<void> {
+    const indexName = getLatestEntitiesIndexName(this.namespace);
+    const exists = await this.esClient.indices.exists({ index: indexName });
+    if (!exists) {
+      throw new EntityStoreNotInstalledError();
+    }
+  }
+
+  /**
+   * Page/search over the v2 unified LATEST entities index (normalized hits, optional JSON `filterQuery`, entity-type filter).
+   * Prefer {@link listEntities} from HTTP routes; this remains for direct server callers.
+   */
+  public async searchLatestEntities(
+    params: SearchEntitiesV2Params
+  ): Promise<SearchEntitiesV2Result> {
+    return searchEntitiesV2({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      ...params,
+    });
   }
 
   // updateEntity takes a single entity patch and applies it to an existing
@@ -181,6 +250,7 @@ export class CRUDClient {
   // ID will be validated and used if correct
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
+    await this.assertInstalled();
     const generatedId = getEuidFromObject(entityType, doc);
     const valid = validateAndTransformDoc(
       'update',
@@ -221,6 +291,7 @@ export class CRUDClient {
     objects,
     force = false,
   }: BulkUpdateEntityParams): Promise<BulkObjectResponse[]> {
+    await this.assertInstalled();
     const operations: (BulkOperationContainer | BulkUpdateAction)[] = [];
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
@@ -265,6 +336,7 @@ export class CRUDClient {
 
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
+    await this.assertInstalled();
     const id = getEuidFromObject(entityType, doc);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
@@ -303,31 +375,71 @@ export class CRUDClient {
     }
   }
 
-  // listEntities searches the LATEST index for all entities.
-  // An optional DSL filter can be provided and is applied as an additional
-  // filter clause on the search query, e.g. to scope results by additional
-  // field conditions. Supports size and searchAfter for pagination.
+  // listEntities searches the LATEST index: cursor mode (KQL-derived DSL + search_after) or
+  // page mode (same semantics as searchEntitiesV2: sort, from/size, entity types, JSON filterQuery).
   public async listEntities(params?: ListEntitiesParams): Promise<ListEntitiesResult> {
-    this.logger.debug('Listing entities');
+    const p = params ?? {};
+    const pageMode =
+      p.page != null ||
+      p.perPage != null ||
+      p.sortField != null ||
+      p.sortOrder != null ||
+      p.filterQuery != null ||
+      (p.entityTypes != null && p.entityTypes.length > 0);
 
-    const { filter, size, searchAfter } = params ?? {};
+    if (pageMode) {
+      this.logger.debug('Listing entities (page mode)');
+      const { records, total, inspect } = await searchEntitiesV2({
+        esClient: this.esClient,
+        namespace: this.namespace,
+        entityTypes: p.entityTypes ?? [],
+        filterQuery: p.filterQuery,
+        page: p.page ?? 1,
+        perPage: p.perPage ?? 10,
+        sortField: p.sortField ?? '@timestamp',
+        sortOrder: p.sortOrder ?? 'desc',
+      });
+      return {
+        entities: records,
+        total,
+        page: p.page ?? 1,
+        per_page: p.perPage ?? 10,
+        inspect,
+      };
+    }
 
-    const query: QueryDslQueryContainer = filter
-      ? { bool: { filter: [filter] } }
-      : { match_all: {} };
+    this.logger.debug('Listing entities (cursor mode)');
+
+    const { filter, size, searchAfter, source, fields } = p;
+
+    let query: QueryDslQueryContainer = { match_all: {} };
+    if (filter) {
+      if (Array.isArray(filter)) {
+        query = { bool: { filter } };
+      } else {
+        query = { bool: { filter: [filter] } };
+      }
+    }
 
     const resp = await this.esClient.search<Entity>({
       index: getLatestEntitiesIndexName(this.namespace),
       query,
       size,
-      sort: [{ _id: 'asc' }],
+      sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
       search_after: searchAfter,
+      ...(fields && fields.length > 0 ? { fields } : {}),
+      ...(source && source.length > 0 ? { _source: source } : {}),
     });
 
     const hits = resp.hits.hits;
     const entities = hits.map((hit) => hit._source as Entity);
     const lastHit = hits[hits.length - 1];
+    const entityFields = fields && fields.length > 0 ? hits.map((hit) => hit.fields) : undefined;
 
-    return { entities, nextSearchAfter: lastHit?.sort as Array<string | number> | undefined };
+    return {
+      entities,
+      nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
+      ...(entityFields ? { fields: entityFields } : {}),
+    };
   }
 }

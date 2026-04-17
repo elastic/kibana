@@ -38,6 +38,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'secret-client-id',
             scope: 'openid email',
           },
@@ -48,9 +49,12 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
         clientId: 'secret-client-id',
         scope: 'openid email',
+        scopeParamName: undefined,
       });
       expect(mockActionsClient.get).toHaveBeenCalledWith({ id: 'connector-1' });
       expect(mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -60,6 +64,38 @@ describe('OAuthAuthorizationService', () => {
       );
     });
 
+    it('returns scopeParamName from decrypted secrets', async () => {
+      const service = createService();
+      const getResult = createMockConnector({
+        id: 'connector-1',
+        config: { authType: 'oauth_authorization_code' },
+      });
+      mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: {
+          secrets: {
+            authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+            tokenUrl: 'https://slack.com/api/oauth.v2.access',
+            clientId: 'slack-client-id',
+            scope: 'channels:read',
+            scopeParamName: 'user_scope',
+          },
+          config: {},
+        },
+      });
+
+      const result = await service.getOAuthConfig('connector-1', undefined);
+
+      expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
+        authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+        tokenUrl: 'https://slack.com/api/oauth.v2.access',
+        clientId: 'slack-client-id',
+        scope: 'channels:read',
+        scopeParamName: 'user_scope',
+      });
+    });
+
     it('falls back to config when secrets are missing fields', async () => {
       const service = createService();
       const getResult = createMockConnector({
@@ -67,6 +103,7 @@ describe('OAuthAuthorizationService', () => {
         config: {
           authType: 'oauth_authorization_code',
           authorizationUrl: 'https://config-provider.example.com/authorize',
+          tokenUrl: 'https://config-provider.example.com/token',
           clientId: 'config-client-id',
           scope: 'profile',
         },
@@ -77,6 +114,7 @@ describe('OAuthAuthorizationService', () => {
           secrets: {},
           config: {
             authorizationUrl: 'https://config-provider.example.com/authorize',
+            tokenUrl: 'https://config-provider.example.com/token',
             clientId: 'config-client-id',
             scope: 'profile',
           },
@@ -86,35 +124,12 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://config-provider.example.com/authorize',
+        tokenUrl: 'https://config-provider.example.com/token',
         clientId: 'config-client-id',
         scope: 'profile',
-      });
-    });
-
-    it('supports auth.type for OAuth validation', async () => {
-      const service = createService();
-      const getResult = createMockConnector({
-        id: 'connector-1',
-        config: { auth: { type: 'oauth_authorization_code' } },
-      });
-      mockActionsClient.get.mockResolvedValue(getResult);
-      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
-        attributes: {
-          secrets: {
-            authorizationUrl: 'https://provider.example.com/authorize',
-            clientId: 'client-id',
-          },
-          config: {},
-        },
-      });
-
-      const result = await service.getOAuthConfig('connector-1', undefined);
-
-      expect(result).toEqual({
-        authorizationUrl: 'https://provider.example.com/authorize',
-        clientId: 'client-id',
-        scope: undefined,
+        scopeParamName: undefined,
       });
     });
 
@@ -129,6 +144,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
           },
           config: {},
@@ -156,6 +172,7 @@ describe('OAuthAuthorizationService', () => {
         attributes: {
           secrets: {
             authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
             clientId: 'client-id',
           },
           config: {},
@@ -165,9 +182,39 @@ describe('OAuthAuthorizationService', () => {
       const result = await service.getOAuthConfig('connector-1', undefined);
 
       expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
         authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
         clientId: 'client-id',
         scope: undefined,
+      });
+    });
+
+    it('resolves authType from secrets when config has none', async () => {
+      const service = createService();
+      const getResult = createMockConnector({ id: 'connector-1', config: {} });
+      mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: {
+          secrets: {
+            authType: 'oauth_authorization_code',
+            authorizationUrl: 'https://provider.example.com/authorize',
+            tokenUrl: 'https://provider.example.com/token',
+            clientId: 'client-id',
+          },
+          config: {},
+        },
+      });
+
+      const result = await service.getOAuthConfig('connector-1', undefined);
+
+      expect(result).toEqual({
+        authTypeId: 'oauth_authorization_code',
+        authorizationUrl: 'https://provider.example.com/authorize',
+        tokenUrl: 'https://provider.example.com/token',
+        clientId: 'client-id',
+        scope: undefined,
+        scopeParamName: undefined,
       });
     });
 
@@ -178,9 +225,12 @@ describe('OAuthAuthorizationService', () => {
         config: { authType: 'basic' },
       });
       mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: { secrets: {}, config: {} },
+      });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector does not use OAuth Authorization Code flow'
+        'Connector does not use OAuth Authorization Code or EARS flow'
       );
     });
 
@@ -192,15 +242,31 @@ describe('OAuthAuthorizationService', () => {
         authMode: 'shared',
       });
       mockActionsClient.get.mockResolvedValue(getResult);
+      mockEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+        attributes: { secrets: {}, config: {} },
+      });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector does not use OAuth Authorization Code flow'
+        'Connector does not use OAuth Authorization Code or EARS flow'
       );
     });
 
     it.each([
-      ['authorizationUrl', { clientId: 'client-id' }],
-      ['clientId', { authorizationUrl: 'https://provider.example.com/authorize' }],
+      [
+        'authorizationUrl',
+        { tokenUrl: 'https://provider.example.com/token', clientId: 'client-id' },
+      ],
+      [
+        'tokenUrl',
+        { authorizationUrl: 'https://provider.example.com/authorize', clientId: 'client-id' },
+      ],
+      [
+        'clientId',
+        {
+          authorizationUrl: 'https://provider.example.com/authorize',
+          tokenUrl: 'https://provider.example.com/token',
+        },
+      ],
     ])('throws when missing required OAuth config (%s)', async (_, secrets) => {
       const service = createService();
       const getResult = createMockConnector({
@@ -216,7 +282,7 @@ describe('OAuthAuthorizationService', () => {
       });
 
       await expect(service.getOAuthConfig('connector-1', undefined)).rejects.toThrow(
-        'Connector missing required OAuth configuration (authorizationUrl, clientId)'
+        'Connector missing required OAuth configuration (authorizationUrl, tokenUrl, clientId)'
       );
     });
   });
@@ -276,6 +342,60 @@ describe('OAuthAuthorizationService', () => {
       const parsed = new URL(url);
       expect(parsed.searchParams.has('scope')).toBe(false);
       expect(parsed.searchParams.get('client_id')).toBe('my-client-id');
+    });
+
+    it('uses custom scopeParamName when provided', () => {
+      const service = createService();
+
+      const url = service.buildAuthorizationUrl({
+        baseAuthorizationUrl: 'https://slack.com/oauth/v2/authorize',
+        clientId: 'slack-client-id',
+        scope: 'channels:read chat:write',
+        scopeParamName: 'user_scope',
+        redirectUri: 'https://kibana.example.com/callback',
+        state: 'state-value',
+        codeChallenge: 'challenge-value',
+      });
+
+      const parsed = new URL(url);
+      expect(parsed.searchParams.has('scope')).toBe(false);
+      expect(parsed.searchParams.get('user_scope')).toBe('channels:read chat:write');
+    });
+
+    it.each(['client_id', 'response_type', 'redirect_uri', 'state', 'code_challenge'])(
+      'throws when scopeParamName is the reserved param "%s"',
+      (reserved) => {
+        const service = createService();
+
+        expect(() =>
+          service.buildAuthorizationUrl({
+            baseAuthorizationUrl: 'https://provider.example.com/authorize',
+            clientId: 'my-client-id',
+            scope: 'openid',
+            scopeParamName: reserved,
+            redirectUri: 'https://kibana.example.com/callback',
+            state: 'state-value',
+            codeChallenge: 'challenge-value',
+          })
+        ).toThrow(`scopeParamName "${reserved}" conflicts with a reserved OAuth parameter`);
+      }
+    );
+
+    it('defaults to scope param name when scopeParamName is undefined', () => {
+      const service = createService();
+
+      const url = service.buildAuthorizationUrl({
+        baseAuthorizationUrl: 'https://provider.example.com/authorize',
+        clientId: 'my-client-id',
+        scope: 'openid',
+        redirectUri: 'https://kibana.example.com/callback',
+        state: 'state-value',
+        codeChallenge: 'challenge-value',
+      });
+
+      const parsed = new URL(url);
+      expect(parsed.searchParams.get('scope')).toBe('openid');
+      expect(parsed.searchParams.has('user_scope')).toBe(false);
     });
   });
 });

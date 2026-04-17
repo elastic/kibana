@@ -20,14 +20,15 @@ import {
   getDatasourceLayers,
   getLegendTruncateAfterLines,
   getSharedChartLensStateToAPI,
+  getScaleTypeFromColumnType,
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
-import { fromColorByValueLensStateToAPI } from '../../coloring';
+import { AUTO_COLOR, fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
-  buildDatasetStateESQL,
-  buildDatasetStateNoESQL,
+  buildDataSourceStateESQL,
+  buildDataSourceStateNoESQL,
   generateApiLayer,
   isTextBasedLayer,
   operationFromColumn,
@@ -35,43 +36,44 @@ import {
 import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
 import { getValueApiColumn } from '../../columns/esql_column';
 import type { LensApiAllMetricOperations } from '../../../schema/metric_ops';
+import { legendSizeCompat } from '../legend_sizes';
+import { axisLabelOrientationCompat } from '../common';
+import type { XScaleSchemaType } from '../../../schema/charts/shared';
 
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapState['legend'] {
   return {
-    visible: legend.isVisible,
-    position: legend.position,
+    visibility: legend.isVisible ? 'visible' : 'hidden',
     ...stripUndefined<HeatmapState['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
-      size: legend.legendSize,
+      size: legendSizeCompat.toAPI(legend.legendSize),
     }),
   };
 }
 
-function getOrientationFromRotation(rotation: number): 'angled' | 'vertical' | 'horizontal' {
-  return rotation === -45 ? 'angled' : rotation === -90 ? 'vertical' : 'horizontal';
-}
-
 function getGridConfigProps(
-  gridConfig: HeatmapVisualizationState['gridConfig']
+  gridConfig: HeatmapVisualizationState['gridConfig'],
+  xAxisScale?: XScaleSchemaType
 ): HeatmapState['axis'] {
   return {
     x: {
       labels: {
         visible: gridConfig.isXAxisLabelVisible,
         ...(gridConfig.xAxisLabelRotation !== undefined && {
-          orientation: getOrientationFromRotation(gridConfig.xAxisLabelRotation),
+          orientation:
+            axisLabelOrientationCompat.toAPI(gridConfig.xAxisLabelRotation) ?? 'horizontal',
         }),
       },
       title: {
-        value: gridConfig.xTitle,
+        text: gridConfig.xTitle,
         visible: gridConfig.isXAxisTitleVisible,
       },
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
+      scale: xAxisScale ?? 'ordinal',
     },
     y: {
       labels: { visible: gridConfig.isYAxisLabelVisible },
       title: {
-        value: gridConfig.yTitle,
+        text: gridConfig.yTitle,
         visible: gridConfig.isYAxisTitleVisible,
       },
       ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
@@ -92,20 +94,28 @@ function reverseBuildVisualizationState(
     throw new Error('Value accessor is missing in the visualization state');
   }
 
+  let xAxisScale: XScaleSchemaType | undefined;
+  if (isTextBasedLayer(layer) && visualization.xAccessor) {
+    const xColumn = layer.columns.find((c) => c.columnId === visualization.xAccessor);
+    xAxisScale = getScaleTypeFromColumnType(xColumn?.meta?.type);
+  }
+
   const sharedProps = {
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig),
-    cells: {
-      labels: { visible: visualization.gridConfig.isCellLabelVisible },
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
+    styling: {
+      cells: {
+        labels: { visible: visualization.gridConfig.isCellLabelVisible },
+      },
     },
   } satisfies Partial<HeatmapState>;
 
   const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
+    color: visualization.palette
+      ? fromColorByValueLensStateToAPI(visualization.palette)
+      : AUTO_COLOR,
   } satisfies Partial<HeatmapState['metric']>;
 
   if (isTextBasedLayer(layer)) {
@@ -113,11 +123,11 @@ function reverseBuildVisualizationState(
       throw new Error('xAccessor is missing in the visualization state');
     }
 
-    const dataset = buildDatasetStateESQL(layer);
+    const dataSource = buildDataSourceStateESQL(layer);
 
     return {
       ...sharedProps,
-      dataset,
+      data_source: dataSource,
       metric: {
         ...getValueApiColumn(valueAccessor, layer),
         ...paletteProps,
@@ -127,7 +137,7 @@ function reverseBuildVisualizationState(
     } satisfies HeatmapStateESQL;
   }
 
-  const dataset = buildDatasetStateNoESQL(
+  const dataSource = buildDataSourceStateNoESQL(
     layer,
     layerId,
     adHocDataViews,
@@ -137,7 +147,7 @@ function reverseBuildVisualizationState(
 
   return {
     ...sharedProps,
-    dataset,
+    data_source: dataSource,
     metric: {
       ...operationFromColumn(valueAccessor, layer),
       ...paletteProps,

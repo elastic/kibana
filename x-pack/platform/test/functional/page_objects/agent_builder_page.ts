@@ -6,6 +6,7 @@
  */
 
 import type { ToolType } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { subj } from '@kbn/test-subj-selector';
 import { AGENT_BUILDER_APP_ID } from '../../agent_builder/common/constants';
 import type { LlmProxy } from '../../agent_builder_api_integration/utils/llm_proxy';
@@ -29,10 +30,17 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
-   * Navigate to the AgentBuilder app
+   * Navigate to the AgentBuilder app.
+   * When landing on a new conversation, waits for `agentBuilderWelcomePage` — this
+   * confirms the app has finished loading and the connector has been fetched, so it
+   * is safe to call typeMessage/sendMessage. Without this guard, those calls can fire
+   * before the connector is ready and all LLM interceptors will time out.
    */
-  async navigateToApp(path: string = 'conversations/new') {
+  async navigateToApp(path: string = `agents/${agentBuilderDefaultAgentId}/conversations/new`) {
     await this.common.navigateToApp(AGENT_BUILDER_APP_ID, { path });
+    if (path.includes('conversations/new')) {
+      await this.testSubjects.existOrFail('agentBuilderWelcomePage');
+    }
   }
 
   /**
@@ -45,11 +53,20 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
-   * Send the current message
+   * Send the current message.
+   * Waits for the submit button to be enabled before clicking — the button can be
+   * temporarily disabled while the conversation is in a loading or error-transition
+   * state, and clicking it while disabled silently drops the submission.
    */
   async sendMessage() {
-    const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
-    await sendButton.click();
+    await this.retry.try(async () => {
+      const sendButton = await this.testSubjects.find('agentBuilderConversationInputSubmitButton');
+      const isEnabled = await sendButton.isEnabled();
+      if (!isEnabled) {
+        throw new Error('Send button is not yet enabled');
+      }
+      await sendButton.click();
+    });
   }
 
   /**
@@ -58,7 +75,7 @@ export class AgentBuilderPageObject extends FtrService {
   async getCurrentConversationIdFromUrl(): Promise<string> {
     return await this.retry.try(async () => {
       const url = await this.browser.getCurrentUrl();
-      // URL should be something like: /app/agent_builder/conversations/{conversationId}
+      // URL should be something like: /app/agent_builder/agents/{agentId}/conversations/{conversationId}
       const match = url.match(/\/conversations\/([^\/\?]+)/);
       if (!match) {
         throw new Error('Could not extract conversation ID from URL');
@@ -78,7 +95,7 @@ export class AgentBuilderPageObject extends FtrService {
     withToolCall: boolean = false
   ): Promise<string> {
     // Navigate to new conversation
-    await this.navigateToApp('conversations/new');
+    await this.navigateToApp();
 
     await (withToolCall
       ? setupAgentCallSearchToolWithNoIndexSelectedThenAnswer({
@@ -112,47 +129,13 @@ export class AgentBuilderPageObject extends FtrService {
     return await this.getCurrentConversationIdFromUrl();
   }
 
-  async openConversationsHistory() {
-    // Only open if not already open
-    if (await this.isConversationsHistoryOpen()) {
-      return;
-    }
-
-    const conversationsHistoryToggleBtn = await this.testSubjects.find(
-      'agentBuilderConversationsHistoryToggleBtn'
-    );
-    await conversationsHistoryToggleBtn.click();
-
-    // Wait for the conversations history popover to be visible and populated
-    await this.retry.try(async () => {
-      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
-      // Verify the list is actually visible and has content
-      const isDisplayed = await conversationList.isDisplayed();
-      if (!isDisplayed) {
-        throw new Error('Conversation list is not displayed');
-      }
-    });
-  }
-
-  /**
-   * Check if the conversations history popover is currently open
-   */
-  async isConversationsHistoryOpen(): Promise<boolean> {
-    try {
-      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
-      return await conversationList.isDisplayed();
-    } catch {
-      return false;
-    }
-  }
-
   /**
    * Navigate to an existing conversation by clicking on it in the history sidebar
    */
   async navigateToConversationViaHistory(conversationId: string) {
-    await this.openConversationsHistory();
-
-    const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
+    const conversationItem = await this.testSubjects.find(
+      `agentBuilderSidebarConversation-${conversationId}`
+    );
     await conversationItem.click();
   }
 
@@ -160,7 +143,9 @@ export class AgentBuilderPageObject extends FtrService {
    * Navigate to an existing conversation using the conversation ID in the URL
    */
   async navigateToConversationById(conversationId: string) {
-    await this.navigateToApp(`conversations/${conversationId}`);
+    await this.navigateToApp(
+      `agents/${agentBuilderDefaultAgentId}/conversations/${conversationId}`
+    );
   }
 
   /**
@@ -173,6 +158,10 @@ export class AgentBuilderPageObject extends FtrService {
       continueConversation: true,
     });
 
+    // Snapshot round count before sending so we can detect when a new one appears
+    const existingRoundCount = (await this.testSubjects.findAll('agentBuilderRoundResponse'))
+      .length;
+
     // Type and send the message
     await this.typeMessage(userMessage);
     await this.sendMessage();
@@ -180,25 +169,31 @@ export class AgentBuilderPageObject extends FtrService {
     // Wait for all interceptors to be called (backend processing complete)
     await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-    // Wait for the response to appear in the UI
+    // Wait for a new response round to appear. Comparing against the pre-send count
+    // prevents a false-positive where an existing earlier round satisfies the find().
     await this.retry.try(async () => {
-      await this.testSubjects.find('agentBuilderRoundResponse');
+      const currentCount = (await this.testSubjects.findAll('agentBuilderRoundResponse')).length;
+      if (currentCount <= existingRoundCount) {
+        throw new Error(
+          `Waiting for new response round (have ${currentCount}, need more than ${existingRoundCount})`
+        );
+      }
     });
   }
 
   /**
-   * Delete a conversation by clicking the more actions button and then the delete button
+   * Delete a conversation by clicking the title button popover and then the delete button
    */
   async deleteConversation(conversationId: string) {
-    await this.openConversationsHistory();
-
     // Click on conversation to open it
-    const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
+    const conversationItem = await this.testSubjects.find(
+      `agentBuilderSidebarConversation-${conversationId}`
+    );
     await conversationItem.click();
 
-    // Click on the more actions button
-    const moreActionsButton = await this.testSubjects.find('agentBuilderMoreActionsButton');
-    await moreActionsButton.click();
+    // Click the title button to open the popover with rename/delete actions
+    const titleButton = await this.testSubjects.find('agentBuilderConversationTitleButton');
+    await titleButton.click();
 
     // Click on the delete button from the popover
     const deleteButton = await this.testSubjects.find('agentBuilderConversationDeleteButton');
@@ -207,9 +202,9 @@ export class AgentBuilderPageObject extends FtrService {
     const confirmButton = await this.testSubjects.find('confirmModalConfirmButton');
     await confirmButton.click();
 
-    // Wait for the conversation to be removed
+    // Wait for the conversation to be removed from the sidebar
     await this.retry.try(async () => {
-      await this.testSubjects.missingOrFail(`conversationItem-${conversationId}`);
+      await this.testSubjects.missingOrFail(`agentBuilderSidebarConversation-${conversationId}`);
     });
   }
 
@@ -217,10 +212,8 @@ export class AgentBuilderPageObject extends FtrService {
    * Check if a conversation exists in the history by conversation ID
    */
   async isConversationInHistory(conversationId: string): Promise<boolean> {
-    await this.openConversationsHistory();
-
     try {
-      await this.testSubjects.find(`conversationItem-${conversationId}`);
+      await this.testSubjects.find(`agentBuilderSidebarConversation-${conversationId}`);
       return true;
     } catch (error) {
       return false;
@@ -239,38 +232,44 @@ export class AgentBuilderPageObject extends FtrService {
    * Click the new conversation button
    */
   async clickNewConversationButton() {
-    const newButton = await this.testSubjects.find('agentBuilderNewConversationButton');
+    const newButton = await this.testSubjects.find('agentBuilderSidebarNewConversationButton');
     await newButton.click();
   }
 
   /**
-   * Get the current conversation title text
+   * Get the current conversation title text.
+   * For persisted conversations the title is inside a button (popover trigger);
+   * for unsaved ones it is a plain h4.
    */
   async getConversationTitle(): Promise<string> {
-    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    const isPersisted = await this.testSubjects.exists('agentBuilderConversationTitleButton');
+    const selector = isPersisted
+      ? 'agentBuilderConversationTitleButton'
+      : 'agentBuilderConversationTitle';
+    const titleElement = await this.testSubjects.find(selector);
     return await titleElement.getVisibleText();
   }
 
   /**
-   * Rename a conversation by hovering over the title, clicking the pencil icon,
-   * entering the new name, and submitting
+   * Rename a conversation by clicking the title button to open the popover,
+   * then selecting rename, entering the new name in the modal, and submitting.
    */
   async renameConversation(newTitle: string): Promise<string> {
-    // Hover over the conversation title to reveal the pencil icon
-    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
-    await titleElement.moveMouseTo();
+    // Click the title button to open the popover
+    const titleButton = await this.testSubjects.find('agentBuilderConversationTitleButton');
+    await titleButton.click();
 
-    // Click the pencil icon to enter edit mode
+    // Click the rename button from the popover
     const renameButton = await this.testSubjects.find('agentBuilderConversationRenameButton');
     await renameButton.click();
 
-    // Wait for the inline edit input to appear and clear + type new name
-    const inputElement = await this.testSubjects.find('renameConversationInputField');
+    // Wait for the rename modal input, clear it, and type the new name
+    const inputElement = await this.testSubjects.find('renameConversationModalInput');
     await inputElement.clearValueWithKeyboard();
     await inputElement.type(newTitle);
 
-    // Click the save button (checkmark icon)
-    const saveButton = await this.testSubjects.find('renameConversationSaveButton');
+    // Click the save button in the modal
+    const saveButton = await this.testSubjects.find('renameConversationModalSave');
     await saveButton.click();
 
     // Wait for the title to update
@@ -313,15 +312,15 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async navigateToToolsLanding() {
-    await this.navigateToApp('tools');
+    await this.navigateToApp('manage/tools');
   }
 
   async navigateToNewTool() {
-    await this.navigateToApp('tools/new');
+    await this.navigateToApp('manage/tools/new');
   }
 
   async navigateToTool(toolId: string) {
-    await this.navigateToApp(`tools/${toolId}`);
+    await this.navigateToApp(`manage/tools/${toolId}`);
   }
 
   /*
@@ -367,9 +366,16 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async selectMcpTool(toolName: string) {
-    await this.testSubjects.click('agentBuilderMcpToolSelect');
-    await this.retry.try(async () => {
-      await this.testSubjects.click(`mcpToolOption-${toolName}`);
+    const optionSelector = `mcpToolOption-${toolName}`;
+    // Check whether the dropdown is already open before clicking, so we don't
+    // accidentally toggle it closed on retry.
+    await this.retry.tryForTime(30000, async () => {
+      const isOpen = await this.testSubjects.exists(optionSelector, { timeout: 0 });
+      if (!isOpen) {
+        await this.testSubjects.click('agentBuilderMcpToolSelect');
+      }
+      await this.testSubjects.existOrFail(optionSelector, { timeout: 2000 });
+      await this.testSubjects.click(optionSelector);
     });
   }
 
@@ -390,7 +396,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async navigateToBulkImportMcp() {
-    await this.navigateToApp('tools/bulk_import_mcp');
+    await this.navigateToApp('manage/tools/bulk_import_mcp');
   }
 
   async openManageMcpMenu() {
@@ -425,7 +431,9 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async setBulkImportNamespace(namespace: string) {
-    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace);
+    await this.testSubjects.setValue('bulkImportMcpToolsNamespaceInput', namespace, {
+      clearWithKeyboard: true,
+    });
   }
 
   async clickBulkImportSubmit() {
@@ -504,6 +512,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async isToolInTable(toolId: string): Promise<boolean> {
+    await this.toolsSearch().type(toolId);
     try {
       await this.testSubjects.find(`agentBuilderToolsTableRow-${toolId}`);
       return true;
@@ -540,7 +549,7 @@ export class AgentBuilderPageObject extends FtrService {
    * ==========================
    */
   async createAgentViaUI({ id, name, labels }: { id: string; name: string; labels: string[] }) {
-    await this.navigateToApp('agents/new');
+    await this.navigateToApp('manage/agents/new');
     const selectors = {
       inputs: {
         id: 'agentSettingsIdInput',
@@ -551,9 +560,16 @@ export class AgentBuilderPageObject extends FtrService {
       saveButton: 'agentFormSaveButton',
       labelsComboBox: 'agentSettingsLabelsComboBox',
     };
-    await this.testSubjects.append(selectors.inputs.id, id);
-    await this.testSubjects.append(selectors.inputs.displayName, name);
-    await this.testSubjects.append(selectors.inputs.description, `Agent for testing ${id}`);
+    // Use clearWithKeyboard so React Hook Form's controlled inputs receive proper
+    // keyboard events and don't restore a stale value after the JS clear.
+    const setValueOpts = { clearWithKeyboard: true };
+    await this.testSubjects.setValue(selectors.inputs.id, id, setValueOpts);
+    await this.testSubjects.setValue(selectors.inputs.displayName, name, setValueOpts);
+    await this.testSubjects.setValue(
+      selectors.inputs.description,
+      `Agent for testing ${id}`,
+      setValueOpts
+    );
     const labelsComboBox = await this.testSubjects.find(selectors.labelsComboBox);
     const labelsInput = await this.testSubjects.findDescendant(
       selectors.inputs.labels,
@@ -565,6 +581,8 @@ export class AgentBuilderPageObject extends FtrService {
       await labelsInput.pressKeys(this.browser.keys.ENTER);
     }
     await this.testSubjects.click(selectors.saveButton);
+    // Wait for the save to complete and navigation to the agents list to finish.
+    await this.testSubjects.existOrFail('agentBuilderAgentsListPageTitle');
   }
 
   /*
@@ -750,6 +768,93 @@ export class AgentBuilderPageObject extends FtrService {
     };
   }
 
+  /*
+   * ==========================
+   * Embeddable sidebar helpers
+   * ==========================
+   */
+
+  /**
+   * Navigate to the Kibana home page — use this as the starting point for sidebar tests
+   * so the sidebar components don't clash with the full-screen agent builder components.
+   */
+  async navigateToHome() {
+    await this.common.navigateToApp('home');
+  }
+
+  /**
+   * Standard starting point for all embeddable sidebar tests.
+   * Navigates to home, opens the sidebar, and waits for it to be ready.
+   * Must be called from any page except the agent builder app, to avoid
+   * data-test-subj clashes with full-screen components.
+   */
+  async prepareEmbeddableSidebar() {
+    await this.navigateToHome();
+    await this.openEmbeddableSidebar();
+    await this.waitForEmbeddableSidebarOpen();
+  }
+
+  /**
+   * Opens the sidebar and resets it to a blank new chat.
+   * Use when the test needs a clean empty conversation ready for input.
+   */
+  async prepareEmbeddableSidebarWithNewChat() {
+    await this.prepareEmbeddableSidebar();
+    await this.openEmbeddableMenu();
+    await this.clickEmbeddableNewChatButton();
+  }
+
+  /**
+   * Open the embeddable conversation sidebar by clicking the nav control button
+   */
+  async openEmbeddableSidebar() {
+    await this.testSubjects.click('AgentBuilderNavControlButton');
+  }
+
+  /**
+   * Wait for the embeddable sidebar to be open (menu button visible)
+   */
+  async waitForEmbeddableSidebarOpen() {
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('agentBuilderEmbeddableMenuButton');
+    });
+  }
+
+  /**
+   * Open the embeddable menu (hamburger button)
+   */
+  async openEmbeddableMenu() {
+    await this.testSubjects.click('agentBuilderEmbeddableMenuButton');
+  }
+
+  /**
+   * Click "New chat" button inside the embeddable menu popover
+   */
+  async clickEmbeddableNewChatButton() {
+    await this.testSubjects.click('agentBuilderEmbeddableNewChatButton');
+  }
+
+  /**
+   * Select an existing conversation from the embeddable menu popover
+   */
+  async selectEmbeddableConversation(conversationId: string) {
+    await this.testSubjects.click(`agentBuilderEmbeddableConversation-${conversationId}`);
+  }
+
+  /**
+   * Click the agent row in the conversations popover to navigate to agents view
+   */
+  async clickEmbeddableAgentRow() {
+    await this.testSubjects.click('agentBuilderEmbeddableAgentRow');
+  }
+
+  /**
+   * Select an agent from the agents popover view
+   */
+  async selectEmbeddableAgent(agentId: string) {
+    await this.testSubjects.click(`agentBuilderAgentOption-${agentId}`);
+  }
+
   async getAgentFormDisplayName() {
     const displayNameInputValue = await this.testSubjects.getAttribute(
       'agentSettingsDisplayNameInput',
@@ -759,7 +864,11 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   async setAgentFormDisplayName(name: string) {
-    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name);
+    // clearWithKeyboard ensures React Hook Form's controlled input receives proper
+    // keyboard events and doesn't restore the stale value after the JS clear.
+    await this.testSubjects.setValue('agentSettingsDisplayNameInput', name, {
+      clearWithKeyboard: true,
+    });
   }
 
   agentFormSaveButton() {
@@ -771,6 +880,8 @@ export class AgentBuilderPageObject extends FtrService {
       },
       click: async () => {
         await this.testSubjects.click(saveButtonSelector);
+        // Wait for the save to complete and navigation back to the agents list.
+        await this.testSubjects.existOrFail('agentBuilderAgentsListPageTitle');
       },
     };
   }

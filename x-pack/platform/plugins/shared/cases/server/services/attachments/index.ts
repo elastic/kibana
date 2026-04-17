@@ -36,7 +36,6 @@ import {
   getAttachmentTypeTransformers,
   resolveAttachmentSavedObjectType,
 } from '../../common/attachments';
-import { passThroughTransformer } from '../../common/attachments/base';
 
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
@@ -77,7 +76,7 @@ import type {
   UnifiedAttachmentSavedObjectTransformed,
 } from '../../common/types/attachments_v2';
 import { isSOError } from '../../common/error';
-import { transformAttributesForMode } from './operations/utils';
+import { getTransformerForPatchAttributes, transformAttributesForMode } from './operations/utils';
 
 /**
  * Ensures alert attachments have rule.name, or else existing tests will fail
@@ -105,9 +104,12 @@ export class AttachmentService {
   }
 
   private async getAttachmentSavedObjectType(
-    attachmentId: string
+    savedObjectId: string
   ): Promise<typeof CASE_ATTACHMENT_SAVED_OBJECT | typeof CASE_COMMENT_SAVED_OBJECT | null> {
-    return resolveAttachmentSavedObjectType(this.context.unsecuredSavedObjectsClient, attachmentId);
+    return resolveAttachmentSavedObjectType(
+      this.context.unsecuredSavedObjectsClient,
+      savedObjectId
+    );
   }
 
   public async countAlertsAttachedToCase(
@@ -237,16 +239,16 @@ export class AttachmentService {
     }
   }
 
-  public async bulkDelete({ attachmentIds, refresh }: DeleteAttachmentArgs) {
+  public async bulkDelete({ savedObjectIds, refresh }: DeleteAttachmentArgs) {
     try {
-      if (attachmentIds.length <= 0) {
+      if (savedObjectIds.length <= 0) {
         return;
       }
 
-      this.context.log.debug(`Attempting to DELETE attachments ${attachmentIds}`);
+      this.context.log.debug(`Attempting to DELETE attachments ${savedObjectIds}`);
       // SO IDs are space-unique, so the same ID in both types refers to the same logical attachment.
       // If an attachment doesn't exist in one type, bulkDelete will ignore it.
-      const deleteRequests = attachmentIds.flatMap((id) => [
+      const deleteRequests = savedObjectIds.flatMap((id) => [
         { id, type: CASE_ATTACHMENT_SAVED_OBJECT },
         { id, type: CASE_COMMENT_SAVED_OBJECT },
       ]);
@@ -254,7 +256,7 @@ export class AttachmentService {
         refresh,
       });
     } catch (error) {
-      this.context.log.error(`Error on DELETE attachments ${attachmentIds}: ${error}`);
+      this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
     }
   }
@@ -273,7 +275,8 @@ export class AttachmentService {
       const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(attributes);
       const savedObjectType = getAttachmentSavedObjectType(this.context.config);
       const transformer = getAttachmentTypeTransformers(
-        getAttachmentTypeFromAttributes(decodedAttributes)
+        getAttachmentTypeFromAttributes(decodedAttributes),
+        decodedAttributes.owner
       );
       if (savedObjectType === CASE_ATTACHMENT_SAVED_OBJECT) {
         const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
@@ -345,7 +348,8 @@ export class AttachmentService {
                 attachment.attributes
               );
               const transformer = getAttachmentTypeTransformers(
-                getAttachmentTypeFromAttributes(decodedAttributes)
+                getAttachmentTypeFromAttributes(decodedAttributes),
+                decodedAttributes.owner
               );
               const attributesToWrite = transformer.toUnifiedSchema(decodedAttributes);
 
@@ -368,7 +372,8 @@ export class AttachmentService {
             );
 
             const transformer = getAttachmentTypeTransformers(
-              getAttachmentTypeFromAttributes(decodedAttributes)
+              getAttachmentTypeFromAttributes(decodedAttributes),
+              decodedAttributes.owner
             );
             const attributesToWrite = transformer.toLegacySchema(decodedAttributes);
             const { attributes: extractedAttributes, references: extractedReferences } =
@@ -428,22 +433,23 @@ export class AttachmentService {
   }
 
   public async update({
-    attachmentId,
+    savedObjectId,
     updatedAttributes,
     options,
   }: UpdateAttachmentArgs): Promise<SavedObjectsUpdateResponse<AttachmentAttributesV2>> {
     try {
-      this.context.log.debug(`Attempting to UPDATE attachment ${attachmentId}`);
+      this.context.log.debug(`Attempting to UPDATE attachment ${savedObjectId}`);
 
-      const soType = await this.getAttachmentSavedObjectType(attachmentId);
+      const soType = await this.getAttachmentSavedObjectType(savedObjectId);
       if (soType === null) {
-        throw new Error(`Attachment ${attachmentId} not found`);
+        throw new Error(`Attachment ${savedObjectId} not found`);
       }
 
       const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(updatedAttributes);
       assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
       const transformer = getAttachmentTypeTransformers(
-        getAttachmentTypeFromAttributes(decodedAttributes)
+        getAttachmentTypeFromAttributes(decodedAttributes),
+        decodedAttributes.owner ?? ''
       );
 
       if (soType === CASE_ATTACHMENT_SAVED_OBJECT) {
@@ -452,7 +458,7 @@ export class AttachmentService {
         const res =
           await this.context.unsecuredSavedObjectsClient.update<UnifiedAttachmentAttributes>(
             CASE_ATTACHMENT_SAVED_OBJECT,
-            attachmentId,
+            savedObjectId,
             unifiedAttributes,
             { ...options }
           );
@@ -475,7 +481,7 @@ export class AttachmentService {
       const res =
         await this.context.unsecuredSavedObjectsClient.update<AttachmentPersistedAttributes>(
           CASE_COMMENT_SAVED_OBJECT,
-          attachmentId,
+          savedObjectId,
           extractedAttributes,
           {
             ...options,
@@ -502,7 +508,7 @@ export class AttachmentService {
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
-      this.context.log.error(`Error on UPDATE attachment ${attachmentId}: ${error}`);
+      this.context.log.error(`Error on UPDATE attachment ${savedObjectId}: ${error}`);
       throw error;
     }
   }
@@ -511,10 +517,12 @@ export class AttachmentService {
     comments,
     refresh,
     requestWithoutType = false,
-  }: BulkUpdateAttachmentArgs): Promise<SavedObjectsBulkUpdateResponse<AttachmentAttributesV2>> {
+  }: BulkUpdateAttachmentArgs): Promise<
+    SavedObjectsBulkUpdateResponse<AttachmentTransformedAttributesV2>
+  > {
     try {
       this.context.log.debug(
-        `Attempting to UPDATE attachments ${comments.map((c) => c.attachmentId).join(', ')}`
+        `Attempting to UPDATE attachments ${comments.map((c) => c.savedObjectId).join(', ')}`
       );
 
       const savedObjectType = getAttachmentSavedObjectType(this.context.config);
@@ -523,18 +531,19 @@ export class AttachmentService {
         const res =
           await this.context.unsecuredSavedObjectsClient.bulkUpdate<UnifiedAttachmentAttributes>(
             comments.map((c) => {
-              const decodedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
+              const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
                 c.updatedAttributes
               );
-              const transformer = requestWithoutType
-                ? passThroughTransformer
-                : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
+              const transformer = getTransformerForPatchAttributes(
+                decodedAttributes,
+                requestWithoutType
+              );
               const unifiedAttributes = transformer.toUnifiedSchema(decodedAttributes);
 
               return {
                 ...c.options,
                 type: CASE_ATTACHMENT_SAVED_OBJECT,
-                id: c.attachmentId,
+                id: c.savedObjectId,
                 attributes: unifiedAttributes,
               };
             }),
@@ -550,9 +559,10 @@ export class AttachmentService {
               c.updatedAttributes
             );
             assertAlertAttachmentHasRuleName(decodedAttributes as Record<string, unknown>);
-            const transformer = requestWithoutType
-              ? passThroughTransformer
-              : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
+            const transformer = getTransformerForPatchAttributes(
+              decodedAttributes,
+              requestWithoutType
+            );
             const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
             const {
               attributes: extractedAttributes,
@@ -569,7 +579,7 @@ export class AttachmentService {
             return {
               ...c.options,
               type: CASE_COMMENT_SAVED_OBJECT,
-              id: c.attachmentId,
+              id: c.savedObjectId,
               attributes: extractedAttributes,
               /* If c.options?.references are undefined and there is no field to move to the refs
                * then the extractedAttributes will be an empty array. If we pass the empty array
@@ -585,7 +595,7 @@ export class AttachmentService {
       return this.transformAndDecodeBulkUpdateResponse(res, comments, requestWithoutType);
     } catch (error) {
       this.context.log.error(
-        `Error on UPDATE attachments ${comments.map((c) => c.attachmentId).join(', ')}: ${error}`
+        `Error on UPDATE attachments ${comments.map((c) => c.savedObjectId).join(', ')}: ${error}`
       );
       throw error;
     }
@@ -611,17 +621,17 @@ export class AttachmentService {
         // TODO: we should fix the return type of this function so that it can return errors
         validatedAttachments.push(attachment as SavedObjectsUpdateResponse<AttachmentAttributesV2>);
       } else if (attachment.type === CASE_ATTACHMENT_SAVED_OBJECT) {
-        const validatedAttributes = decodeOrThrow(UnifiedAttachmentAttributesRt)(
-          attachment.attributes
+        // Saved Objects bulkUpdate may return only the attributes that were sent in the request, not
+        // the full merged document. Match single update(): return the validated patch from the request.
+        const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
+          comments[i].updatedAttributes
         );
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
         const decodedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
         );
-        const transformer = requestWithoutType
-          ? passThroughTransformer
-          : getAttachmentTypeTransformers(getAttachmentTypeFromAttributes(decodedAttributes));
+        const transformer = getTransformerForPatchAttributes(decodedAttributes, requestWithoutType);
         const legacyAttributes = transformer.toLegacySchema(decodedAttributes);
         const transformedAttachment = injectAttachmentSOAttributesFromRefsForPatch(
           legacyAttributes,

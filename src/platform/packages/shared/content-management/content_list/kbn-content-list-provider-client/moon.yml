@@ -19,6 +19,9 @@ project:
 dependsOn:
   - '@kbn/content-list-provider'
   - '@kbn/content-management-table-list-view-common'
+  - '@kbn/management-settings-ids'
+  - '@kbn/content-management-favorites-public'
+  - '@kbn/content-management-tags'
 tags:
   - shared-browser
   - package
@@ -31,26 +34,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

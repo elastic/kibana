@@ -11,19 +11,19 @@ export const PLUGIN_ID = 'searchInferenceEndpoints';
 export const PLUGIN_NAME = 'Inference Endpoints';
 export const INFERENCE_ENDPOINTS_APP_ID = 'inference_endpoints';
 export const MODEL_SETTINGS_APP_ID = 'model_settings';
-export const MANAGEMENT_APP_PATH = `/ml/${MODEL_SETTINGS_APP_ID}`;
+export const MANAGEMENT_APP_PATH = `/modelManagement/${MODEL_SETTINGS_APP_ID}`;
 
-export const PLUGIN_TITLE = i18n.translate(
-  'xpack.searchInferenceEndpoints.inferenceEndpointsTitle',
+export const EXTERNAL_INFERENCE_TITLE = i18n.translate(
+  'xpack.searchInferenceEndpoints.externalInferenceTitle',
   {
-    defaultMessage: 'Inference endpoints',
+    defaultMessage: 'External Inference',
   }
 );
 
 export const MODEL_SETTINGS_SECTION_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.modelSettingsTitle',
   {
-    defaultMessage: 'Model Settings',
+    defaultMessage: 'Feature Settings',
   }
 );
 
@@ -32,17 +32,15 @@ export const ELASTIC_INFERENCE_SERVICE_APP_ID = 'elastic_inference_service';
 export const ELASTIC_INFERENCE_SERVICE_TITLE = i18n.translate(
   'xpack.searchInferenceEndpoints.elasticInferenceServiceTitle',
   {
-    defaultMessage: 'Elastic Inference Service',
+    defaultMessage: 'Elastic Inference',
   }
 );
 
+export const INFERENCE_CONNECTORS_QUERY_KEY = 'inferenceConnectorsQueryKey';
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const INFERENCE_FEATURES_QUERY_KEY = 'inferenceFeaturesQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
 export const INFERENCE_SETTINGS_QUERY_KEY = 'inferenceSettingsQueryKey';
-export const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
-export const ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID =
-  'searchInferenceEndpoints:elasticInferenceServiceEnabled';
 
 export const INFERENCE_SETTINGS_SO_TYPE = 'inference-settings';
 export const INFERENCE_SETTINGS_NAMESPACE_TYPE = 'single';
@@ -53,3 +51,5 @@ export enum ROUTE_VERSIONS {
 }
 
 export const DYNAMIC_CONNECTORS_POLLING_START_DELAY = 5000; // 5 seconds
+
+export const NO_DEFAULT_MODEL = 'NO_DEFAULT_MODEL';

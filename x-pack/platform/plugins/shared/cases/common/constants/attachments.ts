@@ -4,38 +4,105 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AttachmentType } from '../types/domain';
+import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from './owners';
 
 // ----------------Unified attachment types-------------------------
 export const COMMENT_ATTACHMENT_TYPE = 'comment';
+export const SECURITY_EVENT_ATTACHMENT_TYPE = 'security.event';
+export const LENS_ATTACHMENT_TYPE = 'lens';
+
+export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
+export const ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml.anomaly_charts';
+export const ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE = 'ml.single_metric_viewer';
+export const AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE = 'aiops.change_point_chart';
+export const AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE = 'aiops.pattern_analysis';
+export const AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiops.log_rate_analysis';
+
+// ----------------Legacy attachment types-------------------------
+export const LEGACY_ACTIONS_TYPE = 'actions';
+export const LEGACY_ALERT_TYPE = 'alert';
+export const LEGACY_EVENT_TYPE = 'event';
+export const LEGACY_EXTERNAL_REFERENCE_TYPE = 'externalReference';
+export const LEGACY_PERSISTABLE_STATE_TYPE = 'persistableState';
+export const LEGACY_USER_TYPE = 'user';
+
+export const LEGACY_LENS_ATTACHMENT_TYPE = '.lens';
+export const LEGACY_ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml_anomaly_swimlane';
+export const LEGACY_ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml_anomaly_charts';
+export const LEGACY_ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE = 'ml_single_metric_viewer';
+export const LEGACY_AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE = 'aiopsChangePointChart';
+export const LEGACY_AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE = 'aiopsPatternAnalysisEmbeddable';
+export const LEGACY_AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiopsLogRateAnalysisEmbeddable';
 
 export const LEGACY_ATTACHMENT_TYPES = new Set([
-  AttachmentType.actions,
-  AttachmentType.alert,
-  AttachmentType.event,
-  AttachmentType.externalReference,
-  AttachmentType.persistableState,
-  AttachmentType.user,
+  LEGACY_ACTIONS_TYPE,
+  LEGACY_ALERT_TYPE,
+  LEGACY_EVENT_TYPE,
+  LEGACY_EXTERNAL_REFERENCE_TYPE,
+  LEGACY_PERSISTABLE_STATE_TYPE,
+  LEGACY_USER_TYPE,
 ]);
 
-export const UNIFIED_ATTACHMENT_TYPES = new Set([COMMENT_ATTACHMENT_TYPE]);
+export const UNIFIED_ATTACHMENT_TYPES = new Set([
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+]);
 
+export const PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
+  [LEGACY_LENS_ATTACHMENT_TYPE]: LENS_ATTACHMENT_TYPE,
+  [LEGACY_ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE]: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  [LEGACY_ML_ANOMALY_CHARTS_ATTACHMENT_TYPE]: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  [LEGACY_ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE]: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+  [LEGACY_AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE]: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  [LEGACY_AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE]: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+  [LEGACY_AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE]: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+} as const;
+
+export const PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
+  [LENS_ATTACHMENT_TYPE]: LEGACY_LENS_ATTACHMENT_TYPE,
+  [ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE]: LEGACY_ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  [ML_ANOMALY_CHARTS_ATTACHMENT_TYPE]: LEGACY_ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  [ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE]: LEGACY_ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+  [AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE]: LEGACY_AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  [AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE]: LEGACY_AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+  [AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE]: LEGACY_AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+} as const;
+
+export const PERSISTABLE_ATTACHMENT_TYPES = new Set<string>(
+  Object.keys(PERSISTABLE_STATE_UNIFIED_TO_LEGACY_MAP)
+);
 /**
  * Mapping from legacy attachment type names to unified names.
  */
 export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
-  [AttachmentType.user]: COMMENT_ATTACHMENT_TYPE,
+  [LEGACY_USER_TYPE]: COMMENT_ATTACHMENT_TYPE,
 } as const;
 
 /**
  * Reverse mapping from unified names to legacy names.
  */
 export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
-  [COMMENT_ATTACHMENT_TYPE]: AttachmentType.user,
+  [COMMENT_ATTACHMENT_TYPE]: LEGACY_USER_TYPE,
+  [SECURITY_EVENT_ATTACHMENT_TYPE]: LEGACY_EVENT_TYPE,
 } as const;
 
 /**
  * Attachment type identifiers that are migrated to unified read/write behavior.
- * Include both legacy and unified names while migration is in progress.
  */
-export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([COMMENT_ATTACHMENT_TYPE]);
+export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  ...PERSISTABLE_ATTACHMENT_TYPES,
+]);
+
+export const OWNER_TO_PREFIX_MAP: Partial<Record<string, string>> = {
+  [SECURITY_SOLUTION_OWNER]: 'security',
+  [OBSERVABILITY_OWNER]: 'observability',
+  [GENERAL_CASES_OWNER]: 'stack',
+};
+
+export const PREFIX_TO_OWNER_MAP: Partial<Record<string, string>> = {
+  security: SECURITY_SOLUTION_OWNER,
+  observability: OBSERVABILITY_OWNER,
+  stack: GENERAL_CASES_OWNER,
+};

@@ -941,6 +941,7 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
+        '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
@@ -1209,7 +1210,7 @@ module.exports = {
     },
 
     /**
-     * Integration assistant overrides
+     * Automatic Import overrides
      */
     {
       // front end and common typescript and javascript files only
@@ -1871,6 +1872,20 @@ module.exports = {
       files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
       rules: {
         'import/no-default-export': 'off',
+      },
+    },
+    /**
+     * Exception for connector specs whose product name contains 'server' (e.g., sharepoint_server).
+     * These are connector configuration specs (shared-common code), not server-side runtime code.
+     * The **\/*server* pattern in the parent rule is relaxed here to allow intra-package imports.
+     */
+    {
+      files: [
+        'src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts',
+        'src/platform/packages/shared/kbn-connector-specs/src/specs/sharepoint_server/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
       },
     },
 
@@ -2790,6 +2805,7 @@ module.exports = {
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
+        '@kbn/eslint/scout_no_at_in_test_titles': 'warn',
         '@kbn/eslint/scout_no_locators': ['error', { restricted: ['globalLoadingIndicator'] }],
         '@kbn/eslint/require_include_in_check_a11y': 'warn',
       },
@@ -2844,7 +2860,6 @@ module.exports = {
         // Can use fs for telemetry collection
         'src/platform/plugins/shared/telemetry/**',
         'x-pack/solutions/security/packages/test-api-clients/**',
-        // Will be migrated to automatic_import_v2 that relies on SOs
         'x-pack/platform/plugins/shared/automatic_import/**',
       ],
       rules: {

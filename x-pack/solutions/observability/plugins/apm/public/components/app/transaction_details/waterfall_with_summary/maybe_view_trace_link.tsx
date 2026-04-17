@@ -31,7 +31,7 @@ function FullTraceButton({ isLoading, isDisabled }: { isLoading?: boolean; isDis
         defaultMessage: 'View full trace',
       })}
       data-test-subj="apmFullTraceButtonViewFullTraceButton"
-      iconType="apmTrace"
+      iconType="chartWaterfall"
       isLoading={isLoading}
       disabled={isDisabled}
     >
@@ -63,7 +63,6 @@ export function MaybeViewTraceLink({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer',
     '/dependencies/operation'
   );
 
