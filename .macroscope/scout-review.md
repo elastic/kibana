@@ -10,7 +10,7 @@ include:
 conclusion: neutral
 ---
 
-Review this PR for compliance with Kibana's UI and API testing framework Scout.
+Review this PR for compliance with Kibana Scout test best practices.
 
 Only review files that are:
 
