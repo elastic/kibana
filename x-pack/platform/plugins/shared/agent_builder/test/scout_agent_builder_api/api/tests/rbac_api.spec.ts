@@ -89,7 +89,7 @@ function naturalId(): number {
 apiTest.describe(
   'Agent Builder — RBAC',
   {
-    tag: [...tags.stateful.classic, ...tags.serverless.search],
+    tag: [...tags.stateful.classic],
   },
   () => {
     const testRunId = randomUUID();

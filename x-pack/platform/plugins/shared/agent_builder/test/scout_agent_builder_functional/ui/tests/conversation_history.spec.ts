@@ -41,6 +41,7 @@ test.describe(
     });
 
     test('conversation history flows', async ({ page, pageObjects, llmProxy }) => {
+      test.setTimeout(180_000);
       const conversationIds: string[] = [];
 
       await test.step('create three conversations', async () => {

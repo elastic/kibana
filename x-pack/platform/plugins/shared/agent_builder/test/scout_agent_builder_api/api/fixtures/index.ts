@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { apiTest as baseApiTest, mergeTests } from '@kbn/scout';
-import { synthtraceFixture } from '@kbn/scout-synthtrace';
+import type { SynthtraceFixture } from '@kbn/scout-synthtrace';
+import { getSynthtraceClient, synthtraceFixture } from '@kbn/scout-synthtrace';
+import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { withAuth } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { COMMON_HEADERS } from './constants';
@@ -20,8 +23,28 @@ interface AgentBuilderApiWorkerFixtures extends ScoutWorkerFixtures {
 
 export const apiTest = mergeTests(baseApiTest, synthtraceFixture).extend<
   ScoutTestFixtures,
-  AgentBuilderApiWorkerFixtures
+  AgentBuilderApiWorkerFixtures & Pick<SynthtraceFixture, 'apmSynthtraceEsClient'>
 >({
+  // Override the default apmSynthtraceEsClient so it does NOT try to install
+  // the APM Fleet package. Installing is forbidden on serverless search projects
+  // (Fleet returns 403) and the FTR equivalent (`@kbn/synthtrace` default)
+  apmSynthtraceEsClient: [
+    async ({ esClient, config, kbnUrl, log }, use) => {
+      const { apmEsClient } = await getSynthtraceClient(
+        'apmEsClient',
+        { esClient, kbnUrl: kbnUrl.get(), log, config },
+        { skipInstallation: true }
+      );
+
+      const index = async (events: SynthtraceGenerator<ApmFields>) => {
+        await apmEsClient.index(Readable.from(Array.from(events)));
+      };
+      const clean = async () => await apmEsClient.clean();
+
+      await use({ index, clean });
+    },
+    { scope: 'worker' },
+  ],
   asAdmin: [
     async ({ apiClient, requestAuth }, use) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();

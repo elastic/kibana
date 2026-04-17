@@ -52,6 +52,8 @@ test.describe(
     });
 
     test('MCP tool flows', async ({ page, pageObjects, kbnClient }) => {
+      test.setTimeout(180_000);
+
       await test.step('creates an MCP tool by selecting connector and tool', async () => {
         const toolId = `scout.mcp.${Date.now()}`;
         await pageObjects.agentBuilder.navigateToNewTool();

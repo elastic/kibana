@@ -10,6 +10,7 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { subj } from '@kbn/test-subj-selector';
 import {
   setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
@@ -289,19 +290,33 @@ export class AgentBuilderApp {
 
   async selectMcpTool(toolName: string) {
     const optionSubj = `mcpToolOption-${toolName}`;
-    await this.page.testSubj.click('agentBuilderMcpToolSelect');
     const option = this.page.locator(`[data-test-subj="${optionSubj}"]`);
-    await option.waitFor({ state: 'visible', timeout: 60_000 });
+    // Retry clicking the combobox until the option appears. A single click can
+    // either open or close the EuiComboBox dropdown, so we guard against
+    // accidentally toggling it closed by only clicking when the option isn't
+    // already visible.
+    await expect(async () => {
+      if (!(await option.isVisible())) {
+        await this.page.testSubj.click('agentBuilderMcpToolSelect');
+      }
+      await expect(option).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 60_000 });
     await option.click();
   }
 
   async waitForMcpToolsToLoad() {
-    await this.page.waitForFunction(() => {
-      const el = document.querySelector(
-        '[data-test-subj="agentBuilderMcpToolSelect"]'
-      ) as HTMLButtonElement | null;
-      return el !== null && el.getAttribute('disabled') !== 'true';
-    });
+    // EuiComboBox renders an <input> inside the wrapper that carries the
+    // data-test-subj. While MCP tools are loading or the combobox is disabled,
+    // that input has the `disabled` attribute set. Wait until it's cleared.
+    await this.page.waitForFunction(
+      () => {
+        const wrapper = document.querySelector('[data-test-subj="agentBuilderMcpToolSelect"]');
+        const input = wrapper?.querySelector('input') as HTMLInputElement | null;
+        return input !== null && !input.disabled;
+      },
+      undefined,
+      { timeout: 60_000 }
+    );
   }
 
   async openManageMcpMenu() {
