@@ -207,6 +207,33 @@ describe('evidence_grounding evaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('grounds descriptive evidence via keyword overlap with hyphenated technical tokens', async () => {
+    const result = await evidenceGroundingEvaluator.evaluate({
+      input: {
+        sample_logs: [],
+        sample_docs: [
+          {
+            resource: { attributes: { app: 'product-catalog' } },
+            body: { text: 'otel-collector connection failed' },
+          },
+        ],
+      },
+      output: [
+        {
+          esql: 'FROM logs | WHERE true',
+          title: 'Collector',
+          category: 'error',
+          severity_score: 60,
+          evidence: ['product-catalog logs show otel-collector connection failures'],
+        },
+      ],
+      expected: {},
+      metadata: null,
+    });
+
+    expect(result.score).toBe(1);
+  });
+
   it('rejects evidence with too few matching keywords and no features', async () => {
     const result = await evidenceGroundingEvaluator.evaluate({
       input: {

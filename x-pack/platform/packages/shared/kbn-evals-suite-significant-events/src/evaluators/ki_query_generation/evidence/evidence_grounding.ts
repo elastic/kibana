@@ -36,8 +36,9 @@ function stripEvidenceAnnotations(evidence: string): string {
 /**
  * Returns true for tokens that look like technical identifiers rather
  * than natural-language prose: dotted field paths, camelCase names,
- * tokens with digits, or ALL_CAPS error codes. No stop-words list
- * required — the structural heuristics are sufficient.
+ * tokens with digits, ALL_CAPS error codes, or hyphenated compound
+ * identifiers (e.g. otel-collector, product-catalog). No stop-words
+ * list required - the structural heuristics are dataset-agnostic.
  */
 function isTechnicalToken(token: string): boolean {
   if (token.length <= 3) return false;
@@ -45,6 +46,7 @@ function isTechnicalToken(token: string): boolean {
   if (/[a-z][A-Z]/.test(token)) return true;
   if (/\d/.test(token)) return true;
   if (token === token.toUpperCase() && /[A-Z]/.test(token)) return true;
+  if (token.includes('-')) return true;
   return false;
 }
 

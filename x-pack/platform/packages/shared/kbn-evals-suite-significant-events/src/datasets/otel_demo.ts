@@ -128,6 +128,16 @@ export const otelDemoDataset: DatasetConfig = {
               { match_phrase: { 'body.text': 'context deadline exceeded' } },
             ],
           },
+          {
+            id: 'k8s-pod-events',
+            text: 'Should identify Kubernetes pod startup events during initial deployment (evidence: 47 K8s events with reasons Started, Created, Pulled, ScalingReplicaSet, SuccessfulCreate, Scheduled across all service pods)',
+            score: 1,
+            sampling_filters: [
+              { match: { 'body.structured.object.reason': 'Started' } },
+              { match: { 'body.structured.object.reason': 'ScalingReplicaSet' } },
+              { match: { 'body.structured.object.reason': 'Scheduled' } },
+            ],
+          },
         ],
         min_features: 8,
         max_features: 25,
