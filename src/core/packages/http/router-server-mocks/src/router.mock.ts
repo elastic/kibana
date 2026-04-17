@@ -64,6 +64,7 @@ export interface RequestFixtureOptions<P = any, Q = any, B = any> {
     query?: RouteValidationSpec<Q>;
     body?: RouteValidationSpec<B>;
   };
+  spaceId?: string;
 }
 
 function createKibanaRequestMock<P = any, Q = any, B = any>({
@@ -85,13 +86,16 @@ function createKibanaRequestMock<P = any, Q = any, B = any>({
     startTime: new Date('2025-01-01T00:00:00.000Z').getTime(),
   },
   auth = { isAuthenticated: true },
+  spaceId,
 }: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> {
   const queryString = stringify(query, { sort: false });
   const url = new URL(`${path}${queryString ? `?${queryString}` : ''}`, 'http://localhost');
 
+  const appState = spaceId ? { ...kibanaRequestState, spaceId } : kibanaRequestState;
+
   return kibanaRequestFactory<P, Q, B>(
     hapiMocks.createRequest({
-      app: kibanaRequestState,
+      app: appState,
       auth,
       headers,
       params,
