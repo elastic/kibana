@@ -22,11 +22,6 @@ export function getReadResponseBodySchema(isDashboardAppRequest: boolean) {
     }),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: asCodeMetaSchema,
-    warnings: schema.maybe(warningsSchema, {
-      meta: {
-        description:
-          'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.',
-      },
-    }),
+    warnings: schema.maybe(warningsSchema),
   });
 }

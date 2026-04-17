@@ -12,7 +12,7 @@ import { referenceSchema } from '@kbn/content-management-utils';
 
 const droppedPanelWarningSchema = schema.object(
   {
-    type: schema.literal('dropped_panel', { meta: { description: 'The warning type.' } }),
+    type: schema.literal('dropped_panel'),
     message: schema.string({
       meta: { description: 'Human-readable explanation of why the panel was dropped.' },
     }),
@@ -45,4 +45,8 @@ const droppedPanelWarningSchema = schema.object(
 
 export const warningsSchema = schema.arrayOf(droppedPanelWarningSchema, {
   maxSize: 100,
+  meta: {
+    description:
+      'Panels dropped because their type is not supported by the API. Present only when one or more panels could not be returned.',
+  },
 });
