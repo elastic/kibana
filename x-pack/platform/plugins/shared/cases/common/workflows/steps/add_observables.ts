@@ -44,7 +44,7 @@ export const addObservablesStepCommonDefinition: CommonStepDefinition<
   AddObservablesStepOutputSchema
 > = {
   id: AddObservablesStepTypeId,
-  category: StepCategory.Kibana,
+  category: StepCategory.KibanaCases,
   label: i18n.ADD_OBSERVABLES_STEP_LABEL,
   description: i18n.ADD_OBSERVABLES_STEP_DESCRIPTION,
   documentation: {

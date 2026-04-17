@@ -16,6 +16,7 @@ import { PasswordWidget } from './components/password_widget';
 import { DiscriminatedUnionWidget } from './components/discriminated_union_widget';
 import { HiddenWidget } from './components/hidden_widget';
 import { ObjectWidget } from './components/object_widget';
+import { FileUploadWidget } from './components/file_upload_widget';
 
 const WIDGET_REGISTRY = {
   [WidgetType.Text]: TextWidget,
@@ -24,6 +25,7 @@ const WIDGET_REGISTRY = {
   [WidgetType.FormFieldset]: DiscriminatedUnionWidget,
   [WidgetType.Hidden]: HiddenWidget,
   [WidgetType.Object]: ObjectWidget,
+  [WidgetType.FileUpload]: FileUploadWidget,
 };
 
 interface MetaFunctionsParam {
