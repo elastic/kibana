@@ -58,7 +58,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
       if (!isDashboardLayoutPanel(panelToCopy)) throw new Error();
     } catch {
       coreServices.notifications.toasts.addDanger({
-        title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(),
+        title: dashboardCopyToDashboardActionStrings.getPanelNotFoundError(api.uuid),
         'data-test-subj': 'copyToDashboardPanelNotFound',
       });
       closeModal();

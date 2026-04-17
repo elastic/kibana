@@ -30,9 +30,10 @@ export const dashboardCopyToDashboardActionStrings = {
     i18n.translate('dashboard.panel.copyToDashboard.existingDashboardOptionLabel', {
       defaultMessage: 'Existing dashboard',
     }),
-  getPanelNotFoundError: () =>
+  getPanelNotFoundError: (id: string) =>
     i18n.translate('dashboard.panel.copyToDashboard.panelNotFoundError', {
-      defaultMessage: 'Unable to find panel to copy',
+      defaultMessage: 'Unable to copy panel, no panel with id {id} found',
+      values: { id },
     }),
 };
 
