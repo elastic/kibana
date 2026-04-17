@@ -1109,7 +1109,9 @@ export class SettingsPageObject extends FtrService {
     await this.setFieldTypeFilter(fieldType);
     await this.testSubjects.click('editFieldFormat');
 
-    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    await this.retry.try(async () => {
+      expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+    });
 
     await this.retry.tryForTime(5000, async () => {
       const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');
