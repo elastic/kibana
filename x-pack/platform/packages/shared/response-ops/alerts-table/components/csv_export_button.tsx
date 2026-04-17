@@ -145,12 +145,21 @@ export const CsvExportButton: React.FC = () => {
     }
   }, [http, ruleTypeIds, consumers, query, sort, columns, notifications, settings]);
 
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  const handleClick = useCallback(async () => {
+    // Weird bug where the tooltip is stuck after clicking the button
+    buttonRef.current?.blur();
+    await handleExport();
+  }, [handleExport]);
+
   return (
-    <EuiToolTip content={CSV_EXPORT_LABEL} disableScreenReaderOutput>
+    <EuiToolTip content={CSV_EXPORT_LABEL} delay="long" disableScreenReaderOutput>
       <EuiButtonIcon
+        buttonRef={buttonRef}
         color="text"
         iconType="exportAction"
-        onClick={handleExport}
+        onClick={handleClick}
         isLoading={isExporting}
         aria-label={CSV_EXPORT_LABEL}
         data-test-subj="alerts-csv-export-button"
