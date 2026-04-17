@@ -84,7 +84,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, {
-      title: 'AIOPS change point chart',
+      title: 'Change point detection chart',
       getTransforms: () => ({
         transformIn: changePointTransformIn,
         transformOut: changePointTransformOut,
