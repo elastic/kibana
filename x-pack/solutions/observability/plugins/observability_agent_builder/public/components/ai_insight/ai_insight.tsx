@@ -165,7 +165,10 @@ export function AiInsight({ insightType, title, fetchInsight, buildAttachments }
             <EuiSpacer size="m" />
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <StartConversationButton insightType={insightType} onClick={handleStartConversation} />
+                <StartConversationButton
+                  insightType={insightType}
+                  onClick={handleStartConversation}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </>
