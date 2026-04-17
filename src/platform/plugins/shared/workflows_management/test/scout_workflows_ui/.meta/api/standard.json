@@ -1,5 +1,5 @@
 {
-  "sha1": "633c03d5fa8b3e5e14e57cb797978afa595fa72f",
+  "sha1": "622ec6cab4c9ef0491fa06a49837bf591eb71802",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -504,6 +504,90 @@
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/scheduled_workflow_save_update.spec.ts",
         "line": 46,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-bdbeae7b09e9467",
+      "title": "Workflows management API availability (serverless tiers) observability logs essentials: workflow API is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_logs_essentials",
+        "@cloud-serverless-observability_logs_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-ad99f6c4127439d",
+      "title": "Workflows management API availability (serverless tiers) observability complete: can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 58,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-b2646edea4379ca",
+      "title": "Workflows management API availability (serverless tiers) security essentials: workflow API is not available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-b6684e03b06dc5c",
+      "title": "Workflows management API availability (serverless tiers) security complete: can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-afcd9627695814e",
+      "title": "Workflows management API availability (serverless tiers) security EASE (AI for SOC): can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_ease",
+        "@cloud-serverless-security_ease"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 99,
+        "column": 12
+      }
+    },
+    {
+      "id": "f8530841402abe4-15b182e404f1928",
+      "title": "Workflows management API availability (serverless tiers) search: can create and retrieve a workflow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/workflows_management_api_availability.spec.ts",
+        "line": 111,
         "column": 12
       }
     }

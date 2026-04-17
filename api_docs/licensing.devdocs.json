@@ -140,7 +140,20 @@
           "deprecated": true,
           "removeBy": "8.8.0",
           "trackAdoption": false,
-          "references": [],
+          "references": [
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/upload_license.ts"
+            },
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/start_basic.ts"
+            },
+            {
+              "plugin": "licenseManagement",
+              "path": "x-pack/platform/plugins/shared/license_management/public/application/store/actions/start_trial.ts"
+            }
+          ],
           "children": [],
           "returnComment": []
         },
