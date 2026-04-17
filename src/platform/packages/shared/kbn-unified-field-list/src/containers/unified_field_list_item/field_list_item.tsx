@@ -83,10 +83,11 @@ interface MultiFieldsProps {
   toggleDisplay: (field: DataViewField) => void;
   alwaysShowActionButton: boolean;
   size: FieldItemButtonProps<DataViewField>['size'];
+  searchMode: SearchMode | undefined;
 }
 
 const MultiFields: React.FC<MultiFieldsProps> = memo(
-  ({ stateService, multiFields, toggleDisplay, alwaysShowActionButton, size }) => (
+  ({ stateService, multiFields, toggleDisplay, alwaysShowActionButton, size, searchMode }) => (
     <React.Fragment>
       <EuiTitle size="xxxs">
         <h5>
@@ -110,6 +111,7 @@ const MultiFields: React.FC<MultiFieldsProps> = memo(
             isSelected: entry.isSelected,
             toggleDisplay,
             size,
+            searchMode,
           })}
         />
       ))}
@@ -327,6 +329,7 @@ function UnifiedFieldListItemComponent({
               alwaysShowActionButton={alwaysShowActionButton}
               toggleDisplay={toggleDisplay}
               size={size}
+              searchMode={searchMode}
             />
           </>
         )}
