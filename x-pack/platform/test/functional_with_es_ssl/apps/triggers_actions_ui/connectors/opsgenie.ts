@@ -153,8 +153,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         beforeEach(async () => {
-          await testSubjects.click(`edit${connectorId}`);
-          await testSubjects.click('testConnectorTab');
+          await retry.try(async () => {
+            if (await testSubjects.exists('edit-connector-flyout-close-btn', { timeout: 1000 })) {
+              await testSubjects.click('edit-connector-flyout-close-btn');
+            }
+            await testSubjects.click(`edit${connectorId}`);
+            await testSubjects.click('testConnectorTab');
+            await testSubjects.existOrFail('opsgenie-subActionSelect', { timeout: 10000 });
+          });
         });
 
         afterEach(async () => {
