@@ -12,6 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
+import { HttpMethodSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import { z } from '@kbn/zod/v4';
 
 // HTTP connector parameter schema
@@ -23,8 +24,11 @@ export const HttpParamsSchema = z.object({
       'The base URL to send the request to. If `connector-id` is provided the configured URL will be used and this value will be ignored.'
     ),
   path: z.string().optional().describe('The path appended to the base URL.'),
-  method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']).default('GET'),
-  body: z.string().optional(),
+  method: HttpMethodSchema.describe('The HTTP method to use for the request.'),
+  body: z
+    .string()
+    .optional()
+    .describe('The body of the request. Can be a raw string, a JSON object, or a JSON array.'),
   query: z.record(z.string(), z.string()).optional(),
   headers: z.record(z.string(), z.string()).optional(),
   fetcher: z
