@@ -22,7 +22,7 @@ jest.mock('../../../routes/utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn(),
 }));
 
-describe('create_query_ki tool', () => {
+describe('ki_query_create tool', () => {
   const logger = loggingSystemMock.createLogger();
   const server = {} as unknown as StreamsServer;
   const request = {} as unknown as KibanaRequest;
@@ -168,7 +168,7 @@ describe('create_query_ki tool', () => {
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({
         ki_kind: 'query',
-        tool_id: 'create_query_ki',
+        tool_id: 'ki_query_create',
         success: true,
         stream_name: 'logs.test',
         stream_type: 'classic',
@@ -224,7 +224,7 @@ describe('create_query_ki tool', () => {
     expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
       expect.objectContaining({
         ki_kind: 'query',
-        tool_id: 'create_query_ki',
+        tool_id: 'ki_query_create',
         success: false,
         stream_name: 'logs.test',
         stream_type: 'classic',
