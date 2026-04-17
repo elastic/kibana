@@ -76,7 +76,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           <EuiCard
             hasBorder
             display="plain"
-            paddingSize="l"
+            paddingSize="m"
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
@@ -119,7 +119,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
           <EuiCard
             hasBorder
             display="plain"
-            paddingSize="l"
+            paddingSize="m"
             title={overviewLabels.agentSettingsCardTitle}
             titleElement="h3"
             titleSize="xs"
