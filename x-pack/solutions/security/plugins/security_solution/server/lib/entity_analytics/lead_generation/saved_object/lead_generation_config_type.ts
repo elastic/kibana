@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 
 export const leadGenerationConfigTypeName = 'lead-generation-config';
 
@@ -16,8 +17,18 @@ export const leadGenerationConfigTypeMappings: SavedObjectsType['mappings'] = {
   properties: {},
 };
 
-const version1: SavedObjectsModelVersion = {
+const leadGenerationConfigSchemaV1 = schema.object({
+  connectorId: schema.string(),
+  lastExecutionUuid: schema.maybe(schema.string()),
+  lastError: schema.maybe(schema.nullable(schema.string())),
+});
+
+const version1: SavedObjectsFullModelVersion = {
   changes: [],
+  schemas: {
+    forwardCompatibility: leadGenerationConfigSchemaV1.extends({}, { unknowns: 'ignore' }),
+    create: leadGenerationConfigSchemaV1,
+  },
 };
 
 export const leadGenerationConfigType: SavedObjectsType = {
