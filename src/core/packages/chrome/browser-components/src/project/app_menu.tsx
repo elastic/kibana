@@ -111,8 +111,11 @@ const useAppMenuBarStyles = (
         ? euiTheme.size.s
         : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
-      /* No bottom border / negative margin — avoids an extra “stripe” under the main chrome for every app */
-      borderBottom: 'none',
+      /* Tabs: `EuiTabs bottomBorder` — skip root border to avoid a double rule. Discover: no root border (design). */
+      borderBottom:
+        hasHeaderTabs || currentAppId === 'discover'
+          ? 'none'
+          : `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
       marginBottom: 0,
       minHeight: 0,
       boxSizing: 'border-box' as const,
