@@ -253,6 +253,8 @@ describe('AnnotationsPanel', () => {
         </EuiThemeProvider>
       );
 
+      onAnnotationChange.mockClear();
+
       act(() => {
         screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
       });
@@ -270,7 +272,8 @@ describe('AnnotationsPanel', () => {
         },
       };
 
-      expect(onAnnotationChange).toHaveBeenCalledWith(expectedRangeAnnotation);
+      expect(onAnnotationChange).toHaveBeenCalledTimes(1);
+      expect(onAnnotationChange).toHaveBeenNthCalledWith(1, expectedRangeAnnotation);
 
       rerender(
         <EuiThemeProvider>
@@ -285,11 +288,13 @@ describe('AnnotationsPanel', () => {
         </EuiThemeProvider>
       );
 
+      onAnnotationChange.mockClear();
+
       act(() => {
         screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
       });
 
-      expect(onAnnotationChange).toHaveBeenCalledWith({
+      const expectedPointAnnotation = {
         color: AUTO_ANNOTATION_COLOR,
         id: 'ann1',
         isHidden: undefined,
@@ -299,7 +304,10 @@ describe('AnnotationsPanel', () => {
         },
         label: 'Event',
         type: 'manual',
-      });
+      };
+
+      expect(onAnnotationChange).toHaveBeenCalledTimes(1);
+      expect(onAnnotationChange).toHaveBeenNthCalledWith(1, expectedPointAnnotation);
     });
 
     test('shows correct options for query based', () => {

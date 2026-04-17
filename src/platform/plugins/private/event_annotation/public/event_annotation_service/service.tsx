@@ -441,7 +441,7 @@ const annotationsToExpression = (annotations: EventAnnotationConfig[]) => {
             id: [id],
             timeField: timeField ? [timeField] : [],
             label: [label || defaultAnnotationLabel],
-            color: color ? [color] : [],
+            color: [getPersistedAnnotationColor(color)],
             lineWidth: [lineWidth || 1],
             lineStyle: [lineStyle || 'solid'],
             icon: hasIcon(icon) ? [icon] : ['triangle'],

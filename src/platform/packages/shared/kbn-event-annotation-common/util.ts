@@ -18,8 +18,9 @@ import type {
 export const AUTO_ANNOTATION_COLOR = 'auto';
 export const defaultAnnotationColor = '#2B394F';
 export const darkModeDefaultAnnotationColor = '#FFFFFF';
-export const defaultAnnotationRangeColor = '#2B394F1A';
-export const darkModeDefaultAnnotationRangeColor = '#FFFFFF1A';
+// Do not compute it live as dependencies will add tens of Kbs to the plugin
+export const defaultAnnotationRangeColor = '#2B394F1A'; // defaultAnnotationColor with opacity 0.1
+export const darkModeDefaultAnnotationRangeColor = '#FFFFFF1A'; // defaultAnnotationColor with opacity 0.1
 
 export const getDefaultAnnotationColor = (isDarkMode = false) =>
   isDarkMode ? darkModeDefaultAnnotationColor : defaultAnnotationColor;

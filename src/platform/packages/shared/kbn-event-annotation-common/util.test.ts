@@ -20,7 +20,7 @@ describe('event annotation color helpers', () => {
     expect(getPersistedAnnotationColor(undefined)).toBe(AUTO_ANNOTATION_COLOR);
   });
 
-  it('resolves auto point annotation colors from the current theme', () => {
+  it('resolves auto point annotation colors from the light theme by default', () => {
     expect(
       getResolvedAnnotationColor({
         color: AUTO_ANNOTATION_COLOR,
@@ -28,7 +28,7 @@ describe('event annotation color helpers', () => {
     ).toBe(defaultAnnotationColor);
   });
 
-  it('resolves auto range annotation colors from the current theme', () => {
+  it('resolves auto range annotation colors from the dark theme', () => {
     expect(
       getResolvedAnnotationColor({
         color: AUTO_ANNOTATION_COLOR,

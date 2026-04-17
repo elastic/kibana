@@ -12,7 +12,6 @@ import type { XYDataLayerConfig } from './types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { KbnPalette } from '@kbn/palettes';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import { getResolvedAnnotationColor } from '@kbn/event-annotation-common';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
@@ -347,13 +346,7 @@ describe('color_assignment', () => {
         true
       );
 
-      expect(assigned.color).toEqual(
-        getResolvedAnnotationColor({
-          color: undefined,
-          isDarkMode: true,
-          isRange: false,
-        })
-      );
+      expect(assigned.color).toEqual('#FFFFFF');
     });
 
     it('should resolve the range annotation fallback color for the light theme', () => {
@@ -382,13 +375,7 @@ describe('color_assignment', () => {
         false
       );
 
-      expect(assigned.color).toEqual(
-        getResolvedAnnotationColor({
-          color: undefined,
-          isDarkMode: false,
-          isRange: true,
-        })
-      );
+      expect(assigned.color).toEqual('#2B394F1A');
     });
   });
 });
