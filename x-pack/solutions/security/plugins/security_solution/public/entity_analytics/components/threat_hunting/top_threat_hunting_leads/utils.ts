@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+export const MAX_VISIBLE_TAGS = 3;
+
 export const getEntityIcon = (entityType: string): string => {
   switch (entityType) {
     case 'user':
