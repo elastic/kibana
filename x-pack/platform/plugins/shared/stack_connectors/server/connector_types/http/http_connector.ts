@@ -38,6 +38,7 @@ import type {
 import type { Result } from '../lib/result_type';
 
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
+import { processBufferResponse } from '../lib/process_buffer_response';
 import { isOk, promiseResult } from '../lib/result_type';
 import { getAxiosConfig } from './get_axios_config';
 import { ensureUriAllowed, validateConnectorTypeConfig } from './validations';
@@ -192,6 +193,31 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
+function getContentTypeHeader(headers: Record<string, string>): string | null {
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === 'content-type') {
+      return value;
+    }
+  }
+  return null;
+}
+
+function toResponseBuffer(data: unknown): Buffer {
+  if (Buffer.isBuffer(data)) {
+    return data;
+  }
+  if (data == null) {
+    return Buffer.alloc(0);
+  }
+  if (data instanceof ArrayBuffer) {
+    return Buffer.from(data);
+  }
+  if (ArrayBuffer.isView(data)) {
+    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  }
+  return Buffer.from(data as ArrayLike<number>);
+}
+
 // action executor
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
@@ -291,6 +317,7 @@ export async function executor(
         maxContentLength: fetcher.max_content_length,
         maxBodyLength: fetcher.max_content_length,
       }),
+      responseType: 'arraybuffer',
       signal,
     })
   );
@@ -300,9 +327,7 @@ export async function executor(
   }
 
   if (isOk(result)) {
-    const {
-      value: { status, statusText, data },
-    } = result;
+    const { status, statusText } = result.value;
     logger.debug(`response from http action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     const headers = Object.entries(result.value.headers || {}).reduce<Record<string, string>>(
@@ -314,6 +339,10 @@ export async function executor(
       },
       {}
     );
+
+    const responseBuffer = toResponseBuffer(result.value.data);
+    const contentType = getContentTypeHeader(headers);
+    const data = processBufferResponse(responseBuffer, contentType);
 
     return { status: 'ok', actionId, data: { status, statusText, headers, data } };
   } else {
