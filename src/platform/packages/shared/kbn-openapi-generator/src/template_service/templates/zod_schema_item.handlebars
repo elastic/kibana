@@ -23,7 +23,7 @@
     {{~#if @first~}}
       {{> zod_schema_item }}
     {{~else~}}
-      .extend({{> zod_schema_item }})
+      .merge({{> zod_schema_item }})
     {{~/if~}}
   {{~/each~}}
 {{~/if~}}

@@ -14,75 +14,79 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { IndexPattern, EntityType, Interval, EngineDescriptor } from './common.gen';
 
+export const InitEntityStoreRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The number of historical values to keep for each field.
+     */
+    fieldHistoryLength: z.number().int().optional().default(10),
+    indexPattern: IndexPattern.optional(),
+    filter: z.string().optional(),
+    entityTypes: z.array(EntityType).optional(),
+    enrichPolicyExecutionInterval: Interval.optional(),
+    /**
+     * The field to use as the timestamp.
+     */
+    timestampField: z.string().optional().default('@timestamp'),
+    /**
+     * The amount of time the transform looks back to calculate the aggregations.
+     */
+    lookbackPeriod: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional()
+      .default('3h'),
+    /**
+     * The timeout for initializing the aggregating transform.
+     */
+    timeout: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional()
+      .default('180s'),
+    /**
+     * The frequency at which the transform will run.
+     */
+    frequency: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional()
+      .default('1m'),
+    /**
+     * The delay before the transform will run.
+     */
+    delay: z
+      .string()
+      .regex(/[smdh]$/)
+      .optional()
+      .default('1m'),
+    /**
+     * The number of documents per second to process.
+     */
+    docsPerSecond: z.number().int().optional().default(-1),
+    /**
+     * The initial page size to use for the composite aggregation of each checkpoint.
+     */
+    maxPageSearchSize: z.number().int().optional().default(500),
+  })
+);
 export type InitEntityStoreRequestBody = z.infer<typeof InitEntityStoreRequestBody>;
-export const InitEntityStoreRequestBody = z.object({
-  /**
-   * The number of historical values to keep for each field.
-   */
-  fieldHistoryLength: z.number().int().optional().default(10),
-  indexPattern: IndexPattern.optional(),
-  filter: z.string().optional(),
-  entityTypes: z.array(EntityType).optional(),
-  enrichPolicyExecutionInterval: Interval.optional(),
-  /**
-   * The field to use as the timestamp.
-   */
-  timestampField: z.string().optional().default('@timestamp'),
-  /**
-   * The amount of time the transform looks back to calculate the aggregations.
-   */
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional()
-    .default('3h'),
-  /**
-   * The timeout for initializing the aggregating transform.
-   */
-  timeout: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional()
-    .default('180s'),
-  /**
-   * The frequency at which the transform will run.
-   */
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional()
-    .default('1m'),
-  /**
-   * The delay before the transform will run.
-   */
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .optional()
-    .default('1m'),
-  /**
-   * The number of documents per second to process.
-   */
-  docsPerSecond: z.number().int().optional().default(-1),
-  /**
-   * The initial page size to use for the composite aggregation of each checkpoint.
-   */
-  maxPageSearchSize: z.number().int().optional().default(500),
-});
 export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 
+export const InitEntityStoreResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the Entity Store was initialized successfully.
+     */
+    succeeded: z.boolean().optional(),
+    /**
+     * The engine descriptors created during initialization.
+     */
+    engines: z.array(EngineDescriptor).optional(),
+  })
+);
 export type InitEntityStoreResponse = z.infer<typeof InitEntityStoreResponse>;
-export const InitEntityStoreResponse = z.object({
-  /**
-   * Whether the Entity Store was initialized successfully.
-   */
-  succeeded: z.boolean().optional(),
-  /**
-   * The engine descriptors created during initialization.
-   */
-  engines: z.array(EngineDescriptor).optional(),
-});

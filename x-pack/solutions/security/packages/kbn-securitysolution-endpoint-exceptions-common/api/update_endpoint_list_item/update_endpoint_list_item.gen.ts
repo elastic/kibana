@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemId,
@@ -30,32 +30,34 @@ import {
 import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_item_entry.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
+export const UpdateEndpointListItemRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Either `id` or `item_id` must be specified
+     */
+    id: ExceptionListItemId.optional(),
+    /**
+     * Either `id` or `item_id` must be specified
+     */
+    item_id: ExceptionListItemHumanId.optional(),
+    type: ExceptionListItemType,
+    name: ExceptionListItemName,
+    description: ExceptionListItemDescription,
+    entries: ExceptionListItemEntryArray,
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: ExceptionListItemTags.optional(),
+    meta: ExceptionListItemMeta.optional(),
+    comments: ExceptionListItemCommentArray.optional().default([]),
+    /**
+     * The version id, normally returned by the API when the item is retrieved. Use it ensure updates are made against the latest version.
+     */
+    _version: z.string().optional(),
+  })
+);
 export type UpdateEndpointListItemRequestBody = z.infer<typeof UpdateEndpointListItemRequestBody>;
-export const UpdateEndpointListItemRequestBody = z.object({
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  id: ExceptionListItemId.optional(),
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  item_id: ExceptionListItemHumanId.optional(),
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional(),
-  meta: ExceptionListItemMeta.optional(),
-  comments: ExceptionListItemCommentArray.optional().default([]),
-  /**
-   * The version id, normally returned by the API when the item is retrieved. Use it ensure updates are made against the latest version.
-   */
-  _version: z.string().optional(),
-});
 export type UpdateEndpointListItemRequestBodyInput = z.input<
   typeof UpdateEndpointListItemRequestBody
 >;
 
+export const UpdateEndpointListItemResponse = lazySchema(() => EndpointListItem);
 export type UpdateEndpointListItemResponse = z.infer<typeof UpdateEndpointListItemResponse>;
-export const UpdateEndpointListItemResponse = EndpointListItem;

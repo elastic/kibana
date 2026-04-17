@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { ListId } from '../model/list_common.gen';
@@ -23,46 +23,52 @@ import { ListItem } from '../model/list_schemas.gen';
 /**
  * Returns the items that come after the last item returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all items are sorted and returned correctly.
  */
+export const FindListItemsCursor = lazySchema(() =>
+  z.string().min(1).superRefine(isNonEmptyString)
+);
 export type FindListItemsCursor = z.infer<typeof FindListItemsCursor>;
-export const FindListItemsCursor = z.string().min(1).superRefine(isNonEmptyString);
 
+export const FindListItemsFilter = lazySchema(() => z.string());
 export type FindListItemsFilter = z.infer<typeof FindListItemsFilter>;
-export const FindListItemsFilter = z.string();
 
-export type FindListItemsRequestQuery = z.infer<typeof FindListItemsRequestQuery>;
-export const FindListItemsRequestQuery = z.object({
-  list_id: ListId,
-  /**
-   * The page number to return.
-   */
-  page: z.coerce.number().int().optional(),
-  /**
-   * The number of list items to return per page.
-   */
-  per_page: z.coerce.number().int().optional(),
-  /**
-   * Determines which field is used to sort the results.
-   */
-  sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
-  /**
-   * Determines the sort order, which can be `desc` or `asc`
-   */
-  sort_order: z.enum(['desc', 'asc']).optional(),
-  cursor: FindListItemsCursor.optional(),
-  /**
+export const FindListItemsRequestQuery = lazySchema(() =>
+  z.object({
+    list_id: ListId,
+    /**
+     * The page number to return.
+     */
+    page: z.coerce.number().int().optional(),
+    /**
+     * The number of list items to return per page.
+     */
+    per_page: z.coerce.number().int().optional(),
+    /**
+     * Determines which field is used to sort the results.
+     */
+    sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
+    /**
+     * Determines the sort order, which can be `desc` or `asc`
+     */
+    sort_order: z.enum(['desc', 'asc']).optional(),
+    cursor: FindListItemsCursor.optional(),
+    /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
 
       */
-  filter: FindListItemsFilter.optional(),
-});
+    filter: FindListItemsFilter.optional(),
+  })
+);
+export type FindListItemsRequestQuery = z.infer<typeof FindListItemsRequestQuery>;
 export type FindListItemsRequestQueryInput = z.input<typeof FindListItemsRequestQuery>;
 
+export const FindListItemsResponse = lazySchema(() =>
+  z.object({
+    data: z.array(ListItem),
+    page: z.number().int().min(0),
+    per_page: z.number().int().min(0),
+    total: z.number().int().min(0),
+    cursor: FindListItemsCursor,
+  })
+);
 export type FindListItemsResponse = z.infer<typeof FindListItemsResponse>;
-export const FindListItemsResponse = z.object({
-  data: z.array(ListItem),
-  page: z.number().int().min(0),
-  per_page: z.number().int().min(0),
-  total: z.number().int().min(0),
-  cursor: FindListItemsCursor,
-});

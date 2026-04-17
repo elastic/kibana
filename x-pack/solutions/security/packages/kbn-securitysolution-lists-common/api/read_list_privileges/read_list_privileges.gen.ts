@@ -14,29 +14,35 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ListPrivileges = lazySchema(() =>
+  z.object({
+    username: z.string(),
+    has_all_requested: z.boolean(),
+    cluster: z.object({}).catchall(z.boolean()),
+    index: z.object({}).catchall(z.object({}).catchall(z.boolean())),
+    application: z.object({}).catchall(z.boolean()),
+  })
+);
 export type ListPrivileges = z.infer<typeof ListPrivileges>;
-export const ListPrivileges = z.object({
-  username: z.string(),
-  has_all_requested: z.boolean(),
-  cluster: z.object({}).catchall(z.boolean()),
-  index: z.object({}).catchall(z.object({}).catchall(z.boolean())),
-  application: z.object({}).catchall(z.boolean()),
-});
 
+export const ListItemPrivileges = lazySchema(() =>
+  z.object({
+    username: z.string(),
+    has_all_requested: z.boolean(),
+    cluster: z.object({}).catchall(z.boolean()),
+    index: z.object({}).catchall(z.object({}).catchall(z.boolean())),
+    application: z.object({}).catchall(z.boolean()),
+  })
+);
 export type ListItemPrivileges = z.infer<typeof ListItemPrivileges>;
-export const ListItemPrivileges = z.object({
-  username: z.string(),
-  has_all_requested: z.boolean(),
-  cluster: z.object({}).catchall(z.boolean()),
-  index: z.object({}).catchall(z.object({}).catchall(z.boolean())),
-  application: z.object({}).catchall(z.boolean()),
-});
 
+export const ReadListPrivilegesResponse = lazySchema(() =>
+  z.object({
+    lists: ListPrivileges,
+    listItems: ListItemPrivileges,
+    is_authenticated: z.boolean(),
+  })
+);
 export type ReadListPrivilegesResponse = z.infer<typeof ReadListPrivilegesResponse>;
-export const ReadListPrivilegesResponse = z.object({
-  lists: ListPrivileges,
-  listItems: ListItemPrivileges,
-  is_authenticated: z.boolean(),
-});

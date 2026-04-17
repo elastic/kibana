@@ -14,14 +14,14 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SetAlertAssigneesBody } from '../../model/set_alert_assignees_body.gen';
 
+export const SetUnifiedAlertsAssigneesRequestBody = lazySchema(() => SetAlertAssigneesBody);
 export type SetUnifiedAlertsAssigneesRequestBody = z.infer<
   typeof SetUnifiedAlertsAssigneesRequestBody
 >;
-export const SetUnifiedAlertsAssigneesRequestBody = SetAlertAssigneesBody;
 export type SetUnifiedAlertsAssigneesRequestBodyInput = z.input<
   typeof SetUnifiedAlertsAssigneesRequestBody
 >;
@@ -29,5 +29,7 @@ export type SetUnifiedAlertsAssigneesRequestBodyInput = z.input<
 /**
  * Elasticsearch update by IDs response
  */
+export const SetUnifiedAlertsAssigneesResponse = lazySchema(() =>
+  z.object({}).catchall(z.unknown())
+);
 export type SetUnifiedAlertsAssigneesResponse = z.infer<typeof SetUnifiedAlertsAssigneesResponse>;
-export const SetUnifiedAlertsAssigneesResponse = z.object({}).catchall(z.unknown());

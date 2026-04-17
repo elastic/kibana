@@ -14,53 +14,57 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 import { List } from '../model/list_schemas.gen';
 
+export const FindListsCursor = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type FindListsCursor = z.infer<typeof FindListsCursor>;
-export const FindListsCursor = z.string().min(1).superRefine(isNonEmptyString);
 
+export const FindListsFilter = lazySchema(() => z.string());
 export type FindListsFilter = z.infer<typeof FindListsFilter>;
-export const FindListsFilter = z.string();
 
-export type FindListsRequestQuery = z.infer<typeof FindListsRequestQuery>;
-export const FindListsRequestQuery = z.object({
-  /**
-   * The page number to return.
-   */
-  page: z.coerce.number().int().optional(),
-  /**
-   * The number of value lists to return per page.
-   */
-  per_page: z.coerce.number().int().optional(),
-  /**
-   * Determines which field is used to sort the results.
-   */
-  sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
-  /**
-   * Determines the sort order, which can be `desc` or `asc`
-   */
-  sort_order: z.enum(['desc', 'asc']).optional(),
-  /**
-   * Returns the lists that come after the last lists returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
-   */
-  cursor: FindListsCursor.optional(),
-  /**
+export const FindListsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The page number to return.
+     */
+    page: z.coerce.number().int().optional(),
+    /**
+     * The number of value lists to return per page.
+     */
+    per_page: z.coerce.number().int().optional(),
+    /**
+     * Determines which field is used to sort the results.
+     */
+    sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
+    /**
+     * Determines the sort order, which can be `desc` or `asc`
+     */
+    sort_order: z.enum(['desc', 'asc']).optional(),
+    /**
+     * Returns the lists that come after the last lists returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
+     */
+    cursor: FindListsCursor.optional(),
+    /**
       * Filters the returned results according to the value of the specified field,
 using the <field name>:<field value> syntax.
 
       */
-  filter: FindListsFilter.optional(),
-});
+    filter: FindListsFilter.optional(),
+  })
+);
+export type FindListsRequestQuery = z.infer<typeof FindListsRequestQuery>;
 export type FindListsRequestQueryInput = z.input<typeof FindListsRequestQuery>;
 
+export const FindListsResponse = lazySchema(() =>
+  z.object({
+    data: z.array(List),
+    page: z.number().int().min(0),
+    per_page: z.number().int().min(0),
+    total: z.number().int().min(0),
+    cursor: FindListsCursor,
+  })
+);
 export type FindListsResponse = z.infer<typeof FindListsResponse>;
-export const FindListsResponse = z.object({
-  data: z.array(List),
-  page: z.number().int().min(0),
-  per_page: z.number().int().min(0),
-  total: z.number().int().min(0),
-  cursor: FindListsCursor,
-});

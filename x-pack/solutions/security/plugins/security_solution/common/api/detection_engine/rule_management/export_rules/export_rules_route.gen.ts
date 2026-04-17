@@ -14,38 +14,42 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { RuleSignatureId } from '../../model/rule_schema/common_attributes.gen';
 
-export type ExportRulesRequestQuery = z.infer<typeof ExportRulesRequestQuery>;
-export const ExportRulesRequestQuery = z.object({
-  /**
-   * Determines whether a summary of the exported rules is returned.
-   */
-  exclude_export_details: BooleanFromString.optional().default(false),
-  /**
+export const ExportRulesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Determines whether a summary of the exported rules is returned.
+     */
+    exclude_export_details: BooleanFromString.optional().default(false),
+    /**
       * File name for saving the exported rules.
 > info
 > When using cURL to export rules to a file, use the -O and -J options to save the rules to the file name specified in the URL.
 
       */
-  file_name: z.string().optional().default('export.ndjson'),
-});
+    file_name: z.string().optional().default('export.ndjson'),
+  })
+);
+export type ExportRulesRequestQuery = z.infer<typeof ExportRulesRequestQuery>;
 export type ExportRulesRequestQueryInput = z.input<typeof ExportRulesRequestQuery>;
 
+export const ExportRulesRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
+       */
+      objects: z.array(
+        z.object({
+          rule_id: RuleSignatureId,
+        })
+      ),
+    })
+    .nullable()
+);
 export type ExportRulesRequestBody = z.infer<typeof ExportRulesRequestBody>;
-export const ExportRulesRequestBody = z
-  .object({
-    /**
-     * Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
-     */
-    objects: z.array(
-      z.object({
-        rule_id: RuleSignatureId,
-      })
-    ),
-  })
-  .nullable();
 export type ExportRulesRequestBodyInput = z.input<typeof ExportRulesRequestBody>;

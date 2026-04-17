@@ -14,29 +14,31 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import { DefendInsightType, DefendInsightsResponse } from './common_attributes.gen';
 import { AnonymizationFieldResponse } from '../anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { ApiConfig, Replacements } from '../conversations/common_attributes.gen';
 
+export const DefendInsightsPostRequestBody = lazySchema(() =>
+  z.object({
+    endpointIds: z.array(NonEmptyString),
+    insightType: DefendInsightType,
+    anonymizationFields: z.array(AnonymizationFieldResponse),
+    /**
+     * LLM API configuration.
+     */
+    apiConfig: ApiConfig,
+    langSmithProject: z.string().optional(),
+    langSmithApiKey: z.string().optional(),
+    model: z.string().optional(),
+    replacements: Replacements.optional(),
+    subAction: z.enum(['invokeAI', 'invokeStream']),
+  })
+);
 export type DefendInsightsPostRequestBody = z.infer<typeof DefendInsightsPostRequestBody>;
-export const DefendInsightsPostRequestBody = z.object({
-  endpointIds: z.array(NonEmptyString),
-  insightType: DefendInsightType,
-  anonymizationFields: z.array(AnonymizationFieldResponse),
-  /**
-   * LLM API configuration.
-   */
-  apiConfig: ApiConfig,
-  langSmithProject: z.string().optional(),
-  langSmithApiKey: z.string().optional(),
-  model: z.string().optional(),
-  replacements: Replacements.optional(),
-  subAction: z.enum(['invokeAI', 'invokeStream']),
-});
 export type DefendInsightsPostRequestBodyInput = z.input<typeof DefendInsightsPostRequestBody>;
 
+export const DefendInsightsPostResponse = lazySchema(() => DefendInsightsResponse);
 export type DefendInsightsPostResponse = z.infer<typeof DefendInsightsPostResponse>;
-export const DefendInsightsPostResponse = DefendInsightsResponse;

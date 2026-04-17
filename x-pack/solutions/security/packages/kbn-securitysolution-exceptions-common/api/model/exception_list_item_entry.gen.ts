@@ -14,55 +14,65 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ListId, ListType } from '@kbn/securitysolution-lists-common/api/model/list_common.gen';
 
+export const ExceptionListItemEntryOperator = lazySchema(() => z.enum(['excluded', 'included']));
 export type ExceptionListItemEntryOperator = z.infer<typeof ExceptionListItemEntryOperator>;
-export const ExceptionListItemEntryOperator = z.enum(['excluded', 'included']);
 export type ExceptionListItemEntryOperatorEnum = typeof ExceptionListItemEntryOperator.enum;
 export const ExceptionListItemEntryOperatorEnum = ExceptionListItemEntryOperator.enum;
 
+export const ExceptionListItemEntryMatch = lazySchema(() =>
+  z.object({
+    type: z.literal('match'),
+    field: NonEmptyString,
+    value: NonEmptyString,
+    operator: ExceptionListItemEntryOperator,
+  })
+);
 export type ExceptionListItemEntryMatch = z.infer<typeof ExceptionListItemEntryMatch>;
-export const ExceptionListItemEntryMatch = z.object({
-  type: z.literal('match'),
-  field: NonEmptyString,
-  value: NonEmptyString,
-  operator: ExceptionListItemEntryOperator,
-});
 
+export const ExceptionListItemEntryMatchAny = lazySchema(() =>
+  z.object({
+    type: z.literal('match_any'),
+    field: NonEmptyString,
+    value: z.array(NonEmptyString).min(1),
+    operator: ExceptionListItemEntryOperator,
+  })
+);
 export type ExceptionListItemEntryMatchAny = z.infer<typeof ExceptionListItemEntryMatchAny>;
-export const ExceptionListItemEntryMatchAny = z.object({
-  type: z.literal('match_any'),
-  field: NonEmptyString,
-  value: z.array(NonEmptyString).min(1),
-  operator: ExceptionListItemEntryOperator,
-});
 
+export const ExceptionListItemEntryList = lazySchema(() =>
+  z.object({
+    type: z.literal('list'),
+    field: NonEmptyString,
+    list: z.object({
+      id: ListId,
+      type: ListType,
+    }),
+    operator: ExceptionListItemEntryOperator,
+  })
+);
 export type ExceptionListItemEntryList = z.infer<typeof ExceptionListItemEntryList>;
-export const ExceptionListItemEntryList = z.object({
-  type: z.literal('list'),
-  field: NonEmptyString,
-  list: z.object({
-    id: ListId,
-    type: ListType,
-  }),
-  operator: ExceptionListItemEntryOperator,
-});
 
+export const ExceptionListItemEntryExists = lazySchema(() =>
+  z.object({
+    type: z.literal('exists'),
+    field: NonEmptyString,
+    operator: ExceptionListItemEntryOperator,
+  })
+);
 export type ExceptionListItemEntryExists = z.infer<typeof ExceptionListItemEntryExists>;
-export const ExceptionListItemEntryExists = z.object({
-  type: z.literal('exists'),
-  field: NonEmptyString,
-  operator: ExceptionListItemEntryOperator,
-});
 
-export const ExceptionListItemEntryNestedEntryItemInternal = z.union([
-  ExceptionListItemEntryMatch,
-  ExceptionListItemEntryMatchAny,
-  ExceptionListItemEntryExists,
-]);
+export const ExceptionListItemEntryNestedEntryItemInternal = lazySchema(() =>
+  z.union([
+    ExceptionListItemEntryMatch,
+    ExceptionListItemEntryMatchAny,
+    ExceptionListItemEntryExists,
+  ])
+);
 
 export type ExceptionListItemEntryNestedEntryItem = z.infer<
   typeof ExceptionListItemEntryNestedEntryItemInternal
@@ -70,35 +80,41 @@ export type ExceptionListItemEntryNestedEntryItem = z.infer<
 export const ExceptionListItemEntryNestedEntryItem =
   ExceptionListItemEntryNestedEntryItemInternal as z.ZodType<ExceptionListItemEntryNestedEntryItem>;
 
+export const ExceptionListItemEntryNested = lazySchema(() =>
+  z.object({
+    type: z.literal('nested'),
+    field: NonEmptyString,
+    entries: z.array(ExceptionListItemEntryNestedEntryItem).min(1),
+  })
+);
 export type ExceptionListItemEntryNested = z.infer<typeof ExceptionListItemEntryNested>;
-export const ExceptionListItemEntryNested = z.object({
-  type: z.literal('nested'),
-  field: NonEmptyString,
-  entries: z.array(ExceptionListItemEntryNestedEntryItem).min(1),
-});
 
+export const ExceptionListItemEntryMatchWildcard = lazySchema(() =>
+  z.object({
+    type: z.literal('wildcard'),
+    field: NonEmptyString,
+    value: NonEmptyString,
+    operator: ExceptionListItemEntryOperator,
+  })
+);
 export type ExceptionListItemEntryMatchWildcard = z.infer<
   typeof ExceptionListItemEntryMatchWildcard
 >;
-export const ExceptionListItemEntryMatchWildcard = z.object({
-  type: z.literal('wildcard'),
-  field: NonEmptyString,
-  value: NonEmptyString,
-  operator: ExceptionListItemEntryOperator,
-});
 
-export const ExceptionListItemEntryInternal = z.discriminatedUnion('type', [
-  ExceptionListItemEntryMatch,
-  ExceptionListItemEntryMatchAny,
-  ExceptionListItemEntryList,
-  ExceptionListItemEntryExists,
-  ExceptionListItemEntryNested,
-  ExceptionListItemEntryMatchWildcard,
-]);
+export const ExceptionListItemEntryInternal = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    ExceptionListItemEntryMatch,
+    ExceptionListItemEntryMatchAny,
+    ExceptionListItemEntryList,
+    ExceptionListItemEntryExists,
+    ExceptionListItemEntryNested,
+    ExceptionListItemEntryMatchWildcard,
+  ])
+);
 
 export type ExceptionListItemEntry = z.infer<typeof ExceptionListItemEntryInternal>;
 export const ExceptionListItemEntry =
   ExceptionListItemEntryInternal as z.ZodType<ExceptionListItemEntry>;
 
+export const ExceptionListItemEntryArray = lazySchema(() => z.array(ExceptionListItemEntry));
 export type ExceptionListItemEntryArray = z.infer<typeof ExceptionListItemEntryArray>;
-export const ExceptionListItemEntryArray = z.array(ExceptionListItemEntry);
