@@ -297,8 +297,12 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           inferenceClient: inferenceClient.bindTo({ connectorId }),
           agentPipelineSchema,
           maxSteps,
+<<<<<<< HEAD
+          signal: abortController.signal,
+=======
           maxDurationMs: 180_000, // 3 minutes - surface errors faster than infrastructure timeout
           signal: timeoutAbortController.signal,
+>>>>>>> upstream/main
           documents: documentsForAgent,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
@@ -319,19 +323,13 @@ export const suggestProcessingPipelineRoute = createServerRoute({
             }),
         });
 
-        let pipeline: SuggestProcessingPipelineResult['pipeline'];
-        if (suggestion.pipeline) {
-          pipeline = effectiveParsingProcessor
+        const pipeline =
+          suggestion.pipeline && effectiveParsingProcessor
             ? mergeSeedParsingProcessorIntoSuggestedPipeline(
                 effectiveParsingProcessor,
                 suggestion.pipeline
               )
             : suggestion.pipeline;
-        } else if (effectiveParsingProcessor) {
-          pipeline = { steps: [effectiveParsingProcessor] };
-        } else {
-          pipeline = null;
-        }
 
         const result: SuggestProcessingPipelineResult = {
           ...suggestion,

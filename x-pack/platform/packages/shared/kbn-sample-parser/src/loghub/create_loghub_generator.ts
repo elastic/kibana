@@ -45,10 +45,7 @@ export function createLoghubGenerator({
 
   const filepath = `${system.name}.log`;
 
-  const effectiveRpm = Math.max(
-    1,
-    Math.round(targetRpm ?? (systemRpm === Infinity ? 1 : systemRpm))
-  );
+  const effectiveRpm = Math.max(1, Math.round(targetRpm ?? systemRpm));
   const msBetween = 60000 / effectiveRpm;
 
   if (timestampLayout === 'uniform_interval') {
