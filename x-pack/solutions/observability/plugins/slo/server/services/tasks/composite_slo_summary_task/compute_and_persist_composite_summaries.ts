@@ -115,7 +115,7 @@ export async function computeAndPersistCompositeSummaries({
     await finder.close();
   }
 
-  logger.debug(`Composite SLO summary task completed: ${totalProcessed} processed`);
+  logger.info(`Composite SLO summary task completed: ${totalProcessed} processed`);
 }
 
 function groupBySpace(
@@ -244,7 +244,7 @@ function buildBulkOps(
         });
         bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId));
       } catch (err) {
-        logger.error(
+        logger.warn(
           `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
         );
       }
@@ -263,7 +263,7 @@ function decodeCompositeSLO(
 ): CompositeSLODefinition | undefined {
   const result = compositeSloDefinitionSchema.decode(so.attributes);
   if (isLeft(result)) {
-    logger.debug(`Invalid stored composite SLO [${so.attributes.id}], skipping`);
+    logger.warn(`Invalid stored composite SLO [${so.attributes.id}], skipping`);
     return undefined;
   }
   return result.right;
@@ -316,7 +316,7 @@ function decodeStoredSLO(
   });
 
   if (isLeft(result)) {
-    logger.debug(`Invalid stored SLO [${stored.id}], skipping`);
+    logger.warn(`Invalid stored SLO [${stored.id}], skipping`);
     return undefined;
   }
 
