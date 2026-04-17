@@ -94,12 +94,9 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       setSavedState(newSaved);
       setState(newSaved);
       notifications.toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess',
-          {
-            defaultMessage: 'Default model settings saved',
-          }
-        ),
+        title: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.saveSuccess', {
+          defaultMessage: 'Default model settings saved',
+        }),
       });
     } catch (e) {
       notifications.toasts.addDanger({
