@@ -6,6 +6,8 @@
  */
 
 import { useCallback } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { THREAT_HUNTING_AGENT_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LEAD_ATTACHMENT_PROMPT } from '../../../../agent_builder/components/prompts';
@@ -48,6 +50,11 @@ const buildLeadPrompt = (lead: HuntingLead): string => {
 
 export const useLeadAttachment = () => {
   const { agentBuilder } = useKibana().services;
+  const skillsEnabled = useUiSetting<boolean>(
+    AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
+    false
+  );
+  const agentId = skillsEnabled ? undefined : THREAT_HUNTING_AGENT_ID;
 
   const openWithLead = useCallback(
     (lead: HuntingLead) => {
@@ -60,10 +67,10 @@ export const useLeadAttachment = () => {
         newConversation: true,
         initialMessage: buildLeadPrompt(lead),
         sessionTag: 'security',
-        agentId: THREAT_HUNTING_AGENT_ID,
+        agentId,
       });
     },
-    [agentBuilder]
+    [agentBuilder, agentId]
   );
 
   return openWithLead;
