@@ -951,6 +951,36 @@ describe('execute()', () => {
     expect(requestMock.mock.calls[0][0].data).toBe(JSON.stringify(body));
   });
 
+  test('execute throws error if body is not serializable', async () => {
+    const config: ConnectorTypeConfigType = {
+      ...emptyConfig,
+      url: 'https://abc.def',
+    };
+    const body = {
+      foo: {
+        toJSON() {
+          throw new Error('foo is not serializable');
+        },
+      },
+    };
+    await expect(
+      connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: {
+          method: 'POST',
+          path: '/my-endpoint',
+          body: body as any,
+        },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      })
+    ).rejects.toThrow('Error serializing request body: foo is not serializable');
+  });
+
   test('renders parameter templates as expected', async () => {
     const rogue = `double-quote:"; line-break->\n`;
 

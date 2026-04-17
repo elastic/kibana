@@ -183,11 +183,13 @@ function buildQueryString(query?: Record<string, string>): string {
   return `?${params.toString()}`;
 }
 
-function serializeHttpRequestBody(body: unknown): unknown {
+function serializeHttpRequestBody(body: unknown): string {
   if (typeof body === 'string') {
     return body;
   }
-  return safeJsonStringify(body);
+  return safeJsonStringify(body, (error) => {
+    throw new Error(`Error serializing request body: ${error.message}`);
+  }) as string; // will return a string or throw an error if it fails
 }
 
 // action executor
