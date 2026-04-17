@@ -39,6 +39,8 @@ export async function update(
   } catch (resolveError) {
     if (resolveError.isBoom && resolveError.output.statusCode === 404) {
       isCreateRequest = true;
+    } else {
+      throw resolveError;
     }
   }
 
