@@ -99,7 +99,13 @@ describe('TraceItemRow', () => {
     mockUseEuiTheme.mockReturnValue({
       euiTheme: {
         border: { thin: '1px solid #eee', width: { thick: '2px' } },
-        colors: { danger: 'red', lightestShade: '#fafafa', backgroundBaseWarning: '#fff7e2' },
+        colors: {
+          danger: 'red',
+          lightestShade: '#fafafa',
+          backgroundBaseWarning: '#fff7e2',
+          backgroundBaseInteractiveSelect: '#f1f6ff',
+          backgroundBaseInteractiveHover: 'rgba(23, 80, 186, 0.04)',
+        },
       },
     } as any);
   });
@@ -177,12 +183,37 @@ describe('TraceItemRow', () => {
     expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #fff7e2');
   });
 
+  it('applies selected background when isSelected is true, overriding context', () => {
+    mockUseTraceWaterfallContext.mockReturnValue({
+      duration: 100,
+      margin: { left: 20, right: 10 },
+      showAccordion: true,
+      onClick: jest.fn(),
+      onErrorClick: jest.fn(),
+      contextSpanIds: ['span-1'],
+      selectedSpanId: 'span-1',
+      criticalPathSegmentsById: {},
+      showCriticalPath: false,
+    } as unknown as TraceWaterfallContextProps);
+    const { getByTestId } = render(
+      <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
+    );
+    expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #f1f6ff');
+  });
+
   describe('with critical path', () => {
     beforeEach(() => {
       mockUseEuiTheme.mockReturnValue({
         euiTheme: {
           border: { thin: '1px solid #eee', width: { thick: '2px' } },
-          colors: { danger: 'red', lightestShade: '#fafafa', accent: 'orange' },
+          colors: {
+            danger: 'red',
+            lightestShade: '#fafafa',
+            backgroundBaseWarning: '#fff7e2',
+            backgroundBaseInteractiveSelect: '#f1f6ff',
+            backgroundBaseInteractiveHover: 'rgba(23, 80, 186, 0.04)',
+            accent: 'orange',
+          },
         },
       } as any);
     });

@@ -48,6 +48,7 @@ export interface TraceWaterfallContextProps {
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
   contextSpanIds?: string[];
+  selectedSpanId?: string;
   scrollToContextOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
@@ -165,6 +166,16 @@ export function TraceWaterfallContextProvider({
       entryTransactionId,
     });
 
+  const [selectedSpanId, setSelectedSpanId] = useState<string | undefined>();
+
+  const handleNodeClick = useCallback<OnNodeClick>(
+    (id, options) => {
+      setSelectedSpanId(id);
+      onClick?.(id, options);
+    },
+    [onClick]
+  );
+
   const [uncontrolledValue, setUncontrolledValue] = useState(defaultShowCriticalPath);
   const isCriticalPathControlled = controlledValue !== undefined;
   const showCriticalPath = isCriticalPathControlled ? controlledValue : uncontrolledValue;
@@ -264,10 +275,11 @@ export function TraceWaterfallContextProvider({
         showCriticalPath,
         setShowCriticalPath,
         showCriticalPathControl,
-        onClick,
+        onClick: onClick ? handleNodeClick : undefined,
         onErrorClick,
         getServiceBadgeHref,
         contextSpanIds,
+        selectedSpanId,
         scrollToContextOnMount,
         getRelatedErrorsHref,
         isEmbeddable,
