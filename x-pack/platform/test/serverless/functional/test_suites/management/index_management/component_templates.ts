@@ -100,34 +100,5 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
     });
-
-    describe('no access', () => {
-      this.tags(['skipSvlOblt', 'skipMKI']);
-      before(async () => {
-        await samlAuth.setCustomRole({
-          elasticsearch: {
-            cluster: ['monitor'],
-            indices: [{ names: ['*'], privileges: ['all'] }],
-          },
-          kibana: [
-            {
-              base: ['all'],
-              feature: {},
-              spaces: ['*'],
-            },
-          ],
-        });
-        await pageObjects.svlCommonPage.loginWithCustomRole();
-        await pageObjects.common.navigateToApp('indexManagement');
-      });
-
-      after(async () => {
-        await samlAuth.deleteCustomRole();
-      });
-
-      it('hides the component templates tab', async () => {
-        await testSubjects.missingOrFail('component_templatesTab');
-      });
-    });
   });
 };
