@@ -19,7 +19,7 @@ import {
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
-  createBackgroundAgentExecutionCompleteEvent,
+  createBackgroundAgentCompleteEvent,
   createThinkingCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
@@ -223,7 +223,7 @@ export const convertGraphEvents = ({
 
           for (const action of addedActions) {
             if (isBackgroundExecutionCompleteAction(action)) {
-              bgEvents.push(createBackgroundAgentExecutionCompleteEvent(action.execution));
+              bgEvents.push(createBackgroundAgentCompleteEvent(action.execution));
             }
           }
 

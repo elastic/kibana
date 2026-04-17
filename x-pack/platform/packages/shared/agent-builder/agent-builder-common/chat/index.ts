@@ -17,8 +17,8 @@ export {
   type ConversationInternalState,
   type BackgroundExecutionState,
   type BackgroundExecutionCompletedAt,
-  type BackgroundAgentExecutionCompleteStep,
-  isBackgroundAgentExecutionCompleteStep,
+  type BackgroundAgentCompleteStep,
+  isBackgroundAgentCompleteStep,
   type ConversationWithoutRounds,
   type ConversationRoundStepMixin,
   type ToolCallStep,
@@ -91,8 +91,8 @@ export {
   type CompactionCompletedEventData,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
-  type BackgroundAgentExecutionCompleteEvent,
-  type BackgroundAgentExecutionCompleteEventData,
-  isBackgroundAgentExecutionCompleteEvent,
+  type BackgroundAgentCompleteEvent,
+  type BackgroundAgentCompleteEventData,
+  isBackgroundAgentCompleteEvent,
 } from './events';
 export type { RoundState } from './round_state';

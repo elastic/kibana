@@ -775,7 +775,7 @@ describe('convertPreviousRounds', () => {
   describe('background execution notices (from round steps)', () => {
     const makeBgStep = (overrides: Partial<BackgroundExecutionState> = {}): ConversationRoundStep =>
       ({
-        type: ConversationRoundStepType.backgroundAgentExecutionComplete,
+        type: ConversationRoundStepType.backgroundAgentComplete,
         execution_id: 'bg-exec-1',
         status: ExecutionStatus.completed,
         response: { message: 'Background result' },

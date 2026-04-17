@@ -19,7 +19,7 @@ import {
   isThinkingCompleteEvent,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
-  isBackgroundAgentExecutionCompleteEvent,
+  isBackgroundAgentCompleteEvent,
   ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
 import {
@@ -155,10 +155,10 @@ export const useSubscribeToChatEvents = ({
         tokenCountAfter: event.data.token_count_after,
         summarizedRoundCount: event.data.summarized_round_count,
       });
-    } else if (isBackgroundAgentExecutionCompleteEvent(event)) {
+    } else if (isBackgroundAgentCompleteEvent(event)) {
       conversationActions.addBackgroundExecutionCompleteStep({
         step: {
-          type: ConversationRoundStepType.backgroundAgentExecutionComplete,
+          type: ConversationRoundStepType.backgroundAgentComplete,
           ...event.data.execution,
         },
       });

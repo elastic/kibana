@@ -10,7 +10,7 @@ import {
   isReasoningStep,
   isToolCallStep,
   isCompactionStep,
-  isBackgroundAgentExecutionCompleteStep,
+  isBackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -106,7 +106,7 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
             />
           ),
         });
-      } else if (isBackgroundAgentExecutionCompleteStep(step)) {
+      } else if (isBackgroundAgentCompleteStep(step)) {
         itemFactories.push({
           key: `step-bg-execution-${stepIndex}`,
           factory: (icon, textColor) => (

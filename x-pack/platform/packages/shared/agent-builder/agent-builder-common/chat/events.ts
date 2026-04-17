@@ -32,7 +32,7 @@ export enum ChatEventType {
   conversationIdSet = 'conversation_id_set',
   compactionStarted = 'compaction_started',
   compactionCompleted = 'compaction_completed',
-  backgroundAgentExecutionComplete = 'background_agent_execution_complete',
+  backgroundAgentComplete = 'background_agent_complete',
 }
 
 export type ChatEventBase<
@@ -335,19 +335,19 @@ export const isCompactionCompletedEvent = (
   return event.type === ChatEventType.compactionCompleted;
 };
 
-export interface BackgroundAgentExecutionCompleteEventData {
+export interface BackgroundAgentCompleteEventData {
   execution: BackgroundExecutionState;
 }
 
-export type BackgroundAgentExecutionCompleteEvent = ChatEventBase<
-  ChatEventType.backgroundAgentExecutionComplete,
-  BackgroundAgentExecutionCompleteEventData
+export type BackgroundAgentCompleteEvent = ChatEventBase<
+  ChatEventType.backgroundAgentComplete,
+  BackgroundAgentCompleteEventData
 >;
 
-export const isBackgroundAgentExecutionCompleteEvent = (
+export const isBackgroundAgentCompleteEvent = (
   event: AgentBuilderEvent<string, any>
-): event is BackgroundAgentExecutionCompleteEvent => {
-  return event.type === ChatEventType.backgroundAgentExecutionComplete;
+): event is BackgroundAgentCompleteEvent => {
+  return event.type === ChatEventType.backgroundAgentComplete;
 };
 
 /**
@@ -367,7 +367,7 @@ export type ChatAgentEvent =
   | RoundCompleteEvent
   | CompactionStartedEvent
   | CompactionCompletedEvent
-  | BackgroundAgentExecutionCompleteEvent;
+  | BackgroundAgentCompleteEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

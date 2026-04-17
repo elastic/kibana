@@ -18,7 +18,7 @@ import {
   ConversationRoundStatus,
   isReasoningStep,
   isToolCallStep,
-  isBackgroundAgentExecutionCompleteStep,
+  isBackgroundAgentCompleteStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -113,7 +113,7 @@ export const roundToLangchain = async (
 
     let groupIndex = 0;
     for (const step of round.steps) {
-      if (isBackgroundAgentExecutionCompleteStep(step)) {
+      if (isBackgroundAgentCompleteStep(step)) {
         messages.push(createUserMessage(formatSystemNotice(step)));
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group

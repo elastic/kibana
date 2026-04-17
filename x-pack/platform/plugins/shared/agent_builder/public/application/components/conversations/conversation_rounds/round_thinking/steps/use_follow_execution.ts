@@ -20,7 +20,7 @@ import {
   isMessageCompleteEvent,
   isToolProgressEvent,
   isRoundCompleteEvent,
-  isBackgroundAgentExecutionCompleteEvent,
+  isBackgroundAgentCompleteEvent,
 } from '@kbn/agent-builder-common';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 
@@ -114,11 +114,11 @@ export const useFollowExecution = (executionId: string | null): UseFollowExecuti
                 return step;
               })
             );
-          } else if (isBackgroundAgentExecutionCompleteEvent(event)) {
+          } else if (isBackgroundAgentCompleteEvent(event)) {
             setSteps((prev) => [
               ...prev,
               {
-                type: ConversationRoundStepType.backgroundAgentExecutionComplete,
+                type: ConversationRoundStepType.backgroundAgentComplete,
                 ...event.data.execution,
               } as ConversationRoundStep,
             ]);

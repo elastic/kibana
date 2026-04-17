@@ -11,7 +11,7 @@ import type {
   ConversationRoundStepMixin,
   ReasoningStep,
   CompactionStep,
-  BackgroundAgentExecutionCompleteStep,
+  BackgroundAgentCompleteStep,
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
@@ -54,7 +54,7 @@ export type PersistentConversationRoundStep =
   | PersistentToolCallStep
   | ReasoningStep
   | CompactionStep
-  | BackgroundAgentExecutionCompleteStep;
+  | BackgroundAgentCompleteStep;
 
 /**
  * Legacy fields that may exist in old persisted documents.

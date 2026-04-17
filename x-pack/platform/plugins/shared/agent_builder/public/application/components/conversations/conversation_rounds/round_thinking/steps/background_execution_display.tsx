@@ -8,12 +8,12 @@
 import React from 'react';
 import { EuiText, EuiLink, EuiBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { BackgroundAgentExecutionCompleteStep } from '@kbn/agent-builder-common';
+import type { BackgroundAgentCompleteStep } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { ThinkingItemLayout } from './thinking_item_layout';
 
 interface BackgroundExecutionDisplayProps {
-  step: BackgroundAgentExecutionCompleteStep;
+  step: BackgroundAgentCompleteStep;
   onInspect: () => void;
   icon?: React.ReactNode;
   textColor?: string;

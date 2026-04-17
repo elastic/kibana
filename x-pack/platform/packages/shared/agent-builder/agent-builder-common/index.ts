@@ -148,8 +148,8 @@ export {
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
-  isBackgroundAgentExecutionCompleteStep,
-  type BackgroundAgentExecutionCompleteStep,
+  isBackgroundAgentCompleteStep,
+  type BackgroundAgentCompleteStep,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -202,9 +202,9 @@ export {
   type CompactionCompletedEventData,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
-  type BackgroundAgentExecutionCompleteEvent,
-  type BackgroundAgentExecutionCompleteEventData,
-  isBackgroundAgentExecutionCompleteEvent,
+  type BackgroundAgentCompleteEvent,
+  type BackgroundAgentCompleteEventData,
+  isBackgroundAgentCompleteEvent,
 } from './chat';
 export {
   type PublicSkillDefinition,
