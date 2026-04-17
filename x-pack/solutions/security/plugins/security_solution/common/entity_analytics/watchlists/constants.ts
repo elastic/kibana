@@ -15,8 +15,12 @@ export const WATCHLISTS_SYNC_URL = `${WATCHLISTS_URL}/{watchlist_id}/sync` as co
 export const WATCHLISTS_INDICES_URL = `${WATCHLISTS_URL}/indices` as const;
 export const WATCHLISTS_CSV_UPLOAD_URL = `${WATCHLISTS_URL}/{watchlist_id}/csv_upload` as const;
 
-export const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
+const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
 export const PRIVILEGED_USER_WATCHLIST_NAME = 'Privileged Users';
+
+/** Saved object id for the prebuilt privileged-users watchlist in a given Kibana space. */
+export const getPrivilegedUserWatchlistSavedObjectId = (namespace: string): string =>
+  `${PRIVILEGED_USER_WATCHLIST_ID}-${namespace}`;
 
 export const PREBUILT_WATCHLIST_NAMES: Record<string, string> = {
   [PRIVILEGED_USER_WATCHLIST_ID]: i18n.translate(

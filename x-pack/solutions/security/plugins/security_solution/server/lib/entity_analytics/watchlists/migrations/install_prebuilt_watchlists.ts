@@ -10,7 +10,7 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { PRIVILEGED_USER_MODIFIER } from '../../risk_score/modifiers/privileged_users';
 import {
-  PRIVILEGED_USER_WATCHLIST_ID,
+  getPrivilegedUserWatchlistSavedObjectId,
   PRIVILEGED_USER_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
@@ -19,7 +19,7 @@ import { WatchlistConfigClient as WatchlistConfigClientClass } from '../manageme
 import { WatchlistEntitySourceClient } from '../entity_sources/infra';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
-export const PREBUILT_WATCHLISTS_VERSION = 1;
+export const PREBUILT_WATCHLISTS_VERSION = 2;
 
 const OKTA_PRIVILEGED_ROLES = [
   'Super Administrator',
@@ -42,7 +42,7 @@ const AD_QUERY_RULE = 'entityanalytics_ad.user.privileged_group_member: true';
 
 const getPrebuiltWatchlists = (namespace: string) => [
   {
-    id: PRIVILEGED_USER_WATCHLIST_ID,
+    id: getPrivilegedUserWatchlistSavedObjectId(namespace),
     name: PRIVILEGED_USER_WATCHLIST_NAME,
     description: 'System-managed watchlist for tracking privileged users',
     managed: true,
@@ -109,19 +109,6 @@ export const ensurePrebuiltWatchlists = async ({
   }
 };
 
-const isConflictError = (e: unknown): boolean => {
-  const message = e instanceof Error ? e.message : String(e);
-  return message.includes('conflict');
-};
-
-const findExistingByName = async (
-  watchlistClient: WatchlistConfigClient,
-  name: string
-): Promise<string | undefined> => {
-  const all = await watchlistClient.list();
-  return all.find((w) => w.name === name)?.id;
-};
-
 const getOrCreateWatchlist = async ({
   watchlistClient,
   logger,
@@ -144,33 +131,11 @@ const getOrCreateWatchlist = async ({
     }
 
     logger.info(`Prebuilt watchlist '${attrs.name}' not found, creating...`);
-    try {
-      const created = await watchlistClient.create(attrs, { id });
-      if (!created.id) {
-        throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
-      }
-      return created.id;
-    } catch (createError) {
-      if (isConflictError(createError)) {
-        const existing = await findExistingByName(watchlistClient, attrs.name);
-        if (existing) {
-          logger.info(
-            `Prebuilt watchlist '${attrs.name}' already exists (concurrent creation), using existing ID`
-          );
-          return existing;
-        }
-
-        logger.info(
-          `Prebuilt watchlist '${attrs.name}' ID conflicts across namespaces, creating with auto-generated ID`
-        );
-        const created = await watchlistClient.create(attrs, {});
-        if (!created.id) {
-          throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
-        }
-        return created.id;
-      }
-      throw createError;
+    const created = await watchlistClient.create(attrs, { id });
+    if (!created.id) {
+      throw new Error('Prebuilt watchlist creation succeeded but no ID was returned');
     }
+    return created.id;
   }
 };
 
