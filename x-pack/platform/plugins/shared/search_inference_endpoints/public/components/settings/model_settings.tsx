@@ -28,6 +28,7 @@ import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -44,6 +45,9 @@ export const ModelSettings: React.FC = () => {
 
   const defaultModelSettings = useDefaultModelSettings();
   const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const {
+    services: { application, http },
+  } = useKibana();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
@@ -86,10 +90,14 @@ export const ModelSettings: React.FC = () => {
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
-      history.push(pendingLocation);
+      const url =
+        http.basePath.prepend(pendingLocation.pathname) +
+        pendingLocation.search +
+        pendingLocation.hash;
+      application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [history, pendingLocation, defaultModelSettings]);
+  }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
   const handleResetConfirm = useCallback(() => {
     if (!resetParentKey) return;
