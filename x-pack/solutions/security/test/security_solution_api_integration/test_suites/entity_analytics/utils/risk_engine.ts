@@ -225,6 +225,11 @@ export const readRiskScores = async (
   size: number = 1000,
   query?: Record<string, any>
 ): Promise<EcsRiskScore[]> => {
+  try {
+    await es.indices.refresh({ index: index.join(',') });
+  } catch (e) {
+    // Data stream may not exist yet; callers retry on 404.
+  }
   const results = await es.search({
     index,
     size,
