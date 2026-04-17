@@ -789,6 +789,37 @@ describe('getEntityTool', () => {
       expect(r2.data.columns.map((c) => c.name)).not.toContain('risk_score_inputs');
     });
 
+    it('returns unenriched entity result when enrichment query fails', async () => {
+      (executeEsql as jest.Mock)
+        // 1. Entity lookup: entity has a risk score (triggers enrichment path)
+        .mockResolvedValueOnce({
+          columns: [
+            { name: 'entity.id', type: 'keyword' },
+            { name: 'entity.name', type: 'keyword' },
+            { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+            { name: 'entity.risk.calculated_score_norm', type: 'double' },
+          ],
+          values: [['host:server1', 'server1', 'host', 75.5]],
+        })
+        // 2. Risk score inputs query: fails
+        .mockRejectedValueOnce(new Error('risk index unavailable'));
+
+      const result = (await tool.handler(
+        { entityType: 'host', entityId: 'server1' },
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const esqlResult = result.results[0] as EsqlResults;
+      expect(esqlResult.type).toBe(ToolResultType.esqlResults);
+
+      const { columns, values } = esqlResult.data;
+      expect(columns.map((c) => c.name)).not.toContain('risk_score_inputs');
+      expect(columns.map((c) => c.name)).not.toContain('profile_history');
+      expect(values).toHaveLength(1);
+      expect(values[0]).toEqual(['host:server1', 'server1', 'host', 75.5]);
+    });
+
     it('returns error result when ES|QL query fails', async () => {
       (executeEsql as jest.Mock).mockRejectedValueOnce(new Error('ES|QL failure'));
 
