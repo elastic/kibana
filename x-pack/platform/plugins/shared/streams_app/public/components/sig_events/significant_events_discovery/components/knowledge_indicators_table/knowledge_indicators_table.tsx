@@ -50,6 +50,7 @@ export function KnowledgeIndicatorsTable() {
   const {
     generatingStreamNames,
     isGenerating,
+    isInitialGenerationStatusLoading,
     isScheduling,
     generationCompletedAt,
     onboardingConfig,
@@ -65,23 +66,24 @@ export function KnowledgeIndicatorsTable() {
   } = useKiGeneration();
 
   const runAndClearPicker = useCallback(
-    (action: (names: string[]) => Promise<void>) => {
-      void action(generationStreamNames);
+    async (action: (names: string[]) => Promise<void>) => {
+      const names = generationStreamNames;
       setGenerationStreamNames([]);
+      await action(names);
     },
     [generationStreamNames]
   );
 
   const onRunGeneration = useCallback(
-    () => runAndClearPicker(bulkOnboardAll),
+    async () => runAndClearPicker(bulkOnboardAll),
     [runAndClearPicker, bulkOnboardAll]
   );
   const onRunFeaturesOnly = useCallback(
-    () => runAndClearPicker(bulkOnboardFeaturesOnly),
+    async () => runAndClearPicker(bulkOnboardFeaturesOnly),
     [runAndClearPicker, bulkOnboardFeaturesOnly]
   );
   const onRunQueriesOnly = useCallback(
-    () => runAndClearPicker(bulkOnboardQueriesOnly),
+    async () => runAndClearPicker(bulkOnboardQueriesOnly),
     [runAndClearPicker, bulkOnboardQueriesOnly]
   );
 
@@ -194,7 +196,7 @@ export function KnowledgeIndicatorsTable() {
     </>
   ) : null;
 
-  if (isLoading) {
+  if (knowledgeIndicators.length === 0 && (isLoading || isInitialGenerationStatusLoading)) {
     return <LoadingPanel size="l" />;
   }
 

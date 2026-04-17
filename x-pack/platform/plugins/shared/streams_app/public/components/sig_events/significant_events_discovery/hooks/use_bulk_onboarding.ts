@@ -46,24 +46,32 @@ export function useBulkOnboarding({
   const bulkScheduleOnboardingTask = useCallback(
     async (streamNames: string[], options?: ScheduleOnboardingOptions) => {
       setIsScheduling(true);
+      const succeeded: string[] = [];
       try {
         await pMap(
           streamNames,
           async (streamName) => {
-            await scheduleOnboardingTask(streamName, options);
+            try {
+              await scheduleOnboardingTask(streamName, options);
+              succeeded.push(streamName);
+            } catch (error) {
+              toasts.addError(getFormattedError(error), {
+                title: ONBOARDING_SCHEDULING_FAILURE_TITLE,
+              });
+            }
           },
-          { concurrency: 10 }
+          { concurrency: 10, stopOnError: false }
         );
-      } catch (error) {
-        toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
       } finally {
         setIsScheduling(false);
       }
 
-      streamNames.forEach((streamName) => {
+      succeeded.forEach((streamName) => {
         onboardingStatusUpdateQueue.add(streamName);
       });
-      processStatusUpdateQueue();
+      if (succeeded.length > 0) {
+        processStatusUpdateQueue();
+      }
     },
     [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
   );

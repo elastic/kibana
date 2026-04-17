@@ -16,7 +16,6 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { TableRow } from './utils';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useInsightsDiscoveryApi } from '../../../../../hooks/sig_events/use_insights_discovery_api';
-import { useConnectorConfig } from '../../../../../hooks/sig_events/use_connector_config';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
@@ -29,7 +28,6 @@ import {
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
   NO_INSIGHTS_TOAST_TITLE,
-  ONBOARDING_FAILURE_TITLE,
   STREAMS_TABLE_SEARCH_ARIA_LABEL,
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
@@ -42,11 +40,7 @@ const datePickerStyle = css`
   }
 `;
 
-interface StreamsViewProps {
-  refreshUnbackedQueriesCount: () => void;
-}
-
-export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
+export function StreamsView() {
   const {
     core,
     core: {
@@ -57,22 +51,20 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
   const [isWaitingForInsightsTask, setIsWaitingForInsightsTask] = useState(false);
 
   const {
-    discoveryConnectors,
-    discoveryConnectorOverride,
-    setDiscoveryConnectorOverride,
-    displayDiscoveryConnectorId,
-  } = useConnectorConfig();
-
-  const {
     filteredStreams,
     isStreamsLoading,
+    isScheduling,
     onboardingConfig,
     setOnboardingConfig,
     allConnectors,
     connectorError,
     featuresConnectors,
     queriesConnectors,
+    discoveryConnectors,
     isConnectorCatalogUnavailable,
+    discoveryConnectorOverride,
+    setDiscoveryConnectorOverride,
+    displayDiscoveryConnectorId,
     streamStatusMap,
     cancelOnboardingTask,
     bulkScheduleOnboardingTask,
@@ -80,22 +72,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     bulkOnboardFeaturesOnly,
     bulkOnboardQueriesOnly,
     isStreamActionable,
-    registerStatusCallback,
   } = useKiGeneration();
-
-  useEffect(() => {
-    return registerStatusCallback((streamName, taskResult) => {
-      if (taskResult.status === TaskStatus.Failed) {
-        toasts.addError(getFormattedError(new Error(taskResult.error)), {
-          title: ONBOARDING_FAILURE_TITLE,
-        });
-      }
-
-      if (taskResult.status === TaskStatus.Completed) {
-        refreshUnbackedQueriesCount();
-      }
-    });
-  }, [registerStatusCallback, toasts, refreshUnbackedQueriesCount]);
 
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);
   const router = useStreamsAppRouter();
@@ -247,9 +224,11 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
                 selectedStreams.length === 0 ||
                 isConnectorCatalogUnavailable ||
                 featuresConnectors.loading ||
-                queriesConnectors.loading
+                queriesConnectors.loading ||
+                isScheduling
               }
               isConfigDisabled={selectedStreams.length === 0}
+              isLoading={isScheduling}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -40,6 +40,7 @@ interface ConnectorState {
 interface KiGenerationContextValue {
   filteredStreams: ListStreamDetail[] | undefined;
   isStreamsLoading: boolean;
+  isInitialGenerationStatusLoading: boolean;
   generatingStreamNames: string[];
   isGenerating: boolean;
   isScheduling: boolean;
@@ -51,7 +52,11 @@ interface KiGenerationContextValue {
   connectorError: Error | undefined;
   featuresConnectors: ConnectorState;
   queriesConnectors: ConnectorState;
+  discoveryConnectors: ConnectorState;
   isConnectorCatalogUnavailable: boolean;
+  discoveryConnectorOverride: string | undefined;
+  setDiscoveryConnectorOverride: (id: string | undefined) => void;
+  displayDiscoveryConnectorId: string | undefined;
   bulkOnboardAll: (streamNames: string[]) => Promise<void>;
   bulkOnboardFeaturesOnly: (streamNames: string[]) => Promise<void>;
   bulkOnboardQueriesOnly: (streamNames: string[]) => Promise<void>;
@@ -86,7 +91,11 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
     connectorError,
     featuresConnectors,
     queriesConnectors,
+    discoveryConnectors,
     isConnectorCatalogUnavailable,
+    discoveryConnectorOverride,
+    setDiscoveryConnectorOverride,
+    displayDiscoveryConnectorId,
   } = useConnectorConfig();
 
   const streamsListFetch = useFetchStreams({
@@ -174,6 +183,16 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
   const isGenerating = generatingStreams.size > 0;
   const generatingStreamNames = useMemo(() => Array.from(generatingStreams), [generatingStreams]);
 
+  // True until we've received at least one status result for every filtered
+  // stream, so consumers can defer rendering empty/generating UI until the
+  // generating set is known. Once false, stays false — transient refetches of
+  // the streams list must not flash the loading panel again.
+  const isInitialGenerationStatusLoading = useMemo(() => {
+    if (initialStatusFetchDoneRef.current) return false;
+    if (isStreamsLoading || !filteredStreams) return true;
+    return filteredStreams.some((item) => !(item.stream.name in streamStatusMap));
+  }, [isStreamsLoading, filteredStreams, streamStatusMap]);
+
   // Wrap bulk onboard methods with optimistic pre-fill so the UI immediately
   // reflects streams as generating before the scheduling round-trip resolves.
   const bulkOnboardAll = useCallback(
@@ -223,6 +242,7 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       cancelOnboardingTask: bulkOnboarding.cancelOnboardingTask,
       filteredStreams,
       isStreamsLoading,
+      isInitialGenerationStatusLoading,
       generatingStreamNames,
       isGenerating,
       streamStatusMap,
@@ -233,7 +253,11 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       connectorError,
       featuresConnectors,
       queriesConnectors,
+      discoveryConnectors,
       isConnectorCatalogUnavailable,
+      discoveryConnectorOverride,
+      setDiscoveryConnectorOverride,
+      displayDiscoveryConnectorId,
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,
@@ -246,6 +270,7 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       bulkOnboarding.cancelOnboardingTask,
       filteredStreams,
       isStreamsLoading,
+      isInitialGenerationStatusLoading,
       generatingStreamNames,
       isGenerating,
       streamStatusMap,
@@ -256,7 +281,11 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
       connectorError,
       featuresConnectors,
       queriesConnectors,
+      discoveryConnectors,
       isConnectorCatalogUnavailable,
+      discoveryConnectorOverride,
+      setDiscoveryConnectorOverride,
+      displayDiscoveryConnectorId,
       bulkOnboardAll,
       bulkOnboardFeaturesOnly,
       bulkOnboardQueriesOnly,

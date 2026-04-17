@@ -15,8 +15,11 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import { TaskStatus } from '@kbn/streams-schema';
+import React, { useEffect, useMemo } from 'react';
 import { useIsMutating } from '@kbn/react-query';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../util/errors';
 import { useStreamsAppBreadcrumbs } from '../../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
@@ -28,7 +31,9 @@ import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import {
   KnowledgeIndicatorsTable,
   KiGenerationProvider,
+  useKiGeneration,
 } from './components/knowledge_indicators_table';
+import { ONBOARDING_FAILURE_TITLE } from './components/streams_view/translations';
 import { QueriesTable } from './components/queries_table/queries_table';
 import { StreamsView } from './components/streams_view/streams_view';
 import { InsightsTab } from './components/insights/tab';
@@ -47,6 +52,35 @@ type DiscoveryTab = (typeof discoveryTabs)[number];
 
 function isValidDiscoveryTab(value: string): value is DiscoveryTab {
   return discoveryTabs.includes(value as DiscoveryTab);
+}
+
+function KiGenerationEffects({
+  refreshUnbackedQueriesCount,
+}: {
+  refreshUnbackedQueriesCount: () => void;
+}) {
+  const { registerStatusCallback } = useKiGeneration();
+  const {
+    core: {
+      notifications: { toasts },
+    },
+  } = useKibana();
+
+  useEffect(() => {
+    return registerStatusCallback((_streamName, taskResult) => {
+      if (taskResult.status === TaskStatus.Failed) {
+        toasts.addError(getFormattedError(new Error(taskResult.error)), {
+          title: ONBOARDING_FAILURE_TITLE,
+        });
+      }
+
+      if (taskResult.status === TaskStatus.Completed) {
+        refreshUnbackedQueriesCount();
+      }
+    });
+  }, [registerStatusCallback, toasts, refreshUnbackedQueriesCount]);
+
+  return null;
 }
 
 export function SignificantEventsDiscoveryPage() {
@@ -186,8 +220,9 @@ export function SignificantEventsDiscoveryPage() {
         tabs={tabs}
       />
       <KiGenerationProvider>
+        <KiGenerationEffects refreshUnbackedQueriesCount={refetch} />
         <StreamsAppPageTemplate.Body grow>
-          {tab === 'streams' && <StreamsView refreshUnbackedQueriesCount={refetch} />}
+          {tab === 'streams' && <StreamsView />}
           {tab === 'knowledge_indicators' && <KnowledgeIndicatorsTable />}
           {tab === 'queries' && <QueriesTable />}
           {tab === 'significant_events' && <InsightsTab />}
