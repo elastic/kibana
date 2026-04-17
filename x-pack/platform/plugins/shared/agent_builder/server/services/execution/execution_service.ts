@@ -14,7 +14,11 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  createBadRequestError,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AttachmentServiceStart } from '../attachments';
@@ -22,10 +26,11 @@ import type {
   AgentExecutionService,
   AgentExecution,
   ExecuteAgentParams,
-  ExecuteSubAgentParams,
   ExecuteAgentResult,
   FollowExecutionOptions,
   FindExecutionsOptions,
+  ConversationExecutionParams,
+  StandaloneExecutionParams,
 } from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
@@ -36,7 +41,6 @@ import {
   serializeExecutionError,
   type AgentExecutionDeps,
 } from './execution_runner';
-import { handleSubAgentExecution } from './sub_agent_execution_runner';
 import { AbortMonitor } from './task/abort_monitor';
 import { followExecution$ } from './execution_follower';
 
@@ -86,6 +90,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
   async executeAgent({
     request,
+    mode,
     params,
     executionId: providedExecutionId,
     useTaskManager,
@@ -105,19 +110,33 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const validatedAttachments = await this.validateAttachmentsIfProvided(
-      params.nextInput.attachments,
-      request
-    );
-    const validatedParams = validatedAttachments
-      ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
-      : params;
+    // Validate attachments for conversation mode
+    let validatedParams = params;
+    if (mode === AgentExecutionMode.conversation) {
+      const convParams = params as ConversationExecutionParams;
+      const validatedAttachments = await this.validateAttachmentsIfProvided(
+        convParams.nextInput.attachments,
+        request
+      );
+      if (validatedAttachments) {
+        validatedParams = {
+          ...convParams,
+          nextInput: { ...convParams.nextInput, attachments: validatedAttachments },
+        };
+      }
+    }
 
     const execution = await executionClient.create({
       executionId,
       agentId,
       spaceId,
       agentParams: validatedParams,
+      executionMode:
+        mode === AgentExecutionMode.standalone ? AgentExecutionMode.standalone : undefined,
+      parentExecutionId:
+        mode === AgentExecutionMode.standalone
+          ? (params as StandaloneExecutionParams).parentExecutionId
+          : undefined,
       metadata,
     });
 
@@ -139,40 +158,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     } else {
       return this.executeLocally({ execution, request });
     }
-  }
-
-  async executeSubAgent({
-    request,
-    params,
-    abortSignal,
-  }: ExecuteSubAgentParams): Promise<ExecuteAgentResult> {
-    const executionId = uuidv4();
-    const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
-    const executionClient = this.createExecutionClient();
-
-    const execution = await executionClient.create({
-      executionId,
-      agentId: params.agentId,
-      spaceId,
-      agentParams: params,
-      executionMode: 'subagent',
-      parentExecutionId: params.parentExecutionId,
-    });
-
-    // Wire up external abort signal
-    if (abortSignal) {
-      const onAbort = () => {
-        this.abortExecution(executionId).catch(noop);
-      };
-      if (abortSignal.aborted) {
-        onAbort();
-      } else {
-        abortSignal.addEventListener('abort', onAbort, { once: true });
-      }
-    }
-
-    // Run locally — we're already on a task manager node (spawned from a parent execution)
-    return this.executeLocally({ execution, request });
   }
 
   async getExecution(executionId: string): Promise<AgentExecution | undefined> {
@@ -250,7 +235,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     execution: AgentExecution;
     request: ExecuteAgentParams['request'];
   }): Promise<ExecuteAgentResult> {
-    const { executionId, executionMode } = execution;
+    const { executionId } = execution;
     const executionClient = this.createExecutionClient();
 
     // Update status to running
@@ -265,21 +250,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     abortMonitor.start();
 
     try {
-      // Dispatch to the right handler based on execution mode
-      const rawEvents$ =
-        executionMode === 'subagent'
-          ? await handleSubAgentExecution({
-              deps: this.deps,
-              request,
-              execution,
-              abortSignal: abortMonitor.getSignal(),
-            })
-          : await handleAgentExecution({
-              deps: this.deps,
-              request,
-              execution,
-              abortSignal: abortMonitor.getSignal(),
-            });
+      const rawEvents$ = await handleAgentExecution({
+        deps: this.deps,
+        request,
+        execution,
+        abortSignal: abortMonitor.getSignal(),
+      });
 
       // Multicast the stream so multiple subscribers share the same source
       const events$ = rawEvents$.pipe(shareReplay());

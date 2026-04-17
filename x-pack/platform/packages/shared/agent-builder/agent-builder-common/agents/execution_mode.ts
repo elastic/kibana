@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type ExecutionMode = 'agent' | 'subagent';
+export enum AgentExecutionMode {
+  conversation = 'conversation',
+  standalone = 'standalone',
+}

@@ -20,6 +20,7 @@ import {
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
   createBadRequestError,
+  AgentExecutionMode,
 } from '@kbn/agent-builder-common';
 import {
   ConnectorOrInferenceIdConflictError,
@@ -292,6 +293,7 @@ export function registerChatRoutes({
       executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;
 
     const { events$ } = await executionService.executeAgent({
+      mode: AgentExecutionMode.conversation,
       request,
       abortSignal,
       useTaskManager,

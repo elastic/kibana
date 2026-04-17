@@ -13,9 +13,9 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { isAgentBuilderError, createInternalError } from '@kbn/agent-builder-common';
+import { isAgentBuilderError, createInternalError, AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
-import type { Conversation, ConverseInput, ExecutionMode } from '@kbn/agent-builder-common';
+import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {
   ScopedRunner,
   ScopedRunnerRunAgentParams,
@@ -90,7 +90,7 @@ export interface CreateScopedRunnerDeps {
   toolManager: ToolManager;
   filestore: IFileStore;
   /** Execution mode for this runner context. */
-  executionMode?: ExecutionMode;
+  executionMode?: AgentExecutionMode;
   /** Sub-agent executor for spawning child executions. */
   subAgentExecutor: SubAgentExecutor;
 }
@@ -194,7 +194,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     nextInput?: ConverseInput;
     promptState?: PromptStorageState;
     abortSignal?: AbortSignal;
-    executionMode?: ExecutionMode;
+    executionMode?: AgentExecutionMode;
   }): Promise<ScopedRunner> => {
     const { resultStore, filestore, skillsStore } = createStore({ conversation });
 
@@ -211,14 +211,15 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     const subAgentExecutor: SubAgentExecutor = {
       executeSubAgent: async (params) => {
         const executionService = getExecutionService();
-        return executionService.executeSubAgent({
+        return executionService.executeAgent({
+          mode: AgentExecutionMode.standalone,
           request,
           params: {
             agentId: params.agentId,
             connectorId: params.connectorId,
             capabilities: params.capabilities,
             parentExecutionId: params.parentExecutionId,
-            prompt: params.prompt,
+            nextInput: { message: params.prompt },
           },
           abortSignal: params.abortSignal,
         });

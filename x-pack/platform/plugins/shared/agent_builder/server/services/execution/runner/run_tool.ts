@@ -8,7 +8,7 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { ToolResult, ToolType } from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore } from '@kbn/agent-builder-common/tools';
-import { createBadRequestError, HookLifecycle, ToolResultType } from '@kbn/agent-builder-common';
+import { createBadRequestError, HookLifecycle, ToolResultType, AgentExecutionMode } from '@kbn/agent-builder-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
   AfterToolCallHookContext,
@@ -104,13 +104,13 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
   const beforeToolHooksResult = await hooks.run(HookLifecycle.beforeToolCall, hookContext);
   toolParams = beforeToolHooksResult.toolParams;
 
-  const isSubAgentExecution = manager.deps.executionMode === 'subagent';
+  const isStandaloneExecution = manager.deps.executionMode === AgentExecutionMode.standalone;
 
   // only perform pre-call confirmation prompt when the agent is calling the tool
   if (tool.confirmation && source === 'agent') {
     if (tool.confirmation.askUser === 'once' || tool.confirmation.askUser === 'always') {
       // In sub-agent mode, HITL is not available — auto-decline
-      if (isSubAgentExecution) {
+      if (isStandaloneExecution) {
         return {
           results: [
             createErrorResult(
@@ -204,7 +204,7 @@ export const runInternalTool = async <TParams = Record<string, unknown>>({
     });
   } else {
     // On-demand HITL prompt from tool handler
-    if (isSubAgentExecution) {
+    if (isStandaloneExecution) {
       runToolReturn = {
         results: [
           createErrorResult(

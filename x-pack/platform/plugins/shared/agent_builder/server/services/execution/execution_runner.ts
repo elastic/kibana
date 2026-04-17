@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, EMPTY } from 'rxjs';
+import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -19,6 +19,8 @@ import {
   isRoundCompleteEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
+  AgentExecutionMode,
+  createInternalError,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -39,7 +41,13 @@ import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
-import type { AgentExecution, AgentExecutionParams, SerializedExecutionError } from './types';
+import {
+  isStandaloneExecution,
+  type AgentExecution,
+  type ConversationExecutionParams,
+  type StandaloneExecutionParams,
+  type SerializedExecutionError,
+} from './types';
 import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
@@ -63,10 +71,8 @@ export interface AgentExecutionDeps {
 }
 
 /**
- * Resolves services, gets the conversation, and builds the full agent event stream.
- * This is the core execution logic shared between local and TM execution.
- *
- * @returns An observable of ChatEvents (agent events + persistence events).
+ * Unified entry point for agent execution. Dispatches to the appropriate handler
+ * based on the execution mode.
  */
 export const handleAgentExecution = async ({
   execution,
@@ -75,6 +81,33 @@ export const handleAgentExecution = async ({
   abortSignal,
 }: {
   execution: AgentExecution;
+  deps: AgentExecutionDeps;
+  request: KibanaRequest;
+  abortSignal: AbortSignal;
+}): Promise<Observable<ChatEvent>> => {
+  if (isStandaloneExecution(execution)) {
+    return handleStandaloneExecution({ execution, deps, request, abortSignal });
+  }
+  // All non-standalone executions are conversation mode (default when executionMode is undefined)
+  return handleConversationExecution({
+    execution: execution as AgentExecution & { agentParams: ConversationExecutionParams },
+    deps,
+    request,
+    abortSignal,
+  });
+};
+
+/**
+ * Handles conversation-mode execution — resolves/creates conversation, generates title,
+ * persists round, reports metering and telemetry.
+ */
+const handleConversationExecution = async ({
+  execution,
+  deps,
+  request,
+  abortSignal,
+}: {
+  execution: AgentExecution & { agentParams: ConversationExecutionParams };
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
@@ -92,7 +125,7 @@ export const handleAgentExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
-  } = execution.agentParams as AgentExecutionParams;
+  } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
@@ -338,4 +371,58 @@ const buildPersistenceEvents = ({
     roundCompletedEvents$,
     action,
   });
+};
+
+/**
+ * Handles a standalone agent execution — no conversation resolution, no title generation,
+ * no persistence events, and no metering/telemetry.
+ */
+const handleStandaloneExecution = async ({
+  execution,
+  deps,
+  request,
+  abortSignal,
+}: {
+  execution: AgentExecution & { agentParams: StandaloneExecutionParams };
+  deps: AgentExecutionDeps;
+  request: KibanaRequest;
+  abortSignal: AbortSignal;
+}): Promise<Observable<ChatEvent>> => {
+  const agentId = execution.agentId;
+  const { logger, runAgent } = deps;
+
+  const { selectedConnectorId } = await resolveServices({
+    agentId,
+    connectorId: execution.agentParams.connectorId,
+    request,
+    ...deps,
+  });
+
+  const agentEvents$ = executeAgent$({
+    agentId,
+    executionId: execution.executionId,
+    request,
+    nextInput: execution.agentParams.nextInput,
+    capabilities: execution.agentParams.capabilities,
+    abortSignal,
+    conversation: undefined,
+    defaultConnectorId: selectedConnectorId,
+    runAgent,
+    executionMode: AgentExecutionMode.standalone,
+  });
+
+  return agentEvents$.pipe(
+    handleCancellation(abortSignal),
+    catchError((err) => {
+      logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);
+      return throwError(() => {
+        if (isAgentBuilderError(err)) {
+          return err;
+        }
+        return createInternalError(`Error executing standalone agent: ${err.message}`, {
+          statusCode: 500,
+        });
+      });
+    })
+  );
 };

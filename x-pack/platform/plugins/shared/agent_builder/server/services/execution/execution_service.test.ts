@@ -10,6 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import type { ChatEvent } from '@kbn/agent-builder-common';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from './types';
 import type { AgentExecutionClient } from './persistence';
 import type { AttachmentServiceStart } from '../attachments';
@@ -109,6 +110,7 @@ describe('AgentExecutionService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: {
           agentId: 'agent-1',
@@ -154,6 +156,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: {
           agentId: 'agent-1',
@@ -203,6 +206,7 @@ describe('AgentExecutionService', () => {
 
       await expect(
         service.executeAgent({
+          mode: AgentExecutionMode.conversation,
           request,
           params: {
             agentId: 'agent-1',
@@ -233,6 +237,7 @@ describe('AgentExecutionService', () => {
       });
 
       const { events$ } = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,
@@ -261,6 +266,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         // useTaskManager NOT provided -> auto-detect
@@ -280,6 +286,7 @@ describe('AgentExecutionService', () => {
       const request = httpServerMock.createKibanaRequest();
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         // useTaskManager NOT provided -> auto-detect
@@ -297,6 +304,7 @@ describe('AgentExecutionService', () => {
       Object.defineProperty(request, 'isFakeRequest', { value: true });
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: true,
@@ -314,6 +322,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       const result = await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,
@@ -412,6 +421,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,
@@ -430,6 +440,7 @@ describe('AgentExecutionService', () => {
       mockCollectAndWriteEvents.mockResolvedValue(undefined);
 
       await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
         request,
         params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
         useTaskManager: false,

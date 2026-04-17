@@ -26,7 +26,7 @@ import { RunnerManager } from './runner';
 import { forkContextForAgentRun } from './utils';
 import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { HookLifecycle } from '@kbn/agent-builder-common';
+import { HookLifecycle, AgentExecutionMode } from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -884,8 +884,8 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     tool.getHandler.mockReturnValue(toolHandler);
   });
 
-  it('returns error result instead of confirmation prompt when executionMode is subagent', async () => {
-    runnerDeps.executionMode = 'subagent';
+  it('returns error result instead of confirmation prompt when executionMode is standalone', async () => {
+    runnerDeps.executionMode = AgentExecutionMode.standalone;
     const runnerManager = new RunnerManager(runnerDeps);
 
     tool.confirmation = { askUser: 'always' };
@@ -912,8 +912,8 @@ describe('runInternalTool - sub-agent HITL blocking', () => {
     expect(toolHandler).not.toHaveBeenCalled();
   });
 
-  it('returns error result instead of on-demand prompt when executionMode is subagent', async () => {
-    runnerDeps.executionMode = 'subagent';
+  it('returns error result instead of on-demand prompt when executionMode is standalone', async () => {
+    runnerDeps.executionMode = AgentExecutionMode.standalone;
     const runnerManager = new RunnerManager(runnerDeps);
 
     toolHandler.mockReturnValue({

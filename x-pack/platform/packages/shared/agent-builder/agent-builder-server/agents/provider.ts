@@ -15,7 +15,7 @@ import type {
   AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
-  ExecutionMode,
+  AgentExecutionMode,
   ChatEvent,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -201,9 +201,9 @@ export interface AgentHandlerContext {
   experimentalFeatures: ExperimentalFeatures;
   /**
    * The execution mode for this agent run.
-   * When 'subagent', the execution is non-interactive (HITL disabled, no conversation).
+   * NOTE: atm, when 'standalone', the execution is non-interactive (HITL disabled).
    */
-  executionMode?: ExecutionMode;
+  executionMode?: AgentExecutionMode;
   /**
    * Sub-agent executor for spawning child agent executions.
    */

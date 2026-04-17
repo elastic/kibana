@@ -12,7 +12,6 @@ import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionParams,
-  SubAgentExecutionParams,
   ExecutionStatus,
   SerializedExecutionError,
 } from '../types';
@@ -53,7 +52,7 @@ export interface AgentExecutionProperties {
   execution_mode?: string;
   parent_execution_id?: string;
   space_id: string;
-  agent_params: AgentExecutionParams | SubAgentExecutionParams;
+  agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;
   event_count?: number;
   events?: ChatEvent[];

@@ -14,7 +14,11 @@ import {
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStatus,
+  agentBuilderDefaultAgentId,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
 import type { ConversationInternalState, CompactionSummary } from '@kbn/agent-builder-common/chat';
@@ -188,8 +192,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
-  // Register sub-agent and sleep tools if experimental features enabled and not already a sub-agent
-  if (experimentalFeatures.subagents && context.executionMode !== 'subagent') {
+  // Register sub-agent and sleep tools if experimental features enabled and not in standalone mode
+  if (experimentalFeatures.subagents && context.executionMode !== AgentExecutionMode.standalone) {
     const subagentTool = createSubagentTool({
       agentId: agentId ?? agentBuilderDefaultAgentId,
       executionId: executionId ?? '',
@@ -296,10 +300,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       },
       recursionLimit: graphRecursionLimit,
       callbacks: [],
-      // For sub-agent executions: prevent LangGraph from inheriting the parent graph's
+      // prevent LangGraph from inheriting the parent graph's
       // abort signals via the __pregel_abort_signals configurable key. Without this,
-      // the parent graph's cleanup abort cascades to the sub-agent.
-      ...(context.executionMode === 'subagent'
+      // the parent graph's cleanup abort cascades to the standalone execution.
+      ...(context.executionMode === AgentExecutionMode.standalone
         ? { configurable: { __pregel_abort_signals: undefined } }
         : {}),
     }

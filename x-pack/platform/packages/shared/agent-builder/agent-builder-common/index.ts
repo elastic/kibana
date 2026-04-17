@@ -121,7 +121,7 @@ export {
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
-  type ExecutionMode,
+  AgentExecutionMode,
   ExecutionStatus,
   type SerializedExecutionError,
 } from './agents';
