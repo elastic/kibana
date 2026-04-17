@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { load } from 'js-yaml';
 import deepEqual from 'fast-deep-equal';
 import { omit, pick } from 'lodash';
 
@@ -35,6 +34,7 @@ import {
   validationHasErrors,
 } from '../../create_package_policy_page/services';
 import type { PackagePolicyFormState } from '../../create_package_policy_page/types';
+import { useYaml } from '../../../../../../services';
 import { fixApmDurationVars, hasUpgradeAvailable } from '../utils';
 import { prepareInputPackagePolicyDataset } from '../../create_package_policy_page/services/prepare_input_pkg_policy_dataset';
 
@@ -87,6 +87,7 @@ export function usePackagePolicyWithRelatedData(
   const [loadingError, setLoadingError] = useState<Error>();
 
   const [isUpgrade, setIsUpgrade] = useState<boolean>(options.forceUpgrade ?? false);
+  const yaml = useYaml();
 
   // Form state
   const [isEdited, setIsEdited] = useState(false);
@@ -116,11 +117,11 @@ export function usePackagePolicyWithRelatedData(
   // Update package policy validation
   const updatePackagePolicyValidation = useCallback(
     (newPackagePolicy?: UpdatePackagePolicy) => {
-      if (packageInfo) {
+      if (packageInfo && yaml) {
         const newValidationResult = validatePackagePolicy(
           newPackagePolicy || packagePolicy,
           packageInfo,
-          load
+          yaml.parse
         );
         setValidationResults(newValidationResult);
         // eslint-disable-next-line no-console
@@ -129,7 +130,7 @@ export function usePackagePolicyWithRelatedData(
         return newValidationResult;
       }
     },
-    [packagePolicy, packageInfo]
+    [packagePolicy, packageInfo, yaml]
   );
   // Update package policy method
   const updatePackagePolicy = useCallback(
@@ -310,13 +311,13 @@ export function usePackagePolicyWithRelatedData(
               { prerelease, full: true }
             );
 
-            if (packageData?.item) {
+            if (packageData?.item && yaml) {
               setPackageInfo(packageData.item);
 
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
                 packageData.item,
-                load
+                yaml.parse
               );
               setValidationResults(newValidationResults);
 
@@ -334,7 +335,14 @@ export function usePackagePolicyWithRelatedData(
       setIsLoadingData(false);
     };
     getData();
-  }, [packagePolicyId, options.forceUpgrade]);
+  }, [packagePolicyId, options.forceUpgrade, yaml]);
+
+  // Re-run validation when yaml loads (getData may have run before yaml was available)
+  useEffect(() => {
+    if (yaml && packageInfo && packagePolicy) {
+      updatePackagePolicyValidation();
+    }
+  }, [yaml, packageInfo, packagePolicy, updatePackagePolicyValidation]);
 
   return {
     // form
