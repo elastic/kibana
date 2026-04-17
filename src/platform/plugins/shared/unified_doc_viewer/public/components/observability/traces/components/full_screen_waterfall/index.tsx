@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiTitle,
-  useEuiTheme,
-  useGeneratedHtmlId,
-  type EuiFlyoutProps,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { type EuiFlyoutProps } from '@elastic/eui';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useDocViewerViewedEvent } from '@kbn/unified-doc-viewer';
-import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
@@ -54,7 +44,7 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
-  highlightedSpanId: initialHighlightedSpanId,
+  highlightedSpanId,
   scrollToHighlightedOnMount,
   docId,
   docIndex,
@@ -69,10 +59,9 @@ export const FullScreenWaterfall = ({
 }: FullScreenWaterfallProps) => {
   const historyKey = useFlyoutHistoryKey();
   const { analytics, discoverShared } = getUnifiedDocViewerServices();
-  const FullTraceWaterfall = discoverShared.features.registry.getById(
-    'observability-full-trace-waterfall'
+  const TraceWaterfallFlyout = discoverShared.features.registry.getById(
+    'observability-trace-waterfall-flyout'
   )?.render;
-  const { euiTheme } = useEuiTheme();
 
   useDocViewerViewedEvent({
     reportEvent: analytics.reportEvent,
@@ -80,136 +69,41 @@ export const FullScreenWaterfall = ({
     skipNextReport: skipNextEventReport,
   });
 
-  /*
-   * Temporary workaround: add a native <style> tag to fix the z-index of EuiDataGrid cell popovers
-   * rendered inside nested flyouts.
-   *
-   * EuiDataGrid popovers use EuiPortal, which inserts content at the document root. When nested
-   * flyouts unmount, Emotion's style cleanup can target portals that have already been removed
-   * from the DOM, resulting in a white screen crash.
-   *
-   * By injecting a plain <style> element into document.head, we bypass Emotion entirely,
-   * avoiding the cleanup race condition while still ensuring the popover renders
-   * above the flyout layers.
-   *
-   * TODO: Remove this workaround once EUI provides a proper fix for popover z-index handling
-   * inside nested flyouts (see: https://github.com/elastic/eui/issues/8801).
-   */
-
-  useEffect(() => {
-    const style = document.createElement('style');
-
-    style.id = 'flyout-datagrid-popover-z-index-fix';
-    style.textContent = `
-      .euiDataGridRowCell__popover {
-        z-index: ${euiTheme.levels.menu} !important;
-      }
-    `;
-
-    document.head.appendChild(style);
-
-    return () => {
-      style.remove();
-    };
-  }, [euiTheme.levels.menu]);
-
-  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(
-    initialHighlightedSpanId
-  );
-
-  const traceWaterfallTitleId = useGeneratedHtmlId({
-    prefix: 'traceWaterfallTitle',
-  });
-
-  const traceWaterfallTitle = i18n.translate(
-    'unifiedDocViewer.observability.traces.fullScreenWaterfall.title',
-    {
-      defaultMessage: 'Trace timeline',
-    }
-  );
-
-  const minWidth = euiTheme.base * 30;
-
-  if (!FullTraceWaterfall) {
+  if (!TraceWaterfallFlyout) {
     return null;
   }
 
   return (
-    <EuiFlyout
-      data-test-subj="traceWaterfallFlyout"
-      session="start"
+    <TraceWaterfallFlyout
+      traceId={traceId}
+      rangeFrom={rangeFrom}
+      rangeTo={rangeTo}
+      serviceName={serviceName}
+      highlightedSpanId={highlightedSpanId}
+      scrollToHighlightedOnMount={scrollToHighlightedOnMount}
+      docId={docId}
+      docIndex={docIndex}
+      activeFlyoutType={activeFlyoutType}
+      activeSection={activeSection}
+      skipOpenAnimation={skipOpenAnimation}
       historyKey={historyKey}
-      size="m"
-      onClose={onExitFullScreen}
-      ownFocus={false}
-      aria-labelledby={traceWaterfallTitleId}
-      flyoutMenuProps={{
-        title: traceWaterfallTitle,
-      }}
-      resizable={true}
-      minWidth={minWidth}
-      hasAnimation={!skipOpenAnimation}
-    >
-      <EuiFlyoutHeader>
-        <EuiTitle size="l">
-          <h2 id={traceWaterfallTitleId}>{traceWaterfallTitle}</h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        css={css`
-          .euiFlyoutBody__overflow,
-          .euiFlyoutBody__overflowContent {
-            height: 100%;
-          }
-          .euiFlyoutBody__overflow {
-            overflow: hidden;
-          }
-        `}
-      >
-        <div
-          css={css`
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-          `}
-        >
-          <FullTraceWaterfall
-            traceId={traceId}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            serviceName={serviceName}
-            highlightedSpanId={highlightedSpanId}
-            scrollToHighlightedOnMount={scrollToHighlightedOnMount}
-            scrollStrategy="parent"
-            onNodeClick={(nodeSpanId) => {
-              setHighlightedSpanId(nodeSpanId);
-              onNodeClick(nodeSpanId);
-            }}
-            onErrorClick={(params) => {
-              setHighlightedSpanId(params.errorCount > 1 ? params.docId : undefined);
-              onErrorClick(params);
-            }}
-          />
-        </div>
-      </EuiFlyoutBody>
-
-      {docId && activeFlyoutType ? (
+      onNodeClick={onNodeClick}
+      onErrorClick={onErrorClick}
+      onCloseFlyout={onCloseFlyout}
+      onExitFullScreen={onExitFullScreen}
+      renderDetailFlyout={(props) => (
         <DocumentDetailFlyout
-          type={activeFlyoutType}
-          docId={docId}
-          docIndex={docIndex}
-          traceId={traceId}
+          type={props.type}
+          docId={props.docId}
+          docIndex={props.docIndex}
+          traceId={props.traceId}
           dataView={dataView}
-          dataTestSubj="traceWaterfallDocumentFlyout"
-          hasAnimation={!skipOpenAnimation}
-          onCloseFlyout={(event) => {
-            setHighlightedSpanId(undefined);
-            onCloseFlyout(event);
-          }}
-          activeSection={activeSection}
+          hasAnimation={props.hasAnimation}
+          onCloseFlyout={props.onClose}
+          activeSection={props.activeSection}
           skipNextEventReport={skipNextEventReport}
         />
-      ) : null}
-    </EuiFlyout>
+      )}
+    />
   );
 };

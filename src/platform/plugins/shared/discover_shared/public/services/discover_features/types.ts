@@ -269,13 +269,13 @@ export interface ObservabilityTraceWaterfallFlyoutFeature {
       traceId: string;
       type: 'spanDetailFlyout' | 'logsFlyout';
       hasAnimation: boolean;
-      onClose: () => void;
+      onClose: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
       activeSection?: 'errors-table';
     }) => React.ReactNode;
     onNodeClick: (nodeSpanId: string) => void;
     onErrorClick: FullTraceWaterfallOnErrorClick;
-    onCloseFlyout: () => void;
-    onExitFullScreen: () => void;
+    onCloseFlyout: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
+    onExitFullScreen: (event: MouseEvent | TouchEvent | KeyboardEvent) => void;
   }) => React.ReactNode;
 }
 
