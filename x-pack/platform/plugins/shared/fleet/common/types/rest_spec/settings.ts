@@ -63,15 +63,9 @@ export interface PutSpaceSettingsRequest {
   };
 }
 
-export interface NamespaceTemplatesSummary {
-  created: Record<string, string[]>;
-  removed: Record<string, string[]>;
-}
-
 export interface GetSpaceSettingsResponse {
   item: {
     allowed_namespace_prefixes?: string[];
     namespace_index_templates_enabled_for?: string[];
-    namespace_templates_summary?: NamespaceTemplatesSummary;
   };
 }

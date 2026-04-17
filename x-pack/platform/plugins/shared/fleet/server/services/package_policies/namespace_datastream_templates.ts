@@ -695,7 +695,7 @@ export interface SyncNamespaceTemplatesSummary {
  * list in space settings. Creates namespace templates for added namespaces and deletes
  * them for removed namespaces across all affected integration packages.
  *
- * Called from the `putSpaceSettingsHandler` when the opt-in list changes.
+ * Called from the `fleet:sync_namespace_templates` task when the opt-in list changes.
  */
 export async function syncNamespaceTemplates({
   soClient,

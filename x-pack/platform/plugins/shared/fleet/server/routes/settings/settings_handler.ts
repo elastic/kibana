@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type {
   FleetRequestHandler,
@@ -15,7 +16,7 @@ import type {
 import { appContextService, settingsService } from '../../services';
 import { getSpaceSettings, saveSpaceSettings } from '../../services/spaces/space_settings';
 import { scheduleReindexIntegrationKnowledgeTask } from '../../tasks/reindex_integration_knowledge_task';
-import { syncNamespaceTemplates } from '../../services/package_policies';
+import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 
 export const getSpaceSettingsHandler: FleetRequestHandler = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
@@ -32,7 +33,7 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
   TypeOf<typeof PutSpaceSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = (await context.fleet).internalSoClient;
-  const spaceId = soClient.getCurrentNamespace();
+  const spaceId = soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
 
   // Fetch old settings before saving to compute the diff
   const oldSettings = await getSpaceSettings(spaceId);
@@ -51,27 +52,18 @@ export const putSpaceSettingsHandler: FleetRequestHandler<
     spaceId,
   });
 
-  const settings = await getSpaceSettings(spaceId);
-
-  let namespaceTemplatesSummary;
-
   if (addedNamespaces.length > 0 || removedNamespaces.length > 0) {
-    const esClient = appContextService.getInternalUserESClient();
-    namespaceTemplatesSummary = await syncNamespaceTemplates({
-      soClient,
-      esClient,
+    await scheduleSyncNamespaceTemplatesTask(appContextService.getTaskManagerStart()!, {
       addedNamespaces,
       removedNamespaces,
+      spaceId,
     });
   }
 
+  const settings = await getSpaceSettings(spaceId);
+
   const body = {
-    item: {
-      ...settings,
-      ...(namespaceTemplatesSummary
-        ? { namespace_templates_summary: namespaceTemplatesSummary }
-        : {}),
-    },
+    item: settings,
   };
   return response.ok({ body });
 };

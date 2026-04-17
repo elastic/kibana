@@ -166,6 +166,7 @@ import {
   scheduleVerifyPermissionsTask,
 } from './tasks/agentless/verify_permissions_task';
 import { registerReindexIntegrationKnowledgeTask } from './tasks/reindex_integration_knowledge_task';
+import { registerSyncNamespaceTemplatesTask } from './tasks/sync_namespace_templates_task';
 import {
   type AgentlessPoliciesService,
   AgentlessPoliciesServiceImpl,
@@ -704,6 +705,7 @@ export class FleetPlugin
     registerAgentlessDeploymentSyncTask(deps.taskManager, this.configInitialValue);
     registerVerifyPermissionsTask(deps.taskManager);
     registerReindexIntegrationKnowledgeTask(deps.taskManager);
+    registerSyncNamespaceTemplatesTask(deps.taskManager);
     registerReassignAgentsToVersionSpecificPoliciesTask(deps.taskManager);
 
     this.bulkActionsResolver = new BulkActionsResolver(deps.taskManager, core);
