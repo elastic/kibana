@@ -90,7 +90,9 @@ export const createSyntaxValidationEvaluator = (
     if (hasFailureMode) {
       scoreComponents.push(executionHitRate);
     }
-    const score = scoreComponents.reduce((sum, s) => sum + s, 0) / scoreComponents.length;
+    const score =
+      scoreComponents.reduce((sum, scoreComponent) => sum + scoreComponent, 0) /
+      scoreComponents.length;
 
     const issues: string[] = [];
     if (astValidCount < queries.length) {

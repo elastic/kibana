@@ -24,10 +24,13 @@ import { matchesEvidenceText } from '../../common/matches_evidence_text';
  */
 function stripEvidenceAnnotations(evidence: string): string {
   let cleaned = evidence
+    // Remove trailing parenthetical annotations, e.g. "(4% of sampled logs)"
     .replace(/\s*\([^)]*\)\s*$/, '')
+    // Remove trailing em-dash/en-dash commentary, e.g. "— normal path; absence signals failure"
     .replace(/\s*[—–]\s+.*$/, '')
     .trimEnd();
 
+  // Unwrap quoted values in key-value pairs: `key: "value"` → `key: value`
   cleaned = cleaned.replace(/^([^:=]+[=:]\s*)"(.*)"$/, '$1$2');
 
   return cleaned;
@@ -67,6 +70,9 @@ function checkKeywordGrounding(
   evidence: string,
   flatDocs: Array<Record<string, unknown>>
 ): KeywordGroundingResult {
+  // Split on whitespace and common punctuation/delimiters, then strip any
+  // remaining non-identifier characters (keeping dots, hyphens, slashes, and @
+  // which appear in field paths and email-like tokens).
   const tokens = evidence
     .split(/[\s,;:()[\]{}"'—–]+/)
     .map((t) => t.replace(/[^a-zA-Z0-9_.\-/@]/g, ''))
@@ -276,29 +282,6 @@ export const evidenceGroundingEvaluator: KIQueryGenerationEvaluator = {
     }
 
     const score = groundedEvidence / totalEvidence;
-
-    // eslint-disable-next-line no-console
-    console.log(
-      `\n[evidence_grounding] score=${score.toFixed(2)} (${groundedEvidence}/${totalEvidence})\n` +
-        debugLog
-          .map(
-            (d) =>
-              `  ${d.grounded ? '✓' : '✗'} ${d.raw.slice(0, 80)}${d.raw.length > 80 ? '…' : ''}\n` +
-              `    exact=${d.exactMatch}` +
-              (d.keywordResult
-                ? ` keyword=${
-                    d.keywordResult.grounded
-                  } tokens=[${d.keywordResult.technicalTokens.join(
-                    ', '
-                  )}] matched=[${d.keywordResult.matchedTokens.join(
-                    ', '
-                  )}] unmatched=[${d.keywordResult.unmatchedTokens.join(', ')}]`
-                : '') +
-              (d.featureMatch ? ' feature=true' : '') +
-              (d.stripped !== '(unchanged)' ? `\n    stripped=${d.stripped.slice(0, 80)}` : '')
-          )
-          .join('\n')
-    );
 
     return {
       score,
