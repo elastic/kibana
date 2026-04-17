@@ -53,15 +53,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.clickCopyToLanguageButton();
 
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
+        await retry.try(async () => {
+          const resultToast = await toasts.getElementByIndex(1);
+          const toastText = await resultToast.getVisibleText();
 
-        if (toastText.includes('Write permission denied')) {
-          log.debug('Write permission denied, skipping test');
-          return;
-        }
+          if (toastText.includes('Write permission denied')) {
+            log.debug('Write permission denied, skipping test');
+            return;
+          }
 
-        expect(toastText).to.be('Request copied to clipboard as curl');
+          expect(toastText).to.be('Request copied to clipboard as curl');
+        });
 
         const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
         if (canReadClipboard) {
@@ -85,10 +87,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.clickCopyToLanguageButton();
 
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
-
-        expect(toastText).to.be('Requests copied to clipboard as curl');
+        await retry.try(async () => {
+          const resultToast = await toasts.getElementByIndex(1);
+          const toastText = await resultToast.getVisibleText();
+          expect(toastText).to.be('Requests copied to clipboard as curl');
+        });
 
         // Check if the clipboard has the curl request
         if (canReadClipboard) {
@@ -142,15 +145,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.clickContextMenu();
         await PageObjects.console.changeLanguageAndCopy('javascript');
 
-        const resultToast = await toasts.getElementByIndex(1);
-        const toastText = await resultToast.getVisibleText();
+        await retry.try(async () => {
+          const resultToast = await toasts.getElementByIndex(1);
+          const toastText = await resultToast.getVisibleText();
 
-        if (toastText.includes('Write permission denied')) {
-          log.debug('Write permission denied, skipping test');
-          return;
-        }
+          if (toastText.includes('Write permission denied')) {
+            log.debug('Write permission denied, skipping test');
+            return;
+          }
 
-        expect(toastText).to.be('Request copied to clipboard as JavaScript');
+          expect(toastText).to.be('Request copied to clipboard as JavaScript');
+        });
 
         const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
         if (canReadClipboard) {
