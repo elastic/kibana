@@ -541,10 +541,12 @@ export function TrainedModelsTableProvider(
     }
 
     public async assertVCPUHelperText(expectedText: string) {
-      const helperText = await testSubjects.getVisibleText(
-        'mlModelsStartDeploymentModalVCPUHelperText'
-      );
-      expect(expectedText).to.eql(helperText);
+      await retry.try(async () => {
+        const helperText = await testSubjects.getVisibleText(
+          'mlModelsStartDeploymentModalVCPUHelperText'
+        );
+        expect(helperText).to.eql(expectedText);
+      });
     }
 
     public async assertAdvancedConfigurationOpen(expectedValue: boolean) {
