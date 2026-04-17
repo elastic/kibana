@@ -99,7 +99,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(response).toHaveStatusCode(200);
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.aggs;
-      expect(layer.length).toBe(1);
+      expect(layer).toHaveLength(1);
 
       const clusterFeature = layer.feature(0);
       expect(clusterFeature.type).toBe(1);
@@ -129,7 +129,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(response).toHaveStatusCode(200);
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.aggs;
-      expect(layer.length).toBe(1);
+      expect(layer).toHaveLength(1);
 
       const clusterFeature = layer.feature(0);
       expect(clusterFeature.type).toBe(1);
@@ -159,7 +159,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(response).toHaveStatusCode(200);
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.aggs;
-      expect(layer.length).toBe(1);
+      expect(layer).toHaveLength(1);
 
       const gridFeature = layer.feature(0);
       expect(gridFeature.type).toBe(3);
@@ -197,7 +197,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(response).toHaveStatusCode(200);
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.aggs;
-      expect(layer.length).toBe(1);
+      expect(layer).toHaveLength(1);
 
       const gridFeature = layer.feature(0);
       expect(gridFeature.type).toBe(3);
@@ -241,7 +241,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
       expect(response).toHaveStatusCode(200);
       const jsonTile = new VectorTile(new Protobuf(response.body));
       const layer = jsonTile.layers.aggs;
-      expect(layer.length).toBe(2);
+      expect(layer).toHaveLength(2);
 
       const labelFeature = findFeature(layer, (feature) => {
         return feature.properties._mvt_label_position === true;
@@ -272,7 +272,7 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
     expect(response).toHaveStatusCode(200);
     const jsonTile = new VectorTile(new Protobuf(response.body));
     const metaDataLayer = jsonTile.layers.meta;
-    expect(metaDataLayer.length).toBe(1);
+    expect(metaDataLayer).toHaveLength(1);
 
     const metadataFeature = metaDataLayer.feature(0);
     expect(metadataFeature.type).toBe(3);

@@ -33,7 +33,7 @@ apiTest.describe('Maps - get matching index patterns', { tag: [...tags.stateful.
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.success).toBe(true);
-    expect(response.body.matchingIndexes.length).toBe(1);
+    expect(response.body.matchingIndexes).toHaveLength(1);
   });
 
   apiTest('should return an empty array when no indexes match pattern', async ({ apiClient }) => {
@@ -46,6 +46,6 @@ apiTest.describe('Maps - get matching index patterns', { tag: [...tags.stateful.
 
     expect(response).toHaveStatusCode(200);
     expect(response.body.success).toBe(true);
-    expect(response.body.matchingIndexes.length).toBe(0);
+    expect(response.body.matchingIndexes).toHaveLength(0);
   });
 });
