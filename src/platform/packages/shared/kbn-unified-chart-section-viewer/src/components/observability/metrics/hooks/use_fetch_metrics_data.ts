@@ -14,6 +14,7 @@ import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-uti
 import { getFieldIconType } from '@kbn/field-utils';
 import type { Dimension, MetricsESQLResponse, MetricsInfo, ParsedMetrics } from '../../../../types';
 import { useTelemetry } from '../../../../context/ebt_telemetry_context';
+import { useChartSectionInspector } from '../../../../context/chart_section_inspector';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
@@ -36,6 +37,7 @@ export function useFetchMetricsData({
   selectedDimensionNames?: Dimension[];
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
+  const { trackRequest } = useChartSectionInspector();
   const esql = getEsqlQuery(fetchParams.query);
 
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
@@ -51,24 +53,42 @@ export function useFetchMetricsData({
   );
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
-    async (signal: AbortSignal): Promise<ParsedMetrics | null> => {
-      const result = await executeEsqlQuery<MetricsESQLResponse>({
-        esqlQuery: metricsInfoQuery,
-        search: services.data.search.search,
-        signal,
-        dataView: fetchParams.dataView,
-        timeRange: fetchParams.timeRange,
-        filters: fetchParams.filters ?? [],
-        variables: fetchParams.esqlVariables,
-        uiSettings: services.uiSettings,
-      });
+    async (
+      signal: AbortSignal
+    ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
+      const documents = await trackRequest(
+        'Grid of metrics',
+        'This request queries Elasticsearch to fetch metrics info for the grid.',
+        async () => {
+          const {
+            documents: docs,
+            rawResponse,
+            requestParams,
+          } = await executeEsqlQuery<MetricsESQLResponse>({
+            esqlQuery: metricsInfoQuery,
+            search: services.data.search.search,
+            signal,
+            dataView: fetchParams.dataView,
+            timeRange: fetchParams.timeRange,
+            filters: fetchParams.filters ?? [],
+            variables: fetchParams.esqlVariables,
+            uiSettings: services.uiSettings,
+          });
+
+          return {
+            data: docs,
+            request: requestParams,
+            response: rawResponse,
+          };
+        }
+      );
 
       const getFieldType = (name: string) => {
         const field = fetchParams.dataView?.getFieldByName(name);
         return field ? getFieldIconType(field) : undefined;
       };
 
-      const parsed = parseMetricsWithTelemetry(result, getFieldType);
+      const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
       const sortedMetrics: ParsedMetrics = {
         metricItems: [...parsed.metricItems].sort((a, b) =>
@@ -81,10 +101,14 @@ export function useFetchMetricsData({
         trackMetricsInfo(parsed.telemetry);
       }
 
-      return sortedMetrics;
+      return {
+        ...sortedMetrics,
+        activeDimensions: selectedDimensionNames ?? [],
+      };
     },
     [
       metricsInfoQuery,
+      trackRequest,
       fetchParams.dataView,
       fetchParams.timeRange,
       fetchParams.filters,
@@ -92,6 +116,7 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
+      selectedDimensionNames,
     ]
   );
 
@@ -120,5 +145,6 @@ export function useFetchMetricsData({
     error: error ?? null,
     metricItems: value?.metricItems ?? [],
     allDimensions: value?.allDimensions ?? [],
+    activeDimensions: value?.activeDimensions ?? [],
   };
 }
