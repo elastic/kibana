@@ -14,6 +14,10 @@ import React, { Suspense } from 'react';
 import type { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { ExecutionStatus } from '@kbn/workflows';
+import type {
+  PublicStepDefinition,
+  WorkflowsExtensionsPublicPluginStart,
+} from '@kbn/workflows-extensions/public';
 import { getStepIconType, getTriggerTypeIconType } from './get_step_icon_type';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../status_badge';
@@ -54,7 +58,9 @@ export const StepIcon = React.memo(
     if (stepType.startsWith('trigger_')) {
       iconType = getTriggerTypeIconType(stepType);
     } else {
-      const stepDefinition = workflowsExtensions.getStepDefinition(stepType);
+      const stepDefinition =
+        workflowsExtensions.getStepDefinition(stepType) ??
+        findStepDefinitionByBaseType(stepType, workflowsExtensions);
       if (stepDefinition?.icon) {
         return (
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
@@ -156,4 +162,15 @@ function getActionTypeIcon(
     return actionType.iconClass;
   }
   return undefined;
+}
+
+// List rows aggregate by base type (e.g. `cases` from `cases.createCase`), but extension steps
+// register full ids (e.g. `cases.createCase`). Fall back to the first registered step whose id
+// starts with `${baseType}.` so the list inherits the extension icon chosen for that family.
+function findStepDefinitionByBaseType(
+  baseType: string,
+  workflowsExtensions: WorkflowsExtensionsPublicPluginStart
+): PublicStepDefinition | undefined {
+  const prefix = `${baseType}.`;
+  return workflowsExtensions.getAllStepDefinitions().find((def) => def.id.startsWith(prefix));
 }
