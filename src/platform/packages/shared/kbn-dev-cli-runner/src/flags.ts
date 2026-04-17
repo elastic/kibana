@@ -24,10 +24,15 @@ export interface Flags {
   [key: string]: undefined | boolean | string | string[];
 }
 
+export interface FlagHelpItem {
+  flag: string;
+  description: string;
+}
+
 export interface FlagOptions {
   allowUnexpected?: boolean;
   guessTypesForUnexpectedFlags?: boolean;
-  help?: string;
+  help?: string | FlagHelpItem[];
   examples?: string;
   alias?: { [key: string]: string | string[] };
   boolean?: string[];

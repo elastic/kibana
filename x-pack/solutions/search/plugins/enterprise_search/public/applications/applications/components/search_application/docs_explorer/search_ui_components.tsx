@@ -34,6 +34,14 @@ import type {
   ResultsViewProps,
 } from '@elastic/react-search-ui-views';
 import type { SearchContextState } from '@elastic/search-ui';
+
+type SortingSearchContext = Pick<SearchContextState, 'setSort' | 'sortList'>;
+
+interface SortingProps {
+  mapContextToProps?: (context: SearchContextState) => SortingSearchContext;
+  sortableFields: string[];
+}
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -150,8 +158,17 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
 };
 export const SearchBar: React.FC<InputProps> = ({ additionalInputProps }) => (
   <EuiFlexGroup gutterSize="s">
-    <EuiFieldSearch fullWidth {...additionalInputProps} />
-    <EuiButton type="submit" color="primary" fill>
+    <EuiFieldSearch
+      data-test-subj="enterpriseSearchSearchBarFieldSearch"
+      fullWidth
+      {...additionalInputProps}
+    />
+    <EuiButton
+      data-test-subj="enterpriseSearchSearchBarSearchButton"
+      type="submit"
+      color="primary"
+      fill
+    >
       {i18n.translate(
         'xpack.enterpriseSearch.searchApplications.searchApplication.docsExplorer.inputView.searchLabel',
         {
@@ -195,6 +212,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         </label>
       </EuiTitle>
       <EuiSelect
+        data-test-subj="enterpriseSearchResultsPerPageViewSelect"
         id="results-per-page"
         options={
           options?.map((option) => ({
@@ -215,9 +233,9 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
   </EuiFlexItem>
 );
 
-export const Sorting = withSearch<
+export const Sorting: React.ComponentType<SortingProps> = withSearch<
   { sortableFields: string[] },
-  Pick<SearchContextState, 'setSort' | 'sortList'>
+  SortingSearchContext
 >(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
   const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
   const relevance = i18n.translate(
@@ -263,6 +281,7 @@ export const Sorting = withSearch<
               </label>
             </EuiTitle>
             <EuiSelect
+              data-test-subj="enterpriseSearchSortingSelect"
               id="sorting-direction"
               onChange={(evt) => {
                 switch (evt.target.value) {
