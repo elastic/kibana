@@ -20,6 +20,7 @@ import { createStatsQualityCalibrationEvaluator } from './stats/stats_quality_ca
 import { createToolUsageEvaluator } from './tool_usage/tool_usage_validation';
 import type {
   KIQueryGenerationEvaluationExample,
+  KIQueryGenerationEvaluator,
   KIQueryGenerationOutput,
   ScenarioCriteriaConfig,
 } from './types';
@@ -40,7 +41,7 @@ export const createKIQueryGenerationEvaluators = (
   scenarioCriteria?: ScenarioCriteriaConfig,
   logger?: Logger
 ) => {
-  const base = selectEvaluators([
+  const evaluators: KIQueryGenerationEvaluator[] = [
     createSyntaxValidationEvaluator(esClient, logger),
     categoryComplianceEvaluator,
     expectedCategoryCoverageEvaluator,
@@ -49,7 +50,8 @@ export const createKIQueryGenerationEvaluators = (
     queryTypeDistributionEvaluator,
     statsStructureValidationEvaluator,
     createToolUsageEvaluator(),
-  ]);
+  ];
+  const base = selectEvaluators(evaluators);
 
   if (!scenarioCriteria) {
     return base;
