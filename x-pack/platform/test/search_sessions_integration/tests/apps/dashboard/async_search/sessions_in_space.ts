@@ -34,6 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await searchSessions.save({ withRefresh: true, isSubmitButton: true });
+        // Dismiss the "Background search created" toast
+        await toasts.dismissAll();
         await searchSessions.openCompletedSearchFromToast();
 
         // Wait for the dashboard to load
