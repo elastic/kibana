@@ -62,7 +62,7 @@ export const LOG_SCENARIOS: Record<string, LogScenario> = {
     snapshotName: 'payment-unreachable',
     gcs: PAYMENT_UNREACHABLE_GCS,
     logQuery: {
-      messagePattern: 'produced zero addresses',
+      messagePattern: '13 INTERNAL: failed to charge card: could not charge the card: rpc error: code = Unavailable desc = name resolver error: produced zero addresses',
       serviceName: 'frontend',
       index: 'logs-*',
     },
@@ -74,8 +74,8 @@ export const LOG_SCENARIOS: Record<string, LogScenario> = {
     snapshotName: 'product-catalog',
     gcs: PRODUCT_CATALOG_GCS,
     logQuery: {
-      messagePattern: 'failed to prepare order: failed to get product',
-      serviceName: 'checkout',
+      messagePattern: '13 INTERNAL: failed to prepare order: failed to get product #"OLJCESPC7Z"',
+      serviceName: 'frontend',
       index: 'logs-*',
     },
     expectedOutput: PRODUCT_CATALOG_ERROR_LOG_EXPECTED,
@@ -86,7 +86,7 @@ export const LOG_SCENARIOS: Record<string, LogScenario> = {
     snapshotName: 'payment-service-failures',
     gcs: PAYMENT_SERVICE_GCS,
     logQuery: {
-      messagePattern: 'Receive ListRecommendations',
+      messagePattern: 'Receive ListRecommendations for product ids:["9SIQT8TOJO", "0PUK6V6EV0", "HQTGWGPNH4", "1YMWWN1N4O", "6E92ZMYYFZ"]',
       serviceName: 'recommendation',
       index: 'logs-*',
     },

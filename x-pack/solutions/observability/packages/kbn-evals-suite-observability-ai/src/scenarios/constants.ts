@@ -23,3 +23,8 @@ export const PRODUCT_CATALOG_GCS: GcsConfig = {
   bucket: GCS_BUCKET,
   basePath: 'otel-demo/product-catalog',
 };
+
+export const AD_HIGH_CPU_GCS: GcsConfig = {
+  bucket: GCS_BUCKET,
+  basePath: 'otel-demo/ad-high-cpu',
+};

@@ -52,10 +52,12 @@ function createScenarioTest(scenario: LogScenario) {
           index: scenario.logQuery.index,
           query: {
             bool: {
-              filter: [
-                { term: { 'service.name': scenario.logQuery.serviceName } },
+              filter: [{ term: { 'service.name': scenario.logQuery.serviceName } }],
+              should: [
                 { match_phrase: { message: scenario.logQuery.messagePattern } },
+                { match_phrase: { 'exception.message': scenario.logQuery.messagePattern } },
               ],
+              minimum_should_match: 1,
             },
           },
           sort: [{ '@timestamp': 'desc' }],
@@ -71,9 +73,7 @@ function createScenarioTest(scenario: LogScenario) {
         }
 
         if (!logDoc._id || !logDoc._index) {
-          throw new Error(
-            `Log document missing _id or _index for scenario ${scenario.id}`
-          );
+          throw new Error(`Log document missing _id or _index for scenario ${scenario.id}`);
         }
         logDocId = logDoc._id;
         logIndex = logDoc._index;
