@@ -94,7 +94,6 @@ export interface UrlTracker {
 export interface DiscoverFeatureFlags {
   getCascadeLayoutEnabled: () => boolean;
   getIsEsqlDefault: () => boolean;
-  /** When true, panel state uses Discover session API format (discover_session_id, session tabs). */
   getEmbeddableTransformsEnabled: () => boolean;
 }
 
@@ -212,7 +211,7 @@ export const buildServices = ({
       getIsEsqlDefault: () =>
         core.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
       getEmbeddableTransformsEnabled: () =>
-        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, false),
+        core.featureFlags.getBooleanValue(EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,

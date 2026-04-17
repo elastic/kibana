@@ -9,10 +9,22 @@
 
 import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import {
-  PRIMITIVE_RUNTIME_FIELD_TYPES,
-  RUNTIME_FIELD_COMPOSITE_TYPE,
+import type {
+  PrimitiveRuntimeFieldTypes,
+  RuntimeFieldCompositeType,
 } from '@kbn/data-views-plugin/common';
+
+const PRIMITIVE_RUNTIME_FIELD_TYPES: PrimitiveRuntimeFieldTypes = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+];
+
+const RUNTIME_FIELD_COMPOSITE_TYPE: RuntimeFieldCompositeType = 'composite';
 
 const MAX_NAME_LENGTH = 1000;
 

@@ -23,13 +23,12 @@ Bearer Token
 :   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.
 
 OAuth 2.0 authorization code
-:   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you typically provide:
+:   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you provide:
 
-    - **Authorization URL** (default): `https://accounts.google.com/o/oauth2/v2/auth`
-    - **Token URL** (default): `https://oauth2.googleapis.com/token`
     - **Client ID** and **Client Secret**: from that OAuth client
-    - **Scope** (default): `https://www.googleapis.com/auth/calendar.readonly`
     - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
+
+    The connector automatically uses the correct Google OAuth endpoints and scope (`https://www.googleapis.com/auth/calendar.readonly`).
 
 ## Test connectors [google-calendar-action-configuration]
 
@@ -100,8 +99,8 @@ Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
 3. Open **APIs & Services** > **Data Access** and choose scopes your integration needs (at minimum the readonly scopes
    the connector uses by default:
    `https://www.googleapis.com/auth/calendar.readonly`, or broader scopes if your policy allows).
-4. Save the client. Copy **Client ID** and **Client secret** into the connector in {{kib}}. Keep the default
-   **Authorization URL** and **Token URL** unless your environment requires different Google OAuth endpoints.
+4. Save the client. Copy **Client ID** and **Client secret** into the connector in {{kib}}. The connector automatically
+   configures the correct Google OAuth endpoints and scope.
 
 ### Bearer token (manual, short-lived)
 

@@ -123,6 +123,7 @@
     "@kbn/core-http-common",
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-browser",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }

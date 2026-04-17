@@ -54,12 +54,7 @@ export const panelGridSchema = schema.object(
 export function getPanelSchema(isDashboardAppRequest: boolean) {
   const basePanelProps = {
     grid: panelGridSchema,
-    /**
-     * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
-     * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
-     * In the stored object, `uid` continues to map to `panelIndex`.
-     */
-    uid: schema.maybe(
+    id: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the panel.' },
       })
@@ -106,7 +101,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     panelSchemas as [
       ObjectType<{
         grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-        uid: Type<string | undefined>;
+        id: Type<string | undefined>;
         version: Type<string | undefined>;
         type: Type<string>;
         config: ObjectType<{}>;
@@ -135,7 +130,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         defaultValue: [],
         maxSize: MAX_PANELS,
       }),
-      uid: schema.maybe(
+      id: schema.maybe(
         schema.string({
           meta: { description: 'The unique ID of the section.' },
         })

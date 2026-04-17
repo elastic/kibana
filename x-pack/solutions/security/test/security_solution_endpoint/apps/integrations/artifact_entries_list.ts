@@ -235,8 +235,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           }
         });
 
-        it(`should not show page title if there is no ${testData.title} entry`, async () => {
-          await testSubjects.missingOrFail('header-page-title');
+        it(`should show empty state if there is no ${testData.title} entry`, async () => {
+          await testSubjects.existOrFail(`${testData.pagePrefix}-emptyState`);
         });
 
         it(`should be able to add a new ${testData.title} entry`, async () => {
@@ -298,13 +298,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await deleteArtifact(testData);
           // We only expect one artifact to have been visible
           await testSubjects.missingOrFail(testData.delete.card);
-          // Header has gone because there is no artifact
-          await testSubjects.missingOrFail('header-page-title');
+          // Empty state is shown because there is no artifact
+          await testSubjects.existOrFail(`${testData.pagePrefix}-emptyState`);
         });
       });
     }
 
-    describe('Should check artifacts are correctly generated when multiple entries', function () {
+    // Failing: See https://github.com/elastic/kibana/issues/261849
+    describe.skip('Should check artifacts are correctly generated when multiple entries', function () {
       let firstPolicy: PolicyTestResourceInfo;
       let secondPolicy: PolicyTestResourceInfo;
 

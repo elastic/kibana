@@ -15,7 +15,7 @@ import type { DatatableState, DatatableStateESQL } from '../../schema';
 export const singleMetricESQLDatatable: DatatableState = {
   title: 'Single metric',
   type: 'data_table',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 100',
   },
@@ -34,7 +34,7 @@ export const singleMetricESQLDatatable: DatatableState = {
 export const multipleMetricRowSplitESQLDatatable: DatatableState = {
   title: 'Multiple metrics, rows, split by',
   type: 'data_table',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -72,7 +72,7 @@ export const multipleMetricRowSplitESQLDatatable: DatatableState = {
 export const fullConfigESQLDatatable: DatatableState = {
   title: 'Full config',
   type: 'data_table',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -142,19 +142,21 @@ export const fullConfigESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
+    paging: 10,
   },
-  paging: 10,
 } satisfies DatatableStateESQL;
 
 /**
@@ -163,7 +165,7 @@ export const fullConfigESQLDatatable: DatatableState = {
 export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
   title: 'Sorted by pivoted metric column',
   type: 'data_table',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -233,24 +235,26 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
-  },
-  paging: 10,
-  sort_by: {
-    column_type: 'pivoted_metric',
-    index: 0,
-    values: ['US', 'MM'],
-    direction: 'desc',
+    paging: 10,
+    sort_by: {
+      column_type: 'pivoted_metric',
+      index: 0,
+      values: ['US', 'MM'],
+      direction: 'desc',
+    },
   },
 } satisfies DatatableStateESQL;
 
@@ -260,7 +264,7 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
 export const sortedByRowColumnESQLDatatable: DatatableState = {
   title: 'Sorted by row column',
   type: 'data_table',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM kibana_sample_data_logs | LIMIT 10',
   },
@@ -330,22 +334,24 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
-  },
-  paging: 10,
-  sort_by: {
-    column_type: 'row',
-    index: 1,
-    direction: 'desc',
+    paging: 10,
+    sort_by: {
+      column_type: 'row',
+      index: 1,
+      direction: 'desc',
+    },
   },
 } satisfies DatatableStateESQL;

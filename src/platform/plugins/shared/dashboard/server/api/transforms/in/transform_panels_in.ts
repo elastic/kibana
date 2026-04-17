@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { isDashboardSection, prefixReferencesFromPanel } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
@@ -35,8 +36,8 @@ export function transformPanelsIn(
 
   widgets.forEach((widget) => {
     if (isDashboardSection(widget)) {
-      const { panels: sectionPanels, grid, uid, ...restOfSection } = widget as DashboardSection;
-      const idx = uid ?? uuidv4();
+      const { panels: sectionPanels, grid, id, ...restOfSection } = widget as DashboardSection;
+      const idx = id ?? uuidv4();
       sections.push({ ...restOfSection, gridData: { ...grid, i: idx } });
       sectionPanels.forEach((panel) => {
         try {
@@ -78,13 +79,15 @@ function transformPanelIn(
   storedPanel: SavedDashboardPanel;
   references: SavedObjectReference[];
 } {
-  const { uid, grid, config, ...restPanel } = panel;
-  const idx = uid ?? uuidv4();
+  const { id, grid, config, ...restPanel } = panel;
+  const idx = id ?? uuidv4();
 
   // Temporary escape hatch for lens as code
   // TODO remove when lens as code transforms are ready for production
   const transformType =
-    panel.type === 'lens' && isDashboardAppRequest ? 'lens-dashboard-app' : panel.type;
+    panel.type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest
+      ? 'lens-dashboard-app'
+      : panel.type;
   const transforms = embeddableService?.getTransforms(transformType);
 
   // Dashboard application routes do not validate panel.config at route level

@@ -174,7 +174,6 @@ function TimelineTabContent({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const traceId = unifiedWaterfallFetchResult.traceItems[0]?.traceId;

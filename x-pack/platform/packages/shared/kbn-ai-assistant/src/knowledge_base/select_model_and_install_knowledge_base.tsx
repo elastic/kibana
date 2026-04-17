@@ -25,6 +25,7 @@ import {
   EIS_PRECONFIGURED_INFERENCE_IDS,
   EisKnowledgeBaseCallout,
   useEisKnowledgeBaseCalloutDismissed,
+  useAIAgentTourDismissed,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useInferenceEndpoints } from '../hooks/use_inference_endpoints';
 import type { ModelOptionsData } from '../utils/get_model_options_for_inference_endpoints';
@@ -55,11 +56,16 @@ export function SelectModelAndInstallKnowledgeBase({
   const [selectedInferenceId, setSelectedInferenceId] = useState<string>('');
   const [eisKnowledgeBaseCalloutDismissed, setEisKnowledgeBaseCalloutDismissed] =
     useEisKnowledgeBaseCalloutDismissed();
+  const [aiAgentTourDismissed] = useAIAgentTourDismissed();
 
   const { inferenceEndpoints, isLoading: isLoadingEndpoints, error } = useInferenceEndpoints();
 
   const isSelectedModelFromEis = EIS_PRECONFIGURED_INFERENCE_IDS.includes(selectedInferenceId);
   const showEisKnowledgeBaseCallout = isSelectedModelFromEis && !eisKnowledgeBaseCalloutDismissed;
+
+  // Position callout to the left when AI Agent tour is visible to avoid overlap
+  const eisCalloutAnchorPosition =
+    !isInKnowledgeBaseTab && !aiAgentTourDismissed ? 'leftCenter' : 'downCenter';
 
   const handleDismissEisKnowledgeBaseCallout = () => {
     setEisKnowledgeBaseCalloutDismissed(true);
@@ -163,7 +169,7 @@ export function SelectModelAndInstallKnowledgeBase({
             isOpen={showEisKnowledgeBaseCallout}
             dismissCallout={handleDismissEisKnowledgeBaseCallout}
             zIndex={eisCalloutZIndex}
-            anchorPosition="downCenter"
+            anchorPosition={eisCalloutAnchorPosition}
           >
             <EuiSuperSelect
               fullWidth

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { MetricState } from './metric';
 import { metricStateSchema } from './metric';
@@ -14,9 +15,9 @@ import { metricStateSchema } from './metric';
 describe('Metric Schema', () => {
   const baseMetricConfig = {
     type: 'metric',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   } satisfies Partial<MetricState>;
 
@@ -64,11 +65,11 @@ describe('Metric Schema', () => {
           },
         ],
         styling: {
+          icon: {
+            name: 'star_empty',
+            alignment: 'left',
+          },
           primary: {
-            icon: {
-              name: 'star_empty',
-              alignment: 'left',
-            },
             labels: { alignment: 'left' },
             value: { sizing: 'auto', alignment: 'left' },
           },
@@ -489,12 +490,10 @@ describe('Metric Schema', () => {
         ...baseMetricConfig,
 
         styling: {
-          primary: {
-            icon: {
-              // @ts-expect-error - camelCase icon name
-              name: 'starEmpty',
-              alignment: 'right',
-            },
+          icon: {
+            // @ts-expect-error - camelCase icon name
+            name: 'starEmpty',
+            alignment: 'right',
           },
         },
         metrics: [
@@ -555,10 +554,10 @@ describe('Metric Schema', () => {
           limit: 5,
         },
         styling: {
+          icon: { name: 'star_empty', alignment: 'right' },
           primary: {
             labels: { alignment: 'left' },
             value: { sizing: 'auto', alignment: 'right' },
-            icon: { name: 'star_empty', alignment: 'right' },
           },
           secondary: {
             label: { visible: true, placement: 'before' },
@@ -577,7 +576,7 @@ describe('Metric Schema', () => {
     it('validates esql configuration', () => {
       const input = {
         type: 'metric',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },

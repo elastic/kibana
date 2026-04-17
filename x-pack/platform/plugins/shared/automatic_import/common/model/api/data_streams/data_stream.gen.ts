@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { NonEmptyString } from '../../primitive.gen';
+import { SafeIdentifier, NonEmptyString } from '../../primitive.gen';
 import { OriginalSource, LangSmithOptions } from '../../common_attributes.gen';
 
 export type DeleteDataStreamRequestParams = z.infer<typeof DeleteDataStreamRequestParams>;
@@ -24,11 +24,11 @@ export const DeleteDataStreamRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
   /**
    * The data stream identifier
    */
-  data_stream_id: NonEmptyString,
+  data_stream_id: SafeIdentifier,
 });
 export type DeleteDataStreamRequestParamsInput = z.input<typeof DeleteDataStreamRequestParams>;
 
@@ -37,11 +37,11 @@ export const GetDataStreamResultsRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
   /**
    * The data stream identifier
    */
-  data_stream_id: NonEmptyString,
+  data_stream_id: SafeIdentifier,
 });
 export type GetDataStreamResultsRequestParamsInput = z.input<
   typeof GetDataStreamResultsRequestParams
@@ -66,11 +66,11 @@ export const ReanalyzeDataStreamRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
   /**
    * The data stream identifier
    */
-  data_stream_id: NonEmptyString,
+  data_stream_id: SafeIdentifier,
 });
 export type ReanalyzeDataStreamRequestParamsInput = z.input<
   typeof ReanalyzeDataStreamRequestParams
@@ -106,11 +106,11 @@ export const StopAutoImportDataStreamRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
   /**
    * The data stream identifier
    */
-  data_stream_id: NonEmptyString,
+  data_stream_id: SafeIdentifier,
 });
 export type StopAutoImportDataStreamRequestParamsInput = z.input<
   typeof StopAutoImportDataStreamRequestParams
@@ -123,11 +123,11 @@ export const UpdateDataStreamPipelineRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
   /**
    * The data stream identifier
    */
-  data_stream_id: NonEmptyString,
+  data_stream_id: SafeIdentifier,
 });
 export type UpdateDataStreamPipelineRequestParamsInput = z.input<
   typeof UpdateDataStreamPipelineRequestParams
@@ -170,11 +170,11 @@ export const UploadSamplesToDataStreamRequestParams = z.object({
   /**
    * The integration identifier
    */
-  integration_id: NonEmptyString,
+  integration_id: SafeIdentifier,
   /**
    * The data stream identifier
    */
-  data_stream_id: NonEmptyString,
+  data_stream_id: SafeIdentifier,
 });
 export type UploadSamplesToDataStreamRequestParamsInput = z.input<
   typeof UploadSamplesToDataStreamRequestParams
@@ -192,7 +192,7 @@ export const UploadSamplesToDataStreamRequestBody = z
     /**
      * Index name to pick samples from.
      */
-    sourceIndex: z.string().min(1).optional(),
+    sourceIndex: z.string().min(1).max(100).optional(),
     /**
      * The original source of the samples (file name or index name)
      */

@@ -208,4 +208,62 @@ describe('mapLiveHitToRow', () => {
     const row = mapLiveHitToRow(hit);
     expect(row.tags).toEqual([]);
   });
+
+  test('maps replay parameters for single query (savedQueryId, timeout, ecsMapping, agent selection)', () => {
+    const hit = {
+      _source: {
+        action_id: 'action-replay',
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+        agent_all: true,
+        agent_ids: ['agent-1', 'agent-2'],
+        agent_platforms: ['linux', 'darwin'],
+        agent_policy_ids: ['policy-1'],
+        queries: [
+          {
+            query: 'SELECT * FROM uptime',
+            id: 'q1',
+            agents: ['agent-1', 'agent-2'],
+            saved_query_id: 'saved-query-123',
+            timeout: 601,
+            ecs_mapping: { message: { field: 'days' } },
+          },
+        ],
+      },
+    };
+
+    const row = mapLiveHitToRow(hit);
+    expect(row.savedQueryId).toBe('saved-query-123');
+    expect(row.timeout).toBe(601);
+    expect(row.ecsMapping).toEqual({ message: { field: 'days' } });
+    expect(row.agentIds).toEqual(['agent-1', 'agent-2']);
+    expect(row.agentAll).toBe(true);
+    expect(row.agentPlatforms).toEqual(['linux', 'darwin']);
+    expect(row.agentPolicyIds).toEqual(['policy-1']);
+  });
+
+  test('does not map replay parameters for pack queries', () => {
+    const hit = {
+      _source: {
+        action_id: 'action-pack',
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+        pack_id: 'pack-1',
+        pack_name: 'my_pack',
+        queries: [
+          {
+            query: 'SELECT 1',
+            id: 'q1',
+            agents: ['agent-1'],
+            saved_query_id: 'sq-1',
+            timeout: 300,
+          },
+          { query: 'SELECT 2', id: 'q2', agents: ['agent-1'] },
+        ],
+      },
+    };
+
+    const row = mapLiveHitToRow(hit);
+    expect(row.savedQueryId).toBeUndefined();
+    expect(row.timeout).toBeUndefined();
+    expect(row.ecsMapping).toBeUndefined();
+  });
 });
