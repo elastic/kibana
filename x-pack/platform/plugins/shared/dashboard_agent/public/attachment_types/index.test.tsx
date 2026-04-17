@@ -191,7 +191,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     return {
       agentBuilder,
       addAttachment: mockAddAttachment,
-      data,
+      canWriteDashboards: true,
       filterManager: data.query.filterManager,
       dashboardPlugin,
       unifiedSearch,

@@ -13,6 +13,7 @@ export const MANAGEMENT_APP_PATH = `/modelManagement/${MODEL_SETTINGS_APP_ID}`;
 
 export const ELASTIC_INFERENCE_SERVICE_APP_ID = 'elastic_inference_service';
 
+export const INFERENCE_CONNECTORS_QUERY_KEY = 'inferenceConnectorsQueryKey';
 export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const INFERENCE_FEATURES_QUERY_KEY = 'inferenceFeaturesQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';

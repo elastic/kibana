@@ -65,7 +65,8 @@ const getMemberColumns = (
       defaultMessage: 'Contribution',
     }),
     width: '110px',
-    render: (value: number) => numeral(value).format(percentFormat),
+    render: (value: number) =>
+      value === -1 ? NOT_AVAILABLE_LABEL : numeral(value).format(percentFormat),
   },
 ];
 

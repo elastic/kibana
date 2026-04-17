@@ -125,6 +125,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                     defaultMessage: 'Find Elastic Inference Service models',
                   }
                 )}
+                data-test-subj="eisModelsSearchBar"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -147,6 +148,7 @@ export const ElasticInferenceServiceModelsPage = () => {
                     isSelected={selectedTaskTypes.has(category)}
                     isToggle
                     onClick={() => toggleTaskType(category)}
+                    data-test-subj={`eisTaskTypeFilter-${category}`}
                   >
                     {label}
                   </EuiFilterButton>
@@ -158,6 +160,7 @@ export const ElasticInferenceServiceModelsPage = () => {
         <EuiFlexItem>
           {filtered.length === 0 ? (
             <EuiEmptyPrompt
+              data-test-subj="eisNoModelsFound"
               title={
                 <h3>
                   {i18n.translate('xpack.searchInferenceEndpoints.eisModels.noModelsFound', {
@@ -167,7 +170,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               }
             />
           ) : (
-            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3}>
+            <EuiFlexGrid columns={breakpoint === 'xl' ? 4 : 3} data-test-subj="eisModelCards">
               {filtered.map((m) => (
                 <EuiFlexItem key={`${m.service}::${m.modelName}`}>
                   <ModelCard
