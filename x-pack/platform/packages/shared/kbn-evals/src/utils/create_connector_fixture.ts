@@ -36,20 +36,20 @@ export function resolveConnectorId(connectorId: string): string {
  * was created by another parallel worker — treat as success and reuse.
  */
 function isAlreadyExistsConnectorError(error: unknown): boolean {
-  if (!isAxiosError(error)) {
-    return false;
-  }
-  if (error.status === 409) {
+  const status = isAxiosError(error) ? error.status : (error as { status?: number })?.status;
+  if (status === 409) {
     return true;
   }
-  if (error.status !== 400) {
+  if (status !== 400) {
     return false;
   }
-  const data = error.response?.data;
-  const message =
+  const data = isAxiosError(error) ? error.response?.data : (error as { data?: unknown })?.data;
+  const messageFromData =
     typeof data === 'object' && data !== null && 'message' in data
       ? String((data as { message: unknown }).message)
-      : '';
+      : undefined;
+  const messageFromError = (error as { message?: unknown })?.message;
+  const message = messageFromData ?? (messageFromError ? String(messageFromError) : '');
   return /already exists/i.test(message);
 }
 
