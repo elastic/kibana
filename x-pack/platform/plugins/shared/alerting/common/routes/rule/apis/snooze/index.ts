@@ -17,6 +17,7 @@ export {
   snoozeParamsSchema as snoozeParamsSchemaV1,
   snoozeBodySchema as snoozeBodySchemaV1,
   snoozeResponseSchema as snoozeResponseSchemaV1,
+  snoozeRuleParamsExamples as snoozeRuleParamsExamplesV1,
 } from './external/schemas/v1';
 export {
   snoozeParamsInternalSchema as snoozeParamsInternalSchemaV1,
