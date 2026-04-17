@@ -46,9 +46,10 @@ export interface PipelineSuggestionGroundTruth {
 
 export interface PipelineSuggestionEvaluationExample {
   input: {
-    stream_name: string; // e.g., 'logs.apache'
+    stream_name: string; // e.g., 'logs.otel.apache' (child of logs.otel when using fork)
     system: string; // LogHub system to index
-    sample_document_count: number; // Number of documents to fetch for evaluation
+    sample_documents?: Array<Record<string, unknown>>; // Inline sample documents for evaluation
+    sample_document_count?: number; // Number of documents to fetch from existing stream
   };
   output: PipelineSuggestionGroundTruth;
   metadata: {
