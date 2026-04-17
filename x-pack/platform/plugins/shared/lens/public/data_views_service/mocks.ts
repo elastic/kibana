@@ -230,5 +230,9 @@ export function mockDataViewsService() {
       ];
     }),
     create: jest.fn(),
-  } as unknown as Pick<DataViewsContract, 'get' | 'getIdsWithTitle' | 'create'>;
+    clearInstanceCache: jest.fn(),
+  } as unknown as Pick<
+    DataViewsContract,
+    'get' | 'getIdsWithTitle' | 'create' | 'clearInstanceCache'
+  >;
 }
