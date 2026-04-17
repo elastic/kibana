@@ -48,11 +48,19 @@ export const convertValueToString = ({
   }
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
+  const disableMultiline = options?.compatibleWithCSV ?? false;
   const field = getDataViewFieldOrCreateFromColumnMeta({
     fieldName: columnId,
     dataView,
     columnMeta: columnsMeta?.[columnId],
   });
+
+  if (columnId === '_source' && !field && value && typeof value === 'object') {
+    return {
+      formattedString: disableMultiline ? JSON.stringify(value) : JSON.stringify(value, null, 2),
+      withFormula: false,
+    };
+  }
 
   return commonConvertValueToString({
     dataView,

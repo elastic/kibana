@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type {
   DataTableColumnsMeta,
@@ -66,9 +66,10 @@ export function SourceDocument({
       ? (row.flattened[columnId] as Record<string, unknown>)
       : undefined;
 
-  const effectiveRow = esqlSourceValue
-    ? buildDataTableRecord({ _source: esqlSourceValue }, dataView)
-    : row;
+  const effectiveRow = useMemo(
+    () => (esqlSourceValue ? buildDataTableRecord({ _source: esqlSourceValue }, dataView) : row),
+    [esqlSourceValue, dataView, row]
+  );
 
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(
