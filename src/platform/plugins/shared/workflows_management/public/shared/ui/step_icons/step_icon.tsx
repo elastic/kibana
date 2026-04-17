@@ -92,6 +92,7 @@ export const StepIcon = React.memo(
             background-color: ${statusColor ?? euiTheme.colors.textParagraph};
           `}
           onClick={onClick}
+          {...rest}
           aria-hidden={true}
         />
       );
@@ -100,6 +101,7 @@ export const StepIcon = React.memo(
     if (typeof iconType === 'string' && iconType.startsWith('token')) {
       return (
         <EuiToken
+          title={rest.title}
           iconType={iconType}
           size="s"
           color={
