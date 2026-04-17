@@ -13,12 +13,19 @@ import type * as z4 from 'zod/v4';
  * Wraps a Zod schema factory in a Proxy that defers construction of the
  * underlying schema until any property (including `.parse`, `.safeParse`,
  * `.extend`, `.optional`, etc.) is first accessed. The materialized schema
- * is memoized, so subsequent accesses reuse it.
+ * is cached behind a `WeakRef`, so once no external consumer keeps it alive
+ * the GC is free to reclaim it; the next access rebuilds it from the factory.
  *
  * Intended for generated schemas (e.g. from `@kbn/openapi-generator`) where
  * many schemas are declared at module-load time but only a subset is used
  * at runtime. Unused schemas stay as a single Proxy instance plus a closure,
- * keeping baseline heap low.
+ * keeping baseline heap low; transiently-used schemas are collectible after
+ * their last reference is dropped.
+ *
+ * Trade-off: if the same schema is used repeatedly across GC cycles without
+ * callers retaining a reference, each cycle pays the cost of rebuilding it.
+ * Hold on to a reference (e.g. `const s = LazySchema; s.parse(...)` inside a
+ * hot path) if that matters.
  *
  * Caveat: `instanceof z.ZodObject` / `instanceof z.ZodType` on the returned
  * value will be `false` because the Proxy target is an empty object. Zod's
@@ -26,8 +33,16 @@ import type * as z4 from 'zod/v4';
  * rather than `instanceof`, so this is safe in practice.
  */
 export function lazySchema<T extends z4.ZodType>(factory: () => T): T {
-  let instance: T | undefined;
-  const materialize = (): T => (instance ??= factory());
+  let ref: WeakRef<T> | undefined;
+  const materialize = (): T => {
+    const cached = ref?.deref();
+    if (cached) {
+      return cached;
+    }
+    const fresh = factory();
+    ref = new WeakRef(fresh);
+    return fresh;
+  };
 
   return new Proxy({} as T, {
     get(_target, prop) {

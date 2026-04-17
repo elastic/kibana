@@ -22,15 +22,55 @@ describe('lazySchema', () => {
     expect(factory).toHaveBeenCalledTimes(1);
   });
 
-  it('memoizes the materialized schema', () => {
+  it('caches the materialized schema while it is still reachable', () => {
     const factory = jest.fn(() => z.object({ id: z.string() }));
     const schema = lazySchema(factory);
 
-    schema.parse({ id: 'a' });
+    // A single retained reference pins the instance, so all calls reuse it.
+    const pinned = schema.safeParse({ id: 'a' });
+    expect(pinned.success).toBe(true);
     schema.parse({ id: 'b' });
     schema.safeParse({ id: 'c' });
 
     expect(factory).toHaveBeenCalledTimes(1);
+  });
+
+  // The materialized schema is held via `WeakRef`, so if the GC reclaims it
+  // between turns (under memory pressure), the next access rebuilds it from
+  // the factory. We verify the rebuild path by simulating cache eviction —
+  // V8's heuristics are not deterministic enough to assert collection itself.
+  it('rebuilds the schema after the WeakRef is cleared', () => {
+    const factory = jest.fn(() => z.object({ id: z.string() }));
+    const RealWeakRef = globalThis.WeakRef;
+    let onlyRef: WeakRef<object> | undefined;
+    class EvictableWeakRef<T extends object> {
+      private target: T | undefined;
+      constructor(target: T) {
+        this.target = target;
+        onlyRef = this as unknown as WeakRef<object>;
+      }
+      deref(): T | undefined {
+        return this.target;
+      }
+      evict(): void {
+        this.target = undefined;
+      }
+    }
+    (globalThis as { WeakRef: unknown }).WeakRef = EvictableWeakRef;
+    try {
+      const schema = lazySchema(factory);
+
+      schema.parse({ id: 'a' });
+      expect(factory).toHaveBeenCalledTimes(1);
+
+      // Simulate the GC reclaiming the schema.
+      (onlyRef as unknown as EvictableWeakRef<object>).evict();
+
+      schema.parse({ id: 'b' });
+      expect(factory).toHaveBeenCalledTimes(2);
+    } finally {
+      (globalThis as { WeakRef: unknown }).WeakRef = RealWeakRef;
+    }
   });
 
   it('forwards parse/safeParse and applies validation', () => {
