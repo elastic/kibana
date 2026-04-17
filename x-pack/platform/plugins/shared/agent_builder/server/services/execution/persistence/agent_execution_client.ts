@@ -15,10 +15,14 @@ import { agentExecutionIndexName, createStorage } from './agent_execution_storag
 
 type CreateExecutionParams = Pick<
   AgentExecution,
-  'executionId' | 'agentId' | 'spaceId' | 'agentParams' | 'metadata' | 'executionMode'
-> & {
-  parentExecutionId?: string;
-};
+  | 'executionId'
+  | 'agentId'
+  | 'spaceId'
+  | 'agentParams'
+  | 'metadata'
+  | 'executionMode'
+  | 'parentExecutionId'
+>;
 
 /**
  * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.

@@ -89,6 +89,8 @@ interface BaseAgentExecution {
   events: ChatEvent[];
   /** Caller-provided metadata. */
   metadata?: Record<string, string>;
+  /** The ID of the parent execution that spawned this standalone execution. */
+  parentExecutionId?: string;
 }
 
 /**
@@ -104,8 +106,6 @@ export interface ConversationAgentExecution extends BaseAgentExecution {
  */
 export interface StandaloneAgentExecution extends BaseAgentExecution {
   executionMode: AgentExecutionMode.standalone;
-  /** The ID of the parent execution that spawned this standalone execution. */
-  parentExecutionId?: string;
   agentParams: StandaloneExecutionParams;
 }
 
