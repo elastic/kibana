@@ -12,7 +12,8 @@ export function isElasticCloudEsUrl(esUrl: string): boolean {
     return (
       hostname === 'elastic-cloud.com' ||
       hostname.endsWith('.elastic-cloud.com') ||
-      hostname.endsWith('elastic.cloud')
+      hostname === 'elastic.cloud' ||
+      hostname.endsWith('.elastic.cloud')
     );
   } catch {
     return false;
