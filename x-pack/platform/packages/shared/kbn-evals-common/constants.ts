@@ -10,6 +10,7 @@ export const EVALS_INTERNAL_URL = '/internal/evals' as const;
 export const EVALS_RUNS_URL = `${EVALS_INTERNAL_URL}/runs` as const;
 export const EVALS_RUN_URL = `${EVALS_INTERNAL_URL}/runs/{runId}` as const;
 export const EVALS_RUN_SCORES_URL = `${EVALS_INTERNAL_URL}/runs/{runId}/scores` as const;
+export const EVALS_RUNS_COMPARE_URL = `${EVALS_INTERNAL_URL}/runs/compare` as const;
 export const EVALS_RUN_DATASET_EXAMPLES_URL =
   `${EVALS_INTERNAL_URL}/runs/{runId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
