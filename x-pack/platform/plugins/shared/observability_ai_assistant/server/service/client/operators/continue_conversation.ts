@@ -26,10 +26,7 @@ import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import {
-  isToolValidationError,
-  type InferenceConnector as InferenceConnectorInfo,
-} from '@kbn/inference-common';
+import { isToolValidationError } from '@kbn/inference-common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
