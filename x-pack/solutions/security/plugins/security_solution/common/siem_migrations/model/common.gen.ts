@@ -45,7 +45,7 @@ export const LangSmithOptions = z.object({
  * The LangSmith settings object for evaluations.
  */
 export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptions>;
-export const LangSmithEvaluationOptions = LangSmithOptions.merge(
+export const LangSmithEvaluationOptions = LangSmithOptions.extend(
   z.object({
     /**
      * The dataset name to use for evaluations.
@@ -299,7 +299,7 @@ export const SiemMigrationResourceContent = z.object({
  * The rule migration resource data.
  */
 export type SiemMigrationResourceData = z.infer<typeof SiemMigrationResourceData>;
-export const SiemMigrationResourceData = SiemMigrationResourceBase.merge(
+export const SiemMigrationResourceData = SiemMigrationResourceBase.extend(
   SiemMigrationResourceContent
 );
 
@@ -307,9 +307,9 @@ export const SiemMigrationResourceData = SiemMigrationResourceBase.merge(
  * The rule migration resource document object.
  */
 export type SiemMigrationResource = z.infer<typeof SiemMigrationResource>;
-export const SiemMigrationResource = SiemMigrationResourceBase.merge(
+export const SiemMigrationResource = SiemMigrationResourceBase.extend(
   SiemMigrationResourceContent.partial()
-).merge(
+).extend(
   z.object({
     /**
      * The rule resource migration id

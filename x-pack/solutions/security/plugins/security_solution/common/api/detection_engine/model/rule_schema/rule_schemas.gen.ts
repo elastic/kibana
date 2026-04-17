@@ -154,15 +154,15 @@ export const BaseDefaultableFields = z.object({
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
 export const BaseCreateProps =
-  BaseRequiredFields.merge(BaseOptionalFields).merge(BaseDefaultableFields);
+  BaseRequiredFields.extend(BaseOptionalFields).extend(BaseDefaultableFields);
 
 export type BasePatchProps = z.infer<typeof BasePatchProps>;
 export const BasePatchProps = BaseRequiredFields.partial()
-  .merge(BaseOptionalFields)
-  .merge(BaseDefaultableFields);
+  .extend(BaseOptionalFields)
+  .extend(BaseDefaultableFields);
 
 export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
-export const BaseResponseProps = BaseRequiredFields.merge(BaseOptionalFields).merge(
+export const BaseResponseProps = BaseRequiredFields.extend(BaseOptionalFields).extend(
   BaseDefaultableFields.required()
 );
 
@@ -182,14 +182,14 @@ export const ResponseFields = z.object({
 });
 
 export type SharedCreateProps = z.infer<typeof SharedCreateProps>;
-export const SharedCreateProps = BaseCreateProps.merge(
+export const SharedCreateProps = BaseCreateProps.extend(
   z.object({
     rule_id: RuleSignatureId.optional(),
   })
 );
 
 export type SharedUpdateProps = z.infer<typeof SharedUpdateProps>;
-export const SharedUpdateProps = BaseCreateProps.merge(
+export const SharedUpdateProps = BaseCreateProps.extend(
   z.object({
     id: RuleObjectId.optional(),
     rule_id: RuleSignatureId.optional(),
@@ -197,7 +197,7 @@ export const SharedUpdateProps = BaseCreateProps.merge(
 );
 
 export type SharedPatchProps = z.infer<typeof SharedPatchProps>;
-export const SharedPatchProps = BasePatchProps.merge(
+export const SharedPatchProps = BasePatchProps.extend(
   z.object({
     id: RuleObjectId.optional(),
     rule_id: RuleSignatureId.optional(),
@@ -205,7 +205,7 @@ export const SharedPatchProps = BasePatchProps.merge(
 );
 
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
-export const SharedResponseProps = BaseResponseProps.merge(ResponseFields);
+export const SharedResponseProps = BaseResponseProps.extend(ResponseFields);
 
 export type EqlQueryLanguage = z.infer<typeof EqlQueryLanguage>;
 export const EqlQueryLanguage = z.literal('eql');
@@ -235,25 +235,25 @@ export const EqlOptionalFields = z.object({
 });
 
 export type EqlRuleCreateFields = z.infer<typeof EqlRuleCreateFields>;
-export const EqlRuleCreateFields = EqlRequiredFields.merge(EqlOptionalFields);
+export const EqlRuleCreateFields = EqlRequiredFields.extend(EqlOptionalFields);
 
 export type EqlRuleResponseFields = z.infer<typeof EqlRuleResponseFields>;
-export const EqlRuleResponseFields = EqlRequiredFields.merge(EqlOptionalFields);
+export const EqlRuleResponseFields = EqlRequiredFields.extend(EqlOptionalFields);
 
 export type EqlRulePatchFields = z.infer<typeof EqlRulePatchFields>;
-export const EqlRulePatchFields = EqlRequiredFields.partial().merge(EqlOptionalFields);
+export const EqlRulePatchFields = EqlRequiredFields.partial().extend(EqlOptionalFields);
 
 export type EqlRule = z.infer<typeof EqlRule>;
-export const EqlRule = SharedResponseProps.merge(EqlRuleResponseFields);
+export const EqlRule = SharedResponseProps.extend(EqlRuleResponseFields);
 
 export type EqlRuleCreateProps = z.infer<typeof EqlRuleCreateProps>;
-export const EqlRuleCreateProps = SharedCreateProps.merge(EqlRuleCreateFields);
+export const EqlRuleCreateProps = SharedCreateProps.extend(EqlRuleCreateFields);
 
 export type EqlRuleUpdateProps = z.infer<typeof EqlRuleUpdateProps>;
-export const EqlRuleUpdateProps = SharedUpdateProps.merge(EqlRuleCreateFields);
+export const EqlRuleUpdateProps = SharedUpdateProps.extend(EqlRuleCreateFields);
 
 export type EqlRulePatchProps = z.infer<typeof EqlRulePatchProps>;
-export const EqlRulePatchProps = SharedPatchProps.merge(EqlRulePatchFields);
+export const EqlRulePatchProps = SharedPatchProps.extend(EqlRulePatchFields);
 
 export type QueryRuleRequiredFields = z.infer<typeof QueryRuleRequiredFields>;
 export const QueryRuleRequiredFields = z.object({
@@ -279,31 +279,31 @@ export const QueryRuleDefaultableFields = z.object({
 });
 
 export type QueryRuleCreateFields = z.infer<typeof QueryRuleCreateFields>;
-export const QueryRuleCreateFields = QueryRuleRequiredFields.merge(QueryRuleOptionalFields).merge(
+export const QueryRuleCreateFields = QueryRuleRequiredFields.extend(QueryRuleOptionalFields).extend(
   QueryRuleDefaultableFields
 );
 
 export type QueryRulePatchFields = z.infer<typeof QueryRulePatchFields>;
 export const QueryRulePatchFields = QueryRuleRequiredFields.partial()
-  .merge(QueryRuleOptionalFields)
-  .merge(QueryRuleDefaultableFields);
+  .extend(QueryRuleOptionalFields)
+  .extend(QueryRuleDefaultableFields);
 
 export type QueryRuleResponseFields = z.infer<typeof QueryRuleResponseFields>;
-export const QueryRuleResponseFields = QueryRuleRequiredFields.merge(QueryRuleOptionalFields).merge(
-  QueryRuleDefaultableFields.required()
-);
+export const QueryRuleResponseFields = QueryRuleRequiredFields.extend(
+  QueryRuleOptionalFields
+).extend(QueryRuleDefaultableFields.required());
 
 export type QueryRule = z.infer<typeof QueryRule>;
-export const QueryRule = SharedResponseProps.merge(QueryRuleResponseFields);
+export const QueryRule = SharedResponseProps.extend(QueryRuleResponseFields);
 
 export type QueryRuleCreateProps = z.infer<typeof QueryRuleCreateProps>;
-export const QueryRuleCreateProps = SharedCreateProps.merge(QueryRuleCreateFields);
+export const QueryRuleCreateProps = SharedCreateProps.extend(QueryRuleCreateFields);
 
 export type QueryRuleUpdateProps = z.infer<typeof QueryRuleUpdateProps>;
-export const QueryRuleUpdateProps = SharedUpdateProps.merge(QueryRuleCreateFields);
+export const QueryRuleUpdateProps = SharedUpdateProps.extend(QueryRuleCreateFields);
 
 export type QueryRulePatchProps = z.infer<typeof QueryRulePatchProps>;
-export const QueryRulePatchProps = SharedPatchProps.merge(QueryRulePatchFields);
+export const QueryRulePatchProps = SharedPatchProps.extend(QueryRulePatchFields);
 
 export type SavedQueryRuleRequiredFields = z.infer<typeof SavedQueryRuleRequiredFields>;
 export const SavedQueryRuleRequiredFields = z.object({
@@ -329,31 +329,31 @@ export const SavedQueryRuleDefaultableFields = z.object({
 });
 
 export type SavedQueryRuleCreateFields = z.infer<typeof SavedQueryRuleCreateFields>;
-export const SavedQueryRuleCreateFields = SavedQueryRuleRequiredFields.merge(
+export const SavedQueryRuleCreateFields = SavedQueryRuleRequiredFields.extend(
   SavedQueryRuleOptionalFields
-).merge(SavedQueryRuleDefaultableFields);
+).extend(SavedQueryRuleDefaultableFields);
 
 export type SavedQueryRulePatchFields = z.infer<typeof SavedQueryRulePatchFields>;
 export const SavedQueryRulePatchFields = SavedQueryRuleRequiredFields.partial()
-  .merge(SavedQueryRuleOptionalFields)
-  .merge(SavedQueryRuleDefaultableFields);
+  .extend(SavedQueryRuleOptionalFields)
+  .extend(SavedQueryRuleDefaultableFields);
 
 export type SavedQueryRuleResponseFields = z.infer<typeof SavedQueryRuleResponseFields>;
-export const SavedQueryRuleResponseFields = SavedQueryRuleRequiredFields.merge(
+export const SavedQueryRuleResponseFields = SavedQueryRuleRequiredFields.extend(
   SavedQueryRuleOptionalFields
-).merge(SavedQueryRuleDefaultableFields.required());
+).extend(SavedQueryRuleDefaultableFields.required());
 
 export type SavedQueryRule = z.infer<typeof SavedQueryRule>;
-export const SavedQueryRule = SharedResponseProps.merge(SavedQueryRuleResponseFields);
+export const SavedQueryRule = SharedResponseProps.extend(SavedQueryRuleResponseFields);
 
 export type SavedQueryRuleCreateProps = z.infer<typeof SavedQueryRuleCreateProps>;
-export const SavedQueryRuleCreateProps = SharedCreateProps.merge(SavedQueryRuleCreateFields);
+export const SavedQueryRuleCreateProps = SharedCreateProps.extend(SavedQueryRuleCreateFields);
 
 export type SavedQueryRuleUpdateProps = z.infer<typeof SavedQueryRuleUpdateProps>;
-export const SavedQueryRuleUpdateProps = SharedUpdateProps.merge(SavedQueryRuleCreateFields);
+export const SavedQueryRuleUpdateProps = SharedUpdateProps.extend(SavedQueryRuleCreateFields);
 
 export type SavedQueryRulePatchProps = z.infer<typeof SavedQueryRulePatchProps>;
-export const SavedQueryRulePatchProps = SharedPatchProps.merge(SavedQueryRulePatchFields);
+export const SavedQueryRulePatchProps = SharedPatchProps.extend(SavedQueryRulePatchFields);
 
 export type ThresholdRuleRequiredFields = z.infer<typeof ThresholdRuleRequiredFields>;
 export const ThresholdRuleRequiredFields = z.object({
@@ -380,31 +380,31 @@ export const ThresholdRuleDefaultableFields = z.object({
 });
 
 export type ThresholdRuleCreateFields = z.infer<typeof ThresholdRuleCreateFields>;
-export const ThresholdRuleCreateFields = ThresholdRuleRequiredFields.merge(
+export const ThresholdRuleCreateFields = ThresholdRuleRequiredFields.extend(
   ThresholdRuleOptionalFields
-).merge(ThresholdRuleDefaultableFields);
+).extend(ThresholdRuleDefaultableFields);
 
 export type ThresholdRulePatchFields = z.infer<typeof ThresholdRulePatchFields>;
 export const ThresholdRulePatchFields = ThresholdRuleRequiredFields.partial()
-  .merge(ThresholdRuleOptionalFields)
-  .merge(ThresholdRuleDefaultableFields);
+  .extend(ThresholdRuleOptionalFields)
+  .extend(ThresholdRuleDefaultableFields);
 
 export type ThresholdRuleResponseFields = z.infer<typeof ThresholdRuleResponseFields>;
-export const ThresholdRuleResponseFields = ThresholdRuleRequiredFields.merge(
+export const ThresholdRuleResponseFields = ThresholdRuleRequiredFields.extend(
   ThresholdRuleOptionalFields
-).merge(ThresholdRuleDefaultableFields.required());
+).extend(ThresholdRuleDefaultableFields.required());
 
 export type ThresholdRule = z.infer<typeof ThresholdRule>;
-export const ThresholdRule = SharedResponseProps.merge(ThresholdRuleResponseFields);
+export const ThresholdRule = SharedResponseProps.extend(ThresholdRuleResponseFields);
 
 export type ThresholdRuleCreateProps = z.infer<typeof ThresholdRuleCreateProps>;
-export const ThresholdRuleCreateProps = SharedCreateProps.merge(ThresholdRuleCreateFields);
+export const ThresholdRuleCreateProps = SharedCreateProps.extend(ThresholdRuleCreateFields);
 
 export type ThresholdRuleUpdateProps = z.infer<typeof ThresholdRuleUpdateProps>;
-export const ThresholdRuleUpdateProps = SharedUpdateProps.merge(ThresholdRuleCreateFields);
+export const ThresholdRuleUpdateProps = SharedUpdateProps.extend(ThresholdRuleCreateFields);
 
 export type ThresholdRulePatchProps = z.infer<typeof ThresholdRulePatchProps>;
-export const ThresholdRulePatchProps = SharedPatchProps.merge(ThresholdRulePatchFields);
+export const ThresholdRulePatchProps = SharedPatchProps.extend(ThresholdRulePatchFields);
 
 export type ThreatMatchRuleRequiredFields = z.infer<typeof ThreatMatchRuleRequiredFields>;
 export const ThreatMatchRuleRequiredFields = z.object({
@@ -438,31 +438,31 @@ export const ThreatMatchRuleDefaultableFields = z.object({
 });
 
 export type ThreatMatchRuleCreateFields = z.infer<typeof ThreatMatchRuleCreateFields>;
-export const ThreatMatchRuleCreateFields = ThreatMatchRuleRequiredFields.merge(
+export const ThreatMatchRuleCreateFields = ThreatMatchRuleRequiredFields.extend(
   ThreatMatchRuleOptionalFields
-).merge(ThreatMatchRuleDefaultableFields);
+).extend(ThreatMatchRuleDefaultableFields);
 
 export type ThreatMatchRulePatchFields = z.infer<typeof ThreatMatchRulePatchFields>;
 export const ThreatMatchRulePatchFields = ThreatMatchRuleRequiredFields.partial()
-  .merge(ThreatMatchRuleOptionalFields)
-  .merge(ThreatMatchRuleDefaultableFields);
+  .extend(ThreatMatchRuleOptionalFields)
+  .extend(ThreatMatchRuleDefaultableFields);
 
 export type ThreatMatchRuleResponseFields = z.infer<typeof ThreatMatchRuleResponseFields>;
-export const ThreatMatchRuleResponseFields = ThreatMatchRuleRequiredFields.merge(
+export const ThreatMatchRuleResponseFields = ThreatMatchRuleRequiredFields.extend(
   ThreatMatchRuleOptionalFields
-).merge(ThreatMatchRuleDefaultableFields.required());
+).extend(ThreatMatchRuleDefaultableFields.required());
 
 export type ThreatMatchRule = z.infer<typeof ThreatMatchRule>;
-export const ThreatMatchRule = SharedResponseProps.merge(ThreatMatchRuleResponseFields);
+export const ThreatMatchRule = SharedResponseProps.extend(ThreatMatchRuleResponseFields);
 
 export type ThreatMatchRuleCreateProps = z.infer<typeof ThreatMatchRuleCreateProps>;
-export const ThreatMatchRuleCreateProps = SharedCreateProps.merge(ThreatMatchRuleCreateFields);
+export const ThreatMatchRuleCreateProps = SharedCreateProps.extend(ThreatMatchRuleCreateFields);
 
 export type ThreatMatchRuleUpdateProps = z.infer<typeof ThreatMatchRuleUpdateProps>;
-export const ThreatMatchRuleUpdateProps = SharedUpdateProps.merge(ThreatMatchRuleCreateFields);
+export const ThreatMatchRuleUpdateProps = SharedUpdateProps.extend(ThreatMatchRuleCreateFields);
 
 export type ThreatMatchRulePatchProps = z.infer<typeof ThreatMatchRulePatchProps>;
-export const ThreatMatchRulePatchProps = SharedPatchProps.merge(ThreatMatchRulePatchFields);
+export const ThreatMatchRulePatchProps = SharedPatchProps.extend(ThreatMatchRulePatchFields);
 
 export type MachineLearningRuleRequiredFields = z.infer<typeof MachineLearningRuleRequiredFields>;
 export const MachineLearningRuleRequiredFields = z.object({
@@ -480,35 +480,37 @@ export const MachineLearningRuleOptionalFields = z.object({
 });
 
 export type MachineLearningRulePatchFields = z.infer<typeof MachineLearningRulePatchFields>;
-export const MachineLearningRulePatchFields = MachineLearningRuleRequiredFields.partial().merge(
+export const MachineLearningRulePatchFields = MachineLearningRuleRequiredFields.partial().extend(
   MachineLearningRuleOptionalFields
 );
 
 export type MachineLearningRuleResponseFields = z.infer<typeof MachineLearningRuleResponseFields>;
-export const MachineLearningRuleResponseFields = MachineLearningRuleRequiredFields.merge(
+export const MachineLearningRuleResponseFields = MachineLearningRuleRequiredFields.extend(
   MachineLearningRuleOptionalFields
 );
 
 export type MachineLearningRuleCreateFields = z.infer<typeof MachineLearningRuleCreateFields>;
-export const MachineLearningRuleCreateFields = MachineLearningRuleRequiredFields.merge(
+export const MachineLearningRuleCreateFields = MachineLearningRuleRequiredFields.extend(
   MachineLearningRuleOptionalFields
 );
 
 export type MachineLearningRule = z.infer<typeof MachineLearningRule>;
-export const MachineLearningRule = SharedResponseProps.merge(MachineLearningRuleResponseFields);
+export const MachineLearningRule = SharedResponseProps.extend(MachineLearningRuleResponseFields);
 
 export type MachineLearningRuleCreateProps = z.infer<typeof MachineLearningRuleCreateProps>;
-export const MachineLearningRuleCreateProps = SharedCreateProps.merge(
+export const MachineLearningRuleCreateProps = SharedCreateProps.extend(
   MachineLearningRuleCreateFields
 );
 
 export type MachineLearningRuleUpdateProps = z.infer<typeof MachineLearningRuleUpdateProps>;
-export const MachineLearningRuleUpdateProps = SharedUpdateProps.merge(
+export const MachineLearningRuleUpdateProps = SharedUpdateProps.extend(
   MachineLearningRuleCreateFields
 );
 
 export type MachineLearningRulePatchProps = z.infer<typeof MachineLearningRulePatchProps>;
-export const MachineLearningRulePatchProps = SharedPatchProps.merge(MachineLearningRulePatchFields);
+export const MachineLearningRulePatchProps = SharedPatchProps.extend(
+  MachineLearningRulePatchFields
+);
 
 export type NewTermsRuleRequiredFields = z.infer<typeof NewTermsRuleRequiredFields>;
 export const NewTermsRuleRequiredFields = z.object({
@@ -536,30 +538,30 @@ export const NewTermsRuleDefaultableFields = z.object({
 
 export type NewTermsRulePatchFields = z.infer<typeof NewTermsRulePatchFields>;
 export const NewTermsRulePatchFields = NewTermsRuleRequiredFields.partial()
-  .merge(NewTermsRuleOptionalFields)
-  .merge(NewTermsRuleDefaultableFields);
+  .extend(NewTermsRuleOptionalFields)
+  .extend(NewTermsRuleDefaultableFields);
 
 export type NewTermsRuleResponseFields = z.infer<typeof NewTermsRuleResponseFields>;
-export const NewTermsRuleResponseFields = NewTermsRuleRequiredFields.merge(
+export const NewTermsRuleResponseFields = NewTermsRuleRequiredFields.extend(
   NewTermsRuleOptionalFields
-).merge(NewTermsRuleDefaultableFields.required());
+).extend(NewTermsRuleDefaultableFields.required());
 
 export type NewTermsRuleCreateFields = z.infer<typeof NewTermsRuleCreateFields>;
-export const NewTermsRuleCreateFields = NewTermsRuleRequiredFields.merge(
+export const NewTermsRuleCreateFields = NewTermsRuleRequiredFields.extend(
   NewTermsRuleOptionalFields
-).merge(NewTermsRuleDefaultableFields);
+).extend(NewTermsRuleDefaultableFields);
 
 export type NewTermsRule = z.infer<typeof NewTermsRule>;
-export const NewTermsRule = SharedResponseProps.merge(NewTermsRuleResponseFields);
+export const NewTermsRule = SharedResponseProps.extend(NewTermsRuleResponseFields);
 
 export type NewTermsRuleCreateProps = z.infer<typeof NewTermsRuleCreateProps>;
-export const NewTermsRuleCreateProps = SharedCreateProps.merge(NewTermsRuleCreateFields);
+export const NewTermsRuleCreateProps = SharedCreateProps.extend(NewTermsRuleCreateFields);
 
 export type NewTermsRuleUpdateProps = z.infer<typeof NewTermsRuleUpdateProps>;
-export const NewTermsRuleUpdateProps = SharedUpdateProps.merge(NewTermsRuleCreateFields);
+export const NewTermsRuleUpdateProps = SharedUpdateProps.extend(NewTermsRuleCreateFields);
 
 export type NewTermsRulePatchProps = z.infer<typeof NewTermsRulePatchProps>;
-export const NewTermsRulePatchProps = SharedPatchProps.merge(NewTermsRulePatchFields);
+export const NewTermsRulePatchProps = SharedPatchProps.extend(NewTermsRulePatchFields);
 
 export type EsqlQueryLanguage = z.infer<typeof EsqlQueryLanguage>;
 export const EsqlQueryLanguage = z.literal('esql');
@@ -580,25 +582,25 @@ export const EsqlRuleOptionalFields = z.object({
 });
 
 export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;
-export const EsqlRulePatchFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields.partial());
+export const EsqlRulePatchFields = EsqlRuleOptionalFields.extend(EsqlRuleRequiredFields.partial());
 
 export type EsqlRuleResponseFields = z.infer<typeof EsqlRuleResponseFields>;
-export const EsqlRuleResponseFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields);
+export const EsqlRuleResponseFields = EsqlRuleOptionalFields.extend(EsqlRuleRequiredFields);
 
 export type EsqlRuleCreateFields = z.infer<typeof EsqlRuleCreateFields>;
-export const EsqlRuleCreateFields = EsqlRuleOptionalFields.merge(EsqlRuleRequiredFields);
+export const EsqlRuleCreateFields = EsqlRuleOptionalFields.extend(EsqlRuleRequiredFields);
 
 export type EsqlRule = z.infer<typeof EsqlRule>;
-export const EsqlRule = SharedResponseProps.merge(EsqlRuleResponseFields);
+export const EsqlRule = SharedResponseProps.extend(EsqlRuleResponseFields);
 
 export type EsqlRuleCreateProps = z.infer<typeof EsqlRuleCreateProps>;
-export const EsqlRuleCreateProps = SharedCreateProps.merge(EsqlRuleCreateFields);
+export const EsqlRuleCreateProps = SharedCreateProps.extend(EsqlRuleCreateFields);
 
 export type EsqlRuleUpdateProps = z.infer<typeof EsqlRuleUpdateProps>;
-export const EsqlRuleUpdateProps = SharedUpdateProps.merge(EsqlRuleCreateFields);
+export const EsqlRuleUpdateProps = SharedUpdateProps.extend(EsqlRuleCreateFields);
 
 export type EsqlRulePatchProps = z.infer<typeof EsqlRulePatchProps>;
-export const EsqlRulePatchProps = SharedPatchProps.merge(EsqlRulePatchFields.partial());
+export const EsqlRulePatchProps = SharedPatchProps.extend(EsqlRulePatchFields.partial());
 
 export const TypeSpecificCreatePropsInternal = z.discriminatedUnion('type', [
   EqlRuleCreateFields,

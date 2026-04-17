@@ -62,7 +62,7 @@ export const CreateAlertsMigrationRequestBody = z
      */
     index: z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1),
   })
-  .merge(AlertsReindexOptions);
+  .extend(AlertsReindexOptions);
 export type CreateAlertsMigrationRequestBodyInput = z.input<
   typeof CreateAlertsMigrationRequestBody
 >;

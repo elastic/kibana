@@ -113,7 +113,7 @@ export const UnifiedHistoryRowBase = z.object({
 });
 
 export type LiveHistoryRow = z.infer<typeof LiveHistoryRow>;
-export const LiveHistoryRow = UnifiedHistoryRowBase.merge(
+export const LiveHistoryRow = UnifiedHistoryRowBase.extend(
   z.object({
     /**
      * Identifies this as a live query history row.
@@ -175,7 +175,7 @@ export const LiveHistoryRow = UnifiedHistoryRowBase.merge(
 );
 
 export type ScheduledHistoryRow = z.infer<typeof ScheduledHistoryRow>;
-export const ScheduledHistoryRow = UnifiedHistoryRowBase.merge(
+export const ScheduledHistoryRow = UnifiedHistoryRowBase.extend(
   z.object({
     /**
      * Identifies this as a scheduled query history row.

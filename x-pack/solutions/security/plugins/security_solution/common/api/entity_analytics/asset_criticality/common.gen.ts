@@ -47,7 +47,7 @@ export type AssetCriticalityLevelEnum = typeof AssetCriticalityLevel.enum;
 export const AssetCriticalityLevelEnum = AssetCriticalityLevel.enum;
 
 export type CreateAssetCriticalityRecord = z.infer<typeof CreateAssetCriticalityRecord>;
-export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
+export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.extend(
   z.object({
     criticality_level: AssetCriticalityLevel,
   })
@@ -101,9 +101,9 @@ export const AssetCriticalityRecordEcsParts = z.object({
 });
 
 export type AssetCriticalityRecord = z.infer<typeof AssetCriticalityRecord>;
-export const AssetCriticalityRecord = CreateAssetCriticalityRecord.merge(
+export const AssetCriticalityRecord = CreateAssetCriticalityRecord.extend(
   AssetCriticalityRecordEcsParts
-).merge(
+).extend(
   z.object({
     /**
      * The time the record was created or updated.

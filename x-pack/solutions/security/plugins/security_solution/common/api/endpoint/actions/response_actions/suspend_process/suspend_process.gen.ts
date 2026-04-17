@@ -22,7 +22,7 @@ import {
 } from '../../../model/schema/common.gen';
 
 export type SuspendProcessRouteRequestBody = z.infer<typeof SuspendProcessRouteRequestBody>;
-export const SuspendProcessRouteRequestBody = BaseActionSchema.merge(
+export const SuspendProcessRouteRequestBody = BaseActionSchema.extend(
   z.object({
     parameters: z.union([
       z.object({

@@ -66,7 +66,7 @@ export const DashboardMigration = z
      */
     id: NonEmptyString,
   })
-  .merge(DashboardMigrationData);
+  .extend(DashboardMigrationData);
 
 /**
  * The dashboard migration translation stats object.
@@ -242,7 +242,7 @@ export const DashboardMigrationDashboard = z
      */
     id: NonEmptyString,
   })
-  .merge(DashboardMigrationDashboardData);
+  .extend(DashboardMigrationDashboardData);
 
 /**
  * The partial version of the migrated elastic dashboard.

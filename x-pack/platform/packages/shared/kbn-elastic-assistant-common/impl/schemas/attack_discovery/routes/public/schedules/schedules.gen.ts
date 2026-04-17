@@ -46,7 +46,7 @@ export const AttackDiscoveryScheduleParams = z.object({
   /**
    * LLM API configuration.
    */
-  apiConfig: ApiConfig.merge(
+  apiConfig: ApiConfig.extend(
     z.object({
       /**
        * The name of the connector

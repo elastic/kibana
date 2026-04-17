@@ -66,14 +66,14 @@ export type RulePreviewRequestQueryInput = z.input<typeof RulePreviewRequestQuer
 
 export type RulePreviewRequestBody = z.infer<typeof RulePreviewRequestBody>;
 export const RulePreviewRequestBody = z.discriminatedUnion('type', [
-  EqlRuleCreateProps.merge(RulePreviewParams),
-  QueryRuleCreateProps.merge(RulePreviewParams),
-  SavedQueryRuleCreateProps.merge(RulePreviewParams),
-  ThresholdRuleCreateProps.merge(RulePreviewParams),
-  ThreatMatchRuleCreateProps.merge(RulePreviewParams),
-  MachineLearningRuleCreateProps.merge(RulePreviewParams),
-  NewTermsRuleCreateProps.merge(RulePreviewParams),
-  EsqlRuleCreateProps.merge(RulePreviewParams),
+  EqlRuleCreateProps.extend(RulePreviewParams),
+  QueryRuleCreateProps.extend(RulePreviewParams),
+  SavedQueryRuleCreateProps.extend(RulePreviewParams),
+  ThresholdRuleCreateProps.extend(RulePreviewParams),
+  ThreatMatchRuleCreateProps.extend(RulePreviewParams),
+  MachineLearningRuleCreateProps.extend(RulePreviewParams),
+  NewTermsRuleCreateProps.extend(RulePreviewParams),
+  EsqlRuleCreateProps.extend(RulePreviewParams),
 ]);
 export type RulePreviewRequestBodyInput = z.input<typeof RulePreviewRequestBody>;
 

@@ -22,7 +22,7 @@ import {
 } from '../../../model/schema/common.gen';
 
 export type ScanRouteRequestBody = z.infer<typeof ScanRouteRequestBody>;
-export const ScanRouteRequestBody = BaseActionSchema.merge(
+export const ScanRouteRequestBody = BaseActionSchema.extend(
   z.object({
     parameters: z.object({
       /**

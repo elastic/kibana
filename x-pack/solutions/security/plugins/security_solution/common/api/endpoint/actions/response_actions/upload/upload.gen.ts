@@ -22,7 +22,7 @@ import {
 } from '../../../model/schema/common.gen';
 
 export type UploadRouteRequestBody = z.infer<typeof UploadRouteRequestBody>;
-export const UploadRouteRequestBody = BaseActionSchema.merge(
+export const UploadRouteRequestBody = BaseActionSchema.extend(
   z.object({
     parameters: z.object({
       /**

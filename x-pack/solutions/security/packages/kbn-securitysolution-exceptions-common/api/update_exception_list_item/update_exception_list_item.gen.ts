@@ -80,7 +80,7 @@ export const UpdateExceptionListItemBase = z.object({
 });
 
 export type UpdateExceptionListItemGeneric = z.infer<typeof UpdateExceptionListItemGeneric>;
-export const UpdateExceptionListItemGeneric = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemGeneric = UpdateExceptionListItemBase.extend(
   z.object({
     list_id: ExceptionListHumanId.optional(),
     entries: ExceptionListItemEntryArray,
@@ -93,12 +93,12 @@ export type UpdateExceptionListItemEndpointList = z.infer<
   typeof UpdateExceptionListItemEndpointList
 >;
 export const UpdateExceptionListItemEndpointList =
-  UpdateExceptionListItemBase.merge(EndpointListProperties);
+  UpdateExceptionListItemBase.extend(EndpointListProperties);
 
 export type UpdateExceptionListItemTrustedAppsWindows = z.infer<
   typeof UpdateExceptionListItemTrustedAppsWindows
 >;
-export const UpdateExceptionListItemTrustedAppsWindows = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemTrustedAppsWindows = UpdateExceptionListItemBase.extend(
   TrustedAppsWindowsProperties
 );
 
@@ -106,33 +106,33 @@ export type UpdateExceptionListItemTrustedAppsMac = z.infer<
   typeof UpdateExceptionListItemTrustedAppsMac
 >;
 export const UpdateExceptionListItemTrustedAppsMac =
-  UpdateExceptionListItemBase.merge(TrustedAppsMacProperties);
+  UpdateExceptionListItemBase.extend(TrustedAppsMacProperties);
 
 export type UpdateExceptionListItemTrustedAppsLinux = z.infer<
   typeof UpdateExceptionListItemTrustedAppsLinux
 >;
-export const UpdateExceptionListItemTrustedAppsLinux = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemTrustedAppsLinux = UpdateExceptionListItemBase.extend(
   TrustedAppsLinuxProperties
 );
 
 export type UpdateExceptionListItemTrustedDevicesWindows = z.infer<
   typeof UpdateExceptionListItemTrustedDevicesWindows
 >;
-export const UpdateExceptionListItemTrustedDevicesWindows = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemTrustedDevicesWindows = UpdateExceptionListItemBase.extend(
   TrustedDevicesWindowsProperties
 );
 
 export type UpdateExceptionListItemTrustedDevicesMac = z.infer<
   typeof UpdateExceptionListItemTrustedDevicesMac
 >;
-export const UpdateExceptionListItemTrustedDevicesMac = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemTrustedDevicesMac = UpdateExceptionListItemBase.extend(
   TrustedDevicesMacProperties
 );
 
 export type UpdateExceptionListItemTrustedDevicesWindowsMac = z.infer<
   typeof UpdateExceptionListItemTrustedDevicesWindowsMac
 >;
-export const UpdateExceptionListItemTrustedDevicesWindowsMac = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemTrustedDevicesWindowsMac = UpdateExceptionListItemBase.extend(
   TrustedDevicesWindowsMacProperties
 );
 
@@ -140,18 +140,18 @@ export type UpdateExceptionListItemEventFilters = z.infer<
   typeof UpdateExceptionListItemEventFilters
 >;
 export const UpdateExceptionListItemEventFilters =
-  UpdateExceptionListItemBase.merge(EventFiltersProperties);
+  UpdateExceptionListItemBase.extend(EventFiltersProperties);
 
 export type UpdateExceptionListItemHostIsolation = z.infer<
   typeof UpdateExceptionListItemHostIsolation
 >;
 export const UpdateExceptionListItemHostIsolation =
-  UpdateExceptionListItemBase.merge(HostIsolationProperties);
+  UpdateExceptionListItemBase.extend(HostIsolationProperties);
 
 export type UpdateExceptionListItemBlocklistWindows = z.infer<
   typeof UpdateExceptionListItemBlocklistWindows
 >;
-export const UpdateExceptionListItemBlocklistWindows = UpdateExceptionListItemBase.merge(
+export const UpdateExceptionListItemBlocklistWindows = UpdateExceptionListItemBase.extend(
   BlocklistWindowsProperties
 );
 
@@ -159,13 +159,13 @@ export type UpdateExceptionListItemBlocklistLinux = z.infer<
   typeof UpdateExceptionListItemBlocklistLinux
 >;
 export const UpdateExceptionListItemBlocklistLinux =
-  UpdateExceptionListItemBase.merge(BlocklistLinuxProperties);
+  UpdateExceptionListItemBase.extend(BlocklistLinuxProperties);
 
 export type UpdateExceptionListItemBlocklistMac = z.infer<
   typeof UpdateExceptionListItemBlocklistMac
 >;
 export const UpdateExceptionListItemBlocklistMac =
-  UpdateExceptionListItemBase.merge(BlocklistMacProperties);
+  UpdateExceptionListItemBase.extend(BlocklistMacProperties);
 
 export type UpdateExceptionListItemRequestBody = z.infer<typeof UpdateExceptionListItemRequestBody>;
 export const UpdateExceptionListItemRequestBody = z.union([

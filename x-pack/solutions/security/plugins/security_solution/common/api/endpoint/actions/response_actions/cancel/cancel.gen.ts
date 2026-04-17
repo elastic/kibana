@@ -22,7 +22,7 @@ import {
 } from '../../../model/schema/common.gen';
 
 export type CancelRouteRequestBody = z.infer<typeof CancelRouteRequestBody>;
-export const CancelRouteRequestBody = BaseActionSchema.merge(
+export const CancelRouteRequestBody = BaseActionSchema.extend(
   z.object({
     parameters: z.object({
       /**

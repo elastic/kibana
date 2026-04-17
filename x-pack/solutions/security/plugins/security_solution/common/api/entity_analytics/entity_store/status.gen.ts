@@ -40,7 +40,7 @@ export const GetEntityStoreStatusResponse = z.object({
    * Per-engine status information.
    */
   engines: z.array(
-    EngineDescriptor.merge(
+    EngineDescriptor.extend(
       z.object({
         /**
          * Detailed component-level status. Only included when include_components is true.

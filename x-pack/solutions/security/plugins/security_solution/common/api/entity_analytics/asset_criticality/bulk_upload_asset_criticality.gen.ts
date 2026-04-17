@@ -56,7 +56,7 @@ export type BulkUpsertAssetCriticalityRecordsRequestBody = z.infer<
 export const BulkUpsertAssetCriticalityRecordsRequestBody = z.object({
   records: z
     .array(
-      AssetCriticalityRecordIdParts.merge(
+      AssetCriticalityRecordIdParts.extend(
         z.object({
           criticality_level: AssetCriticalityLevelsForBulkUpload,
         })

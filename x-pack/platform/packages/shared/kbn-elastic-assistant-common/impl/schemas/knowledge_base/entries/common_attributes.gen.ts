@@ -121,17 +121,17 @@ export const BaseDefaultableFields = z.object({
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
-export const BaseCreateProps = BaseRequiredFields.merge(BaseDefaultableFields);
+export const BaseCreateProps = BaseRequiredFields.extend(BaseDefaultableFields);
 
 export type BaseUpdateProps = z.infer<typeof BaseUpdateProps>;
-export const BaseUpdateProps = BaseCreateProps.partial().merge(
+export const BaseUpdateProps = BaseCreateProps.partial().extend(
   z.object({
     id: NonEmptyString,
   })
 );
 
 export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
-export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required());
+export const BaseResponseProps = BaseRequiredFields.extend(BaseDefaultableFields.required());
 
 export type ResponseFields = z.infer<typeof ResponseFields>;
 export const ResponseFields = z.object({
@@ -160,7 +160,7 @@ export const DeleteResponseFields = z.object({
 });
 
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
-export const SharedResponseProps = BaseResponseProps.merge(ResponseFields);
+export const SharedResponseProps = BaseResponseProps.extend(ResponseFields);
 
 export type DocumentEntryType = z.infer<typeof DocumentEntryType>;
 export const DocumentEntryType = z.literal('document');
@@ -192,20 +192,20 @@ export const DocumentEntryOptionalFields = z.object({
 });
 
 export type DocumentEntryCreateFields = z.infer<typeof DocumentEntryCreateFields>;
-export const DocumentEntryCreateFields = BaseCreateProps.merge(DocumentEntryRequiredFields).merge(
+export const DocumentEntryCreateFields = BaseCreateProps.extend(DocumentEntryRequiredFields).extend(
   DocumentEntryOptionalFields
 );
 
 export type DocumentEntryUpdateFields = z.infer<typeof DocumentEntryUpdateFields>;
-export const DocumentEntryUpdateFields = BaseUpdateProps.merge(DocumentEntryCreateFields);
+export const DocumentEntryUpdateFields = BaseUpdateProps.extend(DocumentEntryCreateFields);
 
 export type DocumentEntryResponseFields = z.infer<typeof DocumentEntryResponseFields>;
-export const DocumentEntryResponseFields = DocumentEntryRequiredFields.merge(
+export const DocumentEntryResponseFields = DocumentEntryRequiredFields.extend(
   DocumentEntryOptionalFields
 );
 
 export type DocumentEntry = z.infer<typeof DocumentEntry>;
-export const DocumentEntry = SharedResponseProps.merge(DocumentEntryResponseFields);
+export const DocumentEntry = SharedResponseProps.extend(DocumentEntryResponseFields);
 
 export type IndexEntryType = z.infer<typeof IndexEntryType>;
 export const IndexEntryType = z.literal('index');
@@ -245,16 +245,16 @@ export const IndexEntryOptionalFields = z.object({
 
 export type IndexEntryCreateFields = z.infer<typeof IndexEntryCreateFields>;
 export const IndexEntryCreateFields =
-  BaseCreateProps.merge(IndexEntryRequiredFields).merge(IndexEntryOptionalFields);
+  BaseCreateProps.extend(IndexEntryRequiredFields).extend(IndexEntryOptionalFields);
 
 export type IndexEntryUpdateFields = z.infer<typeof IndexEntryUpdateFields>;
-export const IndexEntryUpdateFields = BaseUpdateProps.merge(IndexEntryCreateFields);
+export const IndexEntryUpdateFields = BaseUpdateProps.extend(IndexEntryCreateFields);
 
 export type IndexEntryResponseFields = z.infer<typeof IndexEntryResponseFields>;
-export const IndexEntryResponseFields = IndexEntryRequiredFields.merge(IndexEntryOptionalFields);
+export const IndexEntryResponseFields = IndexEntryRequiredFields.extend(IndexEntryOptionalFields);
 
 export type IndexEntry = z.infer<typeof IndexEntry>;
-export const IndexEntry = SharedResponseProps.merge(IndexEntryResponseFields);
+export const IndexEntry = SharedResponseProps.extend(IndexEntryResponseFields);
 
 export type KnowledgeBaseEntryCreateProps = z.infer<typeof KnowledgeBaseEntryCreateProps>;
 export const KnowledgeBaseEntryCreateProps = z.discriminatedUnion('type', [

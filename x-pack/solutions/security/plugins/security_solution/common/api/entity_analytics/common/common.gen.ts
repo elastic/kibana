@@ -206,7 +206,7 @@ export const RiskScoreWeightGlobalShared = z.object({
 });
 
 export const RiskScoreWeightInternal = z.union([
-  RiskScoreWeightGlobalShared.merge(
+  RiskScoreWeightGlobalShared.extend(
     z.object({
       host: RiskScoreEntityIdentifierWeights,
       user: RiskScoreEntityIdentifierWeights.optional(),
@@ -214,7 +214,7 @@ export const RiskScoreWeightInternal = z.union([
       generic: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
-  RiskScoreWeightGlobalShared.merge(
+  RiskScoreWeightGlobalShared.extend(
     z.object({
       host: RiskScoreEntityIdentifierWeights.optional(),
       user: RiskScoreEntityIdentifierWeights,
@@ -222,7 +222,7 @@ export const RiskScoreWeightInternal = z.union([
       generic: RiskScoreEntityIdentifierWeights.optional(),
     })
   ),
-  RiskScoreWeightGlobalShared.merge(
+  RiskScoreWeightGlobalShared.extend(
     z.object({
       host: RiskScoreEntityIdentifierWeights.optional(),
       user: RiskScoreEntityIdentifierWeights.optional(),

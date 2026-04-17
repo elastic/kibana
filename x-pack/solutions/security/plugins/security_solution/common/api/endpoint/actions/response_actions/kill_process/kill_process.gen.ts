@@ -22,7 +22,7 @@ import {
 } from '../../../model/schema/common.gen';
 
 export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
-export const KillProcessRouteRequestBody = BaseActionSchema.merge(
+export const KillProcessRouteRequestBody = BaseActionSchema.extend(
   z.object({
     parameters: z.union([
       z.object({

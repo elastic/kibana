@@ -144,35 +144,35 @@ Only valid when query property is undefined.
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;
-export const BulkDeleteRules = BulkActionBase.merge(
+export const BulkDeleteRules = BulkActionBase.extend(
   z.object({
     action: z.literal('delete'),
   })
 );
 
 export type BulkDisableRules = z.infer<typeof BulkDisableRules>;
-export const BulkDisableRules = BulkActionBase.merge(
+export const BulkDisableRules = BulkActionBase.extend(
   z.object({
     action: z.literal('disable'),
   })
 );
 
 export type BulkEnableRules = z.infer<typeof BulkEnableRules>;
-export const BulkEnableRules = BulkActionBase.merge(
+export const BulkEnableRules = BulkActionBase.extend(
   z.object({
     action: z.literal('enable'),
   })
 );
 
 export type BulkExportRules = z.infer<typeof BulkExportRules>;
-export const BulkExportRules = BulkActionBase.merge(
+export const BulkExportRules = BulkActionBase.extend(
   z.object({
     action: z.literal('export'),
   })
 );
 
 export type BulkDuplicateRules = z.infer<typeof BulkDuplicateRules>;
-export const BulkDuplicateRules = BulkActionBase.merge(
+export const BulkDuplicateRules = BulkActionBase.extend(
   z.object({
     action: z.literal('duplicate'),
     /**
@@ -194,7 +194,7 @@ export const BulkDuplicateRules = BulkActionBase.merge(
 );
 
 export type BulkManualRuleRun = z.infer<typeof BulkManualRuleRun>;
-export const BulkManualRuleRun = BulkActionBase.merge(
+export const BulkManualRuleRun = BulkActionBase.extend(
   z.object({
     action: z.literal('run'),
     /**
@@ -214,7 +214,7 @@ export const BulkManualRuleRun = BulkActionBase.merge(
 );
 
 export type BulkManualRuleFillGaps = z.infer<typeof BulkManualRuleFillGaps>;
-export const BulkManualRuleFillGaps = BulkActionBase.merge(
+export const BulkManualRuleFillGaps = BulkActionBase.extend(
   z.object({
     action: z.literal('fill_gaps'),
     /**
@@ -451,7 +451,7 @@ export const BulkActionEditPayload =
   BulkActionEditPayloadInternal as z.ZodType<BulkActionEditPayload>;
 
 export type BulkEditRules = z.infer<typeof BulkEditRules>;
-export const BulkEditRules = BulkActionBase.merge(
+export const BulkEditRules = BulkActionBase.extend(
   z.object({
     action: z.literal('edit'),
     /**

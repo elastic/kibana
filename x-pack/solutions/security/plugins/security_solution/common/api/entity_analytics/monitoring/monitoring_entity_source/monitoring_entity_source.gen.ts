@@ -76,12 +76,11 @@ export const UpdateableMonitoringEntitySourceProperties = z.object({
 export type UpdateEntitySourceNoadditionalProps = z.infer<
   typeof UpdateEntitySourceNoadditionalProps
 >;
-export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySourceProperties.merge(
-  z.object({}).strict()
-);
+export const UpdateEntitySourceNoadditionalProps =
+  UpdateableMonitoringEntitySourceProperties.extend(z.object({}).strict());
 
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
-export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
+export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.extend(
   z.object({
     type: MonitoringEntitySourceType.optional(),
     managed: z.boolean().optional(),
@@ -91,12 +90,12 @@ export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySource
 );
 
 export type MonitoringEntitySourceAttributes = z.infer<typeof MonitoringEntitySourceAttributes>;
-export const MonitoringEntitySourceAttributes = MonitoringEntitySourceProperties.merge(
+export const MonitoringEntitySourceAttributes = MonitoringEntitySourceProperties.extend(
   z.object({})
 );
 
 export type MonitoringEntitySource = z.infer<typeof MonitoringEntitySource>;
-export const MonitoringEntitySource = MonitoringEntitySourceProperties.merge(
+export const MonitoringEntitySource = MonitoringEntitySourceProperties.extend(
   z.object({
     id: z.string(),
   })

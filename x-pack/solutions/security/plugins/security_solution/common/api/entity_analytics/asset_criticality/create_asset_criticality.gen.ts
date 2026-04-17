@@ -21,7 +21,7 @@ import { CreateAssetCriticalityRecord, AssetCriticalityRecord } from './common.g
 export type CreateAssetCriticalityRecordRequestBody = z.infer<
   typeof CreateAssetCriticalityRecordRequestBody
 >;
-export const CreateAssetCriticalityRecordRequestBody = CreateAssetCriticalityRecord.merge(
+export const CreateAssetCriticalityRecordRequestBody = CreateAssetCriticalityRecord.extend(
   z.object({
     /**
      * If 'wait_for' the request will wait for the index refresh.

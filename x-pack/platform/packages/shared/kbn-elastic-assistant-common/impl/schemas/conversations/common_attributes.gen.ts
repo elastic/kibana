@@ -97,7 +97,7 @@ export const SelectOptionInterruptOption = z.object({
  * Interrupt that requests user to select one of the provided options
  */
 export type SelectOptionInterruptValue = z.infer<typeof SelectOptionInterruptValue>;
-export const SelectOptionInterruptValue = BaseInterruptValue.merge(
+export const SelectOptionInterruptValue = BaseInterruptValue.extend(
   z.object({
     type: z.literal('SELECT_OPTION'),
     /**
@@ -115,7 +115,7 @@ export const SelectOptionInterruptValue = BaseInterruptValue.merge(
  * A request approval resume schema
  */
 export type SelectOptionInterruptResumeValue = z.infer<typeof SelectOptionInterruptResumeValue>;
-export const SelectOptionInterruptResumeValue = BaseInterruptResumeValue.merge(
+export const SelectOptionInterruptResumeValue = BaseInterruptResumeValue.extend(
   z.object({
     type: z.literal('SELECT_OPTION'),
     /**
@@ -144,7 +144,7 @@ export const SelectOptionInterrupt = z.object({
  * Interrupt that requests user to provide text input
  */
 export type InputTextInterruptValue = z.infer<typeof InputTextInterruptValue>;
-export const InputTextInterruptValue = BaseInterruptValue.merge(
+export const InputTextInterruptValue = BaseInterruptValue.extend(
   z.object({
     type: z.literal('INPUT_TEXT'),
     /**
@@ -162,7 +162,7 @@ export const InputTextInterruptValue = BaseInterruptValue.merge(
  * A resume value for input text
  */
 export type InputTextInterruptResumeValue = z.infer<typeof InputTextInterruptResumeValue>;
-export const InputTextInterruptResumeValue = BaseInterruptResumeValue.merge(
+export const InputTextInterruptResumeValue = BaseInterruptResumeValue.extend(
   z.object({
     type: z.literal('INPUT_TEXT'),
     /**
@@ -221,7 +221,7 @@ export const BaseContentReference = z.object({
  * References a knowledge base entry
  */
 export type KnowledgeBaseEntryContentReference = z.infer<typeof KnowledgeBaseEntryContentReference>;
-export const KnowledgeBaseEntryContentReference = BaseContentReference.merge(
+export const KnowledgeBaseEntryContentReference = BaseContentReference.extend(
   z.object({
     type: z.literal('KnowledgeBaseEntry'),
     /**
@@ -239,7 +239,7 @@ export const KnowledgeBaseEntryContentReference = BaseContentReference.merge(
  * References an ESQL query
  */
 export type EsqlContentReference = z.infer<typeof EsqlContentReference>;
-export const EsqlContentReference = BaseContentReference.merge(
+export const EsqlContentReference = BaseContentReference.extend(
   z.object({
     type: z.literal('EsqlQuery'),
     /**
@@ -266,7 +266,7 @@ export const EsqlContentReference = BaseContentReference.merge(
  * References a security alert
  */
 export type SecurityAlertContentReference = z.infer<typeof SecurityAlertContentReference>;
-export const SecurityAlertContentReference = BaseContentReference.merge(
+export const SecurityAlertContentReference = BaseContentReference.extend(
   z.object({
     type: z.literal('SecurityAlert'),
     /**
@@ -280,7 +280,7 @@ export const SecurityAlertContentReference = BaseContentReference.merge(
  * References an external URL
  */
 export type HrefContentReference = z.infer<typeof HrefContentReference>;
-export const HrefContentReference = BaseContentReference.merge(
+export const HrefContentReference = BaseContentReference.extend(
   z.object({
     type: z.literal('Href'),
     /**
@@ -298,7 +298,7 @@ export const HrefContentReference = BaseContentReference.merge(
  * References the security alerts page
  */
 export type SecurityAlertsPageContentReference = z.infer<typeof SecurityAlertsPageContentReference>;
-export const SecurityAlertsPageContentReference = BaseContentReference.merge(
+export const SecurityAlertsPageContentReference = BaseContentReference.extend(
   z.object({
     type: z.literal('SecurityAlertsPage'),
   })
@@ -310,7 +310,7 @@ export const SecurityAlertsPageContentReference = BaseContentReference.merge(
 export type ProductDocumentationContentReference = z.infer<
   typeof ProductDocumentationContentReference
 >;
-export const ProductDocumentationContentReference = BaseContentReference.merge(
+export const ProductDocumentationContentReference = BaseContentReference.extend(
   z.object({
     type: z.literal('ProductDocumentation'),
     /**

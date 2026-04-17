@@ -163,7 +163,7 @@ export const PrebuiltRuleVersion = z.object({
  * The last execution of the rule migration task.
  */
 export type RuleMigrationLastExecution = z.infer<typeof RuleMigrationLastExecution>;
-export const RuleMigrationLastExecution = MigrationLastExecution.merge(
+export const RuleMigrationLastExecution = MigrationLastExecution.extend(
   z.object({
     /**
      * Indicates if the last execution skipped matching prebuilt rules.
@@ -206,7 +206,7 @@ export const RuleMigration = z
      */
     name: NonEmptyString,
   })
-  .merge(RuleMigrationData);
+  .extend(RuleMigrationData);
 
 /**
  * The rule migration document object.
@@ -266,13 +266,13 @@ export const RuleMigrationRule = z
      */
     id: NonEmptyString,
   })
-  .merge(RuleMigrationRuleData);
+  .extend(RuleMigrationRuleData);
 
 /**
  * The rule migration task stats object.
  */
 export type RuleMigrationTaskStats = z.infer<typeof RuleMigrationTaskStats>;
-export const RuleMigrationTaskStats = MigrationTaskStats.merge(
+export const RuleMigrationTaskStats = MigrationTaskStats.extend(
   z.object({
     /**
      * The last execution of the rule migration task.

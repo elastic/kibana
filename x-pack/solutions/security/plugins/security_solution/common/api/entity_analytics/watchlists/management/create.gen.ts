@@ -75,7 +75,7 @@ export const CreateWatchlistRequestBody = z.object({
 export type CreateWatchlistRequestBodyInput = z.input<typeof CreateWatchlistRequestBody>;
 
 export type CreateWatchlistResponse = z.infer<typeof CreateWatchlistResponse>;
-export const CreateWatchlistResponse = WatchlistObject.merge(
+export const CreateWatchlistResponse = WatchlistObject.extend(
   z.object({
     entitySources: z.array(MonitoringEntitySource).optional(),
   })

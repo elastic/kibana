@@ -90,7 +90,7 @@ export const MonitoredUserUpdateDoc = z.object({
 });
 
 export type MonitoredUserDoc = z.infer<typeof MonitoredUserDoc>;
-export const MonitoredUserDoc = MonitoredUserUpdateDoc.merge(
+export const MonitoredUserDoc = MonitoredUserUpdateDoc.extend(
   z.object({
     event: z
       .object({
