@@ -9,40 +9,46 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const indexedFieldFormatSchema = schema.object({
-  type: schema.string(),
-  params: schema.maybe(schema.any()),
-});
-
-export const customLabelSchema = schema.maybe(
-  schema.string({
-    minLength: 1,
-    meta: {
-      id: 'kbn-runtime-field-custom-label',
-      title: 'Custom label',
-      description:
-        'Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.',
-    },
-  })
-);
-
-export const customDescriptionSchema = schema.maybe(
-  schema.string({
-    minLength: 1,
-    meta: {
-      id: 'kbn-runtime-field-custom-description',
-      title: 'Custom description',
-      description:
-        "Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.",
-    },
-  })
-);
-
 export const fieldSettingsSchema = schema.object(
   {
-    format: schema.maybe(indexedFieldFormatSchema),
-    custom_label: customLabelSchema,
-    custom_description: customDescriptionSchema,
+    format: schema.maybe(
+      schema.object(
+        {
+          type: schema.string(),
+          params: schema.maybe(schema.any()),
+        },
+        {
+          meta: {
+            id: 'kbn-field-format',
+            title: 'Format',
+            description:
+              'Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.',
+          },
+        }
+      )
+    ),
+    custom_label: schema.maybe(
+      schema.string({
+        minLength: 1,
+        meta: {
+          id: 'kbn-field-custom-label',
+          title: 'Custom label',
+          description:
+            'Create a label to display in place of the field name in Discover, Maps, Lens, Visualize, and TSVB. Useful for shortening a long field name. Queries and filters use the original field name.',
+        },
+      })
+    ),
+    custom_description: schema.maybe(
+      schema.string({
+        minLength: 1,
+        meta: {
+          id: 'kbn-field-custom-description',
+          title: 'Custom description',
+          description:
+            "Add a description to the field. It's displayed next to the field on the Discover, Lens, and Data View Management pages.",
+        },
+      })
+    ),
   },
   {
     meta: {
