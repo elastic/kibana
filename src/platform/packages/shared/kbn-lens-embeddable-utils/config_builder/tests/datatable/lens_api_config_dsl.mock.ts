@@ -259,20 +259,22 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
+    paging: 10,
+    row_numbers: { visible: true },
   },
-  paging: 10,
-  row_numbers: { visible: true },
 } satisfies DatatableStateNoESQL;
 
 /**
@@ -423,19 +425,21 @@ export const fullConfigDatatableWithDataView: DatatableState = {
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
+    paging: 10,
   },
-  paging: 10,
 } satisfies DatatableStateNoESQL;
 
 /**
@@ -586,24 +590,26 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
-  },
-  paging: 10,
-  sort_by: {
-    column_type: 'pivoted_metric',
-    index: 0,
-    values: ['US', 'CH'],
-    direction: 'desc',
+    paging: 10,
+    sort_by: {
+      column_type: 'pivoted_metric',
+      index: 0,
+      values: ['US', 'CH'],
+      direction: 'desc',
+    },
   },
 } satisfies DatatableStateNoESQL;
 
@@ -755,22 +761,24 @@ export const sortedByRowDatatable: DatatableState = {
       },
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'custom',
-        lines: 3,
-      },
-      header: {
-        type: 'auto',
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'custom',
+          lines: 3,
+        },
+        header: {
+          type: 'auto',
+        },
       },
     },
-  },
-  paging: 30,
-  sort_by: {
-    column_type: 'row',
-    index: 1,
-    direction: 'asc',
+    paging: 30,
+    sort_by: {
+      column_type: 'row',
+      index: 1,
+      direction: 'asc',
+    },
   },
 } satisfies DatatableStateNoESQL;
