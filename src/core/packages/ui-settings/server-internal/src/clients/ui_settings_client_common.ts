@@ -90,7 +90,7 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     return result;
   }
 
-  private async computeUserProvided<T = unknown>(bypassCache = false): Promise<UserProvided<T>> {
+  private async computeUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     const userProvided: UserProvided<T> = this.onReadHook(await this.read());
 
     this.sharedUserProvidedCache?.set(this.namespace, userProvided);
@@ -102,7 +102,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
     changes: Record<string, any>,
     { handleWriteErrors }: { validateKeys?: boolean; handleWriteErrors?: boolean } = {}
   ) {
-    // check if a read is currently in progress, wait for it to complete before proceeding
     if (this.sharedUserProvidedCache) {
       this.log.debug(
         `[UiSettings] setMany invalidating SHARED cache for namespace=${this.namespace}`
@@ -112,7 +111,6 @@ export abstract class UiSettingsClientCommon extends BaseUiSettingsClient {
 
     this.onWriteHook(changes);
 
-    // Register write operation as in-flight so concurrent reads will wait
     await this.write({ changes, handleWriteErrors });
 
     this.log.debug(`[UiSettings] setMany ES write COMPLETED for namespace=${this.namespace}`);
