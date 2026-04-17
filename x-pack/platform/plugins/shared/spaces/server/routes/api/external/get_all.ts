@@ -20,6 +20,8 @@ export function initGetAllSpacesApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space',
       access: 'public',
       summary: `Get all spaces`,
+      description:
+        'Retrieve all available Kibana spaces. The list includes only the spaces that the user is authorized to access.',
       options: {
         tags: ['oas-tag:spaces'],
       },

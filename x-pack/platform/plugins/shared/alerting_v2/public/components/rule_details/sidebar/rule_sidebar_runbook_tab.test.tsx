@@ -9,6 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleApiResponse } from '../../../services/rules_api';
+import { RuleProvider } from '../rule_context';
 import { RuleSidebarRunbookTab } from './rule_sidebar_runbook_tab';
 
 const baseRule: RuleApiResponse = {
@@ -28,7 +29,9 @@ const baseRule: RuleApiResponse = {
 const renderRunbookTab = (rule: RuleApiResponse) =>
   render(
     <I18nProvider>
-      <RuleSidebarRunbookTab rule={rule} />
+      <RuleProvider rule={rule}>
+        <RuleSidebarRunbookTab />
+      </RuleProvider>
     </I18nProvider>
   );
 
