@@ -216,7 +216,7 @@ describe('RenderingService', () => {
       expect(bannerList).not.toBeNull();
       expect(bannerList).toHaveStyle({
         paddingTop: '0px',
-        paddingBottom: '12px',
+        paddingBottom: '0px',
         paddingLeft: '12px',
         paddingRight: '12px',
       });

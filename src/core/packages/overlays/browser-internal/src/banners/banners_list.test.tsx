@@ -42,9 +42,11 @@ describe('BannersList', () => {
         <BannersList banners$={banners$} />
       </Wrapper>
     );
-    expect(container.innerHTML).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>Hello!</h1></div></div>"`
-    );
+    const list = container.querySelector('.kbnGlobalBannerList');
+    expect(list).not.toBeNull();
+    expect(list).toHaveStyle({ paddingBottom: '12px' });
+    expect(container.querySelector('[data-test-subj="global-banner-item"]')).not.toBeNull();
+    expect(container.innerHTML).toContain('Hello!');
   });
 
   test('updates banners', async () => {
@@ -91,9 +93,9 @@ describe('BannersList', () => {
     });
 
     // Two new banners should be rendered
-    expect(container.innerHTML).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" data-test-subj=\\"global-banner-item\\" class=\\"css-rhtlbg-BannerItem\\"><h1>Second banner!</h1></div></div>"`
-    );
+    expect(container.querySelectorAll('[data-test-subj="global-banner-item"]')).toHaveLength(2);
+    expect(container.innerHTML).toContain('First Banner!');
+    expect(container.innerHTML).toContain('Second banner!');
     // Original banner should be unmounted
     expect(unmount).toHaveBeenCalled();
   });

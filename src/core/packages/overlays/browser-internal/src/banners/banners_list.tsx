@@ -35,7 +35,12 @@ export const BannersList: React.FunctionComponent<Props> = ({ banners$ }) => {
   }
 
   return (
-    <div className="kbnGlobalBannerList">
+    <div
+      className="kbnGlobalBannerList"
+      css={({ euiTheme }) => ({
+        paddingBottom: euiTheme.size.m,
+      })}
+    >
       {banners.map((banner) => (
         <BannerItem key={banner.id} banner={banner} />
       ))}

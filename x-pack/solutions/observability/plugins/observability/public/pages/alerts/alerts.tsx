@@ -111,9 +111,10 @@ function InternalAlertsPage() {
   const alertsPageSectionProps = useMemo(
     () => ({
       paddingSize: 'none' as const,
-      // Drop EuiPageTemplate.Section default padding-block (~24px); keep horizontal inset.
       css: css`
-        padding-inline: ${euiTheme.size.l};
+        padding-block-start: 0;
+        padding-inline: ${euiTheme.size.m};
+        padding-block-end: ${euiTheme.size.m};
       `,
     }),
     [euiTheme]
@@ -302,19 +303,37 @@ function InternalAlertsPage() {
     const addDataLabel = i18n.translate('xpack.observability.home.addData', {
       defaultMessage: 'Add data',
     });
+    const manageRulesLabel = i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+      defaultMessage: 'Manage Rules',
+    });
 
     const config: AppMenuConfig = {
       layout: 'chromeBarV2',
     };
 
+    if (manageRulesHref) {
+      config.primaryActionItem = {
+        id: 'observability-alerts-manage-rules',
+        label: manageRulesLabel,
+        iconType: 'gear',
+        testId: 'manageRulesPageButton',
+        href: manageRulesHref,
+        target: '_self',
+        run: () => {
+          void application.navigateToUrl(manageRulesHref);
+        },
+      };
+    }
+
     if (addDataHref) {
-      config.overflowOnlyItems = [
+      config.secondaryActionItems = [
         {
-          order: 1,
           id: 'observability-alerts-add-data',
           label: addDataLabel,
           iconType: 'indexOpen',
+          testId: 'observabilityAlertsPageAddData',
           href: addDataHref,
+          target: '_self',
           run: () => {
             void application.navigateToUrl(addDataHref);
           },
@@ -323,7 +342,7 @@ function InternalAlertsPage() {
     }
 
     return config;
-  }, [addDataHref, application]);
+  }, [addDataHref, application, manageRulesHref]);
 
   return (
     <Provider value={alertSearchBarStateContainer}>
@@ -358,7 +377,6 @@ function InternalAlertsPage() {
           kibanaServices={kibanaServices}
           categories={[DEFAULT_APP_CATEGORIES.observability.id]}
         />
-        {isProjectChrome ? <EuiSpacer size="m" /> : null}
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
             <ObservabilityAlertSearchBar
@@ -389,7 +407,6 @@ function InternalAlertsPage() {
                 ruleStats={ruleStats}
                 ruleStatsLoading={ruleStatsLoading}
                 rulesLocator={locators.get<RulesLocatorParams>(rulesLocatorID)}
-                manageRulesHref={manageRulesHref as string}
               />
             </EuiFlexItem>
           ) : null}

@@ -6,13 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -164,12 +158,10 @@ export function RuleStatsMetricsRow({
   ruleStats,
   ruleStatsLoading,
   rulesLocator,
-  manageRulesHref,
 }: {
   ruleStats: RuleStatsState;
   ruleStatsLoading: boolean;
   rulesLocator?: LocatorPublic<RulesLocatorParams>;
-  manageRulesHref: string;
 }) {
   const { ruleCountStat, disabledStatsComponent, snoozedStatsComponent, errorStatsComponent } =
     buildRuleStatElements(ruleStats, ruleStatsLoading, rulesLocator);
@@ -195,19 +187,6 @@ export function RuleStatsMetricsRow({
           <EuiFlexItem grow={false}>{snoozedStatsComponent}</EuiFlexItem>
           <EuiFlexItem grow={false}>{errorStatsComponent}</EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          color="text"
-          iconType="tableOfContents"
-          data-test-subj="manageRulesPageButton"
-          href={manageRulesHref}
-        >
-          {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
-            defaultMessage: 'Manage Rules',
-          })}
-        </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -36,8 +36,6 @@ import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
 
 /** Horizontal inset for banners in `#globalBannerList` (matches main app chrome gutters). */
 const GLOBAL_BANNER_LIST_INSET = '12px';
-/** Bottom padding for the global banner list wrapper (usage / system banners); top is 0 so it sits flush under the header chrome. */
-const GLOBAL_BANNER_LIST_BOTTOM_PADDING = '12px';
 
 const layoutConfigs: { classic: ChromeLayoutConfig; project: ChromeLayoutConfig } = {
   classic: {
@@ -142,7 +140,7 @@ export class GridLayout implements LayoutService {
                       paddingLeft: GLOBAL_BANNER_LIST_INSET,
                       paddingRight: GLOBAL_BANNER_LIST_INSET,
                       paddingTop: 0,
-                      paddingBottom: GLOBAL_BANNER_LIST_BOTTOM_PADDING,
+                      paddingBottom: 0,
                       boxSizing: 'border-box',
                       width: '100%',
                       minWidth: 0,
