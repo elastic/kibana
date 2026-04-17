@@ -171,7 +171,7 @@ export const ConversationSidebarView: React.FC = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiSpacer size="l" />
+                  <EuiSpacer size="m" />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow className="eui-fullHeight">
@@ -189,7 +189,7 @@ export const ConversationSidebarView: React.FC = () => {
                     </EuiFlexItem>
 
                     <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="flexStart">
+                      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
                         <EuiFlexItem grow>
                           <EuiButton
                             fullWidth
