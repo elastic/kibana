@@ -56,9 +56,10 @@ interface DimensionsSelectorProps {
   isLoading?: boolean;
   /**
    * When provided, the option list is filtered on the client to dimensions
-   * carried by at least one metric that also carries every current selection.
-   * Prevents a rapid multi-select from reaching an empty-grid state before the
-   * server fetch returns. Without it, options come straight from `dimensions`.
+   * carried by at least one metric that also carries every current selection,
+   * preventing rapid multi-select from reaching an empty-grid state. Selected
+   * dimensions not in the applicable set always stay visible regardless of
+   * this prop (e.g. after URL restore).
    */
   metricItems?: ParsedMetricItem[];
 }
@@ -89,21 +90,21 @@ export const DimensionsSelector = ({
   // current selection. `null` means no client-side filter applies (either no
   // selection yet, or metricItems wasn't provided).
   const optimisticApplicableNames = useMemo(() => {
-    if (!metricItems || localSelectedDimensions.length === 0) {
+    if (!metricItems || selectedNamesSet.size === 0) {
       return null;
     }
     return getApplicableDimensionNames(metricItems, [...selectedNamesSet]);
-  }, [metricItems, localSelectedDimensions, selectedNamesSet]);
+  }, [metricItems, selectedNamesSet]);
 
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
+
+    const applicableNames = optimisticApplicableNames ?? new Set(dimensions.map((d) => d.name));
 
     const filteredDimensions =
       optimisticApplicableNames == null
         ? dimensions
         : dimensions.filter((dimension) => optimisticApplicableNames.has(dimension.name));
-
-    const applicableNames = new Set(filteredDimensions.map((d) => d.name));
 
     // Selections no longer in the applicable set stay visible (prepended,
     // checked) so the count badge matches the rendered ticks and the user can

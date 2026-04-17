@@ -133,20 +133,12 @@ const mockDimensions: Dimension[] = [
   { name: 'cloud.availability_zone' },
 ] as Dimension[];
 
-const mockFields = [
-  { dimensions: [mockDimensions[0], mockDimensions[1]] },
-  { dimensions: [mockDimensions[0], mockDimensions[2]] },
-  { dimensions: [mockDimensions[1], mockDimensions[3]] },
-  { dimensions: [mockDimensions[0], mockDimensions[1], mockDimensions[2]] },
-];
-
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<IntlProvider>{component}</IntlProvider>);
 };
 
 describe('DimensionsSelector', () => {
   const defaultProps = {
-    fields: mockFields,
     dimensions: mockDimensions,
     selectedDimensions: [],
     onChange: jest.fn(),
