@@ -74,7 +74,6 @@ const defaultLensConfig: Omit<LensXYConfig, 'title' | 'dataset'> = {
 export interface SimilarErrorsOccurrencesChartProps {
   baseEsqlQuery: ReturnType<typeof import('../get_esql_query').getEsqlQuery>;
   currentDocumentTimestamp?: string;
-  profileId: string;
 }
 
 const currentDocumentLabel = i18n.translate(
@@ -87,11 +86,10 @@ const currentDocumentLabel = i18n.translate(
 export function SimilarErrorsOccurrencesChart({
   baseEsqlQuery,
   currentDocumentTimestamp,
-  profileId,
 }: SimilarErrorsOccurrencesChartProps) {
   const { data } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
   const timeRange = useMemo(

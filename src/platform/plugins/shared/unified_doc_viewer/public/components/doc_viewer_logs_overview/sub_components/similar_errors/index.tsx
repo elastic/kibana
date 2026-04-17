@@ -37,10 +37,9 @@ const sectionTitle = i18n.translate(
 
 export interface SimilarErrorsProps {
   hit: DataTableRecord;
-  profileId: string;
 }
 
-export function SimilarErrors({ hit, profileId }: SimilarErrorsProps) {
+export function SimilarErrors({ hit }: SimilarErrorsProps) {
   const { indexes } = useDataSourcesContext();
   const hitFlattened = hit.flattened;
   const { field: serviceNameField, value: serviceNameValue } = getFieldValueWithFallback(
@@ -140,7 +139,6 @@ export function SimilarErrors({ hit, profileId }: SimilarErrorsProps) {
       <SimilarErrorsOccurrencesChart
         baseEsqlQuery={esqlQueryWhereClause}
         currentDocumentTimestamp={normalizedTimestamp}
-        profileId={profileId}
       />
     </ContentFrameworkSection>
   );

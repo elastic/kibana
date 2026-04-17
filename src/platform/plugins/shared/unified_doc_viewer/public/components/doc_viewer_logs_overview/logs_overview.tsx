@@ -146,9 +146,9 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             onRemoveColumn={onRemoveColumn}
             dataView={dataView}
           />
-          <DataSourcesProvider indexes={indexes}>
+          <DataSourcesProvider indexes={indexes} profileId={profileId}>
             <DocViewerExtensionActionsProvider actions={docViewActions}>
-              {showSimilarErrors ? <SimilarErrors hit={hit} profileId={profileId} /> : null}
+              {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
                 {renderFlyoutStreamField &&
                   renderFlyoutStreamField({ dataView, doc: hit, renderCpsWarning })}
