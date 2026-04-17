@@ -23,12 +23,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   hideDimensionsSelector?: boolean;
   hideRightSideActions?: boolean;
   isLoading?: boolean;
-  /**
-   * Full (non-paginated, non-search-filtered) metric items currently in the
-   * grid. Forwarded to {@link DimensionsSelector} so it can compute an
-   * optimistic, client-side applicable-dimension set on each click — see
-   * PR #263629 Phase 6.
-   */
+  /** Forwarded to {@link DimensionsSelector}; see its prop docs. */
   metricItems?: ParsedMetricItem[];
 }
 

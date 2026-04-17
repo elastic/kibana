@@ -411,11 +411,10 @@ describe('DimensionsSelector', () => {
   });
 
   describe('Selected dimensions not in applicable set (race-condition guard)', () => {
-    // AC2 from ticket #263309: a dimension that the user has already selected
-    // must remain visible in the picker even if the latest METRICS_INFO
-    // response drops it from `dimensions` (the applicable set). This covers
-    // the case where the user selects two dimensions before the grid
-    // refreshes and the server returns no metrics matching both.
+    // A selected dimension must stay visible in the picker even when it is
+    // not in `dimensions` — e.g. the latest METRICS_INFO response narrowed
+    // the applicable set and dropped it. Without this the count badge can
+    // disagree with the visible checkmarks.
     const applicableOnly = [{ name: 'b' }, { name: 'c' }] as Dimension[];
     const orphanPlusApplicable = [{ name: 'a' }, { name: 'b' }] as Dimension[];
 
@@ -440,7 +439,7 @@ describe('DimensionsSelector', () => {
       expect(applicableOption).toHaveAttribute('data-checked', 'on');
     });
 
-    it('reflects both orphan and applicable selections in the popover count (AC3)', () => {
+    it('reflects both orphan and applicable selections in the popover count', () => {
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}
@@ -540,12 +539,10 @@ describe('DimensionsSelector', () => {
     });
   });
 
-  describe('Optimistic filter via metricItems (Phase 6)', () => {
-    // These tests cover the client-side optimistic filtering that prevents the
-    // empty-grid dead-state described in PR #263629 review feedback: if the
-    // user clicks one dimension, the picker must immediately hide dimensions
+  describe('Optimistic filter via metricItems', () => {
+    // Once a selection is made, the picker must immediately hide dimensions
     // that no metric carrying that selection supports — without waiting for
-    // the server round-trip.
+    // the server round-trip — so rapid multi-select can't reach an empty grid.
     const environment = { name: 'environment' } as Dimension;
     const region = { name: 'region' } as Dimension;
     const hostName = { name: 'host.name' } as Dimension;
@@ -598,9 +595,8 @@ describe('DimensionsSelector', () => {
     });
 
     it('without metricItems, falls back to the full dimensions list', () => {
-      // Defensive check: the new prop must be optional and existing callers
-      // (URL-restore, any integration that hasn't been updated yet) should
-      // see the pre-Phase-6 behaviour unchanged.
+      // The prop is optional; callers that don't provide it get the options
+      // straight from `dimensions`, no client-side narrowing.
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}
@@ -621,9 +617,8 @@ describe('DimensionsSelector', () => {
     });
 
     it('orphan selections still surface even with the optimistic filter', () => {
-      // The optimistic filter operates on applicable options only; any
-      // selected dimension that isn't present in metricItems must still be
-      // rendered (checked) via the pre-existing orphan-surfacing path so the
+      // The optimistic filter operates on applicable options; a selected
+      // dimension that isn't in metricItems still renders (checked) so the
       // count stays consistent and the user can back out.
       const orphan = { name: 'orphan.field' } as Dimension;
 
@@ -644,9 +639,8 @@ describe('DimensionsSelector', () => {
     });
 
     it('no selection means the full applicable list is shown', () => {
-      // When nothing is selected the optimistic filter is a no-op — we don't
-      // know which metric "group" to constrain to, so every applicable
-      // dimension must remain available.
+      // With nothing selected there's no metric subset to constrain to, so
+      // every applicable dimension must remain available.
       renderWithIntl(
         <DimensionsSelector
           {...defaultProps}

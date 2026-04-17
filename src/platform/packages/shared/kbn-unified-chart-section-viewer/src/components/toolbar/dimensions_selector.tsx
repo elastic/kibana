@@ -40,15 +40,10 @@ interface DimensionsSelectorProps {
   singleSelection?: boolean;
   isLoading?: boolean;
   /**
-   * Full set of metric items currently in the grid. When provided, the picker
-   * performs an optimistic client-side filter: only dimensions carried by
-   * metrics that also carry every currently-selected dimension remain in the
-   * option list. This prevents a user from reaching an empty-grid state by
-   * rapidly selecting dimensions that belong to disjoint metrics (the server
-   * would filter them out on the next fetch, but the click already happened).
-   *
-   * When omitted, the applicable set is taken verbatim from `dimensions`
-   * (pre-Phase-6 behaviour).
+   * When provided, the option list is filtered on the client to dimensions
+   * carried by at least one metric that also carries every current selection.
+   * Prevents a rapid multi-select from reaching an empty-grid state before the
+   * server fetch returns. Without it, options come straight from `dimensions`.
    */
   metricItems?: ParsedMetricItem[];
 }
@@ -75,11 +70,9 @@ export const DimensionsSelector = ({
     [localSelectedDimensions]
   );
 
-  // Phase 6 optimistic filter: given the metric items currently in the grid
-  // and the user's selection so far, compute the set of dimension names that
-  // still has a non-empty intersection of metrics carrying every selected
-  // dimension. Returning `null` means "no client-side filter applies" — the
-  // caller should fall back to the full `dimensions` array.
+  // Names of dimensions still carried by at least one metric that has every
+  // current selection. `null` means no client-side filter applies (either no
+  // selection yet, or metricItems wasn't provided).
   const optimisticApplicableNames = useMemo(() => {
     if (!metricItems || localSelectedDimensions.length === 0) {
       return null;
@@ -102,11 +95,6 @@ export const DimensionsSelector = ({
   const options: SelectableEntry[] = useMemo(() => {
     const isAtMaxLimit = localSelectedDimensions.length >= MAX_DIMENSIONS_SELECTIONS;
 
-    // When the optimistic filter is active, narrow the applicable list to
-    // dimensions carried by at least one metric that still carries every
-    // current selection. The orphan path below continues to surface any
-    // already-selected dimension that falls outside this set, so the user
-    // never loses sight of their own picks.
     const filteredDimensions =
       optimisticApplicableNames == null
         ? dimensions
@@ -114,11 +102,9 @@ export const DimensionsSelector = ({
 
     const applicableNames = new Set(filteredDimensions.map((d) => d.name));
 
-    // Orphan selections are dimensions the user has already picked but that
-    // are not in the current applicable set (e.g. a filtered METRICS_INFO
-    // response dropped them). Per AC2/AC3 of ticket #263309 they must remain
-    // visible and toggleable so the count badge matches the rendered ticks
-    // and the user can always back out of an invalid combination.
+    // Selections no longer in the applicable set stay visible (prepended,
+    // checked) so the count badge matches the rendered ticks and the user can
+    // always deselect what they picked.
     const orphanSelections = localSelectedDimensions
       .filter((dimension) => !applicableNames.has(dimension.name))
       .slice()
@@ -213,9 +199,8 @@ export const DimensionsSelector = ({
     (chosenOption?: SelectableEntry | SelectableEntry[]) => {
       const opts =
         chosenOption == null ? [] : Array.isArray(chosenOption) ? chosenOption : [chosenOption];
-      // Look up dimensions from both the applicable set and the current local
-      // selection: this lets us preserve orphan selections (those not in the
-      // current applicable set) when the user toggles another option.
+      // Include local selections in the lookup so toggling another option
+      // doesn't silently drop a selection that's no longer in `dimensions`.
       const dimensionByName = new Map<string, Dimension>();
       for (const dimension of localSelectedDimensions) {
         dimensionByName.set(dimension.name, dimension);
