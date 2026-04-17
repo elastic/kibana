@@ -250,7 +250,7 @@ export class ESQLService extends FtrService {
 
   public async selectEsqlBadgeHoverOption(badgeClassName: string, optionText: string) {
     await this.retry.try(async () => {
-      await this.browser.moveMouseTo({ xOffset: 0, yOffset: 0 });
+      await this.browser.moveMouseTo({ x: 0, y: 0 });
       const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
       await badge.moveMouseTo();
 
