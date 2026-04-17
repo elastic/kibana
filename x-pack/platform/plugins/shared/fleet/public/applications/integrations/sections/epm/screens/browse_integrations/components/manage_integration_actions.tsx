@@ -119,9 +119,9 @@ export const ManageIntegrationActions: React.FC<{
     setShowReviewModal(true);
     (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_review_approve_menu_clicked',
-      {}
+      { integrationId: integration.integrationId, version: integration.version ?? '' }
     );
-  }, [automaticImport]);
+  }, [automaticImport, integration.integrationId, integration.version]);
 
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
