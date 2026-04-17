@@ -43,12 +43,21 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { AgentBuilderToolsSetup } from '@kbn/agent-builder-server/tools';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from './attachment_framework/unified_attachment_registry';
 import type { ConfigType } from './config';
+
+/**
+ * Minimal subset of the agentBuilder plugin's setup contract used by Cases.
+ * Uses the package-level interface to avoid a circular dependency.
+ */
+export interface AgentBuilderPluginSetupContract {
+  tools: AgentBuilderToolsSetup;
+}
 
 export interface CasesServerSetupDependencies {
   alerting: AlertingServerSetup;
@@ -63,6 +72,7 @@ export interface CasesServerSetupDependencies {
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
   workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  agentBuilder?: AgentBuilderPluginSetupContract;
 }
 
 export interface CasesServerStartDependencies {

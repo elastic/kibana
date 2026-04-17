@@ -11,7 +11,6 @@ import type {
   AgentBuilderPluginStart,
 } from '@kbn/agent-builder-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import type { CasesServerStart } from '@kbn/cases-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface PluginSetupDependencies {
@@ -22,7 +21,6 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   llmTasks?: LlmTasksPluginStart;
-  cases?: CasesServerStart;
   spaces?: SpacesPluginStart;
 }
 

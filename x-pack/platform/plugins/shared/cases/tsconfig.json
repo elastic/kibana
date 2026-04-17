@@ -104,6 +104,8 @@
     "@kbn/openapi-generator",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/resizable-layout",
     "@kbn/css-utils",

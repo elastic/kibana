@@ -57,6 +57,8 @@ import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { registerCaseWorkflowSteps } from './workflows';
+import { registerCasesAgentBuilderTools } from './agent_builder';
+import type { AgentBuilderPluginSetupContract } from './types';
 import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
@@ -216,6 +218,17 @@ export class CasePlugin
     });
 
     registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
+
+    void core.plugins
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .then(({ agentBuilder }) => {
+        if (agentBuilder.found) {
+          registerCasesAgentBuilderTools(agentBuilder.contract, getCasesClient, core);
+        }
+      })
+      .catch((error: Error) => {
+        this.logger.error(`Failed to register Cases agent builder tools: ${error.message}`);
+      });
 
     return {
       attachmentFramework: {

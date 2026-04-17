@@ -7,50 +7,45 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import type { CoreSetup } from '@kbn/core/server';
-import type { Case, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
-import type { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';
-import type { CasesClient } from '@kbn/cases-plugin/server/client';
+import type { CasesFindRequest } from '../../../common/types/api';
+import type { Case, RelatedCase } from '../../../common/types/domain';
+import type { CasesClient } from '../../client';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import type { AgentBuilderPlatformPluginStart, PluginStartDependencies } from '../../types';
+import type { CasesServerStartDependencies } from '../../types';
 import {
   normalizeTimeRange,
   createCommentSummariesFromArray,
   enhanceCaseData,
   createResult,
   createErrorResponse,
-  getCasesClient,
   deduplicateCases,
   fetchAllPages,
   type CoreServices,
   type EnhancedCaseData,
-} from './helpers';
+} from './search_cases_helpers';
 
 const casesSchema = z.object({
-  // Get case by ID operation
   caseId: z
     .string()
     .optional()
     .describe(
       'Case ID to retrieve a specific case. If provided, returns only that case. Use this for getting a single case by its ID.'
     ),
-  // Find cases by alert IDs
   alertIds: z
     .array(z.string())
     .optional()
     .describe(
       'Array of alert IDs to find cases containing these alerts. If provided, cases containing any of these alert IDs will be returned. Alert IDs must be provided via this parameter.'
     ),
-  // Owner filter
   owner: z
     .enum(['cases', 'observability', 'securitySolution'])
     .optional()
     .describe(
       'Filter cases by owner. Valid values: "cases" (Stack Management/General Cases), "observability" (Observability), "securitySolution" (Elastic Security). If not provided, returns all cases the user has access to.'
     ),
-  // Date range filters
   start: z
     .string()
     .optional()
@@ -63,7 +58,6 @@ const casesSchema = z.object({
     .describe(
       'ISO datetime string for the end time to fetch cases (exclusive). Maps to Cases API "to" parameter. Format: "2025-01-22T00:00:00Z"'
     ),
-  // Search parameters
   search: z
     .string()
     .optional()
@@ -76,7 +70,6 @@ const casesSchema = z.object({
     .describe(
       'Fields to perform the search query against. Valid values: "title", "description". If not provided, searches both fields by default.'
     ),
-  // Filter parameters
   severity: z
     .union([
       z.enum(['low', 'medium', 'high', 'critical']),
@@ -115,7 +108,6 @@ const casesSchema = z.object({
     .describe(
       'Filter cases by category. Can be a single category string or an array of categories.'
     ),
-  // Comments control
   includeComments: z
     .boolean()
     .optional()
@@ -125,9 +117,6 @@ const casesSchema = z.object({
     ),
 });
 
-/**
- * Fetches and enhances a single case by ID.
- */
 async function fetchCaseById(
   caseId: string,
   casesClient: CasesClient,
@@ -149,9 +138,6 @@ async function fetchCaseById(
   return enhanceCaseData(theCase, commentsSummary, request, coreServices, logger);
 }
 
-/**
- * Fetches cases by alert IDs.
- */
 async function fetchCasesByAlertIds(
   alertIds: string[],
   casesClient: CasesClient,
@@ -159,7 +145,6 @@ async function fetchCasesByAlertIds(
   includeComments: boolean,
   logger: Logger
 ): Promise<Case[]> {
-  // Query each alert ID in parallel
   const allRelatedCasesArrays = await Promise.all(
     alertIds.map(async (alertId) => {
       try {
@@ -174,14 +159,12 @@ async function fetchCasesByAlertIds(
     })
   );
 
-  // Flatten and deduplicate cases by case ID
   const relatedCases: RelatedCase[] = deduplicateCases(allRelatedCasesArrays);
 
   if (relatedCases.length === 0) {
     return [];
   }
 
-  // Fetch full case details for each related case
   const caseFetchResults = await Promise.allSettled(
     relatedCases.map((relatedCase) =>
       casesClient.cases.get({
@@ -202,9 +185,6 @@ async function fetchCasesByAlertIds(
   });
 }
 
-/**
- * Enhances an array of cases with comments and formatting.
- */
 function enhanceCases(
   cases: Case[],
   includeComments: boolean,
@@ -222,8 +202,9 @@ function enhanceCases(
   });
 }
 
-export const casesTool = (
-  coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>
+export const searchCasesTool = (
+  coreSetup: CoreSetup<CasesServerStartDependencies>,
+  getCasesClientFn: (request: KibanaRequest) => Promise<CasesClient>
 ): BuiltinToolDefinition<typeof casesSchema> => {
   return {
     id: platformCoreTools.cases,
@@ -287,21 +268,17 @@ Returns case details (id, title, description, status, severity, tags, assignees,
         category,
         includeComments,
       },
-      { request, logger }
+      { request, spaceId, logger }
     ) => {
       try {
-        const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+        const [coreStart] = await coreSetup.getStartServices();
         const coreServices: CoreServices = {
           coreStart,
-          spacesPlugin: pluginsStart.spaces,
+          spaceId,
         };
 
         const timeRange = normalizeTimeRange(start, end, logger);
-        const casesClientResult = await getCasesClient(pluginsStart, request, logger, timeRange);
-        if ('error' in casesClientResult) {
-          return casesClientResult.error;
-        }
-        const { casesClient } = casesClientResult;
+        const casesClient = await getCasesClientFn(request);
         const shouldIncludeComments = includeComments ?? false;
 
         // Operation mode 1: Get case by ID
@@ -347,9 +324,7 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           return createResult(
             casesData,
             timeRange,
-            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alertIds.join(
-              ', '
-            )}`
+            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alertIds.join(', ')}`
           );
         }
 

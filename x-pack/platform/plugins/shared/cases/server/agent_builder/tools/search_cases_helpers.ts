@@ -10,16 +10,13 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CasesClient } from '@kbn/cases-plugin/server/client';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { CasesClient } from '../../client';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import type { Case, AttachmentV2, RelatedCase } from '@kbn/cases-plugin/common/types/domain';
-import type { CasesFindRequest } from '@kbn/cases-plugin/common/types/api';
-import { getCurrentSpaceId } from '@kbn/agent-builder-plugin/server/utils/spaces';
-import { getCaseViewPath } from '@kbn/cases-plugin/server/common/utils';
-import { isLegacyCommentAttachment } from '@kbn/cases-plugin/common/utils/attachments/v1_type_guards';
-import { isUnifiedCommentAttachment } from '@kbn/cases-plugin/common/utils/attachments/v2_type_guards';
-import type { PluginStartDependencies } from '../../types';
+import type { Case, AttachmentV2, RelatedCase } from '../../../common/types/domain';
+import type { CasesFindRequest } from '../../../common/types/api';
+import { getCaseViewPath } from '../../common/utils';
+import { isLegacyCommentAttachment } from '../../../common/utils/attachments/v1_type_guards';
+import { isUnifiedCommentAttachment } from '../../../common/utils/attachments/v2_type_guards';
 
 export interface CommentSummary {
   id: string;
@@ -30,7 +27,8 @@ export interface CommentSummary {
 
 export interface CoreServices {
   coreStart: CoreStart;
-  spacesPlugin: SpacesPluginStart | undefined;
+  /** Space ID for the current request, from ToolHandlerContext.spaceId */
+  spaceId: string;
 }
 
 export interface EnhancedCaseData extends Case {
@@ -41,12 +39,6 @@ export interface EnhancedCaseData extends Case {
 
 /**
  * Normalizes and validates time range parameters for case queries.
- * Validates ISO date strings and logs warnings for invalid dates.
- *
- * @param start - ISO datetime string for start time (inclusive), optional
- * @param end - ISO datetime string for end time (exclusive), optional
- * @param logger - Logger instance for warning messages
- * @returns Normalized time range object with ISO strings and Date objects, or null if neither start nor end is provided
  */
 export const normalizeTimeRange = (
   start: string | undefined,
@@ -89,13 +81,7 @@ export const normalizeTimeRange = (
 };
 
 /**
- * Creates a standardized tool result response for the cases tool.
- * Handles success, empty, and error cases.
- *
- * @param cases - Array of enhanced case data objects (empty array for empty results)
- * @param timeRange - Normalized time range object or null if no time filtering
- * @param message - Optional message to include in the response
- * @returns Tool result object conforming to ToolResultType.other format
+ * Creates a standardized tool result response for the cases search tool.
  */
 export const createResult = (
   cases: EnhancedCaseData[],
@@ -118,11 +104,6 @@ export const createResult = (
 
 /**
  * Creates a summary object from a case attachment/comment.
- * Extracts key information including comment text (truncated to 200 chars),
- * creator username, and creation timestamp.
- *
- * @param comment - The attachment/comment object from the cases API
- * @returns A CommentSummary object with id, comment text, creator, and timestamp
  */
 export const createCommentSummary = (comment: AttachmentV2): CommentSummary => {
   const commentText = isLegacyCommentAttachment(comment)
@@ -141,10 +122,7 @@ export const createCommentSummary = (comment: AttachmentV2): CommentSummary => {
 
 /**
  * Creates comment summaries from an array of attachments.
- * Filters to only user comments, limits to the first 5, and converts to summaries.
- *
- * @param comments - Array of attachment objects from the cases API
- * @returns Array of CommentSummary objects (max 5 user comments)
+ * Filters to only user comments, limits to the first 5.
  */
 export const createCommentSummariesFromArray = (comments: AttachmentV2[]): CommentSummary[] => {
   return comments
@@ -155,12 +133,6 @@ export const createCommentSummariesFromArray = (comments: AttachmentV2[]): Comme
 
 /**
  * Fetches all pages of cases from a search query.
- * Handles pagination automatically up to a maximum number of pages.
- *
- * @param casesClient - The cases client instance for API calls
- * @param searchParams - Search parameters for the query
- * @param maxPages - Maximum number of pages to fetch (default: 10)
- * @returns Promise resolving to array of all cases from all pages
  */
 export const fetchAllPages = async (
   casesClient: CasesClient,
@@ -181,7 +153,6 @@ export const fetchAllPages = async (
 
     allCases.push(...searchResult.cases);
 
-    // Stop if we got fewer results than requested (last page)
     if (searchResult.cases.length < (searchParams.perPage ?? 100)) {
       hasMorePages = false;
     }
@@ -194,13 +165,6 @@ export const fetchAllPages = async (
 
 /**
  * Enhances a case object with URL and markdown link fields.
- *
- * @param caseItem - The base case object from the API
- * @param comments - Optional array of comment summaries to include
- * @param request - Kibana request object for URL generation
- * @param coreServices - Core services including CoreStart and SpacesPlugin
- * @param logger - Logger instance for warning messages
- * @returns Enhanced case data object with url and markdown_link fields
  */
 export const enhanceCaseData = (
   caseItem: Case,
@@ -210,13 +174,8 @@ export const enhanceCaseData = (
   logger: Logger
 ): EnhancedCaseData => {
   const caseUrl =
-    getCaseUrl(
-      request,
-      coreServices.coreStart,
-      coreServices.spacesPlugin,
-      caseItem.id,
-      caseItem.owner
-    ) || null;
+    getCaseUrl(request, coreServices.coreStart, coreServices.spaceId, caseItem.id, caseItem.owner) ||
+    null;
   if (!caseUrl) {
     logger.warn(
       `[Cases Tool] Failed to generate URL for case ${caseItem.id} with owner ${caseItem.owner}`
@@ -235,14 +194,6 @@ export const enhanceCaseData = (
 
 /**
  * Creates a standardized error response for the cases tool.
- * Extracts error message, logs it with the provided prefix, and returns
- * a tool result with an error message formatted for the user.
- *
- * @param error - The error object of unknown type
- * @param logPrefix - Prefix string for the error log message
- * @param userMessage - User-friendly error message to display
- * @param logger - Logger instance for error logging
- * @returns Tool result object with error information
  */
 export const createErrorResponse = (
   error: unknown,
@@ -258,42 +209,7 @@ export const createErrorResponse = (
 };
 
 /**
- * Retrieves a cases client instance from the cases plugin.
- * Checks if the cases plugin is available and creates a client scoped to the request.
- * Returns an error result if the plugin is unavailable.
- *
- * @param pluginsStart - Plugin start dependencies containing the cases plugin
- * @param request - Kibana request object for creating a scoped client
- * @param logger - Logger instance for warning messages
- * @param timeRange - Normalized time range for error responses (if plugin unavailable)
- * @returns Promise resolving to either a cases client or an error result object
- */
-export const getCasesClient = async (
-  pluginsStart: PluginStartDependencies,
-  request: KibanaRequest,
-  logger: Logger,
-  timeRange: ReturnType<typeof normalizeTimeRange> | null
-): Promise<{ casesClient: CasesClient } | { error: ReturnType<typeof createResult> }> => {
-  const casesPlugin = pluginsStart.cases;
-
-  if (!casesPlugin) {
-    logger.warn('[Cases Tool] Cases plugin not available, returning empty results');
-    return {
-      error: createResult([], timeRange, 'Cases plugin not available'),
-    };
-  }
-
-  const casesClient = await casesPlugin.getCasesClientWithRequest(request);
-  return { casesClient };
-};
-
-/**
  * Deduplicates cases across multiple arrays by case ID.
- * Takes an array of case arrays (e.g., from multiple alert ID queries)
- * and returns a single array with unique cases based on their ID.
- *
- * @param casesArrays - Array of arrays containing RelatedCase objects
- * @returns Array of unique RelatedCase objects (first occurrence kept)
  */
 export const deduplicateCases = (casesArrays: RelatedCase[][]): RelatedCase[] => {
   const casesMap = new Map<string, RelatedCase>();
@@ -309,18 +225,12 @@ export const deduplicateCases = (casesArrays: RelatedCase[][]): RelatedCase[] =>
 
 // CASE URL
 
-/**
- * App routes for different Kibana applications
- */
 const APP_ROUTES = {
   security: '/app/security',
   observability: '/app/observability',
   management: '/app/management/insightsAndAlerting',
 } as const;
 
-/**
- * Get the app route based on owner/case type
- */
 function getAppRoute(owner: string): string {
   const ownerToRoute: Record<string, string> = {
     securitySolution: APP_ROUTES.security,
@@ -330,9 +240,6 @@ function getAppRoute(owner: string): string {
   return ownerToRoute[owner] || APP_ROUTES.management;
 }
 
-/**
- * Build a full URL from base components
- */
 function buildFullUrl(
   request: KibanaRequest,
   core: CoreStart,
@@ -342,13 +249,11 @@ function buildFullUrl(
   const publicBaseUrl = core.http.basePath.publicBaseUrl;
   const serverBasePath = core.http.basePath.serverBasePath;
 
-  // First try using publicBaseUrl if configured
   if (publicBaseUrl) {
     const pathWithSpace = addSpaceIdToPath(serverBasePath, spaceId, path);
     return `${publicBaseUrl}${pathWithSpace}`;
   }
 
-  // Fallback: construct URL from request
   const protocol = request.headers['x-forwarded-proto'] || 'http';
   const host = request.headers.host || 'localhost:5601';
   const baseUrl = `${protocol}://${host}`;
@@ -358,20 +263,19 @@ function buildFullUrl(
 }
 
 /**
- * Generate a URL to a case
+ * Generate a URL to a case.
+ * @param spaceId - from ToolHandlerContext.spaceId
  */
 export function getCaseUrl(
   request: KibanaRequest,
   core: CoreStart,
-  spaces: SpacesPluginStart | undefined,
+  spaceId: string,
   caseId: string,
   owner: string
 ): string | null {
   try {
-    const spaceId = getCurrentSpaceId({ request, spaces });
     const publicBaseUrl = core.http.basePath.publicBaseUrl;
 
-    // getCaseViewPath returns a full URL when publicBaseUrl is provided
     if (publicBaseUrl) {
       return getCaseViewPath({
         publicBaseUrl,
@@ -381,7 +285,6 @@ export function getCaseUrl(
       });
     }
 
-    // Fallback: construct URL manually
     const appRoute = getAppRoute(owner);
     const path = `${appRoute}/cases/${caseId}`;
     return buildFullUrl(request, core, spaceId, path);

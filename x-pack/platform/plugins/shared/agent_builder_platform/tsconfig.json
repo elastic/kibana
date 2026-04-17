@@ -22,7 +22,6 @@
     "@kbn/llm-tasks-plugin",
     "@kbn/i18n",
     "@kbn/agent-builder-browser",
-    "@kbn/cases-plugin",
     "@kbn/core-http-server",
     "@kbn/spaces-plugin",
     "@kbn/core-http-server-mocks",

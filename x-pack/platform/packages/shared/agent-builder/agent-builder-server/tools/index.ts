@@ -19,6 +19,7 @@ export type {
   ToolConfirmationPolicy,
   ToolConfirmationPolicyMode,
 } from './builtin';
+export type { AgentBuilderToolsSetup } from './setup';
 export {
   type ToolHandlerFn,
   type ToolHandlerReturn,
