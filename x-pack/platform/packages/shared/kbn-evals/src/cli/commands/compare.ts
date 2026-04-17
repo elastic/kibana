@@ -80,34 +80,42 @@ export const compareCmd: Command<void> = {
     }
 
     const evaluationsEsUrl = process.env.EVALUATIONS_ES_URL ?? DEFAULT_EVALUATIONS_ES_URL;
+    const evaluationsEsApiKey = process.env.EVALUATIONS_ES_API_KEY;
     if (!process.env.EVALUATIONS_ES_URL) {
       log.warning(`EVALUATIONS_ES_URL not set; defaulting to ${DEFAULT_EVALUATIONS_ES_URL}.`);
     }
 
-    const esClient = createEsClientForTesting({ esUrl: evaluationsEsUrl });
+    const esClient = createEsClientForTesting({
+      esUrl: evaluationsEsUrl,
+      ...(evaluationsEsApiKey ? { auth: { apiKey: evaluationsEsApiKey } } : {}),
+    });
     const scoreRepository = new EvaluationScoreRepository(esClient, log);
 
     let secondRunId = secondRunIdPositional;
+    let baselineTimestamp: string | null = null;
+    let baselineCommitSha: string | null = null;
 
     if (!secondRunId && baselineBranch && suite) {
       log.info(
         `Looking up latest baseline run on branch "${baselineBranch}" for suite "${suite}"...`
       );
-      const baselineId = await scoreRepository.findLatestBaselineRunId(
+      const baseline = await scoreRepository.findLatestBaselineRun(
         suite,
         baselineBranch,
         firstRunId
       );
 
-      if (!baselineId) {
+      if (!baseline) {
         log.warning(
           `No baseline run found for suite "${suite}" on branch "${baselineBranch}". Nothing to compare.`
         );
         return;
       }
 
-      log.info(`Found baseline run: ${baselineId}`);
-      secondRunId = baselineId;
+      log.info(`Found baseline run: ${baseline.runId}`);
+      secondRunId = baseline.runId;
+      baselineTimestamp = baseline.timestamp;
+      baselineCommitSha = baseline.commitSha;
     }
 
     const scoreOpts = suite ? { suiteId: suite } : undefined;
@@ -174,6 +182,8 @@ export const compareCmd: Command<void> = {
         prRunId: firstRunId,
         baselineRunId: secondRunId!,
         baselineBranch: baselineBranch ?? 'unknown',
+        baselineTimestamp,
+        baselineCommitSha,
         results,
         kibanaUrl,
       });

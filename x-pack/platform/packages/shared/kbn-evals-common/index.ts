@@ -22,7 +22,12 @@ export {
   buildModelDisplayId,
   buildLatestBaselineRunQuery,
   parseLatestBaselineRunId,
+  parseLatestBaselineRun,
 } from './impl/query_builders';
-export type { RunsListingResult, RunDetailEvaluatorStat } from './impl/query_builders';
+export type {
+  RunsListingResult,
+  RunDetailEvaluatorStat,
+  LatestBaselineRun,
+} from './impl/query_builders';
 export { pairScores, computePairedTTestResults } from './impl/statistical_analysis';
 export type { PairedScore } from './impl/statistical_analysis';

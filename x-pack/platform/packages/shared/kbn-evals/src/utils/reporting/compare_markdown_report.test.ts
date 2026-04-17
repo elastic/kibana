@@ -171,4 +171,54 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).toContain('No significant regressions detected (0 evaluator comparisons).');
     expect(output).not.toContain('<details>');
   });
+
+  it('shows baseline commit and age when metadata is provided', () => {
+    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const output = formatMarkdownCompareReport({
+      ...baseOpts,
+      baselineTimestamp: yesterday,
+      baselineCommitSha: 'abc123def456',
+      results: [makeResult({ pValue: 0.5 })],
+    });
+
+    expect(output).toContain('commit `abc123d`');
+    expect(output).toContain('1 day ago');
+    expect(output).not.toContain('> **Warning:**');
+  });
+
+  it('shows staleness warning when baseline is older than 3 days', () => {
+    const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+    const output = formatMarkdownCompareReport({
+      ...baseOpts,
+      baselineTimestamp: fiveDaysAgo,
+      baselineCommitSha: 'deadbeef1234',
+      results: [makeResult({ pValue: 0.5 })],
+    });
+
+    expect(output).toContain('commit `deadbee`');
+    expect(output).toContain('5 days ago');
+    expect(output).toContain(
+      '> **Warning:** Baseline is 5 days old. Results may not reflect recent changes to `main`.'
+    );
+  });
+
+  it('shows only commit SHA when timestamp is not available', () => {
+    const output = formatMarkdownCompareReport({
+      ...baseOpts,
+      baselineCommitSha: 'abc123def456',
+      results: [makeResult({ pValue: 0.5 })],
+    });
+
+    expect(output).toContain('Baseline: commit `abc123d`');
+    expect(output).not.toContain('days ago');
+  });
+
+  it('omits baseline metadata line when neither timestamp nor commit are provided', () => {
+    const output = formatMarkdownCompareReport({
+      ...baseOpts,
+      results: [makeResult({ pValue: 0.5 })],
+    });
+
+    expect(output).not.toContain('Baseline:');
+  });
 });

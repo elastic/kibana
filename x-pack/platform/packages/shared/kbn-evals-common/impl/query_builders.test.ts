@@ -18,6 +18,7 @@ import {
   buildModelDisplayId,
   buildLatestBaselineRunQuery,
   parseLatestBaselineRunId,
+  parseLatestBaselineRun,
 } from './query_builders';
 
 describe('query_builders', () => {
@@ -470,6 +471,7 @@ describe('query_builders', () => {
           terms: { field: 'run_id', size: 1, order: { latest_timestamp: 'desc' } },
           aggs: {
             latest_timestamp: { max: { field: '@timestamp' } },
+            git_commit_sha: { terms: { field: 'run_metadata.git_commit_sha', size: 1 } },
           },
         },
       });
@@ -490,20 +492,66 @@ describe('query_builders', () => {
     });
   });
 
-  describe('parseLatestBaselineRunId', () => {
-    it('extracts the run ID from the aggregation response', () => {
+  describe('parseLatestBaselineRun', () => {
+    it('extracts full metadata from the aggregation response', () => {
+      const aggregations = {
+        latest_run: {
+          buckets: [
+            {
+              key: 'bk-baseline-run',
+              doc_count: 50,
+              latest_timestamp: { value_as_string: '2025-06-10T12:00:00Z' },
+              git_commit_sha: { buckets: [{ key: 'abc123def' }] },
+            },
+          ],
+        },
+      };
+
+      expect(parseLatestBaselineRun(aggregations)).toEqual({
+        runId: 'bk-baseline-run',
+        timestamp: '2025-06-10T12:00:00Z',
+        commitSha: 'abc123def',
+      });
+    });
+
+    it('returns null fields when sub-aggregations are missing', () => {
       const aggregations = {
         latest_run: {
           buckets: [{ key: 'bk-baseline-run', doc_count: 50 }],
         },
       };
 
-      expect(parseLatestBaselineRunId(aggregations)).toBe('bk-baseline-run');
+      expect(parseLatestBaselineRun(aggregations)).toEqual({
+        runId: 'bk-baseline-run',
+        timestamp: null,
+        commitSha: null,
+      });
     });
 
     it('returns undefined when there are no buckets', () => {
-      const aggregations = { latest_run: { buckets: [] } };
-      expect(parseLatestBaselineRunId(aggregations)).toBeUndefined();
+      expect(parseLatestBaselineRun({ latest_run: { buckets: [] } })).toBeUndefined();
+    });
+
+    it('returns undefined when aggregations are undefined', () => {
+      expect(parseLatestBaselineRun(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('parseLatestBaselineRunId (deprecated)', () => {
+    it('extracts just the run ID for backward compatibility', () => {
+      const aggregations = {
+        latest_run: {
+          buckets: [
+            {
+              key: 'bk-baseline-run',
+              doc_count: 50,
+              latest_timestamp: { value_as_string: '2025-06-10T12:00:00Z' },
+            },
+          ],
+        },
+      };
+
+      expect(parseLatestBaselineRunId(aggregations)).toBe('bk-baseline-run');
     });
 
     it('returns undefined when aggregations are undefined', () => {

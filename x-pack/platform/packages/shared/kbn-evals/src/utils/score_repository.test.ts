@@ -617,20 +617,31 @@ describe('EvaluationScoreRepository', () => {
     });
   });
 
-  describe('findLatestBaselineRunId', () => {
-    it('returns the run ID from the aggregation response', async () => {
+  describe('findLatestBaselineRun', () => {
+    it('returns full baseline metadata from the aggregation response', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [] },
         aggregations: {
           latest_run: {
-            buckets: [{ key: 'bk-baseline-42', doc_count: 100 }],
+            buckets: [
+              {
+                key: 'bk-baseline-42',
+                doc_count: 100,
+                latest_timestamp: { value_as_string: '2025-06-10T12:00:00Z' },
+                git_commit_sha: { buckets: [{ key: 'abc123' }] },
+              },
+            ],
           },
         },
       });
 
-      const result = await repository.findLatestBaselineRunId('my-suite', 'main');
+      const result = await repository.findLatestBaselineRun('my-suite', 'main');
 
-      expect(result).toBe('bk-baseline-42');
+      expect(result).toEqual({
+        runId: 'bk-baseline-42',
+        timestamp: '2025-06-10T12:00:00Z',
+        commitSha: 'abc123',
+      });
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           size: 0,
@@ -652,14 +663,14 @@ describe('EvaluationScoreRepository', () => {
         aggregations: { latest_run: { buckets: [] } },
       });
 
-      const result = await repository.findLatestBaselineRunId('my-suite', 'main');
+      const result = await repository.findLatestBaselineRun('my-suite', 'main');
       expect(result).toBeUndefined();
     });
 
     it('returns undefined and logs on ES error', async () => {
       mockEsClient.search.mockRejectedValue(new Error('connection refused'));
 
-      const result = await repository.findLatestBaselineRunId('my-suite', 'main');
+      const result = await repository.findLatestBaselineRun('my-suite', 'main');
 
       expect(result).toBeUndefined();
       expect(mockLog.error).toHaveBeenCalled();
@@ -668,10 +679,19 @@ describe('EvaluationScoreRepository', () => {
     it('passes excludeRunId to the query', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [] },
-        aggregations: { latest_run: { buckets: [{ key: 'bk-other' }] } },
+        aggregations: {
+          latest_run: {
+            buckets: [
+              {
+                key: 'bk-other',
+                latest_timestamp: { value_as_string: '2025-06-01T00:00:00Z' },
+              },
+            ],
+          },
+        },
       });
 
-      await repository.findLatestBaselineRunId('my-suite', 'main', 'bk-current');
+      await repository.findLatestBaselineRun('my-suite', 'main', 'bk-current');
 
       const searchCall = mockEsClient.search.mock.calls[0][0];
       expect(searchCall.query.bool.must_not).toEqual(

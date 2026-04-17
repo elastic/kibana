@@ -416,22 +416,54 @@ export const buildLatestBaselineRunQuery = (
         terms: { field: 'run_id', size: 1, order: { latest_timestamp: 'desc' as const } },
         aggs: {
           latest_timestamp: { max: { field: '@timestamp' } },
+          git_commit_sha: { terms: { field: 'run_metadata.git_commit_sha', size: 1 } },
         },
       },
     },
   };
 };
 
+export interface LatestBaselineRun {
+  runId: string;
+  timestamp: string | null;
+  commitSha: string | null;
+}
+
 /**
- * Extracts the run ID from the aggregation response returned by
+ * Extracts baseline run metadata from the aggregation response returned by
  * {@link buildLatestBaselineRunQuery}.
+ */
+export const parseLatestBaselineRun = (
+  aggregations: Record<string, unknown> | undefined
+): LatestBaselineRun | undefined => {
+  const agg = aggregations as
+    | {
+        latest_run?: {
+          buckets?: Array<{
+            key: string;
+            latest_timestamp?: { value_as_string?: string };
+            git_commit_sha?: { buckets?: Array<{ key: string }> };
+          }>;
+        };
+      }
+    | undefined;
+
+  const bucket = agg?.latest_run?.buckets?.[0];
+  if (!bucket) return undefined;
+
+  return {
+    runId: bucket.key,
+    timestamp: bucket.latest_timestamp?.value_as_string ?? null,
+    commitSha: bucket.git_commit_sha?.buckets?.[0]?.key ?? null,
+  };
+};
+
+/**
+ * @deprecated Use {@link parseLatestBaselineRun} which returns full metadata.
  */
 export const parseLatestBaselineRunId = (
   aggregations: Record<string, unknown> | undefined
-): string | undefined => {
-  const agg = aggregations as { latest_run?: { buckets?: Array<{ key: string }> } } | undefined;
-  return agg?.latest_run?.buckets?.[0]?.key;
-};
+): string | undefined => parseLatestBaselineRun(aggregations)?.runId;
 
 // ---------------------------------------------------------------------------
 // Internal helpers

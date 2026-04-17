@@ -184,6 +184,7 @@ function buildEvalsYaml({
           `        key: kbn-evals-post-comparison`,
           `        command: bash .buildkite/scripts/steps/evals/post_eval_comment.sh`,
           `        env:`,
+          `          KBN_EVALS: '1'`,
           `          EVAL_SUITE_IDS: '${suiteIds}'`,
           `        depends_on:`,
           ...suiteStepKeys.map((k) => `          - '${k}'`),

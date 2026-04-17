@@ -8,6 +8,7 @@
 import type { PairedTTestResult } from '../statistical_analysis';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
+const STALENESS_WARNING_DAYS = 3;
 
 function formatNumber(value: number): string {
   return Number.isFinite(value) ? value.toFixed(2) : '-';
@@ -33,6 +34,22 @@ function escapeMarkdownTableCell(value: string): string {
   return value.replace(/\|/g, '\\|');
 }
 
+function formatBaselineAge(
+  timestamp: string,
+  now: Date = new Date()
+): {
+  label: string;
+  days: number;
+} {
+  const baselineDate = new Date(timestamp);
+  const diffMs = now.getTime() - baselineDate.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (days === 0) return { label: 'today', days };
+  if (days === 1) return { label: '1 day ago', days };
+  return { label: `${days} days ago`, days };
+}
+
 function buildMarkdownTable(headers: string[], rows: string[][]): string {
   const separator = headers.map(() => '---');
   const lines = [
@@ -48,6 +65,8 @@ export interface FormatMarkdownCompareReportOptions {
   prRunId: string;
   baselineRunId: string;
   baselineBranch: string;
+  baselineTimestamp?: string | null;
+  baselineCommitSha?: string | null;
   results: PairedTTestResult[];
   significanceThreshold?: number;
   kibanaUrl?: string;
@@ -58,6 +77,8 @@ export function formatMarkdownCompareReport({
   prRunId,
   baselineRunId,
   baselineBranch,
+  baselineTimestamp,
+  baselineCommitSha,
   results,
   significanceThreshold = DEFAULT_SIGNIFICANCE_THRESHOLD,
   kibanaUrl,
@@ -78,6 +99,29 @@ export function formatMarkdownCompareReport({
   lines.push(`### Eval Comparison: ${suiteId}`);
   lines.push('');
   lines.push(`**PR run**: \`${prRunId}\` | **Baseline (${baselineBranch})**: \`${baselineRunId}\``);
+
+  if (baselineTimestamp || baselineCommitSha) {
+    const parts: string[] = [];
+    if (baselineCommitSha) {
+      parts.push(`commit \`${baselineCommitSha.slice(0, 7)}\``);
+    }
+    if (baselineTimestamp) {
+      const { label, days } = formatBaselineAge(baselineTimestamp);
+      parts.push(`${label} (${new Date(baselineTimestamp).toISOString().slice(0, 10)})`);
+      if (days >= STALENESS_WARNING_DAYS) {
+        lines.push(`Baseline: ${parts.join(', ')}`);
+        lines.push('');
+        lines.push(
+          `> **Warning:** Baseline is ${days} days old. Results may not reflect recent changes to \`${baselineBranch}\`.`
+        );
+      } else {
+        lines.push(`Baseline: ${parts.join(', ')}`);
+      }
+    } else {
+      lines.push(`Baseline: ${parts.join(', ')}`);
+    }
+  }
+
   lines.push(`Significance threshold: p < ${significanceThreshold}`);
   lines.push('');
 

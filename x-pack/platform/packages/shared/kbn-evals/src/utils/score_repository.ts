@@ -13,7 +13,8 @@ import {
   buildStatsAggregation,
   SCORES_SORT_ORDER,
   buildLatestBaselineRunQuery,
-  parseLatestBaselineRunId,
+  parseLatestBaselineRun,
+  type LatestBaselineRun,
 } from '@kbn/evals-common';
 import { getEvalDoc } from '../evaluations_export/eval_doc';
 
@@ -719,11 +720,11 @@ export class EvaluationScoreRepository {
     }
   }
 
-  async findLatestBaselineRunId(
+  async findLatestBaselineRun(
     suiteId: string,
     branch: string,
     excludeRunId?: string
-  ): Promise<string | undefined> {
+  ): Promise<LatestBaselineRun | undefined> {
     const { query, aggs } = buildLatestBaselineRunQuery(suiteId, branch, excludeRunId);
     try {
       const response = await this.esClient.search({
@@ -732,7 +733,7 @@ export class EvaluationScoreRepository {
         query,
         aggs,
       });
-      return parseLatestBaselineRunId(response.aggregations as Record<string, unknown> | undefined);
+      return parseLatestBaselineRun(response.aggregations as Record<string, unknown> | undefined);
     } catch (error) {
       this.log.error(
         `Failed to find baseline run for suite ${suiteId} on branch ${branch}:`,
