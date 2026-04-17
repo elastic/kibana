@@ -112,9 +112,7 @@ function InternalAlertsPage() {
     () => ({
       paddingSize: 'none' as const,
       css: css`
-        padding-block-start: 0;
-        padding-inline: ${euiTheme.size.m};
-        padding-block-end: ${euiTheme.size.m};
+        padding: ${euiTheme.size.m};
       `,
     }),
     [euiTheme]

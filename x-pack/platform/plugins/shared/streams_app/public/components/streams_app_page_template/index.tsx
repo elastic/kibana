@@ -43,9 +43,7 @@ StreamsAppPageTemplate.Body = ({
       className={cx(
         css`
           overflow-y: auto;
-          ${noPadding
-            ? 'padding: 0;'
-            : `padding: ${euiTheme.size.m} ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};`}
+          ${noPadding ? 'padding: 0;' : `padding: ${euiTheme.size.m};`}
         `,
         consumerClassName
       )}

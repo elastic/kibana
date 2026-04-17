@@ -125,6 +125,7 @@ function toDiscoverProjectChromeAppMenuConfig(baseConfig: AppMenuConfig): AppMen
     primaryActionItem: baseConfig.primaryActionItem,
     secondaryActionItems,
     overflowOnlyItems,
+    hideProjectHeaderBottomBorder: true,
   };
 }
 

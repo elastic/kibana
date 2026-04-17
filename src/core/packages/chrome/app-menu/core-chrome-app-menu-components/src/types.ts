@@ -368,4 +368,9 @@ export interface AppMenuConfig {
    * the current route.
    */
   hideProjectHeaderBackButton?: boolean;
+  /**
+   * When true, the project chrome `AppMenuBar` root omits its bottom border (e.g. Discover uses
+   * the document area edge instead of a rule under the top nav).
+   */
+  hideProjectHeaderBottomBorder?: boolean;
 }

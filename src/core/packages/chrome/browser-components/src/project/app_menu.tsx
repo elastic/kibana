@@ -94,7 +94,8 @@ const useAppMenuBarStyles = (
   hasSecondaryRow: boolean,
   showBackToParent: boolean,
   hasHeaderTabs: boolean,
-  currentAppId: string | undefined
+  currentAppId: string | undefined,
+  hideProjectHeaderBottomBorder: boolean
 ) =>
   useMemo(() => {
     const root = {
@@ -111,11 +112,10 @@ const useAppMenuBarStyles = (
         ? euiTheme.size.s
         : euiTheme.size.m,
       background: euiTheme.colors.backgroundBasePlain,
-      /* Tabs: `EuiTabs bottomBorder` — skip root border to avoid a double rule. Discover: no root border (design). */
-      borderBottom:
-        hasHeaderTabs || currentAppId === 'discover'
-          ? 'none'
-          : `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+      /* Header tabs use `EuiTabs bottomBorder={false}`; root supplies the divider under the bar. */
+      borderBottom: hideProjectHeaderBottomBorder
+        ? 'none'
+        : `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
       marginBottom: 0,
       minHeight: 0,
       boxSizing: 'border-box' as const,
@@ -239,11 +239,11 @@ const useAppMenuBarStyles = (
       titleEuiTitleReact,
       menuSection,
     };
-  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs, currentAppId]);
+  }, [euiTheme, hasSecondaryRow, showBackToParent, hasHeaderTabs, currentAppId, hideProjectHeaderBottomBorder]);
 
 const AppMenuBarHeaderTabs = ({ tabs }: { tabs: AppMenuHeaderTab[] }) => (
   <EuiTabs
-    bottomBorder
+    bottomBorder={false}
     data-test-subj="kibanaProjectHeaderAppMenuTabs"
     css={{ marginBottom: 0, width: '100%' }}
   >
@@ -298,12 +298,14 @@ export const AppMenuBar = React.memo(({ globalBanners }: AppMenuBarProps) => {
   const showBackToParent =
     !hideBackFromAppMenu && Boolean(parentBreadcrumb) && canNavigateToParent(parentBreadcrumb);
   const currentAppId = useCurrentAppId();
+  const hideProjectHeaderBottomBorder = appMenuConfig?.hideProjectHeaderBottomBorder === true;
   const styles = useAppMenuBarStyles(
     euiTheme,
     hasSecondaryRow,
     showBackToParent,
     hasHeaderTabs,
-    currentAppId
+    currentAppId,
+    hideProjectHeaderBottomBorder
   );
   const hasLegacyActionMenu = useHasLegacyActionMenu();
 

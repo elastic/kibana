@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { InPortal } from 'react-reverse-portal';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { useGlobalHeaderPortal } from '../../hooks/use_global_header_portal';
-
-/** Unified search `.uniSearchBar` adds vertical padding; strip it in the sticky global header slot. */
-const globalSearchBarStripVerticalPadding = css`
-  header .uniSearchBar {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-  }
-`;
 
 export interface FiltersGlobalProps {
   children: React.ReactNode;
@@ -25,6 +17,17 @@ export interface FiltersGlobalProps {
 
 export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {
   const { globalKQLHeaderPortalNode } = useGlobalHeaderPortal();
+  const { euiTheme } = useEuiTheme();
+
+  const globalSearchBarStripPadding = useMemo(
+    () => css`
+      header .uniSearchBar {
+        padding-top: ${euiTheme.size.m} !important;
+        padding-bottom: 0 !important;
+      }
+    `,
+    [euiTheme]
+  );
 
   return (
     <InPortal node={globalKQLHeaderPortalNode}>
@@ -32,7 +35,7 @@ export const FiltersGlobal = React.memo<FiltersGlobalProps>(({ children }) => {
         borderRadius="none"
         color="transparent"
         paddingSize="none"
-        css={globalSearchBarStripVerticalPadding}
+        css={globalSearchBarStripPadding}
       >
         <header data-test-subj="filters-global-container">{children}</header>
       </EuiPanel>
