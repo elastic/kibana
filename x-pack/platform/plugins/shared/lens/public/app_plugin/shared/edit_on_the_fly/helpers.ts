@@ -50,17 +50,12 @@ export const buildDisplayRowsFromEsqlValues = ({
     return values;
   }
 
-  return values.map((row) => {
-    const byName: Record<string, unknown> = {};
-
-    valueColumns.forEach((col, i) => {
-      byName[col.name] = row[i];
-    });
-
-    return displayColumns.map((col) =>
-      Object.prototype.hasOwnProperty.call(byName, col.name) ? byName[col.name]! : null
-    );
-  });
+  // Pre-compute which value column index each display column maps to (-1 if missing)
+  const valueIndexPerGridColumn = displayColumns.map((col) =>
+    valueColumns.findIndex((v) => v.name === col.name)
+  );
+  // For each row, pick values by index; fill null for columns with no data
+  return values.map((row) => valueIndexPerGridColumn.map((i) => (i >= 0 ? row[i] : null)));
 };
 
 const getDSLFilter = (
