@@ -6,3 +6,4 @@
  */
 
 export { FeatureSettingsPage } from './feature_settings_page';
+export { EisModelsPage } from './eis_models_page';
