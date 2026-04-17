@@ -193,31 +193,6 @@ function serializeHttpRequestBody(body: unknown): string {
   }) as string; // will return a string or throw an error if it fails
 }
 
-function getContentTypeHeader(headers: Record<string, string>): string | null {
-  for (const [key, value] of Object.entries(headers)) {
-    if (key.toLowerCase() === 'content-type') {
-      return value;
-    }
-  }
-  return null;
-}
-
-function toResponseBuffer(data: unknown): Buffer {
-  if (Buffer.isBuffer(data)) {
-    return data;
-  }
-  if (data == null) {
-    return Buffer.alloc(0);
-  }
-  if (data instanceof ArrayBuffer) {
-    return Buffer.from(data);
-  }
-  if (ArrayBuffer.isView(data)) {
-    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
-  }
-  return Buffer.from(data as ArrayLike<number>);
-}
-
 // action executor
 export async function executor(
   execOptions: HttpConnectorTypeExecutorOptions
@@ -340,9 +315,7 @@ export async function executor(
       {}
     );
 
-    const responseBuffer = toResponseBuffer(result.value.data);
-    const contentType = getContentTypeHeader(headers);
-    const data = processBufferResponse(responseBuffer, contentType);
+    const data = processBufferResponse(result.value.data, headers);
 
     return { status: 'ok', actionId, data: { status, statusText, headers, data } };
   } else {

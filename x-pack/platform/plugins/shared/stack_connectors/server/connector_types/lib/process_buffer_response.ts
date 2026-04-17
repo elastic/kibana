@@ -15,6 +15,31 @@ const isTextContentType = (contentType: string | null | undefined): boolean => {
   return !!mimeCharset(mimeType);
 };
 
+function toResponseBuffer(data: unknown): Buffer {
+  if (Buffer.isBuffer(data)) {
+    return data;
+  }
+  if (data == null) {
+    return Buffer.alloc(0);
+  }
+  if (data instanceof ArrayBuffer) {
+    return Buffer.from(data);
+  }
+  if (ArrayBuffer.isView(data)) {
+    return Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  }
+  return Buffer.from(data as ArrayLike<number>);
+}
+
+function getContentTypeHeader(headers: Record<string, string>): string | null {
+  for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() === 'content-type') {
+      return value;
+    }
+  }
+  return null;
+}
+
 /**
  * Processes an HTTP response body received as raw bytes (e.g. from an Axios
  * request made with `responseType: 'arraybuffer'`).
@@ -26,13 +51,14 @@ const isTextContentType = (contentType: string | null | undefined): boolean => {
  *   UTF-8 decoding that would otherwise corrupt non-UTF-8 byte sequences, while
  *   keeping the result JSON-serializable for downstream consumers.
  */
-export const processBufferResponse = (
-  buffer: Buffer,
-  contentType: string | null | undefined
-): unknown => {
+export const processBufferResponse = (data: unknown, headers: Record<string, string>): unknown => {
+  const buffer = toResponseBuffer(data);
+  const contentType = getContentTypeHeader(headers);
+
   if (!isTextContentType(contentType)) {
     return buffer.toString('base64');
   }
+
   const text = buffer.toString('utf-8');
   try {
     return JSON.parse(text);
