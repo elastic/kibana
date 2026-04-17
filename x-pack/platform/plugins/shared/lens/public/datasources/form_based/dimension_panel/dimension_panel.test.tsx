@@ -297,6 +297,7 @@ describe.skip('FormBasedDimensionEditor', () => {
   afterEach(() => {
     if (wrapper) {
       wrapper.unmount();
+      wrapper = undefined as unknown as ReactWrapper | ShallowWrapper;
     }
   });
 
@@ -2526,65 +2527,50 @@ describe.skip('FormBasedDimensionEditor', () => {
   });
 
   describe('FormatSelector numeric column detection', () => {
-    const formatSelector = () =>
-      wrapper.find(EuiComboBox).filter('[data-test-subj="indexPattern-dimension-format"]');
-
     it('should show FormatSelector when activeData reports the column as numeric', () => {
-      wrapper = mountWithProviders(
-        <FormBasedDimensionEditorComponent
-          {...defaultProps}
-          state={getStateWithColumns({ col1: lastValueColumn('string') })}
-          activeData={{
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+        activeData: {
             first: {
               type: 'datatable',
               columns: [{ id: 'col1', name: 'source', meta: { type: 'number' } }],
               rows: [],
             },
-          }}
-        />
-      );
+        },
+      });
 
-      expect(formatSelector()).toHaveLength(1);
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
     });
 
     it('should hide FormatSelector when activeData reports the column as non-numeric', () => {
-      wrapper = mountWithProviders(
-        <FormBasedDimensionEditorComponent
-          {...defaultProps}
-          state={getStateWithColumns({ col1: lastValueColumn('number') })}
-          activeData={{
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+        activeData: {
             first: {
               type: 'datatable',
               columns: [{ id: 'col1', name: 'source', meta: { type: 'string' } }],
               rows: [],
             },
-          }}
-        />
-      );
+        },
+      });
 
-      expect(formatSelector()).toHaveLength(0);
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
     });
 
     it('should show FormatSelector when selectedColumn dataType is numeric and activeData is not available', () => {
-      wrapper = mountWithProviders(
-        <FormBasedDimensionEditorComponent
-          {...defaultProps}
-          state={getStateWithColumns({ col1: lastValueColumn('number') })}
-        />
-      );
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('number') }),
+      });
 
-      expect(formatSelector()).toHaveLength(1);
+      expect(screen.getByTestId('indexPattern-dimension-format')).toBeInTheDocument();
     });
 
     it('should hide FormatSelector selectedColumn dataType is non numeric and activeData is not available', () => {
-      wrapper = mountWithProviders(
-        <FormBasedDimensionEditorComponent
-          {...defaultProps}
-          state={getStateWithColumns({ col1: lastValueColumn('string') })}
-        />
-      );
+      renderDimensionPanel({
+        state: getStateWithColumns({ col1: lastValueColumn('string') }),
+      });
 
-      expect(formatSelector()).toHaveLength(0);
+      expect(screen.queryByTestId('indexPattern-dimension-format')).not.toBeInTheDocument();
     });
   });
 });
