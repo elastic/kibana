@@ -9,6 +9,10 @@ import { renderHook, act } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type {
+  AlertEpisodeGroupAction,
+  EpisodeActionState,
+} from '@kbn/alerting-v2-episodes-ui/types/action';
 import { useBulkCreateAlertActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions';
 import { useEpisodesBulkActions } from './use_episodes_bulk_actions';
 
@@ -33,12 +37,40 @@ const ep = (id: string, groupHash: string): AlertEpisode =>
 
 const episodesData = [ep('ep1', 'gh1'), ep('ep2', 'gh2'), ep('ep3', 'gh1')];
 
-const defaultParams = {
+const defaultParams: Parameters<typeof useEpisodesBulkActions>[0] = {
   episodesData,
+  episodeActionsMap: undefined,
+  groupActionsMap: undefined,
   http: mockHttp,
   toastNotifications: mockToasts as never,
   refetch: mockRefetch,
 };
+
+const acked = (episodeId: string): [string, EpisodeActionState] => [
+  episodeId,
+  {
+    episodeId,
+    ruleId: null,
+    groupHash: null,
+    lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
+  },
+];
+
+const groupActionState = (
+  groupHash: string,
+  overrides: Partial<AlertEpisodeGroupAction> = {}
+): [string, AlertEpisodeGroupAction] => [
+  groupHash,
+  {
+    groupHash,
+    ruleId: null,
+    lastDeactivateAction: null,
+    lastSnoozeAction: null,
+    snoozeExpiry: null,
+    tags: [],
+    ...overrides,
+  },
+];
 
 beforeEach(() => jest.clearAllMocks());
 
@@ -184,6 +216,108 @@ describe('useEpisodesBulkActions', () => {
 
     expect(mockToasts.addWarning).toHaveBeenCalled();
     expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+  });
+
+  describe('available predicates', () => {
+    const getAction = (key: string, params = defaultParams) => {
+      const { result } = renderHook(() => useEpisodesBulkActions(params));
+      return result.current.customBulkActions.find((a) => a.key === key)!;
+    };
+
+    it('edit-tags has no available predicate (always shown)', () => {
+      const editTags = getAction('edit-tags');
+      expect(editTags.available).toBeUndefined();
+    });
+
+    describe('acknowledge / unacknowledge', () => {
+      it('acknowledge is available when at least one selected episode is not acknowledged', () => {
+        const episodeActionsMap = new Map([acked('ep1')]);
+        const ack = getAction('acknowledge', { ...defaultParams, episodeActionsMap });
+        expect(ack.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
+      });
+
+      it('acknowledge is hidden when all selected episodes are already acknowledged', () => {
+        const episodeActionsMap = new Map([acked('ep1'), acked('ep2')]);
+        const ack = getAction('acknowledge', { ...defaultParams, episodeActionsMap });
+        expect(ack.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
+      });
+
+      it('unacknowledge is hidden when no selected episode is acknowledged', () => {
+        const unack = getAction('unacknowledge');
+        expect(unack.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
+      });
+
+      it('unacknowledge is available when at least one selected episode is acknowledged', () => {
+        const episodeActionsMap = new Map([acked('ep1')]);
+        const unack = getAction('unacknowledge', { ...defaultParams, episodeActionsMap });
+        expect(unack.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
+      });
+    });
+
+    describe('snooze / unsnooze', () => {
+      it('snooze is available when at least one selected group is not snoozed', () => {
+        const groupActionsMap = new Map([
+          groupActionState('gh1', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
+        ]);
+        const snooze = getAction('snooze', { ...defaultParams, groupActionsMap });
+        // rows 0 (gh1 snoozed) and 1 (gh2 not snoozed)
+        expect(snooze.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
+      });
+
+      it('snooze is hidden when all selected unique groups are already snoozed', () => {
+        const groupActionsMap = new Map([
+          groupActionState('gh1', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
+          groupActionState('gh2', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
+        ]);
+        const snooze = getAction('snooze', { ...defaultParams, groupActionsMap });
+        expect(snooze.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
+      });
+
+      it('unsnooze is hidden when no selected group is snoozed', () => {
+        const unsnooze = getAction('unsnooze');
+        expect(unsnooze.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
+      });
+
+      it('unsnooze is available when at least one selected group is snoozed', () => {
+        const groupActionsMap = new Map([
+          groupActionState('gh1', { lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE }),
+        ]);
+        const unsnooze = getAction('unsnooze', { ...defaultParams, groupActionsMap });
+        expect(unsnooze.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
+      });
+    });
+
+    describe('resolve / activate', () => {
+      it('resolve is available when at least one selected group is not deactivated', () => {
+        const groupActionsMap = new Map([
+          groupActionState('gh1', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
+        ]);
+        const resolve = getAction('resolve', { ...defaultParams, groupActionsMap });
+        expect(resolve.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
+      });
+
+      it('resolve is hidden when all selected unique groups are already deactivated', () => {
+        const groupActionsMap = new Map([
+          groupActionState('gh1', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
+          groupActionState('gh2', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
+        ]);
+        const resolve = getAction('resolve', { ...defaultParams, groupActionsMap });
+        expect(resolve.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
+      });
+
+      it('activate is hidden when no selected group is deactivated', () => {
+        const activate = getAction('activate');
+        expect(activate.available!({ selectedDocIds: ['0', '1'] })).toBe(false);
+      });
+
+      it('activate is available when at least one selected group is deactivated', () => {
+        const groupActionsMap = new Map([
+          groupActionState('gh1', { lastDeactivateAction: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE }),
+        ]);
+        const activate = getAction('activate', { ...defaultParams, groupActionsMap });
+        expect(activate.available!({ selectedDocIds: ['0', '1'] })).toBe(true);
+      });
+    });
   });
 
   it('onBulkError shows a danger toast', () => {

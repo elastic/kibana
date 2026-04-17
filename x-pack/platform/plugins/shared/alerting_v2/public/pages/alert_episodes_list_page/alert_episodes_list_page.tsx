@@ -209,6 +209,8 @@ export const AlertEpisodesListPage = () => {
     onBulkSaveTags,
   } = useEpisodesBulkActions({
     episodesData,
+    episodeActionsMap,
+    groupActionsMap,
     http: services.http,
     toastNotifications: services.toastNotifications,
     refetch,

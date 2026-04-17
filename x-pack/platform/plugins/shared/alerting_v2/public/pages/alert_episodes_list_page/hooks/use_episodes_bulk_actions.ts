@@ -12,6 +12,10 @@ import type { CustomBulkActions } from '@kbn/unified-data-table';
 import type { BulkCreateAlertActionBody } from '@kbn/alerting-v2-schemas';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type {
+  AlertEpisodeGroupAction,
+  EpisodeActionState,
+} from '@kbn/alerting-v2-episodes-ui/types/action';
 import { useBulkCreateAlertActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_create_alert_actions';
 import {
   getEpisodesFromDocIds,
@@ -21,10 +25,30 @@ import * as i18n from '../translations';
 
 interface UseEpisodesBulkActionsParams {
   episodesData: AlertEpisode[] | undefined;
+  episodeActionsMap: Map<string, EpisodeActionState> | undefined;
+  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined;
   http: HttpStart;
   toastNotifications: CoreStart['notifications']['toasts'];
   refetch: () => void;
 }
+
+const isEpisodeAcknowledged = (
+  episode: AlertEpisode,
+  episodeActionsMap: Map<string, EpisodeActionState> | undefined
+) => episodeActionsMap?.get(episode['episode.id'])?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
+
+const isGroupSnoozed = (
+  episode: AlertEpisode,
+  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined
+) =>
+  groupActionsMap?.get(episode.group_hash)?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE;
+
+const isGroupDeactivated = (
+  episode: AlertEpisode,
+  groupActionsMap: Map<string, AlertEpisodeGroupAction> | undefined
+) =>
+  groupActionsMap?.get(episode.group_hash)?.lastDeactivateAction ===
+  ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
 
 interface UseEpisodesBulkActionsResult {
   customBulkActions: CustomBulkActions;
@@ -37,6 +61,8 @@ interface UseEpisodesBulkActionsResult {
 
 export const useEpisodesBulkActions = ({
   episodesData,
+  episodeActionsMap,
+  groupActionsMap,
   http,
   toastNotifications,
   refetch,
@@ -101,6 +127,10 @@ export const useEpisodesBulkActions = ({
       {
         key: 'acknowledge',
         label: i18n.BULK_ACKNOWLEDGE,
+        available: ({ selectedDocIds }) => {
+          const selected = getEpisodesFromDocIds(selectedDocIds, episodesData ?? []);
+          return selected.some((ep) => !isEpisodeAcknowledged(ep, episodeActionsMap));
+        },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = getEpisodesFromDocIds(
             selectedDocIds,
@@ -116,6 +146,10 @@ export const useEpisodesBulkActions = ({
       {
         key: 'unacknowledge',
         label: i18n.BULK_UNACKNOWLEDGE,
+        available: ({ selectedDocIds }) => {
+          const selected = getEpisodesFromDocIds(selectedDocIds, episodesData ?? []);
+          return selected.some((ep) => isEpisodeAcknowledged(ep, episodeActionsMap));
+        },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = getEpisodesFromDocIds(
             selectedDocIds,
@@ -131,6 +165,12 @@ export const useEpisodesBulkActions = ({
       {
         key: 'snooze',
         label: i18n.BULK_SNOOZE,
+        available: ({ selectedDocIds }) => {
+          const groups = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          );
+          return groups.some((ep) => !isGroupSnoozed(ep, groupActionsMap));
+        },
         onClick: ({ selectedDocIds }) => {
           setPendingBulkState({ action: 'snooze', selectedDocIds });
         },
@@ -138,6 +178,12 @@ export const useEpisodesBulkActions = ({
       {
         key: 'unsnooze',
         label: i18n.BULK_UNSNOOZE,
+        available: ({ selectedDocIds }) => {
+          const groups = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          );
+          return groups.some((ep) => isGroupSnoozed(ep, groupActionsMap));
+        },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
@@ -151,6 +197,12 @@ export const useEpisodesBulkActions = ({
       {
         key: 'resolve',
         label: i18n.BULK_RESOLVE,
+        available: ({ selectedDocIds }) => {
+          const groups = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          );
+          return groups.some((ep) => !isGroupDeactivated(ep, groupActionsMap));
+        },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
@@ -165,6 +217,12 @@ export const useEpisodesBulkActions = ({
       {
         key: 'activate',
         label: i18n.BULK_ACTIVATE,
+        available: ({ selectedDocIds }) => {
+          const groups = uniqueGroupEpisodes(
+            getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
+          );
+          return groups.some((ep) => isGroupDeactivated(ep, groupActionsMap));
+        },
         onClick: ({ selectedDocIds }) => {
           const items: BulkCreateAlertActionBody = uniqueGroupEpisodes(
             getEpisodesFromDocIds(selectedDocIds, episodesData ?? [])
@@ -184,7 +242,7 @@ export const useEpisodesBulkActions = ({
         },
       },
     ],
-    [episodesData, bulkMutate, onBulkSuccess, onBulkError]
+    [episodesData, episodeActionsMap, groupActionsMap, bulkMutate, onBulkSuccess, onBulkError]
   );
 
   return {
