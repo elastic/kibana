@@ -9,7 +9,7 @@ export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
   'Content-Type': 'application/json;charset=UTF-8',
-};
+} as const;
 
 // Uses an existing task type registered by Task Manager internally.
 // Tasks are scheduled with enabled: false so they are never claimed or executed.
