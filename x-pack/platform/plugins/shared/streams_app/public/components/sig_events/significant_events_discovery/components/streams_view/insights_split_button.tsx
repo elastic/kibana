@@ -17,7 +17,11 @@ import { ContextMenuSplitButton } from './context_menu_split_button';
 import type { MenuHelpers } from './context_menu_split_button';
 
 interface InsightsSplitButtonProps {
-  allConnectors: InferenceConnector[];
+  /**
+   * Connectors scoped to the Discovery feature: recommended endpoints first,
+   * then the rest of the catalog. Drives the dropdown options.
+   */
+  discoveryConnectors: InferenceConnector[];
   connectorError: Error | undefined;
   resolvedConnectorId: string | undefined;
   displayConnectorId: string | undefined;
@@ -28,7 +32,7 @@ interface InsightsSplitButtonProps {
 }
 
 export const InsightsSplitButton = ({
-  allConnectors,
+  discoveryConnectors,
   connectorError,
   resolvedConnectorId,
   displayConnectorId,
@@ -38,8 +42,8 @@ export const InsightsSplitButton = ({
   isDisabled,
 }: InsightsSplitButtonProps) => {
   const discoveryConnector = useMemo(
-    () => allConnectors.find((c) => c.connectorId === displayConnectorId),
-    [allConnectors, displayConnectorId]
+    () => discoveryConnectors.find((c) => c.connectorId === displayConnectorId),
+    [discoveryConnectors, displayConnectorId]
   );
 
   const buildPanels = useCallback(
@@ -48,7 +52,7 @@ export const InsightsSplitButton = ({
         items: [buildConnectorMenuItem({ connector: discoveryConnector, panelId: 1 })],
       },
       buildConnectorSelectionPanel({
-        connectors: allConnectors,
+        connectors: discoveryConnectors,
         resolvedConnectorId,
         selectedConnectorId: displayConnectorId,
         onSelect: (connectorId) => {
@@ -57,7 +61,13 @@ export const InsightsSplitButton = ({
         },
       }),
     ],
-    [discoveryConnector, allConnectors, resolvedConnectorId, displayConnectorId, onConnectorChange]
+    [
+      discoveryConnector,
+      discoveryConnectors,
+      resolvedConnectorId,
+      displayConnectorId,
+      onConnectorChange,
+    ]
   );
 
   return (

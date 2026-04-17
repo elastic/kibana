@@ -69,7 +69,6 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     featuresConnectors,
     queriesConnectors,
     discoveryConnectors,
-    allConnectors,
     connectorError,
     isConnectorCatalogUnavailable,
     discoveryConnectorOverride,
@@ -319,7 +318,8 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           <EuiFlexItem grow={false}>
             <GenerateSplitButton
               config={onboardingConfig}
-              allConnectors={allConnectors}
+              featuresConnectors={featuresConnectors.connectors}
+              queriesConnectors={queriesConnectors.connectors}
               connectorError={connectorError}
               featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
               queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
@@ -338,7 +338,7 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <InsightsSplitButton
-              allConnectors={allConnectors}
+              discoveryConnectors={discoveryConnectors.connectors}
               connectorError={connectorError}
               resolvedConnectorId={discoveryConnectors.resolvedConnectorId}
               displayConnectorId={displayDiscoveryConnectorId}

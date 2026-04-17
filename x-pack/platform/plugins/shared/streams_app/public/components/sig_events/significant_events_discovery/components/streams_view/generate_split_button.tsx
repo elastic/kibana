@@ -23,7 +23,17 @@ import type { MenuHelpers } from './context_menu_split_button';
 
 interface GenerateSplitButtonProps {
   config: OnboardingConfig;
-  allConnectors: InferenceConnector[];
+  /**
+   * Connectors scoped to the KI Features (Knowledge Indicator extraction)
+   * feature: recommended endpoints first, then the rest of the catalog.
+   */
+  featuresConnectors: InferenceConnector[];
+  /**
+   * Connectors scoped to the KI Queries (Knowledge Indicator query
+   * generation) feature: recommended endpoints first, then the rest of the
+   * catalog.
+   */
+  queriesConnectors: InferenceConnector[];
   connectorError: Error | undefined;
   featuresResolvedConnectorId: string | undefined;
   queriesResolvedConnectorId: string | undefined;
@@ -37,7 +47,8 @@ interface GenerateSplitButtonProps {
 
 export const GenerateSplitButton = ({
   config,
-  allConnectors,
+  featuresConnectors,
+  queriesConnectors,
   connectorError,
   featuresResolvedConnectorId,
   queriesResolvedConnectorId,
@@ -49,12 +60,12 @@ export const GenerateSplitButton = ({
   isConfigDisabled,
 }: GenerateSplitButtonProps) => {
   const featuresConnector = useMemo(
-    () => allConnectors.find((c) => c.connectorId === config.connectors.features),
-    [allConnectors, config.connectors.features]
+    () => featuresConnectors.find((c) => c.connectorId === config.connectors.features),
+    [featuresConnectors, config.connectors.features]
   );
   const queriesConnector = useMemo(
-    () => allConnectors.find((c) => c.connectorId === config.connectors.queries),
-    [allConnectors, config.connectors.queries]
+    () => queriesConnectors.find((c) => c.connectorId === config.connectors.queries),
+    [queriesConnectors, config.connectors.queries]
   );
 
   const onSelectFeaturesConnector = useCallback(
@@ -107,7 +118,7 @@ export const GenerateSplitButton = ({
         ],
       },
       buildConnectorSelectionPanel({
-        connectors: allConnectors,
+        connectors: featuresConnectors,
         resolvedConnectorId: featuresResolvedConnectorId,
         selectedConnectorId: config.connectors.features,
         onSelect: (connectorId) => {
@@ -116,7 +127,7 @@ export const GenerateSplitButton = ({
         },
       }),
       buildConnectorSelectionPanel({
-        connectors: allConnectors,
+        connectors: queriesConnectors,
         resolvedConnectorId: queriesResolvedConnectorId,
         selectedConnectorId: config.connectors.queries,
         onSelect: (connectorId) => {
@@ -129,7 +140,8 @@ export const GenerateSplitButton = ({
       isRunDisabled,
       featuresConnector,
       queriesConnector,
-      allConnectors,
+      featuresConnectors,
+      queriesConnectors,
       featuresResolvedConnectorId,
       queriesResolvedConnectorId,
       config.connectors.features,

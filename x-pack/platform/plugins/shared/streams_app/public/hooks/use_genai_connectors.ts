@@ -26,7 +26,7 @@ export interface UseGenAIConnectorsResult {
   isConnectorSelectionRestricted: boolean;
 }
 
-const toInferenceConnector = (c: AIConnector): InferenceConnector => ({
+export const toInferenceConnector = (c: AIConnector): InferenceConnector => ({
   connectorId: c.id,
   name: c.name,
   type: c.actionTypeId as InferenceConnectorType,
