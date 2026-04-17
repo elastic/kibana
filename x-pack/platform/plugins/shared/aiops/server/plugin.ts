@@ -100,7 +100,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, {
-      title: 'AIOPS log rate analysis',
+      title: 'Log rate analysis',
       getTransforms: () => ({
         transformIn: logRateTransformIn,
         transformOut: logRateTransformOut,
