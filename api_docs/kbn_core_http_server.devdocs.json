@@ -3676,6 +3676,14 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/role_mapping/get.ts"
               },
               {
@@ -6396,6 +6404,30 @@
               },
               {
                 "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/platform/plugins/shared/security/server/routes/oauth_metadata/protected_resource.test.ts"
+              },
+              {
+                "plugin": "security",
                 "path": "x-pack/platform/plugins/shared/security/server/routes/role_mapping/get.test.ts"
               },
               {
@@ -7121,6 +7153,10 @@
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
                 "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/pagerduty_simulation.ts"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators/server/servicenow_oauth_simulation.ts"
               },
               {
                 "plugin": "@kbn/test-suites-xpack-platform",
@@ -16677,6 +16713,10 @@
               },
               {
                 "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/compare_runs.ts"
+              },
+              {
+                "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/examples/get_example_scores.ts"
               },
               {
@@ -16690,6 +16730,10 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/datasets/get_dataset.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/remotes/register_routes.ts"
               },
               {
                 "plugin": "evals",
@@ -17190,10 +17234,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/lead_generation/routes/get_leads.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/lead_generation/routes/get_lead_by_id.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17857,6 +17897,10 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/datasets/update_example.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/remotes/register_routes.ts"
               },
               {
                 "plugin": "inferenceEndpoint",
@@ -18812,6 +18856,14 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/datasets/upsert_dataset.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/remotes/register_routes.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/remotes/register_routes.ts"
               },
               {
                 "plugin": "inferenceEndpoint",
@@ -19974,6 +20026,10 @@
               {
                 "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/datasets/delete_example.ts"
+              },
+              {
+                "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/remotes/register_routes.ts"
               },
               {
                 "plugin": "osquery",
