@@ -22,7 +22,7 @@ const emptyDocumentsMetrics: ProcessingSimulationResponse['documents_metrics'] =
   partially_parsed_rate: 0,
   skipped_rate: 0,
   dropped_rate: 0,
-};
+} as const;
 
 const baseParams = {
   fieldsMetadataClient: stubFieldsMetadataClient,
@@ -66,7 +66,7 @@ describe('buildSimulationFeedback', () => {
       documents: [],
       detected_fields: [],
       processors_metrics: {},
-      definition_error: { message: 'bad pipeline', type: 'definition' },
+      definition_error: { message: 'bad pipeline', type: 'validation_error' },
       documents_metrics: { ...emptyDocumentsMetrics },
     };
 
@@ -90,15 +90,16 @@ describe('buildSimulationFeedback', () => {
         },
       ],
       detected_fields: [],
-      processors_metrics: {
-        'root.steps[0]': {
-          parsed_rate: 1,
-          failed_rate: 0,
-          partially_parsed_rate: 0,
-          skipped_rate: 0,
-          dropped_rate: 0,
-        },
-      },
+       processors_metrics: {
+         'root.steps[0]': {
+           parsed_rate: 1,
+           failed_rate: 0,
+           skipped_rate: 0,
+           dropped_rate: 0,
+           detected_fields: [],
+           errors: [],
+         },
+       },
       definition_error: undefined,
       documents_metrics: { ...emptyDocumentsMetrics },
     };
@@ -114,43 +115,44 @@ describe('buildSimulationFeedback', () => {
   it('reports per-processor failure rates when above 20%', async () => {
     const simulationResult: ProcessingSimulationResponse = {
       documents: [
-        {
-          value: { message: 'ok' },
-          errors: [{ type: 'generic_processor_failure', message: 'bad pattern' }],
-          detected_fields: [],
-          status: 'error',
-          processed_by: ['root.steps[0]'],
-        },
+       {
+           value: { message: 'ok' },
+           errors: [{ type: 'generic_processor_failure', message: 'bad pattern', processor_id: 'root.steps[0]' }],
+           detected_fields: [],
+           status: 'failed',
+           processed_by: ['root.steps[0]'],
+         },
       ],
       detected_fields: [],
-      processors_metrics: {
-        'root.steps[0]': {
-          parsed_rate: 0,
-          failed_rate: 1,
-          partially_parsed_rate: 0,
-          skipped_rate: 0,
-          dropped_rate: 0,
-        },
-      },
-      definition_error: undefined,
-      documents_metrics: {
-        parsed_rate: 0,
-        failed_rate: 1,
-        partially_parsed_rate: 0,
-        skipped_rate: 0,
-        dropped_rate: 0,
-      },
-    };
+       processors_metrics: {
+         'root.steps[0]': {
+           parsed_rate: 0,
+           failed_rate: 1,
+           skipped_rate: 0,
+           dropped_rate: 0,
+           detected_fields: [],
+           errors: [],
+         },
+       },
+       definition_error: undefined,
+       documents_metrics: {
+         parsed_rate: 0,
+         failed_rate: 1,
+         partially_parsed_rate: 0,
+         skipped_rate: 0,
+         dropped_rate: 0,
+       },
+     };
 
-    const feedback = await buildSimulationFeedback({
-      simulationResult,
-      ...baseParams,
-    });
+     const feedback = await buildSimulationFeedback({
+       simulationResult,
+       ...baseParams,
+     });
 
-    expect(feedback).toMatchSnapshot();
-  });
+     expect(feedback).toMatchSnapshot();
+   });
 
-  it('reports temporary fields and marks invalid', async () => {
+   it('reports temporary fields and marks invalid', async () => {
     const simulationResult: ProcessingSimulationResponse = {
       documents: [
         {
@@ -180,49 +182,50 @@ describe('buildSimulationFeedback', () => {
       documents: [
         {
           value: { message: 'fail' },
-          errors: [{ type: 'generic_processor_failure', message: 'Text could not be parsed' }],
+          errors: [{ type: 'generic_processor_failure', message: 'Text could not be parsed', processor_id: 'root.steps[0]' }],
           detected_fields: [],
-          status: 'error',
+          status: 'failed',
           processed_by: ['root.steps[0]'],
         },
         {
           value: { message: 'fail2' },
-          errors: [{ type: 'generic_processor_failure', message: 'Text could not be parsed' }],
+          errors: [{ type: 'generic_processor_failure', message: 'Text could not be parsed', processor_id: 'root.steps[0]' }],
           detected_fields: [],
-          status: 'error',
+          status: 'failed',
           processed_by: ['root.steps[0]'],
         },
       ],
       detected_fields: [],
-      processors_metrics: {
-        'root.steps[0]': {
-          parsed_rate: 0,
-          failed_rate: 1,
-          partially_parsed_rate: 0,
-          skipped_rate: 0,
-          dropped_rate: 0,
-        },
-      },
-      definition_error: undefined,
-      documents_metrics: {
-        parsed_rate: 0,
-        failed_rate: 1,
-        partially_parsed_rate: 0,
-        skipped_rate: 0,
-        dropped_rate: 0,
-      },
-    };
+       processors_metrics: {
+         'root.steps[0]': {
+           parsed_rate: 0,
+           failed_rate: 1,
+           skipped_rate: 0,
+           dropped_rate: 0,
+           detected_fields: [],
+           errors: [],
+         },
+       },
+       definition_error: undefined,
+       documents_metrics: {
+         parsed_rate: 0,
+         failed_rate: 1,
+         partially_parsed_rate: 0,
+         skipped_rate: 0,
+         dropped_rate: 0,
+       },
+     };
 
-    const feedback = await buildSimulationFeedback({
-      simulationResult,
-      ...baseParams,
-    });
+     const feedback = await buildSimulationFeedback({
+       simulationResult,
+       ...baseParams,
+     });
 
-    expect(feedback).toMatchSnapshot();
-  });
+     expect(feedback).toMatchSnapshot();
+   });
 
-  it('returns invalid feedback when simulation returns no documents', async () => {
-    const simulationResult: ProcessingSimulationResponse = {
+   it('includes per-processor top_errors with attribution', async () => {
+     const simulationResult: ProcessingSimulationResponse = {
       documents: [],
       detected_fields: [],
       processors_metrics: {},

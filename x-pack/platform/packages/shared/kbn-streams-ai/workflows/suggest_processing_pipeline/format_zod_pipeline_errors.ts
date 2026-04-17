@@ -62,7 +62,7 @@ export function formatZodPipelineErrors(
         for (const issue of singleResult.error.issues) {
           results.push({
             stepIndex: i,
-            action,
+            action: action ?? 'unknown',
             message: formatIssue(issue),
           });
         }
