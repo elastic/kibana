@@ -58,7 +58,7 @@ describe('useServiceMap()', () => {
     mockedUseLicenseContext.mockReturnValue({
       isActive: true,
       hasAtLeast: () => true,
-    } as ReturnType<typeof useLicenseContext>);
+    } as unknown as ReturnType<typeof useLicenseContext>);
 
     mockedUseApmPluginContext.mockReturnValue({
       config: {

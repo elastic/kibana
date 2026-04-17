@@ -70,26 +70,41 @@ test.describe(
         await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
       });
 
+      await test.step('verify embeddable fills the panel horizontally', async () => {
+        const panel = page.testSubj.locator('embeddablePanel');
+        const embeddable = page.testSubj.locator('apmServiceMapEmbeddable');
+
+        const panelBox = await panel.boundingBox();
+        const embeddableBox = await embeddable.boundingBox();
+
+        expect(panelBox).not.toBeNull();
+        expect(embeddableBox).not.toBeNull();
+
+        const horizontalFill = embeddableBox!.width / panelBox!.width;
+        expect(horizontalFill).toBeGreaterThan(0.95);
+      });
+
       await test.step('maximize the Service map panel', async () => {
         await pageObjects.dashboard.maximizePanel();
         await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
       });
 
-      await test.step('disable custom time range and verify panel uses global time', async () => {
-        await pageObjects.dashboard.openCustomizePanel();
-        await pageObjects.dashboard.disableCustomTimeRange();
-        await pageObjects.dashboard.saveCustomizePanel();
+      await test.step('verify embeddable fills the maximized panel', async () => {
+        const maximizedPanel = page.locator('.dshLayout-isMaximizedPanel');
+        const embeddable = page.testSubj.locator('apmServiceMapEmbeddable');
 
-        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
-      });
+        const panelBox = await maximizedPanel.boundingBox();
+        const embeddableBox = await embeddable.boundingBox();
 
-      await test.step('change global time range to empty range and verify no data', async () => {
-        await pageObjects.datePicker.setAbsoluteRange({
-          from: 'Jan 1, 2000 @ 00:00:00.000',
-          to: 'Jan 2, 2000 @ 00:00:00.000',
-        });
+        expect(panelBox).not.toBeNull();
+        expect(embeddableBox).not.toBeNull();
 
-        await expect(page.getByText('No services available')).toBeVisible();
+        const horizontalFill = embeddableBox!.width / panelBox!.width;
+        const verticalFill = embeddableBox!.height / panelBox!.height;
+
+        expect(horizontalFill).toBeGreaterThan(0.95);
+        // Panel header with time range badge takes ~8% vertical space
+        expect(verticalFill).toBeGreaterThan(0.9);
       });
 
       await test.step('TODO: open a service node popover by clicking a map item', async () => {

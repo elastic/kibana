@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -58,7 +58,6 @@ export function ServiceMapEmbeddable({
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
-  const { euiTheme } = useEuiTheme();
 
   const { start: resolvedStart, end: resolvedEnd } = useMemo(
     () => getDateRange({ rangeFrom, rangeTo }),
@@ -170,24 +169,21 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
   });
 
-  const mapContent = (
+  return (
     <div
       data-test-subj="apmServiceMapEmbeddable"
       style={{
         width: '100%',
+        height: '100%',
         minWidth: EMBEDDABLE_MIN_WIDTH,
-        maxWidth: '100%',
         minHeight: EMBEDDABLE_MIN_HEIGHT,
-        height: EMBEDDABLE_MIN_HEIGHT,
         position: 'relative' as const,
-        zIndex: Number(euiTheme.levels.content) + 1,
-        display: 'block',
         boxSizing: 'border-box',
       }}
     >
       {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
       <ServiceMapGraph
-        height={EMBEDDABLE_MIN_HEIGHT}
+        height="100%"
         nodes={data.nodes}
         edges={data.edges}
         serviceName={serviceName}
@@ -202,25 +198,5 @@ export function ServiceMapEmbeddable({
         showOptionsPanel={false}
       />
     </div>
-  );
-
-  return (
-    <EuiPanel
-      hasBorder
-      paddingSize="none"
-      style={{
-        width: '100%',
-        minWidth: EMBEDDABLE_MIN_WIDTH,
-        maxWidth: '100%',
-        minHeight: EMBEDDABLE_MIN_HEIGHT,
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        boxSizing: 'border-box',
-      }}
-    >
-      {mapContent}
-    </EuiPanel>
   );
 }

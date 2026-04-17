@@ -198,22 +198,24 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           }, [dashboardQuery, kuery]);
 
           return (
-            <ApmEmbeddableContext
-              deps={deps}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              kuery={effectiveKuery}
-            >
-              <ServiceMapEmbeddable
-                rangeFrom={rangeFrom ?? DEFAULT_RANGE_FROM}
-                rangeTo={rangeTo ?? DEFAULT_RANGE_TO}
-                environment={environment}
+            <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+              <ApmEmbeddableContext
+                deps={deps}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
                 kuery={effectiveKuery}
-                serviceName={serviceName ?? undefined}
-                serviceGroupId={serviceGroupId ?? undefined}
-                core={deps.coreStart}
-              />
-            </ApmEmbeddableContext>
+              >
+                <ServiceMapEmbeddable
+                  rangeFrom={rangeFrom ?? DEFAULT_RANGE_FROM}
+                  rangeTo={rangeTo ?? DEFAULT_RANGE_TO}
+                  environment={environment}
+                  kuery={effectiveKuery}
+                  serviceName={serviceName ?? undefined}
+                  serviceGroupId={serviceGroupId ?? undefined}
+                  core={deps.coreStart}
+                />
+              </ApmEmbeddableContext>
+            </div>
           );
         },
       };

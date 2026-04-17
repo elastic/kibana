@@ -71,7 +71,7 @@ const edgeTypes: EdgeTypes = {
 };
 
 interface GraphProps {
-  height: number;
+  height: number | string;
   nodes: ServiceMapNode[];
   edges: ServiceMapEdgeType[];
   /** Currently focused service name (for service-specific map) */
