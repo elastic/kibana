@@ -194,6 +194,7 @@ export class WorkflowsService {
         query: {
           bool: {
             must: [{ ids: { values: [id] } }, { term: { spaceId } }],
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         size: 1,
@@ -846,7 +847,7 @@ export class WorkflowsService {
 
     return {
       total: ids.length,
-      deleted: ids.length - failures.length,
+      deleted: successfulIds.length,
       failures,
       successfulIds,
     };
@@ -955,7 +956,7 @@ export class WorkflowsService {
 
     return {
       total: ids.length,
-      deleted: ids.length - failures.length,
+      deleted: successfulIds.length,
       failures,
       successfulIds,
     };
