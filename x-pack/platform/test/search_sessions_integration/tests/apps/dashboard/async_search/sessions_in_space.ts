@@ -11,14 +11,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
   const securityService = getService('security');
-  const { common, header, dashboard, security, searchSessionsManagement } = getPageObjects([
+  const { common, header, dashboard, security } = getPageObjects([
     'common',
     'header',
     'dashboard',
     'security',
-    'searchSessionsManagement',
   ]);
-  const dashboardPanelActions = getService('dashboardPanelActions');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
@@ -36,18 +34,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.waitForRenderComplete();
 
         await searchSessions.save({ withRefresh: true, isSubmitButton: true });
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'A Pie in another space '
-        );
+        await searchSessions.openCompletedSearchFromToast();
 
-        await searchSessions.openFlyout();
-
-        // navigate to discover
-        const searchSessionItem = await searchSessionsManagement.waitForItemToBeComplete(
-          savedSessionId
-        );
-        await searchSessionItem.view();
-
+        // Wait for the dashboard to load
         await header.waitUntilLoadingHasFinished();
         await dashboard.waitForRenderComplete();
 
