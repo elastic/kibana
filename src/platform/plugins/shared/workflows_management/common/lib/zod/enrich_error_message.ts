@@ -24,7 +24,12 @@ export interface EnrichmentResult {
   enriched: boolean;
 }
 
-const enrichmentCache = new Map<string, string | null>();
+interface StepInfo {
+  stepType: string;
+  pathWithinWith: string[];
+}
+
+const enrichmentCache = new Map<string, EnrichmentResult>();
 
 export function clearEnrichmentCache(): void {
   enrichmentCache.clear();
@@ -36,16 +41,39 @@ export function enrichErrorMessage(
   errorCode: string,
   context: ErrorContext
 ): EnrichmentResult {
-  const { schema } = context;
+  const { schema, yamlDocument } = context;
   const fieldName = path.length > 0 ? String(path[path.length - 1]) : 'field';
+  const stepInfo = findStepInfoFromPath(path, yamlDocument);
 
+  const cacheKey = `${path.join('.')}|${errorCode}|${originalMessage}|${
+    stepInfo?.stepType ?? 'unknown'
+  }|${schema ? 'schema' : 'noschema'}`;
+
+  const cached = enrichmentCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const result = computeEnrichment(path, originalMessage, errorCode, fieldName, schema, stepInfo);
+  enrichmentCache.set(cacheKey, result);
+  return result;
+}
+
+function computeEnrichment(
+  path: PropertyKey[],
+  originalMessage: string,
+  errorCode: string,
+  fieldName: string,
+  schema: z.ZodType | undefined,
+  stepInfo: StepInfo | null
+): EnrichmentResult {
   const domainEnriched = tryDomainSpecificEnrichment(path, errorCode, originalMessage);
   if (domainEnriched) {
     return { message: domainEnriched, enriched: true };
   }
 
-  if (schema && path.length > 0) {
-    const schemaEnriched = trySchemaAwareEnrichment(path, fieldName, context);
+  if (path.length > 0) {
+    const schemaEnriched = trySchemaAwareEnrichment(path, fieldName, schema, stepInfo);
     if (schemaEnriched) {
       return { message: schemaEnriched, enriched: true };
     }
@@ -64,39 +92,22 @@ export function enrichErrorMessage(
 function trySchemaAwareEnrichment(
   path: PropertyKey[],
   fieldName: string,
-  context: ErrorContext
+  schema: z.ZodType | undefined,
+  stepInfo: StepInfo | null
 ): string | null {
-  const { schema, yamlDocument } = context;
-
-  const stepType = getStepTypeAtPath(path, yamlDocument);
-  const cacheKey = `${path.join('.')}-${fieldName}-${stepType ?? 'unknown'}`;
-
-  if (enrichmentCache.has(cacheKey)) {
-    return enrichmentCache.get(cacheKey) ?? null;
+  const connectorEnriched = stepInfo ? tryConnectorSchemaEnrichment(fieldName, stepInfo) : null;
+  if (connectorEnriched) {
+    return connectorEnriched;
   }
 
-  let result: string | null = null;
-
-  result = tryConnectorSchemaEnrichment(path, fieldName, yamlDocument);
-
-  if (!result && schema) {
-    result = tryWorkflowSchemaEnrichment(path, fieldName, schema);
+  if (schema) {
+    return tryWorkflowSchemaEnrichment(path, fieldName, schema);
   }
 
-  enrichmentCache.set(cacheKey, result);
-  return result;
+  return null;
 }
 
-function tryConnectorSchemaEnrichment(
-  path: PropertyKey[],
-  fieldName: string,
-  yamlDocument?: Document
-): string | null {
-  const stepInfo = findStepInfoFromPath(path, yamlDocument);
-  if (!stepInfo) {
-    return null;
-  }
-
+function tryConnectorSchemaEnrichment(fieldName: string, stepInfo: StepInfo): string | null {
   const { stepType, pathWithinWith } = stepInfo;
 
   const paramsSchema = getConnectorParamsSchema(stepType);
@@ -140,7 +151,7 @@ function tryDomainSpecificEnrichment(
   originalMessage: string
 ): string | null {
   if (errorCode === 'invalid_union' && path[0] === 'steps' && path.includes('type')) {
-    return 'Invalid connector type. Use Ctrl+Space to see available options.';
+    return 'Invalid step type. Use Ctrl+Space to see available options.';
   }
 
   if (errorCode === 'invalid_literal' && path.includes('type')) {
@@ -153,7 +164,7 @@ function tryDomainSpecificEnrichment(
     if (receivedValue.startsWith('kibana.')) {
       return `Unknown Kibana API: "${receivedValue}". Use autocomplete to see valid kibana.* APIs.`;
     }
-    return `Unknown connector type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, inference.*`;
+    return `Unknown step type: "${receivedValue}". Available: elasticsearch.*, kibana.*, slack, http, console, wait, ai.*`;
   }
 
   if (errorCode === 'invalid_type' && path.length === 1 && path[0] === 'triggers') {
@@ -179,11 +190,6 @@ function tryGenericFallbackEnrichment(
   return null;
 }
 
-interface StepInfo {
-  stepType: string;
-  pathWithinWith: string[];
-}
-
 function findStepInfoFromPath(path: PropertyKey[], yamlDocument?: Document): StepInfo | null {
   if (!yamlDocument?.contents || !YAML.isMap(yamlDocument.contents)) {
     return null;
@@ -203,17 +209,6 @@ function findStepInfoFromPath(path: PropertyKey[], yamlDocument?: Document): Ste
   }
 
   return { stepType, pathWithinWith: pathWithinWith.map(String) };
-}
-
-export function getStepTypeAtPath(path: PropertyKey[], yamlDocument?: Document): string | null {
-  if (!yamlDocument?.contents || !YAML.isMap(yamlDocument.contents)) {
-    return null;
-  }
-
-  const withIndex = path.indexOf('with');
-  const pathToStep = withIndex !== -1 ? path.slice(0, withIndex) : path;
-
-  return getStepTypeAtYamlPath(pathToStep, yamlDocument);
 }
 
 function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document): string | null {
@@ -261,10 +256,7 @@ function getConnectorParamsSchema(stepType: string): z.ZodType | null {
   return getAllConnectors().find((connector) => connector.type === stepType)?.paramsSchema ?? null;
 }
 
-function analyzeUnionSchema(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unionSchema: z.ZodUnion<any>
-): string[] {
+function analyzeUnionSchema(unionSchema: z.ZodUnion): string[] {
   return unionSchema.def.options.map((option: z.ZodType) => analyzeUnionOption(option));
 }
 
@@ -364,8 +356,7 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
+function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion): string | null {
   const optionDescriptions = analyzeUnionSchema(unionSchema);
   if (optionDescriptions.length === 0) {
     return null;
@@ -375,8 +366,7 @@ function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<an
   return `${fieldName} must be one of:\n${optionsList}`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
+function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray): string {
   const elementSchema = unwrapSchema(arraySchema.element);
 
   if (elementSchema instanceof z.ZodObject) {
@@ -429,7 +419,7 @@ function getObjectPropertiesDescription(
   return `an object with: ${propsText}${suffix}`;
 }
 
-export function getTypeDescriptionForError(schema: z.ZodType): string {
+function getTypeDescriptionForError(schema: z.ZodType): string {
   return getDetailedTypeDescription(schema, {
     detailed: true,
     maxDepth: 3,

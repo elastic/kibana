@@ -9,7 +9,8 @@
 
 import { parseDocument } from 'yaml';
 import { z } from '@kbn/zod/v4';
-import { clearErrorMessageCache, formatZodError } from './format_zod_error';
+import { clearEnrichmentCache } from './enrich_error_message';
+import { formatZodError } from './format_zod_error';
 import { getAllConnectors } from '../../schema';
 import type { MockZodError } from '../errors/invalid_yaml_schema';
 
@@ -57,7 +58,7 @@ describe('formatZodError', () => {
       })
       .safeParse({ steps: [{ type: 'invalid' }] });
     const result = formatZodError(error!);
-    expect(result.message).toBe('Invalid connector type. Use Ctrl+Space to see available options.');
+    expect(result.message).toBe('Invalid step type. Use Ctrl+Space to see available options.');
   });
 
   it('should dynamically format union errors when schema is provided', () => {
@@ -196,7 +197,7 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError);
-      expect(result.message).toContain('Unknown connector type');
+      expect(result.message).toContain('Unknown step type');
       expect(result.message).toContain('custom_type');
     });
 
@@ -312,9 +313,7 @@ describe('formatZodError', () => {
       };
 
       const result = formatLoose(mockError);
-      expect(result.message).toBe(
-        'Invalid connector type. Use Ctrl+Space to see available options.'
-      );
+      expect(result.message).toBe('Invalid step type. Use Ctrl+Space to see available options.');
     });
   });
 
@@ -1014,7 +1013,7 @@ describe('Dynamic validation system behavior', () => {
 describe('Nested step support', () => {
   beforeEach(() => {
     mockGetAllConnectors.mockReset();
-    clearErrorMessageCache();
+    clearEnrichmentCache();
   });
 
   it('should enrich errors for steps nested in foreach', () => {

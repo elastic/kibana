@@ -9,15 +9,8 @@
 
 import type { Document } from 'yaml';
 import type { z } from '@kbn/zod/v4';
-import {
-  clearEnrichmentCache,
-  enrichErrorMessage,
-  getTypeDescriptionForError,
-} from './enrich_error_message';
+import { enrichErrorMessage } from './enrich_error_message';
 import type { FormattedZodError, MockZodError } from '../errors/invalid_yaml_schema';
-
-// Re-export for backward compatibility
-export { clearEnrichmentCache as clearErrorMessageCache, getTypeDescriptionForError };
 
 interface FormatZodErrorResult {
   message: string;

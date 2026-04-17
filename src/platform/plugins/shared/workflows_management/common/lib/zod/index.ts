@@ -11,11 +11,6 @@ export { getSchemaAtPath, parsePath } from '@kbn/workflows/common/utils/zod/get_
 export { inferZodType } from './infer_zod_type';
 export { getZodTypeName } from './get_zod_type_name';
 export { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';
-export { formatZodError, clearErrorMessageCache } from './format_zod_error';
-export {
-  enrichErrorMessage,
-  clearEnrichmentCache,
-  getStepTypeAtPath,
-  getTypeDescriptionForError,
-} from './enrich_error_message';
+export { formatZodError } from './format_zod_error';
+export { enrichErrorMessage } from './enrich_error_message';
 export type { ErrorContext, EnrichmentResult } from './enrich_error_message';
