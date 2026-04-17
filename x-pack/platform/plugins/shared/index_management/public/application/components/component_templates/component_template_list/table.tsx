@@ -10,7 +10,12 @@ import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiInMemoryTableProps, EuiSelectableOption, EuiBasicTableColumn } from '@elastic/eui';
+import type {
+  EuiInMemoryTableProps,
+  EuiSelectableOption,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -199,7 +204,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
     ],
   };
 
-  const selectionConfig = {
+  const selectionConfig: EuiTableSelectionType<ComponentTemplateListItem> = {
     onSelectionChange: setSelection,
     selectable: ({ usedBy }) => usedBy.length === 0,
     selectableMessage: (selectable, { name }) =>
