@@ -8,10 +8,11 @@
 import React from 'react';
 import { EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 
 export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
   return (
-    <div className="text-left">
+    <div css={helpCommandsStyles} data-test-subj="syntheticsProjectApiKeyHelpCommands">
       <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="info" size="s" />
       <EuiSpacer size="s" />
       <EuiText size="s">
@@ -41,6 +42,10 @@ export const HelpCommands = ({ apiKey }: { apiKey: string }) => {
     </div>
   );
 };
+
+const helpCommandsStyles = css({
+  textAlign: 'left',
+});
 
 const API_KEY_LABEL = i18n.translate('xpack.synthetics.monitorManagement.apiKey.label', {
   defaultMessage: 'API key',
