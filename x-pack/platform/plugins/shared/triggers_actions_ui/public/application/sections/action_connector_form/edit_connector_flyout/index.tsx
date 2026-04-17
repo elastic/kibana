@@ -138,7 +138,13 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
   const disabled = !isFormModified || hasErrors || isSaving;
 
-  const connectorWithoutSecrets = useMemo(() => getConnectorWithoutSecrets(connector), [connector]);
+  const connectorWithoutSecrets = useMemo(
+    () =>
+      getConnectorWithoutSecrets(
+        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+      ),
+    [connector]
+  );
 
   const onExecutionAction = useCallback(async () => {
     try {
