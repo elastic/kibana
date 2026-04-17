@@ -29,6 +29,7 @@ import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '../../../../rules_client/common';
 import type { SanitizedRule } from '../../../../../common';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -250,12 +251,7 @@ const bulkEnableRulesWithOCC = async (
             const updatedAttributes = updateMetaAttributes(context, {
               ...(newApiKeyAttributes
                 ? {
-                    ...omit(rule.attributes, [
-                      'apiKey',
-                      'apiKeyOwner',
-                      'apiKeyCreatedByUser',
-                      'uiamApiKey',
-                    ]),
+                    ...omit(rule.attributes, API_KEY_ATTRIBUTES_TO_STRIP),
                     ...newApiKeyAttributes,
                   }
                 : rule.attributes),

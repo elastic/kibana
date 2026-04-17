@@ -50,6 +50,22 @@ export enum ApiKeyType {
   UIAM = 'uiam',
 }
 
+export const API_KEY_FIELDS: Record<
+  ApiKeyType,
+  { encodedKey: string; keyId: string; userScopeKeyId: string }
+> = {
+  [ApiKeyType.ES]: {
+    encodedKey: 'apiKey',
+    keyId: 'apiKeyId',
+    userScopeKeyId: 'apiKeyId',
+  },
+  [ApiKeyType.UIAM]: {
+    encodedKey: 'uiamApiKey',
+    keyId: 'uiamApiKeyId',
+    userScopeKeyId: 'uiamApiKeyId',
+  },
+};
+
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({

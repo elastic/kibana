@@ -17,6 +17,7 @@ import {
   injectReferencesIntoActions,
   injectReferencesIntoArtifacts,
   addMissingUiamKeyTagIfNeeded,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '..';
 import { createNewAPIKeySet, extractReferences, updateMeta } from '../../lib';
 import type {
@@ -271,7 +272,7 @@ async function updateAttributes({
   const updatedAttributes = updateMeta(context, {
     ...(apiKeyAttributes
       ? {
-          ...omit(attributes, ['apiKey', 'apiKeyOwner', 'apiKeyCreatedByUser', 'uiamApiKey']),
+          ...omit(attributes, [...API_KEY_ATTRIBUTES_TO_STRIP]),
           ...apiKeyAttributes,
         }
       : attributes),
