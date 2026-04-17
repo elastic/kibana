@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { useQuery } from '@kbn/react-query';
-import {
-  INFERENCE_CONNECTORS_INTERNAL_API_PATH,
-  type InferenceConnectorsApiResponseBody,
-} from '@kbn/inference-common';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { useKibana } from '../use_kibana';
-
-const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
 export interface UseInferenceFeatureConnectorsResult {
   resolvedConnectorId: string | undefined;
@@ -21,34 +15,32 @@ export interface UseInferenceFeatureConnectorsResult {
 }
 
 /**
- * Resolves the connector to use for a given inference feature by calling
- * the search_inference_endpoints API directly. This bypasses the
- * default-prepending logic in useLoadConnectors, so we always get the
- * feature-specific connector when one exists.
+ * Resolves the connector to use for a given inference feature.
+ * Delegates to useLoadConnectors from @kbn/inference-connectors
+ * and picks the best connector based on SO overrides vs recommended.
  */
 export function useInferenceFeatureConnectors(
   featureId: string
 ): UseInferenceFeatureConnectorsResult {
-  const { core } = useKibana();
+  const {
+    core: {
+      http,
+      notifications: { toasts },
+    },
+  } = useKibana();
 
-  const query = useQuery<InferenceConnectorsApiResponseBody, Error>(
-    ['streams-feature-connectors', featureId],
-    () =>
-      core.http.get<InferenceConnectorsApiResponseBody>(INFERENCE_CONNECTORS_INTERNAL_API_PATH, {
-        query: { featureId },
-        version: '1',
-      }),
-    { retry: false, keepPreviousData: true }
-  );
+  const query = useLoadConnectors({ http, toasts, featureId });
+  const connectors = query.data ?? [];
 
-  // Feature-specific connectors take priority over the full catalog.
-  const featureConnectors = query.data?.connectors ?? [];
-  const allConnectors = query.data?.allConnectors ?? [];
-  const raw = featureConnectors[0]?.connectorId ?? allConnectors[0]?.connectorId;
-  const resolvedConnectorId = raw === NO_DEFAULT_CONNECTOR ? undefined : raw;
+  // When an SO entry exists the API puts the configured connector first.
+  // Otherwise the API prepends the global default before the recommended
+  // ones, so we skip it and pick the first recommended connector instead.
+  const picked = query.soEntryFound
+    ? connectors[0]
+    : connectors.find((c) => c.isRecommended) ?? connectors[0];
 
   return {
-    resolvedConnectorId,
+    resolvedConnectorId: picked?.id,
     loading: query.isLoading || query.isFetching,
     error: query.error ?? undefined,
   };
