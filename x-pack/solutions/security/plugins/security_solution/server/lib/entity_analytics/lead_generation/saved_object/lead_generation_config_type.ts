@@ -13,24 +13,11 @@ export const leadGenerationConfigTypeName = 'lead-generation-config';
 
 export const leadGenerationConfigTypeMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
-  properties: {
-    connectorId: { type: 'keyword' },
-    lastExecutionUuid: { type: 'keyword' },
-    lastError: { type: 'text' },
-  },
+  properties: {},
 };
 
 const version1: SavedObjectsModelVersion = {
-  changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        connectorId: { type: 'keyword' },
-        lastExecutionUuid: { type: 'keyword' },
-        lastError: { type: 'text' },
-      },
-    },
-  ],
+  changes: [],
 };
 
 export const leadGenerationConfigType: SavedObjectsType = {
