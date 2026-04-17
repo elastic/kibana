@@ -45,7 +45,7 @@ describe('create_feature_ki tool', () => {
     });
 
     expect(tool.id).toBe(STREAMS_CREATE_FEATURE_KNOWLEDGE_INDICATOR_TOOL_ID);
-    expect(tool.id).toBe('platform.streams.sig_events.create_feature_ki');
+    expect(tool.id).toBe('platform.streams.sig_events.ki_feature_create');
   });
 
   it('uses always confirmation policy with custom prompt', async () => {
@@ -65,6 +65,8 @@ describe('create_feature_ki tool', () => {
         id: 'feature-1',
         type: 'error_pattern',
         description: 'Recurring timeout pattern',
+        properties: {},
+        confidence: 80,
       },
     });
 

@@ -52,7 +52,7 @@ export async function createQueryKnowledgeIndicatorToolHandler({
 
   await queryClient.upsert(definition, query);
 
-  logger.info(
+  logger.debug(
     `create_query_ki: created query KI for stream "${definition.name}" with id "${query.id}"`
   );
 

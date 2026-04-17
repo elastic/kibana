@@ -35,7 +35,7 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
 
   await featureClient.bulk(streamName, [{ index: { feature } }]);
 
-  logger.info(
+  logger.debug(
     `create_feature_ki: created feature KI for stream "${streamName}" with id "${feature.id}" and uuid "${feature.uuid}"`
   );
 

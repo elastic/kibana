@@ -12,9 +12,8 @@ import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamsManagementSkill } from './skills/streams_management_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
-import { knowledgeIndicatorsManagementSkill } from './skills/knowledge_indicators_management_skill';
+import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -32,8 +31,7 @@ export const registerStreamsAgentBuilder = async ({
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  agentBuilder.skills.register(streamsManagementSkill);
-  agentBuilder.skills.register(knowledgeIndicatorsManagementSkill);
+  registerAgentBuilderSkills({ agentBuilder });
 
   const getMemoryService = () =>
     new MemoryServiceImpl({

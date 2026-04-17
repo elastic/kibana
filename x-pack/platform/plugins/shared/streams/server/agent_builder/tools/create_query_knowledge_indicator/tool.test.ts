@@ -45,7 +45,7 @@ describe('create_query_ki tool', () => {
     });
 
     expect(tool.id).toBe(STREAMS_CREATE_QUERY_KNOWLEDGE_INDICATOR_TOOL_ID);
-    expect(tool.id).toBe('platform.streams.sig_events.create_query_ki');
+    expect(tool.id).toBe('platform.streams.sig_events.ki_query_create');
   });
 
   it('uses always confirmation policy with custom prompt', async () => {
@@ -63,6 +63,7 @@ describe('create_query_ki tool', () => {
       toolParams: {
         stream_name: 'logs.test',
         title: 'Checkout 5xx burst detector',
+        description: 'Detects 5xx bursts',
         esql: {
           query: 'FROM logs.test, logs.test.* | WHERE http.response.status_code >= 500',
         },
