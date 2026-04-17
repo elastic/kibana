@@ -5,38 +5,23 @@ mapped_pages:
 
 # Contribute to Kibana [development]
 
-[{{kib}}](https://www.elastic.co/what-is/kibana) is a pluggable platform that allows users to search, visualize and analyze data in Elasticsearch.
+[{{kib}}](https://www.elastic.co/what-is/kibana) is a pluggable platform for searching, visualizing, and analyzing data in Elasticsearch. Most of the UI you see in {{kib}} is built inside a plugin, and the platform is designed to be extended — both by plugins in the repository and by plugins developed outside it.
 
-{{kib}} ships with many out-of-the-box capabilities that can be extended and enhanced by custom javascript plugins. Developers can also write their own custom applications.
+This documentation is organized into five sections. Pick the one that matches what you need.
 
-This guide is organized by documentation type. If you already know what you need, browse the sections below. If not, start with one of the paths here.
+- **[Getting started](./getting-started/welcome.md)** — set up a local environment, run {{kib}}, and build your first "Hello World" plugin.
+- **[Key concepts](./key-concepts/plugins-packages-and-the-platform.md)** — the mental models and architecture you need to build on the platform: plugins vs. packages vs. core, the lifecycle, saved objects, security, performance, embeddables, and more.
+- **[Tutorials](./tutorials/index.md)** — task-focused, hands-on walkthroughs for common plugin development tasks (registering routes, configuring your plugin, accessing data, adding logging, and so on).
+- **[Testing](./testing/index.md)** — the testing pyramid for {{kib}} plugins: Jest unit/integration, Scout (Playwright) for UI and API, and legacy FTR.
+- **[Contributing](./contributing/developer-principles.md)** — how to work inside the {{kib}} repository: standards, pull requests, CI, linting, debugging, and build.
 
-## Choose a path
+## Where to start
 
-### Contribute to Kibana
+- **New to {{kib}} development?** Start with [Getting started](./getting-started/welcome.md), then the [Hello World plugin](./getting-started/hello-world.md).
+- **Building on the platform from outside the repo?** See the [external plugin development guide](./tutorials/external-plugin-development.md) after you've set up an environment.
+- **Landing on a specific task?** Jump directly to [Tutorials](./tutorials/index.md) and find it by category.
 
-Use this path if you are working inside the Kibana repository.
+## Reference
 
-1. [Getting started](./getting-started/welcome.md)
-2. [How-to guides](./how-to/index.md)
-3. [Concepts](./concepts/index.md)
-4. [Reference](./reference/index.md)
-
-### Build on Kibana
-
-Use this path if you are building plugins on top of the platform. If you are making changes inside the Kibana repository, start with **Contribute to Kibana** even when your work is plugin-focused.
-
-1. [External plugin development](./tutorials/external-plugin-development.md)
-2. [Tutorials](./tutorials/index.md)
-3. [How-to guides](./how-to/index.md)
-4. [Concepts](./concepts/index.md)
-5. [Reference](./reference/index.md)
-
-## Browse by doc type
-
-- [Getting started](./getting-started/welcome.md) - first-run setup, a minimal plugin, and the shortest path to a working local environment.
-- [Tutorials](./tutorials/index.md) - guided, example-driven walkthroughs for common plugin development tasks.
-- [How-to guides](./how-to/index.md) - task-focused instructions for contributor workflows, testing, debugging, and plugin authoring.
-- [Concepts](./concepts/index.md) - architecture, design principles, platform mental models, and core subsystem overviews.
-- [Reference](./reference/index.md) - generated API docs, inventories, version reports, and lookup material.
-
+- [Plugin list](./plugin-list.md) — inventory of built-in plugins with short descriptions.
+- [Dependency versions](./dependencies-versions.md) — version matrix for {{kib}}'s runtime dependencies.

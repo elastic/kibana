@@ -52,3 +52,7 @@ Use **Jest** for unit and integration tests:
 The **Functional Test Runner (FTR)** is Kibana's legacy E2E framework. Existing FTR tests continue to run, and teams can migrate incrementally to Scout.
 
 - [Functional Test Runner](./ftr.md) — when to use FTR, how it works, and migration guidance
+
+## External plugins
+
+If you're testing a plugin developed outside the Kibana repository, see [Testing Kibana plugins](../tutorials/testing-kibana-plugin.md) in the Tutorials section.

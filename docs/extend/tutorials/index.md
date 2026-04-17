@@ -4,7 +4,7 @@ navigation_title: Tutorials
 
 # Tutorials [tutorials]
 
-Hands-on guides for specific Kibana plugin development tasks. If you're new to Kibana development, start with the [Getting Started](../getting-started/welcome.md) section instead.
+Hands-on, task-focused guides for working with the {{kib}} platform from inside a plugin. If you're new to {{kib}} development, start with [Getting started](../getting-started/welcome.md) instead.
 
 ## Data access
 
@@ -13,38 +13,38 @@ Hands-on guides for specific Kibana plugin development tasks. If you're new to K
 - [Data views API](./data-views-api.md) — create, query, and manage data views programmatically
 - [data.search services](./kibana-data-search-services.md) — run search requests with async search, sessions, and custom strategies
 
-## Building user interfaces
-
-- [Page template](./kibana-page-template.md) — create consistent page layouts with `KibanaPageTemplate`
-- [Expressions service](./kibana-expressions-service.md) — build and execute expression pipelines
-- [Lens Config Builder API](./lens-config-builder-api-examples.md) — embed Lens visualizations using the config builder API
-
 ## HTTP APIs
 
 - [Register and access an endpoint](./registering-and-accessing-an-endpoint.md) — add a custom HTTP API and call it from client-side code
 - [Versioning HTTP APIs](./versioning-http-apis.md) — create or migrate to versioned HTTP APIs
 - [Versioning interfaces](./versioning-interfaces.md) — manage request and response schema versions over time
 - [Generate OAS documentation](./generating-oas-for-http-apis.md) — generate OpenAPI Specification docs for your HTTP APIs
-- [Add data tutorials](./home-tutorials.md) — register data ingestion tutorials in the Kibana home screen
+
+## Building UIs
+
+- [Register an application](./registering-an-application.md) — register a top-level application in {{kib}}
+- [Page template](./kibana-page-template.md) — create consistent page layouts with `KibanaPageTemplate`
+- [Expressions service](./kibana-expressions-service.md) — build and execute expression pipelines
+- [Lens Config Builder API](./lens-config-builder-api-examples.md) — embed Lens visualizations using the config builder API
+- [Add data tutorials](./home-tutorials.md) — register data ingestion tutorials in the {{kib}} home screen
 
 ## Configuration
 
+- [Configure your plugin](./configuring-your-plugin.md) — define a config schema and read values at runtime
 - [UI settings](./ui-settings.md) — register a new UI setting (aka advanced setting / uiSetting) and read it at runtime
 
-## Performance
+## Platform services
 
-- [Build and track custom performance metrics](./adding-performance-metrics.md) — instrument your plugin with EBT-based performance events
-
-## Development environment
-
-- [Debugging in development](../contributing/debugging-in-development.md) — debug the Kibana server and client using Chrome DevTools or VS Code
-- [Debugging FIPS test failures](../contributing/debugging-fips-test-failures.md) — investigate failures from the FIPS nightly pipeline
-- [Set up WSL on Windows](../getting-started/wsl-on-windows-development.md) — configure a Windows development environment using WSL2
-- [Local cross-cluster search setup](../getting-started/local-cross-cluster-search-setup.md) — run two Elasticsearch clusters locally for CCS testing
+- [Logging](./logging-service.md) — structured logging from the server
+- [Reporting integration](./reporting-integration.md) — integrate your plugin with the Reporting plugin
 - [Screenshotting service](./screenshotting/kibana-screenshotting-service.md) — generate screenshots programmatically
+- [Performance metrics](./adding-performance-metrics.md) — instrument your plugin with EBT-based performance events
+- [Development telemetry](./development-telemetry.md) — register telemetry events for usage analytics
+- [Internationalization (i18n)](./i18n.md) — add translatable strings and use the i18n tooling
 
-## Build and ship
+## External plugin development
 
-- [Build a Kibana distributable](../contributing/building-a-kibana-distributable.md) — package Kibana for distribution
-- [CI](../contributing/ci.md) — understand Kibana's BuildKite CI pipeline and comment triggers
-- [Submit a pull request](../contributing/development-pull-request.md) — fork, branch, and open a PR against the Kibana repository
+- [Overview](./external-plugin-development.md) — differences when developing plugins outside the {{kib}} repository
+- [Plugin tooling](./plugin-tooling.md) — build and package tooling for external plugins
+- [Functional tests](./external-plugin-functional-tests.md) — run FTR tests for plugins outside the repo
+- [Testing plugins](./testing-kibana-plugin.md) — set up tests for a {{kib}} plugin
