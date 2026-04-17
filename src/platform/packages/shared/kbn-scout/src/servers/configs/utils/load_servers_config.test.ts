@@ -56,7 +56,7 @@ const mockScoutTestConfig: ScoutTestConfig = {
     password: 'changeme',
   },
   serverless: true,
-  http2: true,
+  http2: false,
   uiam: false,
   projectType: 'oblt',
   isCloud: true,
@@ -98,7 +98,7 @@ describe('loadServersConfig', () => {
     (Config as unknown as jest.Mock).mockReturnValue(mockConfigInstance);
   });
 
-  it('should load, apply HTTP/2, save, and return cluster configuration', async () => {
+  it('should load, save, and return cluster configuration without HTTP/2 by default', async () => {
     const configRootDir = '/mock/config/root/default/serverless';
     (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
     (loadRawServerConfig as jest.Mock).mockResolvedValue({ ...mockRawConfig });
@@ -107,11 +107,21 @@ describe('loadServersConfig', () => {
 
     expect(getConfigFilePath).toHaveBeenCalledWith(configRootDir, mockTestTarget);
     expect(loadRawServerConfig).toHaveBeenCalledWith(mockConfigPath);
-    expect(configureHTTP2).toHaveBeenCalled();
+    expect(configureHTTP2).not.toHaveBeenCalled();
     expect(Config).toHaveBeenCalled();
     expect(mockConfigInstance.getScoutTestConfig).toHaveBeenCalled();
     expect(saveScoutTestConfigOnDisk).toHaveBeenCalledWith(mockScoutTestConfig, mockLog);
     expect(result).toBe(mockConfigInstance);
+  });
+
+  it('should apply HTTP/2 when http2 is explicitly true', async () => {
+    const configRootDir = '/mock/config/root/default/serverless';
+    (getConfigFilePath as jest.Mock).mockReturnValue(mockConfigPath);
+    (loadRawServerConfig as jest.Mock).mockResolvedValue({ ...mockRawConfig, http2: true });
+
+    await loadServersConfig(mockTestTarget, mockLog, configRootDir);
+
+    expect(configureHTTP2).toHaveBeenCalled();
   });
 
   it('should skip HTTP/2 when http2 is explicitly false', async () => {

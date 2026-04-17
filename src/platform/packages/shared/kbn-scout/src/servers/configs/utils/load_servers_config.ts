@@ -21,7 +21,7 @@ import { configureHTTP2 } from './configure_http2';
  * instance, that can be used to start local servers and saves its "Scout"-format copy
  * to the disk.
  *
- * HTTP/2 is enabled by default. To disable it, set `http2: false` in the server config.
+ * HTTP/2 is disabled by default. To enable it, set `http2: true` in the server config.
  *
  * @param testTarget The test target definition (based on location, architecture and domain)
  * @param log Logger instance to report errors or debug information.
@@ -48,7 +48,7 @@ export async function loadServersConfig(
 
   const rawConfig = await loadRawServerConfig(configPath);
 
-  if (rawConfig.http2 !== false) {
+  if (rawConfig.http2 === true) {
     log.info('scout: Enabling HTTP/2 with TLS for Kibana server');
     configureHTTP2(rawConfig);
   }

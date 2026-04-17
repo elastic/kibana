@@ -47,7 +47,7 @@ describe('Config.getScoutTestConfig', () => {
 
     const expectedConfig = {
       serverless: false,
-      http2: true,
+      http2: false,
       uiam: false,
       projectType: undefined,
       isCloud: false,
@@ -107,7 +107,7 @@ describe('Config.getScoutTestConfig', () => {
     const scoutConfig = config.getScoutTestConfig();
     const expectedConfig = {
       serverless: true,
-      http2: true,
+      http2: false,
       uiam: false,
       projectType: 'es',
       isCloud: false,
@@ -168,7 +168,7 @@ describe('Config.getScoutTestConfig', () => {
     const scoutConfig = config.getScoutTestConfig();
     const expectedConfig = {
       serverless: true,
-      http2: true,
+      http2: false,
       uiam: true,
       projectType: 'es',
       organizationId: 'org123',
