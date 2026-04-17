@@ -171,24 +171,49 @@ export const useCustomSuggestWidget = (
     isAcceptingRef.current = true;
     hideWidget();
 
-    // Use the completion item's range for correct replacement.
-    // The range specifies what text to replace (e.g., the word being typed).
-    // Adjust endColumn to current cursor to account for typed characters.
+    // Main replacement range: from the item's startColumn through the current cursor.
     const itemRange = item.range;
-    const range = new monaco.Range(
+    const mainRange = new monaco.Range(
       itemRange.startLineNumber,
       itemRange.startColumn,
       pos.lineNumber,
       pos.column
     );
 
-    // Try snippetController2 for snippet insertions (it IS loaded in Kibana,
-    // unlike the editor.action.insertSnippet action which requires a separate contribution)
+    // Fold same-line adjacent additionalTextEdits (e.g., removing the @ trigger)
+    // into the main range so the insertion is one coherent transaction. Applying
+    // them as a second executeEdits breaks because the second call's coordinates
+    // don't compose with the first — leaving stray trigger chars like "@workflow".
+    let unionRange = mainRange;
+    const nonAdjacentEdits: Array<{ range: monaco.IRange; text: string }> = [];
+    for (const edit of item.additionalTextEdits ?? []) {
+      const r = monaco.Range.lift(edit.range);
+      const text = edit.text ?? '';
+      const adjacent =
+        r.startLineNumber === mainRange.startLineNumber &&
+        r.endLineNumber === mainRange.endLineNumber &&
+        text === '' &&
+        r.endColumn >= unionRange.startColumn &&
+        r.startColumn <= unionRange.endColumn;
+      if (adjacent) {
+        unionRange = new monaco.Range(
+          unionRange.startLineNumber,
+          Math.min(unionRange.startColumn, r.startColumn),
+          unionRange.endLineNumber,
+          Math.max(unionRange.endColumn, r.endColumn)
+        );
+      } else {
+        nonAdjacentEdits.push({ range: r, text });
+      }
+    }
+
     const isSnippet =
       item.insertTextRules !== undefined &&
       // eslint-disable-next-line no-bitwise
       (item.insertTextRules & monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet) !== 0;
 
+    // snippetController2 is loaded by Kibana's Monaco build; editor.action.insertSnippet
+    // needs a separate contribution and isn't reliably available here.
     const snippetController = editor.getContribution('snippetController2') as {
       insert?: (
         template: string,
@@ -203,31 +228,27 @@ export const useCustomSuggestWidget = (
     } | null;
 
     if (isSnippet && snippetController?.insert) {
-      const overwriteBefore = pos.column - itemRange.startColumn;
       snippetController.insert(item.insertText, {
-        overwriteBefore,
-        overwriteAfter: 0,
+        overwriteBefore: pos.column - unionRange.startColumn,
+        overwriteAfter: Math.max(0, unionRange.endColumn - pos.column),
         undoStopBefore: true,
         undoStopAfter: true,
         adjustWhitespace: true,
       });
     } else {
-      // Plain text — strip any snippet placeholders just in case
       const plainText = isSnippet ? stripSnippetPlaceholders(item.insertText) : item.insertText;
-      editor.executeEdits('custom-suggest', [{ range, text: plainText, forceMoveMarkers: true }]);
+      editor.executeEdits('custom-suggest', [
+        { range: unionRange, text: plainText, forceMoveMarkers: true },
+      ]);
     }
 
-    // Apply additional text edits (e.g., removing @ trigger character)
-    if (item.additionalTextEdits?.length) {
-      const edits = item.additionalTextEdits.map((edit) => ({
-        range: monaco.Range.lift(edit.range),
-        text: edit.text,
-        forceMoveMarkers: true,
-      }));
-      editor.executeEdits('custom-suggest-additional', edits);
+    if (nonAdjacentEdits.length) {
+      editor.executeEdits(
+        'custom-suggest-additional',
+        nonAdjacentEdits.map((e) => ({ range: e.range, text: e.text, forceMoveMarkers: true }))
+      );
     }
 
-    // Execute post-accept command if present (e.g., create connector)
     if (item.command) {
       const args = item.command.arguments?.[0];
       editor.trigger('custom-suggest', item.command.id, args);

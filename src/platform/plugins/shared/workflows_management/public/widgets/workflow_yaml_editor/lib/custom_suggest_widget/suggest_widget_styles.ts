@@ -236,6 +236,45 @@ export const getSuggestWidgetStyles = (euiThemeContext: UseEuiTheme) => {
     font-style: italic;
   `;
 
+  const keyList = css`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: ${euiTheme.colors.backgroundBaseSubdued};
+    border-radius: ${euiTheme.border.radius.small};
+    padding: 6px 8px;
+  `;
+
+  const keyRow = css`
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: ${euiTheme.size.s};
+    font-family: ${euiTheme.font.familyCode};
+    font-size: 12px;
+    line-height: 1.4;
+  `;
+
+  const keyName = css`
+    color: ${euiTheme.colors.textParagraph};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+
+  const keyType = css`
+    color: ${euiTheme.colors.textSubdued};
+    font-size: 11px;
+    flex-shrink: 0;
+  `;
+
+  const keyMore = css`
+    font-size: 11px;
+    color: ${euiTheme.colors.textSubdued};
+    font-style: italic;
+    margin-top: 2px;
+  `;
+
   return {
     container,
     hidden,
@@ -263,5 +302,10 @@ export const getSuggestWidgetStyles = (euiThemeContext: UseEuiTheme) => {
     description,
     defaultValue,
     emptyDetails,
+    keyList,
+    keyRow,
+    keyName,
+    keyType,
+    keyMore,
   };
 };

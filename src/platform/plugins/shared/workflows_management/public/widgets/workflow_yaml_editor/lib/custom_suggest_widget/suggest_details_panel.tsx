@@ -38,6 +38,79 @@ const YES_LABEL = i18n.translate('workflows.yamlEditor.suggest.details.requiredY
 const NO_LABEL = i18n.translate('workflows.yamlEditor.suggest.details.requiredNo', {
   defaultMessage: 'No',
 });
+const KEYS_LABEL = i18n.translate('workflows.yamlEditor.suggest.details.keys', {
+  defaultMessage: 'Keys',
+});
+const MORE_KEYS_MESSAGE = (n: number) =>
+  i18n.translate('workflows.yamlEditor.suggest.details.moreKeys', {
+    defaultMessage: '+{n} more',
+    values: { n },
+  });
+
+const MAX_INLINE_KEYS = 6;
+
+/**
+ * Pull the first top-level keys and their type hints out of a Zod object-literal
+ * dump like `{ a: string; b: { nested: number }; c: Array<string> }`. The dump
+ * may be followed by a ` // description` suffix which we strip before parsing.
+ * Bracket depth is tracked so a nested `{...}` or `Array<...>` counts as a
+ * single type value and doesn't split on its internal `;` / `,`.
+ */
+const extractTopLevelKeys = (type: string): Array<{ key: string; type: string }> => {
+  const trimmed = type.trim();
+  const openIdx = trimmed.indexOf('{');
+  if (openIdx === -1) return [];
+
+  // Find the matching closing brace for the first `{`, so a trailing
+  // ` // description` suffix doesn't break parsing.
+  let depth = 0;
+  let closeIdx = -1;
+  for (let i = openIdx; i < trimmed.length; i++) {
+    const ch = trimmed[i];
+    if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        closeIdx = i;
+        break;
+      }
+    }
+  }
+  if (closeIdx === -1) return [];
+
+  const body = trimmed.slice(openIdx + 1, closeIdx);
+  const entries: Array<{ key: string; type: string }> = [];
+  const pushEntry = (raw: string) => {
+    const colonIdx = raw.indexOf(':');
+    if (colonIdx === -1) return;
+    const key = raw.slice(0, colonIdx).trim().replace(/\?$/, '');
+    const typeStr = raw.slice(colonIdx + 1).trim();
+    if (key) entries.push({ key, type: typeStr });
+  };
+  let bodyDepth = 0;
+  let start = 0;
+  for (let i = 0; i < body.length; i++) {
+    const ch = body[i];
+    if (ch === '{' || ch === '<' || ch === '[' || ch === '(') bodyDepth++;
+    else if (ch === '}' || ch === '>' || ch === ']' || ch === ')') bodyDepth--;
+    else if (bodyDepth === 0 && (ch === ';' || ch === ',')) {
+      pushEntry(body.slice(start, i));
+      start = i + 1;
+    }
+  }
+  pushEntry(body.slice(start));
+  return entries;
+};
+
+const summarizeKeyType = (type: string): string => {
+  const t = type.trim();
+  if (!t) return '';
+  if (t.endsWith('[]') || t.startsWith('Array<')) return 'array';
+  if (t.startsWith('{') || t.startsWith('Record<')) return 'object';
+  if (t.length <= 20) return t;
+  const firstWord = t.split(/[<\s|]/)[0];
+  return firstWord || 'mixed';
+};
 
 /**
  * Collapse long Zod dumps into a short human-readable label. The full Zod
@@ -84,6 +157,16 @@ export const SuggestDetailsPanel: React.FC<SuggestDetailsPanelProps> = ({ item }
     );
   }
 
+  // When the type is a shaped object, surface the first few top-level keys so
+  // the details panel gives a hint about the shape without showing the full
+  // Zod dump. Works for types that carry a trailing ` // description` suffix
+  // because extractTopLevelKeys finds the matching closing brace rather than
+  // requiring the string to end on `}`.
+  const keysSource = item.types.find((t) => t.includes('{'));
+  const topLevelKeys = keysSource ? extractTopLevelKeys(keysSource) : [];
+  const visibleKeys = topLevelKeys.slice(0, MAX_INLINE_KEYS);
+  const hiddenKeyCount = Math.max(0, topLevelKeys.length - visibleKeys.length);
+
   return (
     <div css={styles.detailsPanel}>
       {/* Header: context label + item name */}
@@ -102,6 +185,24 @@ export const SuggestDetailsPanel: React.FC<SuggestDetailsPanelProps> = ({ item }
                 {compactTypeLabel(t)}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Representative keys for object shapes */}
+      {visibleKeys.length > 0 && (
+        <div css={styles.detailSection}>
+          <div css={styles.detailLabel}>{KEYS_LABEL}</div>
+          <div css={styles.keyList}>
+            {visibleKeys.map(({ key, type }) => (
+              <div key={key} css={styles.keyRow}>
+                <span css={styles.keyName}>{key}</span>
+                <span css={styles.keyType}>{summarizeKeyType(type)}</span>
+              </div>
+            ))}
+            {hiddenKeyCount > 0 && (
+              <div css={styles.keyMore}>{MORE_KEYS_MESSAGE(hiddenKeyCount)}</div>
+            )}
           </div>
         </div>
       )}
