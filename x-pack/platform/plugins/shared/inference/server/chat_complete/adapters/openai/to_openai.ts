@@ -186,10 +186,7 @@ export function messagesToOpenAI({
     }
   });
 
-  return [
-    ...(systemMessage ? [systemMessage] : []),
-    ...mergeConsecutiveMessages(converted),
-  ];
+  return [...(systemMessage ? [systemMessage] : []), ...mergeConsecutiveMessages(converted)];
 }
 
 /**
