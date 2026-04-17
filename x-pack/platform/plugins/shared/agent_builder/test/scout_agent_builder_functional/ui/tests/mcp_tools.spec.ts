@@ -142,8 +142,12 @@ test.describe(
         await pageObjects.agentBuilder.clickToolDeleteButton();
         await pageObjects.agentBuilder.confirmModalConfirm();
 
-        await pageObjects.agentBuilder.navigateToToolsLanding();
-        expect(await pageObjects.agentBuilder.isToolInTable(toolId)).toBe(false);
+        await expect(page.testSubj.locator('agentBuilderToolsPage')).toBeVisible({
+          timeout: 60_000,
+        });
+        await expect(async () => {
+          expect(await pageObjects.agentBuilder.isToolInTable(toolId)).toBe(false);
+        }).toPass({ timeout: 30_000 });
       });
 
       await test.step('executes the add tool and receives correct result', async () => {

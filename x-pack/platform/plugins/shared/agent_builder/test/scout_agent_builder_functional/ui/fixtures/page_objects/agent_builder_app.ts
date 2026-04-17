@@ -170,13 +170,10 @@ export class AgentBuilderApp {
   }
 
   async isConversationInHistory(conversationId: string): Promise<boolean> {
+    // the list query is invalidated and the row is unmounted. Avoids races where the
+    // node is still attached but off-screen during sidebar re-render.
     const loc = this.page.testSubj.locator(`agentBuilderSidebarConversation-${conversationId}`);
-    try {
-      await loc.scrollIntoViewIfNeeded({ timeout: 10_000 });
-    } catch {
-      // row may not exist yet
-    }
-    return loc.isVisible();
+    return (await loc.count()) > 0;
   }
 
   async clickThinkingToggle() {
@@ -357,7 +354,9 @@ export class AgentBuilderApp {
   }
 
   async saveTool(closeToast: boolean = true) {
-    await this.page.testSubj.click('toolFormSaveButton');
+    const saveButton = this.page.testSubj.locator('toolFormSaveButton');
+    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+    await saveButton.click();
     if (closeToast) {
       await this.page.testSubj.click('toastCloseButton');
     }

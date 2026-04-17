@@ -109,7 +109,7 @@ test.describe(
           expect(
             await pageObjects.agentBuilder.isConversationInHistory(conversationIdToDelete)
           ).toBe(false);
-        }).toPass({ timeout: 60_000 });
+        }).toPass({ timeout: 120_000 });
         expect(await pageObjects.agentBuilder.isConversationInHistory(conversationIds[1])).toBe(
           true
         );

@@ -96,7 +96,7 @@ test.describe(
       expect(response.trim().length).toBeGreaterThan(0);
     });
 
-    test('deletes a tool from the tool details page', async ({ pageObjects, kbnClient }) => {
+    test('deletes a tool from the tool details page', async ({ page, pageObjects, kbnClient }) => {
       const toolId = `scout.esql.${Date.now()}`;
       await createToolViaKbn(kbnClient, {
         id: toolId,
@@ -110,8 +110,13 @@ test.describe(
       await pageObjects.agentBuilder.openToolContextMenu();
       await pageObjects.agentBuilder.clickToolDeleteButton();
       await pageObjects.agentBuilder.confirmModalConfirm();
-      await pageObjects.agentBuilder.navigateToToolsLanding();
-      expect(await pageObjects.agentBuilder.isToolInTable(toolId)).toBe(false);
+
+      await expect(page.testSubj.locator('agentBuilderToolsPage')).toBeVisible({
+        timeout: 60_000,
+      });
+      await expect(async () => {
+        expect(await pageObjects.agentBuilder.isToolInTable(toolId)).toBe(false);
+      }).toPass({ timeout: 30_000 });
     });
 
     test('views built-in tool as read-only', async ({ page, pageObjects }) => {
