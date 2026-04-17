@@ -34,7 +34,7 @@ describe('setEsqlRecommendedQueries', () => {
     expect(obltCall).toBeDefined();
   });
 
-  it('includes 4 new metric queries plus 2 K8s queries in the metrics section (10 total observability queries)', () => {
+  it('includes 4 new metric queries plus 2 K8s queries in the metrics section (12 total observability queries)', () => {
     setEsqlRecommendedQueries(mockEsqlPlugin);
 
     const obltCall = mockRegistry.setRecommendedQueries.mock.calls.find(
