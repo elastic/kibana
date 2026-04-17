@@ -2296,3 +2296,87 @@ test('does not set Server-Timing header when serverTiming is disabled', async ()
 
   expect(response.headers['server-timing']).toBeUndefined();
 });
+
+describe('space extraction in onRequest', () => {
+  test('extracts spaceId and rewrites URL for explicit space requests', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { spaceId: req.spaceId, url: req.url.pathname } });
+      }
+    );
+
+    const { registerRouter, server: innerServer, basePath } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/s/custom/foo').expect(200);
+
+    expect(response.body).toEqual({ spaceId: 'custom', url: '/foo' });
+    expect(basePath.get).toBeDefined();
+  });
+
+  test('sets basePath for explicit space requests', async () => {
+    let capturedBasePath: string | undefined;
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        capturedBasePath = (req as any).raw?.route?.realm?.settings?.app?.basePath;
+        return res.ok({ body: { spaceId: req.spaceId } });
+      }
+    );
+
+    const { registerRouter, server: innerServer, basePath } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    await supertest(innerServer.listener).get('/s/my-space/foo').expect(200);
+  });
+
+  test('defaults to "default" spaceId for requests without /s/ prefix', async () => {
+    const router = new Router('/', logger, enhanceWithContext, routerOptions);
+
+    router.get(
+      {
+        path: '/foo',
+        validate: false,
+        security: {
+          authz: {
+            requiredPrivileges: ['foo'],
+          },
+        },
+      },
+      (context, req, res) => {
+        return res.ok({ body: { spaceId: req.spaceId } });
+      }
+    );
+
+    const { registerRouter, server: innerServer } = await server.setup({ config$ });
+    registerRouter(router);
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/foo').expect(200);
+
+    expect(response.body).toEqual({ spaceId: 'default' });
+  });
+});

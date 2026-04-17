@@ -33,7 +33,7 @@ export class BasePath implements IBasePath {
     return `${this.serverBasePath}${requestScopePath}`;
   };
 
-  public set = (request: KibanaRequest, requestSpecificBasePath: string) => {
+  public set = (request: KibanaRequest | Request, requestSpecificBasePath: string) => {
     const rawRequest = ensureRawRequest(request);
 
     if (this.basePathCache.has(rawRequest)) {

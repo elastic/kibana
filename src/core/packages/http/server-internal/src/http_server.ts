@@ -46,6 +46,7 @@ import type {
   TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
 import { identity, isNil, isObject, omitBy } from 'lodash';
@@ -297,10 +298,10 @@ export class HttpServer {
       this.subscriptions.push(configSubscription);
     }
 
+    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     // It's important to have setupRequestStateAssignment call the very first, otherwise context passing will be broken.
     // That's the only reason why context initialization exists in this method.
-    this.setupRequestStateAssignment(config, executionContext, userActivity);
-    const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
+    this.setupRequestStateAssignment(config, basePathService, executionContext, userActivity);
     this.setupBasePathRewrite(config, basePathService);
     this.setupConditionalCompression(config);
     this.setupResponseLogging();
@@ -575,6 +576,7 @@ export class HttpServer {
 
   private setupRequestStateAssignment(
     config: HttpConfig,
+    basePathService: BasePath,
     executionContext?: InternalExecutionContextSetup,
     userActivity?: InternalUserActivityServiceSetup
   ) {
@@ -624,11 +626,26 @@ export class HttpServer {
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
       let spaceId: string | undefined;
-      // try to getspace from URL (`/s/<id>`); fall back to `x-kbn-context` when parsing fails/missing.
+      let pathHasExplicitSpaceIdentifier = false;
       try {
-        spaceId = getSpaceIdFromPath(request.url.pathname, config.basePath).spaceId;
+        const spaceResult = getSpaceIdFromPath(request.url.pathname, config.basePath);
+        spaceId = spaceResult.spaceId;
+        pathHasExplicitSpaceIdentifier = spaceResult.pathHasExplicitSpaceIdentifier;
       } catch {
         spaceId = parentContext?.space;
+      }
+
+      const app: KibanaRequestState = request.app as KibanaRequestState;
+
+      if (pathHasExplicitSpaceIdentifier && spaceId) {
+        const reqBasePath = `/s/${spaceId}`;
+        basePathService.set(request, reqBasePath);
+
+        app.rewrittenUrl = app.rewrittenUrl ?? request.url;
+        const newPathname = request.url.pathname.substr(reqBasePath.length) || '/';
+        const newUrl = `${newPathname}${request.url.search ?? ''}`;
+        request.setUrl(newUrl);
+        request.raw.req.url = newUrl;
       }
 
       userActivity?.setInjectedContext({
@@ -653,10 +670,10 @@ export class HttpServer {
 
       executionContext?.setRequestId(requestId);
 
-      const app: KibanaRequestState = request.app as KibanaRequestState;
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
+      app.spaceId = spaceId ?? DEFAULT_SPACE_ID;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
