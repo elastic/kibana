@@ -16,26 +16,26 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type ScanRouteRequestBody = z.infer<typeof ScanRouteRequestBody>;
 export const ScanRouteRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
       /**
-       * The folder or file’s full path (including the file name).
+       * The folder or file's full path (including the file name).
        */
       path: z.string(),
     }),
   })
 );
 
-export type ScanRouteResponse = z.infer<typeof ScanRouteResponse>;
-export const ScanRouteResponse = z.object({});
-
 export type EndpointScanActionRequestBody = z.infer<typeof EndpointScanActionRequestBody>;
 export const EndpointScanActionRequestBody = ScanRouteRequestBody;
 export type EndpointScanActionRequestBodyInput = z.input<typeof EndpointScanActionRequestBody>;
 
 export type EndpointScanActionResponse = z.infer<typeof EndpointScanActionResponse>;
-export const EndpointScanActionResponse = ScanRouteResponse;
+export const EndpointScanActionResponse = ResponseActionCreateSuccessResponse;
