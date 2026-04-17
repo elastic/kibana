@@ -119,7 +119,6 @@ spaceTest.describe.skip(
     let handlerStepFilterId: string;
 
     spaceTest.beforeAll(async ({ apiServices }) => {
-      spaceTest.setTimeout(90_000);
       workflowsApi = apiServices.workflowsApi;
 
       const failing = await workflowsApi.create(FAILING_WORKFLOW_YAML);
