@@ -410,8 +410,8 @@ export const useEntityAnalyticsRoutes = () => {
      * Get Entity Store v2 privileges
      */
     const fetchEntityStoreV2Privileges = () =>
-      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES, {
-        version: ENTITY_STORE_API_VERSIONS.public.v1,
+      http.fetch<EntityAnalyticsPrivileges>(ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES, {
+        version: ENTITY_STORE_API_VERSIONS.internal.v2,
         method: 'GET',
       });
 
