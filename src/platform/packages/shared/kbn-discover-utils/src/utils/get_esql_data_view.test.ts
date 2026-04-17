@@ -49,13 +49,15 @@ describe('getEsqlDataView', () => {
 
   const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
     const originalHttpPost = services.http.post;
-    services.http.post = jest.fn().mockImplementation((url: string, options?: { body?: string }) => {
-      const body = options?.body ? JSON.parse(options.body) : undefined;
-      if (url === TIMEFIELD_ROUTE && body?.query === query) {
-        return Promise.resolve({ timeField: timeFieldResponse });
-      }
-      return Promise.resolve('');
-    });
+    services.http.post = jest
+      .fn()
+      .mockImplementation((url: string, options?: { body?: string }) => {
+        const body = options?.body ? JSON.parse(options.body) : undefined;
+        if (url === TIMEFIELD_ROUTE && body?.query === query) {
+          return Promise.resolve({ timeField: timeFieldResponse });
+        }
+        return Promise.resolve('');
+      });
     return originalHttpPost;
   };
 
