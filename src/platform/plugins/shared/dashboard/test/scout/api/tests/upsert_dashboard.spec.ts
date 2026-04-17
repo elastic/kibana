@@ -27,7 +27,9 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
-    await kbnClient.importExport.load('src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/dashboards_api.json');
+    await kbnClient.importExport.load(
+      'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/dashboards_api.json'
+    );
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
 
