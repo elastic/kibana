@@ -984,12 +984,6 @@ describe('search embeddable transform utils', () => {
                 query: { match_phrase: { 'log.level': 'error' } },
               },
             ],
-            nonHighlightingFilters: [
-              {
-                meta: { index: 'data-view-1', alias: null, negate: false, disabled: false },
-                query: { match_phrase: { 'trace.id': 'abc123' } },
-              },
-            ],
           }),
         },
       };
@@ -1016,9 +1010,6 @@ describe('search embeddable transform utils', () => {
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
       expect('filters' in result && result.filters).toHaveLength(1);
-      expect('non_highlighting_filters' in result && result.non_highlighting_filters).toHaveLength(
-        1
-      );
       expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
     });
 
@@ -1071,18 +1062,6 @@ describe('search embeddable transform utils', () => {
             negate: false,
           },
         ],
-        non_highlighting_filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: {
-              field: 'trace.id',
-              operator: ASCODE_FILTER_OPERATOR.IS,
-              value: 'abc123',
-            },
-            disabled: false,
-            negate: false,
-          },
-        ],
         query: { language: 'kql', expression: '' },
         rows_per_page: 100,
         sample_size: 500,
@@ -1106,7 +1085,6 @@ describe('search embeddable transform utils', () => {
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
       expect(searchSource.filter).toHaveLength(1);
-      expect(searchSource.nonHighlightingFilters).toHaveLength(1);
     });
 
     it('round-trips all fields through toStoredTab → fromStoredTab', () => {
@@ -1129,14 +1107,6 @@ describe('search embeddable transform utils', () => {
             negate: false,
           },
         ],
-        non_highlighting_filters: [
-          {
-            type: ASCODE_FILTER_TYPE.CONDITION,
-            condition: { field: 'trace.id', operator: ASCODE_FILTER_OPERATOR.IS, value: 'abc123' },
-            disabled: false,
-            negate: false,
-          },
-        ],
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'dv-1' },
       };
 
@@ -1150,9 +1120,6 @@ describe('search embeddable transform utils', () => {
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
       expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
       expect('filters' in result && result.filters).toHaveLength(1);
-      expect('non_highlighting_filters' in result && result.non_highlighting_filters).toHaveLength(
-        1
-      );
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {
