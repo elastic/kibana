@@ -26,7 +26,7 @@ function createMockDataViewsService() {
 
 function createMockHttp(timeField?: string) {
   return {
-    get: jest.fn(async () => ({ timeField })),
+    post: jest.fn(async () => ({ timeField })),
   } as unknown as HttpStart;
 }
 
