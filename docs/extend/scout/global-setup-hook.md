@@ -6,13 +6,7 @@ navigation_title: Global setup hook
 
 Use a global setup hook to run code **once** before any tests start (even with multiple workers). This is most useful for [parallel suites](./parallelism.md), where you want shared data/setup to exist before workers begin. It is also supported by non-parallel test suites.
 
-**Common uses**:
-
-- Load Elasticsearch archives with `esArchiver`
-- Run one-time API setup with `apiServices`
-- Apply shared Kibana settings via `kbnClient`
-
-## When to use [when-to-use]
+### When to use [when-to-use]
 
 Global setup is most valuable when:
 
