@@ -56,7 +56,7 @@ export const generateLeadsRoute = (
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
 
-          const [, startPlugins] = await getStartServices();
+          const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
 
           void (async () => {
@@ -69,6 +69,7 @@ export const generateLeadsRoute = (
                 riskScoreDataClient,
                 executionId: executionUuid,
                 sourceType: 'adhoc',
+                analytics: coreStart.analytics,
               });
               logger.info(
                 `[LeadGeneration] Background generation completed (executionUuid=${executionUuid})`

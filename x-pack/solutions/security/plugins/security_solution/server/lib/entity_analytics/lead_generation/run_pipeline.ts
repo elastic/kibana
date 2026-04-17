@@ -6,9 +6,10 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
+import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
 import { getAlertsIndex } from '../../../../common/entity_analytics/utils';
 import { createLeadGenerationEngine } from './engine/lead_generation_engine';
 import { createRiskScoreModule } from './observation_modules/risk_score_module';
@@ -26,6 +27,7 @@ export interface RunPipelineParams {
   readonly riskScoreDataClient: RiskScoreDataClient;
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
+  readonly analytics?: AnalyticsServiceStart;
 }
 
 export interface RunPipelineResult {
@@ -44,6 +46,7 @@ export const runLeadGenerationPipeline = async ({
   riskScoreDataClient,
   executionId: providedExecutionId,
   sourceType,
+  analytics,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
@@ -108,6 +111,12 @@ export const runLeadGenerationPipeline = async ({
       Date.now() - pipelineStart
     }ms (executionId=${executionId})`
   );
+
+  analytics?.reportEvent(LEAD_GENERATION_EXECUTION_EVENT.eventType, {
+    spaceId,
+    leadsGenerated: leads.length,
+    sourceType,
+  });
 
   return { total: leads.length };
 };

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
@@ -39,6 +41,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
   const { addSuccess, addError } = useAppToasts();
+  const { telemetry } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -64,6 +67,7 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
       await generateLeadsApi({ params: {}, signal });
 
       if (signal.aborted) return;
@@ -97,6 +101,10 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
 
   const isLoading = isLeadsLoading || isStatusLoading;
 
+  const reportLeadClicked = useCallback(() => {
+    telemetry.reportEvent(EntityEventTypes.LeadGenerationLeadClicked, {});
+  }, [telemetry]);
+
   return {
     leads: data?.leads?.map(fromApiLead) ?? [],
     totalCount: data?.total ?? 0,
@@ -108,5 +116,6 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     refetch,
     isScheduled: statusData?.isEnabled ?? false,
     toggleSchedule,
+    reportLeadClicked,
   };
 };

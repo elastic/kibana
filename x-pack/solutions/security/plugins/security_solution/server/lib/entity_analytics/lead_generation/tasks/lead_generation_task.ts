@@ -185,6 +185,7 @@ const runLeadGenerationTask = async ({
       spaceId: state.namespace,
       riskScoreDataClient,
       sourceType: 'scheduled',
+      analytics: core.analytics,
     });
   } catch (e) {
     logger.error(`[LeadGeneration] Error running scheduled lead generation task: ${e.message}`);

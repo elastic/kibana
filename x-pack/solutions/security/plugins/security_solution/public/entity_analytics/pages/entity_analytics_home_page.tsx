@@ -78,6 +78,7 @@ export const EntityAnalyticsHomePage = () => {
     generate,
     isScheduled,
     toggleSchedule,
+    reportLeadClicked,
   } = useHuntingLeads(leadGenerationEnabled);
   const openAgentBuilderWithLead = useLeadAttachment();
 
@@ -131,8 +132,11 @@ export const EntityAnalyticsHomePage = () => {
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   const handleOpenLeadInChat = useCallback(
-    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
-    [openAgentBuilderWithLead]
+    (lead: HuntingLead) => {
+      reportLeadClicked();
+      openAgentBuilderWithLead(lead);
+    },
+    [openAgentBuilderWithLead, reportLeadClicked]
   );
 
   const handleHuntInChat = useCallback(() => {
