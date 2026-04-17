@@ -20,6 +20,7 @@ import {
   generateYamlSchemaFromConnectors,
   getElasticsearchConnectors,
   getKibanaConnectors,
+  getStepPrefixDeprecationInfo,
   SystemConnectorsMap,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
@@ -363,6 +364,11 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
   for (const connector of getAllConnectorsInternal()) {
     if (connector.deprecation) {
       deprecatedStepMetadata[connector.type] = connector.deprecation;
+    } else {
+      const prefixMatch = getStepPrefixDeprecationInfo(connector.type);
+      if (prefixMatch) {
+        deprecatedStepMetadata[connector.type] = prefixMatch;
+      }
     }
   }
 
@@ -375,7 +381,7 @@ export function getDeprecatedStepMetadataMap(): Readonly<Record<string, StepDepr
 }
 
 export function getDeprecatedStepMetadata(stepType: string): StepDeprecationInfo | undefined {
-  return getDeprecatedStepMetadataMap()[stepType];
+  return getDeprecatedStepMetadataMap()[stepType] ?? getStepPrefixDeprecationInfo(stepType);
 }
 
 export function isDeprecatedStepType(stepType: string): boolean {
