@@ -6,11 +6,61 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { CoreStart } from '@kbn/core/public';
 import type { ObservabilityOnboardingPluginStartDeps } from '../plugin';
 import { PLUGIN_ID } from '../../common';
 
-export const registerIngestFlows = (plugins: ObservabilityOnboardingPluginStartDeps) => {
+export const registerIngestFlows = (
+  core: CoreStart,
+  plugins: ObservabilityOnboardingPluginStartDeps
+) => {
+  const hostsCategory = i18n.translate('xpack.observability_onboarding.ingestHub.category.hosts', {
+    defaultMessage: 'Hosts',
+  });
+
   plugins.ingestHub?.registerIngestFlows([
+    {
+      id: 'host_linux',
+      title: i18n.translate('xpack.observability_onboarding.ingestHub.hostLinux.title', {
+        defaultMessage: 'Linux',
+      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.ingestHub.hostLinux.description',
+        {
+          defaultMessage: 'Monitor your Linux host',
+        }
+      ),
+      icon: core.http.staticAssets.getPluginAssetHref('linux.svg'),
+      category: hostsCategory,
+      navigateTo: { appId: PLUGIN_ID, path: '/host/linux/' },
+    },
+    {
+      id: 'host_mac',
+      title: i18n.translate('xpack.observability_onboarding.ingestHub.hostMac.title', {
+        defaultMessage: 'macOS',
+      }),
+      description: i18n.translate('xpack.observability_onboarding.ingestHub.hostMac.description', {
+        defaultMessage: 'Monitor your macOS host',
+      }),
+      icon: core.http.staticAssets.getPluginAssetHref('apple_black.svg'),
+      category: hostsCategory,
+      navigateTo: { appId: PLUGIN_ID, path: '/host/mac/' },
+    },
+    {
+      id: 'host_windows',
+      title: i18n.translate('xpack.observability_onboarding.ingestHub.hostWindows.title', {
+        defaultMessage: 'Windows',
+      }),
+      description: i18n.translate(
+        'xpack.observability_onboarding.ingestHub.hostWindows.description',
+        {
+          defaultMessage: 'Monitor your Windows host',
+        }
+      ),
+      icon: 'logoWindows',
+      category: hostsCategory,
+      navigateTo: { appId: PLUGIN_ID, path: '/host/windows/' },
+    },
     {
       id: 'kubernetes',
       title: i18n.translate('xpack.observability_onboarding.ingestHub.kubernetes.title', {

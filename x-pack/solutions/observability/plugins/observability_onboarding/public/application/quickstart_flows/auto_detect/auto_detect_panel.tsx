@@ -44,13 +44,27 @@ import { usePricingFeature } from '../shared/use_pricing_feature';
 import { useWiredStreamsStatus } from '../../../hooks/use_wired_streams_status';
 import { WIRED_ECS_DATA_VIEW_SPEC } from '../shared/wired_streams_data_view';
 
-export const AutoDetectPanel: FunctionComponent = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate(
-      'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
-      { defaultMessage: 'Elastic Agent: Logs & Metrics' }
-    ),
-  });
+interface AutoDetectPanelProps {
+  /**
+   * When true, the panel does not set its own breadcrumb. Use this when
+   * embedding the panel inside a page that manages its own breadcrumb.
+   */
+  suppressBreadcrumb?: boolean;
+}
+
+export const AutoDetectPanel: FunctionComponent<AutoDetectPanelProps> = ({
+  suppressBreadcrumb = false,
+}) => {
+  useFlowBreadcrumb(
+    suppressBreadcrumb
+      ? null
+      : {
+          text: i18n.translate(
+            'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.autoDetectLabel',
+            { defaultMessage: 'Elastic Agent: Logs & Metrics' }
+          ),
+        }
+  );
   const { status, data, error, refetch, installedIntegrations } = useOnboardingFlow();
   const metricsOnboardingEnabled = usePricingFeature(
     ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING

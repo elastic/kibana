@@ -145,9 +145,9 @@ export class ObservabilityOnboardingPlugin
       getLocator: () => this.locators?.onboarding,
     };
   }
-  public start(_core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
+  public start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
     if (plugins.ingestHub) {
-      registerIngestFlows(plugins);
+      registerIngestFlows(core, plugins);
     }
     return {
       locators: this.locators,

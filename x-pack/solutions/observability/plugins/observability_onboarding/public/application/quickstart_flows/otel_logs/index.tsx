@@ -63,12 +63,28 @@ const HOST_COMMAND = i18n.translate(
 const FETCH_INTERVAL = 2000;
 const SHOW_TROUBLESHOOTING_DELAY = 120_000;
 
-export const OtelLogsPanel: React.FC = () => {
-  useFlowBreadcrumb({
-    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
-      defaultMessage: 'OpenTelemetry: Logs & Metrics',
-    }),
-  });
+interface OtelLogsPanelProps {
+  /**
+   * When set, the panel renders for a single, fixed platform and hides the
+   * OS selector UI. The parent is expected to set its own breadcrumb in this
+   * mode, so the panel skips its default breadcrumb.
+   */
+  lockedPlatform?: 'linux' | 'mac' | 'windows';
+}
+
+export const OtelLogsPanel: React.FC<OtelLogsPanelProps> = ({ lockedPlatform }) => {
+  useFlowBreadcrumb(
+    lockedPlatform
+      ? null
+      : {
+          text: i18n.translate(
+            'xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost',
+            {
+              defaultMessage: 'OpenTelemetry: Logs & Metrics',
+            }
+          ),
+        }
+  );
   const { onPageReady } = usePerformanceContext();
   const {
     services: { share, docLinks },
@@ -96,7 +112,7 @@ export const OtelLogsPanel: React.FC = () => {
     }
   }, [onPageReady, setupData]);
 
-  const [selectedTab, setSelectedTab] = useState('linux');
+  const [selectedTab, setSelectedTab] = useState<string>(lockedPlatform ?? 'linux');
 
   const hasPreExistingDataEarly = usePreExistingDataCheck({ flow: 'otel_host' });
 
@@ -271,47 +287,53 @@ export const OtelLogsPanel: React.FC = () => {
         <EuiSteps
           steps={[
             {
-              title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.platform', {
-                defaultMessage: 'Select your platform',
-              }),
+              title: lockedPlatform
+                ? i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.install', {
+                    defaultMessage: 'Install the collector',
+                  })
+                : i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.platform', {
+                    defaultMessage: 'Select your platform',
+                  }),
 
               children: (
                 <EuiFlexGroup direction="column" gutterSize="l">
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="column" gutterSize="s">
-                      {!isWiredStreamsLoading && (
-                        <EuiText size="s">
-                          <strong>
-                            {i18n.translate(
-                              'xpack.observability_onboarding.otelLogsPanel.osSelector',
+                  {!lockedPlatform && (
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup direction="column" gutterSize="s">
+                        {!isWiredStreamsLoading && (
+                          <EuiText size="s">
+                            <strong>
+                              {i18n.translate(
+                                'xpack.observability_onboarding.otelLogsPanel.osSelector',
+                                {
+                                  defaultMessage: 'OS selector',
+                                }
+                              )}
+                            </strong>
+                          </EuiText>
+                        )}
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonGroup
+                            legend={i18n.translate(
+                              'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
                               {
-                                defaultMessage: 'OS selector',
+                                defaultMessage: 'Choose platform',
                               }
                             )}
-                          </strong>
-                        </EuiText>
-                      )}
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonGroup
-                          legend={i18n.translate(
-                            'xpack.observability_onboarding.otelLogsPanel.choosePlatform',
-                            {
-                              defaultMessage: 'Choose platform',
-                            }
-                          )}
-                          options={installTabContents.map(({ id, name }) => ({
-                            id,
-                            label: name,
-                          }))}
-                          type="single"
-                          idSelected={selectedTab}
-                          onChange={(id: string) => {
-                            setSelectedTab(id);
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
+                            options={installTabContents.map(({ id, name }) => ({
+                              id,
+                              label: name,
+                            }))}
+                            type="single"
+                            idSelected={selectedTab}
+                            onChange={(id: string) => {
+                              setSelectedTab(id);
+                            }}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  )}
 
                   {!isWiredStreamsLoading && (
                     <EuiFlexItem grow={false}>
