@@ -8,9 +8,9 @@
  */
 
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
-import { validateAccessor } from '@kbn/chart-expressions-common';
+import { getColumnByAccessor, validateAccessor } from '@kbn/chart-expressions-common';
 import type { ExtendedDataLayerArgs, ExtendedDataLayerFn } from '../types';
-import { EXTENDED_DATA_LAYER, LayerTypes } from '../constants';
+import { EXTENDED_DATA_LAYER, LayerTypes, XScaleTypes } from '../constants';
 import { getAccessors, normalizeTable, getShowLines } from '../helpers';
 import {
   validateLinesVisibilityForChartType,
@@ -26,6 +26,12 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
     args,
     table
   );
+  // adjust xScaleType based on the column meta data
+  // some ESQL charts created via the Lens API needs to infer the xScaleType at runtime
+  const xColumn = accessors.xAccessor
+    ? getColumnByAccessor(accessors.xAccessor, table.columns)
+    : undefined;
+  const xScaleType = xColumn?.meta.type === 'date' ? XScaleTypes.TIME : args.xScaleType;
 
   validateAccessor(accessors.xAccessor, table.columns);
   accessors.splitAccessors?.forEach((accessor) => validateAccessor(accessor, table.columns));
@@ -44,6 +50,7 @@ export const extendedDataLayerFn: ExtendedDataLayerFn['fn'] = async (data, args,
   return {
     type: EXTENDED_DATA_LAYER,
     ...args,
+    xScaleType,
     layerType: LayerTypes.DATA,
     ...accessors,
     table: normalizedTable,
