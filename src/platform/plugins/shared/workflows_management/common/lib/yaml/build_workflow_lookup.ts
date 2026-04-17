@@ -29,10 +29,16 @@ export interface StepPropInfo {
 }
 
 /**
- * Get plain JavaScript value from a step property value node (scalar).
+ * Get plain JavaScript value from a step property value node.
+ * Handles scalars (returns `.value`) and collection nodes like sequences
+ * (returns the JSON representation via `.toJSON()`).
  */
-export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
+export function getValueFromValueNode(
+  valueNode: YAML.Scalar<unknown> | YAML.YAMLSeq<unknown>
+): unknown {
   if (!valueNode) return undefined;
+  if (YAML.isScalar(valueNode)) return valueNode.value;
+  if ('toJSON' in valueNode && typeof valueNode.toJSON === 'function') return valueNode.toJSON();
   return (valueNode as { value?: unknown }).value;
 }
 
@@ -107,7 +113,7 @@ export function buildWorkflowLookup(
   };
 }
 
-const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
+const NESTED_STEP_KEYS = ['steps', 'else', 'on-failure', 'iteration-on-failure', 'fallback'];
 
 export function inspectStep(
   node: any,
@@ -142,17 +148,17 @@ export function inspectStep(
       }
     });
 
-    // Second pass: handle nested step keys (steps, else, fallback) with stepId as parentStepId
-    if (stepId) {
-      node.items.forEach((item) => {
-        if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-          const keyValue = item.key.value as string;
-          if (NESTED_STEP_KEYS.includes(keyValue)) {
-            Object.assign(result, inspectStep(item.value, lineCounter, stepId));
-          }
+    // Second pass: handle nested step keys with the closest enclosing step as parent.
+    // This also handles intermediate non-step maps like on-failure that contain
+    // fallback arrays — they have no stepId of their own, so parentStepId passes through.
+    node.items.forEach((item) => {
+      if (YAML.isPair(item) && YAML.isScalar(item.key)) {
+        const keyValue = item.key.value as string;
+        if (NESTED_STEP_KEYS.includes(keyValue)) {
+          Object.assign(result, inspectStep(item.value, lineCounter, stepId ?? parentStepId));
         }
-      });
-    }
+      }
+    });
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
       Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
