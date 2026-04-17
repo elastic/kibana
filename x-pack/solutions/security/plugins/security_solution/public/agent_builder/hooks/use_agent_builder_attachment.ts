@@ -8,7 +8,6 @@
 import { useCallback, useRef } from 'react';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { useKibana } from '../../common/lib/kibana/use_kibana';
-import { useSecurityAgentId } from './use_security_agent_id';
 
 export interface UseAgentBuilderAttachmentParams {
   /**
@@ -49,7 +48,6 @@ export const useAgentBuilderAttachment = ({
   attachmentPrompt,
 }: UseAgentBuilderAttachmentParams): UseAgentBuilderAttachmentResult => {
   const { agentBuilder } = useKibana().services;
-  const agentId = useSecurityAgentId();
   const hasWarned = useRef(false);
 
   const openAgentBuilderFlyout = useCallback(() => {
@@ -76,9 +74,8 @@ export const useAgentBuilderAttachment = ({
       initialMessage: attachmentPrompt,
       attachments: [attachment],
       sessionTag: 'security',
-      ...(agentId ? { agentId } : {}),
     });
-  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder, agentId]);
+  }, [attachmentId, attachmentType, attachmentData, attachmentPrompt, agentBuilder]);
 
   return {
     openAgentBuilderFlyout,

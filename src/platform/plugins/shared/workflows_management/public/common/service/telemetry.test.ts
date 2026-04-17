@@ -1187,6 +1187,45 @@ describe('WorkflowsBaseTelemetry', () => {
     });
   });
 
+  describe('reportWorkflowAccessDeniedPrivileges', () => {
+    it('reports access denied due to missing read privileges', () => {
+      telemetry.reportWorkflowAccessDeniedPrivileges();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedLicense', () => {
+    it('reports access denied due to license', () => {
+      telemetry.reportWorkflowAccessDeniedLicense();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedLicense,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+        })
+      );
+    });
+  });
+
+  describe('reportWorkflowAccessDeniedServerlessTier', () => {
+    it('reports access denied due to serverless tier with required products', () => {
+      telemetry.reportWorkflowAccessDeniedServerlessTier();
+
+      expect(mockClient.reportEvent).toHaveBeenCalledWith(
+        WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier,
+        expect.objectContaining({
+          eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
+        })
+      );
+    });
+  });
+
   describe('reportWorkflowValidationError', () => {
     it('reports validation errors for a workflow', () => {
       const validationResults: YamlValidationResult[] = [
