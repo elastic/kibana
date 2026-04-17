@@ -16,6 +16,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type {
   ErrorsByTraceId,
   FocusedTraceWaterfallProps,
+  FullTraceWaterfallOnErrorClick,
   FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
@@ -247,6 +248,37 @@ export interface ObservabilityTracesFetchLatencyOverallSpanDistributionFeature {
   >;
 }
 
+export interface ObservabilityTraceWaterfallFlyoutFeature {
+  id: 'observability-trace-waterfall-flyout';
+  render: (props: {
+    traceId: string;
+    rangeFrom: string;
+    rangeTo: string;
+    serviceName?: string;
+    highlightedSpanId?: string;
+    scrollToHighlightedOnMount?: boolean;
+    docId: string | null;
+    docIndex?: string;
+    activeFlyoutType: 'spanDetailFlyout' | 'logsFlyout' | null;
+    activeSection?: 'errors-table';
+    skipOpenAnimation?: boolean;
+    historyKey?: symbol;
+    renderDetailFlyout?: (props: {
+      docId: string;
+      docIndex?: string;
+      traceId: string;
+      type: 'spanDetailFlyout' | 'logsFlyout';
+      hasAnimation: boolean;
+      onClose: () => void;
+      activeSection?: 'errors-table';
+    }) => React.ReactNode;
+    onNodeClick: (nodeSpanId: string) => void;
+    onErrorClick: FullTraceWaterfallOnErrorClick;
+    onCloseFlyout: () => void;
+    onExitFullScreen: () => void;
+  }) => React.ReactNode;
+}
+
 export type ObservabilityTracesFeature =
   | ObservabilityTracesSpanLinksFeature
   | ObservabilityTracesFetchErrorsFeature
@@ -255,7 +287,8 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
   | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
   | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityFullTraceWaterfallFeature;
+  | ObservabilityFullTraceWaterfallFeature
+  | ObservabilityTraceWaterfallFlyoutFeature;
 
 /** ****************************************************************************************/
 
