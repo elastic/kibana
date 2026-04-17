@@ -524,6 +524,23 @@ export class WorkflowsExecutionEnginePlugin
       config: this.config,
     };
 
+    // Re-check that a workflow is still enabled right before persisting an
+    // execution document.  The route-level check may have read a stale value
+    // if a concurrent hard-delete disabled the workflow in the meantime.
+    // Skipped for test runs — unsaved workflows don't exist in the index.
+    const ensureWorkflowEnabled = async (
+      workflow: WorkflowExecutionEngineModel,
+      spaceId: string
+    ) => {
+      if (workflow.isTestRun) {
+        return;
+      }
+      const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
+      if (!stillEnabled) {
+        throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
+      }
+    };
+
     // Helper function to create and persist a workflow execution
     const createAndPersistWorkflowExecution = async (
       workflow: WorkflowExecutionEngineModel,
@@ -536,6 +553,9 @@ export class WorkflowsExecutionEnginePlugin
       repository: WorkflowExecutionRepository;
     }> => {
       await this.initialize(coreStart);
+
+      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+
       const workflowCreatedAt = new Date();
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
       const executedBy = await getAuthenticatedUser(
@@ -633,22 +653,6 @@ export class WorkflowsExecutionEnginePlugin
         const delayMs = parseInt(String(Array.isArray(raw) ? raw[0] : raw ?? '0'), 10);
         if (delayMs > 0) {
           await new Promise((r) => setTimeout(r, delayMs));
-        }
-      }
-
-      // Re-check that the workflow is still enabled right before persisting the
-      // execution document. The route-level check (run_workflow.ts:75) may have
-      // read a stale value if a concurrent hard-delete disabled the workflow
-      // between the route read and this point.
-      // Skipped for test runs — unsaved workflows don't exist in the index.
-      if (!workflow.isTestRun) {
-        const executionSpaceId = (context.spaceId as string | undefined) || 'default';
-        const stillEnabled = await workflowRepository.isWorkflowEnabled(
-          workflow.id,
-          executionSpaceId
-        );
-        if (!stillEnabled) {
-          throw new Error(`Workflow is disabled: ${workflow.id}. Enable the workflow to run it.`);
         }
       }
 
@@ -771,6 +775,8 @@ export class WorkflowsExecutionEnginePlugin
       await checkLicense(plugins.licensing);
 
       await this.initialize(coreStart);
+      await ensureWorkflowEnabled(workflow, workflow.spaceId || 'default');
+
       const workflowCreatedAt = new Date();
       const context: Record<string, unknown> = {
         ...(executionContext ?? {}),
