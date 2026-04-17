@@ -15,7 +15,6 @@ import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { readJsonWithComments } from '@kbn/moon/src/util';
 
 export async function update(
   requestCtx: RequestHandlerContext,
