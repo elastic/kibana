@@ -341,25 +341,31 @@ describe('suggestProcessingPipeline workflow', () => {
             skipped_rate: 0,
             dropped_rate: 0,
           },
-           processors_metrics: {
-             'root.steps[0]': {
-               parsed_rate: 0.5,
-               failed_rate: 0.5,
-               skipped_rate: 0,
-               dropped_rate: 0,
-               detected_fields: [],
-               errors: [],
-             },
-           },
-           documents: [
-             {
-               value: { message: 'partial' },
-               errors: [{ type: 'generic_processor_failure', message: 'could not parse', processor_id: 'root.steps[0]' }],
-               detected_fields: [],
-               status: 'failed',
-               processed_by: ['root.steps[0]'],
-             },
-           ],
+          processors_metrics: {
+            'root.steps[0]': {
+              parsed_rate: 0.5,
+              failed_rate: 0.5,
+              skipped_rate: 0,
+              dropped_rate: 0,
+              detected_fields: [],
+              errors: [],
+            },
+          },
+          documents: [
+            {
+              value: { message: 'partial' },
+              errors: [
+                {
+                  type: 'generic_processor_failure',
+                  message: 'could not parse',
+                  processor_id: 'root.steps[0]',
+                },
+              ],
+              detected_fields: [],
+              status: 'failed',
+              processed_by: ['root.steps[0]'],
+            },
+          ],
         })
       )
     );
@@ -395,7 +401,9 @@ describe('suggestProcessingPipeline workflow', () => {
       mappedFields: {},
     });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((capturedToolResponse as any).metrics.parse_rate).toBe(50);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((capturedToolResponse as any).errors).not.toContainEqual(
       expect.stringContaining('Parse rate is too low')
     );
@@ -438,8 +446,9 @@ describe('suggestProcessingPipeline workflow', () => {
       mappedFields: {},
     });
 
-     expect(simulatePipeline).not.toHaveBeenCalled();
-     expect((capturedToolResponse as any).valid).toBe(false);
-     expect(capturedToolResponse).toMatchSnapshot();
+    expect(simulatePipeline).not.toHaveBeenCalled();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((capturedToolResponse as any).valid).toBe(false);
+    expect(capturedToolResponse).toMatchSnapshot();
   });
 });

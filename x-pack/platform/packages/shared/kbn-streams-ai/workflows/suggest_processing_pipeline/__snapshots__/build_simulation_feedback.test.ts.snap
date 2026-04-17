@@ -26,6 +26,22 @@ Object {
 }
 `;
 
+exports[`buildSimulationFeedback includes per-processor top_errors with attribution 2`] = `
+Object {
+  "errors": Array [
+    "Simulation returned no documents. The pipeline may be dropping all documents.",
+  ],
+  "metrics": Object {
+    "fields": Array [],
+    "parse_rate": 0,
+    "sampled": 0,
+  },
+  "processors": Object {},
+  "temporary_fields": Array [],
+  "valid": false,
+}
+`;
+
 exports[`buildSimulationFeedback reports per-processor failure rates when above 20% 1`] = `
 Object {
   "errors": Array [

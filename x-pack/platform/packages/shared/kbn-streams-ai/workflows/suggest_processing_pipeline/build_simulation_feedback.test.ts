@@ -14,6 +14,7 @@ const stubGetFieldSummary = jest
 
 const stubFieldsMetadataClient = {
   find: jest.fn().mockResolvedValue({ getFields: () => ({}) }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 } as any;
 
 const emptyDocumentsMetrics: ProcessingSimulationResponse['documents_metrics'] = {
@@ -34,16 +35,19 @@ const baseParams = {
 describe('detectTemporaryFields', () => {
   it('detects custom.* fields', () => {
     const docs = [{ message: 'hello', 'custom.timestamp': '2024-01-01' }];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(detectTemporaryFields(docs as any)).toMatchSnapshot();
   });
 
   it('detects attributes.custom.* fields', () => {
     const docs = [{ message: 'hello', 'attributes.custom.level': 'INFO' }];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(detectTemporaryFields(docs as any)).toMatchSnapshot();
   });
 
   it('returns empty array when no temporary fields', () => {
     const docs = [{ message: 'hello', '@timestamp': '2024-01-01' }];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(detectTemporaryFields(docs as any)).toEqual([]);
   });
 
@@ -52,6 +56,7 @@ describe('detectTemporaryFields', () => {
       { 'custom.b': 'x', 'custom.a': 'y' },
       { 'custom.a': 'z', 'attributes.custom.c': 'w' },
     ];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(detectTemporaryFields(docs as any)).toMatchSnapshot();
   });
 });
@@ -90,16 +95,16 @@ describe('buildSimulationFeedback', () => {
         },
       ],
       detected_fields: [],
-       processors_metrics: {
-         'root.steps[0]': {
-           parsed_rate: 1,
-           failed_rate: 0,
-           skipped_rate: 0,
-           dropped_rate: 0,
-           detected_fields: [],
-           errors: [],
-         },
-       },
+      processors_metrics: {
+        'root.steps[0]': {
+          parsed_rate: 1,
+          failed_rate: 0,
+          skipped_rate: 0,
+          dropped_rate: 0,
+          detected_fields: [],
+          errors: [],
+        },
+      },
       definition_error: undefined,
       documents_metrics: { ...emptyDocumentsMetrics },
     };
@@ -115,44 +120,50 @@ describe('buildSimulationFeedback', () => {
   it('reports per-processor failure rates when above 20%', async () => {
     const simulationResult: ProcessingSimulationResponse = {
       documents: [
-       {
-           value: { message: 'ok' },
-           errors: [{ type: 'generic_processor_failure', message: 'bad pattern', processor_id: 'root.steps[0]' }],
-           detected_fields: [],
-           status: 'failed',
-           processed_by: ['root.steps[0]'],
-         },
+        {
+          value: { message: 'ok' },
+          errors: [
+            {
+              type: 'generic_processor_failure',
+              message: 'bad pattern',
+              processor_id: 'root.steps[0]',
+            },
+          ],
+          detected_fields: [],
+          status: 'failed',
+          processed_by: ['root.steps[0]'],
+        },
       ],
       detected_fields: [],
-       processors_metrics: {
-         'root.steps[0]': {
-           parsed_rate: 0,
-           failed_rate: 1,
-           skipped_rate: 0,
-           dropped_rate: 0,
-           detected_fields: [],
-           errors: [],
-         },
-       },
-       definition_error: undefined,
-       documents_metrics: {
-         parsed_rate: 0,
-         failed_rate: 1,
-         partially_parsed_rate: 0,
-         skipped_rate: 0,
-         dropped_rate: 0,
-       },
-     };
+      processors_metrics: {
+        'root.steps[0]': {
+          parsed_rate: 0,
+          failed_rate: 1,
+          skipped_rate: 0,
+          dropped_rate: 0,
+          detected_fields: [],
+          errors: [],
+        },
+      },
+      definition_error: undefined,
+      documents_metrics: {
+        parsed_rate: 0,
+        failed_rate: 1,
+        partially_parsed_rate: 0,
+        skipped_rate: 0,
+        dropped_rate: 0,
+      },
+    };
 
-     const feedback = await buildSimulationFeedback({
-       simulationResult,
-       ...baseParams,
-     });
+    const feedback = await buildSimulationFeedback({
+      simulationResult,
+      ...baseParams,
+    });
 
-     expect(feedback).toMatchSnapshot();
-   });
+    expect(feedback).toMatchSnapshot();
+  });
 
-   it('reports temporary fields and marks invalid', async () => {
+  it('reports temporary fields and marks invalid', async () => {
     const simulationResult: ProcessingSimulationResponse = {
       documents: [
         {
@@ -182,50 +193,62 @@ describe('buildSimulationFeedback', () => {
       documents: [
         {
           value: { message: 'fail' },
-          errors: [{ type: 'generic_processor_failure', message: 'Text could not be parsed', processor_id: 'root.steps[0]' }],
+          errors: [
+            {
+              type: 'generic_processor_failure',
+              message: 'Text could not be parsed',
+              processor_id: 'root.steps[0]',
+            },
+          ],
           detected_fields: [],
           status: 'failed',
           processed_by: ['root.steps[0]'],
         },
         {
           value: { message: 'fail2' },
-          errors: [{ type: 'generic_processor_failure', message: 'Text could not be parsed', processor_id: 'root.steps[0]' }],
+          errors: [
+            {
+              type: 'generic_processor_failure',
+              message: 'Text could not be parsed',
+              processor_id: 'root.steps[0]',
+            },
+          ],
           detected_fields: [],
           status: 'failed',
           processed_by: ['root.steps[0]'],
         },
       ],
       detected_fields: [],
-       processors_metrics: {
-         'root.steps[0]': {
-           parsed_rate: 0,
-           failed_rate: 1,
-           skipped_rate: 0,
-           dropped_rate: 0,
-           detected_fields: [],
-           errors: [],
-         },
-       },
-       definition_error: undefined,
-       documents_metrics: {
-         parsed_rate: 0,
-         failed_rate: 1,
-         partially_parsed_rate: 0,
-         skipped_rate: 0,
-         dropped_rate: 0,
-       },
-     };
+      processors_metrics: {
+        'root.steps[0]': {
+          parsed_rate: 0,
+          failed_rate: 1,
+          skipped_rate: 0,
+          dropped_rate: 0,
+          detected_fields: [],
+          errors: [],
+        },
+      },
+      definition_error: undefined,
+      documents_metrics: {
+        parsed_rate: 0,
+        failed_rate: 1,
+        partially_parsed_rate: 0,
+        skipped_rate: 0,
+        dropped_rate: 0,
+      },
+    };
 
-     const feedback = await buildSimulationFeedback({
-       simulationResult,
-       ...baseParams,
-     });
+    const feedback = await buildSimulationFeedback({
+      simulationResult,
+      ...baseParams,
+    });
 
-     expect(feedback).toMatchSnapshot();
-   });
+    expect(feedback).toMatchSnapshot();
+  });
 
-   it('includes per-processor top_errors with attribution', async () => {
-     const simulationResult: ProcessingSimulationResponse = {
+  it('returns invalid feedback when simulation returns no documents', async () => {
+    const simulationResult: ProcessingSimulationResponse = {
       documents: [],
       detected_fields: [],
       processors_metrics: {},
