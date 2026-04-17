@@ -12,8 +12,11 @@ import type { SerializableRecord } from '@kbn/utility-types';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
 export const rulesLocatorID = 'RULES_LOCATOR';
 
-export type RuleDetailsTabId = 'alerts' | 'execution';
+export type RuleDetailsTabId = 'alerts' | 'history';
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export const RULE_DETAILS_ALERTS_TAB: RuleDetailsTabId = 'alerts';
+export const RULE_DETAILS_HISTORY_TAB: RuleDetailsTabId = 'history';
 
 export interface RuleDetailsLocatorParams extends SerializableRecord {
   ruleId: string;

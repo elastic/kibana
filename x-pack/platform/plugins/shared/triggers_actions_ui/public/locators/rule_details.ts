@@ -10,14 +10,14 @@ import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_control
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import {
+  RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_HISTORY_TAB,
   ruleDetailsLocatorID,
   type RuleDetailsLocatorParams,
   type RuleDetailsTabId,
 } from '@kbn/deeplinks-management';
 import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
 
-const RULE_DETAILS_ALERTS_TAB: RuleDetailsTabId = 'alerts';
-const RULE_DETAILS_EXECUTION_TAB: RuleDetailsTabId = 'execution';
 const RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY = 'searchBarParams';
 
 export const getRuleDetailsPath = (ruleId: string) => getRulesAppDetailsRoute(ruleId);
@@ -51,7 +51,7 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
         { useHash: false, storeInHashQuery: false },
         path
       );
-    } else if (tabId === RULE_DETAILS_EXECUTION_TAB) {
+    } else if (tabId === RULE_DETAILS_HISTORY_TAB) {
       path = `${path}?tabId=${tabId}`;
     }
 

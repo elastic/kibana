@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_DETAILS_ALERTS_TAB, RULE_DETAILS_HISTORY_TAB } from '@kbn/deeplinks-management';
 import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
 
@@ -18,23 +19,25 @@ describe('RuleDetailsLocator', () => {
     expect(location.path).toEqual(getRuleDetailsPath(mockedRuleId));
   });
 
-  it('should return correct url when tabId is execution', async () => {
+  it('should return correct url when tabId is history', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: 'execution',
+      tabId: RULE_DETAILS_HISTORY_TAB,
     });
     expect(location.app).toEqual('rules');
-    expect(location.path).toEqual(`${getRuleDetailsPath(mockedRuleId)}?tabId=execution`);
+    expect(location.path).toEqual(
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_HISTORY_TAB}`
+    );
   });
 
   it('should return correct url when tabId is alerts without extra search params', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: 'alerts',
+      tabId: RULE_DETAILS_ALERTS_TAB,
     });
     expect(location.app).toEqual('rules');
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=alerts&searchBarParams=(` +
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:'',rangeFrom:now-15m,rangeTo:now)`
     );
   });
@@ -42,13 +45,13 @@ describe('RuleDetailsLocator', () => {
   it('should return correct url when tabId is alerts with search params', async () => {
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: 'alerts',
+      tabId: RULE_DETAILS_ALERTS_TAB,
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',
     });
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=alerts&searchBarParams=(` +
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(active),title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group),(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`
     );
   });
@@ -83,14 +86,14 @@ describe('RuleDetailsLocator', () => {
     ];
     const location = await locator.getLocation({
       ruleId: mockedRuleId,
-      tabId: 'alerts',
+      tabId: RULE_DETAILS_ALERTS_TAB,
       rangeFrom: 'mockedRangeTo',
       rangeTo: 'mockedRangeFrom',
       kuery: 'mockedKuery',
       controlConfigs: mockedControlConfigs,
     });
     expect(location.path).toEqual(
-      `${getRuleDetailsPath(mockedRuleId)}?tabId=alerts&searchBarParams=(` +
+      `${getRuleDetailsPath(mockedRuleId)}?tabId=${RULE_DETAILS_ALERTS_TAB}&searchBarParams=(` +
         `controlConfigs:!((display_settings:(hide_action_bar:!t,hide_exists:!t),field_name:kibana.alert.status,persist:!t,selected_options:!(untracked)` +
         `,title:Status),(display_settings:(hide_exists:!t),field_name:kibana.alert.rule.name,title:Rule),(field_name:kibana.alert.group.value,title:Group)` +
         `,(field_name:tags,title:Tags)),kuery:mockedKuery,rangeFrom:mockedRangeTo,rangeTo:mockedRangeFrom)`

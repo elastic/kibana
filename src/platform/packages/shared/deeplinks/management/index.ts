@@ -11,7 +11,12 @@ export { MONITORING_APP_ID, STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } fr
 
 export type { AppId, LinkId, DeepLinkId } from './deep_links';
 
-export { ruleDetailsLocatorID, rulesLocatorID } from './rules';
+export {
+  RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_HISTORY_TAB,
+  ruleDetailsLocatorID,
+  rulesLocatorID,
+} from './rules';
 export type {
   RuleDetailsLocatorParams,
   RuleDetailsTabId,
