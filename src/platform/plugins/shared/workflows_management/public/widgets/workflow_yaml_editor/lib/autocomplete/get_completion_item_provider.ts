@@ -174,6 +174,12 @@ function enrichCompletionItem(
     }
   }
 
+  // Only show DESCRIPTION when the item genuinely has one. Falling back to
+  // `detail` here duplicated the TYPE pill verbatim (Zod dumps show up in both
+  // TYPE and DESCRIPTION, which was noisy and confusing). Let the details
+  // panel's {description && ...} guard hide the section when there is no doc.
+  const resolvedDescription = description && description !== detail ? description : '';
+
   return {
     label,
     insertText: typeof item.insertText === 'string' ? item.insertText : label,
@@ -187,7 +193,7 @@ function enrichCompletionItem(
     command: item.command,
     types,
     required,
-    description: description || detail || label,
+    description: resolvedDescription,
     category,
     contextLabel,
   };
@@ -293,9 +299,11 @@ export function getCompletionItemProvider(
 
       // Enrich suggestions with structured metadata and emit to the custom
       // suggest widget via the side-channel store. Return empty to Monaco so
-      // the built-in suggest widget never appears.
+      // the built-in suggest widget never appears. The `modelUri` lets widget
+      // subscribers filter out payloads from other editors.
       const enrichedItems = suggestions.map((s) => enrichCompletionItem(s, matchType));
       emitSuggestions({
+        modelUri: model.uri.toString(),
         items: enrichedItems,
         anchorPosition: { lineNumber: position.lineNumber, column: position.column },
         triggerKind:

@@ -68,6 +68,8 @@ export interface EnrichedSuggestionItem {
 
 /** Payload emitted by the completion provider to the custom suggest widget. */
 export interface SuggestionsPayload {
+  /** URI of the Monaco model the suggestions belong to — subscribers filter on this. */
+  modelUri: string;
   items: EnrichedSuggestionItem[];
   anchorPosition: { lineNumber: number; column: number };
   triggerKind: 'auto' | 'manual';

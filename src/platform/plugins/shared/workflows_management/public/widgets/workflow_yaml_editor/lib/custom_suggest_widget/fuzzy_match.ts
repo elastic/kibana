@@ -213,20 +213,22 @@ export const highlightSegments = (label: string, indices: number[]): HighlightSe
 };
 
 /**
- * Get highlight indices for the label when scoring was done against a different
- * filterText. Re-runs fuzzyMatch on the label to get label-specific positions.
+ * Get highlight indices for the label.
+ *
+ * The item still matches (and the user sees it in the list), but we suppress
+ * the underline when the first matched char isn't at a strong position
+ * (word boundary, camelCase break, or string start). That avoids nonsense
+ * highlights like "ch" inside "elasticsearch.search" when the user's pattern
+ * happens to hit a random substring — a highlighted-random-2-chars reads as
+ * a bug, whereas no underline reads as "matched fuzzily somewhere".
  */
 export const getLabelHighlightIndices = (
   pattern: string,
   label: string,
-  filterText: string | undefined
+  _filterText: string | undefined
 ): number[] => {
-  if (!filterText || filterText === label) {
-    // filterText matches label — use the same indices
-    return fuzzyMatch(pattern, label).indices;
-  }
-
-  // filterText differs from label — score the label separately for highlights
-  const labelResult = fuzzyMatch(pattern, label);
-  return labelResult.indices;
+  const result = fuzzyMatch(pattern, label);
+  if (result.indices.length === 0) return [];
+  if (!isStrongPosition(label, result.indices[0])) return [];
+  return result.indices;
 };

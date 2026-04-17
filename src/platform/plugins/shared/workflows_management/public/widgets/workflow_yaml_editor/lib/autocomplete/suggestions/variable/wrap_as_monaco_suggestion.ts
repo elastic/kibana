@@ -53,7 +53,11 @@ export function wrapAsMonacoSuggestion(
     kind: monaco.languages.CompletionItemKind.Field,
     range,
     insertText,
-    detail: `${type}${description ? `: ${description}` : ''}`,
+    // Keep `detail` as the type alone so consumers can treat it as a type
+    // signature; the human description (when the Zod schema has .describe())
+    // goes into `documentation` and is rendered separately.
+    detail: type,
+    documentation: description,
     insertTextRules,
     additionalTextEdits: removeDot
       ? [

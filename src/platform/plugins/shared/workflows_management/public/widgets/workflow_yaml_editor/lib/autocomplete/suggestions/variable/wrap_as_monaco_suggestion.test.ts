@@ -45,7 +45,7 @@ describe('wrapAsMonacoSuggestion', () => {
       expect(result.detail).toBe('number');
     });
 
-    it('should include description in the detail when provided', () => {
+    it('should put description in documentation, keeping detail as the type alone', () => {
       const range = createMockRange();
       const result = wrapAsMonacoSuggestion(
         'apiKey',
@@ -57,7 +57,8 @@ describe('wrapAsMonacoSuggestion', () => {
         'The API key for authentication'
       );
 
-      expect(result.detail).toBe('string: The API key for authentication');
+      expect(result.detail).toBe('string');
+      expect(result.documentation).toBe('The API key for authentication');
     });
   });
 

@@ -107,8 +107,10 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       max-height: 120px;
     }
 
-    /* Hide built-in suggest widget — custom suggest widget handles display */
-    .monaco-editor .suggest-widget {
+    /* Hide built-in suggest widget inside the workflow editor's overflow container
+       — our custom IContentWidget handles display for this editor. Scoped so other
+       Monaco editors on the page keep their built-in suggest UI. */
+    .workflow-custom-suggest-host .suggest-widget {
       display: none !important;
     }
 

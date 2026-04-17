@@ -10,6 +10,7 @@
 import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 
 import { clearSuggestions, subscribeSuggestions } from './enriched_suggestion_store';
@@ -71,22 +72,31 @@ export const useCustomSuggestWidget = (
   }, []);
 
   // ── Hide ──
+  //
+  // preserve=true soft-hides: visibility goes false but anchor/items/filter are
+  // kept so subsequent edits (typically a backspace into a matching prefix) can
+  // re-show the widget without requiring a fresh trigger.
+  const hideWidget = useCallback(
+    (opts?: { preserve?: boolean }) => {
+      if (!ctxKeyRef.current) return;
 
-  const hideWidget = useCallback(() => {
-    if (!ctxKeyRef.current) return;
+      isVisibleRef.current = false;
+      ctxKeyRef.current.set(false);
+      render();
 
-    isVisibleRef.current = false;
-    anchorPositionRef.current = null;
-    filterTextRef.current = '';
-    ctxKeyRef.current.set(false);
-    clearSuggestions();
-    render();
+      (
+        editorRef.current as { setAriaOptions?: (opts: Record<string, unknown>) => void }
+      )?.setAriaOptions?.({ activeDescendant: undefined });
 
-    // Clear aria active descendant (setAriaOptions is available on internal editor API)
-    (
-      editorRef.current as { setAriaOptions?: (opts: Record<string, unknown>) => void }
-    )?.setAriaOptions?.({ activeDescendant: undefined });
-  }, [render]);
+      if (!opts?.preserve) {
+        anchorPositionRef.current = null;
+        filterTextRef.current = '';
+        itemsRef.current = [];
+        clearSuggestions();
+      }
+    },
+    [render]
+  );
 
   // ── Show ──
 
@@ -267,116 +277,142 @@ export const useCustomSuggestWidget = (
     ctxKeyRef.current = ctxKey;
 
     // ── Keybindings ──
-    // Use addCommand for Enter/Tab (these conflict with the `type` command path).
-    // addCommand with a context string doesn't add `editorId` scoping, making it
-    // simpler and more reliable than addAction for keys that go through the `type` path.
+    // All keybindings go through addAction so they return IDisposable and are
+    // cleaned up on unmount. The `precondition` gates on the context key so
+    // default Monaco handlers (Enter/Tab type, Escape exit-edit-mode) stay
+    // active when the widget is hidden.
+    const addKeyAction = (
+      id: string,
+      label: string,
+      keybindings: number[],
+      run: () => void
+    ): void => {
+      disposablesRef.current.push(
+        editor.addAction({ id, label, precondition: CONTEXT_KEY, keybindings, run })
+      );
+    };
 
-    const enterCmdId = editor.addCommand(
-      monaco.KeyCode.Enter,
-      () => acceptSuggestion(),
-      CONTEXT_KEY
+    addKeyAction(
+      'customSuggest.accept',
+      i18n.translate('workflows.yamlEditor.suggest.accept', {
+        defaultMessage: 'Accept suggestion',
+      }),
+      [monaco.KeyCode.Enter],
+      () => acceptSuggestion()
     );
-    if (enterCmdId) disposablesRef.current.push({ dispose: () => {} });
-
-    const tabCmdId = editor.addCommand(monaco.KeyCode.Tab, () => acceptSuggestion(), CONTEXT_KEY);
-    if (tabCmdId) disposablesRef.current.push({ dispose: () => {} });
-
-    const escapeCmdId = editor.addCommand(monaco.KeyCode.Escape, () => hideWidget(), CONTEXT_KEY);
-    if (escapeCmdId) disposablesRef.current.push({ dispose: () => {} });
-
-    // Use addAction for arrow keys (these don't conflict with the `type` command)
+    addKeyAction(
+      'customSuggest.acceptTab',
+      i18n.translate('workflows.yamlEditor.suggest.acceptTab', {
+        defaultMessage: 'Accept suggestion (Tab)',
+      }),
+      [monaco.KeyCode.Tab],
+      () => acceptSuggestion()
+    );
+    // Escape is handled via onKeyDown rather than addAction: the shared CodeEditor
+    // wrapper listens on onKeyDown and exits edit mode on ESC. Our addAction fires
+    // through a separate pipeline, so the wrapper runs first and stopPropagation
+    // prevents our handler from firing. Intercepting in onKeyDown lets us
+    // preventDefault + stopPropagation before the wrapper decides to exit edit mode.
     disposablesRef.current.push(
-      editor.addAction({
-        id: 'customSuggest.selectPrevious',
-        label: 'Custom Suggest: Select Previous',
-        precondition: CONTEXT_KEY,
-        keybindings: [monaco.KeyCode.UpArrow],
-        run: () => {
-          selectedIndexRef.current = Math.max(0, selectedIndexRef.current - 1);
-          render();
-        },
+      editor.onKeyDown((e) => {
+        if (e.keyCode !== monaco.KeyCode.Escape) return;
+        if (!isVisibleRef.current && !anchorPositionRef.current) return;
+        e.preventDefault();
+        e.stopPropagation();
+        hideWidget();
       })
     );
-
-    disposablesRef.current.push(
-      editor.addAction({
-        id: 'customSuggest.selectNext',
-        label: 'Custom Suggest: Select Next',
-        precondition: CONTEXT_KEY,
-        keybindings: [monaco.KeyCode.DownArrow],
-        run: () => {
-          const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
-          selectedIndexRef.current = Math.min(filtered.length - 1, selectedIndexRef.current + 1);
-          render();
-        },
-      })
+    addKeyAction(
+      'customSuggest.selectPrevious',
+      i18n.translate('workflows.yamlEditor.suggest.selectPrevious', {
+        defaultMessage: 'Select previous suggestion',
+      }),
+      [monaco.KeyCode.UpArrow],
+      () => {
+        selectedIndexRef.current = Math.max(0, selectedIndexRef.current - 1);
+        render();
+      }
     );
-
-    disposablesRef.current.push(
-      editor.addAction({
-        id: 'customSuggest.pageUp',
-        label: 'Custom Suggest: Page Up',
-        precondition: CONTEXT_KEY,
-        keybindings: [monaco.KeyCode.PageUp],
-        run: () => {
-          selectedIndexRef.current = Math.max(0, selectedIndexRef.current - 8);
-          render();
-        },
-      })
+    addKeyAction(
+      'customSuggest.selectNext',
+      i18n.translate('workflows.yamlEditor.suggest.selectNext', {
+        defaultMessage: 'Select next suggestion',
+      }),
+      [monaco.KeyCode.DownArrow],
+      () => {
+        const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
+        selectedIndexRef.current = Math.min(filtered.length - 1, selectedIndexRef.current + 1);
+        render();
+      }
     );
-
-    disposablesRef.current.push(
-      editor.addAction({
-        id: 'customSuggest.pageDown',
-        label: 'Custom Suggest: Page Down',
-        precondition: CONTEXT_KEY,
-        keybindings: [monaco.KeyCode.PageDown],
-        run: () => {
-          const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
-          selectedIndexRef.current = Math.min(filtered.length - 1, selectedIndexRef.current + 8);
-          render();
-        },
-      })
+    addKeyAction(
+      'customSuggest.pageUp',
+      i18n.translate('workflows.yamlEditor.suggest.pageUp', {
+        defaultMessage: 'Page up in suggestions',
+      }),
+      [monaco.KeyCode.PageUp],
+      () => {
+        selectedIndexRef.current = Math.max(0, selectedIndexRef.current - 8);
+        render();
+      }
     );
-
-    // NOTE: No addKeybindingRules with command:null — they shadow the addCommand handlers
+    addKeyAction(
+      'customSuggest.pageDown',
+      i18n.translate('workflows.yamlEditor.suggest.pageDown', {
+        defaultMessage: 'Page down in suggestions',
+      }),
+      [monaco.KeyCode.PageDown],
+      () => {
+        const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
+        selectedIndexRef.current = Math.min(filtered.length - 1, selectedIndexRef.current + 8);
+        render();
+      }
+    );
 
     // ── Filter text tracking via onDidChangeModelContent ──
+    //
+    // Derive filter text from the live anchor→cursor range rather than diffing
+    // change events: one source of truth, and it keeps working across paste,
+    // IME composition, and programmatic edits. While the anchor is set we also
+    // process changes when the widget is soft-hidden, so typing into a new
+    // matching prefix (e.g. backspacing after a typo) reopens the widget.
 
     disposablesRef.current.push(
-      editor.onDidChangeModelContent((e) => {
-        if (!isVisibleRef.current || isAcceptingRef.current) return;
+      editor.onDidChangeModelContent(() => {
+        if (isAcceptingRef.current) return;
+        const anchor = anchorPositionRef.current;
+        if (!anchor) return;
 
-        for (const change of e.changes) {
-          if (change.text.length > 0 && change.rangeLength === 0) {
-            filterTextRef.current += change.text;
-          } else if (change.text.length === 0 && change.rangeLength > 0) {
-            filterTextRef.current = filterTextRef.current.slice(
-              0,
-              Math.max(0, filterTextRef.current.length - change.rangeLength)
-            );
-          } else if (change.text.length > 0 && change.rangeLength > 0) {
-            filterTextRef.current = filterTextRef.current.slice(
-              0,
-              Math.max(0, filterTextRef.current.length - change.rangeLength)
-            );
-            filterTextRef.current += change.text;
-          }
+        const pos = editor.getPosition();
+        const model = editor.getModel();
+        if (!pos || !model || pos.lineNumber !== anchor.lineNumber) {
+          hideWidget();
+          return;
+        }
+        if (pos.column < anchor.column) {
+          hideWidget();
+          return;
         }
 
+        filterTextRef.current = model.getValueInRange({
+          startLineNumber: anchor.lineNumber,
+          startColumn: anchor.column,
+          endLineNumber: pos.lineNumber,
+          endColumn: pos.column,
+        });
         selectedIndexRef.current = 0;
 
         const filtered = getFilteredItems(itemsRef.current, filterTextRef.current);
         if (filtered.length === 0) {
-          hideWidget();
+          // Soft hide — keep anchor/items so further editing can restore.
+          hideWidget({ preserve: true });
           return;
         }
 
-        if (filterTextRef.current.length === 0 && e.changes.some((c) => c.rangeLength > 0)) {
-          hideWidget();
-          return;
+        if (!isVisibleRef.current) {
+          isVisibleRef.current = true;
+          ctxKeyRef.current?.set(true);
         }
-
         render();
       })
     );
@@ -385,11 +421,8 @@ export const useCustomSuggestWidget = (
 
     disposablesRef.current.push(
       editor.onDidChangeCursorPosition((e) => {
-        if (!isVisibleRef.current) return;
-        if (
-          anchorPositionRef.current &&
-          e.position.lineNumber !== anchorPositionRef.current.lineNumber
-        ) {
+        if (!anchorPositionRef.current) return;
+        if (e.position.lineNumber !== anchorPositionRef.current.lineNumber) {
           hideWidget();
         }
       })
@@ -399,7 +432,7 @@ export const useCustomSuggestWidget = (
 
     disposablesRef.current.push(
       editor.onMouseDown(() => {
-        if (isVisibleRef.current) {
+        if (isVisibleRef.current || anchorPositionRef.current) {
           hideWidget();
         }
       })
@@ -416,8 +449,13 @@ export const useCustomSuggestWidget = (
     );
 
     // ── Subscribe to enriched suggestions from the completion provider ──
-
+    //
+    // The emitter is a module-level singleton that may receive payloads from
+    // other workflow editor instances; filter by modelUri so each editor only
+    // reacts to its own suggestions.
+    const ownModelUri = editor.getModel()?.uri.toString();
     const unsubscribe = subscribeSuggestions((payload) => {
+      if (ownModelUri && payload.modelUri !== ownModelUri) return;
       showWidget(payload);
     });
 

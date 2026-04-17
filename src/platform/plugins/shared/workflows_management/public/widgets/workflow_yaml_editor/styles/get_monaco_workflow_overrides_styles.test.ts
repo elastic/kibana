@@ -60,14 +60,19 @@ describe('getMonacoWorkflowOverridesStyles', () => {
     expect(stylesString).toContain('hidden');
   });
 
-  it('should apply shadow and border-radius to suggestion widget', () => {
+  it('should hide the built-in suggest widget only inside the workflow suggest host', () => {
     const euiThemeContext = createMockEuiThemeContext();
     const styles = getMonacoWorkflowOverridesStyles(euiThemeContext);
 
     const stylesString = styles.styles;
-    expect(stylesString).toContain('.monaco-editor .suggest-widget');
-    expect(stylesString).toContain('border-radius');
-    expect(stylesString).toContain('6px');
+    // Rule must be scoped so other Monaco editors on the page keep their
+    // built-in suggest UI.
+    expect(stylesString).toMatch(
+      /\.workflow-custom-suggest-host \.suggest-widget\s*{[^}]*display:\s*none/
+    );
+    expect(stylesString).not.toMatch(
+      /^[^{]*\.monaco-editor \.suggest-widget\s*{[^}]*display:\s*none/m
+    );
   });
 
   it('should style hover widget with proper selectors', () => {

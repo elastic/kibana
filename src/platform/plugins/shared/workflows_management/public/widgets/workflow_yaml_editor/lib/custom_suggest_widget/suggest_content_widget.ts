@@ -11,6 +11,8 @@ import { monaco } from '@kbn/monaco';
 
 const WIDGET_ID = 'custom.suggest.widget';
 const WIDGET_WIDTH_PX = 700;
+/** Class applied to the overflow container that hosts the widget, used to scope CSS overrides. */
+export const SUGGEST_HOST_CLASS = 'workflow-custom-suggest-host';
 
 /**
  * IContentWidget wrapper for the custom suggest widget.
@@ -46,6 +48,10 @@ export class SuggestContentWidget implements monaco.editor.IContentWidget {
     });
 
     editor.addContentWidget(this);
+
+    // Tag the overflow container that now hosts our widget so we can scope the
+    // built-in suggest-widget CSS override to this editor's overflow root only.
+    this.domNode.parentElement?.classList.add(SUGGEST_HOST_CLASS);
   }
 
   getId(): string {
@@ -81,6 +87,11 @@ export class SuggestContentWidget implements monaco.editor.IContentWidget {
   }
 
   dispose(): void {
+    const host = this.domNode.parentElement;
     this.editor.removeContentWidget(this);
+    // Only drop the host class if no other workflow suggest widget is attached.
+    if (host && !host.querySelector(`[widgetid="${WIDGET_ID}"]`)) {
+      host.classList.remove(SUGGEST_HOST_CLASS);
+    }
   }
 }

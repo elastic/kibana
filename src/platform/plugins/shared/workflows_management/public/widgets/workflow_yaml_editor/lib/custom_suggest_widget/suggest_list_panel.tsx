@@ -7,14 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, type IconType, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiToken, type IconType, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { fuzzyMatch, getLabelHighlightIndices, highlightSegments } from './fuzzy_match';
 import { getSuggestWidgetStyles } from './suggest_widget_styles';
 import type { EnrichedSuggestionItem } from './types';
 import { getStepIconType } from '../../../../shared/ui/step_icons/get_step_icon_type';
 import { HardcodedIcons } from '../../../../shared/ui/step_icons/hardcoded_icons';
+
+const KIND_LABELS = {
+  step: i18n.translate('workflows.yamlEditor.suggest.kind.step', { defaultMessage: 'step' }),
+  elasticsearch: i18n.translate('workflows.yamlEditor.suggest.kind.elasticsearch', {
+    defaultMessage: 'elasticsearch',
+  }),
+  kibana: i18n.translate('workflows.yamlEditor.suggest.kind.kibana', {
+    defaultMessage: 'kibana',
+  }),
+  connector: i18n.translate('workflows.yamlEditor.suggest.kind.connector', {
+    defaultMessage: 'connector',
+  }),
+  variable: i18n.translate('workflows.yamlEditor.suggest.kind.variable', {
+    defaultMessage: 'variable',
+  }),
+  filter: i18n.translate('workflows.yamlEditor.suggest.kind.filter', {
+    defaultMessage: 'filter',
+  }),
+  keyword: i18n.translate('workflows.yamlEditor.suggest.kind.keyword', {
+    defaultMessage: 'keyword',
+  }),
+  trigger: i18n.translate('workflows.yamlEditor.suggest.kind.trigger', {
+    defaultMessage: 'trigger',
+  }),
+  property: i18n.translate('workflows.yamlEditor.suggest.kind.property', {
+    defaultMessage: 'property',
+  }),
+} as const;
+
+const LIST_HEADER = i18n.translate('workflows.yamlEditor.suggest.listHeader', {
+  defaultMessage: 'Suggested',
+});
+const LIST_ARIA_LABEL = i18n.translate('workflows.yamlEditor.suggest.listAriaLabel', {
+  defaultMessage: 'Suggestions',
+});
 
 /**
  * Resolve the icon for a suggestion item using the same lookup chain as
@@ -61,16 +97,16 @@ export interface FilteredItem {
 const getKindLabel = (item: EnrichedSuggestionItem): string => {
   // For step/connector type suggestions, the description is more useful than the category
   if (item.category === 'connector' || item.category === 'step') {
-    if (item.description?.startsWith('Built-in')) return 'step';
-    if (item.label.startsWith('elasticsearch.')) return 'Elasticsearch';
-    if (item.label.startsWith('kibana.')) return 'Kibana';
-    return 'connector';
+    if (item.description?.startsWith('Built-in')) return KIND_LABELS.step;
+    if (item.label.startsWith('elasticsearch.')) return KIND_LABELS.elasticsearch;
+    if (item.label.startsWith('kibana.')) return KIND_LABELS.kibana;
+    return KIND_LABELS.connector;
   }
-  if (item.category === 'variable') return 'variable';
-  if (item.category === 'filter') return 'filter';
-  if (item.category === 'keyword') return 'keyword';
-  if (item.category === 'trigger') return 'trigger';
-  if (item.category === 'param') return 'property';
+  if (item.category === 'variable') return KIND_LABELS.variable;
+  if (item.category === 'filter') return KIND_LABELS.filter;
+  if (item.category === 'keyword') return KIND_LABELS.keyword;
+  if (item.category === 'trigger') return KIND_LABELS.trigger;
+  if (item.category === 'param') return KIND_LABELS.property;
   return item.category;
 };
 
@@ -135,8 +171,8 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
 
   return (
     <div css={styles.listPanel}>
-      <div css={styles.listHeader}>{'Suggested'}</div>
-      <div css={styles.listScroll} ref={listRef} role="listbox" aria-label="Suggestions">
+      <div css={styles.listHeader}>{LIST_HEADER}</div>
+      <div css={styles.listScroll} ref={listRef} role="listbox" aria-label={LIST_ARIA_LABEL}>
         {filteredItems.map(({ item, labelHighlightIndices }, i) => {
           const isSelected = i === selectedIndex;
           const segments = highlightSegments(item.label, labelHighlightIndices);
@@ -154,12 +190,16 @@ export const SuggestListPanel: React.FC<SuggestListPanelProps> = ({
               onMouseEnter={() => onSelect(i)}
             >
               <span css={[styles.itemIcon, isSelected && styles.itemIconSelected]}>
-                <EuiIcon
-                  type={getItemIcon(item.filterText ?? item.label)}
-                  size="s"
-                  color={isSelected ? 'inherit' : 'subdued'}
-                  aria-hidden={true}
-                />
+                {item.category === 'variable' ? (
+                  <EuiToken iconType="tokenVariable" size="s" shape="square" aria-hidden={true} />
+                ) : (
+                  <EuiIcon
+                    type={getItemIcon(item.filterText ?? item.label)}
+                    size="s"
+                    color={isSelected ? 'inherit' : 'subdued'}
+                    aria-hidden={true}
+                  />
+                )}
               </span>
               <span css={styles.itemLabel}>
                 {segments.map((seg, si) =>
