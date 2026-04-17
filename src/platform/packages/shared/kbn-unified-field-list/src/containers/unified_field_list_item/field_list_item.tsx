@@ -42,7 +42,7 @@ interface GetCommonFieldItemButtonPropsParams {
   size: FieldItemButtonProps<DataViewField>['size'];
   isSelected: boolean;
   toggleDisplay: (field: DataViewField, isSelected?: boolean) => void;
-  searchMode?: SearchMode | undefined;
+  searchMode: SearchMode | undefined;
 }
 
 function getCommonFieldItemButtonProps({
