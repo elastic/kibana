@@ -18,7 +18,6 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
-import { useAccumulatedDimensions } from './use_accumulated_dimensions';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -52,17 +51,6 @@ export function useFetchMetricsData({
     () => buildMetricsInfoQuery(esql, selectedDimensions),
     [esql, selectedDimensions]
   );
-
-  // Accumulate dimensions across filtered fetches so that selecting additional
-  // breakdown dimensions does not remove previously-available dimensions from
-  // the picker. Reset on any data-context change (query, time range, Discover
-  // filters, ES|QL variables), since those can legitimately remove dimensions.
-  const mergeAccumulatedDimensions = useAccumulatedDimensions([
-    esql,
-    fetchParams.timeRange,
-    fetchParams.filters,
-    fetchParams.esqlVariables,
-  ]);
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
     async (
@@ -102,17 +90,11 @@ export function useFetchMetricsData({
 
       const parsed = parseMetricsWithTelemetry(documents, getFieldType);
 
-      // Merge newly-fetched dimensions with the accumulated set so that
-      // dimensions from the unfiltered response are not lost when a WHERE
-      // filter narrows the result set. Pass signal.aborted so the hook can
-      // skip persisting dimensions from a fetch whose data context is gone.
-      const mergedDimensions = mergeAccumulatedDimensions(parsed.allDimensions, signal.aborted);
-
       const sortedMetrics: ParsedMetrics = {
         metricItems: [...parsed.metricItems].sort((a, b) =>
           a.metricName.localeCompare(b.metricName)
         ),
-        allDimensions: [...mergedDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
       };
 
       if (!signal.aborted) {
@@ -126,7 +108,6 @@ export function useFetchMetricsData({
     },
     [
       metricsInfoQuery,
-      mergeAccumulatedDimensions,
       trackRequest,
       fetchParams.dataView,
       fetchParams.timeRange,
