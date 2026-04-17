@@ -111,7 +111,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const btn = document.querySelector('[data-test-subj="reloadButton"]') as HTMLElement;
           if (btn) btn.click();
         });
-        await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+        await retry.try(async () => {
+          await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
+        });
         await testSubjects.click('manageTemplateButton');
         await testSubjects.click('editIndexTemplateButton');
         await pageObjects.header.waitUntilLoadingHasFinished();
