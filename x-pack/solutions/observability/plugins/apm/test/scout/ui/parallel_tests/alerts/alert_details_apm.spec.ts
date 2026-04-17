@@ -26,62 +26,63 @@ function createExploreInApmTest(alertIndex: string) {
     apiServices,
     esClient,
   }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
-    let ruleName: string | undefined;
+    let alertDocId: string;
 
-    try {
-      let alertDocId: string;
-
-      await test.step('set up rule and alert document', async () => {
-        const result = await setupAlertForTest({
-          apiServices,
-          esClient,
-          alertIndex,
-          config: LATENCY_THRESHOLD_CONFIG,
-        });
-        ruleName = result.ruleName;
-        alertDocId = result.alertDocId;
+    await test.step('set up rule and alert document', async () => {
+      const result = await setupAlertForTest({
+        apiServices,
+        esClient,
+        alertIndex,
+        config: LATENCY_THRESHOLD_CONFIG,
       });
+      ruleName = result.ruleName;
+      alertDocId = result.alertDocId;
+    });
 
-      await test.step('navigate to alert details page', async () => {
-        await alertDetailsPage.goto(alertDocId);
-      });
+    await test.step('navigate to alert details page', async () => {
+      await alertDetailsPage.goto(alertDocId);
+    });
 
-      await test.step('open the chart actions dropdown on the Latency chart', async () => {
-        await expect(async () => {
-          await expect(alertDetailsPage.getOpenActionsButton('Latency')).toBeVisible();
-          await alertDetailsPage.openChartActions('Latency');
-        }).toPass({ timeout: 60_000, intervals: [2_000] });
-      });
+    await test.step('open the chart actions dropdown on the Latency chart', async () => {
+      await expect(async () => {
+        await expect(alertDetailsPage.getOpenActionsButton('Latency')).toBeVisible();
+        await alertDetailsPage.openChartActions('Latency');
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
+    });
 
-      await test.step('verify "In APM" action has a valid redirect href', async () => {
-        await expect(alertDetailsPage.viewInApmAction).toBeVisible();
+    await test.step('verify "In APM" action has a valid redirect href', async () => {
+      await expect(alertDetailsPage.viewInApmAction).toBeVisible();
 
-        const apmHref = await alertDetailsPage.getViewInApmHref();
-        expect(apmHref).toBeTruthy();
-        expect(apmHref).toContain('APM_LOCATOR');
-      });
+      const apmHref = await alertDetailsPage.getViewInApmHref();
+      expect(apmHref).toBeTruthy();
+      expect(apmHref).toContain('APM_LOCATOR');
+    });
 
-      await test.step('click "In APM" and verify APM service overview loads', async () => {
-        await alertDetailsPage.clickViewInApm();
+    await test.step('click "In APM" and verify APM service overview loads', async () => {
+      await alertDetailsPage.clickViewInApm();
 
-        await expect(async () => {
-          expect(page.url()).toContain(`/apm/services/${SERVICE_NAME}/overview`);
-          await expect(page.testSubj.locator('apmMainTemplateHeaderServiceName')).toHaveText(
-            SERVICE_NAME
-          );
-        }).toPass({ timeout: 60_000, intervals: [2_000] });
-      });
-    } finally {
-      if (ruleName) {
-        await cleanupApmAlerts({ apiServices, esClient, ruleName });
-      }
-    }
+      await expect(async () => {
+        expect(page.url()).toContain(`/apm/services/${SERVICE_NAME}/overview`);
+        await expect(page.testSubj.locator('apmMainTemplateHeaderServiceName')).toHaveText(
+          SERVICE_NAME
+        );
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
+    });
   };
 }
+
+let ruleName: string | undefined;
 
 test.describe('Alert details - Explore in APM', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
+  });
+
+  test.afterEach(async ({ apiServices, esClient }) => {
+    if (ruleName) {
+      await cleanupApmAlerts({ apiServices, esClient, ruleName });
+      ruleName = undefined;
+    }
   });
 
   test(

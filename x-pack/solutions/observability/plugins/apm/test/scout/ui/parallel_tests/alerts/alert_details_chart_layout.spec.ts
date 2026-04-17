@@ -25,47 +25,48 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
     apiServices,
     esClient,
   }: ExtendedScoutTestFixtures & ObltWorkerFixtures) => {
-    let ruleName: string | undefined;
+    let alertDocId: string;
 
-    try {
-      let alertDocId: string;
+    await test.step('set up rule and alert document', async () => {
+      const result = await setupAlertForTest({ apiServices, esClient, alertIndex, config });
+      ruleName = result.ruleName;
+      alertDocId = result.alertDocId;
+    });
 
-      await test.step('set up rule and alert document', async () => {
-        const result = await setupAlertForTest({ apiServices, esClient, alertIndex, config });
-        ruleName = result.ruleName;
-        alertDocId = result.alertDocId;
-      });
+    await test.step('navigate to alert details page', async () => {
+      await alertDetailsPage.goto(alertDocId);
+    });
 
-      await test.step('navigate to alert details page', async () => {
-        await alertDetailsPage.goto(alertDocId);
-      });
-
-      await test.step('verify all chart panels are rendered', async () => {
-        await expect(async () => {
-          await expect(alertDetailsPage.getChartPanel(config.primaryChartTitle)).toBeVisible();
-          for (const title of config.secondaryChartTitles) {
-            await expect(alertDetailsPage.getChartPanel(title)).toBeVisible();
-          }
-        }).toPass({ timeout: 60_000, intervals: [2_000] });
-      });
-
-      await test.step('verify chart actions are available on each chart', async () => {
-        const allChartTitles = [config.primaryChartTitle, ...config.secondaryChartTitles];
-        for (const title of allChartTitles) {
-          await expect(alertDetailsPage.getOpenActionsButton(title)).toBeVisible();
+    await test.step('verify all chart panels are rendered', async () => {
+      await expect(async () => {
+        await expect(alertDetailsPage.getChartPanel(config.primaryChartTitle)).toBeVisible();
+        for (const title of config.secondaryChartTitles) {
+          await expect(alertDetailsPage.getChartPanel(title)).toBeVisible();
         }
-      });
-    } finally {
-      if (ruleName) {
-        await cleanupApmAlerts({ apiServices, esClient, ruleName });
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
+    });
+
+    await test.step('verify chart actions are available on each chart', async () => {
+      const allChartTitles = [config.primaryChartTitle, ...config.secondaryChartTitles];
+      for (const title of allChartTitles) {
+        await expect(alertDetailsPage.getOpenActionsButton(title)).toBeVisible();
       }
-    }
+    });
   };
 }
+
+let ruleName: string | undefined;
 
 test.describe('Alert details - Chart layout', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
+  });
+
+  test.afterEach(async ({ apiServices, esClient }) => {
+    if (ruleName) {
+      await cleanupApmAlerts({ apiServices, esClient, ruleName });
+      ruleName = undefined;
+    }
   });
 
   test(
