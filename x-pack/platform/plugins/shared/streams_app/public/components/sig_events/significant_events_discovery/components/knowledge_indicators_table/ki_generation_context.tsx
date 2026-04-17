@@ -193,38 +193,52 @@ export function KiGenerationProvider({ children }: { children: React.ReactNode }
     return filteredStreams.some((item) => !(item.stream.name in streamStatusMap));
   }, [isStreamsLoading, filteredStreams, streamStatusMap]);
 
-  // Wrap bulk onboard methods with optimistic pre-fill so the UI immediately
-  // reflects streams as generating before the scheduling round-trip resolves.
+  const unmarkFailedStreams = useCallback((requested: string[], succeeded: string[]) => {
+    if (succeeded.length === requested.length) return;
+    const succeededSet = new Set(succeeded);
+    const failed = requested.filter((s) => !succeededSet.has(s));
+    if (failed.length === 0) return;
+    setGeneratingStreams((current) => {
+      const next = new Set(current);
+      failed.forEach((s) => next.delete(s));
+      return next;
+    });
+  }, []);
+
   const bulkOnboardAll = useCallback(
     async (streamNames: string[]) => {
       markAsGenerating(streamNames);
-      await rawBulkOnboardAll(streamNames);
+      const succeeded = await rawBulkOnboardAll(streamNames);
+      unmarkFailedStreams(streamNames, succeeded);
     },
-    [markAsGenerating, rawBulkOnboardAll]
+    [markAsGenerating, rawBulkOnboardAll, unmarkFailedStreams]
   );
 
   const bulkOnboardFeaturesOnly = useCallback(
     async (streamNames: string[]) => {
       markAsGenerating(streamNames);
-      await rawBulkOnboardFeaturesOnly(streamNames);
+      const succeeded = await rawBulkOnboardFeaturesOnly(streamNames);
+      unmarkFailedStreams(streamNames, succeeded);
     },
-    [markAsGenerating, rawBulkOnboardFeaturesOnly]
+    [markAsGenerating, rawBulkOnboardFeaturesOnly, unmarkFailedStreams]
   );
 
   const bulkOnboardQueriesOnly = useCallback(
     async (streamNames: string[]) => {
       markAsGenerating(streamNames);
-      await rawBulkOnboardQueriesOnly(streamNames);
+      const succeeded = await rawBulkOnboardQueriesOnly(streamNames);
+      unmarkFailedStreams(streamNames, succeeded);
     },
-    [markAsGenerating, rawBulkOnboardQueriesOnly]
+    [markAsGenerating, rawBulkOnboardQueriesOnly, unmarkFailedStreams]
   );
 
   const bulkScheduleOnboardingTask = useCallback(
     async (streamNames: string[], options?: ScheduleOnboardingOptions) => {
       markAsGenerating(streamNames);
-      await rawBulkScheduleOnboardingTask(streamNames, options);
+      const succeeded = await rawBulkScheduleOnboardingTask(streamNames, options);
+      unmarkFailedStreams(streamNames, succeeded);
     },
-    [markAsGenerating, rawBulkScheduleOnboardingTask]
+    [markAsGenerating, rawBulkScheduleOnboardingTask, unmarkFailedStreams]
   );
 
   const isStreamActionable = useCallback(

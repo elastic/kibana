@@ -44,7 +44,7 @@ export function useBulkOnboarding({
   const [isScheduling, setIsScheduling] = useState(false);
 
   const bulkScheduleOnboardingTask = useCallback(
-    async (streamNames: string[], options?: ScheduleOnboardingOptions) => {
+    async (streamNames: string[], options?: ScheduleOnboardingOptions): Promise<string[]> => {
       setIsScheduling(true);
       const succeeded: string[] = [];
       try {
@@ -72,20 +72,22 @@ export function useBulkOnboarding({
       if (succeeded.length > 0) {
         processStatusUpdateQueue();
       }
+
+      return succeeded;
     },
     [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
   );
 
   const bulkOnboardAll = useCallback(
-    async (streamNames: string[]) => {
-      await bulkScheduleOnboardingTask(streamNames, onboardingConfig);
+    async (streamNames: string[]): Promise<string[]> => {
+      return bulkScheduleOnboardingTask(streamNames, onboardingConfig);
     },
     [bulkScheduleOnboardingTask, onboardingConfig]
   );
 
   const bulkOnboardStep = useCallback(
-    async (streamNames: string[], step: OnboardingStep) => {
-      await bulkScheduleOnboardingTask(streamNames, {
+    async (streamNames: string[], step: OnboardingStep): Promise<string[]> => {
+      return bulkScheduleOnboardingTask(streamNames, {
         steps: [step],
         connectors: onboardingConfig.connectors,
       });
@@ -94,15 +96,15 @@ export function useBulkOnboarding({
   );
 
   const bulkOnboardFeaturesOnly = useCallback(
-    async (streamNames: string[]) => {
-      await bulkOnboardStep(streamNames, OnboardingStep.FeaturesIdentification);
+    async (streamNames: string[]): Promise<string[]> => {
+      return bulkOnboardStep(streamNames, OnboardingStep.FeaturesIdentification);
     },
     [bulkOnboardStep]
   );
 
   const bulkOnboardQueriesOnly = useCallback(
-    async (streamNames: string[]) => {
-      await bulkOnboardStep(streamNames, OnboardingStep.QueriesGeneration);
+    async (streamNames: string[]): Promise<string[]> => {
+      return bulkOnboardStep(streamNames, OnboardingStep.QueriesGeneration);
     },
     [bulkOnboardStep]
   );
