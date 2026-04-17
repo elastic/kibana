@@ -7,8 +7,11 @@
 import React, { useMemo } from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { createMemoryHistory } from 'history';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
+import { apmRouter } from '../components/routing/apm_route_config';
 import { getDateRange } from '../context/url_params_context/helpers';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
@@ -34,6 +37,14 @@ export function ApmEmbeddableContext({
   const { start: resolvedStart, end: resolvedEnd } = useMemo(() => {
     return getDateRange({ rangeFrom, rangeTo });
   }, [rangeFrom, rangeTo]);
+
+  const history = useMemo(
+    () =>
+      createMemoryHistory({
+        initialEntries: [`/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`],
+      }),
+    [rangeFrom, rangeTo]
+  );
 
   const services = {
     config: deps.config,
@@ -63,17 +74,19 @@ export function ApmEmbeddableContext({
       <ApmPluginContext.Provider value={services}>
         <KibanaThemeProvider theme={deps.coreStart.theme}>
           <KibanaContextProvider services={deps.coreStart}>
-            <TimeRangeMetadataContextProvider
-              uiSettings={deps.coreStart.uiSettings}
-              start={resolvedStart ?? rangeFrom}
-              end={resolvedEnd ?? rangeTo}
-              kuery={kuery}
-              useSpanName={false}
-            >
-              <LicenseProvider>
-                <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
-              </LicenseProvider>
-            </TimeRangeMetadataContextProvider>
+            <RouterProvider router={apmRouter as any} history={history}>
+              <TimeRangeMetadataContextProvider
+                uiSettings={deps.coreStart.uiSettings}
+                start={resolvedStart ?? rangeFrom}
+                end={resolvedEnd ?? rangeTo}
+                kuery={kuery}
+                useSpanName={false}
+              >
+                <LicenseProvider>
+                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                </LicenseProvider>
+              </TimeRangeMetadataContextProvider>
+            </RouterProvider>
           </KibanaContextProvider>
         </KibanaThemeProvider>
       </ApmPluginContext.Provider>
