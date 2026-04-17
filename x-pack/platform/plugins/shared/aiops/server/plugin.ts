@@ -92,7 +92,7 @@ export class AiopsPlugin
     });
 
     plugins.embeddable.registerTransforms(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, {
-      title: 'AIOPS pattern analysis',
+      title: 'Pattern analysis',
       getTransforms: () => ({
         transformIn: patternAnalysisTransformIn,
         transformOut: patternAnalysisTransformOut,
