@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
 
@@ -28,7 +28,7 @@ interface LocationState extends LocationStateWithFromHistory {
 const NewLiveQueryPageComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   useBreadcrumbs(isHistoryEnabled ? 'new_query' : 'live_query_new');
-  const { replace } = useHistory();
+  const { replace, push } = useHistory();
   const location = useLocation<LocationState>();
   const backNavigationTarget = isHistoryEnabled ? pagePathGetters.history() : 'live_queries';
   const handleGoBack = useGoBack(backNavigationTarget);
@@ -51,6 +51,13 @@ const NewLiveQueryPageComponent = () => {
       replace({ state: null });
     }
   }, [location.state?.form, replace]);
+
+  const handleSuccess = useCallback(
+    (actionId: string) => {
+      push(pagePathGetters.history_details({ liveQueryId: actionId }));
+    },
+    [push]
+  );
 
   const LeftColumn = useMemo(
     () => (
@@ -92,7 +99,12 @@ const NewLiveQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery {...initialFormData} agentPolicyIds={agentPolicyIds} />
+      <LiveQuery
+        {...initialFormData}
+        agentPolicyIds={agentPolicyIds}
+        onSuccess={isHistoryEnabled ? handleSuccess : undefined}
+        redirectsOnSuccess={isHistoryEnabled}
+      />
     </WithHeaderLayout>
   );
 };

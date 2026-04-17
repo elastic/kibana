@@ -24,27 +24,20 @@ describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }
   });
 
   it('should properly show static values in form and results', () => {
-    navigateTo('/app/osquery');
-    cy.contains('Run query').click();
+    navigateTo('/app/osquery/new');
     selectAllAgents();
     inputQuery('select * from processes;');
     getAdvancedButton().click();
     typeInECSFieldInput('tags{downArrow}{enter}');
     getOsqueryFieldTypes('Static value');
     typeInOsqueryFieldInput('test1{enter}test2{enter}');
-    submitQuery();
-    checkResults();
-    cy.contains('[ "test1", "test2" ]');
-    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
-
-    getOsqueryFieldTypes('Static value', 1);
-
-    typeInOsqueryFieldInput('test3{enter}', 1);
-    submitQuery();
-    checkResults();
-    cy.contains('[ "test1", "test2" ]');
-    cy.contains('test3');
+    // Remove test1 to verify removal from multi-value field
     cy.get(`[title="Remove test1 from selection in this group"]`).click();
+    // Add second ECS mapping with static value
+    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
+    getOsqueryFieldTypes('Static value', 1);
+    typeInOsqueryFieldInput('test3{enter}', 1);
+    // Submit once and verify all mappings in results (redirects to details after success)
     submitQuery();
     checkResults();
     cy.contains('[ "test2" ]');
@@ -52,8 +45,7 @@ describe('EcsMapping', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }
   });
 
   it('should hide and show ecs mappings on Advanced accordion click', () => {
-    navigateTo('/app/osquery');
-    cy.contains('Run query').click();
+    navigateTo('/app/osquery/new');
     selectAllAgents();
     cy.getBySel('savedQuerySelect').within(() => {
       cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');

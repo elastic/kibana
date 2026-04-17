@@ -20,8 +20,8 @@ import { checkAndFormatPrivileges } from './utils/check_and_format_privileges';
 export function registerCheckPrivileges(router: EntityStorePluginRouter) {
   router.versioned
     .get({
-      path: ENTITY_STORE_ROUTES.public.CHECK_PRIVILEGES,
-      access: 'public',
+      path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
+      access: 'internal',
       summary: 'Check Entity Store privileges',
       description:
         'Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.',
@@ -35,7 +35,7 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v2,
         validate: false,
         options: {
           oasOperationObject: () =>

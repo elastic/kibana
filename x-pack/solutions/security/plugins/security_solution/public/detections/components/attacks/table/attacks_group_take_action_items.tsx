@@ -13,6 +13,8 @@ import {
   type AttackDiscoveryAlert,
 } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useInvalidateFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -33,19 +35,30 @@ interface AttacksGroupTakeActionItemsProps {
   closePopover?: () => void;
   /** Optional callback to run after an action is successfully taken */
   onActionSuccess?: () => void;
+  /** Whether to include the AI assistant action in the menu (default true) */
+  showAiAssistantAction?: boolean;
   /** Optional size for the context menu for flyout */
   size?: 's' | 'm';
   /** Telemetry source for action events (e.g. flyout vs table) */
   telemetrySource: AttacksActionTelemetrySource;
 }
 
+const ADD_TO_DATASET = i18n.translate(
+  'xpack.securitySolution.attacks.table.takeAction.addToDatasetButtonLabel',
+  { defaultMessage: 'Add to dataset' }
+);
+
 export function AttacksGroupTakeActionItems({
   attack,
   closePopover,
   onActionSuccess,
+  showAiAssistantAction = true,
   size,
   telemetrySource,
 }: AttacksGroupTakeActionItemsProps) {
+  const {
+    services: { evals },
+  } = useKibana();
   const invalidateAttackDiscoveriesCache = useInvalidateFindAttackDiscoveries();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuery(), []);
   const globalQueries = useDeepEqualSelector(getGlobalQuerySelector);
@@ -143,17 +156,62 @@ export function AttacksGroupTakeActionItems({
     telemetrySource,
   });
 
+  const addToDatasetAction = useMemo(() => {
+    if (!evals?.getAddToDatasetAction) return null;
+
+    return evals.getAddToDatasetAction({
+      label: ADD_TO_DATASET,
+      title: ADD_TO_DATASET,
+      onBeforeOpen: closePopover,
+      initialExample: {
+        input: {
+          attackDiscovery: {
+            id: attack.id,
+            title: attack.title,
+            alertIds: attack.alertIds,
+            detailsMarkdown: attack.detailsMarkdown,
+            summaryMarkdown: attack.summaryMarkdown,
+            replacements: attack.replacements,
+          },
+        },
+        output: {
+          title: attack.title,
+        },
+        metadata: {
+          source: 'security_attack_discovery',
+          attack_discovery_id: attack.id,
+        },
+      },
+    });
+  }, [attack, closePopover, evals]);
+
+  const datasetItems = useMemo(
+    () =>
+      addToDatasetAction != null
+        ? [
+            {
+              'data-test-subj': 'addToDataset',
+              key: 'addToDataset',
+              name: addToDatasetAction.label,
+              onClick: addToDatasetAction.onClick,
+            },
+          ]
+        : [],
+    [addToDatasetAction]
+  );
+
   const defaultPanel: EuiContextMenuPanelDescriptor = useMemo(
     () => ({
       id: 0,
       items: [
-        ...workflowItems,
-        ...runWorkflowItems,
-        ...assignItems,
-        ...tagsItems,
-        ...investigateInTimelineItems,
         ...casesItems,
-        ...viewInAiAssistantItems,
+        ...workflowItems,
+        ...tagsItems,
+        ...assignItems,
+        ...runWorkflowItems,
+        ...(showAiAssistantAction ? viewInAiAssistantItems : []),
+        ...datasetItems,
+        ...investigateInTimelineItems,
       ],
     }),
     [
@@ -163,7 +221,9 @@ export function AttacksGroupTakeActionItems({
       tagsItems,
       investigateInTimelineItems,
       casesItems,
+      showAiAssistantAction,
       viewInAiAssistantItems,
+      datasetItems,
     ]
   );
 
