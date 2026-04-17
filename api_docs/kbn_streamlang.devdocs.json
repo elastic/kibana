@@ -1600,7 +1600,7 @@
           "() => { uri: string; fileMatch: string[]; schema: Record<string, unknown>; } | null"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/src/schema/get_json_schema_from_streamlang_schema.ts",
-        "lineNumber": 1191,
+        "lineNumber": 1082,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8616,6 +8616,23 @@
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "lineNumber": 64,
         "columnNumber": 17,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.setProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "setProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "lineNumber": 235,
+        "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
