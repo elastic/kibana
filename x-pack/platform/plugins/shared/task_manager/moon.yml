@@ -69,6 +69,7 @@ fileGroups:
     - server/**/*.json
     - common/**/*
     - test/scout/**/*
+    - test/scout_task_manager_uiam/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
