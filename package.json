@@ -132,7 +132,7 @@
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.0.0",
     "@elastic/elasticsearch": "9.2.0",
-    "@elastic/ems-client": "8.6.3",
+    "@elastic/ems-client": "8.7.0",
     "@elastic/eui": "106.6.0-backport.1",
     "@elastic/eui-theme-borealis": "3.4.0",
     "@elastic/filesaver": "1.1.2",
