@@ -13,7 +13,7 @@ import { API_AGENT_BUILDER } from '../fixtures/constants';
 
 apiTest.describe(
   'Agent Builder — agents visibility API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+  { tag: [...tags.stateful.classic] },
   () => {
     const createdAgentIds: string[] = [];
 

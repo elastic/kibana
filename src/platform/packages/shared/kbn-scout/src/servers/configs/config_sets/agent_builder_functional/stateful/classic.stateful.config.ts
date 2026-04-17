@@ -21,6 +21,11 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       `--logging.loggers=${JSON.stringify([
+        {
+          name: 'elasticsearch.deprecation',
+          level: 'all',
+          appenders: ['deprecation'],
+        },
         { name: 'plugins.agentBuilder', level: 'debug', appenders: ['console'] },
       ])}`,
       '--feature_flags.overrides.aiAssistant.aiAgents.enabled=true',

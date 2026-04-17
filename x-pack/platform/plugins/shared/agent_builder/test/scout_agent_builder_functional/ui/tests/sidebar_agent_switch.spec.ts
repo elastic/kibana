@@ -23,8 +23,7 @@ test.describe(
   'Agent Builder — sidebar agent switch',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    test.beforeAll(async ({ kbnClient, llmProxy }) => {
-      void llmProxy;
+    test.beforeAll(async ({ kbnClient }) => {
       try {
         await deleteAgentViaKbn(kbnClient, CUSTOM_AGENT_ID);
       } catch {
@@ -41,8 +40,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
-      void llmProxy;
+    test.afterAll(async ({ kbnClient, esClient }) => {
       try {
         await deleteAgentViaKbn(kbnClient, CUSTOM_AGENT_ID);
       } catch {

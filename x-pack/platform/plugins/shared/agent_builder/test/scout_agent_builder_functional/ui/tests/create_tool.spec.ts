@@ -18,8 +18,7 @@ test.describe(
   () => {
     let testIndexName: string;
 
-    test.beforeAll(async ({ esClient, llmProxy }) => {
-      void llmProxy;
+    test.beforeAll(async ({ esClient }) => {
       testIndexName = `scout_agent_builder_${Date.now()}`;
       await esClient.indices.create({ index: testIndexName });
       await esClient.index({
@@ -37,8 +36,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
-      void llmProxy;
+    test.afterAll(async ({ kbnClient, esClient }) => {
       await deleteAllTools(kbnClient);
       try {
         await esClient.indices.delete({ index: testIndexName });

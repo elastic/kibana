@@ -165,37 +165,44 @@ apiTest.describe(
       expect(indexSearchTools.length).toBeGreaterThan(0);
     });
 
-    apiTest('PUT updates description', async ({ asAdmin }) => {
-      const testTool = { ...mockTool, id: 'update-search-test-tool' };
-      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
-        body: testTool,
-        responseType: 'json',
+    // Nested suite mirrors FTR `describe('PUT ...')` + `before` (shared POST for update-search-test-tool).
+    // eslint-disable-next-line playwright/max-nested-describe -- hooks scoped to PUT update tests only
+    apiTest.describe('PUT updates', () => {
+      apiTest.beforeAll(async ({ asAdmin }) => {
+        const testTool = { ...mockTool, id: 'update-search-test-tool' };
+        const createResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+          body: testTool,
+          responseType: 'json',
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        createdToolIds.push(testTool.id);
       });
-      createdToolIds.push(testTool.id);
 
-      const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/update-search-test-tool`, {
-        body: { description: 'Updated search description' },
-        responseType: 'json',
+      apiTest('PUT updates description', async ({ asAdmin }) => {
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/update-search-test-tool`, {
+          body: { description: 'Updated search description' },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.description).toBe('Updated search description');
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.description).toBe('Updated search description');
-    });
 
-    apiTest('PUT updates configuration', async ({ asAdmin }) => {
-      const updates = {
-        configuration: {
-          pattern: testIndex,
-          row_limit: 200,
-          custom_instructions: 'Updated custom instructions',
-        },
-      };
-      const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/update-search-test-tool`, {
-        body: updates,
-        responseType: 'json',
+      apiTest('PUT updates configuration', async ({ asAdmin }) => {
+        const updates = {
+          configuration: {
+            pattern: testIndex,
+            row_limit: 200,
+            custom_instructions: 'Updated custom instructions',
+          },
+        };
+        const response = await asAdmin.put(`${API_AGENT_BUILDER}/tools/update-search-test-tool`, {
+          body: updates,
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.configuration.row_limit).toBe(200);
+        expect(response.body.configuration.custom_instructions).toBe('Updated custom instructions');
       });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.configuration.row_limit).toBe(200);
-      expect(response.body.configuration.custom_instructions).toBe('Updated custom instructions');
     });
 
     apiTest('PUT returns 404 for missing tool', async ({ asAdmin }) => {

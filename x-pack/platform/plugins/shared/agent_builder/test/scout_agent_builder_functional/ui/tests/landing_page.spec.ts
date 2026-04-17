@@ -18,16 +18,11 @@ test.describe(
   'Agent Builder — tools landing page',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    test.beforeAll(async ({ llmProxy }) => {
-      void llmProxy;
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
-      void llmProxy;
+    test.afterAll(async ({ kbnClient, esClient }) => {
       await deleteAllTools(kbnClient);
       await deleteAllConversationsFromEs(esClient);
     });

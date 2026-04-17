@@ -106,55 +106,69 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
-    apiTest('POST /tools/_execute executes indexed ES|QL tool', async ({ asAdmin, esClient }) => {
+    // Nested suite mirrors FTR lifecycle: index create in beforeAll, delete in afterAll.
+    // eslint-disable-next-line playwright/max-nested-describe -- hooks must be scoped to this test only
+    apiTest.describe('POST /tools/_execute with indexed ES|QL data', () => {
       const testIndex = 'test-agent-builder-index';
-      await esClient.indices.delete({ index: testIndex }, { ignore: [404] });
-      await esClient.indices.create({
-        index: testIndex,
-        mappings: {
-          properties: {
-            name: { type: 'text' },
-            age: { type: 'integer' },
-            '@timestamp': { type: 'date' },
+
+      apiTest.beforeAll(async ({ esClient, asAdmin }) => {
+        await esClient.indices.delete({ index: testIndex }, { ignore: [404] });
+        await esClient.indices.create({
+          index: testIndex,
+          mappings: {
+            properties: {
+              name: { type: 'text' },
+              age: { type: 'integer' },
+              '@timestamp': { type: 'date' },
+            },
           },
-        },
-      });
-      await esClient.bulk({
-        body: [
-          { index: { _index: testIndex } },
-          { name: 'Test Case 1', age: 25, '@timestamp': '2023-01-01T00:00:00Z' },
-          { index: { _index: testIndex } },
-          { name: 'Test Case 2', age: 30, '@timestamp': '2023-01-02T00:00:00Z' },
-          { index: { _index: testIndex } },
-          { name: 'Test Case 3', age: 35, '@timestamp': '2023-01-03T00:00:00Z' },
-        ],
-      });
-      await esClient.indices.refresh({ index: testIndex });
+        });
+        await esClient.bulk({
+          body: [
+            { index: { _index: testIndex } },
+            { name: 'Test Case 1', age: 25, '@timestamp': '2023-01-01T00:00:00Z' },
+            { index: { _index: testIndex } },
+            { name: 'Test Case 2', age: 30, '@timestamp': '2023-01-02T00:00:00Z' },
+            { index: { _index: testIndex } },
+            { name: 'Test Case 3', age: 35, '@timestamp': '2023-01-03T00:00:00Z' },
+          ],
+        });
+        await esClient.indices.refresh({ index: testIndex });
 
-      const testTool = {
-        type: 'esql',
-        description: 'A test tool',
-        tags: ['test'],
-        configuration: {
-          query: `FROM ${testIndex} | LIMIT 3`,
-          params: {},
-        },
-        id: 'execute-test-tool',
-      };
-      await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
-        body: testTool,
-        responseType: 'json',
+        const testTool = {
+          type: 'esql',
+          description: 'A test tool',
+          tags: ['test'],
+          configuration: {
+            query: `FROM ${testIndex} | LIMIT 3`,
+            params: {},
+          },
+          id: 'execute-test-tool',
+        };
+        const createToolResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools`, {
+          body: testTool,
+          responseType: 'json',
+        });
+        expect(createToolResponse).toHaveStatusCode(200);
+        createdToolIds.push(testTool.id);
       });
-      createdToolIds.push(testTool.id);
 
-      const executeResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools/_execute`, {
-        body: { tool_id: 'execute-test-tool', tool_params: {} },
-        responseType: 'json',
+      apiTest.afterAll(async ({ esClient }) => {
+        try {
+          await esClient.indices.delete({ index: testIndex });
+        } catch {
+          // Index may already be deleted or absent.
+        }
       });
-      expect(executeResponse).toHaveStatusCode(200);
-      expect(executeResponse.body.results).toBeDefined();
 
-      await esClient.indices.delete({ index: testIndex });
+      apiTest('POST /tools/_execute executes indexed ES|QL tool', async ({ asAdmin }) => {
+        const executeResponse = await asAdmin.post(`${API_AGENT_BUILDER}/tools/_execute`, {
+          body: { tool_id: 'execute-test-tool', tool_params: {} },
+          responseType: 'json',
+        });
+        expect(executeResponse).toHaveStatusCode(200);
+        expect(executeResponse.body.results).toBeDefined();
+      });
     });
 
     apiTest('GET returns existing ES|QL tool', async ({ asAdmin }) => {

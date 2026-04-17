@@ -34,7 +34,7 @@ export const test = baseTest.extend<AgentBuilderUiFixtures, AgentBuilderWorkerFi
       proxy.close();
       await deleteAllConnectors(kbnClient);
     },
-    { scope: 'worker' },
+    { scope: 'worker', auto: true },
   ],
   page: async ({ page }, use) => {
     await page.addInitScript(() => {

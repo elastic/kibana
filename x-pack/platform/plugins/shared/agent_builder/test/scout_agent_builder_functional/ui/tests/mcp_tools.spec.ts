@@ -28,8 +28,7 @@ test.describe(
     let mcpServerUrl: string;
     let connectorId: string;
 
-    test.beforeAll(async ({ kbnClient, llmProxy }) => {
-      void llmProxy;
+    test.beforeAll(async ({ kbnClient }) => {
       await deleteAllTools(kbnClient);
 
       mcpServer = createTestMcpServer();
@@ -42,8 +41,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
-      void llmProxy;
+    test.afterAll(async ({ kbnClient, esClient }) => {
       await deleteAllTools(kbnClient);
       try {
         await mcpServer.stop();

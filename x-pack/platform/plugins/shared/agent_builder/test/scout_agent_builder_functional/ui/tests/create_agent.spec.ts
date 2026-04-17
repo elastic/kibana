@@ -17,16 +17,11 @@ test.describe(
   () => {
     let createdAgentId: string | undefined;
 
-    test.beforeAll(async ({ llmProxy }) => {
-      void llmProxy;
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ kbnClient, esClient, llmProxy }) => {
-      void llmProxy;
+    test.afterAll(async ({ kbnClient, esClient }) => {
       if (createdAgentId) {
         try {
           await deleteAgentViaKbn(kbnClient, createdAgentId);

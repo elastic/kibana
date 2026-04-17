@@ -322,8 +322,10 @@ export class AgentBuilderApp {
 
   async waitForBulkImportToolsToLoad() {
     await this.page.waitForFunction(() => {
-      const table = document.querySelector('[data-test-subj="bulkImportMcpToolsTable"]');
-      return table?.getAttribute('data-is-loading') !== 'true';
+      const table = document.querySelector(
+        '[data-test-subj="bulkImportMcpToolsTable"]'
+      ) as HTMLElement | null;
+      return table !== null && table.getAttribute('data-is-loading') !== 'true';
     });
   }
 

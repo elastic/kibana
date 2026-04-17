@@ -25,8 +25,7 @@ test.describe(
   'Agent Builder — edit agent',
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
-    test.beforeAll(async ({ kbnClient, esClient, llmProxy }) => {
-      void llmProxy;
+    test.beforeAll(async ({ kbnClient, esClient }) => {
       await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
       for (const agent of agents) {
         await createAgentViaKbn(kbnClient, {
@@ -41,8 +40,7 @@ test.describe(
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ esClient, llmProxy }) => {
-      void llmProxy;
+    test.afterAll(async ({ esClient }) => {
       await deleteAllAgentsFromEs(esClient, testData.CHAT_AGENTS_INDEX);
       await deleteAllConversationsFromEs(esClient);
     });

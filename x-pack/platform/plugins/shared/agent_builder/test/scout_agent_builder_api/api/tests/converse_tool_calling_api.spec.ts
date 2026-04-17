@@ -60,6 +60,7 @@ apiTest.describe(
       apiTest(
         `[${mode}] single tool call (search with esql)`,
         async ({ apiClient, apmSynthtraceEsClient }) => {
+          await apmSynthtraceEsClient.clean();
           const myService = apm
             .service({ name: 'java-backend', environment: 'production', agentName: 'java' })
             .instance('my-instance');

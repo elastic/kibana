@@ -32,9 +32,11 @@ apiTest.describe(
     };
 
     apiTest.afterAll(async ({ asAdmin }) => {
-      for (const agentId of createdAgentIds) {
-        await asAdmin.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`);
-      }
+      await Promise.allSettled(
+        createdAgentIds.map((agentId) =>
+          asAdmin.delete(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(agentId)}`)
+        )
+      );
     });
 
     apiTest('POST /api/agent_builder/agents creates agent', async ({ asAdmin }) => {
