@@ -81,9 +81,16 @@ const parseFieldValues = (matcher: string, fieldName: string): string[] => {
 };
 
 /**
+ * Replaces quoted string contents with empty quotes so that field-name
+ * detection only matches structural positions, not values.
+ */
+const stripQuotedContent = (s: string): string => s.replace(/"(?:[^"\\]|\\.)*"/g, '""');
+
+/**
  * Removes AND-separated segments that reference the given field.
  * Handles both bare clauses and parenthesized OR groups.
  * Uses a quote-aware split so values containing ` AND ` are preserved.
+ * Tests against quote-stripped text so field names inside values are ignored.
  */
 const stripFieldClauses = (matcher: string, fieldName: string): string => {
   const escapedField = escapeRegExp(fieldName);
@@ -94,7 +101,7 @@ const stripFieldClauses = (matcher: string, fieldName: string): string => {
     .filter((segment) => {
       if (!segment) return false;
       const unwrapped = segment.replace(/^\(/, '').replace(/\)$/, '');
-      return !fieldPattern.test(unwrapped);
+      return !fieldPattern.test(stripQuotedContent(unwrapped));
     })
     .join(' AND ');
 };

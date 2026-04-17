@@ -195,6 +195,29 @@ describe('matcher_quick_filter_utils', () => {
     });
   });
 
+  describe('field name inside quoted values', () => {
+    it('does not strip a clause whose value contains the target field name', () => {
+      const matcher = 'other.field : "rule.id : test" AND rule.id : "abc"';
+      expect(mergeRuleIdsIntoMatcher(matcher, ['xyz'])).toBe(
+        'other.field : "rule.id : test" AND rule.id : "xyz"'
+      );
+    });
+
+    it('preserves clause with target field pattern in value when clearing', () => {
+      const matcher = 'rule.name : "check rule.tags : something" AND rule.tags : "prod"';
+      expect(mergeRuleTagsIntoMatcher(matcher, [])).toBe(
+        'rule.name : "check rule.tags : something"'
+      );
+    });
+
+    it('preserves clause with episode_status pattern in value', () => {
+      const matcher = 'rule.name : "episode_status : active alert" AND episode_status : "active"';
+      expect(mergeEpisodeStatusIntoMatcher(matcher, ['pending'])).toBe(
+        'rule.name : "episode_status : active alert" AND episode_status : "pending"'
+      );
+    });
+  });
+
   describe('escaping', () => {
     it('escapes double quotes in values', () => {
       expect(mergeRuleIdsIntoMatcher('', ['foo"bar'])).toBe('rule.id : "foo\\"bar"');
