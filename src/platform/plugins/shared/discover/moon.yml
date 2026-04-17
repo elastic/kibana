@@ -143,7 +143,6 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/alerting-v2-plugin'
   - '@kbn/cps-utils'
-  - '@kbn/as-code-data-views-schema'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/presentation-util-plugin'
   - '@kbn/core-saved-objects-common'

@@ -117,14 +117,28 @@ export interface StorageIndexAdapterOptions<TApplicationType> {
  * Adapter for writing and reading documents to/from Elasticsearch,
  * using plain indices.
  *
+ * Index management is lazy — no resources are created at construction time.
+ *
+ * - **Writes** (`index`, `bulk`): ensure the index template, backing index,
+ *   and mappings all exist and are up-to-date before executing.
+ * - **Reads** (`search`, `get`): ensure mappings are up-to-date before
+ *   executing.
+ *
+ * Mapping updates are applied in-place via `putMapping` on the existing
+ * write index — no rollover is performed. This supports additive schema
+ * changes (new fields, new sub-fields) but not incompatible ones
+ * (type changes, field removal).
+ *
  * TODO:
- * - Schema upgrades w/ fallbacks
+ * - Schema upgrades w/ fallbacks (rollover + reindex for incompatible changes)
  */
 export class StorageIndexAdapter<
   TStorageSettings extends IndexStorageSettings,
   TApplicationType extends Partial<StorageDocumentOf<TStorageSettings>>
 > {
   private readonly logger: Logger;
+  private updateMappingsPromise: Promise<void> | undefined;
+
   constructor(
     private readonly esClient: ElasticsearchClient,
     logger: Logger,
@@ -268,6 +282,29 @@ export class StorageIndexAdapter<
   }
 
   /**
+   * If a write index already exists and its mappings are stale,
+   * updates the index template and pushes the new mappings.
+   * No-op when no index exists yet (preserving lazy-write semantics)
+   * or when mappings are already up-to-date.
+   */
+  private async updateMappingsIfNeeded(): Promise<void> {
+    const expectedSchemaVersion = getSchemaVersion(this.storage);
+
+    const writeIndex = await this.getCurrentWriteIndex();
+    if (!writeIndex) {
+      return;
+    }
+
+    if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
+      this.logger.debug(
+        `Updating index template and mappings of existing index due to schema version mismatch`
+      );
+      await this.createOrUpdateIndexTemplate();
+      await this.updateMappingsOfExistingIndex({ name: writeIndex.name });
+    }
+  }
+
+  /**
    * Validates whether:
    * - an index template exists
    * - the index template has the right version (if not, update it)
@@ -292,49 +329,63 @@ export class StorageIndexAdapter<
     return await cb();
   }
 
+  private async ensureMappingsBeforeReading<T>(cb: () => Promise<T>): Promise<T> {
+    if (!this.updateMappingsPromise) {
+      this.updateMappingsPromise = this.updateMappingsIfNeeded().catch((error) => {
+        this.updateMappingsPromise = undefined;
+        throw error;
+      });
+    }
+
+    await this.updateMappingsPromise;
+    return cb();
+  }
+
   private search: StorageClientSearch<TApplicationType> = async (request, transportOptions) => {
-    const searchRequest = {
-      ...request,
-      index: this.getSearchIndexPattern(),
-      allow_no_indices: true,
-    };
-    return (await wrapEsCall(
-      this.esClient
-        .search(searchRequest, ...optionalTransportArgs(transportOptions))
-        .then((response) => {
-          return {
-            ...response,
-            hits: {
-              ...response.hits,
-              hits: response.hits.hits.map((hit) => ({
-                ...hit,
-                _source: this.maybeMigrateSource(hit._source),
-              })),
-            },
-          };
-        })
-        .catch((error): StorageClientSearchResponse<TApplicationType, any> => {
-          if (isNotFoundError(error)) {
+    return this.ensureMappingsBeforeReading(async () => {
+      const searchRequest = {
+        ...request,
+        index: this.getSearchIndexPattern(),
+        allow_no_indices: true,
+      };
+      return (await wrapEsCall(
+        this.esClient
+          .search(searchRequest, ...optionalTransportArgs(transportOptions))
+          .then((response) => {
             return {
-              _shards: {
-                failed: 0,
-                successful: 0,
-                total: 0,
-              },
+              ...response,
               hits: {
-                hits: [],
-                total: {
-                  relation: 'eq',
-                  value: 0,
-                },
+                ...response.hits,
+                hits: response.hits.hits.map((hit) => ({
+                  ...hit,
+                  _source: this.maybeMigrateSource(hit._source),
+                })),
               },
-              timed_out: false,
-              took: 0,
             };
-          }
-          throw error;
-        })
-    )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
+          })
+          .catch((error): StorageClientSearchResponse<TApplicationType, any> => {
+            if (isNotFoundError(error)) {
+              return {
+                _shards: {
+                  failed: 0,
+                  successful: 0,
+                  total: 0,
+                },
+                hits: {
+                  hits: [],
+                  total: {
+                    relation: 'eq',
+                    value: 0,
+                  },
+                },
+                timed_out: false,
+                took: 0,
+              };
+            }
+            throw error;
+          })
+      )) as unknown as ReturnType<StorageClientSearch<TApplicationType>>;
+    });
   };
 
   private index: StorageClientIndex<TApplicationType> = async (
@@ -571,6 +622,10 @@ export class StorageIndexAdapter<
     return _source as TApplicationType;
   };
 
+  /**
+   * Checks whether the backing index exists. No mapping
+   * reconciliation is performed.
+   */
   private existsIndex: StorageClientExistsIndex = () => {
     return this.esClient.indices.exists({
       index: this.getSearchIndexPattern(),

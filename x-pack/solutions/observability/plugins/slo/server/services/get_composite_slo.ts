@@ -10,6 +10,7 @@ import type {
   CompositeSLOMemberSummary,
   CompositeSLOSummary,
   GetCompositeSLOResponse,
+  SLOStatus,
 } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
@@ -33,6 +34,7 @@ interface MemberSummaryData {
   sloName: string;
   summary: {
     sliValue: number;
+    status: SLOStatus;
     fiveMinuteBurnRate: number;
     oneHourBurnRate: number;
     oneDayBurnRate: number;
@@ -79,7 +81,13 @@ export class GetCompositeSLO {
     const memberSummaries: MemberSummaryData[] = activeMembers.map((member, i) => ({
       member,
       sloName: memberDefinitionMap.get(member.sloId)!.name,
-      summary: summaryResults[i].summary,
+      summary: {
+        sliValue: summaryResults[i].summary.sliValue,
+        status: summaryResults[i].summary.status,
+        fiveMinuteBurnRate: summaryResults[i].summary.fiveMinuteBurnRate,
+        oneHourBurnRate: summaryResults[i].summary.oneHourBurnRate,
+        oneDayBurnRate: summaryResults[i].summary.oneDayBurnRate,
+      },
       burnRateWindows: summaryResults[i].burnRateWindows,
     }));
 
@@ -163,7 +171,7 @@ export class GetCompositeSLO {
     ms: {
       member: { sloId: string; weight: number; instanceId?: string };
       sloName: string;
-      summary: { sliValue: number };
+      summary: { sliValue: number; status: SLOStatus };
     },
     normalisedWeight: number
   ): CompositeSLOMemberSummary {
@@ -176,6 +184,7 @@ export class GetCompositeSLO {
       weight: ms.member.weight,
       normalisedWeight,
       sliValue,
+      status: ms.summary.status,
       contribution,
       ...(ms.member.instanceId !== undefined ? { instanceId: ms.member.instanceId } : {}),
     };

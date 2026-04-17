@@ -44,7 +44,6 @@ export type LensProps = Pick<
   | 'noPadding'
   | 'searchSessionId'
   | 'executionContext'
-  | 'onLoad'
   | 'lastReloadRequestTime'
   | 'userMessages'
 >;
