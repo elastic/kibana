@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Streams } from '@kbn/streams-schema';
 import { createStatefulFeatureFlagTestConfig } from '../../default_configs/feature_flag.stateful.config.base';
 
 export default createStatefulFeatureFlagTestConfig({
@@ -36,13 +37,62 @@ export default createStatefulFeatureFlagTestConfig({
               },
             },
             wired: {
-              routing: [],
+              routing: [
+                {
+                  destination: 'logs.ecs.child',
+                  where: {
+                    field: 'host.name',
+                    startsWith: 'filebeat',
+                  },
+                  status: 'enabled',
+                },
+              ],
               fields: {},
             },
           },
         },
       },
-    ])}`,
+      {
+        name: 'logs.otel',
+        dashboards: [],
+        queries: [],
+        rules: [],
+        stream: {
+          type: 'wired',
+          description: '',
+          query_streams: [],
+          ingest: {
+            lifecycle: {
+              dsl: {},
+            },
+            processing: {
+              steps: [],
+            },
+            settings: {},
+            failure_store: {
+              lifecycle: {
+                enabled: {
+                  data_retention: '30d',
+                },
+              },
+            },
+            wired: {
+              routing: [
+                {
+                  destination: 'logs.otel.child',
+                  where: {
+                    field: 'resource.attributes.host.name',
+                    startsWith: 'filebeat',
+                  },
+                  status: 'enabled',
+                },
+              ],
+              fields: {},
+            },
+          },
+        },
+      },
+    ] as Array<Streams.all.UpsertRequest & { name: string }>)}`,
   ],
   junit: {
     reportName: 'Platform Stateful - Streams Preconfigured Definitions API Integration Tests',
