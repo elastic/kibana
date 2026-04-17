@@ -283,6 +283,13 @@ describe('IndexActionConnectorFields', () => {
     await waitFor(() => {
       expect(screen.getByTestId('hasTimeFieldCheckbox')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('hasTimeFieldCheckbox')).not.toBeChecked();
+    expect(screen.queryByTestId('executionTimeFieldSelect')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('hasTimeFieldCheckbox'));
+
+    expect(screen.getByTestId('hasTimeFieldCheckbox')).toBeChecked();
+    expect(screen.getByTestId('executionTimeFieldSelect')).toBeInTheDocument();
   });
 
   test('fetches index names on index combobox input change', async () => {

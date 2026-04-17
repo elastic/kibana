@@ -160,10 +160,8 @@ describe('rule_error_log', () => {
 
     expect(screen.getByTestId('tableHeaderCell_timestamp_0')).toBeInTheDocument();
 
-    // Let the load resolve and verify rows are rendered
-    await waitFor(() => {
-      expect(screen.getAllByRole('row').length).toBeGreaterThan(1);
-    });
+    const rows = await screen.findAllByRole('row');
+    expect(rows.length).toBeGreaterThan(1);
 
     nowMock.mockRestore();
   });
@@ -316,7 +314,6 @@ describe('rule_error_log', () => {
     // Initially do not show the prompt
     expect(screen.queryByTestId('refineSearchPrompt')).not.toBeInTheDocument();
 
-    // Go to the last page
     await screen.findByTestId('pagination-button-99');
     await userEvent.click(screen.getByTestId('pagination-button-99'));
 

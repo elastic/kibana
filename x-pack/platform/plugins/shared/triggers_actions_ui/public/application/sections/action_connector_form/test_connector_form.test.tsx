@@ -151,7 +151,7 @@ describe('test_connector_form', () => {
       />
     );
 
-    await screen.findByTestId('executionModeFieldTest');
+    expect(await screen.findByTestId('executionModeFieldTest')).toBeInTheDocument();
     expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
     expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
@@ -227,9 +227,7 @@ describe('test_connector_form', () => {
       />
     );
 
-    const result = screen.getByTestId('executionResultCodeBlock');
-    expect(result).toBeInTheDocument();
-    expect(result.textContent).toEqual(
+    expect(screen.getByTestId('executionResultCodeBlock')).toHaveTextContent(
       JSON.stringify(
         {
           actionId: '1234',

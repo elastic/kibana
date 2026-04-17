@@ -17,7 +17,7 @@ import type {
 } from '../../../types';
 import { ActionConnectorMode } from '../../../types';
 import { EuiFieldText } from '@elastic/eui';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
@@ -178,7 +178,7 @@ describe('action_type_form', () => {
     const setActionParamsProperty = jest.fn();
 
     render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: '.es-query',
@@ -200,7 +200,7 @@ describe('action_type_form', () => {
             },
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     await waitFor(() => {
@@ -227,7 +227,7 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     render(
-      <IntlProvider>
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: '.es-query',
@@ -248,10 +248,10 @@ describe('action_type_form', () => {
             },
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
-    await screen.findByTestId('executionModeFieldActionForm');
+    expect(await screen.findByTestId('executionModeFieldActionForm')).toBeInTheDocument();
     expect(screen.queryByTestId('executionModeFieldTest')).not.toBeInTheDocument();
     expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
@@ -275,7 +275,7 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     render(
-      <IntlProvider>
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: 'siem.esqlRule',
@@ -298,7 +298,7 @@ describe('action_type_form', () => {
           producerId: AlertConsumers.SIEM,
           featureId: AlertConsumers.SIEM,
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     await screen.findByTestId('alertsFilterQueryToggle');
@@ -326,7 +326,7 @@ describe('action_type_form', () => {
     const setActionParamsProperty = jest.fn();
 
     render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: '.es-query',
@@ -348,7 +348,7 @@ describe('action_type_form', () => {
             },
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     // Give the component time to settle; setActionParamsProperty should not be called
@@ -377,7 +377,7 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const { container } = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: '.es-query',
@@ -398,7 +398,7 @@ describe('action_type_form', () => {
             },
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     // Wait for validation to settle — error icon should not show while accordion is expanded
@@ -456,7 +456,7 @@ describe('action_type_form', () => {
       frequency: DEFAULT_FREQUENCY,
     };
     const wrapper = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           actionItem,
@@ -469,7 +469,7 @@ describe('action_type_form', () => {
             };
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     const summaryOrPerRuleSelect = wrapper.getByTestId('summaryOrPerRuleSelect');
@@ -531,7 +531,7 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = render(
-      <IntlProvider locale="en">
+      <I18nProvider>
         {getActionTypeForm({
           index: 1,
           ruleTypeId: 'test',
@@ -553,7 +553,7 @@ describe('action_type_form', () => {
             },
           },
         })}
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(wrapper.getByTestId('mustacheAutocompleteSwitch')).toBeTruthy();
@@ -592,14 +592,14 @@ describe('action_type_form', () => {
         },
       };
       const wrapper = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           {getActionTypeForm({
             index: 1,
             ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
           })}
-        </IntlProvider>
+        </I18nProvider>
       );
 
       await userEvent.click(wrapper.getByTestId('notifyWhenSelect'));
@@ -644,14 +644,14 @@ describe('action_type_form', () => {
         },
       };
       const wrapper = render(
-        <IntlProvider locale="en">
+        <I18nProvider>
           {getActionTypeForm({
             index: 1,
             ruleTypeId: '.es-query',
             actionItem,
             notifyWhenSelectOptions: CUSTOM_NOTIFY_WHEN_OPTIONS,
           })}
-        </IntlProvider>
+        </I18nProvider>
       );
 
       await userEvent.click(wrapper.getByTestId('notifyWhenSelect'));

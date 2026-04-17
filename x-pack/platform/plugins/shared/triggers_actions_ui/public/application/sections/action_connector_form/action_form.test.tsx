@@ -449,7 +449,6 @@ describe('action_form', () => {
       </QueryClientProvider>
     );
 
-    // Wait for async data to load
     await waitFor(() => {
       expect(loadAllActions).toHaveBeenCalled();
     });
@@ -505,7 +504,6 @@ describe('action_form', () => {
       await screen.findByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`);
       await userEvent.click(screen.getByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`));
       await screen.findByTestId('addNewActionConnectorActionGroup-0');
-      // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-0'));
       await screen.findByTestId('addNewActionConnectorActionGroup-0-option-default');
       expect(
@@ -527,7 +525,6 @@ describe('action_form', () => {
       await screen.findByTestId('.jira-alerting-ActionTypeSelectOption');
       await userEvent.click(screen.getByTestId('.jira-alerting-ActionTypeSelectOption'));
       await screen.findByTestId('addNewActionConnectorActionGroup-1');
-      // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
       await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
       const recoveredOption = screen.getByTestId(
@@ -554,7 +551,6 @@ describe('action_form', () => {
       await screen.findByTestId('.jira-alerting-ActionTypeSelectOption');
       await userEvent.click(screen.getByTestId('.jira-alerting-ActionTypeSelectOption'));
       await screen.findByTestId('addNewActionConnectorActionGroup-1');
-      // Open the EuiSuperSelect to see options in the popover
       await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
       await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
       const iHaveRecoveredOption = screen.getByTestId(
@@ -575,10 +571,8 @@ describe('action_form', () => {
       const numConnectorsWithMissingSecrets = allActions.filter(
         (action) => action.actionTypeId === actionType.id && action.isMissingSecrets
       ).length;
-      // Open the combobox to render the options list (portal-rendered, react-window mocked)
       const combobox = screen.getByTestId(`selectActionConnector-${actionType.id}-0`);
       await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
-      // Options render in a portal (EuiComboBox)
       await waitFor(() => {
         expect(screen.getAllByTestId(/^dropdown-connector-/)).toHaveLength(
           numConnectors - numConnectorsWithMissingSecrets
@@ -591,18 +585,12 @@ describe('action_form', () => {
       await screen.findByTestId('preconfigured-alerting-ActionTypeSelectOption');
       await userEvent.click(screen.getByTestId('preconfigured-alerting-ActionTypeSelectOption'));
       const combobox = await screen.findByTestId('selectActionConnector-preconfigured-1');
-      // Verify the combobox shows only 1 option for preconfigured-only type
-      // (only isPreconfigured=true connectors pass the filter)
-      // Open the combobox dropdown
       await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
       // When the preconfigured-only action type is selected, only test3 (isPreconfigured=true)
       // passes the filter. test3 is auto-selected, so areAllOptionsSelected()=true and
       // EuiComboBox renders "You've selected all available options" instead of option buttons.
       // This confirms that test4 (isPreconfigured=false) was correctly filtered out.
-      await waitFor(() => {
-        expect(screen.getByText("You've selected all available options")).toBeInTheDocument();
-      });
-      // Confirm the selected connector is test3 (Preconfigured Only), not test4
+      expect(await screen.findByText("You've selected all available options")).toBeInTheDocument();
       expect(within(combobox).getByRole('combobox')).toHaveValue('Preconfigured Only');
       expect(screen.queryByTestId('dropdown-connector-test4')).not.toBeInTheDocument();
     });
@@ -611,10 +599,7 @@ describe('action_form', () => {
       await setup();
       await screen.findByTestId('preconfigured-alerting-ActionTypeSelectOption');
       await userEvent.click(screen.getByTestId('preconfigured-alerting-ActionTypeSelectOption'));
-      // Wait for the new action's accordion to appear (at index 1 since initial action is at 0)
-      await waitFor(() => {
-        expect(screen.getAllByTestId(/alertActionAccordion-\d+/).length).toBeGreaterThan(0);
-      });
+      await screen.findAllByTestId(/alertActionAccordion-\d+/);
       expect(
         screen.queryByTestId('addNewActionConnectorButton-preconfigured')
       ).not.toBeInTheDocument();
@@ -689,7 +674,6 @@ describe('action_form', () => {
     it('renders system action types correctly', async () => {
       await setup();
       await screen.findByTestId(`${systemActionType.id}-alerting-ActionTypeSelectOption`);
-      // The system action type option is not disabled
       expect(
         screen.getByTestId(`${systemActionType.id}-alerting-ActionTypeSelectOption`)
       ).not.toBeDisabled();

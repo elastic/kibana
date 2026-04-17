@@ -97,7 +97,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
 
     await userEvent.click(screen.getByTestId('swimlaneConfigureMapping'));
 
-    await screen.findByTestId('swimlaneAlertIdInput');
+    expect(await screen.findByTestId('swimlaneAlertIdInput')).toBeInTheDocument();
     expect(screen.getByTestId('swimlaneAlertNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('swimlaneSeverityInput')).toBeInTheDocument();
     expect(screen.getByTestId('swimlaneCaseIdConfig')).toBeInTheDocument();
@@ -138,7 +138,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
 
     await userEvent.click(screen.getByTestId('swimlaneConfigureMapping'));
 
-    await screen.findByTestId('swimlaneCaseIdConfig');
+    expect(await screen.findByTestId('swimlaneCaseIdConfig')).toBeInTheDocument();
     expect(screen.queryByTestId('swimlaneAlertIdInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('swimlaneAlertNameInput')).not.toBeInTheDocument();
     expect(screen.queryByTestId('swimlaneSeverityInput')).not.toBeInTheDocument();
@@ -180,7 +180,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
 
     await userEvent.click(screen.getByTestId('swimlaneConfigureMapping'));
 
-    await screen.findByTestId('swimlaneAlertIdInput');
+    expect(await screen.findByTestId('swimlaneAlertIdInput')).toBeInTheDocument();
     expect(screen.getByTestId('swimlaneAlertNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('swimlaneSeverityInput')).toBeInTheDocument();
     expect(screen.queryByTestId('swimlaneCaseIdConfig')).not.toBeInTheDocument();

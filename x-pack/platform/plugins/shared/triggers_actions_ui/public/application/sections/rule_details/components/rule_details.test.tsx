@@ -177,7 +177,7 @@ describe('rule_details', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByTestId('disableButton'));
 
-      await screen.findByTestId('untrackAlertsModal');
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
       expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -196,7 +196,7 @@ describe('rule_details', () => {
       await waitForEuiPopoverOpen();
       await userEvent.click(screen.getByTestId('disableButton'));
 
-      await screen.findByTestId('untrackAlertsModal');
+      expect(await screen.findByTestId('untrackAlertsModal')).toBeInTheDocument();
       expect(mockRuleApis.bulkDisableRules).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByTestId('confirmModalConfirmButton'));
@@ -310,6 +310,7 @@ describe('rule_details', () => {
       expect(ruleErrorBanner).toBeInTheDocument();
       expect(ruleErrorBanner).toHaveTextContent('Cannot run rule');
       expect(ruleErrorBanner).toHaveTextContent('test');
+      expect(screen.getByRole('link', { name: /manage license/i })).toBeInTheDocument();
     });
 
     it('renders the rule warning banner with warning message, when rule status is a warning', () => {

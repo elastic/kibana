@@ -61,7 +61,6 @@ describe('actions_connectors_event_log_list_kpi', () => {
     expect(within(warningOutcome).getByText('--')).toBeInTheDocument();
     expect(within(failureOutcome).getByText('--')).toBeInTheDocument();
 
-    // Wait for the load to resolve
     await waitFor(() => {
       expect(loadGlobalConnectorExecutionKPIAggregations).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -71,9 +70,7 @@ describe('actions_connectors_event_log_list_kpi', () => {
       );
     });
 
-    await waitFor(() => {
-      expect(within(successOutcome).getByText(`${mockKpiResponse.success}`)).toBeInTheDocument();
-    });
+    expect(await within(successOutcome).findByText(`${mockKpiResponse.success}`)).toBeInTheDocument();
     expect(within(warningOutcome).getByText(`${mockKpiResponse.warning}`)).toBeInTheDocument();
     expect(within(failureOutcome).getByText(`${mockKpiResponse.failure}`)).toBeInTheDocument();
   });
@@ -89,7 +86,6 @@ describe('actions_connectors_event_log_list_kpi', () => {
       />
     );
 
-    // Wait for the load to resolve
     await waitFor(() => {
       expect(loadGlobalExecutionKPIAggregationsMock).toHaveBeenCalledWith(
         expect.objectContaining({

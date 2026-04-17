@@ -33,7 +33,6 @@ describe('event_log_list_status_filter', () => {
       <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
-    // No filter select items shown before popover is opened
     expect(screen.queryByRole('option')).not.toBeInTheDocument();
     expect(screen.getByRole('button')).toBeInTheDocument();
 
@@ -46,10 +45,8 @@ describe('event_log_list_status_filter', () => {
       <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
-    // Open the popover by clicking the filter button
     await userEvent.click(screen.getByRole('button'));
 
-    // EUI popovers render in a portal (outside `container`), so use screen queries
     expect(screen.getAllByRole('option')).toHaveLength(4);
 
     await userEvent.click(screen.getAllByRole('option')[0]);

@@ -92,8 +92,4 @@ describe('rule_action_error_log_flyout', () => {
 
     expect(mockClose).toHaveBeenCalledTimes(1);
   });
-
-  // NOTE: This test asserts on a React prop (`type`) of the flyout element which is not accessible
-  // via the DOM. The flyout type ('push' vs 'overlay') is an internal EUI prop that cannot be
-  // reliably queried in RTL. The test is removed as it asserts on non-DOM state.
 });
