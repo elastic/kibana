@@ -3150,11 +3150,11 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inven
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/contextual-security-apps
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/contextual-security-apps
 
-# Security Service Integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
+# Security integrations
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/integration-experience
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -3243,6 +3243,9 @@ oas_docs/output                               @elastic/ski-docs
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
+
+# Side navigation title glossary
+src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
 
 /x-pack/platform/test/serverless/functional/test_suites/strip_unknown_config_workaround @elastic/kibana-core
 
