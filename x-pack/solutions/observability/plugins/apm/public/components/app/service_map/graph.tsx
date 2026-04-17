@@ -88,6 +88,8 @@ interface GraphProps {
   showMinimap?: boolean;
   /** When false, disables the node/edge detail popover (e.g. in embeddable where router is unavailable). Default true. */
   showPopover?: boolean;
+  /** When false, hides the options panel with filters and layout controls. Default true. */
+  showOptionsPanel?: boolean;
 }
 
 function GraphInner({
@@ -104,6 +106,7 @@ function GraphInner({
   fullMapHref,
   showMinimap = true,
   showPopover = true,
+  showOptionsPanel = true,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -566,26 +569,28 @@ function GraphInner({
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Panel position="top-left" css={topLeftToolbarStyles}>
-          <ServiceMapOptionsPanel
-            nodes={nodesAfterFilters}
-            filterOptionCounts={filterOptionCounts}
-            alertStatusFilter={viewFilters.alertStatusFilter}
-            onAlertStatusFilterChange={(next) =>
-              setViewFilters((prev) => ({ ...prev, alertStatusFilter: next }))
-            }
-            sloStatusFilter={viewFilters.sloStatusFilter}
-            onSloStatusFilterChange={(next) =>
-              setViewFilters((prev) => ({ ...prev, sloStatusFilter: next }))
-            }
-            anomalyStatusFilter={viewFilters.anomalyStatusFilter}
-            onAnomalyStatusFilterChange={(next) =>
-              setViewFilters((prev) => ({ ...prev, anomalyStatusFilter: next }))
-            }
-            mapOrientation={mapOrientation}
-            onMapOrientationChange={setMapOrientation}
-            isExpanded={panelExpanded}
-            onExpandedChange={setPanelExpanded}
-          />
+          {showOptionsPanel && (
+            <ServiceMapOptionsPanel
+              nodes={nodesAfterFilters}
+              filterOptionCounts={filterOptionCounts}
+              alertStatusFilter={viewFilters.alertStatusFilter}
+              onAlertStatusFilterChange={(next) =>
+                setViewFilters((prev) => ({ ...prev, alertStatusFilter: next }))
+              }
+              sloStatusFilter={viewFilters.sloStatusFilter}
+              onSloStatusFilterChange={(next) =>
+                setViewFilters((prev) => ({ ...prev, sloStatusFilter: next }))
+              }
+              anomalyStatusFilter={viewFilters.anomalyStatusFilter}
+              onAnomalyStatusFilterChange={(next) =>
+                setViewFilters((prev) => ({ ...prev, anomalyStatusFilter: next }))
+              }
+              mapOrientation={mapOrientation}
+              onMapOrientationChange={setMapOrientation}
+              isExpanded={panelExpanded}
+              onExpandedChange={setPanelExpanded}
+            />
+          )}
           <div
             className="react-flow__controls vertical"
             css={controlsStyles}
