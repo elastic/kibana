@@ -26,12 +26,10 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 ### Keep tests close to the code they test [keep-tests-close-to-source-code]
 
-Scout uses selective testing to run only the tests for modules affected by a PR. For this to work, tests must live in the same plugin or package as the code they cover, otherwise changes won't trigger the relevant tests.
+Scout uses selective testing to run only the tests for modules affected by a PR. For this to work, tests must live in the same plugin or package as the code they cover, otherwise changes won't trigger the relevant tests. The full suite still runs post-merge on `kibana-on-merge`.
 
 - **API tests**: place them in the plugin that defines the routes being tested.
 - **UI tests**: place them in the plugin that owns the UI components or pages.
-
-If a plugin has no Scout tests and no downstream dependents, changes to it won't trigger any Scout tests in CI, creating a coverage gap.
 
 ### Prefer runtime feature flags [prefer-runtime-feature-flags]
 
@@ -125,7 +123,7 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 :::::
 
 ::::::{note}
-Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook — When to use](./global-setup-hook.md#when-to-use) for guidance.
+Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook: When to use](./global-setup-hook.md#when-to-use) for guidance.
 ::::::
 
 ### Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
