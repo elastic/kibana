@@ -120,7 +120,7 @@ describe('useFocusedStepDecoration', () => {
     const { store } = renderHookWithProviders(editor);
 
     act(() => {
-      store.dispatch(setCursorPosition({ lineNumber: 7, column: 1 }));
+      store.dispatch(setCursorPosition({ lineNumber: 7 }));
     });
 
     expect(decorationsCollection.set).toHaveBeenCalledTimes(1);
@@ -144,7 +144,7 @@ describe('useFocusedStepDecoration', () => {
     const { store, unmount } = renderHookWithProviders(editor);
 
     act(() => {
-      store.dispatch(setCursorPosition({ lineNumber: 7, column: 1 }));
+      store.dispatch(setCursorPosition({ lineNumber: 7 }));
     });
 
     decorationsCollection.clear.mockClear();
