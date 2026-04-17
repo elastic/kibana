@@ -318,13 +318,15 @@ async function findMemberSLOs(
 ): Promise<SLODefinition[]> {
   if (ids.length === 0) return [];
 
-  // The KQL `field:(a or b or ... or N)` filter translates to a bool/should with N clauses.
-  // ES 7+ raised the default bool.max_clause_count to 65536, so the worst-case here
-  // (~2500 unique member IDs per page: 100 composites × 25 members, deduplicated) is well
-  // within limits. soClient.bulkGet is not an option because SO ids are auto-generated and
-  // differ from attributes.id — resolving them would require a find anyway. If performance
-  // testing (see ADR-006) shows this query dominating the task budget, consider chunking
-  // ids into batches of ≤500 and issuing parallel soClient.find calls.
+  // The KQL `field:(a or b or ... or N)` filter translates to a bool/should with N clauses
+  // (each `is(field, value)` becomes a nested bool/should:[term], so N IDs → ~2N total clauses).
+  // In ES 8.x, indices.query.bool.max_clause_count is deprecated and replaced by a dynamic
+  // heuristic (minimum ~1024, higher based on JVM heap). Our worst-case of ~2500 unique member
+  // IDs per page (100 composites × 25 members, deduplicated) generates ~5000 total clauses and
+  // could approach the limit on constrained clusters. If that becomes a problem, chunk ids into
+  // batches of ≤500 and issue parallel soClient.find calls.
+  // soClient.bulkGet is not an option because SO ids are auto-generated and differ from
+  // attributes.id — resolving them would require a find anyway.
   const response = await soClient.find<StoredSLODefinition>({
     type: SO_SLO_TYPE,
     namespaces: [spaceId],
