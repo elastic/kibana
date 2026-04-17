@@ -285,8 +285,7 @@ export class RenderingService {
     if (usingCdn) {
       translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
     } else {
-      const translationHash =
-        translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+      const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
       translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
     }
 
