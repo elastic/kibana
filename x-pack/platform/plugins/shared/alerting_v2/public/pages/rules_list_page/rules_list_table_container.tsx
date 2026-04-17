@@ -146,7 +146,21 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onTableChange={onTableChange}
       />
       {expandedRule ? (
-        <RuleSummaryFlyout rule={expandedRule} onClose={() => setExpandedRule(null)} />
+        <RuleSummaryFlyout
+          rule={expandedRule}
+          onClose={() => setExpandedRule(null)}
+          onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
+          onClone={(r) =>
+            navigateToUrl(
+              basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
+            )
+          }
+          onDelete={(r) => {
+            setRuleToDelete(r);
+            setExpandedRule(null);
+          }}
+          onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        />
       ) : null}
       {ruleToDelete ? (
         <DeleteConfirmationModal
