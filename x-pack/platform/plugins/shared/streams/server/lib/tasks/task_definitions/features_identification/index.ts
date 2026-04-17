@@ -405,7 +405,7 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               const {
                 taskClient,
                 scopedClusterClient,
-                featureClient,
+                getFeatureClient,
                 streamsClient,
                 inferenceClient,
                 soClient,
@@ -413,6 +413,8 @@ export function createStreamsFeaturesIdentificationTask(taskContext: TaskContext
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
+
+              const featureClient = await getFeatureClient();
 
               const taskLogger = taskContext.logger.get('features_identification', streamName);
               const connectorId =
