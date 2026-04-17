@@ -10,6 +10,9 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SetupPage } from './setup_page';
+import { SlackOnboardingPage } from './slack_onboarding_page';
+
+export { SetupPage, SlackOnboardingPage };
 
 export const renderApp = ({
   coreStart,
