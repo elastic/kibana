@@ -101,12 +101,10 @@ const expectNoLegacyThemeDependency = async ({
 
 const expectVisibleBox = async (target: Locator) => {
   const box = await target.boundingBox();
-  if (box === null) {
-    throw new Error('Expected target to have a visible bounding box');
-  }
-  expect(box.width).toBeGreaterThan(0);
-  expect(box.height).toBeGreaterThan(0);
-  return box;
+  expect(box).not.toBeNull();
+  expect(box!.width).toBeGreaterThan(0);
+  expect(box!.height).toBeGreaterThan(0);
+  return box!;
 };
 
 const getBoxDimensionDelta = (after: number, before: number) => {
