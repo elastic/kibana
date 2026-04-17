@@ -23,7 +23,7 @@ import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 
 const getJobTypeList = () => (
   <>
-    <EuiListGroup flush>
+    <EuiListGroup>
       <EuiListGroupItem iconType="outlierDetectionJob" label="Outlier detection" />
 
       <EuiListGroupItem iconType="regressionJob" label="Regression" />

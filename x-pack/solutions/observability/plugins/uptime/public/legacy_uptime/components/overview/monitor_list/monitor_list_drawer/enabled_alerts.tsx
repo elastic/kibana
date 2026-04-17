@@ -66,7 +66,7 @@ export const EnabledAlerts = ({ monitorAlerts, loading }: Props) => {
             })}
           />
         )}
-        {loading ? <EuiLoadingSpinner /> : <LinkGroupList listItems={listItems} flush={true} />}
+        {loading ? <EuiLoadingSpinner /> : <LinkGroupList listItems={listItems} />}
       </EuiDescriptionListDescription>
     </EuiDescriptionList>
   );

@@ -168,7 +168,7 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
       anchorPosition="rightCenter"
       data-test-subj={GROUPED_ITEM_ACTIONS_POPOVER_TEST_ID}
     >
-      <EuiListGroup bordered={false} flush={true}>
+      <EuiListGroup bordered={false}>
         {items.map((popoverItem, index) => {
           if (popoverItem.type === 'separator') {
             return <EuiHorizontalRule key={index} margin="none" size="full" />;

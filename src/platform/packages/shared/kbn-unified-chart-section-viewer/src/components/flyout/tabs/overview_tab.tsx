@@ -151,7 +151,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
                   <EuiListGroup
                     data-test-subj="metricsExperienceFlyoutOverviewTabDimensionsList"
                     listItems={dimensionListItems}
-                    flush
                     wrapText={false}
                     maxWidth={false}
                     css={css`

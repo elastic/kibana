@@ -48,7 +48,6 @@ export const CodeownersList = ({ codeowners }: Props) => {
       <EuiListGroup
         listItems={listItems}
         color="primary"
-        flush={true}
         data-test-subj="inspectFlyoutCodeownersList"
       />
       <EuiSpacer size="m" />

@@ -80,7 +80,6 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
           </EuiCodeBlock>
         ) : null}
         <EuiListGroup
-          flush={true}
           bordered={true}
           style={{
             marginTop: '0.5rem',

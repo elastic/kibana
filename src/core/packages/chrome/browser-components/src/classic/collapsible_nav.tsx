@@ -353,7 +353,7 @@ export function CollapsibleNav({
         {/* Things with no category (largely for custom plugins) */}
         {unknowns.map((link, i) => (
           <EuiCollapsibleNavGroup data-test-subj={`collapsibleNavGroup-noCategory`} key={i}>
-            <EuiListGroup flush>
+            <EuiListGroup>
               <EuiListGroupItem color="text" {...readyForEUI(link, true)} />
             </EuiListGroup>
           </EuiCollapsibleNavGroup>

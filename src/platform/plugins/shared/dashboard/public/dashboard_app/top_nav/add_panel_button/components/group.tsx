@@ -69,13 +69,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
       <EuiTitle size="xxs">
         <h3 id={titleId}>{group.title}</h3>
       </EuiTitle>
-      <EuiListGroup
-        aria-labelledby={titleId}
-        maxWidth={false}
-        flush
-        listItems={listItems}
-        role="menu"
-      />
+      <EuiListGroup aria-labelledby={titleId} maxWidth={false} listItems={listItems} role="menu" />
     </>
   );
 }

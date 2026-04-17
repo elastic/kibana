@@ -107,7 +107,7 @@ export const useNodeDetailsPopover = ({
 
   const popoverContent = useMemo(
     () => (
-      <EuiListGroup bordered={false} flush={true} data-test-subj={contentTestSubj}>
+      <EuiListGroup bordered={false} data-test-subj={contentTestSubj}>
         {items.map((item) => (
           <StyledPopoverListItem
             key={item.key}

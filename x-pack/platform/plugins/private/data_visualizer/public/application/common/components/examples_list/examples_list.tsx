@@ -67,7 +67,7 @@ export const ExamplesList: FC<Props> = ({ examples }) => {
           }}
         />
       </ExpandedRowFieldHeader>
-      <EuiListGroup showToolTips={true} maxWidth={'s'} flush={true}>
+      <EuiListGroup showToolTips={true} maxWidth={'s'}>
         {examplesContent}
       </EuiListGroup>
     </ExpandedRowPanel>

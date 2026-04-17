@@ -155,7 +155,7 @@ export function ConversationList({
               {DATE_CATEGORY_LABELS[category]}
             </EuiText>
           </EuiPanel>
-          <EuiListGroup flush={false}>
+          <EuiListGroup>
             {list.map((conversation) => (
               <EuiListGroupItem
                 data-test-subj="observabilityAiAssistantConversationsLink"

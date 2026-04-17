@@ -138,7 +138,6 @@ export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: Reac
         >
           <div ref={quickAccessRef}>
             <EuiListGroup
-              flush
               css={css`
                 ${useEuiMaxBreakpoint('xl')} {
                   flex-direction: row;
