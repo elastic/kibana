@@ -8,7 +8,7 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: SearchRules
-      summary: Search detection rules with KQL filter, facet counts, and search_after pagination (internal)
+      summary: Search detection rules with KQL filter, facet counts, and search_after pagination
       description: Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
       tags:
         - Rules API
@@ -43,7 +43,7 @@ paths:
               properties:
                 fields:
                   type: array
-                  description: Subset of rule attributes to return. When omitted, all attributes are returned.
+                  description: Subset of rule attributes to return.
                   items:
                     $ref: '../granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
                 filter:
@@ -62,21 +62,20 @@ paths:
                   type: integer
                   minimum: 1
                   default: 1
-                  description: Page number (1-based). Ignored when `search_after` is provided.
+                  description: Page number. Ignored when `search_after` is provided.
+                  example: 1
                 per_page:
                   type: integer
                   minimum: 0
                   maximum: 10000
                   default: 20
                   description: Page size.
+                  example: 20
                 search_after:
                   type: array
                   minItems: 1
                   description: |
-                    Elasticsearch-style `search_after` tiebreaker values. Requires `sort_field` and
-                    `sort_order`. When set, `page` is ignored. `search_after` cannot be used together with gap filter parameters
-                    (`gap_fill_statuses`, `gaps_range_start`, `gaps_range_end`). Use `page` and `per_page`
-                    to paginate gap-filtered results instead.
+                    For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
                   items:
                     $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                 gap_fill_statuses:
@@ -89,13 +88,13 @@ paths:
                     $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
                 gaps_range_start:
                   type: string
-                  description: Start of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+                  description: Gap range start. 
                 gaps_range_end:
-                  type: string
-                  description: End of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+                    type: string
+                    description: End of the gap range (ISO 8601). Required when gap_fill_statuses is set.
                 gap_auto_fill_scheduler_id:
                   type: string
-                  description: Optional scheduler ID for scoping the "error" gap fill status (exhausted retries).
+                  description: Gap auto fill scheduler ID used to determine gap fill status for rules
       responses:
         '200':
           description: Successful response
@@ -142,7 +141,7 @@ paths:
                     description: |
                       Sort values of the last hit on this page, for use as `search_after` on the next
                       request. Only included when deep pagination applies (offset
-                      at or past the default 10,000-result window) or the request used `search_after`.
+                      at or past the default 10,000-result max) or the request used `search_after`.
                     items:
                       $ref: '#/components/schemas/SearchRulesSearchAfterItem'
                   counts:
@@ -155,7 +154,7 @@ paths:
         '400':
           description: |
             Request validation failed (for example invalid KQL, incompatible sort and
-            `search_after`, or gap filter constraints). The response body lists human-readable errors.
+            `search_after`, or gap filter constraints).
           content:
             application/json:
               schema:

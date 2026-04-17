@@ -55,7 +55,7 @@ export type SearchRulesRequestBody = z.infer<typeof SearchRulesRequestBody>;
 export const SearchRulesRequestBody = z
   .object({
     /**
-     * Subset of rule attributes to return. When omitted, all attributes are returned.
+     * Subset of rule attributes to return.
      */
     fields: z.array(SearchRulesField).optional(),
     /**
@@ -68,7 +68,7 @@ export const SearchRulesRequestBody = z
     sort_field: FindRulesSortField.optional(),
     sort_order: SortOrder.optional(),
     /**
-     * Page number (1-based). Ignored when `search_after` is provided.
+     * Page number. Ignored when `search_after` is provided.
      */
     page: z.number().int().min(1).optional().default(1),
     /**
@@ -76,10 +76,7 @@ export const SearchRulesRequestBody = z
      */
     per_page: z.number().int().min(0).max(10000).optional().default(20),
     /**
-      * Elasticsearch-style `search_after` tiebreaker values. Requires `sort_field` and
-`sort_order`. When set, `page` is ignored. `search_after` cannot be used together with gap filter parameters
-(`gap_fill_statuses`, `gaps_range_start`, `gaps_range_end`). Use `page` and `per_page`
-to paginate gap-filtered results instead.
+      * For pagination beyond elasticsearch's default 10,000 result window, requires `sort_field` and `sort_order`. When set, `page` is ignored.
 
       */
     search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
@@ -91,7 +88,7 @@ offset pagination (`page` / `per_page`) instead.
       */
     gap_fill_statuses: z.array(GapFillStatus).optional(),
     /**
-     * Start of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+     * Gap range start.
      */
     gaps_range_start: z.string().optional(),
     /**
@@ -99,7 +96,7 @@ offset pagination (`page` / `per_page`) instead.
      */
     gaps_range_end: z.string().optional(),
     /**
-     * Optional scheduler ID for scoping the "error" gap fill status (exhausted retries).
+     * Gap auto fill scheduler ID used to determine gap fill status for rules
      */
     gap_auto_fill_scheduler_id: z.string().optional(),
   })
@@ -117,7 +114,7 @@ export const SearchRulesResponse = z
     /**
       * Sort values of the last hit on this page, for use as `search_after` on the next
 request. Only included when deep pagination applies (offset
-at or past the default 10,000-result window) or the request used `search_after`.
+at or past the default 10,000-result max) or the request used `search_after`.
 
       */
     search_after: z.array(SearchRulesSearchAfterItem).optional(),

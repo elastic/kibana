@@ -145,7 +145,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const rule = body.data[0] as Record<string, unknown>;
 
       // Core fields present without a fields filter.
-      // Note: the RuleResponse uses `interval` (not `schedule`) for the schedule.
       expect(rule.name).not.to.be(undefined);
       expect(rule.enabled).not.to.be(undefined);
       expect(rule.interval).not.to.be(undefined);
