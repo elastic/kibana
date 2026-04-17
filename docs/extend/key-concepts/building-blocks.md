@@ -112,7 +112,7 @@ sharing and space isolation, and tags.
 
 ## Advanced Settings
 
-[Advanced Settings and the uiSettings service](../tutorials/how-to-register-a-new-advanced-setting.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
+[Advanced Settings and the uiSettings service](../tutorials/ui-settings.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
 
 **Github labels**: `Team:Core`, `Feature:uiSettings`, `Feature:Advanced Settings`
 

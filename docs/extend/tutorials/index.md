@@ -29,7 +29,7 @@ Hands-on guides for specific Kibana plugin development tasks. If you're new to K
 
 ## Configuration
 
-- [Register an advanced setting](./how-to-register-a-new-advanced-setting.md) — add a new entry to Advanced Settings (`uiSettings`)
+- [UI settings](./ui-settings.md) — register a new UI setting (aka advanced setting / uiSetting) and read it at runtime
 
 ## Performance
 

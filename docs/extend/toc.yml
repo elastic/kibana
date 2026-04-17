@@ -107,8 +107,7 @@ toc:
       - file: lens-config-builder-api-examples.md
       - file: home-tutorials.md
       - file: configuring-your-plugin.md
-      - file: how-to-register-a-new-advanced-setting.md
-      - file: ui-settings-service.md
+      - file: ui-settings.md
       - file: logging-service.md
       - file: reporting-integration.md
       - file: adding-performance-metrics.md
