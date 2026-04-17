@@ -73,8 +73,10 @@ export class TemplatesService {
         ...so.attributes,
         fieldSearchMatches:
           searchLower !== '' &&
-          (so.attributes.fieldNames ?? []).some((fieldName) =>
-            fieldName.toLowerCase().includes(searchLower)
+          (so.attributes.fieldNames ?? []).some(
+            (field) =>
+              field.label.toLowerCase().includes(searchLower) ||
+              field.name.toLowerCase().includes(searchLower)
           ),
       })),
       page,
@@ -199,8 +201,28 @@ export class TemplatesService {
                   },
                 },
                 {
-                  wildcard: {
-                    [`${SO}.fieldNames`]: { value: `*${search}*`, case_insensitive: true },
+                  nested: {
+                    path: `${SO}.fieldNames`,
+                    query: {
+                      bool: {
+                        should: [
+                          {
+                            wildcard: {
+                              [`${SO}.fieldNames.name`]: {
+                                value: `*${search}*`,
+                                case_insensitive: true,
+                              },
+                            },
+                          },
+                          {
+                            match: {
+                              [`${SO}.fieldNames.label`]: search,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
                   },
                 },
               ],
@@ -273,7 +295,12 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: parsedDefinition.fields.map((f) => ({
+          name: f.name,
+          label: f.label ?? f.name,
+          type: f.type,
+          control: f.control,
+        })),
         isEnabled: input.isEnabled ?? true,
       } as Template,
       { refresh: true, id }
@@ -308,7 +335,12 @@ export class TemplatesService {
         tags: parsedDefinition.tags ?? input.tags,
         author: currentTemplate.attributes.author,
         fieldCount: parsedDefinition.fields.length,
-        fieldNames: parsedDefinition.fields.map((f) => f.name),
+        fieldNames: parsedDefinition.fields.map((f) => ({
+          name: f.name,
+          label: f.label ?? f.name,
+          type: f.type,
+          control: f.control,
+        })),
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,

@@ -369,10 +369,28 @@ describe('TemplatesService', () => {
                     }),
                   }),
                   expect.objectContaining({
-                    wildcard: expect.objectContaining({
-                      [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames`]: expect.objectContaining({
-                        value: '*my-search*',
-                        case_insensitive: true,
+                    nested: expect.objectContaining({
+                      path: `${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames`,
+                      query: expect.objectContaining({
+                        bool: expect.objectContaining({
+                          should: expect.arrayContaining([
+                            expect.objectContaining({
+                              wildcard: expect.objectContaining({
+                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames.name`]:
+                                  expect.objectContaining({
+                                    value: '*my-search*',
+                                    case_insensitive: true,
+                                  }),
+                              }),
+                            }),
+                            expect.objectContaining({
+                              match: expect.objectContaining({
+                                [`${CASE_TEMPLATE_SAVED_OBJECT}.fieldNames.label`]: 'my-search',
+                              }),
+                            }),
+                          ]),
+                          minimum_should_match: 1,
+                        }),
                       }),
                     }),
                   }),
@@ -548,12 +566,18 @@ describe('TemplatesService', () => {
         const soMatch = createTemplateSO('so-match', {
           templateId: 't-match',
           name: 'Matching Template',
-          fieldNames: ['severity', 'hostname'],
+          fieldNames: [
+            { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+            { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+          ],
         });
         const soNoMatch = createTemplateSO('so-nomatch', {
           templateId: 't-nomatch',
           name: 'No Match Template',
-          fieldNames: ['effort', 'details'],
+          fieldNames: [
+            { name: 'effort', label: 'Effort', type: 'keyword', control: 'TEXT' },
+            { name: 'details', label: 'Details', type: 'keyword', control: 'TEXT' },
+          ],
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(
@@ -578,7 +602,10 @@ describe('TemplatesService', () => {
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          fieldNames: ['HostName', 'Severity'],
+          fieldNames: [
+            { name: 'HostName', label: 'HostName', type: 'keyword', control: 'TEXT' },
+            { name: 'Severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+          ],
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([so]));
@@ -597,7 +624,10 @@ describe('TemplatesService', () => {
         const so = createTemplateSO('so-1', {
           templateId: 't-1',
           name: 'Template',
-          fieldNames: ['severity', 'hostname'],
+          fieldNames: [
+            { name: 'severity', label: 'Severity', type: 'keyword', control: 'TEXT' },
+            { name: 'hostname', label: 'Hostname', type: 'keyword', control: 'TEXT' },
+          ],
         });
 
         unsecuredSavedObjectsClient.search.mockResolvedValue(createMockSearchResponse([so]));
@@ -703,7 +733,9 @@ describe('TemplatesService', () => {
         tags: ['security', 'network'],
         author: 'alice',
         fieldCount: 1,
-        fieldNames: ['field_one'],
+        fieldNames: [
+          { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
         isLatest: true,
       }),
       expect.objectContaining({ id: 'generated-id' })
@@ -891,7 +923,9 @@ describe('TemplatesService', () => {
         tags: ['updated', 'tag'],
         author: 'bob',
         fieldCount: 1,
-        fieldNames: ['field_one'],
+        fieldNames: [
+          { name: 'field_one', label: 'field_one', type: 'keyword', control: 'INPUT_TEXT' },
+        ],
         isLatest: true,
       }),
       expect.any(Object)

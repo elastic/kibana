@@ -23,6 +23,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import { resolveExtendedFieldFilters } from '../../services/cases/extended_field_search_utils';
 
 /**
  * Retrieves a case and optionally its comments.
@@ -35,7 +36,7 @@ export const search = async (
   casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
-    services: { caseService, licensingService },
+    services: { caseService, licensingService, templatesService },
     authorization,
     logger,
     spaceId,
@@ -120,6 +121,28 @@ export const search = async (
 
     const namespaces = [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING];
 
+    const resolvedExtendedFieldFilters = await (async () => {
+      const rawFilters = paramArgs.extendedFieldFilters;
+      if (!rawFilters || rawFilters.length === 0) {
+        return undefined;
+      }
+
+      const ownerArray = asArray(paramArgs.owner).filter(Boolean);
+      const templatesResult = await templatesService.getAllTemplates({
+        page: 1,
+        perPage: 10000,
+        owner: ownerArray.length > 0 ? ownerArray : [],
+        tags: [],
+        author: [],
+        sortField: 'name',
+        sortOrder: 'asc',
+        isDeleted: false,
+        search: '',
+      });
+
+      return resolveExtendedFieldFilters(rawFilters, templatesResult.templates);
+    })();
+
     const [cases, statusStats] = await Promise.all([
       caseService.searchCasesGroupedByID({
         caseOptions: {
@@ -128,6 +151,7 @@ export const search = async (
           searchFields: asArray(paramArgs.searchFields),
         },
         namespaces,
+        extendedFieldFilters: resolvedExtendedFieldFilters,
       }),
       caseService.getCaseStatusStats({
         searchOptions: statusStatsOptions,
