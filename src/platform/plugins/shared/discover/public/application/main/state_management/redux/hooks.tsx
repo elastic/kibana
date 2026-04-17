@@ -15,7 +15,7 @@ import {
   createSelectorHook,
 } from 'react-redux';
 import type { PropsWithChildren } from 'react';
-import React, { useMemo, createContext } from 'react';
+import React, { useMemo, createContext, useContext } from 'react';
 import defaultComparator from 'fast-deep-equal';
 import { useAdHocDataViews } from './runtime_state';
 import type { DiscoverAppState, DiscoverInternalState, TabState } from './types';
@@ -46,6 +46,16 @@ export const InternalStateProvider = ({
 export const useInternalStateDispatch = createDispatchHook(
   internalStateContext
 ) as () => InternalStateDispatch;
+
+export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
+  const { store } = useContext(internalStateContext);
+  return store.getState as () => DiscoverInternalState;
+};
+
+export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
+  const { store } = useContext(internalStateContext);
+  return store.subscribe;
+};
 
 export const useInternalStateSelector: TypedUseSelectorHook<DiscoverInternalState> =
   createSelectorHook(internalStateContext);

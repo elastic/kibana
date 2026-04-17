@@ -28,6 +28,8 @@ const actionsLabel = i18n.translate('xpack.apm.home.actionsMenu.actions', {
   defaultMessage: 'Actions',
 });
 
+const ACTIONS_MENU_BUTTON_MIN_WIDTH = 118; // match Unified Search submit button min width
+
 export function ActionsMenu() {
   const { slo: sloPlugin } = useKibana<ApmPluginStartDeps>().services;
   const { core, plugins } = useApmPluginContext();
@@ -201,9 +203,10 @@ export function ActionsMenu() {
           <EuiButton
             fill
             size="s"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             data-test-subj="apmActionsMenuButton"
+            style={{ minWidth: ACTIONS_MENU_BUTTON_MIN_WIDTH }}
           >
             {actionsLabel}
           </EuiButton>

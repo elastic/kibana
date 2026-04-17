@@ -10,6 +10,7 @@ import { expect, type Page, type Locator } from '@playwright/test';
 export class FleetAgentsOverviewPage {
   page: Page;
 
+  private readonly addMenuButton: Locator;
   private readonly addAgentCTA: Locator;
   private readonly createNewAgentPolicyLink: Locator;
   private readonly createPolicyButton: Locator;
@@ -24,6 +25,7 @@ export class FleetAgentsOverviewPage {
   constructor(page: Page) {
     this.page = page;
 
+    this.addMenuButton = this.page.getByTestId('addAgentMenuButton');
     this.addAgentCTA = this.page.getByTestId('addAgentButton');
     this.createNewAgentPolicyLink = this.page.getByTestId('createNewAgentPolicyLink');
     this.createPolicyButton = this.page.getByTestId('createPolicyBtn');
@@ -37,6 +39,7 @@ export class FleetAgentsOverviewPage {
   }
 
   public async clickAddAgentCTA() {
+    await this.addMenuButton.click();
     await this.addAgentCTA.click();
   }
 

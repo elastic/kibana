@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
-import type { LegacyMetricState } from './legacy_metric';
+import type { LegacyMetricState, LegacyMetricStateESQL } from './legacy_metric';
 import { legacyMetricStateSchema } from './legacy_metric';
 
 describe('Legacy Metric Schema', () => {
   const baseLegacyMetricConfig = {
     type: 'legacy_metric',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   } satisfies Partial<LegacyMetricState>;
 
@@ -40,7 +41,8 @@ describe('Legacy Metric Schema', () => {
 
       const validated = legacyMetricStateSchema.validate(input);
       expect(validated.metric.size).toBeUndefined();
-      expect(validated.metric.alignments).toBeUndefined();
+      expect(validated.metric.labels).toBeUndefined();
+      expect(validated.metric.values).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
       expect(validated.metric.color).toBeUndefined();
     });
@@ -53,9 +55,11 @@ describe('Legacy Metric Schema', () => {
           field: 'test_field',
           size: 's',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
-          alignments: {
-            labels: 'bottom',
-            value: 'right',
+          labels: {
+            alignment: 'bottom',
+          },
+          values: {
+            alignment: 'right',
           },
         },
       } satisfies LegacyMetricInput;
@@ -70,7 +74,8 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'average',
           field: 'temperature',
-          alignments: { labels: 'top', value: 'left' },
+          labels: { alignment: 'top' },
+          values: { alignment: 'left' },
           size: 'l',
           apply_color_to: 'value',
           color: {
@@ -108,9 +113,9 @@ describe('Legacy Metric Schema', () => {
         metric: {
           operation: 'count',
           field: 'test_field',
-          alignments: {
+          labels: {
             // @ts-expect-error
-            labels: 'invalid',
+            alignment: 'invalid',
           },
         },
       } satisfies LegacyMetricInput;
@@ -187,10 +192,10 @@ describe('Legacy Metric Schema', () => {
           field: 'sales',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           size: 'xl',
-          alignments: {
-            labels: 'bottom',
-            value: 'right',
+          labels: {
+            alignment: 'bottom',
           },
+          values: { alignment: 'right' },
           apply_color_to: 'background',
           color: {
             type: 'dynamic',
@@ -210,26 +215,22 @@ describe('Legacy Metric Schema', () => {
       });
     });
 
-    it('validates esql configuration', () => {
+    it('rejects esql configuration', () => {
       const input = {
         type: 'legacy_metric',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'unique_count',
           size: 'xxl',
-          alignments: {
-            labels: 'top',
-            value: 'center',
-          },
+          labels: { alignment: 'top' },
+          values: { alignment: 'center' },
         },
-      } satisfies LegacyMetricInput;
+      } satisfies Omit<LegacyMetricStateESQL, keyof typeof defaultValues>;
 
-      const validated = legacyMetricStateSchema.validate(input);
-      expect(validated).toEqual({ ...defaultValues, ...input });
+      expect(() => legacyMetricStateSchema.validate(input)).toThrow();
     });
   });
 });

@@ -73,4 +73,16 @@ if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
   if [ -n "${PING_SLACK_TEAM:-}" ]; then
     buildkite-agent meta-data set 'slack:ping_team:body' "${PING_SLACK_TEAM}, can you please take a look at the test failures?"
   fi
+
+  # Cancel steps registered for cancel-on-gate-failure when a check gate fails.
+  if [[ "${CHECK_GATE:-}" == "true" ]]; then
+    # Spot/preemptible retries use Buildkite's synthetic `-1` status. Do not
+    # poison the build until a non-retryable gate attempt actually fails.
+    if [[ $BUILDKITE_COMMAND_EXIT_STATUS -eq -1 ]]; then
+      echo '--- Gate step exited with retryable status -1; skipping cancel-on-gate-failure'
+    else
+      echo '--- Cancel steps on gate failure'
+      .buildkite/scripts/steps/gate_failure/cancel.sh || true
+    fi
+  fi
 fi

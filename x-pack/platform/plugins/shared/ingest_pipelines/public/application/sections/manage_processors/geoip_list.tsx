@@ -51,7 +51,7 @@ export const GeoipList: React.FunctionComponent = () => {
   const addDatabaseButton = (
     <EuiButton
       fill
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={() => {
         setShowModal('add');
       }}

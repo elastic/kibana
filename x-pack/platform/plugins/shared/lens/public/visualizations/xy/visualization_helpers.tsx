@@ -19,7 +19,7 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 import type {
-  XYState,
+  XYVisualizationState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
   XYDataLayerConfig,
@@ -71,7 +71,10 @@ export function getAxisName(
 // * 2 or more layers
 // * at least one with date histogram
 // * at least one with interval function
-export function checkXAccessorCompatibility(state: XYState, datasourceLayers: DatasourceLayers) {
+export function checkXAccessorCompatibility(
+  state: XYVisualizationState,
+  datasourceLayers: DatasourceLayers
+) {
   const dataLayers = getDataLayers(state.layers);
   const errors = [];
   const hasDateHistogramSetIndex = dataLayers.findIndex(
@@ -238,7 +241,7 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationSubtypeId(state: XYState) {
+export function getVisualizationSubtypeId(state: XYVisualizationState) {
   if (!state.layers.length) {
     return (
       visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
@@ -255,7 +258,7 @@ export function getVisualizationSubtypeId(state: XYState) {
 }
 
 export function getVisualizationType(
-  state: XYState,
+  state: XYVisualizationState,
   layerId?: string
 ): VisualizationType | 'mixed' {
   if (!state.layers.length) {
@@ -282,7 +285,7 @@ export function getVisualizationType(
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: XYState, layerId?: string) {
+export function getDescription(state?: XYVisualizationState, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -441,7 +444,7 @@ export function newLayerState({
   return newLayerFn[layerType]({ layerId, seriesType, indexPatternId, extraArg });
 }
 
-export function getLayersByType(state: XYState, byType?: string) {
+export function getLayersByType(state: XYVisualizationState, byType?: string) {
   return state.layers.filter(({ layerType = layerTypes.DATA }) =>
     byType ? layerType === byType : true
   );

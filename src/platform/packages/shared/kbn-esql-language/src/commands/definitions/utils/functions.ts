@@ -11,14 +11,11 @@ import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
 import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
-import { isLiteral } from '@elastic/esql';
 import {
   type FunctionDefinition,
   type FunctionFilterPredicates,
   type FunctionParameterType,
   FunctionDefinitionTypes,
-  type SupportedDataType,
   type InlineCastingType,
 } from '../types';
 import { operatorsDefinitions } from '../all_operators';
@@ -33,9 +30,8 @@ import { buildFunctionDocumentation } from './documentation';
 import { getSafeInsertText, getControlSuggestion } from './autocomplete/helpers';
 import { buildFieldsBrowserCommandArgs } from '../../../language/autocomplete/autocomplete_utils';
 import { createFieldsBrowserSuggestion } from '../../registry/complete_items';
-import { removeFinalUnknownIdentiferArg, techPreviewLabel } from './shared';
+import { techPreviewLabel } from './shared';
 import { getTestFunctions } from './test_functions';
-import { getMatchingSignatures } from './expressions';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -76,7 +72,6 @@ export const buildFieldsDefinitions = (
       detail: i18n.translate('kbn-esql-language.esql.autocomplete.fieldDefinition', {
         defaultMessage: `Field specified by the input table`,
       }),
-      sortText: 'D',
       category: SuggestionCategory.FIELD,
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
@@ -277,11 +272,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     text = `${fn.name.toUpperCase()}(${fn.customParametersSnippet})`;
   }
 
-  let functionsPriority = fn.type === FunctionDefinitionTypes.AGG ? 'A' : 'C';
-  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
-    functionsPriority = '1A';
-  }
-
   // Determine function category explicitly
   let category: SuggestionCategory;
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
@@ -310,8 +300,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
         fn.examples
       ),
     },
-    // time_series_agg functions have priority over everything else
-    sortText: functionsPriority,
     category,
     // Open signature help when function is accepted
     command: {
@@ -320,83 +308,6 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
   };
 }
-
-export function checkFunctionInvocationComplete(
-  func: ESQLFunction,
-  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
-): {
-  complete: boolean;
-  reason?: 'tooFewArgs' | 'wrongTypes';
-} {
-  const fnDefinition = getFunctionDefinition(func.name);
-  if (!fnDefinition) {
-    return { complete: false };
-  }
-
-  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
-
-  const argLengthCheck = fnDefinition.signatures.some((def) => {
-    if (def.minParams && cleanedArgs.length >= def.minParams) {
-      return true;
-    }
-
-    if (cleanedArgs.length === def.params.length) {
-      return true;
-    }
-
-    return cleanedArgs.length >= def.params.filter(({ optional }) => !optional).length;
-  });
-
-  if (!argLengthCheck) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  if (func.incomplete && (fnDefinition.name === 'is null' || fnDefinition.name === 'is not null')) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  if (
-    (fnDefinition.name === 'in' || fnDefinition.name === 'not in') &&
-    Array.isArray(func.args[1]) &&
-    !func.args[1].length
-  ) {
-    return { complete: false, reason: 'tooFewArgs' };
-  }
-
-  // If the function is complete, check that the types of the arguments match the function definition
-  const givenTypes = func.args.map((arg) => getExpressionType(arg));
-  const literalMask = func.args.map((arg) => isLiteral(Array.isArray(arg) ? arg[0] : arg));
-
-  const hasCorrectTypes = !!getMatchingSignatures(
-    fnDefinition.signatures,
-    givenTypes,
-    literalMask,
-    true
-  ).length;
-
-  if (!hasCorrectTypes) {
-    return { complete: false, reason: 'wrongTypes' };
-  }
-  return { complete: true };
-}
-
-/**
- * Generates a sort key for field suggestions based on their categorization.
- * Recommended fields are prioritized, followed by ECS fields.
- *
- * @param isEcs - True if the field is an Elastic Common Schema (ECS) field.
- * @param isRecommended - True if the field is a recommended field from the registry.
- * @returns A string representing the sort key ('1C' for recommended, '1D' for ECS, 'D' for others).
- */
-const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
-  if (isRecommended) {
-    return '1C';
-  }
-  if (isEcs) {
-    return '1D';
-  }
-  return 'D';
-};
 
 const getVariablePrefix = (variableType: ESQLVariableType) =>
   variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
@@ -456,10 +367,6 @@ export const buildColumnSuggestions = (
     const fieldIsRecommended = recommendedFieldsFromExtensions.some(
       (recommendedField) => recommendedField.name === column.name
     );
-    const sortText = getFieldsSortText(
-      !column.userDefined && Boolean(column.isEcs),
-      Boolean(fieldIsRecommended)
-    );
 
     const category = getColumnSuggestionCategory(column, fieldIsRecommended);
 
@@ -471,7 +378,6 @@ export const buildColumnSuggestions = (
         (options?.advanceCursor ? ' ' : ''),
       kind: 'Variable',
       detail: titleCaseType,
-      sortText,
       category,
     };
 

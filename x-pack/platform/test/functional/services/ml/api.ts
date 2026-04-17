@@ -858,10 +858,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         await this.deleteDatafeedES(datafeedId);
       }
 
-      const { body, status } = await esSupertest
-        .delete(`/_ml/anomaly_detectors/${jobId}`)
-        .query({ force: true });
-      this.assertResponseStatusCode(200, status, body);
+      await retry.tryForTime(30 * 1000, async () => {
+        const { body, status } = await esSupertest
+          .delete(`/_ml/anomaly_detectors/${jobId}`)
+          .query({ force: true });
+        this.assertResponseStatusCode(200, status, body);
+      });
 
       await this.waitForAnomalyDetectionJobNotToExist(jobId);
       log.debug('> AD job deleted.');

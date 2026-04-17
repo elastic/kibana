@@ -9,6 +9,7 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -21,43 +22,57 @@ import {
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { useKibana } from '../../../hooks/use_kibana';
 
+const mockFetchAlertsIndexNames = fetchAlertsIndexNames as jest.MockedFunction<
+  typeof fetchAlertsIndexNames
+>;
+
 jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/unified-search-plugin/public', () => ({
   SearchBar: MockSearchBar,
 }));
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => ({
-  useAlertsDataView: jest.fn(() => ({
-    isLoading: false,
-    dataView: {
-      id: 'test-data-view',
-      title: '.alerts-*-default',
-      timeFieldName: '@timestamp',
-      fields: [],
-    },
-  })),
-  useFetchUnifiedAlertsFields: jest.fn(() => ({
-    isLoading: false,
-    data: { fields: [] },
-  })),
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => ({
+  fetchAlertsIndexNames: jest.fn(),
 }));
+jest.mock('@kbn/alerts-ui-shared/src/common/hooks', () => {
+  const actual = jest.requireActual('@kbn/alerts-ui-shared/src/common/hooks');
+  return {
+    ...actual,
+    useAlertsDataView: jest.fn(() => ({
+      isLoading: false,
+      dataView: {
+        id: 'test-data-view',
+        title: '.alerts-*-default',
+        timeFieldName: '@timestamp',
+        fields: [],
+      },
+    })),
+    useFetchUnifiedAlertsFields: jest.fn(() => ({
+      isLoading: false,
+      data: { fields: [] },
+    })),
+  };
+});
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
-    <I18nProvider>{children}</I18nProvider>
+  <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient} context={AlertsQueryContext}>
+      <I18nProvider>{children}</I18nProvider>
+    </QueryClientProvider>
   </QueryClientProvider>
 );
 
 describe('WorkflowExecuteEventForm', () => {
   const mockSetValue = jest.fn();
   const mockSetErrors = jest.fn();
-  const { mockSpaces, mockSearchSource, mockData } = createEventFormKibanaMocks();
+  const { mockSearchSource, mockData } = createEventFormKibanaMocks();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchAlertsIndexNames.mockResolvedValue(['.alerts-security.alerts-default']);
     mockUseKibana.mockReturnValue({
       services: {
         unifiedSearch: {
@@ -65,7 +80,6 @@ describe('WorkflowExecuteEventForm', () => {
             SearchBar: MockSearchBar,
           },
         },
-        spaces: mockSpaces as any,
         data: mockData as any,
         fieldFormats: mockData.fieldFormats as any,
         ...createCommonMockServices(),
@@ -94,7 +108,47 @@ describe('WorkflowExecuteEventForm', () => {
     });
   });
 
-  it('creates data view for alerts index pattern', async () => {
+  it('does not create data view when alert indices API is unavailable', async () => {
+    mockFetchAlertsIndexNames.mockRejectedValue(new Error('alerting unavailable'));
+
+    render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+        />
+      </TestWrapper>
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockData.dataViews.create).not.toHaveBeenCalled();
+  });
+
+  it('does not call RAC index API when racQueriesEnabled is false', async () => {
+    render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+          setErrors={mockSetErrors}
+          racQueriesEnabled={false}
+        />
+      </TestWrapper>
+    );
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockFetchAlertsIndexNames).not.toHaveBeenCalled();
+  });
+
+  it('creates data view from alert indices returned by RAC API', async () => {
+    mockFetchAlertsIndexNames.mockResolvedValue([
+      '.alerts-observability.logs.alerts-default',
+      '.alerts-security.alerts-default',
+    ]);
+
     render(
       <TestWrapper>
         <WorkflowExecuteEventForm
@@ -108,7 +162,7 @@ describe('WorkflowExecuteEventForm', () => {
 
     await waitFor(() => {
       expect(mockData.dataViews.create).toHaveBeenCalledWith({
-        title: '.alerts-*-default',
+        title: '.alerts-observability.logs.alerts-default,.alerts-security.alerts-default',
         timeFieldName: '@timestamp',
       });
     });

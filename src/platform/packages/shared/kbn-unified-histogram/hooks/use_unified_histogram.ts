@@ -74,7 +74,7 @@ export type UnifiedHistogramApi = {
   fetch: (params: UnifiedHistogramFetchParamsExternal) => void;
 } & Pick<
   UnifiedHistogramStateService,
-  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTotalHits'
+  'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTotalHits' | 'setLensRequestAdapter'
 >;
 
 export type UnifiedHistogramPartialLayoutProps = Omit<

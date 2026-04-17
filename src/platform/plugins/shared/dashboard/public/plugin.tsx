@@ -53,7 +53,11 @@ import type {
   ScreenshotModePluginStart,
 } from '@kbn/screenshot-mode-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type {
+  ExportShareDerivatives,
+  SharePluginSetup,
+  SharePluginStart,
+} from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { type UiActionsSetup, type UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -63,6 +67,7 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
@@ -72,12 +77,13 @@ import {
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
-import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
+import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/performance/dashboard_duration_start_mark';
+import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -135,6 +141,8 @@ export interface DashboardStart {
    * @returns A promise that resolves to the {@link FindDashboardsService}.
    */
   findDashboardsService: () => Promise<FindDashboardsService>;
+
+  dashboardAppClientApi$: PublishingSubject<DashboardApi | undefined>;
 }
 
 export class DashboardPlugin
@@ -152,6 +160,7 @@ export class DashboardPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private listingViewRegistry: Set<DashboardListingTab> = new Set();
+  private dashboardAppApi$ = new BehaviorSubject<DashboardApi | undefined>(undefined);
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
@@ -178,6 +187,14 @@ export class DashboardPlugin
           },
         })
       );
+      share.registerShareIntegration<ExportShareDerivatives>('dashboard', {
+        id: 'exportJson',
+        groupId: 'exportDerivatives',
+        getShareIntegrationConfig: async () => {
+          const { exportJsonConfig } = await import('./dashboard_renderer/dashboard_module');
+          return exportJsonConfig;
+        },
+      });
     }
 
     const {
@@ -251,14 +268,17 @@ export class DashboardPlugin
         performance.mark(DASHBOARD_DURATION_START_MARK);
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
-        const [{ mountApp }] = await Promise.all([
+        const [{ mountApp }, { initializeDashboardApiServices }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
           import('./dashboard_renderer/dashboard_module'),
           untilPluginStartServicesReady(),
         ]);
         appMounted();
 
-        const [coreStart] = await core.getStartServices();
+        const [[coreStart], _] = await Promise.all([
+          core.getStartServices(),
+          initializeDashboardApiServices(),
+        ]);
 
         const mountContext: DashboardMountContextProps = {
           restorePreviousUrl,
@@ -273,6 +293,7 @@ export class DashboardPlugin
           appUnMounted,
           element: params.element,
           mountContext,
+          setDashboardAppApi: (api) => this.dashboardAppApi$.next(api),
         });
       },
     };
@@ -352,6 +373,7 @@ export class DashboardPlugin
         const { findService } = await import('./dashboard_client');
         return findService;
       },
+      dashboardAppClientApi$: this.dashboardAppApi$,
     };
   }
 

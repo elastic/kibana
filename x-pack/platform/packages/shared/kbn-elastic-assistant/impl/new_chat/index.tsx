@@ -99,7 +99,7 @@ const NewChatComponent: React.FC<Props> = ({
       ) : (
         <EuiButtonEmpty
           color={color}
-          data-test-subj="newChat"
+          data-test-subj="plusCircle"
           onClick={showOverlay}
           iconType={icon}
         >

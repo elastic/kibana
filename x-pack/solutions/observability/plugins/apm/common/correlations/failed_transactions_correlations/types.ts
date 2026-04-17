@@ -17,7 +17,8 @@ export interface FailedTransactionsCorrelation extends FieldValuePair {
   normalizedScore: number;
   failurePercentage: number;
   successPercentage: number;
-  histogram: HistogramItem[];
+  /** Present when histograms were requested (default for legacy p-values API). */
+  histogram?: HistogramItem[];
 }
 
 export type FailedTransactionsCorrelationsImpactThreshold =

@@ -96,7 +96,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
                 isDisabled={disabled || error}
                 size="s"
                 onClick={onAddCustomField}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 data-test-subj="add-custom-field"
               >
                 {i18n.ADD_CUSTOM_FIELD}

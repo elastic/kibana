@@ -12,10 +12,10 @@ import { allowedExperimentalValues } from '../../common/experimental_features';
 const ExperimentalFeaturesContext = createContext<ExperimentalFeatures | null>(null);
 
 export const ExperimentalFeaturesProvider: React.FC<{
-  value: ExperimentalFeatures;
+  value?: ExperimentalFeatures;
   children: React.ReactNode;
 }> = ({ value, children }) => (
-  <ExperimentalFeaturesContext.Provider value={value}>
+  <ExperimentalFeaturesContext.Provider value={value ?? allowedExperimentalValues}>
     {children}
   </ExperimentalFeaturesContext.Provider>
 );

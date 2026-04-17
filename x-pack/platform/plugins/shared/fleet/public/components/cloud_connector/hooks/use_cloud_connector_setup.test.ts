@@ -18,6 +18,7 @@ import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 jest.mock('../utils', () => ({
   updateInputVarsWithCredentials: jest.fn(),
   isAzureCloudConnectorVars: jest.fn(),
+  isGcpCloudConnectorVars: jest.fn(),
   isCloudConnectorNameValid: jest.fn((name: string | undefined) => {
     if (!name) return false;
     const trimmedLength = name.trim().length;
@@ -28,7 +29,6 @@ jest.mock('../utils', () => ({
 const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as jest.MockedFunction<
   typeof isAzureCloudConnectorVars
 >;
-
 // Mock PackageInfo for testing
 const mockPackageInfo: PackageInfo = {
   name: 'cloud_security_posture',

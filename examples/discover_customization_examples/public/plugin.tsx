@@ -8,6 +8,7 @@
  */
 
 import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
@@ -121,6 +122,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
           return (
             <EuiFlexItem grow={false}>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'discoverCustomizationExamples.logsViewSelectorAriaLabel',
+                  { defaultMessage: 'Logs view selector' }
+                )}
                 button={
                   <EuiButton
                     size="s"
@@ -170,11 +175,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
             ControlGroupRendererApi | undefined
           >();
           const stateStorage = stateContainer.stateStorage;
-          const currentTabId = stateContainer.getCurrentTab().id;
-          const dataView = useObservable(
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$,
-            stateContainer.runtimeStateManager.tabs.byId[currentTabId].currentDataView$.getValue()
-          );
+          const currentDataView$ = stateContainer.getCurrentTabDataView$();
+          const dataView = useObservable(currentDataView$, undefined);
 
           useEffect(() => {
             if (!controlGroupAPI) {

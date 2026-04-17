@@ -19,7 +19,7 @@ export const columnsAfter = async (
   previousColumns: ESQLColumnData[],
   query: string,
   additionalFields: IAdditionalFields,
-  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.FAIL
+  unmappedFieldsStrategy: UnmappedFieldsStrategy = UnmappedFieldsStrategy.DEFAULT
 ) => {
   const forkCommand = command as ESQLAstForkCommand;
   const branches = forkCommand.args.map((parens) => parens.child);

@@ -62,6 +62,11 @@ export const selectHasYamlSchemaValidationErrors = createSelector(
   (detail): boolean => detail.hasYamlSchemaValidationErrors
 );
 
+export const selectAiAssisted = createSelector(
+  selectDetail,
+  (detail): boolean => detail.aiAssisted
+);
+
 export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
 
 export const selectHighlightedStepId = createSelector(
@@ -76,7 +81,17 @@ export const selectIsTestModalOpen = createSelector(
 
 export const selectReplayExecutionId = createSelector(
   selectDetail,
-  (detail) => detail.replayExecutionId
+  (detail) => detail.replay?.executionId ?? null
+);
+
+export const selectReplayStepExecutionId = createSelector(
+  selectDetail,
+  (detail) => detail.replay?.stepExecutionId ?? null
+);
+
+export const selectTestStepModalOpenStepId = createSelector(
+  selectDetail,
+  (detail) => detail.testStepModalOpenStepId ?? undefined
 );
 
 export const selectIsSavingYaml = createSelector(

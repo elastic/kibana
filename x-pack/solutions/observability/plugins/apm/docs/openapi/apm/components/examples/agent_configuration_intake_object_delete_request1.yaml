@@ -1,9 +1,6 @@
 # summary: 
 description: Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.
-value: >
-    {
-        "service" : {
-            "name": "frontend",
-            "environment": "production"
-        }
-    }
+value:
+  service:
+    name: "frontend"
+    environment: "production"

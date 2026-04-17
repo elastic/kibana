@@ -70,7 +70,6 @@ describe('inlineSuggest', () => {
         label: 'Search all fields',
         description: 'Use WHERE to filter/search data',
         queryString: 'FROM logs* | WHERE KQL("term")',
-        sortText: 'D',
       },
     ]);
     mockGetColumnsByTypeRetriever.mockReturnValue({
@@ -157,25 +156,21 @@ describe('inlineSuggest', () => {
         label: 'Search all fields',
         description: 'Use WHERE to filter/search data',
         queryString: 'FROM logs* | WHERE KQL("term")',
-        sortText: 'D',
       },
       {
         label: 'Search ...',
         description: '',
         queryString: 'FROM logs* | WHERE KQL("term")',
-        sortText: 'D',
       },
       {
         label: 'Search all',
         description: '',
         queryString: 'FROM logs* | /* comment */ WHERE KQL("term")',
-        sortText: 'D',
       },
       {
         label: 'Search all again',
         description: '',
         queryString: 'FROM logs* | WHERE KQL("term") // comment',
-        sortText: 'D',
       },
     ]);
     const result = await inlineSuggest('FROM logs*', 'FROM logs*', mockRange, mockCallbacks);
@@ -190,13 +185,11 @@ describe('inlineSuggest', () => {
         label: 'Search all fields',
         description: 'Use WHERE to filter/search data',
         queryString: 'FROM logs* | WHERE KQL("term")',
-        sortText: 'D',
       },
       {
         label: 'Aggregate with STATS',
         description: '',
         queryString: 'FROM logs* | STATS count = COUNT(*)',
-        sortText: 'D',
       },
     ]);
     const result = await inlineSuggest(

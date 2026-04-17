@@ -13,14 +13,35 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import type { TraceWaterfallItem } from './use_trace_waterfall';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
-// Mock AutoSizer to avoid ResizeObserver issues in jsdom
+let mockListProps: Record<string, any> = {};
+
+// Mock react-virtualized to avoid ResizeObserver issues in jsdom and to capture List props
 jest.mock('react-virtualized', () => {
   const actual = jest.requireActual('react-virtualized');
+
+  function MockList(props: any) {
+    mockListProps = props;
+    const rows = Array.from({ length: props.rowCount }, (_: any, i: number) =>
+      props.rowRenderer({ index: i, style: {}, key: String(i), parent: {} })
+    );
+    const style: React.CSSProperties = props.autoHeight
+      ? { height: 'auto', overflowY: 'hidden' }
+      : {};
+    return (
+      <div role="grid" style={style}>
+        {rows}
+      </div>
+    );
+  }
 
   return {
     ...actual,
     AutoSizer: ({ children }: { children: (size: { width: number; height: number }) => any }) =>
       children({ width: 800, height: 600 }),
+    WindowScroller: ({ children }: any) =>
+      children({ height: 600, onChildScroll: jest.fn(), scrollTop: 0, registerChild: jest.fn() }),
+    CellMeasurer: ({ children }: any) => children,
+    List: MockList,
   };
 });
 
@@ -139,6 +160,7 @@ describe('convertTreeToList', () => {
 describe('TraceWaterfall', () => {
   afterEach(() => {
     cleanup();
+    mockListProps = {};
   });
 
   const mockTraceItems: TraceItem[] = [
@@ -281,6 +303,60 @@ describe('TraceWaterfall', () => {
       renderTraceWaterfall({ traceItems: [], showAccordion: false });
 
       expect(screen.getByTestId('traceWarning')).toBeInTheDocument();
+    });
+  });
+
+  describe('Scroll strategy', () => {
+    it('uses auto-height layout for window scroll strategy', () => {
+      renderTraceWaterfall({ scrollStrategy: 'window' });
+
+      expect(screen.getByRole('grid')).toHaveStyle({ height: 'auto' });
+    });
+
+    it('uses fixed-height layout for parent scroll strategy', () => {
+      renderTraceWaterfall({ scrollStrategy: 'parent' });
+
+      expect(screen.getByRole('grid')).not.toHaveStyle({ height: 'auto' });
+    });
+
+    it('passes scrollToIndex when scrollToHighlightedOnMount is true for parent strategy', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        highlightedSpanId: 'span-1',
+        scrollToHighlightedOnMount: true,
+      });
+
+      // span-1 is at index 1 in the visible list (after the root trace-1)
+      expect(mockListProps.scrollToIndex).toBe(1);
+    });
+
+    it('does not pass scrollToIndex for window strategy even when highlightedSpanId is set', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'window',
+        highlightedSpanId: 'span-1',
+      });
+
+      expect(mockListProps.scrollToIndex).toBeUndefined();
+    });
+
+    it('does not pass scrollToIndex when scrollToHighlightedOnMount is false', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        highlightedSpanId: 'span-1',
+        scrollToHighlightedOnMount: false,
+      });
+
+      expect(mockListProps.scrollToIndex).toBeUndefined();
+    });
+
+    it('does not pass scrollToIndex when highlightedSpanId is not in the trace', () => {
+      renderTraceWaterfall({
+        scrollStrategy: 'parent',
+        highlightedSpanId: 'nonexistent-span',
+        scrollToHighlightedOnMount: true,
+      });
+
+      expect(mockListProps.scrollToIndex).toBeUndefined();
     });
   });
 });

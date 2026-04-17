@@ -102,7 +102,7 @@ function ErrorsWarningsContent({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={type} color={color} size="s" />
+                      <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                       {i18n.translate('esqlEditor.query.lineNumber', {
@@ -155,13 +155,14 @@ export function ErrorsWarningsFooterPopover({
     return items;
   }, [items, dataErrorsControl]);
 
-  const { color, message } = getConstsByType(type, visibleItems.length);
+  const { color, message, label } = getConstsByType(type, visibleItems.length);
   const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
 
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiPopover
+          aria-label={label}
           anchorPosition="downLeft"
           hasArrow={false}
           panelPaddingSize="none"

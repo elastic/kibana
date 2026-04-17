@@ -15,6 +15,8 @@ import { DateRangePicker, type DateRangePickerProps } from './date_range_picker'
 const defaultProps: DateRangePickerProps = {
   defaultValue: 'last 20 minutes',
   onChange: () => {},
+  settings: { roundRelativeTime: false },
+  onSettingsChange: () => {},
 };
 
 describe('DateRangePicker', () => {

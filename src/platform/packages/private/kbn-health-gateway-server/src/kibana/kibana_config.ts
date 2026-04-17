@@ -20,6 +20,7 @@ const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 const configSchema = schema.object({
   hosts: schema.arrayOf(hostURISchema, {
     minSize: 1,
+    maxSize: 100,
   }),
   requestTimeout: schema.duration({ defaultValue: '30s' }),
   ssl: schema.object({
@@ -28,7 +29,7 @@ const configSchema = schema.object({
       { defaultValue: 'full' }
     ),
     certificateAuthorities: schema.maybe(
-      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })])
     ),
     certificate: schema.maybe(schema.string()),
   }),

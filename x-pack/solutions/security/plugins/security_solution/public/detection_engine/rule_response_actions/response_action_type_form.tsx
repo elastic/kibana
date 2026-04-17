@@ -80,7 +80,7 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
     return (
       <EuiButtonIcon
         data-test-subj="remove-response-action"
-        iconType="minusInCircle"
+        iconType="minusCircle"
         color="danger"
         className="actAccordionActionForm__extraAction"
         aria-label={i18n.translate(

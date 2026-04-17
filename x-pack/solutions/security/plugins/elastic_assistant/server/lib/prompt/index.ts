@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getPrompt, getPromptsByGroupId } from './get_prompt';
+export { getPrompt, getPromptsByGroupId, getInferenceConnectorById } from './get_prompt';
 export { promptDictionary } from './local_prompt_object';

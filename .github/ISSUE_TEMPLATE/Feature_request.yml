@@ -1,0 +1,82 @@
+name: Feature request
+description: Kibana can't do all the things, but maybe it can do your things.
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Tip:** Use the `/gh-create-issue` skill in your coding agent (e.g. Claude Code, Cursor) — it will interview you and file the issue for you.
+  - type: textarea
+    id: what
+    attributes:
+      label: What?
+      description: Describe what feature should be added. If applicable, note what's explicitly out of scope.
+      placeholder: "I want Kibana to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why?
+      description: Describe why this should be added. What use-case does this enable? How do you work around this today? Who would use this?
+      placeholder: "This allows me to..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: |
+        List the conditions that must be true for this feature to be considered complete.
+        Each criterion should be independently verifiable — if you cannot write a test for it, make it more specific.
+        Cover: the happy path, edge cases (empty state, error state), and any affected user roles or deployment targets (Serverless/Hosted/On-prem).
+      placeholder: |
+        <!-- Replace these examples with your own. Each line should be a binary pass/fail check. -->
+
+        **Happy path**
+        - [ ] A [viewer / editor / admin] can [specific action] and sees [specific outcome]
+        - [ ] The feature is accessible via keyboard navigation and has correct ARIA labels
+        - [ ] Developers can [specific action] and [specific outcome]
+
+        **Edge / error cases**
+        - [ ] When [precondition is absent], the UI shows [specific empty state or error message]
+        - [ ] When the user lacks the required privilege, the action is disabled / hidden
+        - [ ] When developers [specific action], the system will [specific error state]
+
+        **Deployment & rollout**
+        - [ ] The feature is gated behind the `my_feature_flag` feature flag
+        - [ ] Behavior on Serverless: [same as Stateful / not available / scoped to X tier]
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How important is this feature to you?
+      options:
+        - Nice to have (quality of life improvement)
+        - Important (workaround exists)
+        - Urgent (workaround exists, but is very painful)
+        - Critical (blocking my workflow)
+    validations:
+      required: false
+
+  - type: input
+    id: blocked-by
+    attributes:
+      label: Blocked By
+      description: Issue(s) that must be resolved first (e.g., `#12345, #67890`).
+      placeholder: "#12345, #67890"
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add screenshots, mockups, links to related issues, or any other context.
+    validations:
+      required: false

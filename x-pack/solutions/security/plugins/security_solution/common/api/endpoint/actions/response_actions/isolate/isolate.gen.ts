@@ -14,12 +14,18 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import { BaseActionSchema, ResponseActionDetails } from '../../../model/schema/common.gen';
 
 export type IsolateRouteResponse = z.infer<typeof IsolateRouteResponse>;
-export const IsolateRouteResponse = z.object({});
+export const IsolateRouteResponse = z.object({
+  /**
+   * The action ID (legacy field, same as `data.id`).
+   */
+  action: z.string().optional(),
+  data: ResponseActionDetails.optional(),
+});
 
 export type EndpointIsolateActionRequestBody = z.infer<typeof EndpointIsolateActionRequestBody>;
 export const EndpointIsolateActionRequestBody = BaseActionSchema;

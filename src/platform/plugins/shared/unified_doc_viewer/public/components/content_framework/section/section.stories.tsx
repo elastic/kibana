@@ -31,7 +31,7 @@ export const Basic: Story = {
     description: 'This is a description for the section.',
     actions: [
       {
-        icon: 'expand',
+        icon: 'maximize',
         onClick: () => alert('First action clicked!'),
         ariaLabel: 'First action ariaLabel',
         dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',

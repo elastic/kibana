@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 export const dynamicColorsMetricAttributes: LensAttributes = {
   description: 'Metric - dynamic colors',
@@ -133,7 +134,7 @@ export const dynamicColorsMetricAttributes: LensAttributes = {
     adHocDataViews: {},
   },
   title: 'Metric - dynamic colors',
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsMetric',
   references: [
     {

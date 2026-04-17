@@ -19,7 +19,7 @@ import { DATASET_VAR_NAME } from '../constants';
 
 import { PackagePolicyValidationError } from '../errors';
 
-import { packageToPackagePolicy } from '.';
+import { packageToPackagePolicy, getInputEffectiveName } from '.';
 import { isInputAllowedForDeploymentMode } from './agentless_policy_helper';
 
 export type SimplifiedVars = Record<
@@ -93,7 +93,9 @@ export function packagePolicyToSimplifiedPackagePolicy(packagePolicy: PackagePol
 }
 
 export function generateInputId(input: NewPackagePolicyInput) {
-  return `${input.policy_template ? `${input.policy_template}-` : ''}${input.type}`;
+  return `${input.policy_template ? `${input.policy_template}-` : ''}${getInputEffectiveName(
+    input
+  )}`;
 }
 
 export function formatInputs(

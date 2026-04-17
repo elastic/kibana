@@ -63,7 +63,7 @@ const BulkActionsComponent: React.FC<Props> = ({
         <EuiButtonEmpty
           data-test-subj="bulkActionsButton"
           disabled={disabled}
-          iconType={appliesTo === 'multipleRows' ? 'arrowDown' : 'boxesVertical'}
+          iconType={appliesTo === 'multipleRows' ? 'chevronSingleDown' : 'boxesVertical'}
           iconSide={appliesTo === 'multipleRows' ? 'right' : undefined}
           onClick={onButtonClick}
           size="xs"

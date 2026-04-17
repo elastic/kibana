@@ -12,10 +12,10 @@ import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { licenseService } from '../../hooks/use_license';
 import type { ActionsComponentProps } from './actions';
 import { Actions } from './actions';
-import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
 
 jest.mock('../../hooks/use_selector');
-jest.mock('../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver');
+jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {
     isPlatinumPlus: jest.fn(),
@@ -36,8 +36,10 @@ const defaultProps: ActionsComponentProps = {
   disablePinAction: false,
   disableTimelineAction: false,
   ecsData: mockTimelineData[0].ecs,
+  eventData: undefined,
   eventId: 'abc',
   eventIdToNoteIds: {},
+  hit: { id: 'id', raw: {}, flattened: {} },
   isEventViewer: false,
   onEventDetailsPanelOpened: jest.fn(),
   onRuleChange: jest.fn(),
@@ -202,7 +204,7 @@ describe('Actions', () => {
   describe('alert context menu', () => {
     describe('analyzer icon', () => {
       it('should render', () => {
-        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);
 
         const { getByTestId } = render(
           <TestProviders>
@@ -214,7 +216,7 @@ describe('Actions', () => {
       });
 
       test('should not show analyzer icon', () => {
-        (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(false);
+        (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(false);
 
         const { queryByTestId } = render(
           <TestProviders>

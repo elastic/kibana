@@ -25,8 +25,7 @@ const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', va
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
         <MisconfigurationsInsight
-          name={value}
-          fieldName={fieldName}
+          identityFields={{ [fieldName]: value }}
           data-test-subj={testId}
           openDetailsPanel={openDetailsPanel}
         />

@@ -90,6 +90,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await (await testSubjects.find('create-submit')).click();
 
+      await (await testSubjects.find('confirmModalConfirmButton')).click();
+
       await retry.try(async () => {
         const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created maintenance window 'Test Maintenance Window'`);

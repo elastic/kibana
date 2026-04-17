@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_API_PATH, DASHBOARD_APP_API_PATH } from '../../common/constants';
+import {
+  DASHBOARD_API_PATH,
+  DASHBOARD_API_VERSION,
+  DASHBOARD_APP_API_PATH,
+  DASHBOARD_APP_API_VERSION,
+} from '../../common/constants';
 
 export function getRouteConfig(isDashboardAppRequest: boolean) {
   return isDashboardAppRequest
@@ -27,26 +32,19 @@ export function getRouteConfig(isDashboardAppRequest: boolean) {
             },
           },
         } as const,
-        routeVersion: '1',
+        routeVersion: DASHBOARD_APP_API_VERSION,
       }
     : {
         basePath: DASHBOARD_API_PATH,
         routeConfig: {
-          // TODO change to public before FF
-          access: 'internal',
-          /**
-           * `enableQueryVersion` is a temporary solution for testing internal endpoints.
-           * Requests to these internal endpoints from Kibana Dev Tools or external clients
-           * should include the ?apiVersion=1 query parameter.
-           * This will be removed when the API is finalized and moved to a stable version.
-           */
-          enableQueryVersion: true,
+          access: 'public',
           description:
             'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
           options: {
             tags: ['oas-tag:Dashboards'],
             availability: {
               stability: 'experimental',
+              since: '9.4.0',
             },
           },
           security: {
@@ -56,7 +54,6 @@ export function getRouteConfig(isDashboardAppRequest: boolean) {
             },
           },
         } as const,
-        // TODO change to '2023-10-31' before FF
-        routeVersion: '1',
+        routeVersion: DASHBOARD_API_VERSION,
       };
 }

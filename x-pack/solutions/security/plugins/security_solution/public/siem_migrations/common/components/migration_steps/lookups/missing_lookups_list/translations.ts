@@ -16,7 +16,7 @@ export const REFERENCE_SETS_QRADAR_APP = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.dataInputFlyout.lookups.missingReferenceSetsList.qradarAppSection',
   {
     defaultMessage:
-      "We've also found reference sets within your rules. To fully translate those rules containing these reference sets, follow the step-by-step guide to export and upload them all.",
+      'Below are the reference set found in your rules. Export them from QRadar and upload here.',
   }
 );
 

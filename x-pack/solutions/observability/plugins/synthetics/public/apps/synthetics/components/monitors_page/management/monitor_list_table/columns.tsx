@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
@@ -41,15 +41,23 @@ import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge'
 import { getFrequencyLabel } from './labels';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { UnhealthyTooltip } from './unhealthy_tooltip';
 
 export function useMonitorListColumns({
   loading,
   overviewStatus,
   setMonitorPendingDeletion,
+  setMonitorPendingReset,
+  isFixableByReset,
 }: {
   loading: boolean;
   overviewStatus: OverviewStatusState | null;
   setMonitorPendingDeletion: (configs: string[]) => void;
+  setMonitorPendingReset: (val: {
+    resetIds: string[];
+    skippedMonitors: Array<{ id: string; name: string }>;
+  }) => void;
+  isFixableByReset: (configId: string) => boolean;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
   const { http, spaces } = useKibana<ClientPluginsStart>().services;
@@ -82,9 +90,20 @@ export function useMonitorListColumns({
         defaultMessage: 'Monitor',
       }),
       sortable: true,
-      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => (
-        <MonitorDetailsLink monitor={monitor} />
-      ),
+      render: (_: string, monitor: EncryptedSyntheticsSavedMonitor) => {
+        const configId = monitor[ConfigKey.CONFIG_ID];
+
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <MonitorDetailsLink monitor={monitor} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <UnhealthyTooltip configId={configId} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
     },
     // Only show Project ID column if project monitors are present
     ...(overviewStatus?.projectMonitorsCount ?? 0 > 0
@@ -299,6 +318,41 @@ export function useMonitorListColumns({
           },
         },
         {
+          'data-test-subj': 'syntheticsMonitorResetAction',
+          isPrimary: false,
+          name: (fields) => (
+            <NoPermissionsTooltip
+              canEditSynthetics={canEditSynthetics}
+              canUsePublicLocations={isPublicLocationsAllowed(fields)}
+            >
+              <span
+                aria-label={i18n.translate('xpack.synthetics.management.monitorList.resetLabel', {
+                  defaultMessage: 'Reset monitor {monitorName}',
+                  values: { monitorName: fields[ConfigKey.NAME] },
+                })}
+              >
+                {labels.RESET_LABEL}
+              </span>
+            </NoPermissionsTooltip>
+          ),
+          description: labels.RESET_LABEL,
+          icon: 'refresh' as const,
+          type: 'icon' as const,
+          color: 'warning' as const,
+          available: (fields) => isFixableByReset(fields[ConfigKey.CONFIG_ID]),
+          enabled: (fields) =>
+            canEditSynthetics &&
+            !isActionLoading(fields) &&
+            isServiceAllowed &&
+            isPublicLocationsAllowed(fields),
+          onClick: (fields) => {
+            setMonitorPendingReset({
+              resetIds: [fields[ConfigKey.CONFIG_ID]],
+              skippedMonitors: [],
+            });
+          },
+        },
+        {
           description: labels.DISABLE_STATUS_ALERT,
           name: (fields) => (
             <span
@@ -353,7 +407,7 @@ export function useMonitorListColumns({
         <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
           <EuiButtonIcon
             data-test-subj="syntheticsUseMonitorListColumnsButton"
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             isDisabled={true}
             aria-label={CANNOT_PERFORM_ACTION_SYNTHETICS}
           />

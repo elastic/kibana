@@ -9,16 +9,31 @@
 
 import moment from 'moment';
 
+import { resolveNamedRangeAlias } from '../parse';
 import {
   DATE_RANGE_DISPLAY_DELIMITER,
   DEFAULT_DATE_FORMAT,
-  FORMAT_NO_YEAR,
-  FORMAT_TIME_ONLY,
+  DEFAULT_DATE_FORMAT_NO_YEAR,
+  DEFAULT_DATE_FORMAT_TIME_ONLY,
   UNIT_SHORT_TO_FULL_MAP,
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_NOW,
+  DATE_TYPE_RELATIVE,
 } from '../constants';
-import type { TimeRange, TimeRangeTransformOptions } from '../types';
+import type { TimePrecision, TimeRange, TimeRangeTransformOptions } from '../types';
+
+/**
+ * Trims a moment format string to the requested sub-minute precision.
+ * - `'ms'`  — keep everything (seconds + milliseconds).
+ * - `'s'`   — strip `.SSS`.
+ * - `'none'`— strip `:ss.SSS` (and `:ss`).
+ */
+export function applyTimePrecision(format: string, precision: TimePrecision = 's'): string {
+  if (precision === 'ms') return format;
+  if (precision === 's') return format.replace(/[.,]SSS/g, '');
+  // 'none' — strip seconds (and any trailing milliseconds)
+  return format.replace(/:ss[.,]SSS/g, '').replace(/:ss/g, '');
+}
 
 /**
  * Converts a parsed TimeRange into a human-readable display string.
@@ -27,16 +42,34 @@ export function timeRangeToDisplayText(
   timeRange: TimeRange,
   options?: TimeRangeTransformOptions
 ): string {
-  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, dateFormat = DEFAULT_DATE_FORMAT } =
-    options ?? {};
+  const {
+    delimiter = DATE_RANGE_DISPLAY_DELIMITER,
+    dateFormat = DEFAULT_DATE_FORMAT,
+    timePrecision = 's',
+  } = options ?? {};
 
   if (timeRange.isInvalid) {
     return timeRange.value;
   }
   if (timeRange.isNaturalLanguage) {
-    // capitalize
-    const { value } = timeRange;
-    return value.charAt(0).toUpperCase() + value.slice(1);
+    // Resolve aliases (e.g. "yd" → "yesterday") before capitalizing
+    const resolved = resolveNamedRangeAlias(timeRange.value);
+    return resolved.charAt(0).toUpperCase() + resolved.slice(1);
+  }
+
+  // For [RELATIVE, NOW] show "Last {count} {unit}" and for [NOW, RELATIVE] show "Next {count} {unit}"
+  const [startType, endType] = timeRange.type;
+  if (startType === DATE_TYPE_RELATIVE && endType === DATE_TYPE_NOW) {
+    const parts = dateMathToRelativeParts(timeRange.start);
+    if (parts) {
+      return formatCompactRelativeTime(parts.count, parts.unit, false);
+    }
+  }
+  if (startType === DATE_TYPE_NOW && endType === DATE_TYPE_RELATIVE) {
+    const parts = dateMathToRelativeParts(timeRange.end);
+    if (parts) {
+      return formatCompactRelativeTime(parts.count, parts.unit, true);
+    }
   }
 
   let startDateFormat = dateFormat;
@@ -54,8 +87,8 @@ export function timeRangeToDisplayText(
     const startInCurrentYear = startIsNow || startYear === currentYear;
     const endInCurrentYear = endIsNow || endYear === currentYear;
     if (startInCurrentYear && endInCurrentYear) {
-      startDateFormat = FORMAT_NO_YEAR;
-      endDateFormat = FORMAT_NO_YEAR;
+      startDateFormat = DEFAULT_DATE_FORMAT_NO_YEAR;
+      endDateFormat = DEFAULT_DATE_FORMAT_NO_YEAR;
     }
 
     // Show only time for end date if both dates are on the same day
@@ -64,12 +97,20 @@ export function timeRangeToDisplayText(
       timeRange.endDate &&
       timeRange.startDate.toDateString() === timeRange.endDate.toDateString()
     ) {
-      endDateFormat = FORMAT_TIME_ONLY;
+      endDateFormat = DEFAULT_DATE_FORMAT_TIME_ONLY;
     }
   }
 
-  const startDisplay = formatDateInstant(timeRange.start, timeRange.startDate, startDateFormat);
-  const endDisplay = formatDateInstant(timeRange.end, timeRange.endDate, endDateFormat);
+  const startDisplay = formatDateInstant(
+    timeRange.start,
+    timeRange.startDate,
+    applyTimePrecision(startDateFormat, timePrecision)
+  );
+  const endDisplay = formatDateInstant(
+    timeRange.end,
+    timeRange.endDate,
+    applyTimePrecision(endDateFormat, timePrecision)
+  );
 
   return `${startDisplay} ${delimiter.trim()} ${endDisplay}`;
 }
@@ -82,18 +123,22 @@ export function timeRangeToFullFormattedText(
   timeRange: TimeRange,
   options?: TimeRangeTransformOptions
 ): string {
-  const { delimiter = DATE_RANGE_DISPLAY_DELIMITER, dateFormat = DEFAULT_DATE_FORMAT } =
-    options ?? {};
+  const {
+    delimiter = DATE_RANGE_DISPLAY_DELIMITER,
+    dateFormat = DEFAULT_DATE_FORMAT,
+    timePrecision = 'ms',
+  } = options ?? {};
 
   if (timeRange.isInvalid) {
     return timeRange.value;
   }
 
+  const format = applyTimePrecision(dateFormat, timePrecision);
   const formattedStart = timeRange.startDate
-    ? formatAbsoluteInstant(timeRange.startDate, dateFormat)
+    ? formatAbsoluteInstant(timeRange.startDate, format)
     : timeRange.start;
   const formattedEnd = timeRange.endDate
-    ? formatAbsoluteInstant(timeRange.endDate, dateFormat)
+    ? formatAbsoluteInstant(timeRange.endDate, format)
     : timeRange.end;
 
   return `${formattedStart} ${delimiter.trim()} ${formattedEnd}`;
@@ -162,6 +207,19 @@ function formatRelativeTime(count: number, unit: string, isFuture: boolean): str
   const direction = isFuture ? 'from now' : 'ago';
 
   return `${count} ${unitName}${plural} ${direction}`;
+}
+
+/**
+ * Formats a compact relative time label.
+ * e.g., (7, 'm', false) => "Last 7 minutes"
+ * e.g., (3, 'd', true) => "Next 3 days"
+ */
+function formatCompactRelativeTime(count: number, unit: string, isFuture: boolean): string {
+  const unitName = UNIT_SHORT_TO_FULL_MAP[unit] || unit;
+  const plural = count === 1 ? '' : 's';
+  const direction = isFuture ? 'Next' : 'Last';
+
+  return `${direction} ${count} ${unitName}${plural}`;
 }
 
 /**

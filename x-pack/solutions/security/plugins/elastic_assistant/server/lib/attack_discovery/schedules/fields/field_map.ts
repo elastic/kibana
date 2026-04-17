@@ -36,7 +36,7 @@ import {
   ALERT_ATTACK_DISCOVERY_USER_NAME,
   ALERT_RISK_SCORE,
   ALERT_ATTACK_IDS,
-} from './field_names';
+} from '@kbn/elastic-assistant-common';
 
 export const attackDiscoveryAlertFieldMap: FieldMap = {
   /**

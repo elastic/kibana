@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       it('should return focus to the open button when dismissing the open search flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton'));
+        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverOpenButton', true));
 
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed(
@@ -120,9 +120,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should return focus to the share button when dismissing the share popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('shareTopNavButton'));
-
-      it('should return focus to the inspect button when dismissing the inspector flyout', () =>
-        expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('openInspectorButton', true));
 
       it('should return focus to the save button when dismissing the save modal', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverSaveButton'));

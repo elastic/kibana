@@ -5,135 +5,148 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiButton, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { CodeEditor } from '@kbn/code-editor';
-import React, { useCallback } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
-import { useCasesTemplatesNavigation } from '../../../common/navigation';
-import { useCreateTemplate } from '../hooks/use_create_template';
-import { useUpdateTemplate } from '../hooks/use_update_template';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { useAvailableCasesOwners } from '../../app/use_available_owners';
-import { getOwnerDefaultValue } from '../../create/utils';
+import {
+  getTemplateDefinitionJsonSchema,
+  TEMPLATE_SCHEMA_URI,
+} from '../utils/template_json_schema';
+import { TemplateYamlEditorBase } from './template_yaml_editor';
+import { TemplateYamlValidationAccordion } from './template_yaml_validation_accordion';
+import { useValidationAccordionPositioning } from '../hooks/use_validation_accordion_positioning';
+import { useFieldNameValidation } from '../hooks/use_field_name_validation';
+import { useUserPickerValidation } from '../hooks/use_user_picker_validation';
+import { useKibana } from '../../../common/lib/kibana';
 
-import * as i18n from '../translations';
+export interface YamlEditorFormValues {
+  definition: string;
+}
+
+export interface TemplateYamlEditorProps {
+  value: string;
+  onChange: (value: string) => void;
+  isSaving?: boolean;
+  isSaved?: boolean;
+}
 
 const styles = {
   editorContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-      height: '50vh',
+      height: '100%',
       width: '100%',
       padding: euiTheme.size.xs,
+      position: 'relative',
     }),
+  statusIndicator: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      position: 'absolute',
+      top: euiTheme.size.s,
+      right: euiTheme.size.s,
+      zIndex: 1,
+    }),
+  validationContainer: css({
+    position: 'fixed',
+    bottom: '57px',
+    marginLeft: '-24px',
+    pointerEvents: 'none',
+    display: 'flex',
+    flexDirection: 'column-reverse',
+    '& > *': {
+      pointerEvents: 'auto',
+    },
+  }),
 };
 
-export interface TemplateFormValues {
-  name: string;
-  owner: string;
-  definition: string;
-}
-
-export const TemplateFormFields = () => {
+export const TemplateYamlEditor = ({
+  value,
+  onChange,
+  isSaving = false,
+  isSaved = false,
+}: TemplateYamlEditorProps) => {
   const euiTheme = useEuiTheme();
-  const { control } = useFormContext<TemplateFormValues>();
+  const { security } = useKibana().services;
+
+  const {
+    containerRef,
+    accordionRef,
+    editorRef,
+    containerBounds,
+    accordionHeight,
+    portalNode,
+    validationErrors,
+    isEditorMounted,
+    handleValidationChange,
+    handleEditorMount,
+    handleErrorClick,
+  } = useValidationAccordionPositioning();
+
+  useFieldNameValidation(editorRef.current, value);
+  useUserPickerValidation(editorRef.current, value, security);
+
+  const schemas = useMemo(() => {
+    const jsonSchema = getTemplateDefinitionJsonSchema();
+    if (!jsonSchema) {
+      return [];
+    }
+    return [
+      {
+        uri: TEMPLATE_SCHEMA_URI,
+        fileMatch: ['*'],
+        schema: jsonSchema,
+      },
+    ];
+  }, []);
+
+  const editorPaddingBottom = `${accordionHeight + 8}px`;
 
   return (
-    <div css={styles.editorContainer(euiTheme)}>
-      <Controller
-        control={control}
-        name="definition"
-        render={({ field }) => {
-          return (
-            <CodeEditor
-              fullWidth
-              height={'100%'}
-              transparentBackground
-              languageId="yaml"
-              value={field.value}
-              onChange={(code) => field.onChange(code)}
+    <>
+      <div
+        ref={containerRef}
+        css={styles.editorContainer(euiTheme)}
+        style={{ paddingBottom: editorPaddingBottom }}
+      >
+        {isSaving && (
+          <div css={styles.statusIndicator(euiTheme)}>
+            <EuiLoadingSpinner size="m" />
+          </div>
+        )}
+        {!isSaving && isSaved && (
+          <div css={styles.statusIndicator(euiTheme)}>
+            <EuiIcon type="check" color="success" size="l" title="Template saved" />
+          </div>
+        )}
+        <TemplateYamlEditorBase
+          value={value}
+          onChange={onChange}
+          schemas={schemas}
+          onValidationChange={handleValidationChange}
+          onEditorMount={handleEditorMount}
+        />
+      </div>
+      {portalNode &&
+        createPortal(
+          <div
+            ref={accordionRef}
+            css={styles.validationContainer}
+            style={{
+              left: `${containerBounds.left}px`,
+              width: `${containerBounds.width}px`,
+            }}
+          >
+            <TemplateYamlValidationAccordion
+              isMounted={isEditorMounted}
+              validationErrors={validationErrors}
+              onErrorClick={handleErrorClick}
             />
-          );
-        }}
-      />
-    </div>
+          </div>,
+          portalNode
+        )}
+    </>
   );
 };
 
-TemplateFormFields.displayName = 'TemplateFormFields';
-
-export const CreateTemplateForm = () => {
-  const { handleSubmit } = useFormContext<TemplateFormValues>();
-  const { mutateAsync, isLoading } = useCreateTemplate();
-
-  const { owner } = useCasesContext();
-  const availableOwners = useAvailableCasesOwners();
-  const defaultOwnerValue = owner[0] ?? getOwnerDefaultValue(availableOwners);
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
-
-  const onSubmit = useCallback(
-    async (data: { name: string; owner: string; definition: string }) => {
-      await mutateAsync({
-        template: {
-          owner: defaultOwnerValue,
-          definition: data.definition,
-        },
-      });
-      navigateToCasesTemplates();
-    },
-    [defaultOwnerValue, mutateAsync, navigateToCasesTemplates]
-  );
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <TemplateFormFields />
-
-      <EuiSpacer />
-
-      <div>
-        <EuiButton type="submit" isLoading={isLoading}>
-          {i18n.SAVE_TEMPLATE}
-        </EuiButton>
-      </div>
-    </form>
-  );
-};
-
-CreateTemplateForm.displayName = 'CreateTemplateForm';
-
-export const UpdateTemplateForm = ({ templateId }: { templateId: string }) => {
-  const { handleSubmit } = useFormContext<TemplateFormValues>();
-  const { mutateAsync, isLoading } = useUpdateTemplate();
-  const { navigateToCasesTemplates } = useCasesTemplatesNavigation();
-
-  const onSubmit = useCallback(
-    async (data: TemplateFormValues) => {
-      await mutateAsync({
-        templateId,
-        template: {
-          definition: data.definition,
-        },
-      });
-      navigateToCasesTemplates();
-    },
-    [mutateAsync, navigateToCasesTemplates, templateId]
-  );
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <TemplateFormFields />
-
-      <EuiSpacer />
-
-      <div>
-        <EuiButton type="submit" isLoading={isLoading}>
-          {i18n.SAVE_TEMPLATE}
-        </EuiButton>
-      </div>
-    </form>
-  );
-};
-
-UpdateTemplateForm.displayName = 'UpdateTemplateForm';
+TemplateYamlEditor.displayName = 'TemplateYamlEditor';

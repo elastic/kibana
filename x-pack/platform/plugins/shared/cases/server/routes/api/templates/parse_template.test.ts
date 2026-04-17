@@ -94,4 +94,26 @@ describe('parseTemplate', () => {
     expect(result.isLatest).toBe(true);
     expect(result.latestVersion).toBe(1);
   });
+
+  it('parses severity and category from the definition', () => {
+    const definition = yaml.dump({
+      name: 'Template with severity',
+      severity: 'high',
+      category: 'security',
+      fields: [],
+    });
+    const template = createTemplate({ definition });
+    const result = parseTemplate(template);
+
+    expect(result.definition.severity).toBe('high');
+    expect(result.definition.category).toBe('security');
+  });
+
+  it('omits severity and category when not present in the definition', () => {
+    const template = createTemplate();
+    const result = parseTemplate(template);
+
+    expect(result.definition.severity).toBeUndefined();
+    expect(result.definition.category).toBeUndefined();
+  });
 });

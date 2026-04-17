@@ -407,7 +407,7 @@ function EmbeddableRelatedErrors({
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiBadge
         color={euiTheme.colors.danger}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         href={getRelatedErrorsHref(item.id) as any}
         onClick={(e: React.MouseEvent | React.KeyboardEvent) => {
           e.stopPropagation();
@@ -437,7 +437,6 @@ function RelatedErrors({
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer',
     '/dependencies/operation'
   );
   const {
@@ -488,7 +487,7 @@ function RelatedErrors({
     return (
       <EuiBadge
         color={euiTheme.colors.danger}
-        iconType="arrowRight"
+        iconType="chevronSingleRight"
         onClick={onClick}
         tabIndex={0}
         role="button"

@@ -22,13 +22,13 @@ export interface TriggerConditionItem {
   yamlPath: (string | number)[];
 }
 
-/** Path is triggers[n].with.condition → returns n; otherwise null. */
+/** Path is triggers[n].on.condition → returns n; otherwise null. */
 function getTriggerIndexIfConditionPath(path: (string | number)[]): number | null {
   if (
     path.length < 4 ||
     path[0] !== 'triggers' ||
     typeof path[1] !== 'number' ||
-    path[2] !== 'with' ||
+    path[2] !== 'on' ||
     path[3] !== 'condition'
   ) {
     return null;
@@ -57,7 +57,7 @@ function offsetToLineColumn(text: string, offset: number): { line: number; colum
 }
 
 /**
- * Collects all custom trigger condition nodes (triggers[].with.condition) from the YAML document
+ * Collects all custom trigger condition nodes (triggers[].on.condition) from the YAML document
  * with their positions and trigger type. Used to validate that each condition is valid KQL
  * and only references properties from the trigger's eventSchema.
  */

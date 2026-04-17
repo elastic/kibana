@@ -101,7 +101,7 @@ export const MlPopover = React.memo(() => {
             aria-label={i18n.ML_JOB_SETTINGS}
             color="primary"
             data-test-subj="integrations-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
             textProps={{ style: { fontSize: '1rem' } }}
@@ -129,7 +129,7 @@ export const MlPopover = React.memo(() => {
             aria-label={i18n.ML_JOB_SETTINGS}
             color="primary"
             data-test-subj="integrations-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);

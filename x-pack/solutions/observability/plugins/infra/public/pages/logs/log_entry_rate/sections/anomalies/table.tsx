@@ -134,7 +134,7 @@ export const AnomaliesTable: React.FunctionComponent<{
   const expandedIdsRowContents = useMemo(
     () =>
       [...expandedIds].reduce<Record<string, React.ReactNode>>((aggregatedRows, id) => {
-        const anomaly = results.find((_anomaly) => _anomaly.id === id);
+        const anomaly = results?.find((_anomaly) => _anomaly.id === id);
 
         return {
           ...aggregatedRows,
@@ -301,7 +301,7 @@ const PaginationControls = ({
         <EuiFlexGroup>
           <EuiButtonIcon
             data-test-subj="infraPaginationControlsButton"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             isDisabled={!fetchPreviousPage || isLoading}
             onClick={fetchPreviousPage}
             aria-label={previousPageLabel}
@@ -311,7 +311,7 @@ const PaginationControls = ({
           </span>
           <EuiButtonIcon
             data-test-subj="infraPaginationControlsButton"
-            iconType="arrowRight"
+            iconType="chevronSingleRight"
             isDisabled={!fetchNextPage || isLoading}
             onClick={fetchNextPage}
             aria-label={nextPageLabel}

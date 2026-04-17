@@ -514,6 +514,59 @@ describe('schema validation', () => {
     expect(validationResp).toEqual(expectedResponse);
   });
 
+  it('get inputs template with OTelCollectorConfig fields should return valid response', () => {
+    const expectedResponse = {
+      inputs: [
+        {
+          id: 'log-input-1',
+          type: 'logfile',
+          streams: [
+            {
+              id: 'stream-1',
+              data_stream: { dataset: 'mypackage.logs', type: 'logs' },
+            },
+          ],
+        },
+      ],
+      extensions: {
+        health_check: {},
+      },
+      receivers: {
+        otlp: {
+          protocols: { grpc: {}, http: {} },
+        },
+      },
+      processors: {
+        batch: {},
+      },
+      connectors: {
+        some_connector: { config: {} },
+      },
+      exporters: {
+        elasticsearch: {
+          hosts: ['https://localhost:9200'],
+        },
+      },
+      service: {
+        extensions: ['health_check'],
+        pipelines: {
+          logs: {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['elasticsearch'],
+          },
+          metrics: {
+            receivers: ['otlp'],
+            processors: ['batch'],
+            exporters: ['elasticsearch'],
+          },
+        },
+      },
+    };
+    const validationResp = GetInputsResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
   it('get package info should return valid response', async () => {
     const expectedResponse: GetInfoResponse = {
       item: packageInfo,

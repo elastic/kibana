@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ADD_AGENT_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+
+import { ADD_AGENT_BUTTON, ADD_AGENT_MENU_BUTTON, AGENT_FLYOUT } from '../screens/fleet';
 import { cleanupAgentPolicies, deleteAgentDocs } from '../tasks/cleanup';
 import { createAgentDoc } from '../tasks/agents';
 import { setFleetServerHost } from '../tasks/fleet_server';
 import { FLEET, navigateTo } from '../tasks/navigation';
 import { request } from '../tasks/common';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { login } from '../tasks/login';
 
 const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
@@ -66,6 +67,8 @@ describe('Fleet add agent flyout', () => {
       const AGENT_ID = 'agent' + Date.now();
       navigateTo(FLEET);
 
+      // When enableOpAMP is on, addAgentButton lives inside a popover — open it first.
+      cy.getBySel(ADD_AGENT_MENU_BUTTON).click();
       cy.getBySel(ADD_AGENT_BUTTON).click();
       cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
 

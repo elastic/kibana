@@ -92,6 +92,56 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('Policy space isolation', () => {
+      let defaultSpacePolicyId: string;
+      let testSpacePolicyId: string;
+      const testSpaceId = 'test1';
+
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.savedObjects.cleanStandardList({
+          space: testSpaceId,
+        });
+        await cleanFleetIndices(esClient);
+        await apiClient.postEnableSpaceAwareness();
+        await apiClient.setup();
+        const defaultPolicy = await apiClient.createFleetServerPolicy();
+        defaultSpacePolicyId = defaultPolicy.item.id;
+        const testSpacePolicy = await apiClient.createFleetServerPolicy(testSpaceId);
+        testSpacePolicyId = testSpacePolicy.item.id;
+      });
+
+      after(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.savedObjects.cleanStandardList({
+          space: testSpaceId,
+        });
+        await cleanFleetIndices(esClient);
+      });
+
+      it('default space should only return fleet server policies from default space', async () => {
+        const res = await apiClient.getEnrollmentSettings();
+        const policyIds = res.fleet_server.policies.map((p) => p.id);
+        expect(policyIds).to.contain(defaultSpacePolicyId);
+        expect(policyIds).not.to.contain(testSpacePolicyId);
+      });
+
+      it('test space should only return fleet server policies from that space', async () => {
+        const res = await apiClient.getEnrollmentSettings(testSpaceId);
+        const policyIds = res.fleet_server.policies.map((p) => p.id);
+        expect(policyIds).to.contain(testSpacePolicyId);
+        expect(policyIds).not.to.contain(defaultSpacePolicyId);
+      });
+
+      it('default space has_active should be true even when the active fleet server is in another space', async () => {
+        // Enroll a fleet server agent only in the test space (no agent in default space)
+        await createFleetAgent(esClient, testSpacePolicyId, testSpaceId);
+
+        const res = await apiClient.getEnrollmentSettings();
+        expect(res.fleet_server.has_active).to.be(true);
+      });
+    });
+
     describe('With Fleet server setup in default space', () => {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();

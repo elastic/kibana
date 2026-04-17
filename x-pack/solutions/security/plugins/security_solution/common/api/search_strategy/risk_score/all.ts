@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { RiskScoreFields } from '../../../search_strategy/security_solution/risk_score/all';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';

@@ -6,12 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SCRIPT_TAGS } from '../../../endpoint/service/scripts_library/constants';
+import { SCRIPT_TAGS } from '../../../endpoint/service/script_library/constants';
 import { validateNoDuplicateValues, validateNonEmptyString } from '../schema_utils';
 import { SUPPORTED_HOST_OS_TYPE } from '../../../endpoint/constants';
 
 export const ScriptNameSchema = schema.string({ minLength: 1, validate: validateNonEmptyString });
 export const ScriptFileSchema = schema.stream();
+export const ScriptFileTypeSchema = schema.oneOf([
+  schema.literal('archive'),
+  schema.literal('script'),
+]);
 export const ScriptRequiresInputSchema = schema.boolean({ defaultValue: false });
 export const ScriptDescriptionSchema = schema.string({
   minLength: 1,

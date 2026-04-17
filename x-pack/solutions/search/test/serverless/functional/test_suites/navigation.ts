@@ -160,6 +160,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
           // footer:
           'search_getting_started',
           'dev_tools',
+          'workflows',
           'data_management',
           'admin_and_settings',
         ],

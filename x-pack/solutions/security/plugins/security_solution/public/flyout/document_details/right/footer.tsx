@@ -8,33 +8,12 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { NewChatByTitle } from '@kbn/elastic-assistant';
-import {
-  ALERT_ATTACHMENT_PROMPT,
-  EVENT_ATTACHMENT_PROMPT,
-} from '../../../agent_builder/components/prompts';
-import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useDocumentDetailsContext } from '../shared/context';
-import { useAssistant } from './hooks/use_assistant';
 import { FLYOUT_FOOTER_TEST_ID } from './test_ids';
 import { TakeActionButton } from '../shared/components/take_action_button';
-import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_agent_builder_availability';
-import { NewAgentBuilderAttachment } from '../../../agent_builder/components/new_agent_builder_attachment';
-import { useAgentBuilderAttachment } from '../../../agent_builder/hooks/use_agent_builder_attachment';
-import { getRawData } from '../../../assistant/helpers';
-import { stringifyEssentialAlertData } from '../../../agent_builder/helpers';
-import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
-
-export const ASK_AI_ASSISTANT = i18n.translate(
-  'xpack.securitySolution.ease.flyout.right.footer.askAIAssistant',
-  {
-    defaultMessage: 'Ask AI Assistant',
-  }
-);
-export const EVENT = i18n.translate('xpack.securitySolution.flyout.right.footer.event', {
-  defaultMessage: 'Security Event',
-});
+import { FooterAiActions } from '../../../flyout_v2/document/components/footer_ai_actions';
 
 interface PanelFooterProps {
   /**
@@ -47,27 +26,8 @@ interface PanelFooterProps {
  * Bottom section of the flyout that contains the take action button
  */
 export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
-  const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
-  const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
-  const { showAssistant, showAssistantOverlay } = useAssistant({
-    dataFormattedForFieldBrowser,
-    isAlert,
-  });
-  const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
-
-  const alertAttachment = useMemo(() => {
-    const rawData = getRawData(dataFormattedForFieldBrowser ?? []);
-    return {
-      attachmentType: SecurityAgentBuilderAttachments.alert,
-      attachmentData: {
-        alert: stringifyEssentialAlertData(rawData),
-        attachmentLabel: isAlert ? rawData['kibana.alert.rule.name']?.[0] : EVENT,
-      },
-      attachmentPrompt: isAlert ? ALERT_ATTACHMENT_PROMPT : EVENT_ATTACHMENT_PROMPT,
-    };
-  }, [dataFormattedForFieldBrowser, isAlert]);
-
-  const { openAgentBuilderFlyout } = useAgentBuilderAttachment(alertAttachment);
+  const { searchHit, dataFormattedForFieldBrowser } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   if (isRulePreview) return null;
 
@@ -76,22 +36,10 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isRulePreview }) => {
       <EuiPanel color="transparent">
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
-            {isAgentChatExperienceEnabled ? (
-              <NewAgentBuilderAttachment
-                onClick={openAgentBuilderFlyout}
-                telemetry={{
-                  pathway: 'alerts_flyout',
-                  attachments: ['alert'],
-                }}
-              />
-            ) : (
-              showAssistant && (
-                <NewChatByTitle
-                  showAssistantOverlay={showAssistantOverlay}
-                  text={ASK_AI_ASSISTANT}
-                />
-              )
-            )}
+            <FooterAiActions
+              hit={hit}
+              dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <TakeActionButton />

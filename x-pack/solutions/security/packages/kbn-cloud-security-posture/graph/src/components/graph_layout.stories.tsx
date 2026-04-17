@@ -1115,14 +1115,14 @@ export const EventsAndEntityRelationships: Story = {
         label: 'prod-ec2-instance-01',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
       },
       {
         id: 'host-prod-2',
         label: 'prod-ec2-instance-02',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
       },
       {
         id: 'iam-role',
@@ -1194,7 +1194,7 @@ export const EventsAndRelationshipsStacked: Story = {
         label: 'prod-ec2-instance-01',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
       },
       // Relationship edges (static/configuration-based) - Ownership and access permissions
       // Nodes with the same id + same source/target will be stacked together
@@ -1249,7 +1249,7 @@ export const EventsAndRelationshipsStacked: Story = {
         label: 'hosts',
         color: 'primary',
         shape: 'pentagon',
-        icon: 'compute',
+        icon: 'processor',
         count: 3,
       },
 

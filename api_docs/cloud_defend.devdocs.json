@@ -448,7 +448,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"process\" | \"file\""
+              "\"file\" | \"process\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "lineNumber": 116,
@@ -749,7 +749,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"process\" | \"file\""
+              "\"file\" | \"process\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
             "lineNumber": 105,
@@ -916,7 +916,7 @@
           "\ncloud_defend/control types"
         ],
         "signature": [
-          "\"process\" | \"file\""
+          "\"file\" | \"process\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/common/v1.ts",
         "lineNumber": 56,

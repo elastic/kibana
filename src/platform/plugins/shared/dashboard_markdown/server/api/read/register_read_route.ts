@@ -18,7 +18,7 @@ import { MARKDOWN_API_PATH } from '../../../common/constants';
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
     path: `${MARKDOWN_API_PATH}/{id}`,
-    summary: `Get a markdown panel by ID`,
+    summary: `Get a markdown library item by ID`,
     ...commonRouteConfig,
   });
 
@@ -30,7 +30,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the markdown panel.',
+                description: 'A unique identifier for the markdown library item.',
               },
             }),
           }),
@@ -38,6 +38,13 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         response: {
           200: {
             body: () => readResponseBodySchema,
+            description: 'success',
+          },
+          403: {
+            description: 'forbidden',
+          },
+          404: {
+            description: 'not found',
           },
         },
       },
@@ -52,16 +59,16 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
         if (e.isBoom && e.output.statusCode === 404) {
           return res.notFound({
             body: {
-              message: `A markdown panel with ID ${req.params.id} was not found.`,
+              message: `A markdown library item with ID ${req.params.id} was not found.`,
             },
           });
         }
 
         if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
+          return res.forbidden({ body: { message: e.message } });
         }
 
-        return res.badRequest({ body: e.message });
+        return res.badRequest({ body: { message: e.message } });
       }
     }
   );

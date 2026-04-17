@@ -11,13 +11,15 @@ import type {
   PersistedSkillCreateRequest,
   PersistedSkillUpdateRequest,
 } from '@kbn/agent-builder-common';
+import type { SkillListOptions } from './persisted/client';
 
 export interface ReadonlySkillProvider {
   id: string;
   readonly: true;
   has(skillId: string): MaybePromise<boolean>;
   get(skillId: string): MaybePromise<InternalSkillDefinition | undefined>;
-  list(): MaybePromise<InternalSkillDefinition[]>;
+  bulkGet(ids: string[]): MaybePromise<Map<string, InternalSkillDefinition>>;
+  list(options?: SkillListOptions): MaybePromise<InternalSkillDefinition[]>;
 }
 
 export interface WritableSkillProvider extends Omit<ReadonlySkillProvider, 'readonly'> {

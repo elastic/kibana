@@ -294,7 +294,7 @@ export function DifferentialTopNFunctionsGrid({
                       'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
                       { defaultMessage: 'Show actions' }
                     )}
-                    iconType="expand"
+                    iconType="maximize"
                     color="text"
                     onClick={handleOnClick}
                   />

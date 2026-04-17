@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import chroma from 'chroma-js';
@@ -43,10 +42,4 @@ export const ColorPickerPopover: FC<Props> = (props: Props) => {
       {() => <ColorPicker value={value} {...rest} />}
     </Popover>
   );
-};
-
-ColorPickerPopover.propTypes = {
-  ...ColorPicker.propTypes,
-  // @ts-expect-error upgrade typescript v5.9.3
-  anchorPosition: PropTypes.string,
 };

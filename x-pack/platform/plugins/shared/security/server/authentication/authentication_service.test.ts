@@ -36,6 +36,8 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
+import { userActivityServiceMock } from '@kbn/core-user-activity-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
@@ -51,7 +53,7 @@ import { ConfigSchema, createConfig } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
-import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
@@ -80,6 +82,7 @@ describe('AuthenticationService', () => {
     kibanaFeatures: [];
     isElasticCloudDeployment: jest.Mock;
     customLogoutURL?: string;
+    userActivity: UserActivityServiceStart;
   };
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
@@ -124,6 +127,7 @@ describe('AuthenticationService', () => {
       kibanaFeatures: [],
       isElasticCloudDeployment: jest.fn().mockReturnValue(false),
       customLogoutURL: 'https://some-logout-origin/logout',
+      userActivity: userActivityServiceMock.createStartContract(),
     };
     (mockStartAuthenticationParams.http.basePath.get as jest.Mock).mockImplementation(
       () => mockStartAuthenticationParams.http.basePath.serverBasePath
@@ -805,6 +809,141 @@ describe('AuthenticationService', () => {
           mockOnPreResponseToolkit
         )
       ).resolves.toBe(mockReturnedValue);
+    });
+
+    describe('UIAM OAuth WWW-Authenticate header', () => {
+      it('returns JSON-RPC error with WWW-Authenticate header for 401 on routes tagged with ROUTE_TAG_ACCEPT_UIAM_OAUTH', async () => {
+        const mockReturnedValue = { type: 'render' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.render.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+
+        await expect(
+          onPreResponseHandler(
+            httpServerMock.createKibanaRequest({
+              routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+            }),
+            { statusCode: 401 },
+            mockOnPreResponseToolkit
+          )
+        ).resolves.toBe(mockReturnedValue);
+
+        expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            error: { code: -32000, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': expect.stringContaining('Bearer resource_metadata="'),
+            'Content-Type': 'application/json',
+          },
+        });
+      });
+
+      it('does not add WWW-Authenticate header when mcp config is not set', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          }),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
+      });
+
+      it('does not add WWW-Authenticate header for non-401 responses on tagged routes', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest({
+            routeTags: [ROUTE_TAG_ACCEPT_UIAM_OAUTH],
+          }),
+          { statusCode: 200 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
+      });
+
+      it('does not add WWW-Authenticate header for 401 on routes without the tag', async () => {
+        const mockReturnedValue = { type: 'next' as any };
+        const mockOnPreResponseToolkit = httpServiceMock.createOnPreResponseToolkit();
+        mockOnPreResponseToolkit.next.mockReturnValue(mockReturnedValue);
+
+        mockSetupAuthenticationParams.config = createConfig(
+          ConfigSchema.validate(
+            {
+              mcp: {
+                oauth2: {
+                  metadata: {
+                    authorization_servers: ['https://localhost:9200'],
+                    resource: 'http://localhost:5620',
+                  },
+                },
+              },
+            },
+            { serverless: true }
+          ),
+          loggingSystemMock.create().get(),
+          { isTLSEnabled: false }
+        );
+
+        const { onPreResponseHandler } = getService();
+        await onPreResponseHandler(
+          httpServerMock.createKibanaRequest(),
+          { statusCode: 401 },
+          mockOnPreResponseToolkit
+        );
+
+        expect(mockOnPreResponseToolkit.next).toHaveBeenCalledWith();
+      });
     });
 
     it('ignores responses if authenticator is not initialized', async () => {

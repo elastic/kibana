@@ -205,7 +205,6 @@ export const push = async (
       caseService.getAllCaseComments({
         id: caseId,
         options: {
-          fields: [],
           page: 1,
           perPage: theCase?.totalComment ?? 0,
         },
@@ -266,7 +265,7 @@ export const push = async (
         comments: comments.saved_objects
           .filter((comment) => comment.attributes.pushed_at == null)
           .map((comment) => ({
-            attachmentId: comment.id,
+            savedObjectId: comment.id,
             updatedAttributes: {
               pushed_at: pushedDate,
               pushed_by: { username, full_name, email, profile_uid },
@@ -274,7 +273,7 @@ export const push = async (
             version: comment.version,
           })),
         refresh: false,
-        owner: myCase.attributes.owner,
+        requestWithoutType: true,
       }),
     ]);
 

@@ -240,7 +240,7 @@
           "(esqlQuery: string) => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -256,7 +256,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-            "lineNumber": 18,
+            "lineNumber": 19,
             "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false,
@@ -547,6 +547,45 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-utils",
+        "id": "def-common.injectMetadataId",
+        "type": "Function",
+        "tags": [],
+        "label": "injectMetadataId",
+        "description": [
+          "\nInjects `METADATA _id` into the FROM command of an ES|QL query and performs\nbest-effort fixups so `_id` survives through the pipeline.\n\nThe caller is responsible for skipping aggregating queries — this function\ntransforms unconditionally.\n\n**What it does:**\n1. Upserts `METADATA _id` into FROM (no-op if already present).\n2. Appends `_id` to any KEEP command that would otherwise exclude it\n   (including KEEP with wildcards — redundant but harmless).\n\n**When KEEP injection stops (conservatively):**\n- `DROP _id` / `DROP _*` / any wildcard DROP — column removed\n- `RENAME _id AS …` — column exists under a new name\n- `EVAL _id = …` — metadata value overwritten\n\n**Examples:**\n```\n\"FROM logs*\"                          → \"FROM logs* METADATA _id\"\n\"FROM logs* METADATA _index\"          → \"FROM logs* METADATA _index, _id\"\n\"FROM logs* | KEEP host\"              → \"FROM logs* METADATA _id | KEEP host, _id\"\n\"FROM logs* | KEEP host, _id\"         → \"FROM logs* METADATA _id | KEEP host, _id\"  (no-op)\n\"FROM logs* METADATA _id\"             → \"FROM logs* METADATA _id\"                    (no-op)\n\"FROM logs* | DROP _id | KEEP host\"   → \"FROM logs* METADATA _id | DROP _id | KEEP host\"\n\"FROM logs* | KEEP agent.*\"           → \"FROM logs* METADATA _id | KEEP agent.*, _id\"\n```\n\nDROP _id is intentionally left untouched — removing a user's explicit DROP\nwould be surprising. This remains an accepted limitation."
+        ],
+        "signature": [
+          "(query: string) => string"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/inject_metadata_id.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/securitysolution-utils",
+            "id": "def-common.injectMetadataId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/inject_metadata_id.ts",
+            "lineNumber": 49,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-utils",
         "id": "def-common.isAggregatingQuery",
         "type": "Function",
         "tags": [],
@@ -554,17 +593,11 @@
         "description": [],
         "signature": [
           "(astExpression: ",
-          {
-            "pluginId": "@kbn/esql-language",
-            "scope": "common",
-            "docId": "kibKbnEsqlLanguagePluginApi",
-            "section": "def-common.ESQLAstQueryExpression",
-            "text": "ESQLAstQueryExpression"
-          },
+          "ESQLAstQueryExpression",
           ") => boolean"
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-        "lineNumber": 10,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -577,16 +610,10 @@
             "label": "astExpression",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.ESQLAstQueryExpression",
-                "text": "ESQLAstQueryExpression"
-              }
+              "ESQLAstQueryExpression"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/compute_if_esql_query_aggregating.ts",
-            "lineNumber": 10,
+            "lineNumber": 11,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
@@ -811,9 +838,7 @@
         "type": "Function",
         "tags": [],
         "label": "parseEsqlQuery",
-        "description": [
-          "\ncheck if esql query valid for Security rule:\n- if it's non aggregation query it must have metadata operator"
-        ],
+        "description": [],
         "signature": [
           "(query: string) => ",
           {
@@ -825,7 +850,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/parse_esql_query.ts",
-        "lineNumber": 22,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -841,7 +866,7 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/parse_esql_query.ts",
-            "lineNumber": 22,
+            "lineNumber": 17,
             "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
@@ -1231,13 +1256,7 @@
             "label": "errors",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/esql-language",
-                "scope": "common",
-                "docId": "kibKbnEsqlLanguagePluginApi",
-                "section": "def-common.EditorError",
-                "text": "EditorError"
-              },
+              "EditorError",
               "[]"
             ],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/parse_esql_query.ts",
@@ -1255,19 +1274,6 @@
             "description": [],
             "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/parse_esql_query.ts",
             "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-utils",
-            "id": "def-common.ParseEsqlQueryResult.hasMetadataOperator",
-            "type": "boolean",
-            "tags": [],
-            "label": "hasMetadataOperator",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src/esql/parse_esql_query.ts",
-            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

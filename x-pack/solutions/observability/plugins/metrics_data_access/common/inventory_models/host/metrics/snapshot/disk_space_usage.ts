@@ -12,6 +12,50 @@ export const diskSpaceUsage: SchemaBasedAggregations = {
     diskSpaceUsage: { max: { field: 'system.filesystem.used.pct' } },
   },
   semconv: {
-    diskSpaceUsage: { max: { field: 'metrics.system.filesystem.utilization' } },
+    disk_usage_state_free: {
+      terms: {
+        field: 'state',
+        include: ['free'],
+      },
+      aggs: {
+        sum: {
+          sum: {
+            field: 'metrics.system.filesystem.usage',
+          },
+        },
+      },
+    },
+    disk_usage_state_free_total: {
+      sum_bucket: {
+        buckets_path: 'disk_usage_state_free.sum',
+      },
+    },
+    disk_usage_state_all: {
+      terms: {
+        field: 'state',
+      },
+      aggs: {
+        sum: {
+          sum: {
+            field: 'metrics.system.filesystem.usage',
+          },
+        },
+      },
+    },
+    disk_usage_state_all_total: {
+      sum_bucket: {
+        buckets_path: 'disk_usage_state_all.sum',
+      },
+    },
+    diskSpaceUsage: {
+      bucket_script: {
+        buckets_path: {
+          freeTotal: 'disk_usage_state_free_total',
+          usageTotal: 'disk_usage_state_all_total',
+        },
+        script: 'params.usageTotal > 0 ? 1 - params.freeTotal / params.usageTotal : 0',
+        gap_policy: 'skip',
+      },
+    },
   },
 };

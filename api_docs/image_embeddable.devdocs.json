@@ -22,10 +22,10 @@
         "label": "ImageConfig",
         "description": [],
         "signature": [
-          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+          "{ readonly alt_text?: string | undefined; readonly background_color?: string | undefined; readonly src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -39,10 +39,10 @@
         "label": "ImageConfigState",
         "description": [],
         "signature": [
-          "{ readonly altText?: string | undefined; readonly backgroundColor?: string | undefined; readonly src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
+          "{ readonly alt_text?: string | undefined; readonly background_color?: string | undefined; readonly src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; readonly object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
-        "lineNumber": 80,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -64,10 +64,10 @@
             "section": "def-server.DrilldownState",
             "text": "DrilldownState"
           },
-          "[] | undefined; readonly imageConfig: Readonly<{ altText?: string | undefined; backgroundColor?: string | undefined; } & { src: Readonly<{ fileImageMeta?: Readonly<{ blurHash?: string | undefined; } & { width: number; height: number; }> | undefined; } & { type: \"file\"; fileId: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; sizing: Readonly<{} & { objectFit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }>; }"
+          "[] | undefined; readonly image_config: Readonly<{ alt_text?: string | undefined; background_color?: string | undefined; } & { src: Readonly<{} & { type: \"file\"; file_id: string; }> | Readonly<{} & { type: \"url\"; url: string; }>; object_fit: \"none\" | \"fill\" | \"contain\" | \"cover\"; }>; }"
         ],
         "path": "src/platform/plugins/private/image_embeddable/server/schemas.ts",
-        "lineNumber": 81,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -82,6 +82,23 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "imageEmbeddable",
+        "id": "def-common.DEFAULT_OBJECT_FIT",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_OBJECT_FIT",
+        "description": [],
+        "signature": [
+          "\"contain\""
+        ],
+        "path": "src/platform/plugins/private/image_embeddable/common/constants.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "imageEmbeddable",
         "id": "def-common.IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS",

@@ -235,7 +235,7 @@
           "\nAIOps app context value to be provided via React context."
         ],
         "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -259,7 +259,7 @@
               ">; }"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -277,7 +277,7 @@
               "ApplicationStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -301,7 +301,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -319,7 +319,7 @@
               "ExecutionContextSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 53,
+            "lineNumber": 54,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -346,7 +346,7 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -380,7 +380,7 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 61,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -398,7 +398,7 @@
               "HttpSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -416,7 +416,7 @@
               "NotificationsStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -441,7 +441,7 @@
               "<any, void>"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -459,7 +459,7 @@
               "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -477,7 +477,7 @@
               "IUiSettingsClient"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -501,7 +501,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -526,7 +526,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 90,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +544,7 @@
               "UserProfileService"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 94,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -569,7 +569,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 98,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -593,7 +593,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 102,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -618,7 +618,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 106,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -636,7 +636,7 @@
               "I18nStart"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 110,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -680,7 +680,7 @@
               ">; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 114,
+            "lineNumber": 115,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -703,7 +703,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 121,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -726,7 +726,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 122,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -742,7 +742,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 123,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -757,7 +757,7 @@
               "Identifier to indicate the plugin utilizing the component"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 124,
+            "lineNumber": 125,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -782,7 +782,32 @@
               " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
-            "lineNumber": 126,
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "aiops",
+            "id": "def-public.AiopsAppContextValue.cps",
+            "type": "Object",
+            "tags": [],
+            "label": "cps",
+            "description": [
+              "CPS plugin for project routing"
+            ],
+            "signature": [
+              {
+                "pluginId": "cps",
+                "scope": "public",
+                "docId": "kibCpsPluginApi",
+                "section": "def-public.CPSPluginStart",
+                "text": "CPSPluginStart"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/aiops/public/hooks/use_aiops_app_context.ts",
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1597,7 +1622,7 @@
       "label": "AiopsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-      "lineNumber": 51,
+      "lineNumber": 53,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1621,7 +1646,7 @@
             ") => boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 52,
+          "lineNumber": 54,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1643,7 +1668,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 53,
+          "lineNumber": 55,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1661,7 +1686,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 54,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1716,7 +1741,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-      "lineNumber": 50,
+      "lineNumber": 52,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

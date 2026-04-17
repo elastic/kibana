@@ -18,8 +18,9 @@ import {
   ActionsClientChatBedrockConverse,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { OPENAI_CHAT_URL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
+import { InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { CustomHttpRequestError } from './custom_http_request_error';
 
 export interface BulkError {
@@ -201,31 +202,34 @@ export const getLlmClass = (llmType?: string) => {
   }
 };
 
-export const isOpenSourceModel = (connector?: Connector): boolean => {
+export const isOpenSourceModel = (connector?: InferenceConnector): boolean => {
   if (connector == null) {
     return false;
   }
 
-  const llmType = getLlmType(connector.actionTypeId);
-  const isOpenAiType = llmType === 'openai';
-
-  if (!isOpenAiType) {
-    return false;
+  if (connector.type === InferenceConnectorType.OpenAI) {
+    const connectorApiProvider = connector.config?.apiProvider as OpenAiProviderType | undefined;
+    if (connectorApiProvider === OpenAiProviderType.Other) {
+      return true;
+    }
+    const connectorApiUrl = connector.config?.apiUrl as string | undefined;
+    return (
+      !!connectorApiUrl &&
+      connectorApiUrl !== OPENAI_CHAT_URL &&
+      connectorApiProvider !== OpenAiProviderType.AzureAi
+    );
   }
-  const connectorApiProvider = connector.config?.apiProvider
-    ? (connector.config?.apiProvider as OpenAiProviderType)
-    : undefined;
-  if (connectorApiProvider === OpenAiProviderType.Other) {
-    return true;
+
+  if (connector.type === InferenceConnectorType.Inference) {
+    const provider: string | undefined = connector.config?.provider;
+    const service: string | undefined = connector.config?.service;
+    if (provider !== 'openai' && service !== 'openai') {
+      return false;
+    }
+    // A custom URL that doesn't point to api.openai.com indicates a self-hosted/OSS model
+    const url: string | undefined = connector.config?.providerConfig?.url;
+    return !!url && !url.includes('api.openai.com');
   }
 
-  const connectorApiUrl = connector.config?.apiUrl
-    ? (connector.config.apiUrl as string)
-    : undefined;
-
-  return (
-    !!connectorApiUrl &&
-    connectorApiUrl !== OPENAI_CHAT_URL &&
-    connectorApiProvider !== OpenAiProviderType.AzureAi
-  );
+  return false;
 };

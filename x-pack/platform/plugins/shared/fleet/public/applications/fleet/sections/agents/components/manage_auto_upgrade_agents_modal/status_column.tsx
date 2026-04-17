@@ -82,7 +82,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     const failedStatus = (
       <EuiButtonEmpty size="s" href={getAgentsHref(true)} color="text">
-        <EuiIcon type="errorFilled" color="danger" />{' '}
+        <EuiIcon type="errorFill" color="danger" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.failedText"
           defaultMessage="Upgrade failed"
@@ -91,7 +91,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     const completedStatus = (
       <EuiButtonEmpty size="s" href={getAgentsHref(false)} color="text">
-        <EuiIcon type="checkInCircleFilled" color="success" />{' '}
+        <EuiIcon type="checkCircleFill" color="success" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.completedText"
           defaultMessage="Completed"
@@ -100,7 +100,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     const notStartedStatus = (
       <EuiButtonEmpty size="s" color="text">
-        <EuiIcon type="minusInCircle" color="text" />{' '}
+        <EuiIcon type="minusCircle" color="text" />{' '}
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.notStartedText"
           defaultMessage="Not started"

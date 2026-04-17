@@ -15,4 +15,5 @@ export {
   HostRiskScoreQueryId,
   formatRiskScore,
   FIRST_RECORD_PAGINATION,
+  safeErrorMessage,
 } from './utils';

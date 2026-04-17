@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/event-log-fixture-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/event-log-fixture-plugin'
+  title: '@kbn/event-log-fixture-plugin'
   description: Moon project for @kbn/event-log-fixture-plugin
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/event_log
+  sourceRoot: x-pack/platform/test/plugin_api_integration/plugins/event_log
 dependsOn:
   - '@kbn/core'
   - '@kbn/event-log-plugin'

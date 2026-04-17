@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { AssetCriticalityUpsert } from '../../../../../common/entity_analytics/asset_criticality/types';
 import {
   CreateAssetCriticalityRecordRequestBody,
@@ -23,10 +23,12 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { AssetCriticalityAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 
-export const assetCriticalityPublicUpsertRoute = (
-  router: EntityAnalyticsRoutesDeps['router'],
-  logger: Logger
-) => {
+export const assetCriticalityPublicUpsertRoute = ({
+  router,
+  logger,
+  config,
+  docLinks,
+}: EntityAnalyticsRoutesDeps) => {
   router.versioned
     .post({
       access: 'public',
@@ -45,6 +47,17 @@ export const assetCriticalityPublicUpsertRoute = (
             body: buildRouteValidationWithZod(CreateAssetCriticalityRecordRequestBody),
           },
         },
+        ...(config.experimentalFeatures.entityAnalyticsEntityStoreV2
+          ? {
+              options: {
+                deprecated: {
+                  documentationUrl: docLinks.links.securitySolution.entityAnalytics.api,
+                  severity: 'warning',
+                  reason: { type: 'remove' },
+                },
+              },
+            }
+          : {}),
       },
       async (
         context,

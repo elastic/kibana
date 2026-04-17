@@ -9,6 +9,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 import * as selectors from '../store/selectors';
 import { PanelRouter } from './panels';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
@@ -24,13 +25,17 @@ interface DetailsPanelProps {
    * Optional callback when a node event is clicked
    */
   nodeEventOnClick?: NodeEventOnClick;
+  /**
+   * Renderer used by Resolver panels for field cell actions.
+   */
+  renderCellActions: CellActionRenderer;
 }
 
 /**
  * Details panel component
  */
 const DetailsPanelComponent = React.memo(
-  ({ resolverComponentInstanceID, nodeEventOnClick }: DetailsPanelProps) => {
+  ({ resolverComponentInstanceID, nodeEventOnClick, renderCellActions }: DetailsPanelProps) => {
     const isLoading = useSelector((state: State) =>
       selectors.isTreeLoading(state.analyzer[resolverComponentInstanceID])
     );
@@ -56,7 +61,11 @@ const DetailsPanelComponent = React.memo(
         </div>
       </div>
     ) : resolverTreeHasNodes ? (
-      <PanelRouter id={resolverComponentInstanceID} nodeEventOnClick={nodeEventOnClick} />
+      <PanelRouter
+        id={resolverComponentInstanceID}
+        nodeEventOnClick={nodeEventOnClick}
+        renderCellActions={renderCellActions}
+      />
     ) : (
       <ResolverNoProcessEvents />
     );
@@ -68,7 +77,7 @@ DetailsPanelComponent.displayName = 'DetailsPanelComponent';
  * Stand alone details panel to be used when in split panel mode
  */
 export const DetailsPanel = React.memo(
-  ({ resolverComponentInstanceID, nodeEventOnClick }: DetailsPanelProps) => {
+  ({ resolverComponentInstanceID, nodeEventOnClick, renderCellActions }: DetailsPanelProps) => {
     const isAnalyzerInitialized = useSelector((state: State) =>
       Boolean(state.analyzer[resolverComponentInstanceID])
     );
@@ -77,6 +86,7 @@ export const DetailsPanel = React.memo(
       <DetailsPanelComponent
         resolverComponentInstanceID={resolverComponentInstanceID}
         nodeEventOnClick={nodeEventOnClick}
+        renderCellActions={renderCellActions}
       />
     ) : (
       <div data-test-subj="resolver:panel:loading" className="loading-container">

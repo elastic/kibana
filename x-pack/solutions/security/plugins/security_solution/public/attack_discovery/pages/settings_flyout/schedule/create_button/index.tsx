@@ -25,7 +25,7 @@ export const CreateButton: React.FC<CreateButtonProps> = React.memo(({ onClick }
           fill
           onClick={onClick}
           size="m"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           disabled={!enabled}
         >
           {i18n.CREATE_SCHEDULE}

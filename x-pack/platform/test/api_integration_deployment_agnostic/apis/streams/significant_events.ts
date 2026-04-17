@@ -50,6 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Wired streams update', () => {
       const STREAM_NAME = 'logs.otel.queries-test';
       const stream: Streams.WiredStream.UpsertRequest['stream'] = {
+        type: 'wired',
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
@@ -75,17 +76,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('updates the queries', async () => {
+        const esqlQuery = `FROM ${STREAM_NAME}, ${STREAM_NAME}.* METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const response = await putStream(apiClient, STREAM_NAME, {
           stream,
           ...emptyAssets,
           queries: [
             {
               id: 'aaa',
+              type: 'match' as const,
               title: 'OOM Error',
-              kql: { query: "message: 'OOM Error'" },
-              esql: {
-                query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`,
-              },
+              description: '',
+              esql: { query: esqlQuery },
             },
           ],
         });
@@ -95,11 +96,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
+          type: 'match',
           title: 'OOM Error',
-          kql: { query: "message: 'OOM Error'" },
-          esql: {
-            query: `FROM ${STREAM_NAME},${STREAM_NAME}.* | WHERE KQL("message: 'OOM Error'")`,
-          },
+          description: '',
+          esql: { query: esqlQuery },
         });
       });
 
@@ -127,8 +127,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'logs.otel.queries-test.query1',
+              type: 'match' as const,
               title: 'should not be deleted',
-              kql: { query: 'message:"irrelevant"' },
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test,logs.queries-test.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -170,8 +171,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'logs.otel.queries-test.child.query1',
+              type: 'match' as const,
               title: 'must be deleted',
-              kql: { query: 'message:"irrelevant"' },
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test.child,logs.queries-test.child.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -187,8 +189,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'logs.otel.queries-test.child.first.query1',
+              type: 'match' as const,
               title: 'must be deleted',
-              kql: { query: 'message:"irrelevant"' },
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -196,8 +199,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             {
               id: 'logs.otel.queries-test.child.first.query2',
+              type: 'match' as const,
               title: 'must be deleted',
-              kql: { query: 'message:"irrelevant"' },
+              description: '',
               esql: {
                 query:
                   'FROM logs.queries-test.child.first,logs.queries-test.child.first.* | WHERE KQL("message:\\"irrelevant\\"")',
@@ -218,6 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Classic streams update', () => {
       const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -263,6 +268,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('updates the queries', async () => {
         const indexName = 'classic-stream-queries';
+        const esqlQuery = `FROM ${indexName} METADATA _id, _source | WHERE KQL("message: 'OOM Error'")`;
         const clean = await createDataStream(indexName, { dsl: { data_retention: '77d' } });
         await putStream(apiClient, indexName, classicPutBody);
 
@@ -274,11 +280,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [
             {
               id: 'aaa',
+              type: 'match' as const,
               title: 'OOM Error',
-              kql: { query: "message: 'OOM Error'" },
-              esql: {
-                query: `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`,
-              },
+              description: '',
+              esql: { query: esqlQuery },
             },
           ],
         });
@@ -288,11 +293,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(streamDefinition.queries.length).to.eql(1);
         expect(streamDefinition.queries[0]).to.eql({
           id: 'aaa',
+          type: 'match',
           title: 'OOM Error',
-          kql: { query: "message: 'OOM Error'" },
-          esql: {
-            query: `FROM ${indexName} | WHERE KQL("message: 'OOM Error'")`,
-          },
+          description: '',
+          esql: { query: esqlQuery },
         });
 
         await clean();

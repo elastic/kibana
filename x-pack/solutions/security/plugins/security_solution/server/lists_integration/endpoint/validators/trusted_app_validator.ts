@@ -15,6 +15,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import type { PromiseFromStreams } from '@kbn/lists-plugin/server/services/exception_lists/import_exception_list_and_items';
 import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 import { BaseValidator } from './base_validator';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -144,6 +145,7 @@ const LinuxEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
+  maxSize: 250,
   validate(entries: TrustedAppConditionEntry[]) {
     const dups = getDuplicateFields(entries as ConditionEntry[]);
     return dups.map((field) => `Duplicated entry: ${field}`).join(', ') || undefined;
@@ -199,7 +201,7 @@ const TrustedAppAdvancedModeDataSchema = schema.object(
         },
         { unknowns: 'ignore' }
       ),
-      { minSize: 1 }
+      { minSize: 1, maxSize: 250 }
     ),
   },
   {
@@ -218,6 +220,21 @@ export class TrustedAppValidator extends BaseValidator {
 
   protected async validateHasReadPrivilege(): Promise<void> {
     return super.validateHasPrivilege('canReadTrustedApplications');
+  }
+
+  async validatePreImport(items: PromiseFromStreams): Promise<void> {
+    await this.validateHasWritePrivilege();
+
+    await this.validatePreImportItems(items, async (item) => {
+      // import specific validations
+      await this.validateImportOwnerSpaceIds(item); // instead of validateCreateOwnerSpaceIds
+      await this.validateCanImportGlobalArtifacts(item); // instead of validateCanCreateGlobalArtifacts
+      await this.removeInvalidPolicyIds(item); // instead of validateByPolicyItem
+
+      // usual validators from pre-create
+      await this.validateTrustedAppData(item);
+      await this.validateCanCreateByPolicyArtifacts(item);
+    });
   }
 
   async validatePreCreateItem(

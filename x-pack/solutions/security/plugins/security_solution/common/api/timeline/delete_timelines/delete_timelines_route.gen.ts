@@ -14,17 +14,17 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type DeleteTimelinesRequestBody = z.infer<typeof DeleteTimelinesRequestBody>;
 export const DeleteTimelinesRequestBody = z.object({
   /**
    * The list of IDs of the Timelines or Timeline templates to delete
    */
-  savedObjectIds: z.array(z.string()),
+  savedObjectIds: z.array(z.string()).max(100),
   /**
    * Saved search IDs that should be deleted alongside the timelines
    */
-  searchIds: z.array(z.string()).optional(),
+  searchIds: z.array(z.string()).max(100).optional(),
 });
 export type DeleteTimelinesRequestBodyInput = z.input<typeof DeleteTimelinesRequestBody>;

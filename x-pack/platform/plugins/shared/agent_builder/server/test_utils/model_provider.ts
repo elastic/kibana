@@ -6,7 +6,7 @@
  */
 
 import type { ModelProvider } from '@kbn/agent-builder-server';
-import type { ModelProviderFactoryFn } from '../services/runner/model_provider';
+import type { ModelProviderFactoryFn } from '../services/execution/runner/model_provider';
 import type { ChangeReturnType } from './common';
 
 export type ModelProviderMock = jest.Mocked<ModelProvider>;

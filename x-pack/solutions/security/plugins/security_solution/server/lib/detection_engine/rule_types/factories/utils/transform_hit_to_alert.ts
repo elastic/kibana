@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 
 import type { BaseHit } from '../../../../../../common/detection_engine/types';

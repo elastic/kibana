@@ -59,6 +59,10 @@ export interface DashboardRendererProps {
    * @param internalApi - The {@link DashboardInternalApi} instance.
    */
   onApiAvailable?: (api: DashboardApi, internalApi: DashboardInternalApi) => void;
+  /**
+   * Callback invoked when the dashboard API is destroyed.
+   */
+  onApiCleanup?: () => void;
 }
 
 export function DashboardRenderer({
@@ -68,6 +72,7 @@ export function DashboardRenderer({
   dashboardRedirect,
   getCreationOptions,
   onApiAvailable,
+  onApiCleanup,
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
@@ -124,7 +129,7 @@ export function DashboardRenderer({
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
-    loadDashboardApi({ getCreationOptions, savedObjectId })
+    loadDashboardApi({ getCreationOptions, onApiCleanup, savedObjectId })
       .then((results) => {
         if (!results) return;
         if (canceled) {

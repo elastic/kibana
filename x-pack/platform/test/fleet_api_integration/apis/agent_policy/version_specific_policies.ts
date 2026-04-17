@@ -377,5 +377,163 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.has_agent_version_conditions).to.eql(false);
       });
     });
+
+    describe('version specific policies telemetry', () => {
+      let policyWithPackageConditionsId: string;
+      let policyWithTemplateConditionsId: string;
+
+      before(async () => {
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await fleetAndAgents.setup();
+
+        // Agent policy with package-level version conditions (abnormal_security has package-level condition)
+        const { body: policy1Response } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'VSP telemetry policy 1', namespace: 'default', force: true })
+          .expect(200);
+        policyWithPackageConditionsId = policy1Response.item.id;
+
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'abnormal_security-telemetry',
+            namespace: 'default',
+            policy_id: policyWithPackageConditionsId,
+            enabled: true,
+            inputs: [
+              {
+                policy_template: 'abnormal_security',
+                type: 'cel',
+                enabled: true,
+                streams: [],
+              },
+            ],
+            package: { name: 'abnormal_security', version: '1.12.0' },
+          })
+          .expect(200);
+
+        // Agent policy with template-level version conditions (auth0 has _meta.agent.version in .hbs)
+        const { body: policy2Response } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: 'VSP telemetry policy 2', namespace: 'default', force: true })
+          .expect(200);
+        policyWithTemplateConditionsId = policy2Response.item.id;
+
+        await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'auth0-telemetry',
+            namespace: 'default',
+            policy_id: policyWithTemplateConditionsId,
+            enabled: true,
+            inputs: [
+              {
+                policy_template: 'auth0_events',
+                type: 'cel',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: { type: 'logs', dataset: 'auth0.logs' },
+                    vars: {
+                      url: { value: 'https://tenant.us.auth0.com', type: 'text' },
+                      client_id: { value: 'id', type: 'text' },
+                      client_secret: { value: 'secret', type: 'password' },
+                      initial_interval: { value: '24h', type: 'text' },
+                      interval: { value: '5m', type: 'text' },
+                      batch_size: { value: 100, type: 'integer' },
+                      http_client_timeout: { value: '30s', type: 'text' },
+                      tags: { value: ['forwarded', 'auth0-logstream'], type: 'text' },
+                      preserve_original_event: { value: false, type: 'bool' },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: { name: 'auth0', version: '1.26.0' },
+          })
+          .expect(200);
+
+        // Enroll agents with versioned policy IDs (policy_id contains '#')
+        await es.bulk({
+          index: '.fleet-agents',
+          body: [
+            { create: { _id: 'agent-vspc-telemetry-1' } },
+            {
+              agent: { version: '8.15.0' },
+              active: true,
+              policy_id: `${policyWithPackageConditionsId}#8.15`,
+              last_checkin: new Date().toISOString(),
+              last_checkin_status: 'online',
+            },
+            { create: { _id: 'agent-vspc-telemetry-2' } },
+            {
+              agent: { version: '8.15.0' },
+              active: true,
+              policy_id: `${policyWithPackageConditionsId}#8.15`,
+              last_checkin: new Date().toISOString(),
+              last_checkin_status: 'online',
+            },
+            { create: { _id: 'agent-vspc-telemetry-3' } },
+            {
+              agent: { version: '8.14.0' },
+              active: true,
+              policy_id: `${policyWithTemplateConditionsId}#8.14`,
+              last_checkin: new Date().toISOString(),
+              last_checkin_status: 'online',
+            },
+          ],
+          refresh: 'wait_for',
+        });
+      });
+
+      after(async () => {
+        await es.delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-1' }).catch(() => {});
+        await es.delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-2' }).catch(() => {});
+        await es.delete({ index: '.fleet-agents', id: 'agent-vspc-telemetry-3' }).catch(() => {});
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: policyWithPackageConditionsId })
+          .expect(200);
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: policyWithTemplateConditionsId })
+          .expect(200);
+      });
+
+      it('should report packages with agent version conditions and agents on versioned policies', async () => {
+        const { body } = await supertest
+          .get('/internal/fleet/telemetry/usage')
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(200);
+
+        const usage = body.usage;
+
+        expect(usage.packages_with_agent_version_conditions).to.contain('abnormal_security');
+        expect(usage.packages_with_agent_version_conditions).to.contain('auth0');
+
+        const versionsWithAgents = usage.agents_on_version_specific_policies_per_version;
+        const agents815 = versionsWithAgents.find(
+          (v: { agent_version: string }) => v.agent_version === '8.15.0'
+        );
+        const agents814 = versionsWithAgents.find(
+          (v: { agent_version: string }) => v.agent_version === '8.14.0'
+        );
+        expect(agents815).to.be.ok();
+        expect(agents815.count).to.eql(2);
+        expect(agents814).to.be.ok();
+        expect(agents814.count).to.eql(1);
+
+        expect(usage.agent_policies.count_with_agent_version_conditions).to.eql(2);
+      });
+    });
   });
 }

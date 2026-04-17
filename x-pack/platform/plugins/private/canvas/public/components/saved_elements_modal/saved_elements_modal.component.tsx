@@ -17,6 +17,7 @@ import {
   EuiFieldSearch,
   EuiSpacer,
   EuiButton,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -116,6 +117,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
   const [elementToDelete, setElementToDelete] = useState<CustomElement | null>(null);
   const [elementToEdit, setElementToEdit] = useState<CustomElement | null>(null);
   const [search, setSearch] = useState<string>(initialSearch);
+  const modalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (!hasLoadedElements.current) {
@@ -186,7 +188,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
   let customElementContent = (
     <EuiEmptyPrompt
-      iconType="vector"
+      iconType="vectorSquare"
       title={<h2>{strings.getAddNewElementTitle()}</h2>}
       body={<p>{strings.getAddNewElementDescription()}</p>}
       titleSize="s"
@@ -212,9 +214,10 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
         className="canvasModal--fixedSize"
         maxWidth="1000px"
         initialFocus=".canvasElements__filter input"
+        aria-labelledby={modalTitleId}
       >
         <EuiModalHeader className="canvasAssetManager__modalHeader">
-          <EuiModalHeaderTitle className="canvasAssetManager__modalHeaderTitle">
+          <EuiModalHeaderTitle id={modalTitleId} className="canvasAssetManager__modalHeaderTitle">
             {strings.getModalTitle()}
           </EuiModalHeaderTitle>
         </EuiModalHeader>

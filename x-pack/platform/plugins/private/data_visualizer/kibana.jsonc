@@ -30,7 +30,8 @@
       "lens",
       "dataViewFieldEditor",
       "customIntegrations",
-      "cloud"
+      "cloud",
+      "cps"
     ],
     "requiredBundles": [
       "kibanaReact",

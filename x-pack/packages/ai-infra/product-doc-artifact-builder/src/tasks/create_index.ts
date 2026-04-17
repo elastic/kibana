@@ -10,6 +10,7 @@ import { getArtifactMappings } from '../artifact/mappings';
 
 export const DEFAULT_ELSER = '.elser-2-elasticsearch';
 export const DEFAULT_E5_SMALL = '.multilingual-e5-small-elasticsearch';
+export const DEFAULT_JINA = '.jina-embeddings-v5-text-small';
 
 interface BaseSemanticTextMapping {
   type: 'semantic_text';
@@ -25,9 +26,13 @@ export interface SemanticTextMapping extends BaseSemanticTextMapping {
   };
 }
 
-type SupportedInferenceId = typeof DEFAULT_E5_SMALL | typeof DEFAULT_ELSER;
+type SupportedInferenceId = typeof DEFAULT_E5_SMALL | typeof DEFAULT_ELSER | typeof DEFAULT_JINA;
 const isSupportedInferenceId = (inferenceId: string): inferenceId is SupportedInferenceId => {
-  return inferenceId === DEFAULT_E5_SMALL || inferenceId === DEFAULT_ELSER;
+  return (
+    inferenceId === DEFAULT_E5_SMALL ||
+    inferenceId === DEFAULT_ELSER ||
+    inferenceId === DEFAULT_JINA
+  );
 };
 
 const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<SupportedInferenceId, SemanticTextMapping> = {
@@ -46,6 +51,10 @@ const INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING: Record<SupportedInferenceId, Semant
     type: 'semantic_text',
     inference_id: DEFAULT_ELSER,
   },
+  [DEFAULT_JINA]: {
+    type: 'semantic_text',
+    inference_id: '.jina-embeddings-v5-text-small',
+  },
 };
 export const getSemanticTextMapping = (
   inferenceId: string = DEFAULT_ELSER
@@ -53,7 +62,10 @@ export const getSemanticTextMapping = (
   if (isSupportedInferenceId(inferenceId)) {
     return INFERENCE_ID_TO_SEMANTIC_TEXT_MAPPING[inferenceId];
   }
-  throw new Error(`Semantic text mapping for Inference ID ${inferenceId} not found`);
+  return {
+    type: 'semantic_text',
+    inference_id: inferenceId,
+  };
 };
 
 export const createTargetIndex = async ({

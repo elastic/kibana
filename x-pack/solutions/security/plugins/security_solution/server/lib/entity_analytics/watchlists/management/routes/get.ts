@@ -63,7 +63,8 @@ export const getWatchlistRoute = (router: EntityAnalyticsRoutesDeps['router'], l
               statusCode: error.statusCode,
             });
           }
-        }
+        },
+        'platinum'
       )
     );
 };

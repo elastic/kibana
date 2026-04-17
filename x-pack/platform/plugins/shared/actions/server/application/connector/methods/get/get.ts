@@ -88,6 +88,9 @@ export async function get({
       isSystemAction: false,
       isDeprecated: isConnectorDeprecated(result.attributes),
       isConnectorTypeDeprecated: actionTypeRegistry.isDeprecated(result.attributes.actionTypeId),
+      authMode: result.attributes.authMode
+        ? (result.attributes.authMode as Connector['authMode'])
+        : 'shared',
     };
   }
 

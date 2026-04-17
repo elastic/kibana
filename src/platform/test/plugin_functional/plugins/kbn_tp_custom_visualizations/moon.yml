@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kbn-tp-custom-visualizations-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-visualizations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kbn-tp-custom-visualizations-plugin'
+  title: '@kbn/kbn-tp-custom-visualizations-plugin'
   description: Moon project for @kbn/kbn-tp-custom-visualizations-plugin
   channel: ''
   owner: '@elastic/kibana-visualizations'
-  metadata:
-    sourceRoot: src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
+  sourceRoot: src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

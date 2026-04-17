@@ -83,11 +83,23 @@ const workflowIdSchema: RootSchema<{ workflowId?: string }> = {
   },
 };
 
+const aiAssistedSchema: RootSchema<{ aiAssisted?: boolean }> = {
+  aiAssisted: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether this action was performed with AI assistance (NL2Workflow). True when the user accepted at least one AI proposal, or saved from the chat attachment renderer.',
+      optional: true,
+    },
+  },
+};
+
 const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
   ...baseResultActionSchema,
   ...eventNameSchema,
   ...workflowIdSchema,
   ...editorTypeSchema,
+  ...aiAssistedSchema,
   enabled: {
     type: 'boolean',
     _meta: {
@@ -181,12 +193,21 @@ const workflowCreatedSchema: RootSchema<ReportWorkflowCreatedActionParams> = {
       optional: false,
     },
   },
+  hasTriggerConditions: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Whether any configured trigger has a non-empty on.condition. Only presence is tracked.',
+      optional: false,
+    },
+  },
 };
 
 const workflowUpdatedSchema: RootSchema<ReportWorkflowUpdatedActionParams> = {
   ...baseResultActionSchema,
   ...eventNameSchema,
   ...editorTypeSchema,
+  ...aiAssistedSchema,
   workflowId: {
     type: 'keyword',
     _meta: {

@@ -247,7 +247,7 @@
         "{}"
       ],
       "path": "src/platform/plugins/shared/newsfeed/public/plugin.tsx",
-      "lineNumber": 22,
+      "lineNumber": 20,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -283,7 +283,7 @@
         " | null>; }"
       ],
       "path": "src/platform/plugins/shared/newsfeed/public/plugin.tsx",
-      "lineNumber": 23,
+      "lineNumber": 21,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

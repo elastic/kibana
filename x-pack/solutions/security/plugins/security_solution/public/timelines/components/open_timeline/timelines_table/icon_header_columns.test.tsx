@@ -94,7 +94,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an empty star when favorite is null', () => {
@@ -108,7 +108,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an empty star when favorite is empty', () => {
@@ -122,7 +122,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starEmpty-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-star-star"]').exists()).toBe(true);
   });
 
   test('it renders an filled star when favorite has one entry', () => {
@@ -147,7 +147,7 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-starFill-star"]').exists()).toBe(true);
   });
 
   test('it renders an filled star when favorite has more than one entry', () => {
@@ -176,6 +176,6 @@ describe('#getActionsColumns', () => {
       </TestProvidersComponent>
     );
 
-    expect(wrapper.find('[data-test-subj="favorite-starFilled-star"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="favorite-starFill-star"]').exists()).toBe(true);
   });
 });

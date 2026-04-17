@@ -23,7 +23,6 @@ const CASES_ROOT = resolve(__dirname, '..');
     templateName: 'zod_operation_schema',
     skipLinting: true,
     schemaNameTransform: 'pascalCase',
-    experimentallyImportZodV4: true,
   });
 
   // Move generated types to `common` because `docs` will be excluded from bundle

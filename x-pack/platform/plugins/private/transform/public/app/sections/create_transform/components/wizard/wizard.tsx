@@ -204,6 +204,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
           {currentStep === WIZARD_STEPS.CREATE ? (
             <StepCreateForm
               createDataView={stepDetailsState.createDataView}
+              deferValidation={stepDetailsState.deferValidation}
               transformId={stepDetailsState.transformId}
               transformConfig={transformConfig}
               onChange={setStepCreateState}
@@ -224,6 +225,7 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
     currentStep,
     setCurrentStep,
     stepDetailsState.createDataView,
+    stepDetailsState.deferValidation,
     stepDetailsState.transformId,
     transformConfig,
     setStepCreateState,

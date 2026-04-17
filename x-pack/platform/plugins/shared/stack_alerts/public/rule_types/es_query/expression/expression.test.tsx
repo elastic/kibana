@@ -84,7 +84,13 @@ const defaultEsqlRuleParams: EsQueryRuleParams<SearchType.esqlQuery> = {
   aggType: 'count',
 };
 
-const dataViewPluginMock = dataViewPluginMocks.createStartContract();
+const dataViewPluginMock = (() => {
+  const base = dataViewPluginMocks.createStartContract();
+  return Object.assign(base, {
+    getFieldsForWildcard: jest.fn().mockResolvedValue([]),
+    getIndices: jest.fn().mockResolvedValue([]),
+  });
+})();
 const chartsStartMock = chartPluginMock.createStartContract();
 const unifiedSearchMock = unifiedSearchPluginMock.createStartContract();
 const httpMock = httpServiceMock.createStartContract();
@@ -141,7 +147,11 @@ const savedQueryMock = {
 };
 
 const dataMock = dataPluginMock.createStartContract();
-const dataViewsMock = dataViewPluginMocks.createStartContract();
+const dataViewsMock = {
+  ...dataViewPluginMocks.createStartContract(),
+  getFieldsForWildcard: jest.fn().mockResolvedValue([]),
+  getIndices: jest.fn().mockResolvedValue([]),
+};
 const dataViewEditorMock = dataViewEditorPluginMock.createStartContract();
 
 (dataMock.search.searchSource.create as jest.Mock).mockImplementation(() =>

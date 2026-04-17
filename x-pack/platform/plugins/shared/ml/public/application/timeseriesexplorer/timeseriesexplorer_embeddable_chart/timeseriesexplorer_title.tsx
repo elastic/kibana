@@ -67,7 +67,7 @@ const FilterButton: FC<{
       <EuiButtonIcon
         size="xs"
         onClick={onClick}
-        iconType={isAddFilter ? 'plusInCircle' : 'minusInCircle'}
+        iconType={isAddFilter ? 'plusCircle' : 'minusCircle'}
         aria-label={
           isAddFilter
             ? i18n.translate('xpack.ml.timeSeriesExplorer.title.addFilterAriaLabel', {

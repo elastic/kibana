@@ -24,7 +24,6 @@ export class NavControlsService {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
-    const navControlsExtension$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const helpMenuLinks$ = new BehaviorSubject<ChromeHelpMenuLink[]>([]);
 
     const toSorted = (controls: ReadonlySet<ChromeNavControl>) =>
@@ -33,7 +32,6 @@ export class NavControlsService {
     const left$ = navControlsLeft$.pipe(map(toSorted), takeUntil(this.stop$));
     const right$ = navControlsRight$.pipe(map(toSorted), takeUntil(this.stop$));
     const center$ = navControlsCenter$.pipe(map(toSorted), takeUntil(this.stop$));
-    const extension$ = navControlsExtension$.pipe(map(toSorted), takeUntil(this.stop$));
     const helpLinks$ = helpMenuLinks$.pipe(takeUntil(this.stop$));
 
     return {
@@ -48,9 +46,6 @@ export class NavControlsService {
       registerCenter: (navControl: ChromeNavControl) =>
         navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
 
-      registerExtension: (navControl: ChromeNavControl) =>
-        navControlsExtension$.next(new Set([...navControlsExtension$.value.values(), navControl])),
-
       setHelpMenuLinks: (links: ChromeHelpMenuLink[]) => {
         // This extension point is only intended to be used once by the cloud integration > cloud_links plugin
         if (helpMenuLinks$.value.length > 0) {
@@ -62,7 +57,6 @@ export class NavControlsService {
       getLeft$: () => left$,
       getRight$: () => right$,
       getCenter$: () => center$,
-      getExtension$: () => extension$,
       getHelpMenuLinks$: () => helpLinks$,
     };
   }

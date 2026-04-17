@@ -37,7 +37,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -83,7 +83,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -125,7 +125,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -170,7 +170,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         {
@@ -213,7 +213,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           {
@@ -259,7 +259,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           // Should be processed: status=active AND priority=high
@@ -313,7 +313,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { message: 'should process', should_process: true },

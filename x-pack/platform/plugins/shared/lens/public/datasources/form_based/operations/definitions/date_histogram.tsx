@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import moment from 'moment';
-import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -22,32 +21,35 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type {
-  AggFunctionsMapping,
-  AggParamOption,
-  IndexPatternAggRestrictions,
-} from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping, AggParamOption } from '@kbn/data-plugin/public';
 import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
 import {
   extendedBoundsToAst,
   intervalOptions,
   getCalculateAutoTimeExpression,
+  splitStringInterval,
 } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import type {
-  DateHistogramIndexPatternColumn,
-  DateRange,
-  IndexPattern,
-  FormBasedLayer,
-} from '@kbn/lens-common';
+import type { DateHistogramIndexPatternColumn, FormBasedLayer } from '@kbn/lens-common';
+import { esql } from '@elastic/esql';
+import { TIME_SYSTEM_PARAMS } from '@kbn/esql-language';
+
 import { updateColumnParam } from '../layer_helpers';
 import type { FieldBasedOperationErrorMessage, OperationDefinition, ParamEditorProps } from '.';
 import { getInvalidFieldMessage, getSafeName } from './helpers';
 import { TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS } from '../../../../user_messages_ids';
+import {
+  AUTO_INTERVAL,
+  AUTO_TARGET_NUMBER_OF_BUCKETS,
+  DEFAULT_DATE_HISTOGRAM_INTERVAL,
+  getTimeZoneAndInterval,
+  hasDateRange,
+  restrictedInterval,
+} from '../../date_histogram_esql';
 
 const { isValidInterval } = search.aggs;
-const autoInterval = 'auto';
+
 const calendarOnlyIntervals = new Set(['w', 'M', 'q', 'y']);
 
 function getMultipleDateHistogramsErrorMessage(
@@ -80,50 +82,28 @@ function getMultipleDateHistogramsErrorMessage(
   ];
 }
 
-function getTimeZoneAndInterval(
-  column: DateHistogramIndexPatternColumn,
-  indexPattern: IndexPattern
-) {
-  const usedField = indexPattern.getFieldByName(column.sourceField);
+const ESQL_UNIT_MAP: Record<string, [string, string]> = {
+  ms: ['millisecond', 'milliseconds'],
+  s: ['second', 'seconds'],
+  m: ['minute', 'minutes'],
+  h: ['hour', 'hours'],
+  d: ['day', 'days'],
+  w: ['week', 'weeks'],
+  M: ['month', 'months'],
+  y: ['year', 'years'],
+};
 
-  if (
-    usedField &&
-    usedField.aggregationRestrictions &&
-    usedField.aggregationRestrictions.date_histogram
-  ) {
-    return {
-      interval: restrictedInterval(usedField.aggregationRestrictions) ?? autoInterval,
-      timeZone: usedField.aggregationRestrictions.date_histogram.time_zone,
-      usedField,
-    };
+function mapToEsqlInterval(interval: string) {
+  const parsed = splitStringInterval(interval);
+  if (!parsed) return '1 hour';
+  const { value, unit } = parsed;
+  const n = value;
+  const pair = ESQL_UNIT_MAP[unit];
+  if (pair) {
+    const word = n === 1 ? pair[0] : pair[1];
+    return `${n} ${word}`;
   }
-  return {
-    usedField: undefined,
-    timeZone: undefined,
-    interval: column.params?.interval ?? autoInterval,
-  };
-}
-
-export function mapToEsqlInterval(dateRange: DateRange, interval: string) {
-  if (interval !== 'm' && interval.endsWith('m')) {
-    return interval.replace('m', ' minutes');
-  }
-  switch (interval) {
-    case '1M':
-      return '1 month';
-    case 'd':
-      return '1d';
-    case 'h':
-      return '1h';
-    case 'm':
-      return '1 minute';
-    case 's':
-      return '1s';
-    case 'ms':
-      return '1ms';
-    default:
-      return interval;
-  }
+  return interval;
 }
 
 export const dateHistogramOperation: OperationDefinition<
@@ -158,7 +138,7 @@ export const dateHistogramOperation: OperationDefinition<
   },
   getDefaultLabel: (column, columns, indexPattern, uiSettings, dateRange) => {
     const field = getSafeName(column.sourceField, indexPattern);
-    let interval = column.params?.interval || autoInterval;
+    let interval = column.params?.interval || AUTO_INTERVAL;
     if (dateRange && uiSettings) {
       const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
       interval =
@@ -182,7 +162,7 @@ export const dateHistogramOperation: OperationDefinition<
       sourceField: field.name,
       isBucketed: true,
       params: {
-        interval: columnParams?.interval ?? autoInterval,
+        interval: columnParams?.interval ?? AUTO_INTERVAL,
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         dropPartials: Boolean(columnParams?.dropPartials),
       },
@@ -228,26 +208,28 @@ export const dateHistogramOperation: OperationDefinition<
     }
     return { id: 'date', params: { pattern: uiSettings?.get('dateFormat') } };
   },
-  toESQL: (column, columnId, indexPattern, layer, uiSettings, dateRange) => {
+  toESQL: (column, _columnId, indexPattern, _layer, _uiSettings, dateRange) => {
     if (column.params?.includeEmptyRows) return;
     const { interval } = getTimeZoneAndInterval(column, indexPattern);
-    const calcAutoInterval = getCalculateAutoTimeExpression((key) => uiSettings.get(key));
+    const esqlColumnNode = esql.col(column.sourceField);
 
-    const resolvedInterval =
-      interval === 'auto'
-        ? mapToEsqlInterval(
-            dateRange,
-            calcAutoInterval({ from: dateRange.fromDate, to: dateRange.toDate }) || '1h'
-          )
-        : mapToEsqlInterval(dateRange, interval);
+    if (interval === AUTO_INTERVAL) {
+      if (hasDateRange(dateRange)) {
+        const [ESQL_TIME_RANGE_START, ESQL_TIME_RANGE_END] = TIME_SYSTEM_PARAMS;
+        return {
+          template: `BUCKET(${esqlColumnNode}, ${AUTO_TARGET_NUMBER_OF_BUCKETS}, ${ESQL_TIME_RANGE_START}, ${ESQL_TIME_RANGE_END})`,
+        };
+      }
+      // Fall back to default 1h when date range is missing
+      return {
+        template: `BUCKET(${esqlColumnNode}, ${mapToEsqlInterval(
+          DEFAULT_DATE_HISTOGRAM_INTERVAL
+        )})`,
+      };
+    }
 
-    // Use columnId to make param name unique
-    const fieldKey = `field_${snakeCase(columnId)}`;
-    // The interval is a safe string like '30 minutes' or '1h' - it doesn't need parameter escaping
-    // and should be directly in the template (not as a string parameter which would be quoted)
     return {
-      template: `BUCKET(??${fieldKey}, ${resolvedInterval})`,
-      params: { [fieldKey]: column.sourceField },
+      template: `BUCKET(${esqlColumnNode}, ${mapToEsqlInterval(interval)})`,
     };
   },
   toEsAggsFn: (column, columnId, indexPattern) => {
@@ -286,14 +268,14 @@ export const dateHistogramOperation: OperationDefinition<
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 
     const [intervalInput, setIntervalInput] = useState(currentColumn.params.interval);
-    const interval = intervalInput === autoInterval ? autoInterval : parseInterval(intervalInput);
+    const interval = intervalInput === AUTO_INTERVAL ? AUTO_INTERVAL : parseInterval(intervalInput);
 
     // We force the interval value to 1 if it's empty, since that is the ES behavior,
     // and the isValidInterval function doesn't handle the empty case properly. Fixing
     // isValidInterval involves breaking changes in other areas.
     const isValid =
-      (!currentColumn.params.ignoreTimeRange && intervalInput === autoInterval) ||
-      (interval !== autoInterval &&
+      (!currentColumn.params.ignoreTimeRange && intervalInput === AUTO_INTERVAL) ||
+      (interval !== AUTO_INTERVAL &&
         intervalInput !== '' &&
         isValidInterval(
           `${interval.value === '' ? '1' : interval.value}${interval.unit}`,
@@ -320,10 +302,10 @@ export const dateHistogramOperation: OperationDefinition<
     const setInterval = useCallback(
       (newInterval: typeof interval) => {
         const isCalendarInterval =
-          newInterval !== autoInterval && calendarOnlyIntervals.has(newInterval.unit);
+          newInterval !== AUTO_INTERVAL && calendarOnlyIntervals.has(newInterval.unit);
         const value =
-          newInterval === autoInterval
-            ? autoInterval
+          newInterval === AUTO_INTERVAL
+            ? AUTO_INTERVAL
             : `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
         paramEditorUpdater((newLayer) =>
@@ -334,7 +316,7 @@ export const dateHistogramOperation: OperationDefinition<
     );
 
     const options = (intervalOptions || [])
-      .filter((option) => option.val !== autoInterval)
+      .filter((option) => option.val !== AUTO_INTERVAL)
       .map((option: AggParamOption) => {
         return { label: option.display, key: option.val };
       }, []);
@@ -350,7 +332,7 @@ export const dateHistogramOperation: OperationDefinition<
             }) || '1h',
         },
       }),
-      key: autoInterval,
+      key: AUTO_INTERVAL,
     });
 
     const definedOption = options.find((o) => o.key === intervalInput);
@@ -436,7 +418,7 @@ export const dateHistogramOperation: OperationDefinition<
                   });
                   if (
                     !currentColumn.params.ignoreTimeRange &&
-                    currentColumn.params.interval === autoInterval
+                    currentColumn.params.interval === AUTO_INTERVAL
                   ) {
                     const newFixedInterval =
                       data.search.aggs.calculateAutoTimeExpression({
@@ -504,7 +486,7 @@ export const dateHistogramOperation: OperationDefinition<
               onChange={(opts) => {
                 const newValue = opts.length ? opts[0].key! : '';
                 setIntervalInput(newValue);
-                if (newValue === autoInterval && currentColumn.params.ignoreTimeRange) {
+                if (newValue === AUTO_INTERVAL && currentColumn.params.ignoreTimeRange) {
                   paramEditorUpdater(
                     updateColumnParam({
                       layer,
@@ -638,15 +620,4 @@ function parseInterval(currentInterval: string) {
     value: isNaN(result) ? '' : result,
     unit: unitMatch[0] || 'h',
   };
-}
-
-function restrictedInterval(aggregationRestrictions?: Partial<IndexPatternAggRestrictions>) {
-  if (!aggregationRestrictions || !aggregationRestrictions.date_histogram) {
-    return;
-  }
-
-  return (
-    aggregationRestrictions.date_histogram.calendar_interval ||
-    aggregationRestrictions.date_histogram.fixed_interval
-  );
 }

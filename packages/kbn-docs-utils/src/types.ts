@@ -317,8 +317,8 @@ export interface ApiStats {
 
 /**
  * Represents an exported declaration that has no identifiable name.
- * This typically occurs when a JSDoc-style comment appears above a line
- * that isn't a proper declaration.
+ * This typically occurs with anonymous `export default` expressions (e.g.,
+ * `export default { ... }` or `export default function() { ... }`).
  */
 export interface UnnamedExport {
   pluginId: string;

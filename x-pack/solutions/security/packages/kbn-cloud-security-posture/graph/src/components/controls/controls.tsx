@@ -128,7 +128,7 @@ export const Controls = ({
         <>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType="plusInCircle"
+              iconType="plusCircle"
               aria-label={ZoomInLabel}
               size="m"
               color="text"
@@ -140,7 +140,7 @@ export const Controls = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType="minusInCircle"
+              iconType="minusCircle"
               aria-label={ZoomOutLabel}
               size="m"
               color="text"

@@ -326,6 +326,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [transformSettingsNumFailureRetries, setTransformSettingsNumFailureRetries] = useState<
       string | number | undefined
     >(defaults.transformSettingsNumFailureRetries);
+    const [deferValidation, setDeferValidation] = useState(defaults.deferValidation);
     const isTransformSettingsNumFailureRetriesValid =
       transformSettingsNumFailureRetries === undefined ||
       transformSettingsNumFailureRetries === '-' ||
@@ -354,6 +355,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         continuousModeDateField,
         continuousModeDelay,
         createDataView,
+        deferValidation,
         isContinuousModeEnabled,
         isRetentionPolicyEnabled,
         retentionPolicyDateField,
@@ -383,6 +385,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       continuousModeDateField,
       continuousModeDelay,
       createDataView,
+      deferValidation,
       isContinuousModeEnabled,
       isRetentionPolicyEnabled,
       retentionPolicyDateField,
@@ -880,6 +883,22 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                 )}
                 isInvalid={!isTransformSettingsNumFailureRetriesValid}
                 data-test-subj="transformNumFailureRetriesInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              helpText={i18n.translate('xpack.transform.stepDetailsForm.deferValidationHelpText', {
+                defaultMessage:
+                  'Skips validation of the source index and the destination pipeline when creating the transform. Use this option when the source index is very large and validation would time out.',
+              })}
+            >
+              <EuiSwitch
+                name="transformDeferValidation"
+                label={i18n.translate('xpack.transform.stepDetailsForm.deferValidationLabel', {
+                  defaultMessage: 'Skip validation',
+                })}
+                checked={deferValidation}
+                onChange={() => setDeferValidation(!deferValidation)}
+                data-test-subj="transformDeferValidationSwitch"
               />
             </EuiFormRow>
           </EuiAccordion>

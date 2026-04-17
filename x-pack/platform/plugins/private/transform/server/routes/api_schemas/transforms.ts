@@ -152,6 +152,14 @@ export interface PutTransformsPivotRequestSchema
 
 export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 'pivot'>;
 
+export const putTransformQuerySchema = schema.object({
+  createDataView: schema.boolean({ defaultValue: false }),
+  timeFieldName: schema.maybe(schema.string()),
+  deferValidation: schema.boolean({ defaultValue: false }),
+});
+
+export type PutTransformQuerySchema = TypeOf<typeof putTransformQuerySchema>;
+
 interface TransformCreated {
   transform: TransformId;
 }

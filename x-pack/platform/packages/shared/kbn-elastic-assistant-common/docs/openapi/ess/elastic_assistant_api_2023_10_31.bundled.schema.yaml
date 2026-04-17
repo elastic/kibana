@@ -2784,6 +2784,9 @@ components:
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
         - $ref: '#/components/schemas/IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntryCreateFields'
+          index: '#/components/schemas/IndexEntryCreateFields'
         propertyName: type
     KnowledgeBaseEntryDetailsInError:
       type: object
@@ -2823,18 +2826,27 @@ components:
         - $ref: '#/components/schemas/DocumentEntry'
         - $ref: '#/components/schemas/IndexEntry'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntry'
+          index: '#/components/schemas/IndexEntry'
         propertyName: type
     KnowledgeBaseEntryUpdateProps:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/IndexEntryUpdateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntryUpdateFields'
+          index: '#/components/schemas/IndexEntryUpdateFields'
         propertyName: type
     KnowledgeBaseEntryUpdateRouteProps:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
         - $ref: '#/components/schemas/IndexEntryCreateFields'
       discriminator:
+        mapping:
+          document: '#/components/schemas/DocumentEntryCreateFields'
+          index: '#/components/schemas/IndexEntryCreateFields'
         propertyName: type
     KnowledgeBaseReadResponse200:
       type: object

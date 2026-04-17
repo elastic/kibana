@@ -15,10 +15,12 @@
     "scripts/**/*",
     "package.json",
     "../../../../../typings/**/*",
-    "test/scout/**/*"
+    "test/scout/**/*",
+    "test/scout_automatic_import/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/tracing-utils",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -106,7 +108,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/automatic-import-plugin",
-    "@kbn/automatic-import-v2-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
     "@kbn/zod",
@@ -132,6 +133,8 @@
     "@kbn/user-profile-components",
     "@kbn/css-utils",
     "@kbn/rison",
-    "@kbn/rule-data-utils"
+    "@kbn/rule-data-utils",
+    "@kbn/doc-links",
+    "@kbn/yaml-loader"
   ]
 }

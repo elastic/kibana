@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
 import { HeaderSection } from '../../header_section';
 
@@ -20,6 +21,7 @@ import type { AnomaliesUserTableProps } from '../types';
 import { useMlCapabilities } from '../hooks/use_ml_capabilities';
 import { BasicTable } from './basic_table';
 
+import { buildAnomaliesTableInfluencersFilterQuery } from '../anomaly/anomaly_table_euid';
 import { getCriteriaFromUsersType } from '../criteria/get_criteria_from_users_type';
 import { Panel } from '../../panel';
 import { convertAnomaliesToUsers } from './convert_anomalies_to_users';
@@ -29,6 +31,7 @@ import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { usersActions, usersSelectors } from '../../../../explore/users/store';
+import { UsersType } from '../../../../explore/users/store/model';
 import type { State } from '../../../store/types';
 import { useInstalledSecurityJobNameById } from '../hooks/use_installed_security_jobs';
 
@@ -45,6 +48,7 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
   userName,
   skip,
   type,
+  identityFields,
 }) => {
   const dispatch = useDispatch();
   const capabilities = useMlCapabilities();
@@ -65,6 +69,8 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
 
   const { jobNameById, loading: loadingJobs } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);
+  const euidApi = useEntityStoreEuidApi();
+  const euid = euidApi?.euid;
 
   const getAnomaliesUserTableFilterQuerySelector = useMemo(
     () => usersSelectors.usersAnomaliesJobIdFilterSelector(),
@@ -108,19 +114,32 @@ const AnomaliesUserTableComponent: React.FC<AnomaliesUserTableProps> = ({
     [dispatch, type]
   );
 
+  const identitySignature = JSON.stringify(identityFields ?? {});
+  const isScopedToEntity = type === UsersType.details && userName != null;
+  const anomaliesInfluencersFilterQuery = useMemo(
+    () =>
+      buildAnomaliesTableInfluencersFilterQuery({
+        euid,
+        entityType: 'user',
+        isScopedToEntity,
+        identityFields,
+        fallbackDisplayName: userName,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [euid, isScopedToEntity, userName, identitySignature]
+  );
+
   const [loadingTable, tableData] = useAnomaliesTableData({
     startDate,
     endDate,
     skip: querySkip,
-    criteriaFields: getCriteriaFromUsersType(type, userName),
-    filterQuery: {
-      exists: { field: 'user.name' },
-    },
+    criteriaFields: getCriteriaFromUsersType(type, userName, identityFields, euid),
+    filterQuery: anomaliesInfluencersFilterQuery,
     jobIds: selectedJobIds.length > 0 ? selectedJobIds : jobIds,
     aggregationInterval: selectedInterval,
   });
 
-  const users = convertAnomaliesToUsers(tableData, jobNameById, userName);
+  const users = convertAnomaliesToUsers(tableData, jobNameById, userName, identityFields, euid);
   const columns = getAnomaliesUserTableColumnsCurated(type, startDate, endDate);
   const pagination = {
     initialPageIndex: 0,

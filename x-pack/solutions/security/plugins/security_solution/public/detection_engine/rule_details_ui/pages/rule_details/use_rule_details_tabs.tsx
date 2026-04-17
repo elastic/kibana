@@ -8,12 +8,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
 import type { NavTab } from '../../../../common/components/navigation/types';
-import { useRuleExecutionSettings } from '../../../rule_monitoring';
 
 export enum RuleDetailTabs {
   overview = 'overview',
@@ -21,7 +21,6 @@ export enum RuleDetailTabs {
   exceptions = 'rule_exceptions',
   endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
-  executionEvents = 'execution_events',
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
@@ -30,22 +29,25 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
-  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
 };
 
 export interface UseRuleDetailsTabsProps {
   rule: Rule | null;
   ruleId: string;
   isExistingRule: boolean;
-  hasIndexRead: boolean | null;
+  canReadAlerts: boolean;
 }
 
 export const useRuleDetailsTabs = ({
   rule,
   ruleId,
   isExistingRule,
-  hasIndexRead,
+  canReadAlerts,
 }: UseRuleDetailsTabsProps) => {
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
       [RuleDetailTabs.overview]: {
@@ -78,18 +80,11 @@ export const useRuleDetailsTabs = ({
         disabled: !isExistingRule,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
       },
-      [RuleDetailTabs.executionEvents]: {
-        id: RuleDetailTabs.executionEvents,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
-      },
     }),
     [isExistingRule, rule, ruleId]
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
-  const ruleExecutionSettings = useRuleExecutionSettings();
 
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canReadExceptions = useUserPrivileges().rulesPrivileges.exceptions.read;
@@ -97,13 +92,10 @@ export const useRuleDetailsTabs = ({
   useEffect(() => {
     const hiddenTabs = [];
 
-    if (!hasIndexRead) {
+    if (!canReadAlerts) {
       hiddenTabs.push(RuleDetailTabs.alerts);
     }
-    if (!ruleExecutionSettings.extendedLogging.isEnabled) {
-      hiddenTabs.push(RuleDetailTabs.executionEvents);
-    }
-    if (!canReadEndpointExceptions) {
+    if (isEndpointExceptionsMovedFFEnabled || !canReadEndpointExceptions) {
       hiddenTabs.push(RuleDetailTabs.endpointExceptions);
     }
     if (!canReadExceptions) {
@@ -124,10 +116,10 @@ export const useRuleDetailsTabs = ({
   }, [
     canReadEndpointExceptions,
     canReadExceptions,
-    hasIndexRead,
+    canReadAlerts,
+    isEndpointExceptionsMovedFFEnabled,
     rule,
     ruleDetailTabs,
-    ruleExecutionSettings,
   ]);
 
   return pageTabs;

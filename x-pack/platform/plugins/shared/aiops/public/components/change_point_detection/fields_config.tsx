@@ -254,7 +254,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                       : i18n.translate('xpack.aiops.changePointDetection.attachChartsLabel', {
                           defaultMessage: 'Attach charts',
                         }),
-                  icon: 'plusInCircle',
+                  icon: 'plusCircle',
                   panel: 'attachMainPanel',
                   'data-test-subj': 'aiopsChangePointDetectionAttachButton',
                 },
@@ -430,7 +430,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 onClick={() => {
                   setIsActionMenuOpen(false);
                   openCasesModalCallback({
-                    timeRange,
+                    time_range: timeRange,
                     viewType: caseAttachment.viewType,
                     fn: fieldConfig.fn,
                     metricField: fieldConfig.metricField,
@@ -525,7 +525,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="aiopsChangePointDetectionExpandConfigButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
             aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
               defaultMessage: 'Expand configuration',
@@ -572,7 +572,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     display="base"
                     size="s"
                     isSelected={isActionMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsActionMenuOpen.bind(null, !isActionMenuOpen)}
                   />
                 }

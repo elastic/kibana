@@ -20,7 +20,7 @@ export const EmptyState = memo<{
     <ManagementEmptyStateWrapper>
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="trustedAppEmptyState"
-        iconType="plusInCircle"
+        iconType="plusCircle"
         title={
           <h2>
             <FormattedMessage

@@ -221,6 +221,78 @@ describe('ESQL routes', () => {
       await client.indices.delete({ index: index2 });
     });
 
+    it('should return @timestamp for multiple indices without subqueries when all have @timestamp', async () => {
+      const index1 = 'multi_ts_index1';
+      const index2 = 'multi_ts_index2';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: index1,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field1: { type: 'keyword' },
+          },
+        },
+      });
+
+      await client.indices.create({
+        index: index2,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field2: { type: 'keyword' },
+          },
+        },
+      });
+
+      const query = `FROM ${index1}, ${index2}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.indices.delete({ index: index1 });
+      await client.indices.delete({ index: index2 });
+    });
+
+    it('should return @timestamp for multiple indices without subqueries when only some have @timestamp', async () => {
+      const index1 = 'mixed_ts_index1';
+      const index2 = 'mixed_no_ts_index2';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: index1,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field1: { type: 'keyword' },
+          },
+        },
+      });
+
+      await client.indices.create({
+        index: index2,
+        mappings: {
+          properties: {
+            created_at: { type: 'date' },
+            field2: { type: 'keyword' },
+          },
+        },
+      });
+
+      const query = `FROM ${index1}, ${index2}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.indices.delete({ index: index1 });
+      await client.indices.delete({ index: index2 });
+    });
+
     it('should return @timestamp when ES|QL source is a view that returns @timestamp', async () => {
       const indexName = 'test_timefield_view_index';
       const viewName = 'test-timefield-view';

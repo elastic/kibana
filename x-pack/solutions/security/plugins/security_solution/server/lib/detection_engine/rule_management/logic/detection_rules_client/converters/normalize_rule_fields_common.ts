@@ -6,7 +6,7 @@
  */
 
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RequiredOptional } from '@kbn/zod-helpers';
+import type { RequiredOptional } from '@kbn/zod-helpers/v4';
 import type { SharedResponseProps } from '../../../../../../../common/api/detection_engine/model';
 import {
   transformAlertToRuleAction,

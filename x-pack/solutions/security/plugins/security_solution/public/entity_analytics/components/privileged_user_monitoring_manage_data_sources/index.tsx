@@ -36,7 +36,7 @@ export const PrivilegedUserMonitoringManageDataSources = ({
     <>
       <EuiButtonEmpty
         flush="left"
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         iconSide="left"
         onClick={onBackToDashboardClicked}
         aria-label={i18n.translate(

@@ -36,11 +36,13 @@ Options:
                                       (as models:judge:<model-group>, e.g. models:judge:llm-gateway/gpt-5.1)
                                       (default: x-pack/platform/packages/shared/kbn-evals/scripts/vault/config.json)
   --judge <connector-id>                Create models:judge:<connector-id> (repeatable)
+  --prune                                Mark stale models:* labels as deprecated (renamed to "deprecated:<name>")
   -h, --help                            Show help
 
 Notes:
   - You can pass raw model groups (script will prefix models: automatically).
   - EIS model labels are created as: models:eis/<modelId>
+  - Use --prune with discovery flags to deprecate labels for models no longer available.
 EOF
 }
 
@@ -56,8 +58,15 @@ FROM_EIS_MODELS_JSON=""
 JUDGE_FROM_EIS_MODELS_JSON=""
 JUDGE_FROM_LITELLM_VAULT_CONFIG=""
 UPDATE_ALL_LABELS="false"
+PRUNE="false"
 declare -a JUDGE_CONNECTOR_IDS=()
 declare -a POSITIONAL=()
+
+# Counters for summary reporting
+CREATED_COUNT=0
+UPDATED_COUNT=0
+DEPRECATED_COUNT=0
+SKIPPED_COUNT=0
 
 if ! command -v gh >/dev/null 2>&1; then
   echo "Error: 'gh' CLI is required." >&2
@@ -73,6 +82,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --update-all-labels)
       UPDATE_ALL_LABELS="true"
+      shift 1
+      ;;
+    --prune)
+      PRUNE="true"
       shift 1
       ;;
     --repo)
@@ -158,6 +171,13 @@ if [[ -n "${REPO}" ]]; then
   GH_REPO_ARGS+=(--repo "${REPO}")
 fi
 
+# When --prune is active, track all labels created/updated so we can deprecate stale ones.
+CREATED_LABELS_FILE=""
+if [[ "${PRUNE}" == "true" ]]; then
+  CREATED_LABELS_FILE="$(mktemp)"
+  trap 'rm -f "${CREATED_LABELS_FILE:-}"' EXIT
+fi
+
 create_or_update_label() {
   local name="$1"
   local description="$2"
@@ -168,19 +188,30 @@ create_or_update_label() {
     exit 1
   fi
 
+  # GitHub label names are limited to 50 characters.
+  if [[ "${#name}" -gt 50 ]]; then
+    echo "skipped: $name (${#name} chars exceeds GitHub's 50-char limit)" >&2
+    SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+    return 0
+  fi
+
   # Prefer edit-first so we can update labels idempotently without relying on parsing "already exists" errors.
   if gh label edit "${GH_REPO_ARGS[@]}" "$name" --description "$description" --color "$color" >/dev/null 2>&1; then
     echo "updated: $name"
+    UPDATED_COUNT=$((UPDATED_COUNT + 1))
+    [[ -n "${CREATED_LABELS_FILE:-}" ]] && echo "$name" >> "$CREATED_LABELS_FILE"
     return 0
   fi
 
   if gh label create "${GH_REPO_ARGS[@]}" "$name" --description "$description" --color "$color" >/dev/null 2>&1; then
     echo "created: $name"
+    CREATED_COUNT=$((CREATED_COUNT + 1))
+    [[ -n "${CREATED_LABELS_FILE:-}" ]] && echo "$name" >> "$CREATED_LABELS_FILE"
     return 0
   fi
 
-  echo "Error: failed to create or update label: $name" >&2
-  exit 1
+  echo "Warning: failed to create or update label: $name" >&2
+  SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
 }
 
 HAS_INPUTS="false"
@@ -191,12 +222,14 @@ if [[ "${#JUDGE_CONNECTOR_IDS[@]}" -gt 0 ]] || [[ "${#POSITIONAL[@]}" -gt 0 ]]; 
   HAS_INPUTS="true"
 fi
 
-if [[ "${HAS_INPUTS}" != "true" ]]; then
+if [[ "${HAS_INPUTS}" != "true" && "${PRUNE}" != "true" ]]; then
   usage
   exit 1
 fi
 
-create_or_update_label "models:all" "Run LLM evals against all available models" "$MODELS_COLOR"
+# Static group labels — curated model sets that expand to multiple models in eval_pipeline.ts.
+# Keep in sync with MODEL_GROUP_ALIASES in .buildkite/pipelines/evals/eval_pipeline.ts.
+create_or_update_label "models:weekly-eis-models" "Run evals against the weekly EIS model set (see eval_pipeline.ts)" "$MODELS_COLOR"
 
 generate_litellm_connectors_json_from_vault_config() {
   local cfg_path="$1"
@@ -211,9 +244,10 @@ generate_litellm_connectors_json_from_vault_config() {
   local litellm_tsv
   litellm_tsv="$(
     node - <<'NODE' "${cfg_path}"
-const Path = require('path');
+const { readFileSync } = require('fs');
+const { resolve } = require('path');
 const cfgPath = process.argv[2];
-const cfg = require(Path.resolve(cfgPath));
+const cfg = JSON.parse(readFileSync(resolve(cfgPath), 'utf8'));
 const litellm = cfg && cfg.litellm ? cfg.litellm : {};
 const baseUrl = litellm.baseUrl || '';
 const teamId = litellm.teamId || '';
@@ -225,15 +259,20 @@ NODE
   local base_url team_id virtual_key
   IFS=$'\t' read -r base_url team_id virtual_key <<<"${litellm_tsv}"
 
-  if [[ -z "${base_url}" || -z "${team_id}" || -z "${virtual_key}" ]]; then
-    echo "Error: missing litellm.baseUrl, litellm.teamId, or litellm.virtualKey in ${cfg_path}" >&2
+  if [[ -z "${base_url}" || -z "${virtual_key}" ]]; then
+    echo "Error: missing litellm.baseUrl or litellm.virtualKey in ${cfg_path}" >&2
     exit 1
   fi
 
   # Do not echo the key. Pass it directly to the generator script.
+  local team_args=()
+  if [[ -n "${team_id}" ]]; then
+    team_args+=(--team-id "${team_id}")
+  fi
+
   node x-pack/platform/packages/shared/kbn-evals/scripts/ci/generate_litellm_connectors.js \
     --base-url "${base_url}" \
-    --team-id "${team_id}" \
+    "${team_args[@]}" \
     --api-key "${virtual_key}" \
     --format json
 }
@@ -379,11 +418,6 @@ for arg in "${POSITIONAL[@]+"${POSITIONAL[@]}"}"; do
     label="models:${label}"
   fi
 
-  if [[ "$label" == "models:all" ]]; then
-    create_or_update_label "$label" "Run LLM evals against all available models" "$MODELS_COLOR"
-    continue
-  fi
-
   if [[ "$label" == models:judge:* ]]; then
     judge_connector_id="${label#models:judge:}"
     create_or_update_label "$label" "${JUDGE_DESC_PREFIX}${judge_connector_id}" "$JUDGE_COLOR"
@@ -393,4 +427,59 @@ for arg in "${POSITIONAL[@]+"${POSITIONAL[@]}"}"; do
     create_or_update_label "$label" "${DESC_PREFIX}${model_group}" "$MODELS_COLOR"
   fi
 done
+
+# --- Deprecation of stale labels ---
+DEPRECATED_COLOR="CCCCCC"
+
+if [[ "${PRUNE}" == "true" && -n "${CREATED_LABELS_FILE:-}" ]]; then
+  if [[ ! -s "${CREATED_LABELS_FILE}" ]]; then
+    echo ""
+    echo "Warning: --prune was set but no labels were created/updated; skipping deprecation to avoid marking all labels stale." >&2
+  else
+    echo ""
+    echo "--- Checking for stale models:* labels to deprecate"
+
+    # Fetch all existing models:* labels from the repo (excluding already-deprecated ones).
+    existing_labels="$(gh label list "${GH_REPO_ARGS[@]}" --search "models:" --limit 500 --json name --jq '.[].name' \
+      | grep -E '^models:' \
+      | sort -u || true)"
+    # Also fetch deprecated:models:* labels so we don't re-deprecate them.
+    already_deprecated="$(gh label list "${GH_REPO_ARGS[@]}" --search "deprecated:models:" --limit 500 --json name --jq '.[].name' \
+      | grep -E '^deprecated:models:' \
+      | sed 's/^deprecated://' \
+      | sort -u || true)"
+    # Exclude labels that already have a deprecated: counterpart.
+    if [[ -n "${already_deprecated}" ]]; then
+      existing_labels="$(comm -23 <(echo "${existing_labels}") <(echo "${already_deprecated}") || true)"
+    fi
+
+    if [[ -z "${existing_labels}" ]]; then
+      echo "No existing models:* labels found; nothing to deprecate."
+    else
+      sorted_created="$(sort -u "${CREATED_LABELS_FILE}")"
+
+      # Set difference: existing minus created/updated = stale
+      stale_labels="$(comm -23 <(echo "${existing_labels}") <(echo "${sorted_created}") || true)"
+
+      if [[ -z "${stale_labels}" ]]; then
+        echo "No stale labels found."
+      else
+        while IFS= read -r stale_label; do
+          [[ -z "$stale_label" ]] && continue
+          deprecated_name="deprecated:${stale_label}"
+          if gh label edit "${GH_REPO_ARGS[@]}" "$stale_label" --name "$deprecated_name" --description "DEPRECATED - model no longer available" --color "$DEPRECATED_COLOR" >/dev/null 2>&1; then
+            echo "deprecated: $stale_label -> $deprecated_name"
+            DEPRECATED_COUNT=$((DEPRECATED_COUNT + 1))
+          else
+            echo "Warning: failed to deprecate label: $stale_label" >&2
+          fi
+        done <<<"${stale_labels}"
+      fi
+    fi
+  fi
+fi
+
+# --- Summary ---
+echo ""
+echo "Summary: created=${CREATED_COUNT} updated=${UPDATED_COUNT} deprecated=${DEPRECATED_COUNT} skipped=${SKIPPED_COUNT}"
 

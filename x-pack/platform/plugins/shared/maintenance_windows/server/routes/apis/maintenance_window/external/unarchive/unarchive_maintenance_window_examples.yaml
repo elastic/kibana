@@ -1,0 +1,7 @@
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          unarchiveMaintenanceWindowResponse:
+            $ref: './unarchive_maintenance_window_response.yaml'

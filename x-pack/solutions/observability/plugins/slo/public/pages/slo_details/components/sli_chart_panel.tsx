@@ -12,61 +12,74 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import React from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
+import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import type { ChartData } from '../../../typings/slo';
 import { getSloChartState, isSloFailed } from '../utils/is_slo_failed';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import type { TimeBounds } from '../types';
+import { SliChartPanelActions } from './sli_chart_panel_actions';
 import { WideChart } from './wide_chart';
-
 export interface Props {
+  slo: SLOWithSummaryResponse;
   data: ChartData[];
   isLoading: boolean;
-  slo: SLOWithSummaryResponse;
-  onBrushed?: (timeBounds: TimeBounds) => void;
+  timeRange?: { from: string; to: string };
   hideHeaderDurationLabel?: boolean;
+  onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
 export function SliChartPanel({
+  slo,
   data,
   isLoading,
-  slo,
-  onBrushed,
+  timeRange,
   hideHeaderDurationLabel = false,
+  onBrushed,
 }: Props) {
-  const { uiSettings } = useKibana().services;
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailedStatus = isSloFailed(slo.summary.status);
   const observedValue = data.at(-1)?.value;
 
   const hasNoData = observedValue === undefined || observedValue < 0;
+  const isApm = isApmIndicatorType(slo.indicator);
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.title', {
-                  defaultMessage: 'Historical SLI',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!hideHeaderDurationLabel && (
+        <EuiFlexGroup>
+          <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem>
-              <EuiText color="subdued" size="s">
-                {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-                  ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
-                      defaultMessage: 'Last {duration}',
-                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                    })
-                  : toDurationAdverbLabel(slo.timeWindow.duration)}
-              </EuiText>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.title', {
+                    defaultMessage: 'Historical SLI',
+                  })}
+                </h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {!hideHeaderDurationLabel && (
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                    ? i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.duration', {
+                        defaultMessage: 'Last {duration}',
+                        values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                      })
+                    : toDurationAdverbLabel(slo.timeWindow.duration)}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          {isApm && (
+            <EuiFlexItem grow={0}>
+              <SliChartPanelActions slo={slo} timeRange={timeRange} />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
-
         <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiStat

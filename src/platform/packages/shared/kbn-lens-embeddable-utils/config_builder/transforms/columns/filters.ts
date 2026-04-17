@@ -9,7 +9,7 @@
 
 import type { FiltersIndexPatternColumn } from '@kbn/lens-common';
 import type { LensApiFiltersOperation } from '../../schema/bucket_ops';
-import { DEFAULT_FILTER, fromFilterLensStateToAPI } from './filter';
+import { DEFAULT_FILTER, fromFilterAPIToLensState, fromFilterLensStateToAPI } from './filter';
 import { getLensAPIBucketSharedProps, getLensStateBucketSharedProps } from './utils';
 
 export function fromFiltersLensApiToLensState(
@@ -27,10 +27,17 @@ export function fromFiltersLensApiToLensState(
       filters: (filters ?? [])
         // do not propagate advanced filters within dimensions
         .filter((filter) => filter.filter.language != null)
-        .map((filter) => ({
-          input: filter.filter,
-          label: filter.label ?? 'Filter',
-        })),
+        .map((filter) => {
+          const lensStateFilter = fromFilterAPIToLensState(filter.filter);
+
+          return {
+            input: {
+              query: lensStateFilter?.query ?? '',
+              language: lensStateFilter?.language ?? 'kuery',
+            },
+            label: filter.label ?? 'Filter',
+          };
+        }),
     },
   };
 }

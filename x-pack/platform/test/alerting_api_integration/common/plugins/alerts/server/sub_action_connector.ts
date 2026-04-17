@@ -9,7 +9,7 @@
 import type { AxiosError } from 'axios';
 import type { ServiceParams } from '@kbn/actions-plugin/server';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 

@@ -75,43 +75,34 @@ const mountComponent = async ({
     })
   );
 
-  const { stateContainer } = await toolkit.initializeSingleTab({
+  const { dataStateContainer } = await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
-  stateContainer.dataState.data$.documents$.next({
+  dataStateContainer.data$.documents$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
   });
-  stateContainer.dataState.data$.totalHits$.next({
+  dataStateContainer.data$.totalHits$.next({
     fetchStatus: FetchStatus.COMPLETE,
     result: Number(esHitsMock.length),
   });
-  stateContainer.dataState.data$.main$.next({
+  dataStateContainer.data$.main$.next({
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
   });
 
   const props: DiscoverMainContentProps = {
     dataView,
-    stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: jest.fn(),
+    }),
     isChartAvailable,
-    panelsToggle: (
-      <PanelsToggle
-        sidebarToggleState$={
-          new BehaviorSubject<SidebarToggleState>({
-            isCollapsed: true,
-            toggle: () => {},
-          })
-        }
-        isChartAvailable={undefined}
-        renderedFor="root"
-      />
-    ),
   };
 
   const component = mountWithIntl(
@@ -144,24 +135,22 @@ describe('Discover main content component', () => {
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
     });
 
-    it('should include PanelsToggle when chart is available', async () => {
+    it('should not include inline PanelsToggle when chart is available and visible', async () => {
       const component = await mountComponent({ isChartAvailable: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).exists()).toBe(false);
       expect(component.find(EuiHorizontalRule).exists()).toBe(true);
     });
 
     it('should include PanelsToggle when chart is available and hidden', async () => {
       const component = await mountComponent({ isChartAvailable: true, hideChart: true });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(false);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
 
     it('should include PanelsToggle when chart is not available', async () => {
       const component = await mountComponent({ isChartAvailable: false });
-      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
-      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(PanelsToggle).prop('omitChartButton')).toBe(true);
+      expect(component.find(PanelsToggle).prop('omitTableButton')).toBe(true);
       expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });

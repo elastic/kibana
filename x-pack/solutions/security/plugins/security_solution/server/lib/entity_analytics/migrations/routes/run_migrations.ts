@@ -20,7 +20,8 @@ import { scheduleEntityAnalyticsMigration } from '..';
 export const entityAnalyticsRunMigrationsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: EntityAnalyticsRoutesDeps['logger'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  config: EntityAnalyticsRoutesDeps['config']
 ) => {
   router.versioned
     .post({
@@ -44,7 +45,7 @@ export const entityAnalyticsRunMigrationsRoute = (
              * We cannot provide task manager here because the migrations require
              * the setup contract and we can only access the start contract.
              *
-             * The setup contarct is used to register kibana tasks.
+             * The setup contract is used to register kibana tasks.
              *
              * This means the ECS migration will not be run by calling this endpoint.
              *
@@ -57,6 +58,7 @@ export const entityAnalyticsRunMigrationsRoute = (
             getStartServices,
             auditLogger: securitySolution.getAuditLogger(),
             kibanaVersion: kibanaPackageJson.version,
+            experimentalFeatures: config.experimentalFeatures,
           });
           const body: RunEntityAnalyticsMigrationsResponse = { success: true };
           return response.ok({ body });

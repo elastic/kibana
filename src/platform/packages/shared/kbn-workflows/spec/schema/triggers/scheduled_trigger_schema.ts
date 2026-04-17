@@ -10,14 +10,16 @@
 import { z } from '@kbn/zod/v4';
 import { timezoneNames } from './timezone_names';
 
+// Minimum interval is 1 minute (60s). Seconds are allowed only for values ≥ 60.
+export const SCHEDULED_INTERVAL_PATTERN = /^(([6-9]\d|\d{3,})s|\d+[mhd])$/;
+export const SCHEDULED_INTERVAL_ERROR =
+  'Scheduled interval must be at least 1 minute. Use format like "1m", "90s", "2h", "1d"';
+
 export const ScheduledTriggerSchema = z.object({
   type: z.literal('scheduled'),
   with: z.union([
-    // New format: every: "5m", "2h", "1d", "30s"
     z.object({
-      every: z
-        .string()
-        .regex(/^\d+[smhd]$/, 'Invalid interval format. Use format like "5m", "2h", "1d", "30s"'),
+      every: z.string().regex(SCHEDULED_INTERVAL_PATTERN, SCHEDULED_INTERVAL_ERROR),
     }),
     z.object({
       rrule: z.object({

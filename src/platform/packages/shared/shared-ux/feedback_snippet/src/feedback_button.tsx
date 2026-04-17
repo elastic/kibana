@@ -54,7 +54,7 @@ export const FeedbackButton = ({
           width: 100%;
         `}
         color="text"
-        iconType="popout"
+        iconType="external"
         iconSide="right"
         size="s"
         id={`${feedbackSnippetId}ButtonSurveyLink`}

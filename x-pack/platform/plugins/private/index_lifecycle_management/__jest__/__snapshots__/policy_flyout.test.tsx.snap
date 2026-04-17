@@ -1020,7 +1020,7 @@ exports[`View policy flyout shows all phases 1`] = `
                   </span>
                   <span
                     color="inherit"
-                    data-euiicon-type="arrowUp"
+                    data-euiicon-type="chevronSingleUp"
                   />
                 </span>
               </button>

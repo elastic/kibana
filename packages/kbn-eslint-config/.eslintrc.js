@@ -211,13 +211,6 @@ module.exports = {
           to: '@kbn/rison',
         },
         {
-          from: 'react-dom/client',
-          to: 'react-dom',
-          exact: true,
-          disallowedMessage:
-            'Use `react-dom` instead of `react-dom/client` until upgraded to React 18',
-        },
-        {
           from: '@tanstack/react-query',
           to: '@kbn/react-query',
           exact: true,

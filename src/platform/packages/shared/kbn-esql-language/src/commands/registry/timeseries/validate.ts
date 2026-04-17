@@ -9,7 +9,6 @@
 import type {
   ESQLAst,
   ESQLAstAllCommands,
-  ESQLMessage,
   ESQLCommandOption,
   ESQLSource,
 } from '@elastic/esql/types';
@@ -18,6 +17,7 @@ import type { ICommandContext } from '../types';
 import { METADATA_FIELDS } from '../options/metadata';
 import { getMessageFromId } from '../../definitions/utils';
 import { validateSources } from '../../definitions/utils/validation/sources';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
   command: ESQLAstAllCommands,

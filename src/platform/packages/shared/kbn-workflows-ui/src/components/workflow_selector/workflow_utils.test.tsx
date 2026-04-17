@@ -51,7 +51,8 @@ describe('workflow_utils', () => {
       expect(options[0]).toMatchObject({
         id: '1',
         name: 'workflow-1',
-        label: 'workflow-1',
+        label: '1',
+        searchableLabel: 'workflow-1',
         disabled: false,
         checked: 'on',
       });

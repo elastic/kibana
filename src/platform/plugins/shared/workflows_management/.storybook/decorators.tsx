@@ -41,11 +41,13 @@ const createMockTriggersActionsUi = () => ({
 });
 
 const createMockWorkflowsExtensions = () => ({
-  getStepDefinition: (stepType: string) => {
-    // Return undefined for all step types in Storybook
-    // This allows the component to fall back to default icons
-    return undefined;
-  },
+  getStepDefinition: () => undefined,
+  getAllStepDefinitions: () => [],
+  hasStepDefinition: () => false,
+  getTriggerDefinition: () => undefined,
+  getAllTriggerDefinitions: () => [],
+  hasTriggerDefinition: () => false,
+  isReady: () => true,
 });
 
 /**
@@ -67,6 +69,10 @@ export const kibanaReactDecorator: Decorator = (story: Function) => {
                   executeWorkflow: true,
                 },
               },
+              getUrlForApp: (
+                appId: string,
+                options?: { path?: string; deepLinkId?: string; absolute?: boolean }
+              ) => (options?.absolute ? `${window.location.origin}/app/${appId}` : `/app/${appId}`),
             },
             settings: {
               client: mockUiSettingsService(),

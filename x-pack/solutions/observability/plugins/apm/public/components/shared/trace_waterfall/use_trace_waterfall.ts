@@ -161,11 +161,16 @@ function getWaterfallErrorsMarks({
 }
 
 export function getColorByType(legends: IWaterfallLegend[]) {
-  let count = 0;
-  for (const { type } of legends) {
-    if (type === WaterfallLegendType.ServiceName) count++;
-    if (count > 1) return WaterfallLegendType.ServiceName;
+  let serviceCount = 0;
+  let hasEmptyType = false;
+
+  for (const legend of legends) {
+    if (legend.type === WaterfallLegendType.ServiceName) serviceCount++;
+    if (legend.type === WaterfallLegendType.Type && !legend.value) hasEmptyType = true;
   }
+
+  if (serviceCount > 1 || hasEmptyType) return WaterfallLegendType.ServiceName;
+
   return WaterfallLegendType.Type;
 }
 
@@ -253,7 +258,7 @@ export function getRootItemOrFallback(
   }
 
   const entryTransactionRootItem = entryTransactionId
-    ? traceItems.find((item) => item.id === entryTransactionId)
+    ? traceItems?.find((item) => item.id === entryTransactionId)
     : undefined;
 
   const rootItem = entryTransactionRootItem

@@ -38,6 +38,9 @@ jest.mock('@xyflow/react', () => {
       <div data-testid="react-flow">{children}</div>
     ),
     Background: () => <div data-testid="react-flow-background" />,
+    Panel: ({ children }: { children?: React.ReactNode }) => (
+      <div data-testid="react-flow-panel">{children}</div>
+    ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-testid="react-flow-controls">{children}</div>
     ),
@@ -59,6 +62,9 @@ jest.mock('@xyflow/react', () => {
     useEdgesState: jest.fn((initialEdges) => [initialEdges, jest.fn()]),
     useReactFlow: jest.fn(() => ({
       fitView: jest.fn(),
+      zoomIn: jest.fn(),
+      zoomOut: jest.fn(),
+      setCenter: jest.fn(),
     })),
   };
 });
@@ -83,6 +89,10 @@ jest.mock('./popover', () => ({
 
 jest.mock('./layout', () => ({
   applyDagreLayout: jest.fn((nodes) => nodes),
+}));
+
+jest.mock('./service_map_minimap', () => ({
+  ServiceMapMinimap: () => <div data-testid="react-flow-minimap" />,
 }));
 
 const createMockNode = (id: string, label: string): ServiceMapNode => ({
@@ -214,5 +224,6 @@ describe('ServiceMapGraph - Screen Reader Announcements', () => {
     expect(instructions.textContent).toContain('Arrow keys');
     expect(instructions.textContent).toContain('Enter or Space');
     expect(instructions.textContent).toContain('Escape');
+    expect(instructions.textContent).toMatch(/Command K|Control K/);
   });
 });

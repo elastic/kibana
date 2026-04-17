@@ -5,59 +5,227 @@
  * 2.0.
  */
 
+import { stringify as yamlStringify } from 'yaml';
+import type { z } from '@kbn/zod/v4';
+import { FieldType, type FieldSchema } from '../../../../common/types/domain/template/fields';
 import type { ParsedTemplate } from '../../../../common/types/domain/template/v1';
 
-const yamlString = (value: string | undefined | null) =>
-  value == null ? '""' : JSON.stringify(value);
+type Field = z.infer<typeof FieldSchema>;
 
-const serializeTemplate = (yamlSections: string[], template: ParsedTemplate) => {
-  yamlSections.push(`templateId: ${yamlString(template.templateId)}`);
-  yamlSections.push(`name: ${yamlString(template.name)}`);
-  yamlSections.push(`owner: ${yamlString(template.owner)}`);
+const yamlString = (value: string | number | undefined | null) => {
+  if (value == null) {
+    return '""';
+  }
+  if (typeof value === 'number') {
+    return String(value);
+  }
+  return JSON.stringify(value);
+};
+
+const serializeTemplateHeader = (out: string[], template: ParsedTemplate) => {
+  out.push(`templateId: ${yamlString(template.templateId)}`);
+  out.push(`name: ${yamlString(template.name)}`);
+  out.push(`owner: ${yamlString(template.owner)}`);
 
   if (template.author) {
-    yamlSections.push(`author: ${yamlString(template.author)}`);
+    out.push(`author: ${yamlString(template.author)}`);
   }
 
-  yamlSections.push(`description: ${yamlString(template.description ?? '')}`);
-  yamlSections.push(`templateVersion: ${template.templateVersion}`);
-  yamlSections.push(`latestVersion: ${template.latestVersion}`);
-  yamlSections.push(`isLatest: ${template.isLatest}`);
-  yamlSections.push(
-    `deletedAt: ${template.deletedAt == null ? 'null' : yamlString(template.deletedAt)}`
-  );
-  yamlSections.push(`fieldCount: ${template.fieldCount ?? 0}`);
-  yamlSections.push(`usageCount: ${template.usageCount ?? 0}`);
-  yamlSections.push(`lastUsedAt: ${template.lastUsedAt ? yamlString(template.lastUsedAt) : '""'}`);
-  yamlSections.push(`isDefault: ${template.isDefault ?? false}`);
+  out.push(`description: ${yamlString(template.description ?? '')}`);
+  out.push(`templateVersion: ${template.templateVersion}`);
+  out.push(`latestVersion: ${template.latestVersion}`);
+  out.push(`isLatest: ${template.isLatest}`);
+  out.push(`deletedAt: ${template.deletedAt == null ? 'null' : yamlString(template.deletedAt)}`);
+  out.push(`fieldCount: ${template.fieldCount ?? 0}`);
+  out.push(`usageCount: ${template.usageCount ?? 0}`);
+  out.push(`lastUsedAt: ${template.lastUsedAt ? yamlString(template.lastUsedAt) : '""'}`);
+  out.push(`isDefault: ${template.isDefault ?? false}`);
 
-  yamlSections.push('tags:');
+  if (template.isEnabled !== undefined) {
+    out.push(`isEnabled: ${template.isEnabled}`);
+  }
+
+  // severity and category live inside the parsed definition
+  if (template.definition.severity) {
+    out.push(`severity: ${template.definition.severity}`);
+  }
+  if (template.definition.category != null) {
+    out.push(`category: ${yamlString(template.definition.category)}`);
+  }
+
+  out.push('tags:');
   for (const tag of template.tags ?? []) {
-    yamlSections.push(`  - ${yamlString(tag)}`);
+    out.push(`  - ${yamlString(tag)}`);
   }
+};
 
-  yamlSections.push('definition:');
-  yamlSections.push('  fields:');
+const serializeSelectMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'SELECT_BASIC' }>
+) => {
+  out.push(`      metadata:`);
+  out.push(`        options:`);
+  for (const option of field.metadata.options) {
+    out.push(`          - ${yamlString(option)}`);
+  }
+  const defaultValue = field.metadata?.default;
+  if (
+    defaultValue !== undefined &&
+    (typeof defaultValue === 'string' || typeof defaultValue === 'number')
+  ) {
+    out.push(`        default: ${yamlString(defaultValue)}`);
+  }
+};
+
+const serializeDatePickerMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'DATE_PICKER' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  // `default` is in the catchall bucket, typed as unknown
+  const defaultValue = meta.default;
+  const hasDefault =
+    typeof defaultValue === 'string' ||
+    typeof defaultValue === 'number' ||
+    defaultValue instanceof Date;
+  if (!hasDefault && meta.show_time === undefined && meta.timezone === undefined) return;
+  out.push(`      metadata:`);
+  if (hasDefault) {
+    const serialized =
+      defaultValue instanceof Date ? defaultValue.toISOString() : (defaultValue as string | number);
+    out.push(`        default: ${yamlString(serialized)}`);
+  }
+  if (meta.show_time !== undefined) {
+    out.push(`        show_time: ${meta.show_time}`);
+  }
+  if (meta.timezone !== undefined) {
+    out.push(`        timezone: ${meta.timezone}`);
+  }
+};
+
+const serializeCheckboxGroupMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'CHECKBOX_GROUP' }>
+) => {
+  out.push(`      metadata:`);
+  out.push(`        options:`);
+  for (const option of field.metadata.options) {
+    out.push(`          - ${yamlString(option)}`);
+  }
+  const defaults = field.metadata.default;
+  if (defaults && defaults.length > 0) {
+    out.push(`        default:`);
+    for (const d of defaults) {
+      out.push(`          - ${yamlString(d)}`);
+    }
+  }
+};
+
+const serializeUserPickerMetadata = (
+  out: string[],
+  field: Extract<Field, { control: 'USER_PICKER' }>
+) => {
+  const meta = field.metadata;
+  if (!meta) return;
+  const hasMultiple = meta.multiple !== undefined;
+  const defaults = meta.default;
+  const hasDefaults = Array.isArray(defaults) && defaults.length > 0;
+  if (!hasMultiple && !hasDefaults) return;
+  out.push(`      metadata:`);
+  if (hasMultiple) {
+    out.push(`        multiple: ${meta.multiple}`);
+  }
+  if (hasDefaults) {
+    out.push(`        default:`);
+    for (const user of defaults) {
+      out.push(`          - uid: ${yamlString(user.uid)}`);
+      out.push(`            name: ${yamlString(user.name)}`);
+    }
+  }
+};
+
+const serializeFieldMetadata = (out: string[], field: Field) => {
+  if (field.control === FieldType.SELECT_BASIC) {
+    serializeSelectMetadata(out, field);
+    return;
+  }
+  if (field.control === FieldType.DATE_PICKER) {
+    serializeDatePickerMetadata(out, field);
+    return;
+  }
+  if (field.control === FieldType.CHECKBOX_GROUP) {
+    serializeCheckboxGroupMetadata(out, field);
+    return;
+  }
+  if (field.control === FieldType.RADIO_GROUP) {
+    out.push(`      metadata:`);
+    out.push(`        options:`);
+    for (const option of field.metadata.options) {
+      out.push(`          - ${yamlString(option)}`);
+    }
+    const defaultValue = field.metadata?.default;
+    if (defaultValue !== undefined && typeof defaultValue === 'string') {
+      out.push(`        default: ${yamlString(defaultValue)}`);
+    }
+    return;
+  }
+  if (field.control === FieldType.USER_PICKER) {
+    serializeUserPickerMetadata(out, field);
+    return;
+  }
+  // INPUT_TEXT, INPUT_NUMBER, TEXTAREA
+  const defaultValue = field.metadata?.default;
+  if (
+    defaultValue !== undefined &&
+    (typeof defaultValue === 'string' || typeof defaultValue === 'number')
+  ) {
+    out.push(`      metadata:`);
+    out.push(`        default: ${yamlString(defaultValue)}`);
+  }
+};
+
+const serializeNestedYaml = (out: string[], key: string, value: object) => {
+  const rendered = yamlStringify(value, null, { indent: 2 }).trimEnd();
+  out.push(`      ${key}:`);
+  for (const line of rendered.split('\n')) {
+    out.push(`        ${line}`);
+  }
+};
+
+const serializeDisplay = (out: string[], field: Field) => {
+  if (!field.display) return;
+  serializeNestedYaml(out, 'display', field.display);
+};
+
+const serializeValidation = (out: string[], field: Field) => {
+  if (!field.validation) return;
+  const defined = Object.fromEntries(
+    Object.entries(field.validation).filter(([, v]) => v !== undefined)
+  );
+  if (Object.keys(defined).length === 0) return;
+  serializeNestedYaml(out, 'validation', defined);
+};
+
+const serializeField = (out: string[], field: Field) => {
+  out.push(`    - name: ${yamlString(field.name)}`);
+  if (field.label) {
+    out.push(`      label: ${yamlString(field.label)}`);
+  }
+  out.push(`      control: ${yamlString(field.control)}`);
+  out.push(`      type: ${yamlString(field.type)}`);
+  serializeFieldMetadata(out, field);
+  serializeDisplay(out, field);
+  serializeValidation(out, field);
+  out.push('');
+};
+
+const serializeTemplate = (out: string[], template: ParsedTemplate) => {
+  serializeTemplateHeader(out, template);
+  out.push('definition:');
+  out.push('  fields:');
   for (const field of template.definition.fields) {
-    yamlSections.push(`    - name: ${yamlString(field.name)}`);
-    if (field.label) {
-      yamlSections.push(`      label: ${yamlString(field.label)}`);
-    }
-    yamlSections.push(`      control: ${yamlString(field.control)}`);
-    yamlSections.push(`      type: ${yamlString(field.type)}`);
-
-    if (field.control === 'SELECT_BASIC') {
-      yamlSections.push(`      metadata:`);
-      yamlSections.push(`        options:`);
-      for (const option of field.metadata.options) {
-        yamlSections.push(`          - ${yamlString(option)}`);
-      }
-      if (field.metadata.default) {
-        yamlSections.push(`        default: ${yamlString(field.metadata.default)}`);
-      }
-    }
-
-    yamlSections.push('');
+    serializeField(out, field);
   }
 };
 
@@ -68,26 +236,26 @@ const serializeTemplate = (yamlSections: string[], template: ParsedTemplate) => 
  * of the original author-provided YAML formatting.
  */
 export const templatesToYaml = (templates: ParsedTemplate[]): string => {
-  const yamlSections: string[] = [
+  const out: string[] = [
     `# Bulk Export: ${templates.length} templates`,
     `# Exported: ${new Date().toISOString()}`,
     '',
   ];
 
   for (const template of templates) {
-    yamlSections.push('---');
-    serializeTemplate(yamlSections, template);
+    out.push('---');
+    serializeTemplate(out, template);
   }
 
-  return yamlSections.join('\n');
+  return out.join('\n');
 };
 
 export const templateToYaml = (template: ParsedTemplate): string => {
-  const yamlSections: string[] = [
+  const out: string[] = [
     `# Template: ${template.name}`,
     `# Exported: ${new Date().toISOString()}`,
     '',
   ];
-  serializeTemplate(yamlSections, template);
-  return yamlSections.join('\n');
+  serializeTemplate(out, template);
+  return out.join('\n');
 };

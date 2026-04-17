@@ -66,6 +66,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     },
     uiSettings,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
   const tablePadding = useEuiPaddingSize('xs');
 
@@ -275,6 +276,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
           timeRange,
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           {
             [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
@@ -286,6 +288,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
           { to: timeRange.to, from: timeRange.from },
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           intervalMs,
           timeRange.useSubAgg ? additionalFilter : undefined
         ),
@@ -345,6 +348,7 @@ export const LogCategorizationDiscover: FC<LogCategorizationEmbeddableProps> = (
     getMinimumTimeRange,
     searchQuery,
     runValidateFieldRequest,
+    cps?.cpsManager,
     embeddingOrigin,
     runCategorizeRequest,
     intervalMs,

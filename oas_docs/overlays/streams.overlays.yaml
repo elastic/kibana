@@ -1,0 +1,27 @@
+overlay: 1.0.0
+info:
+  title: Overlays for the Streams API
+  version: 0.0.1
+actions:
+  # ---------------------------------------------------------------------------
+  # Tag description
+  # ---------------------------------------------------------------------------
+  - target: '$.tags[?(@.name=="streams")]'
+    description: Add description, external docs link, and display name for the streams tag
+    update:
+      description: >
+        Streams provide a unified data management layer for ingestion, routing, and processing.
+        There are three stream types:
+
+        * **Wired** streams are managed by Kibana. They route documents to child streams based on
+          field conditions and support custom field mappings and processing steps.
+
+        * **Classic** streams map to existing Elasticsearch data streams. You can add processing
+          steps to classic streams without changing their underlying index template.
+
+        * **Query** streams are virtual aggregations backed by an ES|QL expression. They aggregate
+          data from multiple streams into a single logical view without duplicating documents.
+      externalDocs:
+        description: Streams documentation
+        url: https://www.elastic.co/docs/solutions/observability/streams
+      x-displayName: Streams

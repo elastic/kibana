@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 import { ReadPrebuiltRulesAndTimelinesStatusResponse } from './read_prebuilt_rules_and_timelines_status_route.gen';
 
 describe('Get prebuilt rules and timelines status response schema', () => {
@@ -39,9 +39,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
     const result = ReadPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual(
-      "Unrecognized key(s) in object: 'invalid_field'"
-    );
+    expect(stringifyZodError(result.error)).toEqual('Unrecognized key: "invalid_field"');
   });
 
   test('it should NOT validate an empty prepackaged response with a negative "rules_installed" number', () => {
@@ -58,7 +56,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_installed: Number must be greater than or equal to 0'
+      'rules_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -76,7 +74,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_not_installed: Number must be greater than or equal to 0'
+      'rules_not_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -94,7 +92,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_not_updated: Number must be greater than or equal to 0'
+      'rules_not_updated: Too small: expected number to be >=0'
     );
   });
 
@@ -112,7 +110,7 @@ describe('Get prebuilt rules and timelines status response schema', () => {
 
     expectParseError(result);
     expect(stringifyZodError(result.error)).toEqual(
-      'rules_custom_installed: Number must be greater than or equal to 0'
+      'rules_custom_installed: Too small: expected number to be >=0'
     );
   });
 
@@ -131,6 +129,8 @@ describe('Get prebuilt rules and timelines status response schema', () => {
     const result = ReadPrebuiltRulesAndTimelinesStatusResponse.safeParse(payload);
 
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('rules_installed: Required');
+    expect(stringifyZodError(result.error)).toEqual(
+      'rules_installed: Invalid input: expected number, received undefined'
+    );
   });
 });

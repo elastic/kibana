@@ -8,7 +8,7 @@
  */
 import type { ESQLAstAllCommands, ESQLSource } from '@elastic/esql/types';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { findFinalWord, findPreviousWord } from '../../definitions/utils/autocomplete/helpers';
+import { findPreviousWord } from '../../definitions/utils/autocomplete/helpers';
 import { buildFieldsDefinitions } from '../../definitions/utils/functions';
 import { getOperatorSuggestions } from '../../definitions/utils/operators';
 import { unescapeColumnName } from '../../definitions/utils/shared';
@@ -67,18 +67,6 @@ export async function autocomplete(
 
     const fieldSuggestions = buildFieldsDefinitions(policyMetadata.enrichFields, false);
 
-    const lastWord = findFinalWord(innerText);
-    if (lastWord) {
-      // ENRICH ... WITH a <suggest>
-      const rangeToReplace = {
-        start: innerText.length - lastWord.length + 1,
-        end: innerText.length + 1,
-      };
-      fieldSuggestions.forEach((s) => {
-        s.rangeToReplace = rangeToReplace;
-      });
-    }
-
     return fieldSuggestions;
   };
 
@@ -88,15 +76,6 @@ export async function autocomplete(
 
     case Position.POLICY: {
       const policiesSuggestions = buildPoliciesDefinitions(Array.from(policies.values()));
-      const lastWord = findFinalWord(innerText);
-      if (lastWord !== '') {
-        policiesSuggestions.forEach((policySuggestion) => {
-          policySuggestion.rangeToReplace = {
-            start: innerText.length - lastWord.length + 1,
-            end: innerText.length + 1,
-          };
-        });
-      }
       return policiesSuggestions.length ? policiesSuggestions : [noPoliciesAvailableSuggestion];
     }
 

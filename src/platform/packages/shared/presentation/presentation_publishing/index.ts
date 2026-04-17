@@ -43,6 +43,7 @@ export {
   timeRangeComparators,
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
+export { transformTimeRangeOut } from './interfaces/fetch/bwc/time_range_transforms';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiAppliesFilters,
@@ -265,8 +266,3 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
-
-export {
-  apiSupportsPassThroughContext,
-  type PassThroughContext,
-} from './interfaces/containers/pass_through_context';

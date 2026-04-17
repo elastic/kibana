@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/v1';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import type { JSONSchema7 } from 'json-schema';
@@ -13,8 +13,14 @@ import type { JSONSchema7 } from 'json-schema';
 // Simple JSON Schema to Zod converter for basic types
 function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
   switch (schema.type) {
-    case 'string':
+    case 'string': {
+      // After normalization, legacy `choice` is always `type: string` + `enum` (options).
+      if (schema.enum?.length && schema.enum.every((v): v is string => typeof v === 'string')) {
+        return z.enum(schema.enum);
+      }
+
       return z.string();
+    }
     case 'number':
     case 'integer':
       return z.number();
@@ -41,7 +47,7 @@ function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
         }
         return z.object(shape);
       }
-      return z.record(z.any());
+      return z.record(z.string(), z.any());
     }
     default:
       return z.any();

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { truncate } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type { TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 const omission = '...';
@@ -39,14 +39,5 @@ export class TruncateFormat extends FieldFormat {
     }
 
     return val;
-  };
-
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
   };
 }

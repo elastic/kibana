@@ -18,6 +18,15 @@ import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
+jest.mock('./components/hooks', () => ({
+  ...jest.requireActual('./components/hooks'),
+  useOutputs: jest.fn().mockReturnValue({
+    isLoading: false,
+    canUseOutputPerIntegration: true,
+    allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
+  }),
+}));
+
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {
     name: 'apache',
@@ -259,6 +268,55 @@ describe('StepDefinePackagePolicy', () => {
       });
 
       expect(renderResult.queryByText('Advanced options')).not.toBeInTheDocument();
+    });
+
+    it('should not disable output selector when is_managed is false', () => {
+      // noAdvancedToggle=true forces the advanced section open so the output field renders
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={{ ...packagePolicy, is_managed: false }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          noAdvancedToggle={true}
+        />
+      );
+      expect(renderResult.getByTestId('packagePolicyOutputInput')).not.toBeDisabled();
+    });
+
+    it('should disable output selector when packagePolicy.is_managed is true', () => {
+      // noAdvancedToggle=true forces the advanced section open so the output field renders
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(agentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={{ ...packagePolicy, is_managed: true }}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          noAdvancedToggle={true}
+        />
+      );
+      expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
+    });
+
+    it('should disable output selector when parent agent policy is managed', () => {
+      const managedAgentPolicies: AgentPolicy[] = [{ ...agentPolicies[0], is_managed: true }];
+      renderResult = testRenderer.render(
+        <StepDefinePackagePolicy
+          namespacePlaceholder={getInheritedNamespace(managedAgentPolicies)}
+          packageInfo={packageInfo}
+          packagePolicy={packagePolicy}
+          updatePackagePolicy={mockUpdatePackagePolicy}
+          validationResults={validationResults}
+          submitAttempted={false}
+          noAdvancedToggle={true}
+          agentPolicies={managedAgentPolicies}
+        />
+      );
+      expect(renderResult.getByTestId('packagePolicyOutputInput')).toBeDisabled();
     });
   });
 

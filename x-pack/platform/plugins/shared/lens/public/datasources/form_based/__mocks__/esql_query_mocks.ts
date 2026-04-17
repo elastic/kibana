@@ -18,7 +18,7 @@ export const mockIndexPattern = {
   timeFieldName: 'order_date',
   getFieldByName: (field: string) => {
     if (field === 'records') return undefined;
-    return { name: field };
+    return { name: field, displayName: field };
   },
   getFormatterForField: () => ({ convert: (v: unknown) => v }),
 } as unknown as IndexPattern;
@@ -27,7 +27,7 @@ export const mockIndexPatternWithoutTimeField = {
   title: 'myIndexPattern',
   getFieldByName: (field: string) => {
     if (field === 'records') return undefined;
-    return { name: field };
+    return { name: field, displayName: field };
   },
   getFormatterForField: () => ({ convert: (v: unknown) => v }),
 } as unknown as IndexPattern;

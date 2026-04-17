@@ -72,7 +72,7 @@ const RuleSourceFilterComponent = ({
       <EuiFilterButton
         data-test-subj="coverageOverviewRuleSourceFilterButton"
         isLoading={isLoading}
-        iconType="arrowDown"
+        iconType="chevronSingleDown"
         onClick={onButtonClick}
         isSelected={isPopoverOpen}
         hasActiveFilters={numActiveFilters > 0}

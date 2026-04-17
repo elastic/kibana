@@ -75,7 +75,7 @@ interface ServerExtensionPointDefinition<
  */
 export type ExceptionsListPreImportServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreImport',
-  PromiseFromStreams
+  { data: PromiseFromStreams; overwrite: boolean }
 >;
 
 /**

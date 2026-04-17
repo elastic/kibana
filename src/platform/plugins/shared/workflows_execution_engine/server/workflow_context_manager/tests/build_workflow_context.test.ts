@@ -502,6 +502,34 @@ describe('buildWorkflowContext', () => {
       expect(context.event?.params).toEqual({ threshold: 10 });
     });
 
+    it('should pass through event with type, timestamp, and source for scheduled trigger executions', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        workflowDefinition: {
+          ...baseExecution.workflowDefinition,
+          triggers: [{ type: 'scheduled', with: { every: '5m' } }],
+        },
+        context: {
+          event: {
+            type: 'scheduled',
+            timestamp: '2025-01-15T10:00:00.000Z',
+            source: 'task-manager',
+            spaceId: 'default',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.event).toBeDefined();
+      expect(context.event).toMatchObject({
+        type: 'scheduled',
+        timestamp: '2025-01-15T10:00:00.000Z',
+        source: 'task-manager',
+        spaceId: 'default',
+      });
+    });
+
     it('should handle undefined event context gracefully', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
@@ -538,6 +566,57 @@ describe('buildWorkflowContext', () => {
       expect(context.inputs).toEqual({
         customInput: 'value',
       });
+    });
+  });
+
+  describe('metadata context', () => {
+    it('should include metadata from execution document when present', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        metadata: { agent_id: 'agent-abc', source: 'agent-builder' },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toEqual({ agent_id: 'agent-abc', source: 'agent-builder' });
+    });
+
+    it('should fall back to context.metadata when execution.metadata is not set', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {
+          metadata: { agent_id: 'agent-from-context' },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toEqual({ agent_id: 'agent-from-context' });
+    });
+
+    it('should return undefined metadata when neither execution.metadata nor context.metadata is set', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {},
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toBeUndefined();
+    });
+
+    it('should prefer execution.metadata over context.metadata', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        metadata: { agent_id: 'from-execution' },
+        context: {
+          metadata: { agent_id: 'from-context' },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toEqual({ agent_id: 'from-execution' });
     });
   });
 });

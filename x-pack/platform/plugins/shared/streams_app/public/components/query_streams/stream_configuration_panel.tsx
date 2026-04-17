@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
@@ -32,6 +33,7 @@ export function StreamConfigurationPanel({
   const [isEditFlyoutOpen, { on: openEditFlyout, off: closeEditFlyout }] = useBoolean(false);
 
   const esqlQuery = definition.stream.query.esql;
+  const viewName = definition.stream.query.view;
 
   return (
     <>
@@ -53,6 +55,7 @@ export function StreamConfigurationPanel({
                 language="esql"
                 paddingSize="m"
                 isCopyable
+                data-test-subj="queryStreamDetailsQueryViewerCodeBlock"
                 css={css`
                   min-height: 100px;
                 `}
@@ -62,13 +65,27 @@ export function StreamConfigurationPanel({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="pencil" onClick={openEditFlyout}>
+              <EuiButton
+                iconType="pencil"
+                onClick={openEditFlyout}
+                data-test-subj="queryStreamDetailsEditQueryButton"
+              >
                 {i18n.translate('xpack.streams.streamConfigurationPanel.editQueryButtonLabel', {
                   defaultMessage: 'Edit Query with preview',
                 })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('xpack.streams.streamConfigurationPanel.accessHint', {
+                defaultMessage:
+                  'To query this stream directly in ES|QL, use {viewName}. This data is not included in the parent stream.',
+                values: { viewName },
+              })}
+            </p>
+          </EuiText>
         </EuiPanel>
       </EuiPanel>
 

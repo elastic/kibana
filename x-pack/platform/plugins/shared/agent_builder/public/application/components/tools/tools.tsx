@@ -36,7 +36,7 @@ export const AgentBuilderTools = () => {
   return (
     <KibanaPageTemplate data-test-subj="agentBuilderToolsPage">
       <KibanaPageTemplate.Header
-        pageTitle={labels.tools.title}
+        pageTitle={labels.tools.libraryTitle}
         description={
           <FormattedMessage
             id="xpack.agentBuilder.tools.toolsDescription"

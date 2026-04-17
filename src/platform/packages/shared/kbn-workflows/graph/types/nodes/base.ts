@@ -12,9 +12,11 @@ import {
   DataSetStepSchema,
   ElasticsearchStepSchema,
   KibanaStepSchema,
+  WaitForInputStepSchema,
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
 } from '../../../spec/schema';
 
 export const GraphNodeSchema = z.object({
@@ -37,6 +39,13 @@ export const WaitGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WaitStepSchema,
 });
 export type WaitGraphNode = z.infer<typeof WaitGraphNodeSchema>;
+
+export const WaitForInputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('waitForInput'),
+  configuration: WaitForInputStepSchema,
+});
+export type WaitForInputGraphNode = z.infer<typeof WaitForInputGraphNodeSchema>;
 
 export const DataSetGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
@@ -76,3 +85,10 @@ export const WorkflowExecuteAsyncGraphNodeSchema = GraphNodeSchema.extend({
   configuration: WorkflowExecuteAsyncStepSchema,
 });
 export type WorkflowExecuteAsyncGraphNode = z.infer<typeof WorkflowExecuteAsyncGraphNodeSchema>;
+
+export const WorkflowOutputGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('workflow.output'),
+  configuration: WorkflowOutputStepSchema,
+});
+export type WorkflowOutputGraphNode = z.infer<typeof WorkflowOutputGraphNodeSchema>;

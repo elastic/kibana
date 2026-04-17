@@ -18,7 +18,7 @@ const defaultProps: ContentFrameworkSectionProps = {
   description: 'Section description',
   actions: [
     {
-      icon: 'expand',
+      icon: 'maximize',
       onClick: jest.fn(),
       ariaLabel: 'Expand section',
       dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',

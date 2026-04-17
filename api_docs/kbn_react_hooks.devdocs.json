@@ -27,7 +27,7 @@
         "label": "useAbortableAsync",
         "description": [],
         "signature": [
-          "(fn: ({}: { signal: AbortSignal; }) => T | Promise<T>, deps: any[], options: ",
+          "(fn: ({}: { signal: AbortSignal; }) => T | Promise<T>, deps: React.DependencyList, options: ",
           "UseAbortableAsyncOptions",
           "<T> | undefined) => ",
           {
@@ -40,7 +40,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-        "lineNumber": 42,
+        "lineNumber": 43,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -56,7 +56,7 @@
               "({}: { signal: AbortSignal; }) => T | Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -65,15 +65,15 @@
           {
             "parentPluginId": "@kbn/react-hooks",
             "id": "def-common.useAbortableAsync.$2",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "deps",
             "description": [],
             "signature": [
-              "any[]"
+              "React.DependencyList"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -91,7 +91,7 @@
               "<T> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -166,6 +166,102 @@
       },
       {
         "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useDebouncedValue",
+        "type": "Function",
+        "tags": [],
+        "label": "useDebouncedValue",
+        "description": [
+          "\nReturns a debounced version of the provided value. The returned value only\nupdates after the specified wait period has elapsed since the last change.\n"
+        ],
+        "signature": [
+          "<T>(value: T, wait?: number, options?: ",
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.UseDebouncedValueOptions",
+            "text": "UseDebouncedValueOptions"
+          },
+          "<T> | undefined) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebouncedValue.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The value to debounce."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebouncedValue.$2",
+            "type": "number",
+            "tags": [],
+            "label": "wait",
+            "description": [
+              "- Milliseconds to delay before updating. Defaults to 300."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useDebouncedValue.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- Optional configuration."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-hooks",
+                "scope": "common",
+                "docId": "kibKbnReactHooksPluginApi",
+                "section": "def-common.UseDebouncedValueOptions",
+                "text": "UseDebouncedValueOptions"
+              },
+              "<T> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "The debounced value."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
         "id": "def-common.useDebounceFn",
         "type": "Function",
         "tags": [
@@ -177,12 +273,12 @@
           "\nCustom hook that returns a React safe debounced version of the provided function.\n"
         ],
         "signature": [
-          "(fn: T, options: ",
+          "(fn: (...args: A) => R, options: ",
           "DebounceOptions",
-          " | undefined) => { run: _.DebouncedFunc<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T> | undefined; }"
+          " | undefined) => { run: _.DebouncedFunc<(...args: A) => R>; cancel: () => void; flush: () => R | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
-        "lineNumber": 24,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -197,11 +293,11 @@
               "- The function to debounce."
             ],
             "signature": [
-              "T"
+              "(...args: A) => R"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
-            "lineNumber": 41,
-            "columnNumber": 47,
+            "lineNumber": 40,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -219,7 +315,7 @@
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounce_fn/use_debounce_fn.ts",
             "lineNumber": 41,
-            "columnNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -286,12 +382,12 @@
           "\nCustom hook that returns a React safe  throttled version of the provided function.\n"
         ],
         "signature": [
-          "(fn: T, options: ",
+          "(fn: (...args: A) => R, options: ",
           "ThrottleOptions",
-          " | undefined) => { run: _.DebouncedFuncLeading<(...args: Parameters<T>) => ReturnType<T>>; cancel: () => void; flush: () => ReturnType<T>; }"
+          " | undefined) => { run: _.DebouncedFuncLeading<(...args: A) => R>; cancel: () => void; flush: () => R; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
-        "lineNumber": 23,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -306,11 +402,11 @@
               "- The function to throttle."
             ],
             "signature": [
-              "T"
+              "(...args: A) => R"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
-            "lineNumber": 38,
-            "columnNumber": 47,
+            "lineNumber": 37,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -328,7 +424,7 @@
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_throttle_fn/use_throttle_fn.ts",
             "lineNumber": 38,
-            "columnNumber": 54,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -498,6 +594,87 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.UseDebouncedValueOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDebouncedValueOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-hooks",
+            "scope": "common",
+            "docId": "kibKbnReactHooksPluginApi",
+            "section": "def-common.UseDebouncedValueOptions",
+            "text": "UseDebouncedValueOptions"
+          },
+          "<T>"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.UseDebouncedValueOptions.compare",
+            "type": "Function",
+            "tags": [],
+            "label": "compare",
+            "description": [
+              "\nCustom comparison function. Return `true` when the values should be\nconsidered equal (skip the debounce). Defaults to strict equality (`===`)."
+            ],
+            "signature": [
+              "((a: T, b: T) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseDebouncedValueOptions.compare.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "a",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+                "lineNumber": 21,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/react-hooks",
+                "id": "def-common.UseDebouncedValueOptions.compare.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "b",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/platform/packages/shared/kbn-react-hooks/src/use_debounced_value/use_debounced_value.ts",
+                "lineNumber": 21,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -513,7 +690,7 @@
           "(T extends Promise<infer TReturn> ? State<TReturn> : State<T>) & { refresh: () => void; }"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -527,7 +704,7 @@
         "label": "UseAbortableAsync",
         "description": [],
         "signature": [
-          "<T>(fn: ({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>, deps: any[], options?: (",
+          "<T>(fn: ({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>, deps: React.DependencyList, options?: (",
           "UseAbortableAsyncOptions",
           "<T> & TAdditionalOptions) | undefined) => ",
           {
@@ -540,7 +717,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -557,7 +734,7 @@
               "({}: { signal: AbortSignal; } & TAdditionalParameters) => T | Promise<T>"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -574,7 +751,7 @@
                   "{ signal: AbortSignal; } & TAdditionalParameters"
                 ],
                 "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-                "lineNumber": 37,
+                "lineNumber": 38,
                 "columnNumber": 8,
                 "deprecated": false,
                 "trackAdoption": false
@@ -584,15 +761,15 @@
           {
             "parentPluginId": "@kbn/react-hooks",
             "id": "def-common.UseAbortableAsync.$2",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "deps",
             "description": [],
             "signature": [
-              "any[]"
+              "readonly unknown[]"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -610,7 +787,7 @@
               "<T> & TAdditionalOptions) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-hooks/src/use_abortable_async/use_abortable_async.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

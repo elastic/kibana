@@ -529,6 +529,14 @@ export function loadIndex(indexName: string) {
   });
 }
 
+export async function loadIndexDocCount(indexName: string) {
+  return sendRequest<Record<string, number>>({
+    path: `${INTERNAL_API_BASE_PATH}/index_doc_count`,
+    method: 'post',
+    body: { indexNames: [indexName] },
+  });
+}
+
 export function useLoadIndexMappings(indexName: string) {
   return useRequest<MappingsResponse>({
     path: `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`,

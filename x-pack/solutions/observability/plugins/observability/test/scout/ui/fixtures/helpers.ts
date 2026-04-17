@@ -19,3 +19,17 @@ export async function getRuleIdByName(
   const rule = rules?.data?.data?.find((r: { name: string }) => r.name === ruleName);
   return rule?.id;
 }
+
+/**
+ * Delete a rule by name, ignoring errors if it no longer exists.
+ */
+export async function deleteRuleByName(
+  apiServices: ApiServicesFixture,
+  ruleName: string
+): Promise<void> {
+  const rules = await apiServices.alerting.rules.find({ search: ruleName });
+  const match = rules?.data?.data?.find((r: { name: string }) => r.name === ruleName);
+  if (match) {
+    await apiServices.alerting.rules.delete(match.id).catch(() => {});
+  }
+}

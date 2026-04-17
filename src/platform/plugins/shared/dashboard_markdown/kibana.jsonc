@@ -19,8 +19,6 @@
       "charts",
       "dataViewFieldEditor",
       "visualizations",
-    ],
-    "requiredBundles":[
       "kibanaUtils"
     ]
   }

@@ -45,17 +45,14 @@ function findSubjects(component: ReactWrapper) {
 }
 
 async function mountAndFindSubjects(
-  props: Omit<
-    DiscoverNoResultsProps,
-    'onDisableFilters' | 'data' | 'isTimeBased' | 'stateContainer'
-  >
+  props: Omit<DiscoverNoResultsProps, 'onDisableFilters' | 'data' | 'isTimeBased'>
 ) {
   const isTimeBased = props.dataView.isTimeBased();
   const toolkit = getDiscoverInternalStateMock({ services });
 
   await toolkit.initializeTabs();
 
-  const { stateContainer } = await toolkit.initializeSingleTab({
+  await toolkit.initializeSingleTab({
     tabId: toolkit.getCurrentTab().id,
   });
 
@@ -64,12 +61,7 @@ async function mountAndFindSubjects(
   act(() => {
     component = mountWithIntl(
       <DiscoverToolkitTestProvider toolkit={toolkit}>
-        <DiscoverNoResults
-          stateContainer={stateContainer}
-          isTimeBased={isTimeBased}
-          onDisableFilters={() => {}}
-          {...props}
-        />
+        <DiscoverNoResults isTimeBased={isTimeBased} onDisableFilters={() => {}} {...props} />
       </DiscoverToolkitTestProvider>
     );
   });

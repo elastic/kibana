@@ -1,2 +1,12 @@
+{{#excluded_features}}
+`excluded_features`:
+{{{excluded_features}}}
+{{/excluded_features}}
+
+{{#previously_identified_features}}
+`previously_identified_features`:
+{{{previously_identified_features}}}
+{{/previously_identified_features}}
+
 `sample_documents`:
 {{{sample_documents}}}

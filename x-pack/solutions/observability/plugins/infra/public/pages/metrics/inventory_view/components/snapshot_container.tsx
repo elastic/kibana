@@ -43,6 +43,7 @@ export const SnapshotContainer = React.memo(function SnapshotContainer() {
       accountId,
       region,
       schema: preferredSchema,
+      includeTimeseries: true,
     },
     { sendRequestImmediately: true }
   );

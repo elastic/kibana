@@ -63,7 +63,7 @@ export const PrivilegedAccessDetectionMLPopover: React.FC = () => {
             )}
             color="primary"
             data-test-subj="privileged-access-detections-popover-button"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);

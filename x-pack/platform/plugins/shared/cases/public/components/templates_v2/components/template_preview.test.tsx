@@ -59,10 +59,11 @@ describe('CreateTemplatePreview', () => {
     );
   });
 
-  it('renders parse errors when YAML is invalid', () => {
+  it('renders nothing when YAML is invalid (no last valid template)', () => {
     renderPreview('name: [');
 
-    expect(screen.getByText(/"message":/)).toBeInTheDocument();
+    // Component returns null when there's no valid template
+    expect(screen.queryByTestId('template-field-renderer')).not.toBeInTheDocument();
     expect(TemplateFieldRenderer).not.toHaveBeenCalled();
   });
 });

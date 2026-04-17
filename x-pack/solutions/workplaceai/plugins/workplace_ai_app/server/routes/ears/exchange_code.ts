@@ -84,7 +84,8 @@ export function registerExchangeCodeRoute({
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(`${earsUrl}/${provider}/oauth/token`, fetchOptions);
+        const earsBaseUrl = earsUrl.replace(/\/$/, '');
+        const earsResponse = await fetch(`${earsBaseUrl}/v1/${provider}/oauth/token`, fetchOptions);
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();

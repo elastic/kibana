@@ -31,6 +31,8 @@ test.describe('Stream data retention - updating failure store', () => {
       },
       { meta: true }
     );
+    // Ensure logs.otel has a backing data stream (deferred by default) so retention UI renders
+    await apiServices.streams.restoreDataStream('logs.otel');
     await apiServices.streams.forkStream('logs.otel', 'logs.otel.nginx', {
       field: 'service.name',
       eq: 'nginx',

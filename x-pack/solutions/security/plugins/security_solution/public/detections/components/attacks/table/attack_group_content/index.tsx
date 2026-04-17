@@ -13,9 +13,10 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { i18n } from '@kbn/i18n';
 
-import { IconSparkles } from '../../../../../common/icons/sparkles';
 import { RuleStatus } from '../../../../../timelines/components/timeline/body/renderers/rule_status';
 import { Subtitle } from './subtitle';
+import { TagsBadge } from './tags_badge';
+import { AssigneesBadge } from './assignees_badge';
 
 export const EXPAND_BUTTON_ARIAL_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.attacks.tableSection.expandButtonArialLabel',
@@ -28,7 +29,7 @@ export const ATTACK_GROUP_TEST_ID_SUFFIX = '-group-renderer' as const;
 export const ATTACK_TITLE_TEST_ID_SUFFIX = '-title' as const;
 export const ATTACK_DESCRIPTION_TEST_ID_SUFFIX = '-description' as const;
 export const ATTACK_STATUS_TEST_ID_SUFFIX = '-status' as const;
-export const ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX = '-sparkles-icon' as const;
+export const ATTACK_ASSIGNEES_TEST_ID_SUFFIX = '-assignees' as const;
 export const EXPAND_ATTACK_BUTTON_TEST_ID = 'expand-attack-button';
 
 export interface AttackGroupContentProps {
@@ -62,7 +63,7 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
             aria-label={EXPAND_BUTTON_ARIAL_LABEL}
             color="text"
             data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
-            iconType="expand"
+            iconType="maximize"
             onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
               event.stopPropagation();
               openAttackDetailsFlyout();
@@ -86,17 +87,25 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
                     <h5>{title}</h5>
                   </EuiTitle>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <IconSparkles
-                    data-test-subj={`${dataTestSubj}${ATTACK_SPARKLES_ICON_TEST_ID_SUFFIX}`}
-                  />
-                </EuiFlexItem>
                 <EuiFlexItem
                   grow={false}
                   data-test-subj={`${dataTestSubj}${ATTACK_STATUS_TEST_ID_SUFFIX}`}
                 >
                   <RuleStatus value={attack.alertWorkflowStatus} />
                 </EuiFlexItem>
+                {attack.tags && attack.tags.length > 0 && (
+                  <EuiFlexItem grow={false}>
+                    <TagsBadge tags={attack.tags} />
+                  </EuiFlexItem>
+                )}
+                {attack.assignees && attack.assignees.length > 0 && (
+                  <EuiFlexItem
+                    grow={false}
+                    data-test-subj={`${dataTestSubj}${ATTACK_ASSIGNEES_TEST_ID_SUFFIX}`}
+                  >
+                    <AssigneesBadge assignees={attack.assignees} />
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem

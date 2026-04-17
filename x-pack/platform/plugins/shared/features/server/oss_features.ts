@@ -607,7 +607,7 @@ const getBaseDashboardFeature = ({
   version: 'v1' | 'v2';
 }): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
   const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
-  const savedObjectAllPrivileges = ['dashboard'];
+  const savedObjectAllPrivileges = ['dashboard', 'markdown'];
   const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
   const apiReadPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
   const savedObjectReadPrivileges = [
@@ -621,6 +621,7 @@ const getBaseDashboardFeature = ({
     'map',
     'dashboard',
     'tag',
+    'markdown',
   ];
 
   if (version === 'v1') {

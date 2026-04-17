@@ -11,7 +11,7 @@ import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { scheduleBackfillRoute } from './schedule_backfill_route';
+import { scheduleBackfillRoute, scheduleBackfillPublicRoute } from './schedule_backfill_route';
 import type { ScheduleBackfillResults } from '../../../../application/backfill/methods/schedule/types';
 
 const rulesClient = rulesClientMock.create();
@@ -20,86 +20,86 @@ jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
+const mockScheduleOptions = [
+  {
+    rule_id: 'abc',
+    ranges: [
+      {
+        start: '2023-11-16T08:00:00.000Z',
+        end: '2023-11-16T08:20:00.000Z',
+      },
+    ],
+  },
+];
+
+const mockBackfillResult: ScheduleBackfillResults = [
+  {
+    id: 'abc',
+    createdAt: '2024-01-30T00:00:00.000Z',
+    duration: '12h',
+    enabled: true,
+    initiator: 'user',
+    rule: {
+      name: 'my rule name',
+      tags: ['foo'],
+      alertTypeId: 'myType',
+      params: {},
+      actions: [],
+      apiKeyOwner: 'user',
+      apiKeyCreatedByUser: false,
+      consumer: 'myApp',
+      enabled: true,
+      schedule: { interval: '12h' },
+      createdBy: 'user',
+      updatedBy: 'user',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      revision: 0,
+      id: '1',
+    },
+    spaceId: 'default',
+    start: '2023-11-16T08:00:00.000Z',
+    status: 'pending',
+    schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
+  },
+  {
+    id: 'def',
+    createdAt: '2024-01-30T00:00:00.000Z',
+    duration: '12h',
+    enabled: true,
+    initiator: 'user',
+    rule: {
+      name: 'my rule name',
+      tags: ['foo'],
+      alertTypeId: 'myType',
+      params: {},
+      actions: [],
+      apiKeyOwner: 'user',
+      apiKeyCreatedByUser: false,
+      consumer: 'myApp',
+      enabled: true,
+      schedule: { interval: '12h' },
+      createdBy: 'user',
+      updatedBy: 'user',
+      createdAt: '2019-02-12T21:01:22.479Z',
+      updatedAt: '2019-02-12T21:01:22.479Z',
+      revision: 0,
+      id: '2',
+    },
+    spaceId: 'default',
+    start: '2023-11-16T08:00:00.000Z',
+    status: 'pending',
+    schedule: [
+      { runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' },
+      { runAt: '2023-11-17T08:00:00.000Z', interval: '12h', status: 'pending' },
+    ],
+  },
+];
+
 describe('scheduleBackfillRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
-
-  const mockScheduleOptions = [
-    {
-      rule_id: 'abc',
-      ranges: [
-        {
-          start: '2023-11-16T08:00:00.000Z',
-          end: '2023-11-16T08:20:00.000Z',
-        },
-      ],
-    },
-  ];
-
-  const mockBackfillResult: ScheduleBackfillResults = [
-    {
-      id: 'abc',
-      createdAt: '2024-01-30T00:00:00.000Z',
-      duration: '12h',
-      enabled: true,
-      initiator: 'user',
-      rule: {
-        name: 'my rule name',
-        tags: ['foo'],
-        alertTypeId: 'myType',
-        params: {},
-        actions: [],
-        apiKeyOwner: 'user',
-        apiKeyCreatedByUser: false,
-        consumer: 'myApp',
-        enabled: true,
-        schedule: { interval: '12h' },
-        createdBy: 'user',
-        updatedBy: 'user',
-        createdAt: '2019-02-12T21:01:22.479Z',
-        updatedAt: '2019-02-12T21:01:22.479Z',
-        revision: 0,
-        id: '1',
-      },
-      spaceId: 'default',
-      start: '2023-11-16T08:00:00.000Z',
-      status: 'pending',
-      schedule: [{ runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' }],
-    },
-    {
-      id: 'def',
-      createdAt: '2024-01-30T00:00:00.000Z',
-      duration: '12h',
-      enabled: true,
-      initiator: 'user',
-      rule: {
-        name: 'my rule name',
-        tags: ['foo'],
-        alertTypeId: 'myType',
-        params: {},
-        actions: [],
-        apiKeyOwner: 'user',
-        apiKeyCreatedByUser: false,
-        consumer: 'myApp',
-        enabled: true,
-        schedule: { interval: '12h' },
-        createdBy: 'user',
-        updatedBy: 'user',
-        createdAt: '2019-02-12T21:01:22.479Z',
-        updatedAt: '2019-02-12T21:01:22.479Z',
-        revision: 0,
-        id: '2',
-      },
-      spaceId: 'default',
-      start: '2023-11-16T08:00:00.000Z',
-      status: 'pending',
-      schedule: [
-        { runAt: '2023-11-16T20:00:00.000Z', interval: '12h', status: 'pending' },
-        { runAt: '2023-11-17T08:00:00.000Z', interval: '12h', status: 'pending' },
-      ],
-    },
-  ];
 
   test('should schedule the backfill', async () => {
     const licenseState = licenseStateMock.create();
@@ -157,5 +157,52 @@ describe('scheduleBackfillRoute', () => {
       { body: mockScheduleOptions }
     );
     await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+  });
+});
+
+describe('scheduleBackfillPublicRoute', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  test('should register the public route with the correct path', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    scheduleBackfillPublicRoute(router, licenseState);
+
+    const [config] = router.post.mock.calls[0];
+
+    expect(config.path).toEqual('/api/alerting/rules/backfill/_schedule');
+    expect(config.options).toEqual(
+      expect.objectContaining({
+        access: 'public',
+        summary: 'Schedule a backfill for rules',
+        tags: ['oas-tag:alerting'],
+      })
+    );
+  });
+
+  test('should schedule the backfill via the public route', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    scheduleBackfillPublicRoute(router, licenseState);
+
+    rulesClient.scheduleBackfill.mockResolvedValueOnce(mockBackfillResult);
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { body: mockScheduleOptions }
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.scheduleBackfill).toHaveBeenLastCalledWith(
+      transformRequestV1(mockScheduleOptions)
+    );
+    expect(res.ok).toHaveBeenLastCalledWith({
+      body: transformResponseV1(mockBackfillResult),
+    });
   });
 });

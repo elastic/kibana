@@ -34,6 +34,10 @@ export interface InvestigateInTimelineButtonProps {
    * Whether to keep the current data view or reset it to the default.
    */
   keepDataView?: boolean;
+  /**
+   * Optional data view id to use for the timeline.
+   */
+  dataViewId?: string;
   isDisabled?: boolean;
   iconType?: IconType;
   children?: React.ReactNode;
@@ -57,6 +61,7 @@ export const InvestigateInTimelineButton: FC<
   filters,
   timeRange,
   keepDataView,
+  dataViewId,
   iconType,
   flush,
   isDisabled,
@@ -70,8 +75,9 @@ export const InvestigateInTimelineButton: FC<
       filters,
       timeRange,
       keepDataView,
+      dataViewId,
     });
-  }, [dataProviders, filters, timeRange, keepDataView, investigateInTimeline]);
+  }, [dataProviders, filters, timeRange, keepDataView, dataViewId, investigateInTimeline]);
   const {
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();

@@ -117,11 +117,31 @@ describe('FieldFormat class', () => {
         expect(expected).not.toContain('<');
       });
 
+      test('fallback escapes HTML characters when no custom htmlConvert is provided', () => {
+        const f = getTestFormat(undefined, constant('<script>alert("test")</script>'));
+
+        expect(f.convert('value', 'html')).toBe(
+          '&lt;script&gt;alert(&quot;test&quot;)&lt;/script&gt;'
+        );
+      });
+
       test('does not escape the output of an html specific converter', () => {
         const f = getTestFormat(undefined, constant('<img>'), constant('<img>'));
 
         expect(f.convert('', 'text')).toBe('<img>');
         expect(f.convert('', 'html')).toBe('<img>');
+      });
+
+      test('handles missing values in html context when no custom htmlConvert is provided', () => {
+        const f = getTestFormat(undefined, constant('text'));
+
+        expect(f.convert(null, 'html')).toBe(
+          `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
+        );
+        expect(f.convert(undefined, 'html')).toBe(
+          `<span class="ffString__emptyValue">${NULL_LABEL}</span>`
+        );
+        expect(f.convert('', 'html')).toBe('<span class="ffString__emptyValue">(blank)</span>');
       });
     });
 
@@ -177,6 +197,14 @@ describe('FieldFormat class', () => {
             }
           <span class=\\"ffArray__highlight\\">]</span>"
         `);
+      });
+
+      test('escapes HTML in array values', () => {
+        const f = getTestFormat(undefined, (val) => String(val));
+        const result = f.convert(['<script>alert("test")</script>'], 'html');
+        expect(result).toContain('&lt;script&gt;');
+        expect(result).toContain('alert(&quot;test&quot;)');
+        expect(result).not.toContain('<script>');
       });
     });
   });

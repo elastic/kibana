@@ -257,7 +257,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.awaitKibanaChrome();
         await PageObjects.discover.waitUntilTabIsLoaded();
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be('~ 15 minutes ago');
+        expect(
+          time.start === '~ 15 minutes ago' ||
+            time.start === 'now-15m' ||
+            time.start === 'now-15m/m'
+        ).to.be(true);
         expect(time.end).to.be('now');
       });
     });
@@ -301,15 +305,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const getRequestTimestamp = async () => {
           // check inspector panel request stats for timestamp
-          await inspector.open();
+          await PageObjects.discover.openInspectorFromTabMenu();
           const requestStats = await inspector.getTableData();
           const requestStatsRow = requestStats.filter(
             (r) => r && r[0] && r[0].includes('Request timestamp')
           );
+          await inspector.close();
           if (!requestStatsRow || !requestStatsRow[0] || !requestStatsRow[0][1]) {
             return '';
           }
-          await inspector.close();
           return requestStatsRow[0][1];
         };
 

@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/reporting-common",
+    "@kbn/tracing-utils",
     "@kbn/screenshotting-plugin",
     "@kbn/reporting-server",
     "@kbn/reporting-export-types-png-common",

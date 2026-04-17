@@ -44,7 +44,7 @@ export const DashboardDrilldownEditor = (props: DrilldownEditorProps<DashboardDr
 
     findService
       .search({
-        search: debouncedSearchString ?? '',
+        query: debouncedSearchString ?? '',
         per_page: 100,
       })
       .then((results) => {

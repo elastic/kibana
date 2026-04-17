@@ -146,7 +146,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
                       dataViewId: dataView.id,
-                      timeRange: absoluteTimeRange,
+                      time_range: absoluteTimeRange,
                       ...(windowParameters && { windowParameters }),
                     });
                   },
@@ -224,7 +224,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                 display="base"
                 size="s"
                 isSelected={isActionMenuOpen}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
               />
             }

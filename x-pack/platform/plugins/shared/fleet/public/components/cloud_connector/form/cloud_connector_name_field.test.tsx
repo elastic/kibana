@@ -28,7 +28,7 @@ describe('CloudConnectorNameField', () => {
     it('renders the field with correct label', () => {
       renderWithIntl(<CloudConnectorNameField value="" onChange={mockOnChange} />);
 
-      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity Name')).toBeInTheDocument();
     });
 
     it('renders with initial value', () => {
@@ -59,7 +59,7 @@ describe('CloudConnectorNameField', () => {
     it('shows error when value is empty', () => {
       renderWithIntl(<CloudConnectorNameField value="" onChange={mockOnChange} />);
 
-      expect(screen.getByText('Cloud Connector Name is required')).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity Name is required')).toBeInTheDocument();
     });
 
     it('calls onChange with isValid=false when clearing the field', async () => {
@@ -69,7 +69,11 @@ describe('CloudConnectorNameField', () => {
       const input = screen.getByRole('textbox');
       await user.clear(input);
 
-      expect(mockOnChange).toHaveBeenLastCalledWith('', false, 'Cloud Connector Name is required');
+      expect(mockOnChange).toHaveBeenLastCalledWith(
+        '',
+        false,
+        'Federated Identity Name is required'
+      );
     });
   });
 
@@ -77,9 +81,9 @@ describe('CloudConnectorNameField', () => {
     it('does not show error for valid short name', () => {
       renderWithIntl(<CloudConnectorNameField value="valid-name" onChange={mockOnChange} />);
 
-      expect(screen.queryByText('Cloud Connector Name is required')).not.toBeInTheDocument();
+      expect(screen.queryByText('Federated Identity Name is required')).not.toBeInTheDocument();
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
 
@@ -101,7 +105,7 @@ describe('CloudConnectorNameField', () => {
       renderWithIntl(<CloudConnectorNameField value={exactly255Chars} onChange={mockOnChange} />);
 
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
 
@@ -125,7 +129,7 @@ describe('CloudConnectorNameField', () => {
       renderWithIntl(<CloudConnectorNameField value={moreThan255Chars} onChange={mockOnChange} />);
 
       expect(
-        screen.getByText('Cloud Connector Name must be 255 characters or less')
+        screen.getByText('Federated Identity Name must be 255 characters or less')
       ).toBeInTheDocument();
     });
 
@@ -142,7 +146,7 @@ describe('CloudConnectorNameField', () => {
       expect(mockOnChange).toHaveBeenCalledWith(
         exactly256Chars,
         false,
-        'Cloud Connector Name must be 255 characters or less'
+        'Federated Identity Name must be 255 characters or less'
       );
     });
 
@@ -180,7 +184,7 @@ describe('CloudConnectorNameField', () => {
       const input = screen.getByRole('textbox');
       await user.clear(input);
 
-      expect(mockOnChange).toHaveBeenCalledWith('', false, 'Cloud Connector Name is required');
+      expect(mockOnChange).toHaveBeenCalledWith('', false, 'Federated Identity Name is required');
     });
 
     it('provides undefined error when name is valid', async () => {
@@ -231,7 +235,7 @@ describe('CloudConnectorNameField', () => {
       renderWithIntl(<CloudConnectorNameField value={chars254} onChange={mockOnChange} />);
 
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
 
@@ -240,7 +244,7 @@ describe('CloudConnectorNameField', () => {
       renderWithIntl(<CloudConnectorNameField value={chars255} onChange={mockOnChange} />);
 
       expect(
-        screen.queryByText('Cloud Connector Name must be 255 characters or less')
+        screen.queryByText('Federated Identity Name must be 255 characters or less')
       ).not.toBeInTheDocument();
     });
 
@@ -249,7 +253,7 @@ describe('CloudConnectorNameField', () => {
       renderWithIntl(<CloudConnectorNameField value={chars256} onChange={mockOnChange} />);
 
       expect(
-        screen.getByText('Cloud Connector Name must be 255 characters or less')
+        screen.getByText('Federated Identity Name must be 255 characters or less')
       ).toBeInTheDocument();
     });
 
@@ -258,7 +262,7 @@ describe('CloudConnectorNameField', () => {
       renderWithIntl(<CloudConnectorNameField value={chars257} onChange={mockOnChange} />);
 
       expect(
-        screen.getByText('Cloud Connector Name must be 255 characters or less')
+        screen.getByText('Federated Identity Name must be 255 characters or less')
       ).toBeInTheDocument();
     });
   });

@@ -1,0 +1,246 @@
+{
+  "id": "ingestHub",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "ingestHub",
+        "id": "def-public.IngestFlow",
+        "type": "Interface",
+        "tags": [],
+        "label": "IngestFlow",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.icon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "icon",
+            "description": [],
+            "signature": [
+              "string | React.ComponentType"
+            ],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ingestHub",
+            "id": "def-public.IngestFlow.component",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "React.ComponentType"
+            ],
+            "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "ingestHub",
+      "id": "def-public.IngestHubSetup",
+      "type": "Type",
+      "tags": [],
+      "label": "IngestHubSetup",
+      "description": [],
+      "signature": [
+        "{ [x: string]: never; }"
+      ],
+      "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+      "lineNumber": 29,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "ingestHub",
+      "id": "def-public.IngestHubStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "IngestHubStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+      "lineNumber": 31,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "ingestHub",
+          "id": "def-public.IngestHubStart.registerIngestFlow",
+          "type": "Function",
+          "tags": [],
+          "label": "registerIngestFlow",
+          "description": [],
+          "signature": [
+            "(flow: ",
+            {
+              "pluginId": "ingestHub",
+              "scope": "public",
+              "docId": "kibIngestHubPluginApi",
+              "section": "def-public.IngestFlow",
+              "text": "IngestFlow"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+          "lineNumber": 32,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "ingestHub",
+              "id": "def-public.IngestHubStart.registerIngestFlow.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "flow",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "ingestHub",
+                  "scope": "public",
+                  "docId": "kibIngestHubPluginApi",
+                  "section": "def-public.IngestFlow",
+                  "text": "IngestFlow"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+              "lineNumber": 32,
+              "columnNumber": 24,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "ingestHub",
+          "id": "def-public.IngestHubStart.navigationAvailable$",
+          "type": "Object",
+          "tags": [],
+          "label": "navigationAvailable$",
+          "description": [],
+          "signature": [
+            "Observable",
+            "<boolean>"
+          ],
+          "path": "x-pack/platform/plugins/shared/ingest_hub/public/types.ts",
+          "lineNumber": 33,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -4,21 +4,21 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/moon'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/moon'
+  title: '@kbn/moon'
   description: Moon project for @kbn/moon
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-moon
+  sourceRoot: packages/kbn-moon
 dependsOn:
   - '@kbn/repo-info'
+  - '@kbn/dev-utils'
   - '@kbn/dev-cli-runner'
   - '@kbn/repo-packages'
   - '@kbn/tooling-log'
@@ -27,9 +27,12 @@ tags:
   - package
   - dev
   - group-undefined
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}

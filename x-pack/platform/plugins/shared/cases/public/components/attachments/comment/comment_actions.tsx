@@ -6,9 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { UserActionContentToolbar } from '../../user_actions/content_toolbar';
 import { UserCommentPropertyActions } from '../../user_actions/property_actions/user_comment_property_actions';
-import * as i18n from '../../user_actions/comment/translations';
+import { DELETE_COMMENT_SUCCESS_TITLE } from './translations';
 import { useCommentRenderingContext } from '../../user_actions/comment/comment_rendering_context';
 
 export interface CommentActionsProps {
@@ -40,7 +39,7 @@ export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, conte
 
   const onDelete = useCallback(() => {
     if (handleDeleteComment) {
-      handleDeleteComment(commentId, i18n.DELETE_COMMENT_SUCCESS_TITLE);
+      handleDeleteComment(commentId, DELETE_COMMENT_SUCCESS_TITLE);
     }
   }, [handleDeleteComment, commentId]);
 
@@ -51,15 +50,13 @@ export const CommentActions: React.FC<CommentActionsProps> = ({ commentId, conte
   }, [handleManageQuote, content]);
 
   return (
-    <UserActionContentToolbar id={commentId}>
-      <UserCommentPropertyActions
-        isLoading={isLoading}
-        commentContent={content}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onQuote={onQuote}
-      />
-    </UserActionContentToolbar>
+    <UserCommentPropertyActions
+      isLoading={isLoading}
+      commentContent={content}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      onQuote={onQuote}
+    />
   );
 };
 

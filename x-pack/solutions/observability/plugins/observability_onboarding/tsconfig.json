@@ -9,7 +9,8 @@
     "../../../../../typings/**/*",
     "public/**/*.json",
     "server/**/*",
-    "e2e/**/*"
+    "e2e/**/*",
+    "test/scout/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -39,7 +40,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/custom-integrations-plugin",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
     "@kbn/logs-shared-plugin",
     "@kbn/tooling-log",
@@ -48,8 +48,14 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-query",
     "@kbn/core-security-server",
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client",
     "@kbn/streams-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/ingest-hub-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

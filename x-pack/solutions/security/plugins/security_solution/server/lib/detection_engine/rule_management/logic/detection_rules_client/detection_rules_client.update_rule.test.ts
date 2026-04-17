@@ -24,6 +24,8 @@ import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
+import { getMockRulesAuthz } from '../../__mocks__/authz';
+import { convertAlertingRuleToRuleResponse } from './converters/convert_alerting_rule_to_rule_response';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -35,6 +37,7 @@ describe('DetectionRulesClient.updateRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  const rulesAuthz = getMockRulesAuthz();
   let actionsClient = {
     isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
@@ -51,6 +54,7 @@ describe('DetectionRulesClient.updateRule', () => {
       actionsClient,
       rulesClient,
       mlAuthz,
+      rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
@@ -260,7 +264,9 @@ describe('DetectionRulesClient.updateRule', () => {
         },
       ],
     });
-    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(
+      convertAlertingRuleToRuleResponse(existingRule)
+    );
     rulesClient.update.mockResolvedValue(
       getRuleMock(getQueryRuleParams(), {
         actions: [
@@ -522,6 +528,405 @@ describe('DetectionRulesClient.updateRule', () => {
       await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
         'Cannot update "author" field for prebuilt rules'
       );
+    });
+  });
+
+  describe('RBAC', () => {
+    const createClientWithReadAuthz = (
+      authzOverrides: Partial<ReturnType<typeof getMockRulesAuthz>>
+    ) => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      return createDetectionRulesClient({
+        actionsClient,
+        rulesClient,
+        mlAuthz,
+        rulesAuthz: {
+          ...getMockRulesAuthz(),
+          canEditRules: false,
+          ...authzOverrides,
+        },
+        savedObjectsClient,
+        license: licenseMock.createLicenseMock(),
+        productFeaturesService: createProductFeaturesServiceMock(),
+      });
+    };
+
+    beforeEach(() => {
+      actionsClient = {
+        isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+      } as unknown as jest.Mocked<ActionsClient>;
+      rulesClient = rulesClientMock.create();
+    });
+
+    describe('`note` field', () => {
+      describe('with canEditInvestigationGuides permission', () => {
+        beforeEach(() => {
+          detectionRulesClient = createClientWithReadAuthz({
+            canEditInvestigationGuides: true,
+          });
+        });
+
+        it('uses bulkEditRuleParamsWithReadAuth when only note field changed', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            note: 'Updated investigation guide',
+          };
+
+          rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+            rules: [getRuleMock(getQueryRuleParams())],
+            skipped: [],
+            errors: [],
+            total: 1,
+          });
+
+          await detectionRulesClient.updateRule({ ruleUpdate });
+
+          expect(rulesClient.bulkEditRuleParamsWithReadAuth).toHaveBeenCalled();
+          expect(rulesClient.update).not.toHaveBeenCalled();
+        });
+      });
+
+      describe('without canEditInvestigationGuides permission', () => {
+        beforeEach(() => {
+          detectionRulesClient = createClientWithReadAuthz({ canEditInvestigationGuides: false });
+        });
+
+        it('throws 403 when updating note', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            note: 'Updated investigation guide',
+          };
+
+          await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
+            expect.objectContaining({ statusCode: 403 })
+          );
+        });
+      });
+    });
+
+    describe('`investigation_fields` field', () => {
+      describe('with canEditCustomHighlightedFields permission', () => {
+        beforeEach(() => {
+          detectionRulesClient = createClientWithReadAuthz({
+            canEditCustomHighlightedFields: true,
+          });
+        });
+
+        it('allows updating investigation_fields', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            investigation_fields: { field_names: ['host.name', 'user.name'] },
+          };
+
+          rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+            rules: [getRuleMock(getQueryRuleParams())],
+            skipped: [],
+            errors: [],
+            total: 1,
+          });
+
+          await detectionRulesClient.updateRule({ ruleUpdate });
+
+          expect(rulesClient.bulkEditRuleParamsWithReadAuth).toHaveBeenCalledWith(
+            expect.objectContaining({
+              operations: expect.arrayContaining([
+                expect.objectContaining({
+                  field: 'investigationFields',
+                  operation: 'set',
+                }),
+              ]),
+            })
+          );
+        });
+      });
+
+      describe('without canEditCustomHighlightedFields permission', () => {
+        beforeEach(() => {
+          detectionRulesClient = createClientWithReadAuthz({
+            canEditCustomHighlightedFields: false,
+          });
+        });
+
+        it('throws 403 when updating investigation_fields', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            investigation_fields: { field_names: ['host.name'] },
+          };
+
+          await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
+            expect.objectContaining({ statusCode: 403 })
+          );
+        });
+      });
+    });
+
+    describe('`exceptions_list` field', () => {
+      describe('with canEditExceptions permission', () => {
+        beforeEach(() => {
+          detectionRulesClient = createClientWithReadAuthz({
+            canEditExceptions: true,
+          });
+        });
+
+        it('allows updating exceptions_list', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            exceptions_list: [
+              {
+                id: 'new_exception_list_id',
+                list_id: 'new_exception_list',
+                namespace_type: 'single' as const,
+                type: 'detection' as const,
+              },
+            ],
+          };
+
+          rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+            rules: [getRuleMock(getQueryRuleParams())],
+            skipped: [],
+            errors: [],
+            total: 1,
+          });
+
+          await detectionRulesClient.updateRule({ ruleUpdate });
+
+          expect(rulesClient.bulkEditRuleParamsWithReadAuth).toHaveBeenCalledWith(
+            expect.objectContaining({
+              operations: expect.arrayContaining([
+                expect.objectContaining({
+                  field: 'exceptionsList',
+                  operation: 'set',
+                }),
+              ]),
+            })
+          );
+        });
+
+        it('allows clearing exceptions_list', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            exceptions_list: [],
+          };
+
+          rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+            rules: [getRuleMock(getQueryRuleParams())],
+            skipped: [],
+            errors: [],
+            total: 1,
+          });
+
+          await detectionRulesClient.updateRule({ ruleUpdate });
+
+          expect(rulesClient.bulkEditRuleParamsWithReadAuth).toHaveBeenCalledWith(
+            expect.objectContaining({
+              operations: expect.arrayContaining([
+                expect.objectContaining({
+                  field: 'exceptionsList',
+                  operation: 'set',
+                  value: [],
+                }),
+              ]),
+            })
+          );
+        });
+      });
+
+      describe('without canEditExceptions permission', () => {
+        beforeEach(() => {
+          detectionRulesClient = createClientWithReadAuthz({
+            canEditExceptions: false,
+          });
+        });
+
+        it('throws 403 when updating exceptions_list', async () => {
+          const existingRule = getRulesSchemaMock();
+          (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+          const ruleUpdate = {
+            ...existingRule,
+            id: undefined,
+            exceptions_list: [],
+          };
+
+          await expect(detectionRulesClient.updateRule({ ruleUpdate })).rejects.toThrow(
+            expect.objectContaining({ statusCode: 403 })
+          );
+        });
+      });
+    });
+
+    describe('`enabled` field', () => {
+      beforeEach(() => {
+        detectionRulesClient = createClientWithReadAuthz({
+          canEditInvestigationGuides: true,
+          canEnableDisableRules: true,
+        });
+      });
+
+      it('enables a disabled rule when updating with enabled: true', async () => {
+        const existingRule = getRulesSchemaMock();
+        existingRule.enabled = false;
+        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+        const ruleUpdate = {
+          ...existingRule,
+          id: undefined,
+          note: 'Updated note',
+          enabled: true,
+        };
+
+        rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+          rules: [getRuleMock(getQueryRuleParams())],
+          skipped: [],
+          errors: [],
+          total: 1,
+        });
+
+        const result = await detectionRulesClient.updateRule({ ruleUpdate });
+
+        expect(result.enabled).toBe(true);
+        expect(rulesClient.enableRule).toHaveBeenCalledWith(
+          expect.objectContaining({ id: existingRule.id })
+        );
+        expect(rulesClient.disableRule).not.toHaveBeenCalled();
+      });
+
+      it('disables an enabled rule when updating with enabled: false', async () => {
+        const existingRule = getRulesSchemaMock();
+        existingRule.enabled = true;
+        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+        const ruleUpdate = {
+          ...existingRule,
+          id: undefined,
+          note: 'Updated note',
+          enabled: false,
+        };
+
+        rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+          rules: [getRuleMock(getQueryRuleParams())],
+          skipped: [],
+          errors: [],
+          total: 1,
+        });
+
+        const result = await detectionRulesClient.updateRule({ ruleUpdate });
+
+        expect(result.enabled).toBe(false);
+        expect(rulesClient.disableRule).toHaveBeenCalledWith(
+          expect.objectContaining({ id: existingRule.id })
+        );
+        expect(rulesClient.enableRule).not.toHaveBeenCalled();
+      });
+
+      it('does not toggle enabled state when it has not changed', async () => {
+        const existingRule = getRulesSchemaMock();
+        existingRule.enabled = true;
+        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+        const ruleUpdate = {
+          ...existingRule,
+          id: undefined,
+          note: 'Updated note',
+          enabled: true, // Same as existing
+        };
+
+        rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+          rules: [getRuleMock(getQueryRuleParams())],
+          skipped: [],
+          errors: [],
+          total: 1,
+        });
+
+        await detectionRulesClient.updateRule({ ruleUpdate });
+
+        expect(rulesClient.enableRule).not.toHaveBeenCalled();
+        expect(rulesClient.disableRule).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('skipped rules', () => {
+      beforeEach(() => {
+        detectionRulesClient = createClientWithReadAuthz({ canEditInvestigationGuides: true });
+      });
+
+      it('returns existing rule when bulkEditRuleParamsWithReadAuth skips the rule', async () => {
+        const existingRule = getRulesSchemaMock();
+        existingRule.note = 'Original note';
+        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+        const ruleUpdate = {
+          ...existingRule,
+          id: undefined,
+          note: 'Same note that results in no change',
+        };
+
+        rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+          rules: [],
+          skipped: [{ id: existingRule.id, skip_reason: 'RULE_NOT_MODIFIED' }],
+          errors: [],
+          total: 1,
+        });
+
+        const result = await detectionRulesClient.updateRule({ ruleUpdate });
+
+        expect(result.id).toBe(existingRule.id);
+        expect(result.rule_id).toBe(existingRule.rule_id);
+        expect(rulesClient.update).not.toHaveBeenCalled();
+      });
+
+      it('returns existing rule with updated enabled state when skipped but enabled changed', async () => {
+        const existingRule = getRulesSchemaMock();
+        existingRule.enabled = false;
+        existingRule.note = 'Original note';
+        (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+        const ruleUpdate = {
+          ...existingRule,
+          id: undefined,
+          note: 'Same note',
+          enabled: true,
+        };
+
+        rulesClient.bulkEditRuleParamsWithReadAuth.mockResolvedValue({
+          rules: [],
+          skipped: [{ id: existingRule.id, skip_reason: 'RULE_NOT_MODIFIED' }],
+          errors: [],
+          total: 1,
+        });
+
+        const result = await detectionRulesClient.updateRule({ ruleUpdate });
+
+        expect(result.enabled).toBe(true);
+        expect(rulesClient.enableRule).toHaveBeenCalledWith(
+          expect.objectContaining({ id: existingRule.id })
+        );
+        expect(rulesClient.update).not.toHaveBeenCalled();
+      });
     });
   });
 });

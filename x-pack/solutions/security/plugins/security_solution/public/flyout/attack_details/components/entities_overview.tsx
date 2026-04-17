@@ -54,7 +54,7 @@ export const EntitiesOverview: React.FC = memo(() => {
       }
       highlightTitle
       link={link}
-      linkIconType="arrowStart"
+      linkIconType="chevronLimitLeft"
     >
       <EuiFlexGroup
         direction="column"

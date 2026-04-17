@@ -116,7 +116,7 @@ export const DocumentationPage: React.FunctionComponent<Props> = ({ packageInfo,
 
 type RegistryInputWithStreams = RegistryInput & {
   key: string;
-  streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }>;
+  streams: Array<RegistryStream & { data_stream: { type?: string; dataset: string } }>;
 };
 
 const StreamsSection: React.FunctionComponent<{
@@ -139,8 +139,8 @@ const StreamsSection: React.FunctionComponent<{
       <EuiSpacer size="m" />
       {streams.map((dataStream) => (
         <EuiAccordion
-          key={dataStream.data_stream.type + dataStream.data_stream.dataset}
-          id={dataStream.data_stream.type + dataStream.data_stream.dataset}
+          key={`${dataStream.data_stream.type ?? 'dynamic'}-${dataStream.data_stream.dataset}`}
+          id={`${dataStream.data_stream.type ?? 'dynamic'}-${dataStream.data_stream.dataset}`}
           buttonContent={
             <EuiText>
               <EuiCode>{dataStream.data_stream.dataset}</EuiCode>({dataStream.title})

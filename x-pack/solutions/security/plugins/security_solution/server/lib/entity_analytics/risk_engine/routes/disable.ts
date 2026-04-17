@@ -15,10 +15,12 @@ import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+import { withEntityStoreV2Disabled } from './utils';
 
 export const riskEngineDisableRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
-  getStartServices: EntityAnalyticsRoutesDeps['getStartServices']
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'],
+  isEntityAnalyticsEntityStoreV2Enabled: boolean
 ) => {
   router.versioned
     .post({
@@ -32,60 +34,68 @@ export const riskEngineDisableRoute = (
     })
     .addVersion(
       { version: '1', validate: {} },
-      withRiskEnginePrivilegeCheck(
-        getStartServices,
-        async (context, request, response): Promise<IKibanaResponse<DisableRiskEngineResponse>> => {
-          const securitySolution = await context.securitySolution;
+      withEntityStoreV2Disabled(
+        isEntityAnalyticsEntityStoreV2Enabled,
+        withRiskEnginePrivilegeCheck(
+          getStartServices,
+          async (
+            context,
+            request,
+            response
+          ): Promise<IKibanaResponse<DisableRiskEngineResponse>> => {
+            const siemResponse = buildSiemResponse(response);
 
-          securitySolution.getAuditLogger()?.log({
-            message: 'User attempted to disable the risk engine.',
-            event: {
-              action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
-              category: AUDIT_CATEGORY.DATABASE,
-              type: AUDIT_TYPE.CHANGE,
-              outcome: AUDIT_OUTCOME.UNKNOWN,
-            },
-          });
+            const securitySolution = await context.securitySolution;
 
-          const siemResponse = buildSiemResponse(response);
-          const [_, { taskManager }] = await getStartServices();
-
-          const riskEngineClient = securitySolution.getRiskEngineDataClient();
-
-          if (!taskManager) {
             securitySolution.getAuditLogger()?.log({
-              message:
-                'User attempted to disable the risk engine, but the Kibana Task Manager was unavailable',
+              message: 'User attempted to disable the risk engine.',
               event: {
                 action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
                 category: AUDIT_CATEGORY.DATABASE,
                 type: AUDIT_TYPE.CHANGE,
-                outcome: AUDIT_OUTCOME.FAILURE,
+                outcome: AUDIT_OUTCOME.UNKNOWN,
               },
-              error: {
+            });
+
+            const [_, { taskManager }] = await getStartServices();
+
+            const riskEngineClient = securitySolution.getRiskEngineDataClient();
+
+            if (!taskManager) {
+              securitySolution.getAuditLogger()?.log({
                 message:
                   'User attempted to disable the risk engine, but the Kibana Task Manager was unavailable',
-              },
-            });
+                event: {
+                  action: RiskEngineAuditActions.RISK_ENGINE_DISABLE,
+                  category: AUDIT_CATEGORY.DATABASE,
+                  type: AUDIT_TYPE.CHANGE,
+                  outcome: AUDIT_OUTCOME.FAILURE,
+                },
+                error: {
+                  message:
+                    'User attempted to disable the risk engine, but the Kibana Task Manager was unavailable',
+                },
+              });
 
-            return siemResponse.error({
-              statusCode: 400,
-              body: TASK_MANAGER_UNAVAILABLE_ERROR,
-            });
-          }
+              return siemResponse.error({
+                statusCode: 400,
+                body: TASK_MANAGER_UNAVAILABLE_ERROR,
+              });
+            }
 
-          try {
-            await riskEngineClient.disableRiskEngine({ taskManager });
-            return response.ok({ body: { success: true } });
-          } catch (e) {
-            const error = transformError(e);
-            return siemResponse.error({
-              statusCode: error.statusCode,
-              body: { message: error.message, full_error: JSON.stringify(e) },
-              bypassErrorFormat: true,
-            });
+            try {
+              await riskEngineClient.disableRiskEngine({ taskManager });
+              return response.ok({ body: { success: true } });
+            } catch (e) {
+              const error = transformError(e);
+              return siemResponse.error({
+                statusCode: error.statusCode,
+                body: { message: error.message, full_error: JSON.stringify(e) },
+                bypassErrorFormat: true,
+              });
+            }
           }
-        }
+        )
       )
     );
 };

@@ -1,0 +1,33 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { DefaultEvaluators } from '@kbn/evals';
+
+/**
+ * Common criteria evaluator that can be used across all evaluation scenarios.
+ * This provides a standardized evaluator with a consistent name "Criteria".
+ */
+export function createCriteriaEvaluator({
+  evaluators,
+  getCriteria,
+}: {
+  evaluators: DefaultEvaluators;
+  getCriteria?: (expected: any) => string[];
+}) {
+  return {
+    name: 'Criteria',
+    kind: 'LLM' as const,
+    evaluate: async ({ input, output, expected, metadata }: any) => {
+      const criteria = getCriteria ? getCriteria(expected) : expected.criteria ?? [];
+      const result = await evaluators
+        .criteria(criteria)
+        .evaluate({ input, expected, output, metadata });
+
+      return result;
+    },
+  };
+}

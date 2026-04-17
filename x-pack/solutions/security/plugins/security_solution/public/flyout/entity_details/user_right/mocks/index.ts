@@ -14,6 +14,7 @@ import {
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
+import type { UserEntity } from '../../../../../common/api/entity_analytics';
 
 const anomaly = mockAnomalies.anomalies[0];
 
@@ -74,4 +75,27 @@ export const managedUserDetails: ManagedUserHits = {
 
 export const mockManagedUserData: ManagedUserData = {
   data: managedUserDetails,
+};
+
+export const mockEntityRecord: UserEntity = {
+  '@timestamp': '2024-01-15T10:00:00.000Z',
+  entity: {
+    id: 'test-entity-id-abc123',
+    name: 'test-user-name',
+    type: 'user',
+    lifecycle: {
+      first_seen: '2023-01-01T00:00:00.000Z',
+      last_activity: '2024-01-15T10:00:00.000Z',
+    },
+  },
+  user: {
+    name: 'test-user-name',
+    id: ['1234', '321'],
+    domain: ['test domain'],
+    full_name: ['Test User'],
+    email: ['test-user@example.com'],
+  },
+  asset: {
+    criticality: 'medium_impact',
+  },
 };

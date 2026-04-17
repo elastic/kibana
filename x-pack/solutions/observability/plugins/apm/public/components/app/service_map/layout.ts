@@ -6,7 +6,7 @@
  */
 
 import Dagre from '@dagrejs/dagre';
-import type { Node, Edge } from '@xyflow/react';
+import { Position, type Node, type Edge } from '@xyflow/react';
 import {
   NODE_WIDTH,
   NODE_HEIGHT,
@@ -41,19 +41,52 @@ const DEFAULT_LAYOUT_OPTIONS: Required<LayoutOptions> = {
   nodeHeight: NODE_HEIGHT,
 };
 
+function handlePositionsForRankdir(rankdir: 'TB' | 'LR') {
+  return rankdir === 'TB'
+    ? { sourcePosition: Position.Bottom, targetPosition: Position.Top }
+    : { sourcePosition: Position.Right, targetPosition: Position.Left };
+}
+
+/**
+ * Places nodes on a square grid when Dagre layout fails (e.g. rare internal dagre bugs).
+ * Positions follow the **input array order** (index 0, 1, …), not graph topology—only
+ * a last-resort layout so the map stays usable.
+ */
+export function applyGridFallbackLayout<T extends Node>(
+  nodes: T[],
+  opts: Required<LayoutOptions>
+): T[] {
+  const cols = Math.ceil(Math.sqrt(nodes.length));
+  const handles = handlePositionsForRankdir(opts.rankdir);
+  return nodes.map((node, index) => {
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    return {
+      ...node,
+      ...handles,
+      position: {
+        x: Math.round(opts.marginx + col * (opts.nodeWidth + opts.nodesep)),
+        y: Math.round(opts.marginy + row * (opts.nodeHeight + opts.ranksep)),
+      },
+    };
+  });
+}
+
 /**
  * Apply dagre layout to position nodes in a hierarchical layout.
  *
  * @param nodes - Array of React Flow nodes to position
  * @param edges - Array of React Flow edges defining connections
  * @param options - Optional layout configuration
+ * @param onDagreLayoutFailure - Optional callback when Dagre throws (e.g. for telemetry)
  * @returns Array of nodes with calculated positions
  */
-export function applyDagreLayout<T extends Record<string, unknown>>(
-  nodes: Node<T>[],
+export function applyDagreLayout<T extends Node>(
+  nodes: T[],
   edges: Edge[],
-  options: LayoutOptions = {}
-): Node<T>[] {
+  options: LayoutOptions = {},
+  onDagreLayoutFailure?: (error: unknown) => void
+): T[] {
   if (nodes.length === 0) {
     return nodes;
   }
@@ -85,19 +118,25 @@ export function applyDagreLayout<T extends Record<string, unknown>>(
     }
   });
 
-  // Run layout algorithm
-  Dagre.layout(g);
+  try {
+    Dagre.layout(g);
+  } catch (error) {
+    onDagreLayoutFailure?.(error);
+    return applyGridFallbackLayout(nodes, opts);
+  }
 
   // Apply calculated positions to nodes
+  const handles = handlePositionsForRankdir(opts.rankdir);
   return nodes.map((node) => {
     const dagreNode = g.node(node.id);
 
     if (!dagreNode) {
-      return node;
+      return { ...node, ...handles };
     }
 
     return {
       ...node,
+      ...handles,
       position: {
         x: Math.round(dagreNode.x - opts.nodeWidth / 2),
         y: Math.round(dagreNode.y - opts.nodeHeight / 2),

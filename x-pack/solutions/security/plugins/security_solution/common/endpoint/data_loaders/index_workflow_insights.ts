@@ -10,11 +10,12 @@ import moment from 'moment';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import {
-  ActionType,
-  Category,
+  WorkflowInsightActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
+  WorkflowInsightType,
   type SecurityWorkflowInsight,
-  SourceType,
-  TargetType,
 } from '../types/workflow_insights';
 
 export interface IndexedWorkflowInsights {
@@ -178,22 +179,22 @@ const generateWorkflowInsightsDoc = ({
     },
     '@timestamp': currentTime,
     action: {
-      type: ActionType.Refreshed,
+      type: WorkflowInsightActionType.enum.refreshed,
       timestamp: currentTime,
     },
     source: {
       data_range_end: currentTime.clone().add(24, 'hours'),
       id: '7184ab52-c318-4c91-b765-805f889e34e2',
-      type: SourceType.LlmConnector,
+      type: WorkflowInsightSourceType.enum['llm-connector'],
       data_range_start: currentTime,
     },
     message: 'Incompatible antiviruses detected',
-    category: Category.Endpoint,
-    type: 'incompatible_antivirus',
+    category: WorkflowInsightCategory.enum.endpoint,
+    type: WorkflowInsightType.enum.incompatible_antivirus,
     value: `${antivirus} ${path}${signatureValue ? ` ${signatureValue}` : ''}`,
     target: {
       ids: [endpointId],
-      type: TargetType.Endpoint,
+      type: WorkflowInsightTargetType.enum.endpoint,
     },
   };
 };

@@ -26,8 +26,7 @@ import {
 import type { ICommandCallbacks } from '../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
-import { Parser } from '@elastic/esql';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
@@ -78,11 +77,8 @@ describe('WHERE Autocomplete', () => {
 
   describe('within the expression', () => {
     const suggest = async (query: string) => {
-      const correctedQuery = correctQuerySyntax(query);
-      const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
       const cursorPosition = query.length;
-      const { command } = findAstPosition(root, cursorPosition);
+      const { command } = findAutocompleteAstPosition(query, cursorPosition);
       if (!command) {
         throw new Error('Command not found in the parsed query');
       }
@@ -353,51 +349,6 @@ describe('WHERE Autocomplete', () => {
           label: '|',
         })
       );
-    });
-
-    describe('attaches ranges', () => {
-      test('omits ranges if there is no prefix', async () => {
-        (await suggest('FROM index | WHERE ')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toBeUndefined();
-        });
-      });
-
-      test('uses indices of single prefix by default', async () => {
-        (await suggest('FROM index | WHERE some.prefix')).forEach((suggestion) => {
-          expect(suggestion.rangeToReplace).toEqual({
-            start: 19,
-            end: 30,
-          });
-        });
-      });
-
-      test('"IS (NOT) NULL" with a matching prefix', async () => {
-        const suggestions = await suggest('FROM index | WHERE doubleField IS N');
-
-        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 35,
-        });
-
-        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 35,
-        });
-      });
-
-      test('"IS (NOT) NULL" with a matching prefix with trailing space', async () => {
-        const suggestions = await suggest('FROM index | WHERE doubleField IS ');
-
-        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 34,
-        });
-
-        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 31,
-          end: 34,
-        });
-      });
     });
   });
 

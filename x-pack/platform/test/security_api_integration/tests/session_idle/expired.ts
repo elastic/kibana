@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(401);
 
-      expect(resp.headers[SESSION_ERROR_REASON_HEADER]).to.be('SESSION_EXPIRED');
+      expect(resp.headers[SESSION_ERROR_REASON_HEADER]).to.be('SESSION_IDLE_TIMEOUT');
     });
   });
 }

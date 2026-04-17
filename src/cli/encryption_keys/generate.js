@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dump } from 'js-yaml';
+import { stringify } from 'yaml';
 import { isEmpty } from 'lodash';
 import { interactive } from './interactive';
 import { Logger } from '../logger';
@@ -33,7 +33,7 @@ export async function generate(encryptionConfig, command) {
       await interactive(keys, encryptionConfig.docs({ comment: true }), logger);
     } else {
       if (!command.quiet) logger.log('Settings:');
-      logger.log(dump(keys));
+      logger.log(stringify(keys));
     }
   }
 }

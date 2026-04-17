@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 143
- * Metric groups: 502
+ * Metric groups: 508
  * Hardcoded fields: 34
- * Total fields: 1216
+ * Total fields: 1224
  *
  * @internal
  *
- * WARNING: This object contains 1216+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1224+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -532,7 +532,7 @@ export const semconvFlat = {
   'aws.lambda.resource_mapping.id': {
     name: 'aws.lambda.resource_mapping.id',
     description:
-      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
+      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
     type: 'keyword',
     example: '587ad24b-03b9-4413-8202-bbd56b36e5b7',
   },
@@ -609,7 +609,7 @@ export const semconvFlat = {
   },
   'aws.secretsmanager.secret.arn': {
     name: 'aws.secretsmanager.secret.arn',
-    description: 'The ARN of the Secret stored in the Secrets Mangger',
+    description: 'The ARN of the Secret stored in the Secrets Manager',
     type: 'keyword',
     example: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:SecretName-6RandomCharacters',
   },
@@ -1132,7 +1132,7 @@ export const semconvFlat = {
   'container.runtime.description': {
     name: 'container.runtime.description',
     description:
-      'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
+      'A description about the runtime which could include, for example details about the CRI/API version being used or other customizations.',
     type: 'keyword',
     example: 'docker://19.3.1 - CRI: 1.22.0',
   },
@@ -2119,6 +2119,12 @@ export const semconvFlat = {
     type: 'long',
     example: '180',
   },
+  'gen_ai.workflow.name': {
+    name: 'gen_ai.workflow.name',
+    description: 'Human-readable name of the GenAI workflow provided by the application.',
+    type: 'keyword',
+    example: 'multi_agent_rag',
+  },
   'geo.continent.code': {
     name: 'geo.continent.code',
     description: 'Two-letter code representing continent’s name.',
@@ -2378,7 +2384,7 @@ export const semconvFlat = {
   },
   'hw.battery.capacity': {
     name: 'hw.battery.capacity',
-    description: 'Design capacity in Watts-hours or Amper-hours',
+    description: 'Design capacity in Watts-hours or Ampere-hours',
     type: 'keyword',
     example: '9.3Ah',
   },
@@ -5325,7 +5331,7 @@ export const semconvFlat = {
   },
   'metrics.process.cpu.time': {
     name: 'metrics.process.cpu.time',
-    description: 'Total CPU seconds broken down by different states.',
+    description: 'Total CPU seconds broken down by different CPU modes.',
     type: 'double',
   },
   'metrics.process.cpu.utilization': {
@@ -5481,6 +5487,36 @@ export const semconvFlat = {
     name: 'metrics.system.memory.linux.available',
     description:
       'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.limit': {
+    name: 'metrics.system.memory.linux.hugepages.limit',
+    description: 'Total number of hugepages available.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.page_size': {
+    name: 'metrics.system.memory.linux.hugepages.page_size',
+    description: 'System hugepage size in bytes.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.reserved': {
+    name: 'metrics.system.memory.linux.hugepages.reserved',
+    description: 'Number of reserved hugepages.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.surplus': {
+    name: 'metrics.system.memory.linux.hugepages.surplus',
+    description: 'Number of surplus hugepages.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.usage': {
+    name: 'metrics.system.memory.linux.hugepages.usage',
+    description: 'Number of hugepages in use by state.',
+    type: 'double',
+  },
+  'metrics.system.memory.linux.hugepages.utilization': {
+    name: 'metrics.system.memory.linux.hugepages.utilization',
+    description: 'Percentage of hugepages in use by state.',
     type: 'double',
   },
   'metrics.system.memory.linux.shared': {
@@ -6552,6 +6588,12 @@ export const semconvFlat = {
     description: 'The filesystem type',
     type: 'keyword',
     example: 'ext4',
+  },
+  'system.memory.linux.hugepages.state': {
+    name: 'system.memory.linux.hugepages.state',
+    description: 'The Linux HugePages memory state',
+    type: 'keyword',
+    example: 'free',
   },
   'system.memory.linux.slab.state': {
     name: 'system.memory.linux.slab.state',

@@ -69,7 +69,7 @@
           "({ children, urlKey, }: React.PropsWithChildren<ExpandableFlyoutProviderProps>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/expandable-flyout/src/provider.tsx",
-        "lineNumber": 89,
+        "lineNumber": 96,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -85,7 +85,7 @@
               "React.PropsWithChildren<ExpandableFlyoutProviderProps>"
             ],
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/provider.tsx",
-            "lineNumber": 89,
+            "lineNumber": 96,
             "columnNumber": 96,
             "deprecated": false,
             "trackAdoption": false,

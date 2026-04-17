@@ -29,6 +29,7 @@ interface Props {
 }
 
 export const useDashboardExportItems = ({
+  dashboardApi,
   objectId,
   isDirty,
   dashboardTitle,
@@ -50,7 +51,7 @@ export const useDashboardExportItems = ({
       allowShortUrl,
       shareableUrl,
       objectTypeMeta: getExportObjectTypeMeta(),
-      sharingData: buildExportSharingData(title, locatorParams),
+      sharingData: buildExportSharingData(title, locatorParams, dashboardApi),
       shareableUrlLocatorParams: buildShareableUrlLocatorParams(locatorParams),
     };
 
@@ -91,5 +92,5 @@ export const useDashboardExportItems = ({
       }));
 
     return [...exportItems, ...derivativeItems];
-  }, [intl, objectId, isDirty, dashboardTitle]);
+  }, [dashboardApi, intl, objectId, isDirty, dashboardTitle]);
 };

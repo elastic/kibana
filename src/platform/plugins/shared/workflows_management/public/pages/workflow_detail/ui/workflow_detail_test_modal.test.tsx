@@ -9,6 +9,8 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
 import {
   selectEditorYaml,
@@ -23,7 +25,6 @@ import { TestWrapper } from '../../../shared/test_utils';
 
 // Mock hooks
 const mockUseKibana = jest.fn();
-const mockUseCapabilities = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseAsyncThunk = jest.fn();
 
@@ -31,9 +32,14 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => mockUseKibana(),
 }));
 
-jest.mock('../../../hooks/use_capabilities', () => ({
-  useCapabilities: () => mockUseCapabilities(),
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
+  useWorkflowsCapabilities: jest.fn(),
 }));
+
+const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as jest.MockedFunction<
+  typeof useWorkflowsCapabilities
+>;
 
 jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
@@ -126,7 +132,8 @@ describe('WorkflowDetailTestModal', () => {
       },
     });
 
-    mockUseCapabilities.mockReturnValue({
+    mockUseWorkflowsCapabilities.mockReturnValue({
+      ...createMockWorkflowsCapabilities(),
       canExecuteWorkflow: true,
     });
 
@@ -152,7 +159,8 @@ describe('WorkflowDetailTestModal', () => {
     });
 
     it('should not render when user lacks permissions', () => {
-      mockUseCapabilities.mockReturnValue({
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
 
@@ -222,7 +230,8 @@ describe('WorkflowDetailTestModal', () => {
         },
       });
 
-      mockUseCapabilities.mockReturnValue({
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
 

@@ -55,7 +55,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
         <EuiToolTip content={tooltipMessage}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiIcon type="warningFilled" color="danger" />
+              <EuiIcon type="warningFill" color="danger" />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj={dataTestSubj} grow={false}>
               {i18n.RULE_STATUS_FAILED}

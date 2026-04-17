@@ -106,13 +106,10 @@ const xjsonRules = { ...buildXjsonRules('json_root') };
 // We replace those rules with Console-specific rules that don't use @push
 const originalJsonRoot = xjsonRules.json_root;
 xjsonRules.json_root = [
-  // Return to root only when an unindented closing brace ends the line.
-  // This targets the top-level request body terminator and avoids breaking
-  // highlighting for nested objects where closing braces are indented.
-  // @ts-expect-error custom rule
-  matchTokensWithEOL('paren.rparen', /^}\s*/, 'root'),
-  // Keep closing braces highlighted inside nested objects without changing state.
-  [/\}/, { token: 'paren.rparen' }],
+  // Keep closing braces highlighted without changing state.
+  // We no longer transition to root here; instead, console_editor.ts
+  // injects method matching into json_root so the next request is recognized.
+  [/}/, { token: 'paren.rparen' }],
   // Don't push for opening braces to prevent stack overflow
   [/{/, { token: 'paren.lparen' }],
   // @ts-expect-error include comments into json
@@ -128,7 +125,7 @@ xjsonRules.json_root = [
   // @ts-expect-error include a rule to start esql highlighting
   buildEsqlStartRule(true),
   // Include remaining xjson rules, filtering out the original brace rules
-  ...originalJsonRoot.filter((rule: any) => {
+  ...originalJsonRoot.filter((rule) => {
     // Filter out the original @push/@pop brace rules from xjson
     if (Array.isArray(rule) && rule.length >= 2) {
       const regex = rule[0];
@@ -153,8 +150,8 @@ const esqlRules = buildEsqlRules();
 /*
  Lexer rules that are shared between the Console editor and the Console output panel.
  */
-export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
-  ...(globals as any),
+export const consoleSharedLexerRules = {
+  ...globals,
   defaultToken: 'invalid',
   ...sqlLanguageAttributes,
   ...painlessLanguageAttributes,
@@ -196,4 +193,7 @@ export const consoleSharedLexerRules: monaco.languages.IMonarchLanguage = {
     // include esql rules
     ...esqlRules,
   },
-};
+  // Monarch rules are written as array literals (e.g. [/regex/, action]) which TypeScript
+  // infers as general arrays, not tuples. The IMonarchLanguageRule union requires tuples,
+  // so the tokenizer shape cannot satisfy IMonarchLanguage without a type-level override.
+} as monaco.languages.IMonarchLanguage;

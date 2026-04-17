@@ -19,7 +19,7 @@ import type {
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import { requiredOptional } from '@kbn/zod-helpers';
+import { requiredOptional } from '@kbn/zod-helpers/v4';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,

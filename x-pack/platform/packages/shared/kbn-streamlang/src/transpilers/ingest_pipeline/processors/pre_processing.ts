@@ -34,14 +34,16 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   sort: { from: 'field', to: 'target_field', where: 'if' },
   concat: { to: 'field', where: 'if' },
   network_direction: { where: 'if' },
+  json_extract: { where: 'if' },
+  enrich: { to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 
-export function renameFields<T extends Record<string, any>>(
+export function renameFields<T extends Record<string, unknown>>(
   obj: T,
   renames: Record<string, string>
 ): T {
-  const result: Record<string, any> = {};
+  const result: Record<string, unknown> = {};
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
       const newKey = renames[key] || key;

@@ -7,6 +7,11 @@
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ControlGroupRuntimeState, ControlPanelState } from '@kbn/control-group-renderer';
+import type { OptionsListDSLControlState } from '@kbn/controls-schemas';
+import {
+  DEFAULT_DSL_OPTIONS_LIST_STATE,
+  DEFAULT_PINNED_CONTROL_STATE,
+} from '@kbn/controls-constants';
 import type { StartPlugins } from '../../../types';
 
 export const GET_PAGE_FILTER_STORAGE_KEY = (spaceId: string = 'default') =>
@@ -78,20 +83,9 @@ interface OldFormat {
   };
 }
 
-export interface NewFormatExplicitInput {
-  dataViewId: string;
-  fieldName: string;
-  title: string;
-  selectedOptions: string[];
+export type NewFormatExplicitInput = OptionsListDSLControlState & {
   persist: boolean;
-  displaySettings: {
-    hideSort: boolean;
-    hideActionBar: boolean;
-    hideExists: boolean;
-    hideExclude: boolean;
-    placeholder: string;
-  };
-}
+};
 
 /**
  * Ref PR : https://github.com/elastic/kibana/pull/190561
@@ -107,27 +101,30 @@ export async function migrateAlertPageControlsTo816(storage: Storage, plugins: S
   const oldFormat: OldFormat = storage.get(GET_PAGE_FILTER_STORAGE_KEY(spaceId));
   if (oldFormat && Object.keys(oldFormat).includes('panels')) {
     // Only run when it is old format
-    const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput & ControlPanelState> = {
+    const newFormat: ControlGroupRuntimeState<NewFormatExplicitInput> = {
       initialChildControlState: {},
       ignoreParentSettings: oldFormat.ignoreParentSettings,
     };
 
     for (const [key, value] of Object.entries(oldFormat.panels)) {
       newFormat.initialChildControlState[key] = {
+        ...DEFAULT_PINNED_CONTROL_STATE,
+        ...DEFAULT_DSL_OPTIONS_LIST_STATE,
         type: 'optionsListControl',
         order: value.order,
-        displaySettings: {
-          hideExclude: value.explicitInput.hideExclude ?? true,
-          hideSort: value.explicitInput.hideSort ?? true,
+        display_settings: {
+          hide_exclude: value.explicitInput.hideExclude ?? true,
+          hide_sort: value.explicitInput.hideSort ?? true,
           placeholder: value.explicitInput.placeholder ?? '',
-          hideActionBar: value.explicitInput.hideActionBar ?? false,
-          hideExists: value.explicitInput.hideExists ?? false,
+          hide_action_bar: value.explicitInput.hideActionBar ?? false,
+          hide_exists: value.explicitInput.hideExists ?? false,
         },
         width: value.width as ControlPanelState['width'],
-        dataViewId: value.explicitInput.dataViewId ?? 'security_solution_alerts_dv',
+        data_view_id: value.explicitInput.dataViewId ?? 'security_solution_alerts_dv',
         title: value.explicitInput.title,
-        fieldName: value.explicitInput.fieldName,
-        selectedOptions: value.explicitInput.selectedOptions,
+        field_name: value.explicitInput.fieldName,
+        selected_options:
+          value.explicitInput.selectedOptions ?? DEFAULT_DSL_OPTIONS_LIST_STATE.selected_options,
         persist: value.explicitInput.persist ?? false,
       };
     }

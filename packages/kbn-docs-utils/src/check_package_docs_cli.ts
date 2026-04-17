@@ -27,6 +27,7 @@ import {
 } from './cli';
 import type { PluginOrPackage, MissingApiItemMap } from './types';
 import type { AllPluginStats } from './cli/types';
+import { writeFlatStatsFiles } from './cli/tasks/flat_stats';
 
 type ValidationCheck = 'any' | 'comments' | 'exports' | 'unnamed';
 
@@ -129,6 +130,7 @@ export const runCheckPackageDocs = async (log: ToolingLog, flags: CliFlags) => {
     const apiMapResult = buildApiMap(
       setupResult.project,
       setupResult.plugins,
+      setupResult.allPlugins,
       log,
       transaction,
       optionsWithChecks
@@ -141,6 +143,10 @@ export const runCheckPackageDocs = async (log: ToolingLog, flags: CliFlags) => {
       transaction,
       optionsWithChecks
     );
+
+    if (optionsWithChecks.writeStats) {
+      writeFlatStatsFiles(setupResult.plugins, apiMapResult, allPluginStats);
+    }
 
     reportMetrics(setupResult, apiMapResult, allPluginStats, log, transaction, {
       ...optionsWithChecks,
@@ -160,13 +166,13 @@ export const runCheckPackageDocs = async (log: ToolingLog, flags: CliFlags) => {
 
     if (failingPlugins.length > 0) {
       log.error(
-        `Validation failed for ${failingPlugins.length} plugin(s): ${failingPlugins
-          .map((plugin) => plugin.pluginId)
+        `Validation failed for ${failingPlugins.length} package(s): ${failingPlugins
+          .map(({ pluginId }) => pluginId)
           .join(', ')}.`
       );
       process.exitCode = 1;
     } else {
-      log.info('All plugins passed validation.');
+      log.info('All packages passed validation.');
     }
   } catch (error) {
     transaction?.setOutcome('failure');
@@ -188,11 +194,13 @@ export const runCheckPackageDocsCli = () => {
       },
       flags: {
         string: ['plugin', 'package', 'check'],
+        boolean: ['write'],
         help: `
           --plugin           Optionally, run for only a specific plugin by its plugin ID (plugin.id in kibana.jsonc).
           --package          Optionally, run for only a specific package by its package ID (id in kibana.jsonc, e.g., @kbn/core).
           --check            Optional. Specify validation checks: any, comments, exports, or all (default).
                              Can be provided multiple times to combine checks.
+          --write            Write stats to a flat JSON file in each plugin's target/api_docs/ directory.
         `,
       },
     }

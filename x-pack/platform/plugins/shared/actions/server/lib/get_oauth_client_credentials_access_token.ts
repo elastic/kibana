@@ -29,6 +29,7 @@ interface GetOAuthClientCredentialsAccessTokenOpts {
     secrets: GetOAuthClientCredentialsSecrets;
   };
   connectorTokenClient?: ConnectorTokenClientContract;
+  tokenEndpointAuthMethod?: 'client_secret_post' | 'client_secret_basic';
 }
 
 export const getOAuthClientCredentialsAccessToken = async ({
@@ -39,6 +40,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
   configurationUtilities,
   credentials,
   connectorTokenClient,
+  tokenEndpointAuthMethod,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
   const { clientId, additionalFields } = credentials.config;
   const { clientSecret } = credentials.secrets;
@@ -61,7 +63,10 @@ export const getOAuthClientCredentialsAccessToken = async ({
     hasErrors = errors;
   }
 
-  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
+  if (
+    connectorToken === null ||
+    (connectorToken.expiresAt ? Date.parse(connectorToken.expiresAt) <= Date.now() : false)
+  ) {
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
 
@@ -74,7 +79,8 @@ export const getOAuthClientCredentialsAccessToken = async ({
         clientSecret,
         ...additionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      tokenEndpointAuthMethod
     );
     accessToken = `${tokenResult.tokenType} ${tokenResult.accessToken}`;
 

@@ -281,5 +281,40 @@ describe('logs_layer', () => {
         alias_for: 'resource.attributes.user',
       });
     });
+
+    it('should not create aliases for doc-only fields', () => {
+      // Doc-only fields (no type) don't have actual ES mappings
+      const streamWithDocOnlyField = {
+        name: 'test-stream',
+        ingest: {
+          wired: {
+            fields: {
+              'attributes.some.field': { type: 'keyword' },
+              'attributes.doc_only.field': { description: 'A doc-only override without type' },
+            },
+          },
+        },
+      } as unknown as Streams.WiredStream.Definition;
+
+      const inheritedWithDocOnly: InheritedFieldDefinition = {
+        'resource.attributes.inherited.doc_only': {
+          description: 'An inherited doc-only override without type',
+          from: 'parent-stream',
+        },
+      };
+
+      const result = addAliasesForNamespacedFields(streamWithDocOnlyField, inheritedWithDocOnly);
+
+      // Should create alias for the mapped field
+      expect(result['some.field']).toEqual({
+        type: 'keyword',
+        from: 'test-stream',
+        alias_for: 'attributes.some.field',
+      });
+
+      // Should NOT create aliases for typeless doc-only fields
+      expect(result['doc_only.field']).toBeUndefined();
+      expect(result['inherited.doc_only']).toBeUndefined();
+    });
   });
 });

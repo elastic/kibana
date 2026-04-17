@@ -17,11 +17,16 @@ import { useSelectedTab, useTabs } from './hooks';
 
 export interface HostDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
-  name: string;
+  /**
+   * Entity identifiers for the host (following entity store EUID logic)
+   */
+  hostName: string;
+  entityId: string;
   scopeId: string;
   hasMisconfigurationFindings?: boolean;
   hasVulnerabilitiesFindings?: boolean;
   hasNonClosedAlerts?: boolean;
+  entityStoreEntityId?: string;
   path?: {
     tab?: EntityDetailsLeftPanelTab;
     subTab?: CspInsightLeftPanelSubTab;

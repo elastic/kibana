@@ -15,7 +15,7 @@ import {
   createEnrichPoliciesActions,
   getEnrichPoliciesTableRowCount,
 } from '../helpers/actions/enrich_policies_actions';
-import { notificationService } from '../../../public/application/services/notification';
+import { NotificationService } from '../../../public/application/services/notification';
 
 jest.mock('@kbn/code-editor');
 
@@ -147,8 +147,6 @@ describe('Enrich policies tab', () => {
       const notificationsServiceMock = notificationServiceMock.createStartContract();
 
       beforeEach(async () => {
-        notificationService.setup(notificationsServiceMock);
-
         httpRequestsMockHelpers.setLoadEnrichPoliciesResponse([
           createTestEnrichPolicy('policy-match', 'match'),
         ]);
@@ -158,6 +156,11 @@ describe('Enrich policies tab', () => {
         it('can delete a policy', async () => {
           await renderHome(httpSetup, {
             initialEntries: ['/enrich_policies'],
+            dependenciesOverrides: {
+              services: {
+                notificationService: new NotificationService(notificationsServiceMock.toasts),
+              },
+            },
           });
 
           await screen.findByTestId('enrichPoliciesTable');
@@ -186,6 +189,11 @@ describe('Enrich policies tab', () => {
         test('displays an error toast if it fails', async () => {
           await renderHome(httpSetup, {
             initialEntries: ['/enrich_policies'],
+            dependenciesOverrides: {
+              services: {
+                notificationService: new NotificationService(notificationsServiceMock.toasts),
+              },
+            },
           });
 
           await screen.findByTestId('enrichPoliciesTable');
@@ -219,6 +227,11 @@ describe('Enrich policies tab', () => {
         it('can execute a policy', async () => {
           await renderHome(httpSetup, {
             initialEntries: ['/enrich_policies'],
+            dependenciesOverrides: {
+              services: {
+                notificationService: new NotificationService(notificationsServiceMock.toasts),
+              },
+            },
           });
 
           await screen.findByTestId('enrichPoliciesTable');
@@ -247,6 +260,11 @@ describe('Enrich policies tab', () => {
         test('displays an error toast if it fails', async () => {
           await renderHome(httpSetup, {
             initialEntries: ['/enrich_policies'],
+            dependenciesOverrides: {
+              services: {
+                notificationService: new NotificationService(notificationsServiceMock.toasts),
+              },
+            },
           });
 
           await screen.findByTestId('enrichPoliciesTable');

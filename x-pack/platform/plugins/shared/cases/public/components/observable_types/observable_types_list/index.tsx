@@ -84,7 +84,7 @@ const ObservableTypesListComponent: React.FC<ObservableTypesListProps> = (props)
                         <EuiButtonIcon
                           data-test-subj={`${observableType.key}-observable-type-delete`}
                           aria-label={`${observableType.key}-observable-type-delete`}
-                          iconType="minusInCircle"
+                          iconType="minusCircle"
                           color="danger"
                           disabled={props.disabled}
                           onClick={() => setSelectedItem(observableType)}

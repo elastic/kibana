@@ -11,26 +11,25 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
-  INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
-  INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
-  INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
+  INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
+  INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
 } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
 import { EntitiesDetails } from '../components/entities_details';
-import {
-  THREAT_INTELLIGENCE_TAB_ID,
-  ThreatIntelligenceDetails,
-} from '../components/threat_intelligence_details';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/threat_intelligence';
+import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/threat_intelligence/components/threat_intelligence_details_view';
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../shared/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITIES_TAB_ID = 'entity';
@@ -83,7 +82,8 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab = memo(() => {
   const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, getFieldsData } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId, getFieldsData, searchHit } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
@@ -141,7 +141,9 @@ export const InsightsTab = memo(() => {
       />
       <EuiSpacer size="m" />
       {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}
-      {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && <ThreatIntelligenceDetails />}
+      {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && (
+        <ThreatIntelligenceDetailsView hit={hit} />
+      )}
       {activeInsightsId === PREVALENCE_TAB_ID && <PrevalenceDetails />}
       {activeInsightsId === CORRELATIONS_TAB_ID && <CorrelationsDetails />}
     </>

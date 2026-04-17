@@ -65,6 +65,7 @@ export const LogCategorizationPage: FC = () => {
               'userProfile',
               'embeddable',
               'cases',
+              'cps',
             ]),
           }}
         />

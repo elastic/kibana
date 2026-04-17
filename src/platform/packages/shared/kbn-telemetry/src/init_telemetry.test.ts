@@ -35,6 +35,71 @@ describe('initTelemetry', () => {
     jest.clearAllMocks();
   });
 
+  describe('APM and OTel conflict detection', () => {
+    test('throws when APM is active (default) and OTel tracing is enabled', () => {
+      const apmConfig = new ApmConfiguration(
+        REPO_ROOT,
+        { telemetry: { tracing: { enabled: true, sample_rate: 1, exporters: [] } } },
+        false
+      );
+
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
+
+      expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).toThrow(
+        'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.'
+      );
+    });
+
+    test('throws when APM is explicitly active and OTel tracing is enabled', () => {
+      const apmConfig = new ApmConfiguration(
+        REPO_ROOT,
+        {
+          elastic: { apm: { active: true } },
+          telemetry: { tracing: { enabled: true, sample_rate: 1, exporters: [] } },
+        },
+        false
+      );
+
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
+
+      expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).toThrow(
+        'Elastic APM and OpenTelemetry tracing cannot be enabled simultaneously.'
+      );
+    });
+
+    test('does not throw when APM is disabled and OTel tracing is enabled', () => {
+      const apmConfig = new ApmConfiguration(
+        REPO_ROOT,
+        {
+          telemetry: { tracing: { enabled: true, sample_rate: 1, exporters: [] } },
+        },
+        false
+      );
+
+      // CI sets ELASTIC_APM_ACTIVE=true via env vars, which would override the active:false above.
+      // We spy on getConfig to ensure the test is isolated from the environment.
+      jest
+        .spyOn(apmConfig, 'getConfig')
+        .mockReturnValue({ active: false, contextPropagationOnly: false });
+
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
+
+      expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).not.toThrow();
+    });
+
+    test('does not throw when APM is active and OTel tracing is disabled (default)', () => {
+      const apmConfig = new ApmConfiguration(REPO_ROOT, {}, false);
+
+      const { loadConfiguration } = jest.requireMock('@kbn/apm-config-loader');
+      loadConfiguration.mockImplementationOnce(() => apmConfig);
+
+      expect(() => initTelemetry([], REPO_ROOT, false, 'test-service')).not.toThrow();
+    });
+  });
+
   describe('resource attributes', () => {
     test('ensure naming consistency', () => {
       const apmConfig = new ApmConfiguration(

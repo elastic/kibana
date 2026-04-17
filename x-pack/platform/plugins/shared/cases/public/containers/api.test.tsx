@@ -160,6 +160,7 @@ describe('Cases API', () => {
         method: 'GET',
         query: {
           includeComments: true,
+          mode: 'legacy',
         },
         signal: abortCtrl.signal,
       });
@@ -764,9 +765,16 @@ describe('Cases API', () => {
   });
 
   describe('updateCases', () => {
+    const casesSnakeWithUpdateSummary = casesSnake.map((theCase) => ({
+      ...theCase,
+      updateSummary: {
+        syncedAlertCount: 0,
+      },
+    }));
+
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue(casesSnake);
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
     });
 
     const data = [
@@ -788,12 +796,45 @@ describe('Cases API', () => {
 
     it('should return correct response should not covert to camel case registered attachments', async () => {
       const resp = await updateCases({ cases: data, signal: abortCtrl.signal });
-      expect(resp).toEqual(cases);
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          updateSummary: {
+            syncedAlertCount: 0,
+          },
+        })
+      );
     });
 
     it('returns an empty array if the cases are empty', async () => {
       const resp = await updateCases({ cases: [], signal: abortCtrl.signal });
       expect(resp).toEqual([]);
+    });
+
+    it('returns cases with per-case alert status update summary', async () => {
+      fetchMock.mockResolvedValue(casesSnakeWithUpdateSummary);
+
+      const resp = await updateCases({
+        cases: data,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ cases: data }),
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toHaveLength(cases.length);
+      expect(resp[0]).toEqual(
+        expect.objectContaining({
+          id: cases[0].id,
+          updateSummary: {
+            syncedAlertCount: 0,
+          },
+        })
+      );
     });
   });
 

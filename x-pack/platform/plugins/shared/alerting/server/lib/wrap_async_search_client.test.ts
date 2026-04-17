@@ -79,7 +79,7 @@ describe('wrapScopedClusterClient', () => {
       request: {
         params: { query: '', filter: '', keep_alive: '10m' },
       },
-      options: { retrieveResults: true },
+      options: { returnIntermediateResults: true },
     });
 
     expect(client.search).toHaveBeenCalledWith(
@@ -87,7 +87,7 @@ describe('wrapScopedClusterClient', () => {
       {
         abortSignal: abortController.signal,
         strategy: ESQL_ASYNC_SEARCH_STRATEGY,
-        retrieveResults: true,
+        returnIntermediateResults: true,
       }
     );
   });
@@ -119,7 +119,7 @@ describe('wrapScopedClusterClient', () => {
       request: {
         params: { query: '', filter: '', keep_alive: '10m', wait_for_completion_timeout: '10m' },
       },
-      options: { retrieveResults: true },
+      options: { returnIntermediateResults: true },
     });
 
     expect(response).toEqual({ took: 1, columns: [], values: [] });

@@ -144,7 +144,7 @@ export function WorkspacePanelWrapper({
                         'lnsWorkspacePanelWrapper__applyButton ' +
                         DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS
                       }
-                      iconType="checkInCircleFilled"
+                      iconType="checkCircleFill"
                       onClick={() => dispatchLens(applyChanges())}
                       size="m"
                       data-test-subj="lnsApplyChanges__toolbar"

@@ -112,6 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const wiredPutBody: Streams.WiredStream.UpsertRequest = {
       stream: {
+        type: 'wired',
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
@@ -134,6 +135,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...rootDefinition.stream.ingest,
@@ -170,6 +172,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...rootDefinition.stream.ingest,
@@ -191,6 +194,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...rootDefinition.stream.ingest,
@@ -221,6 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...rootDefinition.stream.ingest,
@@ -232,6 +237,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel.overrides', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -265,6 +271,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel.10d', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -275,6 +282,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel.10d.20d', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -288,6 +296,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel.10d.20d', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -318,6 +327,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel.no', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -329,6 +339,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.otel.no.retention', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -351,6 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...emptyAssets,
               stream: {
+                type: 'wired',
                 description: '',
                 ingest: {
                   ...wiredPutBody.stream.ingest,
@@ -367,6 +379,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, 'logs.otel.ilm', {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -396,6 +409,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -410,6 +424,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -430,6 +445,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -448,6 +464,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -468,6 +485,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Classic streams update', () => {
       const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -530,6 +548,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               ...classicPutBody.stream.ingest,
@@ -551,6 +570,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               ...classicPutBody.stream.ingest,
@@ -573,6 +593,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...emptyAssets,
               stream: {
+                type: 'wired',
                 description: '',
                 ingest: {
                   ...wiredPutBody.stream.ingest,
@@ -591,6 +612,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -609,6 +631,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -634,6 +657,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -677,6 +701,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -690,6 +715,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -712,6 +738,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -733,6 +760,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -765,6 +793,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -928,6 +957,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, streamName, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,

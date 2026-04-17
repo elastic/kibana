@@ -1092,6 +1092,72 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(2);
       });
+
+      // Similar to https://github.com/elastic/kibana/issues/259169, but with indicators first
+      // We seed 2 matching events followed by 10 non-matching events and force 1 event/page.
+      // The first page of indicators creates 2 alerts; later no-op pages verify that the count of created alerts doesn't
+      // get inflated and trigger a false max-signals warning despite only 2 created preview alerts.
+      it('reproduces false max alerts warning when later event pages have no threat matches', async () => {
+        const id = uuidv4();
+        const baseTs = moment();
+
+        const matchingEvents = [
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(1, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(1, 's').toISOString(),
+          },
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(2, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(2, 's').toISOString(),
+          },
+        ];
+        const nonMatchingEvents = Array.from({ length: 100 }, (_, i) => ({
+          id,
+          user: { name: `eventmiss${i + 1}` },
+          '@timestamp': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+          'event.ingested': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+        }));
+        const numThreats = 20;
+        const threats = [
+          {
+            ...threatDoc(id, baseTs.clone().subtract(numThreats, 'm').toISOString()),
+            user: { name: 'matchuser' },
+          },
+          ...Array.from({ length: numThreats - 1 }, (_, i) => ({
+            ...threatDoc(id, baseTs.clone().subtract(i, 'm').toISOString()),
+          })),
+        ];
+
+        await indexListOfDocuments([...matchingEvents, ...nonMatchingEvents, ...threats]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_mapping: [
+            {
+              entries: [{ field: 'user.name', value: 'user.name', type: 'mapping' }],
+            },
+          ],
+          items_per_search: 1,
+          concurrent_searches: 1,
+        };
+
+        const { logs, previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        const allWarnings = logs.flatMap((l) => l.warnings ?? []);
+
+        expect(previewAlerts.length).toEqual(2);
+        expect(allWarnings).not.toContain(getMaxAlertsWarning());
+      });
     });
 
     describe('indicator enrichment: event-first search', () => {
@@ -1604,6 +1670,79 @@ export default ({ getService }: FtrProviderContext) => {
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
         expect(previewAlerts).toHaveLength(2);
+      });
+
+      // https://github.com/elastic/kibana/issues/259169
+      // We seed 2 matching events followed by 10 non-matching events and force 1 event/page.
+      // The first two pages create 2 alerts; later no-op pages verify that the count of created alerts doesn't
+      // get inflated and trigger a false max-signals warning despite only 2 created preview alerts.
+      it('reproduces false max alerts warning when later event pages have no threat matches', async () => {
+        const id = uuidv4();
+        const baseTs = moment();
+        const timestamp = baseTs.toISOString();
+
+        const matchingEvents = [
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(1, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(1, 's').toISOString(),
+          },
+          {
+            id,
+            user: { name: 'matchuser' },
+            '@timestamp': baseTs.clone().subtract(2, 's').toISOString(),
+            'event.ingested': baseTs.clone().subtract(2, 's').toISOString(),
+          },
+        ];
+        const nonMatchingEvents = Array.from({ length: 10 }, (_, i) => ({
+          id,
+          user: { name: `eventmiss${i + 1}` },
+          '@timestamp': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+          'event.ingested': baseTs
+            .clone()
+            .subtract(i + 3, 's')
+            .toISOString(),
+        }));
+        const threats = [
+          {
+            ...threatDoc(id, timestamp),
+            user: { name: 'matchuser' },
+          },
+          ...Array.from({ length: 19 }, (_, i) => ({
+            ...threatDoc(
+              id,
+              baseTs
+                .clone()
+                .subtract(i + 1, 'm')
+                .toISOString()
+            ),
+            user: { name: `threatfiller${i + 1}` },
+          })),
+        ];
+
+        await indexListOfDocuments([...matchingEvents, ...nonMatchingEvents, ...threats]);
+
+        const rule: ThreatMatchRuleCreateProps = {
+          ...threatMatchRuleEcsComplaint(id),
+          threat_mapping: [
+            {
+              entries: [{ field: 'user.name', value: 'user.name', type: 'mapping' }],
+            },
+          ],
+          items_per_search: 1,
+          concurrent_searches: 1,
+        };
+
+        const { logs, previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 1000 });
+        const allWarnings = logs.flatMap((l) => l.warnings ?? []);
+
+        expect(previewAlerts.length).toEqual(2);
+        expect(allWarnings).not.toContain(getMaxAlertsWarning());
       });
     });
 

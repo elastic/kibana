@@ -11,7 +11,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { registerRoutes } from './api/register_routes';
 import { MARKDOWN_EMBEDDABLE_TYPE, MARKDOWN_SAVED_OBJECT_TYPE } from '../common/constants';
-import { markdownEmbeddableSchema } from './schemas';
+import { markdownEmbeddableSchema } from './embeddable/schemas';
 import type { MarkdownAttributes } from './markdown_saved_object';
 import { markdownSavedObjectType } from './markdown_saved_object';
 import { MarkdownStorage } from './content_management';

@@ -49,6 +49,10 @@ uiSettings:
   overrides:
     agentBuilder:experimentalFeatures: true
 
+# Disable APM (conflicts with OTel tracing)
+elastic.apm.active: false
+elastic.apm.contextPropagationOnly: false
+
 # Enable tracing so evaluation traces are collected
 telemetry.enabled: true
 telemetry.tracing.enabled: true

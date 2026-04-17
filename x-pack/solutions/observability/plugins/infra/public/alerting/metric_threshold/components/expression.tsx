@@ -426,7 +426,7 @@ export const Expressions: React.FC<Props> = (props) => {
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage

@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { ApiConfig } from '../../../../conversations/common_attributes.gen';
 import { NonEmptyString } from '../../../../common_attributes.gen';

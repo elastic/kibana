@@ -243,6 +243,58 @@ describe('Field Builder', () => {
 
       expect(result?.message).toContain('First validation failed');
     });
+
+    it('should skip validation for optional fields with empty string value', () => {
+      const schema = z.enum(['option_a', 'option_b']).optional();
+      const path = 'field';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const result = field.validate(createValidationArg('', path));
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should skip validation for optional fields with undefined value', () => {
+      const schema = z.enum(['option_a', 'option_b']).optional();
+      const path = 'field';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const result = field.validate(createValidationArg(undefined, path));
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should skip validation for optional fields with null value', () => {
+      const schema = z.enum(['option_a', 'option_b']).optional();
+      const path = 'field';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const result = field.validate(createValidationArg(null, path));
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should still validate optional fields with non-empty invalid values', () => {
+      const schema = z.enum(['option_a', 'option_b']).optional();
+      const path = 'field';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const result = field.validate(createValidationArg('invalid', path)) as ValidationError;
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('message');
+    });
+
+    it('should still validate required enum fields with empty string value', () => {
+      const schema = z.enum(['option_a', 'option_b']);
+      const path = 'field';
+
+      const field = getFieldFromSchema({ schema, path, formConfig, meta });
+      const result = field.validate(createValidationArg('', path)) as ValidationError;
+
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('message');
+    });
   });
 
   describe('renderField', () => {

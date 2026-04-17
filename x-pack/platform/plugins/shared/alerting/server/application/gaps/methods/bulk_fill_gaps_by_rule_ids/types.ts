@@ -40,9 +40,12 @@ export interface BulkFillGapsByRuleIdsParams {
   };
 }
 
+import type { GapReasonType } from '../../../../../common/constants';
+
 export interface BulkFillGapsByRuleIdsOptions {
   maxGapCountPerRule: number;
   maxBackfillConcurrency?: number;
+  excludedReasons?: GapReasonType[];
 }
 
 export interface BulkFillGapsByRuleIdsResult {

@@ -11,7 +11,8 @@
     "server/**/*",
     "test/scout/**/*",
     "test/scout_oas_schema/**/*",
-    "test/scout_oas_schema/**/*.json"
+    "test/scout_oas_schema/**/*.json",
+    "test/scout_anonymous_authc/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -114,6 +115,15 @@
     "@kbn/test-jest-helpers",
     "@kbn/scout",
     "@kbn/cps-utils",
+    "@kbn/code-editor-mock",
+    "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/core-http-common",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-browser",
+    "@kbn/lens-common"
   ],
   "exclude": ["target/**/*"]
 }

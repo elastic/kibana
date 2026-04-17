@@ -9,7 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
-import { toElasticsearchQuery, fromKueryExpression } from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { toElasticsearchQuery, fromKueryExpression, getKqlFieldNames } from '@kbn/es-query';
 import {
   buildAggregation,
   getDateRangeInfo,
@@ -36,6 +37,40 @@ export interface TimeSeriesQueryParameters {
   useCalculatedDateRange?: boolean;
 }
 
+export async function fetchDataViewBase(
+  esClient: ElasticsearchClient,
+  index: string | string[],
+  fieldNames: string[],
+  projectRouting?: string
+): Promise<DataViewBase> {
+  const indices = Array.isArray(index) ? index : [index];
+  const title = indices.join(',');
+
+  const fieldCapsResponse = await esClient.fieldCaps({
+    index: indices,
+    fields: fieldNames,
+    ignore_unavailable: true,
+    allow_no_indices: true,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
+  });
+
+  const fields: DataViewFieldBase[] = [];
+  for (const [fieldName, fieldCaps] of Object.entries(fieldCapsResponse.fields)) {
+    const esTypes = Object.keys(fieldCaps);
+    const primaryType = esTypes[0];
+    if (!primaryType || primaryType.startsWith('_')) continue;
+
+    fields.push({
+      name: fieldName,
+      type: primaryType,
+      esTypes,
+      scripted: false,
+    });
+  }
+
+  return { title, fields };
+}
+
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
@@ -55,11 +90,29 @@ export async function timeSeriesQuery(
     dateStart,
     dateEnd,
     filterKuery,
+    project_routing: projectRouting,
   } = queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
   const { aggType, aggField, termField, termSize } = queryParams;
+
+  let filterQuery: object[] = [];
+  if (filterKuery) {
+    const kueryNode = fromKueryExpression(filterKuery);
+    let dataView: DataViewBase | undefined;
+    const fieldNames = getKqlFieldNames(kueryNode);
+    if (fieldNames.length > 0) {
+      try {
+        dataView = await fetchDataViewBase(esClient, index, fieldNames, projectRouting);
+      } catch (err) {
+        logger.warn(
+          `indexThreshold timeSeriesQuery: failed to fetch field caps for filter, falling back to untyped conversion: ${err.message}`
+        );
+      }
+    }
+    filterQuery = [toElasticsearchQuery(kueryNode, dataView)];
+  }
 
   // core query
   // Constructing a typesafe ES query in JS is problematic, use any escapehatch for now
@@ -79,7 +132,7 @@ export async function timeSeriesQuery(
               },
             },
           },
-          ...(!!filterKuery ? [toElasticsearchQuery(fromKueryExpression(filterKuery))] : []),
+          ...filterQuery,
         ],
       },
     },
@@ -100,6 +153,7 @@ export async function timeSeriesQuery(
     }),
     ignore_unavailable: true,
     allow_no_indices: true,
+    ...(projectRouting ? { project_routing: projectRouting } : {}),
   };
 
   // add the aggregations

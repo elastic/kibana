@@ -52,8 +52,10 @@
       "profilingDataAccess",
       "observabilityAIAssistant",
       "observabilityAgentBuilder",
+      "agentBuilder",
       "licenseManagement",
-      "serverless"
+      "serverless",
+      "cps"
     ],
     "requiredBundles": [
       "observability",
@@ -61,7 +63,8 @@
       "kibanaUtils",
       "kibanaReact",
       "ml",
-      "fleet"
+      "fleet",
+      "observabilityAgentBuilder"
     ]
   }
 }

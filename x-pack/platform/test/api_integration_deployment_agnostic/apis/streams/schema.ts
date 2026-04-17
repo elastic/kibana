@@ -91,6 +91,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 body: {
                   ...emptyAssets,
                   stream: {
+                    type: 'classic',
                     description: '',
                     ingest: {
                       lifecycle: { inherit: {} },
@@ -163,6 +164,48 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
               body: {
                 field_definitions: [{ name: 'body.text', type: 'keyword' }],
+              },
+            },
+          }
+        );
+
+        expect(response.body.status).to.be('success');
+        expect(response.body.simulationError).to.be(null);
+        expect(response.body.documentsWithRuntimeFieldsApplied).length(1);
+      });
+      it('Ignores typeless (description-only) field definitions', async () => {
+        const response = await apiClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            params: {
+              path: {
+                name: 'logs.otel',
+              },
+              body: {
+                field_definitions: [{ name: 'body.text', description: 'docs-only override' }],
+              },
+            },
+          }
+        );
+
+        // Description-only overrides should never be simulated (no mapping changes to validate)
+        expect(response.body.status).to.be('success');
+        expect(response.body.simulationError).to.be(null);
+        expect(response.body.documentsWithRuntimeFieldsApplied).to.be(null);
+      });
+      it('Ignores typeless definitions but still simulates mapping-affecting ones', async () => {
+        const response = await apiClient.fetch(
+          'POST /internal/streams/{name}/schema/fields_simulation',
+          {
+            params: {
+              path: {
+                name: 'logs.otel',
+              },
+              body: {
+                field_definitions: [
+                  { name: 'body.text', description: 'docs-only override' },
+                  { name: 'body.text', type: 'keyword' },
+                ],
               },
             },
           }

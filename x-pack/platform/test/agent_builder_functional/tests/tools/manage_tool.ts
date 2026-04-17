@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { AgentBuilderUiFtrProviderContext } from '../../../agent_builder/services/functional';
+import { deleteAllTools } from '../../utils/tool_helpers';
 
 export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
@@ -14,6 +15,10 @@ export default function ({ getPageObjects, getService }: AgentBuilderUiFtrProvid
   const supertest = getService('supertest');
 
   describe('manage tool', function () {
+    after(async () => {
+      await deleteAllTools(supertest);
+    });
+
     it('should edit a tool from the tool details page', async () => {
       const toolId = `ftr.esql.${Date.now()}`;
       await supertest

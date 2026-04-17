@@ -423,7 +423,7 @@ export const uiSettings: Record<string, UiSettingsParams<boolean | number | stri
     name: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfall', {
       defaultMessage: 'Use unified trace waterfall',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.observability.apmUseUnifiedTraceWaterfallDescription', {
       defaultMessage: 'Enable the new unified trace waterfall',
     }),

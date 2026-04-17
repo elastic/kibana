@@ -22,7 +22,23 @@ import type {
   Tool,
   McpClientOptions,
 } from './types';
-import { isTextPart } from './types';
+import { isEmbeddedResourcePart, isResourceLinkPart, isTextPart } from './types';
+
+/**
+ * Produces a human-readable error message from a connection error,
+ * surfacing the `cause` that would otherwise be hidden behind
+ * the opaque "fetch failed" message from Node.js.
+ */
+function formatConnectionErrorMessage(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  const cause = error instanceof Error ? error.cause : undefined;
+
+  if (cause instanceof Error) {
+    return `${message} (cause: ${cause.message})`;
+  }
+
+  return message;
+}
 
 /**
  * McpClient is a wrapper around the MCP client SDK.
@@ -43,6 +59,7 @@ export class McpClient {
     clientDetails: ClientDetails,
     {
       headers = {},
+      fetch: customFetch,
       maxRetries = 3,
       reconnectionDelayGrowFactor = 1.5,
       initialReconnectionDelay = 1000,
@@ -53,6 +70,7 @@ export class McpClient {
       requestInit: {
         headers,
       },
+      ...(customFetch ? { fetch: customFetch } : {}),
       reconnectionOptions: {
         maxRetries,
         reconnectionDelayGrowFactor,
@@ -89,17 +107,16 @@ export class McpClient {
         this.connected = true;
         this.logger.debug(`Connected to MCP server ${this.name}, ${this.version}`);
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        const errorMessage = formatConnectionErrorMessage(error);
         this.logger.error(
-          `Error connecting to MCP server ${this.name}, ${this.version}: ${message}`
+          `Error connecting to MCP server ${this.name}, ${this.version}: ${errorMessage}`
         );
         if (error instanceof StreamableHTTPError) {
-          // The SDK formats the message as "Streamable HTTP error: Connection failed"
-          throw new Error(`${message}`);
+          throw new Error(errorMessage);
         } else if (error instanceof UnauthorizedError) {
-          throw new Error(`Unauthorized error: ${message}`);
+          throw new Error(`Unauthorized error: ${errorMessage}`);
         } else {
-          throw new Error(`Error connecting to MCP server: ${message}`);
+          throw new Error(`Error connecting to MCP server: ${errorMessage}`);
         }
       }
     }
@@ -165,8 +182,8 @@ export class McpClient {
 
   /**
    * Call a tool on the MCP client.
-   * This method only returns text content.
-   * It does not support other content types such as images, audio, etc.
+   * This method returns text content, plus resource links and embedded resources.
+   * It does not support other content types such as images and audio.
    * @param {CallToolParams} params - The parameters for the tool call.
    */
   async callTool(params: CallToolParams): Promise<CallToolResponse> {
@@ -180,21 +197,28 @@ export class McpClient {
       arguments: params.arguments,
     });
 
-    const content = response.content as Array<ContentPart | null | undefined>;
-    const textParts = content.filter(isTextPart);
+    const content = (Array.isArray(response.content) ? response.content : []) as Array<
+      ContentPart | null | undefined
+    >;
+    const allowedParts = content.filter(
+      (part): part is ContentPart =>
+        isTextPart(part) || isResourceLinkPart(part) || isEmbeddedResourcePart(part)
+    );
+    const textParts = allowedParts.filter(isTextPart);
 
     if (response.isError) {
       // Tool execution errors are returned as text content parts
       // See https://modelcontextprotocol.io/specification/2025-11-25/server/tools#error-handling
+      const errorText = textParts.map((part) => part.text).join('\n') || 'Unknown tool error';
       throw new Error(
         `Error calling tool '${params.name}' with arguments '${JSON.stringify(
           params.arguments
-        )}': ${textParts.map((part) => part.text).join('\n')}`
+        )}': ${errorText}`
       );
     }
 
     return {
-      content: textParts,
+      content: allowedParts,
     };
   }
 }

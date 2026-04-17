@@ -19,6 +19,8 @@ import type { ImportRetry } from '../types';
 const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('ResolveAllConflicts', () => {
+  const user = userEvent.setup({ pointerEventsCheck: 0 });
+
   const summarizedCopyResult = {
     objects: [
       { type: 'type-1', id: 'id-1', conflict: undefined },
@@ -69,7 +71,7 @@ describe('ResolveAllConflicts', () => {
   };
 
   const openPopover = async () => {
-    await userEvent.click(screen.getByText('(resolve all)'));
+    await user.click(screen.getByText('(resolve all)'));
     await waitFor(() => {
       expect(screen.getByTestId('cts-resolve-all-conflicts-overwrite')).toBeInTheDocument();
     });
@@ -98,7 +100,7 @@ describe('ResolveAllConflicts', () => {
     await openPopover();
     expect(onRetriesChange).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
+    await user.click(screen.getByTestId('cts-resolve-all-conflicts-overwrite'));
     expect(onRetriesChange).toHaveBeenCalledWith([
       { type: 'type-1', id: 'id-1', overwrite: false },
       { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },
@@ -115,7 +117,7 @@ describe('ResolveAllConflicts', () => {
     expect(onRetriesChange).not.toHaveBeenCalled();
     expect(onDestinationMapChange).not.toHaveBeenCalled();
 
-    await userEvent.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
+    await user.click(screen.getByTestId('cts-resolve-all-conflicts-skip'));
     expect(onRetriesChange).toHaveBeenCalledWith([
       { type: 'type-1', id: 'id-1', overwrite: false },
     ]);

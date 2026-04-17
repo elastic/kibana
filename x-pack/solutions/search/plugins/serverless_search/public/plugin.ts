@@ -22,7 +22,6 @@ import type {
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { createNavigationTree } from './navigation_tree';
-import { SEARCH_HOMEPAGE_PATH } from './application/constants';
 import { WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export class ServerlessSearchPlugin
@@ -130,7 +129,6 @@ export class ServerlessSearchPlugin
     services: ServerlessSearchPluginStartDependencies
   ): ServerlessSearchPluginStart {
     const { serverless, management, security } = services;
-    serverless.setProjectHome(SEARCH_HOMEPAGE_PATH);
     const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
 
     const chatExperience$ = core.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
@@ -138,10 +136,14 @@ export class ServerlessSearchPlugin
     const navigationTree$ = combineLatest([of(core.application), chatExperience$]).pipe(
       map(([application, chatExperience]) => {
         const showAiAssistant = chatExperience !== AIChatExperience.Agent;
-        return createNavigationTree({ ...application, showAiAssistant });
+        return createNavigationTree({
+          ...application,
+          showAiAssistant,
+          showAlertingV2: Boolean(application.capabilities.alertingVTwo),
+        });
       })
     );
-    serverless.initNavigation('es', navigationTree$, { dataTestSubj: 'svlSearchSideNav' });
+    serverless.initNavigation('es', navigationTree$);
 
     const extendCardNavDefinitions = serverless.getNavigationCards(
       security.authz.isRoleManagementEnabled(),

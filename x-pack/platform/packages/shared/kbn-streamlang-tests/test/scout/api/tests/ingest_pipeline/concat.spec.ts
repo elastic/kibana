@@ -34,7 +34,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ first_name: 'john', last_name: 'doe', email_domain: 'example.com' }];
       await testBed.ingest(indexName, docs, processors);
@@ -67,7 +67,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { first_name: 'john', last_name: 'doe', email_domain: 'example.com', has_email: true },
@@ -101,7 +101,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },
@@ -137,7 +137,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [
           { first_name: 'john', last_name: 'doe', email_domain: 'example.com' },

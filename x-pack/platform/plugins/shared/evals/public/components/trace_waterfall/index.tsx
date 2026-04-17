@@ -5,46 +5,30 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, useRef } from 'react';
+import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiText,
   EuiSpacer,
-  EuiPanel,
   EuiCallOut,
   EuiResizableContainer,
   EuiSwitch,
   EuiBadge,
-  EuiButtonIcon,
-  EuiAccordion,
-  EuiCodeBlock,
-  EuiCopy,
-  EuiStat,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TraceSpan } from '@kbn/evals-common';
 import { useTrace } from '../../hooks/use_evals_api';
-import {
-  WaterfallItem,
-  LABEL_WIDTH,
-  SPAN_COLORS,
-  getSpanCategory,
-  type SpanCategory,
-} from './waterfall_item';
+import { WaterfallItem, LABEL_WIDTH, SPAN_COLORS, type SpanCategory } from './waterfall_item';
+import { SpanDetail } from './span_detail';
+import type { SpanNode } from './types';
 import * as i18n from './translations';
 
-// ---------------------------------------------------------------------------
-// Types & helpers
-// ---------------------------------------------------------------------------
-
-export interface SpanNode extends TraceSpan {
-  children: SpanNode[];
-  depth: number;
-}
+export { SpanDetail } from './span_detail';
+export type { SpanNode } from './types';
 
 const NOISE_NAME_PATTERNS = [
   /^ext\s*-\s*on(Post|Pre)(Auth|Request|Response|Handler)/i,
@@ -126,8 +110,8 @@ const computeTickValues = (durationMs: number): number[] => {
   const count = 5;
   const step = durationMs / count;
   const ticks: number[] = [];
-  for (let i = 0; i <= count; i++) {
-    ticks.push(i * step);
+  for (let idx = 0; idx <= count; idx++) {
+    ticks.push(idx * step);
   }
   return ticks;
 };
@@ -148,9 +132,10 @@ const LEGEND_ITEMS: Array<{ category: SpanCategory; label: string }> = [
 
 interface TraceWaterfallProps {
   traceId: string;
+  layout?: 'vertical' | 'horizontal';
 }
 
-export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
+export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId, layout = 'vertical' }) => {
   const { data, isLoading, error } = useTrace(traceId);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [hideNoise, setHideNoise] = useState(true);
@@ -196,6 +181,15 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
       };
     }, [data, hideNoise]);
 
+  const autoSelectedTraceRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (flatSpans.length > 0 && autoSelectedTraceRef.current !== traceId) {
+      autoSelectedTraceRef.current = traceId;
+      setSelectedSpanId(flatSpans[0].span_id);
+      setFocusedIndex(0);
+    }
+  }, [flatSpans, traceId]);
+
   const handleSpanClick = useCallback(
     (spanId: string) => {
       setSelectedSpanId(spanId === selectedSpanId ? null : spanId);
@@ -234,15 +228,20 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
 
   if (error) {
     return (
-      <EuiCallOut title={i18n.ERROR_LOADING_TRACE_TITLE} color="danger" iconType="error">
-        <p>{String(error)}</p>
+      <EuiCallOut
+        announceOnMount
+        title={i18n.ERROR_LOADING_TRACE_TITLE}
+        color="danger"
+        iconType="error"
+      >
+        <p>{error instanceof Error ? error.message : String(error)}</p>
       </EuiCallOut>
     );
   }
 
   if (!data || data.spans.length === 0) {
     return (
-      <EuiCallOut title={i18n.NO_SPANS_FOUND_TITLE} color="warning" iconType="help">
+      <EuiCallOut announceOnMount title={i18n.NO_SPANS_FOUND_TITLE} color="warning" iconType="help">
         <p>
           <FormattedMessage
             id="xpack.evals.traceWaterfall.noSpansFoundMessage"
@@ -327,6 +326,11 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
     </>
   );
 
+  const useTabs = layout === 'horizontal';
+  const resizableDirection = layout === 'horizontal' ? 'horizontal' : 'vertical';
+  const waterfallInitialSize = layout === 'horizontal' ? 60 : 55;
+  const detailInitialSize = layout === 'horizontal' ? 40 : 45;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -388,23 +392,44 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
 
       <EuiFlexItem style={{ minHeight: 0 }}>
         {selectedSpan ? (
-          <EuiResizableContainer direction="vertical" style={{ height: '100%' }}>
+          <EuiResizableContainer direction={resizableDirection} style={{ height: '100%' }}>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
-                <EuiResizablePanel initialSize={55} minSize="20%" paddingSize="none">
+                <EuiResizablePanel
+                  initialSize={waterfallInitialSize}
+                  minSize="20%"
+                  paddingSize="none"
+                >
                   <div
                     ref={scrollRef}
-                    style={{ overflowY: 'auto', height: '100%' }}
+                    style={{
+                      overflowY: 'auto',
+                      height: '100%',
+                      paddingRight: layout === 'horizontal' ? 8 : 0,
+                      paddingBottom: layout === 'vertical' ? 8 : 0,
+                    }}
                     tabIndex={0}
                     role="listbox"
+                    aria-label={i18n.SPAN_LIST_ARIA_LABEL}
                   >
                     {renderWaterfallContent()}
                   </div>
                 </EuiResizablePanel>
                 <EuiResizableButton indicator="border" />
-                <EuiResizablePanel initialSize={45} minSize="15%" paddingSize="none">
-                  <div style={{ overflowY: 'auto', height: '100%' }}>
-                    <SpanDetail span={selectedSpan} onClose={() => setSelectedSpanId(null)} />
+                <EuiResizablePanel initialSize={detailInitialSize} minSize="15%" paddingSize="none">
+                  <div
+                    style={{
+                      overflowY: 'auto',
+                      height: '100%',
+                      paddingLeft: layout === 'horizontal' ? 8 : 0,
+                      paddingTop: layout === 'vertical' ? 8 : 0,
+                    }}
+                  >
+                    <SpanDetail
+                      span={selectedSpan}
+                      onClose={() => setSelectedSpanId(null)}
+                      useTabs={useTabs}
+                    />
                   </div>
                 </EuiResizablePanel>
               </>
@@ -416,6 +441,7 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
             style={{ overflowY: 'auto', height: '100%' }}
             tabIndex={0}
             role="listbox"
+            aria-label={i18n.SPAN_LIST_ARIA_LABEL}
           >
             {renderWaterfallContent()}
           </div>
@@ -424,333 +450,3 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({ traceId }) => {
     </EuiFlexGroup>
   );
 };
-
-// --- Attribute categorization helpers ---
-
-interface CategorizedAttrs {
-  tokens: { input?: number; output?: number; total?: number };
-  toolInput?: string;
-  toolOutput?: string;
-  llm: Record<string, unknown>;
-  http: Record<string, unknown>;
-  resource: Record<string, unknown>;
-  other: Record<string, unknown>;
-}
-
-const PROMOTED_KEYS = new Set([
-  'gen_ai.usage.input_tokens',
-  'gen_ai.usage.output_tokens',
-  'gen_ai.usage.total_tokens',
-  'elastic.tool.parameters',
-  'tool.parameters',
-  'output.value',
-]);
-
-const categorizeAttributes = (attrs: Record<string, unknown>): CategorizedAttrs => {
-  const result: CategorizedAttrs = {
-    tokens: {},
-    llm: {},
-    http: {},
-    resource: {},
-    other: {},
-  };
-
-  for (const [key, value] of Object.entries(attrs)) {
-    if (key === 'gen_ai.usage.input_tokens') {
-      result.tokens.input = value as number;
-    } else if (key === 'gen_ai.usage.output_tokens') {
-      result.tokens.output = value as number;
-    } else if (key === 'gen_ai.usage.total_tokens') {
-      result.tokens.total = value as number;
-    } else if (key === 'elastic.tool.parameters' || key === 'tool.parameters') {
-      result.toolInput = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
-    } else if (key === 'output.value') {
-      result.toolOutput =
-        typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
-    } else if (PROMOTED_KEYS.has(key)) {
-      continue;
-    } else if (key.startsWith('gen_ai.') || key.startsWith('llm.')) {
-      result.llm[key] = value;
-    } else if (
-      key.startsWith('http.') ||
-      key.startsWith('url.') ||
-      key.startsWith('net.') ||
-      key.startsWith('server.')
-    ) {
-      result.http[key] = value;
-    } else if (key.startsWith('resource.')) {
-      result.resource[key] = value;
-    } else {
-      result.other[key] = value;
-    }
-  }
-
-  return result;
-};
-
-const tryFormatJson = (value: string): string => {
-  try {
-    return JSON.stringify(JSON.parse(value), null, 2);
-  } catch {
-    return value;
-  }
-};
-
-// --- SpanDetail component ---
-
-const SpanDetail: React.FC<{ span: SpanNode; onClose: () => void }> = ({ span, onClose }) => {
-  const categorized = useMemo(() => categorizeAttributes(span.attributes ?? {}), [span.attributes]);
-  const hasTokens =
-    categorized.tokens.input != null ||
-    categorized.tokens.output != null ||
-    categorized.tokens.total != null;
-
-  const category = getSpanCategory(span);
-
-  return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
-      {/* Header */}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 4,
-                  height: 20,
-                  borderRadius: 2,
-                  backgroundColor: SPAN_COLORS[category],
-                  flexShrink: 0,
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <h4 style={{ margin: 0 }}>{span.name}</h4>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={i18n.CLOSE_DETAIL_ARIA}
-            onClick={onClose}
-            size="s"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xs" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{i18n.DURATION_LABEL}</strong> {(span.duration_ms ?? 0).toFixed(1)}ms
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{i18n.KIND_LABEL}</strong> {span.kind ?? '-'}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <strong>{i18n.STATUS_LABEL}</strong> {span.status ?? '-'}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiCopy textToCopy={span.span_id}>
-            {(copy) => (
-              <EuiButtonIcon
-                iconType="copy"
-                aria-label={i18n.COPY_SPAN_ID_ARIA}
-                onClick={copy}
-                size="xs"
-                color="text"
-              />
-            )}
-          </EuiCopy>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      {/* Token Summary */}
-      {hasTokens && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="m" responsive={false}>
-            {categorized.tokens.input != null && (
-              <EuiFlexItem>
-                <EuiStat
-                  title={String(categorized.tokens.input)}
-                  description={i18n.INPUT_TOKENS_DESC}
-                  titleSize="xxs"
-                  isLoading={false}
-                />
-              </EuiFlexItem>
-            )}
-            {categorized.tokens.output != null && (
-              <EuiFlexItem>
-                <EuiStat
-                  title={String(categorized.tokens.output)}
-                  description={i18n.OUTPUT_TOKENS_DESC}
-                  titleSize="xxs"
-                  isLoading={false}
-                />
-              </EuiFlexItem>
-            )}
-            {categorized.tokens.total != null && (
-              <EuiFlexItem>
-                <EuiStat
-                  title={String(categorized.tokens.total)}
-                  description={i18n.TOTAL_TOKENS_DESC}
-                  titleSize="xxs"
-                  isLoading={false}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </>
-      )}
-
-      {/* Tool I/O */}
-      {categorized.toolInput && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <h5>{i18n.TOOL_INPUT_HEADING}</h5>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock
-            language="json"
-            fontSize="s"
-            paddingSize="s"
-            overflowHeight={150}
-            isCopyable
-          >
-            {tryFormatJson(categorized.toolInput)}
-          </EuiCodeBlock>
-        </>
-      )}
-      {categorized.toolOutput && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <h5>{i18n.TOOL_OUTPUT_HEADING}</h5>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiCodeBlock
-            language="json"
-            fontSize="s"
-            paddingSize="s"
-            overflowHeight={150}
-            isCopyable
-          >
-            {tryFormatJson(categorized.toolOutput)}
-          </EuiCodeBlock>
-        </>
-      )}
-
-      {/* LLM Attributes */}
-      {Object.keys(categorized.llm).length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <h5>{i18n.LLM_ATTRIBUTES_HEADING}</h5>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <AttrTable attrs={categorized.llm} />
-        </>
-      )}
-
-      {/* HTTP Attributes - collapsed */}
-      {Object.keys(categorized.http).length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiAccordion
-            id={`http-${span.span_id}`}
-            buttonContent={i18n.HTTP_ATTRIBUTES_HEADING}
-            paddingSize="xs"
-          >
-            <AttrTable attrs={categorized.http} />
-          </EuiAccordion>
-        </>
-      )}
-
-      {/* Other Attributes - collapsed */}
-      {Object.keys(categorized.other).length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiAccordion
-            id={`other-${span.span_id}`}
-            buttonContent={i18n.getOtherAttributesHeading(Object.keys(categorized.other).length)}
-            paddingSize="xs"
-          >
-            <AttrTable attrs={categorized.other} />
-          </EuiAccordion>
-        </>
-      )}
-
-      {/* Resource Attributes - collapsed */}
-      {Object.keys(categorized.resource).length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiAccordion
-            id={`resource-${span.span_id}`}
-            buttonContent={i18n.getResourceAttributesHeading(
-              Object.keys(categorized.resource).length
-            )}
-            paddingSize="xs"
-          >
-            <AttrTable attrs={categorized.resource} />
-          </EuiAccordion>
-        </>
-      )}
-    </EuiPanel>
-  );
-};
-
-// --- Attribute table with copy support ---
-
-const AttrTable: React.FC<{ attrs: Record<string, unknown> }> = ({ attrs }) => (
-  <table style={{ fontSize: '12px', width: '100%' }}>
-    <tbody>
-      {Object.entries(attrs).map(([key, value]) => {
-        const strValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-        return (
-          <tr key={key}>
-            <td
-              style={{
-                fontWeight: 'bold',
-                padding: '2px 8px 2px 0',
-                whiteSpace: 'nowrap',
-                verticalAlign: 'top',
-              }}
-            >
-              {key}
-            </td>
-            <td style={{ padding: '2px 0', wordBreak: 'break-all' }}>
-              <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
-                <EuiFlexItem>{strValue}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiCopy textToCopy={strValue}>
-                    {(copy) => (
-                      <EuiButtonIcon
-                        iconType="copy"
-                        aria-label={i18n.getCopyAttributeAriaLabel(key)}
-                        onClick={copy}
-                        size="xs"
-                        color="text"
-                        style={{ opacity: 0.4 }}
-                      />
-                    )}
-                  </EuiCopy>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-);

@@ -125,7 +125,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   const button = (
     <EuiFilterButton
       data-test-subj="componentTemplatesFiltersButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}
@@ -197,7 +197,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         </EuiButton>,
         <EuiButton
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createComponentTemplateButton"
           key="createComponentTemplateButton"
           {...reactRouterNavigate(history, '/create_component_template')}

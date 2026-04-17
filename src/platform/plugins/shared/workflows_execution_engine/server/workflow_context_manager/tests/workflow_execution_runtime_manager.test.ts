@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
 import type {
   EsWorkflowExecution,
@@ -82,14 +83,17 @@ describe('WorkflowExecutionRuntimeManager', () => {
       getStepExecution: jest.fn(),
       getLatestStepExecution: jest.fn(),
       getStepExecutionsByStepId: jest.fn(),
+      getAllStepExecutions: jest.fn().mockReturnValue([]),
       upsertStep: jest.fn(),
       load: jest.fn(),
       flush: jest.fn(),
       flushStepChanges: jest.fn(),
+      evictStaleLoopOutputs: jest.fn(),
     } as unknown as WorkflowExecutionState;
 
     workflowExecutionGraph = {
       topologicalOrder: ['node1', 'node2', 'node3'],
+      getInnerStepIds: jest.fn().mockReturnValue(new Set<string>()),
     } as unknown as WorkflowGraph;
 
     workflowExecutionGraph.getNode = jest.fn().mockImplementation((nodeId) => {
@@ -212,6 +216,78 @@ describe('WorkflowExecutionRuntimeManager', () => {
         tags: ['workflow', 'execution', 'start'],
       });
     });
+
+    describe('task manager APM labels (event-driven)', () => {
+      let mockTransaction: {
+        addLabels: jest.Mock;
+        ids: Record<string, string>;
+        outcome: string;
+        _labels: Record<string, unknown>;
+      };
+
+      beforeEach(() => {
+        mockTransaction = {
+          addLabels: jest.fn(),
+          ids: { 'transaction.id': 'txn-1', 'trace.id': 'trace-1' },
+          outcome: 'success',
+          _labels: {},
+        };
+        Object.defineProperty(agent, 'currentTransaction', {
+          configurable: true,
+          enumerable: true,
+          get: () => mockTransaction,
+        });
+      });
+
+      afterEach(() => {
+        Reflect.deleteProperty(agent, 'currentTransaction');
+        workflowExecution.triggeredBy = undefined;
+        workflowExecution.context = {} as EsWorkflowExecution['context'];
+      });
+
+      it('adds event_trigger_id when triggeredBy is an event trigger id', async () => {
+        workflowExecution.triggeredBy = 'cases.caseCreated';
+        workflowExecution.context = {
+          event: { eventChainDepth: 2 },
+        } as EsWorkflowExecution['context'];
+
+        await underTest.start();
+
+        expect(mockTransaction.addLabels.mock.calls[0][0]).toMatchObject({
+          triggered_by: 'task_manager',
+          event_trigger_id: 'cases.caseCreated',
+        });
+        expect(mockTransaction.addLabels.mock.calls[0][0]).not.toHaveProperty('event_chain_depth');
+      });
+
+      it('adds event_trigger_id when context.event has no chain depth', async () => {
+        workflowExecution.triggeredBy = 'my.custom.trigger';
+        workflowExecution.context = {} as EsWorkflowExecution['context'];
+
+        await underTest.start();
+
+        expect(mockTransaction.addLabels.mock.calls[0][0]).toMatchObject({
+          triggered_by: 'task_manager',
+          event_trigger_id: 'my.custom.trigger',
+        });
+        expect(mockTransaction.addLabels.mock.calls[0][0]).not.toHaveProperty('event_chain_depth');
+      });
+
+      it('does not add event labels for well-known triggeredBy values', async () => {
+        workflowExecution.triggeredBy = 'scheduled';
+        workflowExecution.context = {} as EsWorkflowExecution['context'];
+
+        await underTest.start();
+
+        const labels = mockTransaction.addLabels.mock.calls[0][0] as Record<string, unknown>;
+        expect(labels).toMatchObject({
+          triggered_by: 'task_manager',
+          workflow_execution_id: workflowExecution.id,
+        });
+        expect(labels).not.toHaveProperty('event_trigger_id');
+        expect(labels).not.toHaveProperty('event_chain_depth');
+      });
+    });
   });
 
   describe('resume', () => {
@@ -242,6 +318,89 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith({
         status: ExecutionStatus.RUNNING,
+      });
+    });
+
+    describe('evictCompletedLoopOutputs', () => {
+      it('should evict inner step outputs for completed foreach loops on resume', async () => {
+        const innerStepIds = new Set(['iter_step']);
+        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
+          {
+            stepId: 'myForeach',
+            stepType: 'foreach',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ]);
+        (workflowExecutionGraph.getInnerStepIds as jest.Mock).mockReturnValue(innerStepIds);
+
+        await underTest.resume();
+
+        expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledWith('myForeach');
+        expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
+      });
+
+      it('should evict inner step outputs for completed while loops on resume', async () => {
+        const innerStepIds = new Set(['body_step']);
+        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
+          {
+            stepId: 'myWhile',
+            stepType: 'while',
+            status: ExecutionStatus.COMPLETED,
+          } as EsWorkflowStepExecution,
+        ]);
+        (workflowExecutionGraph.getInnerStepIds as jest.Mock).mockReturnValue(innerStepIds);
+
+        await underTest.resume();
+
+        expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledWith('myWhile');
+        expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
+      });
+
+      it('should not evict outputs for a loop that is still running at resume time', async () => {
+        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
+          {
+            stepId: 'midForeach',
+            stepType: 'foreach',
+            status: ExecutionStatus.RUNNING,
+          } as EsWorkflowStepExecution,
+        ]);
+
+        await underTest.resume();
+
+        expect(workflowExecutionState.evictStaleLoopOutputs).not.toHaveBeenCalled();
+      });
+
+      it('should de-duplicate by stepId when a nested loop has multiple COMPLETED executions', async () => {
+        // inner foreach ran once per outer iteration → 3 executions, all COMPLETED
+        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
+          { stepId: 'innerForeach', stepType: 'foreach', status: ExecutionStatus.COMPLETED },
+          { stepId: 'innerForeach', stepType: 'foreach', status: ExecutionStatus.COMPLETED },
+          { stepId: 'innerForeach', stepType: 'foreach', status: ExecutionStatus.COMPLETED },
+        ] as EsWorkflowStepExecution[]);
+        (workflowExecutionGraph.getInnerStepIds as jest.Mock).mockReturnValue(
+          new Set(['deepAction'])
+        );
+
+        await underTest.resume();
+
+        // getInnerStepIds and evictStaleLoopOutputs called exactly once despite 3 executions
+        expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionState.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not call eviction when there are no loop steps', async () => {
+        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
+          { stepId: 'action1', stepType: 'slack', status: ExecutionStatus.COMPLETED },
+          {
+            stepId: 'action2',
+            stepType: 'elasticsearch.search',
+            status: ExecutionStatus.COMPLETED,
+          },
+        ] as EsWorkflowStepExecution[]);
+
+        await underTest.resume();
+
+        expect(workflowExecutionState.evictStaleLoopOutputs).not.toHaveBeenCalled();
       });
     });
   });

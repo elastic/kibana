@@ -68,7 +68,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-        "lineNumber": 33,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -81,7 +81,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -94,7 +94,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -107,7 +107,7 @@
             "label": "jobType",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -123,7 +123,7 @@
               "\"base64\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -139,7 +139,7 @@
               "\"pdf\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -155,7 +155,7 @@
               "(\"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -171,7 +171,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -186,7 +186,7 @@
                 "signature": [
                   "[core: ",
                   "CoreSetup",
-                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { strategy: \"scroll\" | \"pit\"; size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -194,7 +194,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { png: Readonly<{} & { enabled: boolean; }>; csv: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -204,7 +204,7 @@
                   },
                   ", context: ",
                   "PluginInitializerContext",
-                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { strategy: \"scroll\" | \"pit\"; size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -212,10 +212,10 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { png: Readonly<{} & { enabled: boolean; }>; csv: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-                "lineNumber": 47,
+                "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -265,7 +265,7 @@
               " | undefined; }>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -287,7 +287,7 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -329,7 +329,7 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -360,7 +360,7 @@
                   ">"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
-                "lineNumber": 73,
+                "lineNumber": 74,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -432,7 +432,7 @@
           ">"
         ],
         "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": true,
         "trackAdoption": false,
@@ -455,7 +455,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -468,7 +468,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -481,7 +481,7 @@
             "label": "jobType",
             "description": [],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -497,7 +497,7 @@
               "\"base64\" | undefined"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -513,7 +513,7 @@
               "\"pdf\""
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -529,7 +529,7 @@
               "(\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\")[]"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -545,7 +545,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -560,7 +560,7 @@
                 "signature": [
                   "[core: ",
                   "CoreSetup",
-                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<{}, unknown>, config: Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { strategy: \"scroll\" | \"pit\"; size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -568,7 +568,7 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { png: Readonly<{} & { enabled: boolean; }>; csv: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>, logger: ",
                   {
                     "pluginId": "@kbn/logging",
                     "scope": "common",
@@ -578,7 +578,7 @@
                   },
                   ", context: ",
                   "PluginInitializerContext",
-                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { size: number; duration: string; strategy: \"scroll\" | \"pit\"; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
+                  "<Readonly<{ roles?: Readonly<{} & { enabled: boolean; allow: string[]; }> | undefined; encryptionKey?: string | undefined; } & { enabled: boolean; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; csv: Readonly<{ enablePanelActionDownload?: boolean | undefined; } & { scroll: Readonly<{} & { strategy: \"scroll\" | \"pit\"; size: number; duration: string; }>; checkForFormulas: boolean; escapeFormulaValues: boolean; maxSizeBytes: number | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "common",
@@ -586,10 +586,10 @@
                     "section": "def-common.ByteSizeValue",
                     "text": "ByteSizeValue"
                   },
-                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; queue: Readonly<{} & { timeout: number | moment.Duration; pollInterval: number | moment.Duration; indexInterval: string; pollEnabled: boolean; pollIntervalErrorMultiplier: number; }>; capture: Readonly<{} & { maxAttempts: number; }>; kibanaServer: Readonly<{ hostname?: string | undefined; protocol?: string | undefined; port?: number | undefined; } & {}>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { csv: Readonly<{} & { enabled: boolean; }>; png: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
+                  "; useByteOrderMarkEncoding: boolean; maxConcurrentShardRequests: number; maxRows: number; }>; poll: Readonly<{} & { jobCompletionNotifier: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; jobsRefresh: Readonly<{} & { interval: number; intervalErrorMultiplier: number; }>; }>; export_types: Readonly<{} & { png: Readonly<{} & { enabled: boolean; }>; csv: Readonly<{} & { enabled: boolean; }>; pdf: Readonly<{} & { enabled: boolean; }>; }>; statefulSettings: Readonly<{} & { enabled: boolean; }>; }>>]"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-                "lineNumber": 54,
+                "lineNumber": 55,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -629,7 +629,7 @@
               " | undefined; }>"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -651,7 +651,7 @@
                   }
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-                "lineNumber": 60,
+                "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -689,7 +689,7 @@
               ">"
             ],
             "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -720,7 +720,7 @@
                   ">"
                 ],
                 "path": "src/platform/packages/private/kbn-reporting/export_types/pdf/printable_pdf.ts",
-                "lineNumber": 73,
+                "lineNumber": 74,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,

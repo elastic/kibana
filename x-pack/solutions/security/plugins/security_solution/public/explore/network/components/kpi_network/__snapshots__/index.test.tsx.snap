@@ -46,7 +46,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -128,7 +128,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -217,7 +217,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -299,7 +299,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                           aria-hidden="true"
                           class="euiButtonIcon__icon"
                           color="inherit"
-                          data-euiicon-type="arrowDown"
+                          data-euiicon-type="chevronSingleDown"
                         />
                       </button>
                     </div>
@@ -383,7 +383,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                       aria-hidden="true"
                       class="euiButtonIcon__icon"
                       color="inherit"
-                      data-euiicon-type="arrowDown"
+                      data-euiicon-type="chevronSingleDown"
                     />
                   </button>
                 </div>
@@ -413,7 +413,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 >
                   <span
                     color="#EE72A6"
-                    data-euiicon-type="visMapCoordinate"
+                    data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
                   />
                 </div>
@@ -451,7 +451,7 @@ exports[`NetworkKpiComponent rendering it renders the default widget 1`] = `
                 >
                   <span
                     color="#61A2FF"
-                    data-euiicon-type="visMapCoordinate"
+                    data-euiicon-type="waypoint"
                     data-test-subj="stat-icon"
                   />
                 </div>

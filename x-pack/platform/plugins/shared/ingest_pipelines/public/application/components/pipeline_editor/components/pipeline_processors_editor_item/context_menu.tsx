@@ -88,7 +88,7 @@ export const ContextMenu = forwardRef<HTMLButtonElement, Props>((props, ref) => 
             data-test-subj="button"
             disabled={disabled}
             onClick={() => setIsOpen((v) => !v)}
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={i18nTexts.moreButtonAriaLabel}
           />
         }

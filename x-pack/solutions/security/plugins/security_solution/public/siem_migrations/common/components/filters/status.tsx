@@ -56,7 +56,7 @@ const StatusFilterButtonComponent = <T,>({
   const triggerButton = (
     <EuiFilterButton
       grow
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={() => {
         setIsPopoverOpen(!isPopoverOpen);
       }}

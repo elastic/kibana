@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { SearchHit } from '../../../../common/search_strategy';
 import {
   type GetFieldsData,
   useGetFieldsData,
@@ -44,6 +45,10 @@ export interface UseDocumentDetailsResult {
    * Whether the data is loading
    */
   loading: boolean;
+  /**
+   * The actual raw document object
+   */
+  searchHit: SearchHit | undefined;
 }
 
 /**
@@ -71,5 +76,6 @@ export const useDocumentDetails = ({
     dataFormattedForFieldBrowser,
     getFieldsData,
     loading,
+    searchHit,
   };
 };

@@ -147,10 +147,13 @@ export type PolicyProtection =
       UIPolicyConfig['windows'],
       'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
     >
-  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<
+      UIPolicyConfig['mac'],
+      'malware' | 'ransomware' | 'behavior_protection' | 'memory_protection'
+    >
   | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
-export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware' | 'ransomware'>;
 
 export type LinuxPolicyProtection = keyof Pick<UIPolicyConfig['linux'], 'malware'>;
 

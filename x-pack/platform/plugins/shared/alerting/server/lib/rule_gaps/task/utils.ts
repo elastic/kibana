@@ -221,6 +221,7 @@ export async function initRun({
     schedule: soAttrs.schedule,
     maxBackfills: soAttrs.maxBackfills,
     ruleTypes: soAttrs.ruleTypes,
+    excludedReasons: soAttrs.excludedReasons,
   };
   const logEvent = createGapAutoFillSchedulerEventLogger({
     eventLogger,

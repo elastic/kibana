@@ -14,7 +14,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  const start = new Date();
+  const start = new Date(Date.now() + 5 * 60 * 1000);
   const end = new Date(new Date(start).setMonth(start.getMonth() + 1));
 
   describe('createMaintenanceWindow', () => {

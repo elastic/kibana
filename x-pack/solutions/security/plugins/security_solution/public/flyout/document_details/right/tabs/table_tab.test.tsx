@@ -20,7 +20,6 @@ import {
   TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID,
   TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID,
 } from '../components/test_ids';
-import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 const mockDispatch = jest.fn();
@@ -49,8 +48,72 @@ jest.mock('../../../../common/lib/kibana', () => {
         notifications: mockNotifications,
       },
     }),
+    useUiSetting: () => false,
   };
 });
+
+jest.mock('../components/test_ids', () => ({
+  FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID: 'mockFlyoutTableFieldNameCellIcon',
+  FLYOUT_TABLE_PIN_ACTION_TEST_ID: 'mockFlyoutTablePinAction',
+  FLYOUT_TABLE_FIELD_NAME_CELL_TEXT_TEST_ID: 'mockFlyoutTableFieldNameCellText',
+  FLYOUT_TABLE_PREVIEW_LINK_FIELD_TEST_ID: 'mockFlyoutTablePreviewLinkField',
+  TABLE_TAB_SETTING_BUTTON_TEST_ID: 'mockTableTabSettingButton',
+  TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID: 'mockTableHighlightedFieldsOnly',
+  TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID: 'mockTableHideEmptyFields',
+  TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID: 'mockTableHideAlertFields',
+  TABLE_TAB_TOUR_TEST_ID: 'mockTableTabTour',
+}));
+
+jest.mock('../../../../common/mock', () => {
+  const ReactLib = jest.requireActual('react');
+  return {
+    TestProviders: ({ children }: { children: React.ReactNode }) =>
+      ReactLib.createElement(ReactLib.Fragment, null, children),
+  };
+});
+
+jest.mock('../../../../common/hooks/use_selector', () => ({
+  useDeepEqualSelector: jest.fn(() => []),
+}));
+
+jest.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => ({
+  useEntityFromStore: () => ({
+    entity: null,
+    entityRecord: null,
+    firstSeen: null,
+    lastSeen: null,
+    isLoading: false,
+    error: null,
+    refetch: jest.fn(),
+  }),
+}));
+
+jest.mock('../utils/table_tab_columns', () => ({
+  getTableTabColumns: () => {
+    const ReactLib = jest.requireActual('react');
+    return [
+      {
+        field: 'field',
+        name: 'Field',
+        render: (field: string) =>
+          ReactLib.createElement(
+            'span',
+            null,
+            ReactLib.createElement('span', {
+              'data-test-subj': 'mockFlyoutTableFieldNameCellIcon',
+            }),
+            field
+          ),
+      },
+      {
+        field: 'values',
+        name: 'Value',
+        render: (values: string[] | string) =>
+          ReactLib.createElement('span', null, Array.isArray(values) ? values.join(', ') : values),
+      },
+    ];
+  },
+}));
 
 // FLAKY: https://github.com/elastic/kibana/issues/216393
 describe('<TableTab />', () => {
@@ -64,6 +127,11 @@ describe('<TableTab />', () => {
       browserFields: {},
       dataFormattedForFieldBrowser: [],
       investigationFields: [],
+      searchHit: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _source: {},
+      },
     } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = render(
@@ -111,12 +179,10 @@ describe('<TableTab />', () => {
 
   it('should fetch the table state from local storage', async () => {
     mockGet.mockReturnValue({
-      [FLYOUT_STORAGE_KEYS.TABLE_TAB_STATE]: {
-        pinnedFields: [],
-        showHighlightedFields: true,
-        hideEmptyFields: false,
-        hideAlertFields: true,
-      },
+      pinnedFields: [],
+      showHighlightedFields: true,
+      hideEmptyFields: false,
+      hideAlertFields: true,
     });
 
     const { getByTestId } = render(
@@ -127,12 +193,14 @@ describe('<TableTab />', () => {
       </TestProviders>
     );
 
-    const settingsButton = getByTestId(TABLE_TAB_SETTING_BUTTON_TEST_ID);
-    act(async () => {
-      await userEvent.click(settingsButton);
-      expect(screen.getByTestId(TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID)).toBeChecked();
-      expect(screen.getByTestId(TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID)).not.toBeChecked();
-      expect(screen.getByTestId(TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID)).toBeChecked();
+    const settingsButton = getByTestId(TABLE_TAB_SETTING_BUTTON_TEST_ID).querySelector('button');
+    expect(settingsButton).not.toBeNull();
+    await act(async () => {
+      await userEvent.click(settingsButton as HTMLButtonElement);
     });
+
+    expect(screen.getByTestId(TABLE_TAB_SETTING_HIGHLIGHTED_FIELDS_ONLY_TEST_ID)).toBeChecked();
+    expect(screen.getByTestId(TABLE_TAB_SETTING_HIDE_EMPTY_FIELDS_TEST_ID)).not.toBeChecked();
+    expect(screen.getByTestId(TABLE_TAB_SETTING_HIDE_ALERT_FIELDS_TEST_ID)).toBeChecked();
   });
 });

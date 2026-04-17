@@ -15,13 +15,30 @@ import {
   SIEM_MIGRATIONS_DASHBOARDS_PATH,
   SIEM_MIGRATIONS_LANDING_PATH,
   SIEM_MIGRATIONS_RULES_PATH,
+  SIEM_MIGRATIONS_MANAGE_PATH,
   SecurityPageName,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 import { IconDashboards } from '../common/icons/dashboards';
 import { IconRules } from '../common/icons/rules';
+import { IconAgent } from '../common/icons/agent';
 
 const subLinks: LinkItem[] = [
+  {
+    id: SecurityPageName.siemMigrationsManage,
+    title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
+      defaultMessage: 'Manage Automatic Migrations',
+    }),
+    description: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.description', {
+      defaultMessage: 'Manage your AI powered Automatic Migrations to Elastic.',
+    }),
+    landingIcon: IconAgent,
+    path: SIEM_MIGRATIONS_MANAGE_PATH,
+    capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
+    skipUrlState: true,
+    hideTimeline: true,
+    hideWhenExperimentalKey: 'siemMigrationsDisabled',
+  },
   {
     id: SecurityPageName.siemMigrationsRules,
     title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrationRules.title', {
@@ -67,7 +84,7 @@ const subLinks: LinkItem[] = [
 export const links: LinkItem = {
   id: SecurityPageName.siemMigrationsLanding,
   title: i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
-    defaultMessage: 'Migrations',
+    defaultMessage: 'Automatic migrations',
   }),
   path: SIEM_MIGRATIONS_LANDING_PATH,
   capabilities: [
@@ -78,15 +95,23 @@ export const links: LinkItem = {
     i18n.translate('xpack.securitySolution.appLinks.migrations', {
       defaultMessage: 'Migrations',
     }),
+    i18n.translate('xpack.securitySolution.appLinks.automaticMigrations.title', {
+      defaultMessage: 'Automatic migrations',
+    }),
   ],
   links: subLinks,
   skipUrlState: true,
+  globalNavPosition: 13,
   categories: [
     {
       label: i18n.translate('xpack.securitySolution.appLinks.category.automaticMigrations', {
         defaultMessage: 'Automatic migrations',
       }),
-      linkIds: [SecurityPageName.siemMigrationsRules, SecurityPageName.siemMigrationsDashboards],
+      linkIds: [
+        SecurityPageName.siemMigrationsManage,
+        SecurityPageName.siemMigrationsRules,
+        SecurityPageName.siemMigrationsDashboards,
+      ],
     },
   ],
 };

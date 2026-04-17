@@ -221,6 +221,15 @@ export const AgentPolicyBaseSchema = {
       ),
     ])
   ),
+  is_verifier: schema.maybe(
+    schema.boolean({
+      defaultValue: false,
+      meta: {
+        description:
+          'Indicates this is a short-lived verifier policy used for OTel permission verification.',
+      },
+    })
+  ),
 };
 
 function validateGlobalDataTagInput(tags: GlobalDataTag[]): string | undefined {
@@ -289,6 +298,26 @@ export const AgentPolicySchemaV3 = schema
     has_agent_version_conditions: schema.maybe(schema.boolean()),
   });
 
+export const AgentPolicySchemaV4 = AgentPolicySchemaV3.extends({
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+});
+
+export const AgentPolicySchemaV5 = AgentPolicySchemaV4.extends({
+  is_verifier: schema.maybe(schema.boolean()),
+});
+
 export const NewAgentPolicySchema = AgentPolicySchemaV3.extends({
   supports_agentless: schema.maybe(
     schema.oneOf([
@@ -346,6 +375,20 @@ export const AgentPolicyResponseSchema = AgentPolicySchema.extends({
   version: schema.maybe(schema.string()),
   is_preconfigured: schema.maybe(schema.boolean()),
   schema_version: schema.maybe(schema.string()),
+  min_agent_version: schema.maybe(schema.nullable(schema.string())),
+  package_agent_version_conditions: schema.maybe(
+    schema.nullable(
+      schema.arrayOf(
+        schema.object({
+          name: schema.string(),
+          title: schema.string(),
+          version_condition: schema.string(),
+        }),
+        { maxSize: 1000 }
+      )
+    )
+  ),
+  created_at: schema.maybe(schema.string()),
   package_policies: schema.maybe(
     schema.oneOf([
       schema.arrayOf(schema.string(), { maxSize: 10000 }),

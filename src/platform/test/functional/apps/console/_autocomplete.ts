@@ -34,7 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   }
 
-  describe('console autocomplete feature', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/257917
+  describe.skip('console autocomplete feature', function describeIndexTests() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -410,7 +411,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Autocomplete shouldnt trigger within', () => {
+    // FLAKy: https://github.com/elastic/kibana/issues/248964
+    describe.skip('Autocomplete shouldnt trigger within', () => {
       beforeEach(async () => {
         await PageObjects.console.skipTourIfExists();
         await PageObjects.console.clearEditorText();

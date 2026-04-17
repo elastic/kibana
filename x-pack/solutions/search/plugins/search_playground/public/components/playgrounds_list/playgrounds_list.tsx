@@ -84,7 +84,7 @@ export const PlaygroundsList = () => {
             <EuiButton
               data-test-subj="newPlaygroundButton"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               fullWidth={false}
               onClick={onNewPlayground}
             >
@@ -110,7 +110,7 @@ export const PlaygroundsList = () => {
           <EuiButton
             data-test-subj="newPlaygroundButton"
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={onNewPlayground}
           >
             <FormattedMessage

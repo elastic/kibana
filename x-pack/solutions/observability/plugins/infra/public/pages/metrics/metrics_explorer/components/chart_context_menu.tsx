@@ -192,7 +192,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       contentProps={{ 'aria-label': actionAriaLabel }}
       onClick={togglePopover}
       size="s"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
     >
       {actionLabel}

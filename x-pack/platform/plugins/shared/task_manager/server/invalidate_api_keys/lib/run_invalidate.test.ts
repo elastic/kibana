@@ -112,7 +112,8 @@ describe('runInvalidate', () => {
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
         });
-        expect(result).toEqual(0);
+        expect(result.totalInvalidated).toEqual(0);
+        expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(1);
 
@@ -189,7 +190,8 @@ describe('runInvalidate', () => {
           savedObjectTypesToQuery: savedObjectTypes,
         });
 
-        expect(result).toEqual(2);
+        expect(result.totalInvalidated).toEqual(2);
+        expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
           1 + savedObjectTypes.length
@@ -322,7 +324,8 @@ describe('runInvalidate', () => {
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
         });
-        expect(result).toEqual(1);
+        expect(result.totalInvalidated).toEqual(1);
+        expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
           1 + savedObjectTypes.length
@@ -437,7 +440,8 @@ describe('runInvalidate', () => {
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
         });
-        expect(result).toEqual(0);
+        expect(result.totalInvalidated).toEqual(0);
+        expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
           1 + savedObjectTypes.length
@@ -576,7 +580,8 @@ describe('runInvalidate', () => {
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
         });
-        expect(result).toEqual(2);
+        expect(result.totalInvalidated).toEqual(2);
+        expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
           2 * (1 + savedObjectTypes.length)
@@ -759,7 +764,8 @@ describe('runInvalidate', () => {
           savedObjectType: type,
           savedObjectTypesToQuery: savedObjectTypes,
         });
-        expect(result).toEqual(1);
+        expect(result.totalInvalidated).toEqual(1);
+        expect(result.missingApiKeyRetries).toEqual({});
 
         expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(
           2 + savedObjectTypes.length

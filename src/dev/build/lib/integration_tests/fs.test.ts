@@ -12,7 +12,17 @@ import { chmodSync, statSync } from 'fs';
 
 import del from 'del';
 
-import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
+import {
+  mkdirp,
+  write,
+  read,
+  getChildPaths,
+  copyAll,
+  getFileHash,
+  untar,
+  gunzip,
+  compressTar,
+} from '../fs';
 import { getFips } from 'crypto';
 
 const TMP = resolve(__dirname, '../__tmp__');
@@ -354,5 +364,68 @@ describe('gunzip()', () => {
     const destination = resolve(TMP, 'z/y/x/v/u/t/foo.txt');
     await gunzip(FOO_GZIP_PATH, destination);
     expect(await read(resolve(destination))).toBe('foo\n');
+  });
+});
+
+describe('compressTar()', () => {
+  it('creates a valid .tar.gz that can be extracted with untar', async () => {
+    const tarPath = resolve(TMP, 'test.tar.gz');
+    const fileCount = await compressTar({
+      source: resolve(FIXTURES, 'foo_dir'),
+      destination: tarPath,
+      createRootDirectory: false,
+    });
+
+    expect(fileCount).toBeGreaterThan(0);
+    expect(statSync(tarPath).size).toBeGreaterThan(0);
+
+    const extracted = resolve(TMP, 'extracted');
+    await untar(tarPath, extracted);
+
+    expect(await read(resolve(extracted, 'bar.txt'))).toBe('bar\n');
+    expect(await read(resolve(extracted, 'foo/foo.txt'))).toBe('foo\n');
+  });
+
+  it('wraps contents in a root directory when createRootDirectory is true', async () => {
+    const tarPath = resolve(TMP, 'rooted.tar.gz');
+    await compressTar({
+      source: resolve(FIXTURES, 'foo_dir'),
+      destination: tarPath,
+      createRootDirectory: true,
+    });
+
+    const extracted = resolve(TMP, 'extracted_rooted');
+    await untar(tarPath, extracted);
+
+    expect(await read(resolve(extracted, 'foo_dir/bar.txt'))).toBe('bar\n');
+    expect(await read(resolve(extracted, 'foo_dir/foo/foo.txt'))).toBe('foo\n');
+  });
+
+  it('uses rootDirectoryName when provided', async () => {
+    const tarPath = resolve(TMP, 'custom_root.tar.gz');
+    await compressTar({
+      source: resolve(FIXTURES, 'foo_dir'),
+      destination: tarPath,
+      createRootDirectory: true,
+      rootDirectoryName: 'my-custom-root',
+    });
+
+    const extracted = resolve(TMP, 'extracted_custom');
+    await untar(tarPath, extracted);
+
+    expect(await read(resolve(extracted, 'my-custom-root/bar.txt'))).toBe('bar\n');
+    expect(await read(resolve(extracted, 'my-custom-root/foo/foo.txt'))).toBe('foo\n');
+  });
+
+  it('returns accurate file count', async () => {
+    const tarPath = resolve(TMP, 'count.tar.gz');
+    const fileCount = await compressTar({
+      source: resolve(FIXTURES, 'foo_dir'),
+      destination: tarPath,
+      createRootDirectory: false,
+    });
+
+    // foo_dir contains: .bar, bar.txt, foo/foo.txt
+    expect(fileCount).toBe(3);
   });
 });

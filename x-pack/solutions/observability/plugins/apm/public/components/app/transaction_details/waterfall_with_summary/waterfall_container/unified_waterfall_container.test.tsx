@@ -9,6 +9,7 @@ import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import React from 'react';
+import { I18nProvider as IntlProvider } from '@kbn/i18n-react';
 import { Router } from '@kbn/shared-ux-router';
 import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
 import { disableConsoleWarning, renderWithTheme } from '../../../../../utils/test_helpers';
@@ -31,9 +32,11 @@ jest.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => ({
   }),
 }));
 
+const mockRouterLink = jest.fn().mockReturnValue('/mock-service-overview-url');
+
 jest.mock('../../../../../hooks/use_apm_router', () => ({
   useApmRouter: () => ({
-    link: jest.fn().mockReturnValue('/mock-url'),
+    link: mockRouterLink,
   }),
 }));
 
@@ -87,26 +90,41 @@ interface RenderOptions {
   traceItems?: TraceItem[];
   waterfallItemId?: string;
   initialPath?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
 }
 
 function renderUnifiedWaterfallContainer(options: RenderOptions = {}) {
-  const { traceItems = createMockTraceItems(), waterfallItemId, initialPath = '/' } = options;
+  const {
+    traceItems = createMockTraceItems(),
+    waterfallItemId,
+    initialPath = '/',
+    traceDocsTotal,
+    maxTraceItems,
+    discoverHref,
+  } = options;
 
   const history = createMemoryHistory({ initialEntries: [initialPath] });
 
   const result = renderWithTheme(
-    <Router history={history}>
-      <UnifiedWaterfallContainer
-        traceItems={traceItems}
-        errors={[]}
-        agentMarks={{}}
-        serviceName="products-service"
-        waterfallItemId={waterfallItemId}
-        showCriticalPath={false}
-        onShowCriticalPathChange={noop}
-        entryTransactionId="transaction-1"
-      />
-    </Router>
+    <IntlProvider>
+      <Router history={history}>
+        <UnifiedWaterfallContainer
+          traceItems={traceItems}
+          errors={[]}
+          agentMarks={{}}
+          serviceName="products-service"
+          waterfallItemId={waterfallItemId}
+          showCriticalPath={false}
+          onShowCriticalPathChange={noop}
+          entryTransactionId="transaction-1"
+          traceDocsTotal={traceDocsTotal}
+          maxTraceItems={maxTraceItems}
+          discoverHref={discoverHref}
+        />
+      </Router>
+    </IntlProvider>
   );
 
   return { ...result, history };
@@ -121,6 +139,7 @@ describe('UnifiedWaterfallContainer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRouterLink.mockReturnValue('/mock-service-overview-url');
   });
 
   afterEach(() => {
@@ -209,6 +228,95 @@ describe('UnifiedWaterfallContainer', () => {
 
       expect(getByText('GET /api/products')).toBeInTheDocument();
       expect(queryByRole('dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('WaterfallSizeWarning', () => {
+    it('shows warning when traceDocsTotal exceeds maxTraceItems', async () => {
+      const { getByTestId } = renderUnifiedWaterfallContainer({
+        traceDocsTotal: 10000,
+        maxTraceItems: 5000,
+      });
+
+      await waitFor(() => expect(getByTestId('waterfallSizeWarning')).toBeInTheDocument());
+    });
+
+    it('does not show warning when traceDocsTotal is within limit', async () => {
+      const { queryByTestId } = renderUnifiedWaterfallContainer({
+        traceDocsTotal: 4000,
+        maxTraceItems: 5000,
+      });
+
+      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
+    });
+
+    it('does not show warning when traceDocsTotal equals maxTraceItems', async () => {
+      const { queryByTestId } = renderUnifiedWaterfallContainer({
+        traceDocsTotal: 5000,
+        maxTraceItems: 5000,
+      });
+
+      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
+    });
+
+    it('does not show warning when traceDocsTotal or maxTraceItems is undefined', async () => {
+      const { queryByTestId } = renderUnifiedWaterfallContainer({
+        traceDocsTotal: undefined,
+        maxTraceItems: undefined,
+      });
+
+      await waitFor(() => expect(queryByTestId('waterfallSizeWarning')).not.toBeInTheDocument());
+    });
+
+    it('passes discoverHref to the warning', async () => {
+      const { getByTestId } = renderUnifiedWaterfallContainer({
+        traceDocsTotal: 10000,
+        maxTraceItems: 5000,
+        discoverHref: 'https://discover-link',
+      });
+
+      await waitFor(() => {
+        const link = getByTestId('waterfallSizeWarningDiscoverLink');
+        expect(link).toBeInTheDocument();
+        expect(link).toHaveAttribute('href', 'https://discover-link');
+      });
+    });
+
+    it('does not render a Discover link when discoverHref is not provided', async () => {
+      const { queryByTestId } = renderUnifiedWaterfallContainer({
+        traceDocsTotal: 10000,
+        maxTraceItems: 5000,
+      });
+
+      await waitFor(() =>
+        expect(queryByTestId('waterfallSizeWarningDiscoverLink')).not.toBeInTheDocument()
+      );
+    });
+  });
+
+  describe('service badge navigation', () => {
+    it('service name badge has href pointing to service overview', async () => {
+      const { getAllByTestId } = renderUnifiedWaterfallContainer();
+
+      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
+
+      const badges = getAllByTestId('apmBarDetailsServiceNameBadge');
+      badges.forEach((badge) => {
+        expect(badge).toHaveAttribute('href', '/mock-service-overview-url');
+      });
+    });
+
+    it('builds the href using the service name from the trace item', async () => {
+      const { getAllByTestId } = renderUnifiedWaterfallContainer();
+
+      await waitFor(() => getAllByTestId('apmBarDetailsServiceNameBadge'));
+
+      expect(mockRouterLink).toHaveBeenCalledWith(
+        '/services/{serviceName}/overview',
+        expect.objectContaining({
+          path: { serviceName: 'products-service' },
+        })
+      );
     });
   });
 });

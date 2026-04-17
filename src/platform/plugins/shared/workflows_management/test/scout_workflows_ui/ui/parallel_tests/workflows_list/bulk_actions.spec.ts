@@ -22,17 +22,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should enable disabled workflows', async ({
-    page,
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should enable disabled workflows', async ({ page, pageObjects, apiServices }) => {
     const workflows = [
       { name: 'BulkTest Enabled Workflow 1', description: 'Bulk workflow 1', enabled: false },
       { name: 'BulkTest Enabled Workflow 2', description: 'Bulk workflow 2', enabled: false },
     ];
-    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+    await apiServices.workflows.bulkCreate(workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.performBulkAction(
@@ -53,7 +48,6 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
   test('should keep list order stable when bulk-enabling N-1 workflows', async ({
     pageObjects,
     apiServices,
-    scoutSpace,
   }) => {
     const workflows = [
       {
@@ -72,7 +66,7 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
         enabled: false,
       },
     ];
-    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+    await apiServices.workflows.bulkCreate(workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
     const orderBefore = await pageObjects.workflowList.getVisibleWorkflowNamesInOrder();
@@ -86,17 +80,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     expect(orderAfter).toStrictEqual(orderBefore);
   });
 
-  test('should disable enabled workflows', async ({
-    page,
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should disable enabled workflows', async ({ page, pageObjects, apiServices }) => {
     const workflows = [
       { name: 'BulkTest Disabled Workflow 1', description: 'Bulk workflow 1', enabled: true },
       { name: 'BulkTest Disabled Workflow 2', description: 'Bulk workflow 2', enabled: true },
     ];
-    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+    await apiServices.workflows.bulkCreate(workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.performBulkAction(
@@ -114,12 +103,12 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     await checkDisabled();
   });
 
-  test('should delete workflows', async ({ page, pageObjects, apiServices, scoutSpace }) => {
+  test('should delete workflows', async ({ page, pageObjects, apiServices }) => {
     const workflows = [
       { name: 'BulkTest Delete Workflow 1', description: 'To be deleted', enabled: true },
       { name: 'BulkTest Delete Workflow 2', description: 'To be deleted', enabled: true },
     ];
-    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+    await apiServices.workflows.bulkCreate(workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.performBulkAction(
@@ -138,7 +127,7 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
     await checkDeleted();
   });
 
-  test('should clear selection', async ({ page, pageObjects, apiServices, scoutSpace }) => {
+  test('should clear selection', async ({ page, pageObjects, apiServices }) => {
     const workflows = [
       {
         name: 'BulkTest Clear Selection Workflow 1',
@@ -151,7 +140,7 @@ test.describe('WorkflowsList/BulkActions', { tag: [...tags.stateful.classic] }, 
         enabled: true,
       },
     ];
-    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+    await apiServices.workflows.bulkCreate(workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
     await pageObjects.workflowList.selectWorkflows(workflows.map((w) => w.name));

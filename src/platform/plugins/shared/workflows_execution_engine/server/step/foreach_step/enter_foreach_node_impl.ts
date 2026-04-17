@@ -8,6 +8,7 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
+import type { ForeachStepState } from './types';
 import { isTemplateExpression } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -32,8 +33,9 @@ export class EnterForeachNodeImpl implements NodeImplementation {
 
   private async enterForeach(): Promise<void> {
     this.stepExecutionRuntime.startStep();
+    const foreachConfig = this.node.configuration.foreach;
     this.stepExecutionRuntime.setInput({
-      foreach: this.node.configuration.foreach,
+      foreach: Array.isArray(foreachConfig) ? JSON.stringify(foreachConfig) : foreachConfig,
     });
     const evaluatedItems = this.getItems();
 
@@ -73,12 +75,20 @@ export class EnterForeachNodeImpl implements NodeImplementation {
   }
 
   private advanceIteration(): void {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const foreachState = this.stepExecutionRuntime.getCurrentStepState()!;
-    const index = foreachState.index + 1;
+    const currentForeachState = this.stepExecutionRuntime.getCurrentStepState() as
+      | ForeachStepState
+      | undefined;
 
+    if (!currentForeachState) {
+      throw new Error(`Foreach state for step ${this.node.stepId} not found`);
+    }
+
+    const currentIndex = currentForeachState.index as number;
+
+    const index = currentIndex + 1;
+    const newForeachState: ForeachStepState = { index, total: currentForeachState.total };
     // Only persist index and total — no need to store the full items array.
-    this.stepExecutionRuntime.setCurrentStepState({ index, total: foreachState.total });
+    this.stepExecutionRuntime.setCurrentStepState(newForeachState);
     // Enter a new scope for the new iteration
     this.wfExecutionRuntimeManager.enterScope(index.toString());
     this.wfExecutionRuntimeManager.navigateToNextNode();
@@ -121,6 +131,10 @@ export class EnterForeachNodeImpl implements NodeImplementation {
       throw new Error(
         'Foreach configuration is required. Please specify an array or expression that evaluates to an array.'
       );
+    }
+
+    if (Array.isArray(expression)) {
+      return expression;
     }
 
     if (isTemplateExpression(expression)) {

@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import dateMath from '@kbn/datemath';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { TimeRange } from '@kbn/es-query';
 import { getTimeZoneFromSettings } from '@kbn/es-query';
@@ -179,6 +180,7 @@ export async function getESQLResults({
   timeRange,
   variables,
   timezone,
+  executionContext,
 }: {
   esqlQuery: string;
   search: ISearchGeneric;
@@ -188,6 +190,7 @@ export async function getESQLResults({
   timeRange?: TimeRange;
   variables?: ESQLControlVariable[];
   timezone?: string;
+  executionContext?: KibanaExecutionContext;
 }): Promise<{
   response: ESQLSearchResponse;
   params: ESQLSearchParams;
@@ -207,6 +210,7 @@ export async function getESQLResults({
       {
         abortSignal: signal,
         strategy: 'esql_async',
+        ...(executionContext ? { executionContext } : {}),
       }
     )
   );

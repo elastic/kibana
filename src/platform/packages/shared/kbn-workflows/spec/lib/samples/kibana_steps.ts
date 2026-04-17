@@ -106,7 +106,6 @@ export const KIBANA_VALID_SAMPLE_STEPS = [
     type: 'kibana.getCase',
     with: {
       caseId: '123',
-      includeComments: true,
     },
   },
   {
@@ -221,9 +220,7 @@ export const KIBANA_INVALID_SAMPLE_STEPS = [
     step: {
       name: 'get_case_without_case_id',
       type: 'kibana.getCase',
-      with: {
-        includeComments: true,
-      },
+      with: {},
     },
     zodErrorMessage: 'Invalid input: expected string, received undefined',
     diagnosticErrorMessage: /Missing property "caseId"/,

@@ -15,7 +15,7 @@ import {
   EuiPopoverFooter,
   EuiSelectable,
 } from '@elastic/eui';
-import { useLoadConnectors } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -37,7 +37,7 @@ import { ConnectorIcon } from './connector_icon';
 const selectableAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.selectableAriaLabel',
   {
-    defaultMessage: 'Select a connector',
+    defaultMessage: 'Select a model',
   }
 );
 const defaultConnectorLabel = i18n.translate(
@@ -113,7 +113,7 @@ const DefaultConnectorBadge = () => {
 const manageConnectorsAriaLabel = i18n.translate(
   'xpack.agentBuilder.conversationInput.connectorSelector.manageConnectors.ariaLabel',
   {
-    defaultMessage: 'Manage connectors',
+    defaultMessage: 'Manage models',
   }
 );
 
@@ -160,8 +160,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const { data: aiConnectors, isLoading } = useLoadConnectors({
     http,
+    featureId: 'agent_builder',
     settings,
-    inferenceEnabled: true,
   });
 
   const connectors = useMemo(() => aiConnectors ?? [], [aiConnectors]);

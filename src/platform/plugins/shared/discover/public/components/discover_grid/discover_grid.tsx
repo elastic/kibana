@@ -126,7 +126,16 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
 
     return isCascadedDocumentsAvailable && cascadedDocumentsContext.selectedCascadeGroups.length ? (
       <CascadedDocumentsProvider value={cascadedDocumentsContext}>
-        <LazyCascadedDocumentsLayout {...props} />
+        <LazyCascadedDocumentsLayout
+          rows={props.rows}
+          columns={props.columns}
+          dataGridDensityState={props.dataGridDensityState}
+          showTimeCol={props.showTimeCol}
+          dataView={props.dataView}
+          showKeyboardShortcuts={props.showKeyboardShortcuts}
+          externalCustomRenderers={props.externalCustomRenderers}
+          onUpdateDataGridDensity={props.onUpdateDataGridDensity}
+        />
       </CascadedDocumentsProvider>
     ) : (
       <UnifiedDataTable

@@ -62,7 +62,7 @@ const FieldTableHeaderComponent: React.FC<FieldTableHeaderProps> = ({
             <EuiButtonEmpty
               data-test-subj="viewSelectorButton"
               size="xs"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               onClick={togglePopover}
             >

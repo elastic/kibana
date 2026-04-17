@@ -10,13 +10,21 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_TRACE_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { registerGetTraceRoute } from './get_trace';
 
 describe('GET /internal/evals/traces/{traceId}', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetTraceRoute({ router, logger });
+    registerGetTraceRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
+      getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACE_URL).versions[

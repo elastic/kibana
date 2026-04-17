@@ -20,6 +20,8 @@ export interface ModuleDiscoveryInfo {
   name: string;
   group: string;
   type: 'plugin' | 'package';
+  /** Set when using --affected-modules: true if this module's @kbn/ ID is in the affected set */
+  isAffected?: boolean;
   configs: {
     path: string;
     hasTests: boolean;

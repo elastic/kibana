@@ -11,18 +11,18 @@ import type { KbnClient, ScoutLogger } from '../../../../../../common';
 import { measurePerformanceAsync } from '../../../../../../common';
 
 export interface SpacesApiService {
-  create: (space: { id: string; name: string }) => Promise<void>;
+  create: (space: { id: string; name?: string; disabledFeatures?: string[] }) => Promise<void>;
   delete: (id: string) => Promise<void>;
 }
 
 export const getSpacesApiHelper = (log: ScoutLogger, kbnClient: KbnClient): SpacesApiService => {
   return {
-    create: async (space: { id: string; name: string }) => {
-      await measurePerformanceAsync(log, `spacesApi.create(${space.id})`, async () => {
+    create: async ({ id, name = id, disabledFeatures = [] }) => {
+      await measurePerformanceAsync(log, `spacesApi.create(${id})`, async () => {
         await kbnClient.request({
           method: 'POST',
           path: '/api/spaces/space',
-          body: space,
+          body: { id, name, disabledFeatures },
         });
       });
     },

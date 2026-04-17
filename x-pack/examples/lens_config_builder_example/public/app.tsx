@@ -50,26 +50,26 @@ export const App = (props: {
   const [lensConfig, setLensConfig] = useState<LensApiState>({
     type: 'metric',
     title: 'Total Sales',
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
     },
     metrics: [
       {
         type: 'primary',
-        operation: 'value',
         column: 'totalBytes',
         label: 'Total Bytes Value',
-        fit: false,
-        alignments: {
-          value: 'left',
-          labels: 'left',
-        },
       },
     ],
+    styling: {
+      primary: {
+        value: { alignment: 'left', sizing: 'auto' },
+        labels: { alignment: 'left' },
+      },
+    },
     ignore_global_filters: true,
     sampling: 1,
-  });
+  } satisfies LensApiState);
   const [lensConfigString, setLensConfigString] = useState(JSON.stringify(lensConfig));
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;

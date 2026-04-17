@@ -46,10 +46,11 @@ export class VisualizationListingPlugin
     core: CoreSetup<VisualizationListingStartDependencies>,
     dependencies: SetupDependencies
   ) {
+    const tabTitle = i18n.translate('visualizationListing.listingViewTitle', {
+      defaultMessage: 'Visualizations',
+    });
     const visualizationsTabConfig: DashboardListingTab = {
-      title: i18n.translate('visualizationListing.listingViewTitle', {
-        defaultMessage: 'Visualizations',
-      }),
+      title: tabTitle,
       id: 'visualizations',
       getTableList: async (props: TableListTabParentProps) => {
         const [coreStart, pluginsStart] = await core.getStartServices();

@@ -40,7 +40,7 @@ import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
-import type { ConcreteTaskInstance } from './task';
+import type { ConcreteTaskInstance, TaskEventLogger } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import type { TaskRunner } from './task_running';
@@ -80,6 +80,7 @@ export interface TaskPollingLifecycleOpts {
   usageCounter?: UsageCounter;
   taskPartitioner: TaskPartitioner;
   startingCapacity: number;
+  eventLogger: TaskEventLogger;
 }
 
 export type TaskLifecycleEvent =
@@ -122,6 +123,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   private currentPollInterval: number;
   private currentTmUtilization$ = new BehaviorSubject<number>(0);
 
+  private eventLogger: TaskEventLogger;
+
   /**
    * Initializes the task manager, preventing any further addition of middleware,
    * enabling the task manipulation methods, and beginning the background polling
@@ -140,6 +143,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     usageCounter,
     taskPartitioner,
     startingCapacity,
+    eventLogger,
   }: TaskPollingLifecycleOpts) {
     this.basePathService = basePathService;
     this.logger = logger;
@@ -151,6 +155,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.config = config;
     const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
     this.currentPollInterval = pollInterval;
+    this.eventLogger = eventLogger;
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
@@ -274,6 +279,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
+      eventLogger: this.eventLogger,
     });
   };
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ENABLED_TRIGGER_TABS } from './constants';
+import type { ENABLED_STEP_TRIGGER_TABS, ENABLED_TRIGGER_TABS } from './constants';
 
 export type WorkflowTriggerTab = (typeof ENABLED_TRIGGER_TABS)[number];
+export type WorkflowStepTriggerTab = (typeof ENABLED_STEP_TRIGGER_TABS)[number];

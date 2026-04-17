@@ -37,7 +37,7 @@ export const MetricsContextMenu = ({
   const handleClick = useCallback(
     (val: string) => {
       if (!SnapshotMetricTypeRT.is(val)) {
-        const selectedMetric = customMetrics.find((m) => m.id === val);
+        const selectedMetric = customMetrics?.find((m) => m.id === val);
         if (selectedMetric) {
           onChange(selectedMetric);
         }

@@ -61,7 +61,7 @@ export const ConnectToElasticsearch = () => {
           <EuiButton
             data-test-subj="searchHomepageConnectToElasticsearchApiKeysButton"
             color="text"
-            iconType="plusInCircle"
+            iconType="plusCircle"
             size="s"
             onClick={() =>
               openWiredConnectionDetails({

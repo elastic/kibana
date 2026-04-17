@@ -91,7 +91,7 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 onClick={toggleExpanded}
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 iconSide="left"
                 data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
               >

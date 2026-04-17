@@ -123,6 +123,7 @@ function makeEsIndexMappings(
         ...((overrides.event as any) || {}),
       },
       agent_ids: { ignore_above: 1024, type: 'keyword' },
+      tags: { ignore_above: 256, type: 'keyword' },
       ...overrides,
     },
   };

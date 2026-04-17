@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiText,
-  EuiToolTip,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiToolTip } from '@elastic/eui';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -24,6 +16,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
+import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import { AlertingFlyout } from '../../../alerting/ui_components/alerting_flyout';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -44,7 +37,6 @@ import { useFallbackToTransactionsFetcher } from '../../../../hooks/use_fallback
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { isFailure, isPending } from '../../../../hooks/use_fetcher';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { unit } from '../../../../utils/style';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';
@@ -59,7 +51,6 @@ import type {
   VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
-import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 import { SloStatusBadge } from '../../../shared/slo_status_badge';
 import { getESQLQuery, type IndexType } from '../../../shared/links/discover_links/get_esql_query';
@@ -71,6 +62,7 @@ import {
 import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
+import { listMetricColumnPreset } from '../../../../utils/column_presets';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
@@ -109,21 +101,25 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: (
-              <ColumnHeaderWithTooltip
-                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.alertsCount', {
-                  defaultMessage: 'The count of the active alerts',
-                })}
-                label={i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
-                  defaultMessage: 'Alerts',
-                })}
-              />
-            ),
-            width: `${unit * 6}px`,
+            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+              defaultMessage: 'Alerts',
+            }),
+            nameTooltip: {
+              content: i18n.translate('xpack.apm.servicesTable.tooltip.alertsCount', {
+                defaultMessage: 'The count of the active alerts',
+              }),
+              icon: 'question',
+              iconProps: {
+                color: 'subdued',
+              },
+            },
+            width: '6.5em',
+            minWidth: '6.5em',
+            className: 'eui-textNoWrap',
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
-                return null;
+                return <EmptyCellValue />;
               }
 
               return (
@@ -160,17 +156,21 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.SloStatus,
-            name: (
-              <ColumnHeaderWithTooltip
-                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.slosStatus', {
-                  defaultMessage: 'The status of APM SLOs for this service',
-                })}
-                label={i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
-                  defaultMessage: 'SLOs',
-                })}
-              />
-            ),
-            width: `${unit * 8}px`,
+            name: i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
+              defaultMessage: 'SLOs',
+            }),
+            nameTooltip: {
+              content: i18n.translate('xpack.apm.servicesTable.tooltip.slosStatus', {
+                defaultMessage: 'The status of APM SLOs for this service',
+              }),
+              icon: 'question',
+              iconProps: {
+                color: 'subdued',
+              },
+            },
+            width: '8.5em',
+            minWidth: '8.5em',
+            className: 'eui-textNoWrap',
             sortable: true,
             render: (_, { serviceName, agentName, sloStatus, sloCount }) => {
               return (
@@ -189,25 +189,21 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.HealthStatus,
-            name: (
-              <>
-                {i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
-                  defaultMessage: 'Health',
-                })}{' '}
-                <EuiIconTip
-                  iconProps={{
-                    className: 'eui-alignTop',
-                  }}
-                  position="right"
-                  color="subdued"
-                  content={i18n.translate('xpack.apm.servicesTable.healthColumnLabel.tooltip', {
-                    defaultMessage:
-                      'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
-                  })}
-                />
-              </>
-            ),
-            width: `${unit * 6}px`,
+            name: i18n.translate('xpack.apm.servicesTable.healthColumnLabel', {
+              defaultMessage: 'Health',
+            }),
+            nameTooltip: {
+              content: i18n.translate('xpack.apm.servicesTable.healthColumnLabel.tooltip', {
+                defaultMessage:
+                  'Health status is determined by the latency anomalies detected by the ML jobs specific to the selected service environment and the supported transaction types. These transaction types include "page-load", "request", and "mobile".',
+              }),
+              icon: 'question',
+              iconProps: {
+                color: 'subdued',
+              },
+            },
+            width: '6.5em',
+            minWidth: '6.5em',
             sortable: true,
             render: (_, { healthStatus }) => {
               return <HealthBadge healthStatus={healthStatus ?? ServiceHealthStatus.unknown} />;
@@ -221,6 +217,8 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
+      minWidth: '14em',
+      maxWidth: '18em',
       render: (_, { serviceName, agentName, transactionType }) => (
         <ServiceLink
           agentName={agentName}
@@ -237,8 +235,12 @@ export function getServiceColumns({
             name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
               defaultMessage: 'Environment',
             }),
-            width: `${unit * 9}px`,
+            width: '10em',
+            minWidth: '8em',
+            maxWidth: '14em',
             sortable: true,
+            truncateText: true,
+            textOnly: true,
             render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
           } as ITableColumn<ServiceListItem>,
         ]
@@ -250,18 +252,18 @@ export function getServiceColumns({
             name: i18n.translate('xpack.apm.servicesTable.transactionColumnLabel', {
               defaultMessage: 'Transaction type',
             }),
-            width: `${unit * 6}px`,
+            width: `9.5em`,
             sortable: true,
           },
         ]
       : []),
     {
+      ...listMetricColumnPreset(),
       field: ServiceInventoryFieldName.Latency,
       name: i18n.translate('xpack.apm.servicesTable.latencyAvgColumnLabel', {
         defaultMessage: 'Latency (avg.)',
       }),
       sortable: true,
-      dataType: 'number',
       render: (_, { serviceName, latency }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
@@ -278,15 +280,14 @@ export function getServiceColumns({
           />
         );
       },
-      align: RIGHT_ALIGNMENT,
     },
     {
+      ...listMetricColumnPreset(),
       field: ServiceInventoryFieldName.Throughput,
       name: i18n.translate('xpack.apm.servicesTable.throughputColumnLabel', {
         defaultMessage: 'Throughput',
       }),
       sortable: true,
-      dataType: 'number',
       render: (_, { serviceName, throughput }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
@@ -304,15 +305,14 @@ export function getServiceColumns({
           />
         );
       },
-      align: RIGHT_ALIGNMENT,
     },
     {
+      ...listMetricColumnPreset(),
       field: ServiceInventoryFieldName.TransactionErrorRate,
       name: i18n.translate('xpack.apm.servicesTable.transactionErrorRate', {
         defaultMessage: 'Failed transaction rate',
       }),
       sortable: true,
-      dataType: 'number',
       render: (_, { serviceName, transactionErrorRate }) => {
         const valueLabel = asPercent(transactionErrorRate, 1);
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
@@ -330,7 +330,6 @@ export function getServiceColumns({
           />
         );
       },
-      align: RIGHT_ALIGNMENT,
     },
   ];
 }
@@ -531,6 +530,7 @@ export function ApmServicesTable({
           serviceName: item.serviceName,
           transactionType: indexType === 'traces' ? item.transactionType : undefined,
           environment,
+          sortDirection: 'DESC',
         },
         indexSettings,
       });
@@ -609,6 +609,7 @@ export function ApmServicesTable({
           tableSearchBar={tableSearchBar}
           actions={serviceActions}
           isActionsDisabled={(item: ServiceListItem) => item.serviceName === OTHER_SERVICE_NAME}
+          tableLayout="auto"
         />
       </EuiFlexItem>
       <AlertingFlyout

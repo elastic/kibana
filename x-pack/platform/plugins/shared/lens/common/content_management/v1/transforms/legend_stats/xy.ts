@@ -7,23 +7,25 @@
 
 import { LegendValue } from '@elastic/charts';
 
-import type { XYState } from '../../../../../public/visualizations/xy/types';
+import type { XYVisualizationState } from '../../../../../public/visualizations/xy/types';
 
 /**
  * Old color mapping state meant for type safety during runtime migrations of old configurations
  *
  * @deprecated
  */
-export interface DeprecatedLegendValueXYState extends XYState {
+export interface DeprecatedLegendValueXYState extends XYVisualizationState {
   valuesInLegend?: boolean;
 }
 
-export function convertXYToLegendStats(state: DeprecatedLegendValueXYState | XYState): XYState {
+export function convertXYToLegendStats(
+  state: DeprecatedLegendValueXYState | XYVisualizationState
+): XYVisualizationState {
   if ('valuesInLegend' in state) {
     const valuesInLegend = state.valuesInLegend;
     delete state.valuesInLegend;
 
-    const result: XYState = {
+    const result: XYVisualizationState = {
       ...state,
       legend: {
         ...state.legend,

@@ -9,6 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
+import type { createMockStore } from '../../../mock/create_store';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
 import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
@@ -76,9 +77,20 @@ jest.mock('../../../../management/pages/policy/view/policy_hooks', () => ({
   useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
 }));
 
-const renderNav = () =>
+const mockUseIsExperimentalFeatureEnabled = jest.fn((featureName: string) => {
+  if (featureName === 'securityClassicNavUpdate') {
+    return false;
+  }
+  return false;
+});
+jest.mock('../../../hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: (featureName: string) =>
+    mockUseIsExperimentalFeatureEnabled(featureName),
+}));
+
+const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
-    wrapper: TestProviders,
+    wrapper: ({ children }) => <TestProviders store={options?.store}>{children}</TestProviders>,
   });
 
 describe('SecuritySideNav', () => {
@@ -88,24 +100,28 @@ describe('SecuritySideNav', () => {
     useKibana().services.chrome.hasHeaderBanner$ = jest.fn(() =>
       new BehaviorSubject(false).asObservable()
     );
+    useKibana().services.serverless = undefined;
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   it('should render main items', () => {
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith({
-      selectedId: SecurityPageName.alerts,
-      items: [
-        {
-          id: SecurityPageName.alerts,
-          label: 'alerts',
-          href: '/alerts',
-          position: 'top',
-        },
-      ],
-      categories: getNavCategories(),
-      tracker: track,
-    });
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: SecurityPageName.alerts,
+        items: [
+          {
+            id: SecurityPageName.alerts,
+            label: 'alerts',
+            href: '/alerts',
+            position: 'top',
+          },
+        ],
+        categories: getNavCategories(false, false),
+        tracker: track,
+      })
+    );
   });
 
   it('should render the loader if items are still empty', () => {
@@ -167,7 +183,7 @@ describe('SecuritySideNav', () => {
 
   it('should render get started item', () => {
     mockUseNavLinks.mockReturnValue([
-      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'launch' },
+      { id: SecurityPageName.landing, title: 'Get started', sideNavIcon: 'rocket' },
     ]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
@@ -177,7 +193,7 @@ describe('SecuritySideNav', () => {
             id: SecurityPageName.landing,
             label: 'Get started',
             position: 'bottom',
-            iconType: 'launch',
+            iconType: 'rocket',
             appendSeparator: true,
           }),
         ],
@@ -249,7 +265,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(true),
+          categories: getNavCategories(true, false),
         })
       );
     });
@@ -259,7 +275,107 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false),
+          categories: getNavCategories(false, false),
+        })
+      );
+    });
+  });
+
+  describe('securityClassicNavUpdate feature flag', () => {
+    beforeEach(() => {
+      useKibana().services.serverless = undefined;
+    });
+
+    it('should use splitButton interaction variant when classic nav update is disabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          navLinkInteractionVariant: 'splitButton',
+        })
+      );
+    });
+
+    it('should use unifiedRow interaction variant when classic nav update is enabled and not serverless', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      useKibana().services.serverless = undefined;
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          navLinkInteractionVariant: 'unifiedRow',
+        })
+      );
+    });
+
+    it('should place administration item in footer when classic nav update is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseNavLinks.mockReturnValue([alertsNavLink, settingsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: expect.arrayContaining([
+            expect.objectContaining({
+              id: SecurityPageName.administration,
+              position: 'bottom',
+            }),
+          ]),
+        })
+      );
+    });
+
+    it('should not include administration item in body when classic nav update is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseNavLinks.mockReturnValue([settingsNavLink, alertsNavLink]);
+      renderNav();
+      const calls = mockSolutionSideNav.mock.calls;
+      const lastCall = calls[calls.length - 1];
+      const items = lastCall[0].items;
+      const administrationItemsInBody = items.filter(
+        (item) => item.id === SecurityPageName.administration && item.position !== 'bottom'
+      );
+      expect(administrationItemsInBody).toHaveLength(0);
+    });
+
+    it('should pass isClassicNavUpdateLayout true to getNavCategories when enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      useKibana().services.uiSettings.get = jest.fn().mockReturnValue(false);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          categories: getNavCategories(false, true),
+        })
+      );
+    });
+
+    it('should select launchpad when landing page is selected in classic nav layout', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseRouteSpy.mockReturnValue([{ pageName: SecurityPageName.landing }]);
+      const landingNavLink: NavigationLink = {
+        id: SecurityPageName.landing,
+        title: 'Get started',
+        description: 'Get started description',
+      };
+      mockUseNavLinks.mockReturnValue([landingNavLink, alertsNavLink, settingsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selectedId: 'securityGroup:launchpad',
+        })
+      );
+    });
+
+    it('should maintain top position for most items when classic nav update is enabled', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [
+            expect.objectContaining({
+              id: SecurityPageName.alerts,
+              position: 'top',
+            }),
+          ],
         })
       );
     });

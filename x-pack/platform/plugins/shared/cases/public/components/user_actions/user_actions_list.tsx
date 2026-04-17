@@ -11,7 +11,7 @@ import { EuiCommentList, useEuiTheme } from '@elastic/eui';
 import React, { useMemo, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 
-import type { AttachmentUI, UserActionUI } from '../../containers/types';
+import type { AttachmentUIV2, UserActionUI } from '../../containers/types';
 import type { UserActionTreeProps } from './types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
@@ -75,7 +75,7 @@ export type UserActionListProps = Omit<
   >;
   handleManageQuote: (quote: string) => void;
   caseUserActions: UserActionUI[];
-  attachments: AttachmentUI[];
+  attachments: AttachmentUIV2[];
   loadingAlertData: boolean;
   manualAlertsData: Record<string, unknown>;
   bottomActions?: EuiCommentProps[];
@@ -102,8 +102,11 @@ export const UserActionsList = React.memo(
     bottomActions = [],
     isExpandable = false,
   }: UserActionListProps) => {
-    const { externalReferenceAttachmentTypeRegistry, persistableStateAttachmentTypeRegistry } =
-      useCasesContext();
+    const {
+      externalReferenceAttachmentTypeRegistry,
+      persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
+    } = useCasesContext();
     const { owner } = useCasesContext();
     const { commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
@@ -142,6 +145,7 @@ export const UserActionsList = React.memo(
           caseConnectors,
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
+          unifiedAttachmentTypeRegistry,
           userAction,
           userProfiles,
           currentUserProfile,
@@ -170,6 +174,7 @@ export const UserActionsList = React.memo(
       caseConnectors,
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
       userProfiles,
       currentUserProfile,
       attachments,

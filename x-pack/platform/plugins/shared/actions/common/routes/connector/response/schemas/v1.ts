@@ -40,6 +40,13 @@ export const connectorResponseSchema = schema.object({
   is_connector_type_deprecated: schema.boolean({
     meta: { description: 'Indicates whether the connector type is deprecated.' },
   }),
+  auth_mode: schema.maybe(
+    schema.oneOf([schema.literal('shared'), schema.literal('per-user')], {
+      meta: {
+        description: 'The authentication mode used for the connector.',
+      },
+    })
+  ),
 });
 
 const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends({

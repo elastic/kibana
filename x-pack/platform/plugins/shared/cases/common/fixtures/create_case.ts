@@ -78,4 +78,6 @@ export const createCaseResponseFixture = {
   totalAlerts: 0,
   totalComment: 1,
   version: 'WzQ3LDFd',
+  observables: [],
+  total_observables: 0,
 };

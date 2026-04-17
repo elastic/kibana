@@ -54,6 +54,7 @@ describe('getMaintenanceWindowRoute', () => {
           "since": "9.1.0",
           "stability": "stable",
         },
+        "oasOperationObject": [Function],
         "summary": "Get maintenance window details.",
         "tags": Array [
           "oas-tag:maintenance-window",

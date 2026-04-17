@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       /* start by adding some incomplete data so that we can test `exists` query */
       await esArchiver.load(
-        'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls'
+        'src/platform/test/functional/fixtures/es_archiver/dashboard_elements/controls/chaining'
       );
 
       /* then, create our testing dashboard */

@@ -11,6 +11,7 @@ import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
@@ -26,8 +27,9 @@ export const initComponent = memoize(
       (props: PersistableStateAttachmentViewProps) => {
         const { persistableStateAttachmentState, caseData } = props;
 
-        const inputProps =
-          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState;
+        const inputProps = transformTimeRangeOut(
+          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState
+        );
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
@@ -51,8 +53,8 @@ export const initComponent = memoize(
               />
             ),
             description: `${dataFormatter.convert(
-              inputProps.timeRange!.from
-            )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+              inputProps.time_range!.from
+            )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
           },
         ];
 
@@ -68,7 +70,7 @@ export const initComponent = memoize(
           });
         }
 
-        const { jobIds, timeRange, ...rest } = inputProps;
+        const { jobIds, time_range: timeRange, ...rest } = inputProps;
         const selectedJobId = jobIds[0];
 
         return (

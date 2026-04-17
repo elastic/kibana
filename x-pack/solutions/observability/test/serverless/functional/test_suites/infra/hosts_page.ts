@@ -40,7 +40,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
-  describe('Hosts Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/257431
+  describe.skip('Hosts Page', function () {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'

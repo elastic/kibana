@@ -8,17 +8,16 @@
  */
 
 import type { Dispatch } from 'react';
-import type { ActiveFilters } from '../datasource';
 import type { ContentListItem } from '../item';
 
 /**
  * Action type constants for state reducer.
  */
 export const CONTENT_LIST_ACTIONS = {
-  /** Atomically update the search query text and parsed filters. */
-  SET_SEARCH: 'SET_SEARCH',
-  /** Clear all filters and reset query text. */
-  CLEAR_FILTERS: 'CLEAR_FILTERS',
+  /** Set the query text (source of truth for search, filters, and flags). */
+  SET_QUERY: 'SET_QUERY',
+  /** Hard-reset: clear all query text (search, filters, and flags). */
+  RESET_QUERY: 'RESET_QUERY',
   /** Set sort field and direction. */
   SET_SORT: 'SET_SORT',
   /** Set page index. */
@@ -30,36 +29,21 @@ export const CONTENT_LIST_ACTIONS = {
 } as const;
 
 /**
- * Default filter state.
- */
-export const DEFAULT_FILTERS: ActiveFilters = {
-  search: undefined,
-};
-
-/**
  * Client-controlled state managed by the reducer.
  *
- * This includes user-driven state like search, filters, and sort configuration.
+ * This includes user-driven state like query text, sort, and pagination.
  * Query data (items, loading, error) comes directly from React Query.
  */
 export interface ContentListClientState {
   /**
-   * Search state — the serialized `EuiSearchBar` query text is the source of truth
-   * for the search input value. This may contain filter syntax (e.g. `tag:foo`).
-   */
-  search: {
-    /** Full query text including filter syntax (e.g. `tag:foo search text`). */
-    queryText: string;
-  };
-  /**
-   * Parsed filter state used to drive data fetching.
+   * The query text — single source of truth for the search bar.
    *
-   * Updated atomically with `search.queryText` via `SET_SEARCH`.
-   * When no tag service is configured, `filters.search` equals `search.queryText`.
-   * When tag parsing is available, `filters.search` contains only the free-text
-   * portion and `filters.tags` holds the structured tag filters.
+   * All search, filter, and flag state lives in this string (e.g.,
+   * `"createdBy:jane@elastic.co is:starred dashboard"`). The structured
+   * model ({@link ContentListQueryModel}) is derived on-demand via
+   * `useQueryModel`.
    */
-  filters: ActiveFilters;
+  queryText: string;
   /** Sort state. */
   sort: {
     /** Field name to sort by. */
@@ -121,15 +105,15 @@ export interface ContentListQueryData {
  */
 export type ContentListState = ContentListClientState & ContentListQueryData;
 
-/** Atomically update both the query text and the parsed filters. */
-interface SetSearchAction {
-  type: typeof CONTENT_LIST_ACTIONS.SET_SEARCH;
-  payload: { queryText: string; filters: ActiveFilters };
+/** Set the query text. */
+interface SetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.SET_QUERY;
+  payload: { queryText: string };
 }
 
-/** Clear all filters and search text. */
-interface ClearFiltersAction {
-  type: typeof CONTENT_LIST_ACTIONS.CLEAR_FILTERS;
+/** Hard-reset: clear all query text (search, filters, and flags). */
+interface ResetQueryAction {
+  type: typeof CONTENT_LIST_ACTIONS.RESET_QUERY;
 }
 
 /** Set sort field and direction. */
@@ -144,8 +128,8 @@ interface SetSortAction {
  * @internal Used by the state reducer and dispatch function.
  */
 export type ContentListAction =
-  | SetSearchAction
-  | ClearFiltersAction
+  | SetQueryAction
+  | ResetQueryAction
   | SetSortAction
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_INDEX; payload: { index: number } }
   | { type: typeof CONTENT_LIST_ACTIONS.SET_PAGE_SIZE; payload: { size: number } }
@@ -160,6 +144,15 @@ export interface ContentListStateContextValue {
   state: ContentListState;
   /** Dispatch function for client state updates (search, filters, sort). */
   dispatch: Dispatch<ContentListAction>;
-  /** Function to manually refetch items from the data source. */
-  refetch: () => void;
+  /**
+   * Full refetch: clears the data-source cache (`onInvalidate`) then
+   * re-executes the query. Use after item mutations (edit, delete, create).
+   */
+  refetch: () => Promise<void>;
+  /**
+   * Lightweight refresh: re-decorates cached items with external data
+   * (`onRefresh`) then re-executes the query without clearing the cache.
+   * Use after external data mutations (star/unstar).
+   */
+  refresh: () => Promise<void>;
 }

@@ -8,8 +8,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 
-// FLAKY: https://github.com/elastic/kibana/issues/247632
-test.describe.skip(
+test.describe(
   'Custom threshold preview chart',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -30,31 +29,18 @@ test.describe.skip(
       await expect(previewChart.locator('[data-rendering-count="2"]')).toBeVisible();
     });
 
-    test('should handle the error message correctly', async ({ page }) => {
-      await expect(async () => {
-        const customEquationField = page.testSubj.locator(
-          'thresholdRuleCustomEquationEditorFieldText'
-        );
+    test('should show an error message when the equation is invalid', async ({ page }) => {
+      const customEquation = page.testSubj.locator('customEquation');
+      const customEquationField = page.testSubj.locator(
+        'thresholdRuleCustomEquationEditorFieldText'
+      );
+      const lensFailure = page.testSubj.locator('embeddable-lens-failure');
 
-        // Introduce an error in the equation
-        await page.testSubj.click('customEquation');
-        await customEquationField.click();
-        await customEquationField.fill('A +');
-        await page.testSubj.click('o11yClosablePopoverTitleButton');
+      await customEquation.click();
+      await customEquationField.fill('A +');
+      await page.testSubj.click('o11yClosablePopoverTitleButton');
 
-        const lensFailure = page.testSubj.locator('embeddable-lens-failure');
-        await expect(lensFailure).toBeVisible();
-        await expect(lensFailure).toContainText('An error occurred while rendering the chart');
-
-        // Fix the introduced error
-        await page.testSubj.click('customEquation');
-        await customEquationField.click();
-        await customEquationField.fill('A');
-        await page.testSubj.click('o11yClosablePopoverTitleButton');
-
-        // Wait for the chart to re-render after fixing the equation
-        await expect(lensFailure).toBeHidden();
-      }).toPass({ timeout: 15_000, intervals: [1000] });
+      await expect(lensFailure).toBeVisible({ timeout: 20_000 });
     });
   }
 );

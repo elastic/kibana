@@ -136,6 +136,7 @@ export class ScopeExpression extends Component {
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={`scope_cb_${fieldName}`}
+            data-test-subj={`mlScopeCheckbox_${fieldName}`}
             checked={enabled}
             onChange={this.onEnableChange}
           />

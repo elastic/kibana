@@ -26,7 +26,7 @@
           ", void>"
         ],
         "path": "src/core/packages/status/server-internal/src/status_service.ts",
-        "lineNumber": 74,
+        "lineNumber": 76,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -42,7 +42,7 @@
               "any"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 84,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -58,7 +58,7 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/status/server-internal/src/status_service.ts",
-                "lineNumber": 84,
+                "lineNumber": 86,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -80,7 +80,7 @@
               ") => Promise<void>"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 89,
+            "lineNumber": 91,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -96,7 +96,7 @@
                   "StatusServicePrebootDeps"
                 ],
                 "path": "src/core/packages/status/server-internal/src/status_service.ts",
-                "lineNumber": 89,
+                "lineNumber": 91,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -113,7 +113,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "({ analytics, elasticsearch, pluginDependencies, http, httpRateLimiter, metrics, savedObjects, environment, coreUsageData, }: ",
+              "({ analytics, elasticsearch, pluginDependencies, http, httpRateLimiter, metrics, savedObjects, environment, coreUsageData, loggingSystem, }: ",
               "StatusServiceSetupDeps",
               ") => Promise<{ core$: ",
               "Observable",
@@ -142,7 +142,7 @@
               ">; }; isStatusPageAnonymous: () => boolean; }>"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 95,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -152,13 +152,13 @@
                 "id": "def-server.StatusService.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    httpRateLimiter,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n  }",
+                "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    httpRateLimiter,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n    loggingSystem,\n  }",
                 "description": [],
                 "signature": [
                   "StatusServiceSetupDeps"
                 ],
                 "path": "src/core/packages/status/server-internal/src/status_service.ts",
-                "lineNumber": 95,
+                "lineNumber": 97,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -178,7 +178,7 @@
               "() => void"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 187,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -196,7 +196,7 @@
               "() => void"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 195,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -255,7 +255,7 @@
         "label": "StatusServiceSetupDeps",
         "description": [],
         "path": "src/core/packages/status/server-internal/src/status_service.ts",
-        "lineNumber": 62,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -287,7 +287,7 @@
               "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 63,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -309,7 +309,7 @@
               ">>; }"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 64,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -325,7 +325,7 @@
               "InternalEnvironmentServicePreboot"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 65,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -341,7 +341,7 @@
               "ReadonlyMap<string, string[]>"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -357,7 +357,7 @@
               "InternalHttpServiceSetup"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -377,7 +377,7 @@
               "<unknown> | undefined>; }"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 68,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -393,7 +393,7 @@
               "MetricsServiceSetup"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -415,7 +415,7 @@
               ">>; }"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -433,7 +433,31 @@
               "; }"
             ],
             "path": "src/core/packages/status/server-internal/src/status_service.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.loggingSystem",
+            "type": "Object",
+            "tags": [],
+            "label": "loggingSystem",
+            "description": [],
+            "signature": [
+              "{ setGlobalContext: (meta: Partial<",
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.LogMeta",
+                "text": "LogMeta"
+              },
+              ">) => void; }"
+            ],
+            "path": "src/core/packages/status/server-internal/src/status_service.ts",
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

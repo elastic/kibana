@@ -10,12 +10,36 @@
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isAtomic } from '@kbn/workflows/graph';
 import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 import { stepSchemas } from '../../../../common/step_schemas';
+
+const waitForInputFallbackSchema: z.ZodSchema = z.record(z.string(), z.unknown());
 
 export const getOutputSchemaForStepType = (node: GraphNodeUnion): z.ZodSchema => {
   // Handle internal actions with pattern matching first
   // TODO: add output schema support for elasticsearch.request and kibana.request connectors
+
+  // waitForInput has a dynamic output schema derived from its with.schema field.
+  // It is a built-in step so it is handled here directly rather than through the
+  // extension registry (which is for user-space step types like data.map).
+  if (node.stepType === 'waitForInput') {
+    const jsonSchema =
+      isAtomic(node) || 'configuration' in node
+        ? ((node as { configuration?: { with?: { schema?: unknown } } }).configuration?.with
+            ?.schema as Record<string, unknown> | undefined)
+        : undefined;
+
+    if (jsonSchema) {
+      try {
+        const zodSchema = fromJSONSchema(jsonSchema);
+        if (zodSchema) return zodSchema as z.ZodSchema;
+      } catch {
+        // fall through to permissive fallback
+      }
+    }
+    return waitForInputFallbackSchema;
+  }
 
   if (isAtomic(node)) {
     const stepDefinition = stepSchemas.getStepDefinition(node.stepType);

@@ -18,6 +18,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   describe('tab filters', function () {
+    it('should carry over filters as WHERE clauses when switching to ES|QL', async () => {
+      await filterBar.addFilter({ field: 'extension.raw', operation: 'is', value: 'css' });
+      await discover.waitUntilTabIsLoaded();
+      expect(await filterBar.getFilterCount()).to.be(1);
+
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      const query = await esql.getEsqlEditorQuery();
+      expect(query).to.contain('`extension.raw` : "css"');
+      expect(await filterBar.getFilterCount()).to.be(0);
+
+      // Submit the query and verify it returns results
+      await esql.submitEsqlEditorQuery();
+      await discover.waitUntilTabIsLoaded();
+      expect(await discover.getHitCountInt()).to.be.above(0);
+
+      // switch back to data view mode so the next test starts in classic mode
+      await discover.selectDataViewMode({ discardModal: true });
+      await discover.waitUntilTabIsLoaded();
+    });
+
     it('uses the correct query and filters', async () => {
       const checkTab0 = async () => {
         expect(await queryBar.getQueryString()).to.be('');

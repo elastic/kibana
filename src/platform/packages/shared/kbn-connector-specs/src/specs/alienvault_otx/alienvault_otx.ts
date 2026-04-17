@@ -31,7 +31,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
       defaultMessage: 'Community-driven threat intelligence from Open Threat Exchange',
     }),
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

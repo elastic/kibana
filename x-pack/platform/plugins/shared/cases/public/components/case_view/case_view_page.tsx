@@ -23,9 +23,9 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
-import { CaseViewEvents } from './components/case_view_events';
 import { CaseViewAttachments } from './components/case_view_attachments';
 import { filterCaseAttachmentsBySearchTerm } from './components/helpers';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments/migration_utils';
 
 const getActiveTabId = (tabId?: string) => {
   if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
@@ -52,9 +52,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     useFetchAlertData,
     onAlertsTableLoaded,
     renderAlertsTable,
-    renderEventsTable,
   }) => {
-    const { features } = useCasesContext();
+    const { features, unifiedAttachmentTypeRegistry } = useCasesContext();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
 
@@ -99,6 +98,15 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         };
       }
     }, [isLoading, refreshRef, refreshCaseViewPage]);
+
+    const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
+    const EventTabComponent = useMemo(() => {
+      const eventType = toUnifiedAttachmentType('event', owner);
+      if (!unifiedAttachmentTypeRegistry.has(eventType)) {
+        return undefined;
+      }
+      return unifiedAttachmentTypeRegistry.get(eventType)?.getAttachmentTabViewObject?.()?.children;
+    }, [unifiedAttachmentTypeRegistry, owner]);
 
     const onSubmitTitle = useCallback(
       (newTitle: string) =>
@@ -158,17 +166,17 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               <>
                 {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
                   <CaseViewAlerts
+                    key={caseWithFilteredAttachments.updatedAt}
                     caseData={caseWithFilteredAttachments}
                     renderAlertsTable={renderAlertsTable}
                     onAlertsTableLoaded={onAlertsTableLoaded}
                   />
                 )}
-                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
-                  <CaseViewEvents
-                    caseData={caseWithFilteredAttachments}
-                    renderEventsTable={renderEventsTable}
-                  />
-                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS &&
+                  features.events.enabled &&
+                  EventTabComponent != null && (
+                    <EventTabComponent caseData={caseWithFilteredAttachments} />
+                  )}
                 {activeTabId === CASE_VIEW_PAGE_TABS.FILES && (
                   <CaseViewFiles caseData={caseWithFilteredAttachments} searchTerm={searchTerm} />
                 )}

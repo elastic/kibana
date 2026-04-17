@@ -143,6 +143,12 @@ export class FlyoutService {
     };
   }
 
+  public closeAllFlyouts(): void {
+    if (this.activeFlyout) {
+      this.activeFlyout.close();
+    }
+  }
+
   /**
    * Using React.Render to re-render into a target DOM element will replace
    * the content of the target but won't call unmountComponent on any

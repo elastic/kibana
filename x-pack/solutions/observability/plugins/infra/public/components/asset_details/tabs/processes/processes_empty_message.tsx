@@ -23,7 +23,7 @@ export const ProcessesEmptyMessage: React.FC<ProcessesEmptyMessageProps> = ({
 
   return (
     <EuiEmptyPrompt
-      iconType="search"
+      iconType="magnify"
       titleSize="s"
       title={
         <strong>

@@ -18,6 +18,7 @@ export const useMigrationSourceOptions = () => {
     {
       value: MigrationSource.SPLUNK,
       inputDisplay: <span>{MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.SPLUNK]}</span>,
+      'data-test-subj': `migrationSourceOption-${MigrationSource.SPLUNK}`,
     },
   ];
 
@@ -27,9 +28,10 @@ export const useMigrationSourceOptions = () => {
       inputDisplay: (
         <span>
           {MIGRATION_VENDOR_DISPLAY_NAME[MigrationSource.QRADAR]}
-          <EuiIcon type="flask" />
+          <EuiIcon type="flask" aria-label="Technical Preview" />
         </span>
       ),
+      'data-test-subj': `migrationSourceOption-${MigrationSource.QRADAR}`,
     });
   }
   return options;

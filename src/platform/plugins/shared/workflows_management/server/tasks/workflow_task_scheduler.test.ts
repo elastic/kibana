@@ -47,10 +47,6 @@ describe('WorkflowTaskScheduler', () => {
       const conflictError = new Error('Conflict') as Error & { statusCode: number };
       conflictError.statusCode = 409;
       (mockTaskManager.schedule as jest.Mock).mockRejectedValueOnce(conflictError);
-      (mockTaskManager.bulkUpdateSchedules as jest.Mock).mockResolvedValueOnce({
-        tasks: [{ id: 'workflow:test-workflow:scheduled' }],
-        errors: [],
-      });
 
       const workflow: EsWorkflow = {
         id: 'test-workflow',
@@ -80,7 +76,8 @@ describe('WorkflowTaskScheduler', () => {
       expect(mockTaskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
       expect(mockTaskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['workflow:test-workflow:scheduled'],
-        expect.objectContaining({ interval: '30s' })
+        expect.objectContaining({ interval: '30s' }),
+        { request: mockRequest }
       );
       expect(mockLogger.debug).toHaveBeenCalledWith(
         expect.stringContaining('Updated existing scheduled task')

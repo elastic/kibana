@@ -11,6 +11,7 @@ import { fireEvent, waitFor } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 import type { TestRenderer } from '../../../../../../../../mock';
 import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
+import { DATA_STREAM_TYPE_VAR_NAME } from '../../../../../../../../../common/constants';
 
 import type {
   PackageInfo,
@@ -203,10 +204,16 @@ describe('PackagePolicyInputStreamConfig', () => {
     jest.resetAllMocks();
   });
 
+  /**
+   * Renders `PackagePolicyInputStreamConfig`. Pass `inputPolicyTemplate` (parent input’s
+   * `policy_template`) for composable multi-template packages so `dynamic_signal_types` matches
+   * the correct template.
+   */
   const render = (
     packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
     packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
-    packageInfo: PackageInfo = mockPackageInfo
+    packageInfo: PackageInfo = mockPackageInfo,
+    inputPolicyTemplate?: string
   ) => {
     renderResult = testRenderer.render(
       <PackagePolicyInputStreamConfig
@@ -217,6 +224,7 @@ describe('PackagePolicyInputStreamConfig', () => {
         inputStreamValidationResults={{ vars: {} }}
         forceShowErrors={false}
         totalStreams={2}
+        inputPolicyTemplate={inputPolicyTemplate}
       />
     );
   };
@@ -431,6 +439,10 @@ describe('PackagePolicyInputStreamConfig', () => {
   });
 
   describe('dynamic_signal_types behavior', () => {
+    // Data Stream Type UI applies only to `packageInfo.type === 'input'` (see dev_docs/input_packages.md).
+    // Input packages are documented with a single policy template; composable multi-template behavior
+    // for `dynamic_signal_types` / `policy_template` is covered in policy_template.test.ts
+    // (`packagePolicyInputAllowsUndefinedDataStreamType`).
     const mockOtelInputStream: RegistryStreamWithDataStream = {
       input: 'otelcol',
       title: 'OTel Collector',
@@ -626,6 +638,63 @@ describe('PackagePolicyInputStreamConfig', () => {
         expect(
           Array.from(radioGroup.children).find((child) => child.textContent === 'Traces')
         ).toBeInTheDocument();
+      });
+    });
+
+    it('should show use_apm toggle when data_stream.type is traces for non-dynamic otelcol input', async () => {
+      const packageInfoNonDynamic: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OTel',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      const tracesInputStream: NewPackagePolicyInputStream = {
+        ...mockOtelPolicyInputStream,
+        vars: {
+          [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'traces' },
+        },
+      };
+
+      render(mockOtelInputStream, tracesInputStream, packageInfoNonDynamic);
+
+      await waitFor(() => {
+        expect(renderResult.getByText('Enable Elastic APM Enrichment')).toBeInTheDocument();
+      });
+    });
+
+    it('should not show use_apm toggle when data_stream.type is not traces', async () => {
+      const packageInfoNonDynamic: PackageInfo = {
+        ...mockPackageInfo,
+        type: 'input',
+        policy_templates: [
+          {
+            name: 'otel_template',
+            title: 'OTel Template',
+            description: 'OTel',
+            input: 'otelcol',
+            type: 'logs',
+            template_path: 'input.yml.hbs',
+            dynamic_signal_types: false,
+            vars: [],
+          },
+        ],
+      } as unknown as PackageInfo;
+
+      render(mockOtelInputStream, mockOtelPolicyInputStream, packageInfoNonDynamic);
+
+      await waitFor(() => {
+        expect(renderResult.queryByText('Enable Elastic APM Enrichment')).not.toBeInTheDocument();
       });
     });
   });

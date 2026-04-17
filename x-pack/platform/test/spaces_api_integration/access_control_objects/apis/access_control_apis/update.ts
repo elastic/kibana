@@ -9,6 +9,9 @@ import { ACCESS_CONTROL_TYPE } from '@kbn/access-control-test-plugin/server';
 import expect from '@kbn/expect';
 
 import {
+  ACCESS_CONTROL_EDITOR_PASSWORD,
+  ACCESS_CONTROL_EDITOR_USERNAME,
+  createAccessControlEditorUser,
   createSimpleUser,
   loginAsKibanaAdmin,
   loginAsNotObjectOwner,
@@ -29,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_savedobjects_editor']);
       await createSimpleUser(es);
+      await createAccessControlEditorUser(es);
     });
     after(async () => {
       await security.testUser.restoreDefaults();
@@ -64,8 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('should throw', function () {
-      this.tags('skipFIPS');
-
       it('when updating write-restricted objects owned by a different user when not admin', async () => {
         const { cookie: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
           supertestWithoutAuth
@@ -86,8 +88,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { cookie: notOwnerCookie } = await loginAsNotObjectOwner(
           supertestWithoutAuth,
-          'test_user',
-          'changeme'
+          ACCESS_CONTROL_EDITOR_USERNAME,
+          ACCESS_CONTROL_EDITOR_PASSWORD
         );
         const updateResponse = await supertestWithoutAuth
           .put('/access_control_objects/update')

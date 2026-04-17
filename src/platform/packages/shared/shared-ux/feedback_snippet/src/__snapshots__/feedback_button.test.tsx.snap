@@ -18,7 +18,7 @@ exports[`FeedbackButton renders with the expected id 1`] = `
     </span>
     <span
       color="inherit"
-      data-euiicon-type="popout"
+      data-euiicon-type="external"
     />
   </span>
 </button>

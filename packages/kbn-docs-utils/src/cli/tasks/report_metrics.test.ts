@@ -64,6 +64,7 @@ describe('reportMetrics', () => {
       plugins: [mockPlugin],
       pathsByPlugin: new Map(),
       project: {} as any,
+      allPlugins: [mockPlugin],
     };
 
     apiMapResult = {

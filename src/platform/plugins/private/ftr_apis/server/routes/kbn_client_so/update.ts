@@ -29,6 +29,7 @@ export const registerUpdateRoute = (router: IRouter) => {
           attributes: schema.recordOf(schema.string(), schema.any()),
           migrationVersion: schema.maybe(schema.string()),
           references: schema.maybe(
+            // codeql[js/kibana/unbounded-array-in-schema] FTR test-only API, input from test code not end users
             schema.arrayOf(
               schema.object({
                 name: schema.string(),

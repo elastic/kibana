@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/generate'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/generate'
+  title: '@kbn/generate'
   description: Moon project for @kbn/generate
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-generate
+  sourceRoot: packages/kbn-generate
 dependsOn:
   - '@kbn/sort-package-json'
   - '@kbn/dev-cli-runner'

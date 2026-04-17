@@ -28,7 +28,7 @@ export function FeedbackButton() {
       aria-label={feedbackButtonLabel}
       href={LOGS_ALERT_DETAILS_FEEDBACK_LINK}
       size="s"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       target="_blank"
       data-test-subj="logsAlertDetailsFeedbackButton"

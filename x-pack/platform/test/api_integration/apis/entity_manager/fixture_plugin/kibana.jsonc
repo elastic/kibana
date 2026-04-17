@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/entity-manager-fixture-plugin",
-  "owner": "@elastic/obs-entities",
+  "owner": "@elastic/core-analysis",
   "group": "platform",
   "visibility": "private",
   "plugin": {

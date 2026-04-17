@@ -16,7 +16,7 @@ test.describe(
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await page.addInitScript(() => {
-        window.localStorage.setItem('gettingStartedVisited', 'true');
+        window.sessionStorage.setItem('gettingStartedVisited', 'true');
       });
       await pageObjects.homepage.goto();
     });
@@ -134,6 +134,12 @@ test.describe(
         await expect(page).toHaveURL(new RegExp(expectedUrl));
         await pageObjects.homepage.goto();
       }
+    });
+
+    // === Kibana Version Badge Tests ===
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
     });
 
     // === Getting Started Banner Tests ===

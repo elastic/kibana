@@ -1,0 +1,42 @@
+openapi: 3.0.0
+info:
+  title: Endpoint Exceptions Per Policy Opt-In API
+  version: '1'
+paths:
+  /internal/api/endpoint/endpoint_exceptions_per_policy_opt_in:
+    get:
+      summary: Retrieve endpoint exceptions per policy opt-in
+      operationId: GetEndpointExceptionsPerPolicyOptIn
+      x-codegen-enabled: true
+      x-labels: []
+      #      TODO: When the feature flag `endpointExceptionsMovedUnderManagement` is enabled, remove empty `x-labels` and un-comment the line below.
+      #      x-labels: [ ess, serverless ]
+      x-internal: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    type: boolean
+                  reason:
+                    type: string
+                    enum: [newDeployment, userOptedIn]
+
+    post:
+      summary: Opt-in to endpoint exceptions per policy
+      operationId: PerformEndpointExceptionsPerPolicyOptIn
+      x-codegen-enabled: true
+      x-labels: []
+      #      TODO: When the feature flag `endpointExceptionsMovedUnderManagement` is enabled, remove empty `x-labels` and un-comment the line below.
+      #      x-labels: [ ess, serverless ]
+      x-internal: true
+      responses:
+        '200':
+          description: OK
+

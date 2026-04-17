@@ -26,6 +26,10 @@ export interface DocViewerRestorableState {
    * Each tab can store its own state as needed.
    */
   docViewerTabsState?: DocViewerTabsState;
+  /**
+   * Used to dedupe initial `unified_doc_viewer_viewed` event when restoring state.
+   */
+  initialDocViewerViewedEventKey?: string;
 }
 
 export interface FieldMapping {
@@ -33,6 +37,7 @@ export interface FieldMapping {
   scripted?: boolean;
   rowCount?: number;
   type: string;
+  esTypes?: string[];
   name: string;
   displayName?: string;
 }
@@ -61,7 +66,6 @@ export interface DocViewRenderProps {
    * For displaying text-based search results, define column types (which are available separately in the fetch request) here.
    */
   columnsMeta?: DataTableColumnsMeta;
-  query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;
   filter?: DocViewFilterFn;

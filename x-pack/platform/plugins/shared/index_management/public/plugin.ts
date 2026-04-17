@@ -208,8 +208,17 @@ export class IndexMgmtUIPlugin
     plugins: StartDependencies,
     deps: { history: ScopedHistory<unknown> }
   ) {
-    const { fleet, usageCollection, cloud, share, console, ml, licensing, reindexService } =
-      plugins;
+    const {
+      fleet,
+      usageCollection,
+      cloud,
+      cloudConnect,
+      share,
+      console,
+      ml,
+      licensing,
+      reindexService,
+    } = plugins;
     const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } =
       core;
     const { monitor, manageEnrich, monitorEnrich, manageIndexTemplates } =
@@ -231,6 +240,7 @@ export class IndexMgmtUIPlugin
         isFleetEnabled: Boolean(fleet),
         share,
         cloud,
+        cloudConnect,
         console,
         ml,
         licensing,

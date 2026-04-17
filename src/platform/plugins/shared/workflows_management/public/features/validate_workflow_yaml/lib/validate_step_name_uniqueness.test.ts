@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
+
+function parse(yaml: string) {
+  const lineCounter = new LineCounter();
+  const yamlDocument = parseDocument(yaml, { lineCounter });
+  return { yamlDocument, lineCounter };
+}
 
 describe('validateStepNameUniqueness', () => {
   it('should return empty array when all step names are unique', () => {
@@ -22,8 +28,8 @@ steps:
   - name: Third Step
     action: test3
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toEqual([]);
   });
@@ -39,8 +45,8 @@ steps:
   - name: Duplicate Step
     action: test3
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(2); // One error for each occurrence of duplicate
     expect(result.every((r) => r?.message?.includes('Duplicate Step'))).toBe(true);
@@ -64,8 +70,8 @@ steps:
   - name: Duplicate B
     action: test5
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(5); // 2 for "Duplicate A", 3 for "Duplicate B"
 
@@ -86,8 +92,8 @@ steps:
   - name: Duplicate Name
     action: test2`;
 
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(2);
 
@@ -119,8 +125,8 @@ steps:
     action: test2
   - name: "Valid Name"
     action: test3`;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     // Empty strings are not collected by collectAllStepNames (no value check)
     expect(result).toHaveLength(0);
@@ -140,8 +146,8 @@ steps:
     else:
       - name: Duplicate Name
         action: test2`;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     // collectAllStepNames only collects names under 'steps' or 'else', not 'then'
     expect(result).toHaveLength(0);
@@ -156,8 +162,8 @@ steps:
   - name: Duplicate
     action: test2
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toHaveLength(2);
     expect(result[0].id).not.toBe(result[1].id);
@@ -170,15 +176,15 @@ steps:
 name: Test Workflow
 description: A workflow without steps
 `;
-    const yamlDocument = parseDocument(yaml);
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse(yaml);
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toEqual([]);
   });
 
   it('should handle malformed YAML gracefully', () => {
-    const yamlDocument = parseDocument('');
-    const result = validateStepNameUniqueness(yamlDocument);
+    const { yamlDocument, lineCounter } = parse('');
+    const result = validateStepNameUniqueness(yamlDocument, lineCounter);
 
     expect(result).toEqual([]);
   });

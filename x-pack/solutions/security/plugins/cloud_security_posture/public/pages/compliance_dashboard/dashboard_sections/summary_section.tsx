@@ -120,7 +120,7 @@ export const SummarySection = ({
         ),
         button: (
           <EuiButtonEmpty
-            iconType="listAdd"
+            iconType="plusCircle"
             target="_blank"
             href={
               dashboardType === KSPM_POLICY_TEMPLATE ? kspmIntegrationLink : cspmIntegrationLink
@@ -147,7 +147,7 @@ export const SummarySection = ({
         title: <CompactFormattedNumber number={complianceData.stats.resourcesEvaluated || 0} />,
         button: (
           <EuiButtonEmpty
-            iconType="search"
+            iconType="magnify"
             data-test-subj="dashboard-view-all-resources"
             onClick={() => {
               navToFindings(getPolicyTemplateQuery(dashboardType, activeNamespace), [

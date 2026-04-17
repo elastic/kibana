@@ -5,41 +5,115 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFilePicker, EuiSpacer, EuiText } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SuccessSection } from '../../../common/components/success_section';
-import { SectionWrapper } from '../../../common/components/section_wrapper';
-import { ButtonsFooter } from '../../../common/components/buttons_footer';
-import { IntegrationImageHeader } from '../../../common/components/integration_image_header';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import JSZip from 'jszip';
+import { parse as parseYaml } from 'yaml';
+import useObservable from 'react-use/lib/useObservable';
 import {
-  runInstallPackage,
+  EuiCallOut,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { MINIMUM_LICENSE_TYPE } from '../../../../common/constants';
+import { useKibana } from '../../../common/hooks/use_kibana';
+import { ButtonsFooter } from '../../../common/components/button_footer';
+import {
   getIntegrationNameFromResponse,
+  fetchTakenPackageNames,
+  runInstallPackage,
   type RequestDeps,
 } from '../../../common';
-import { useNavigate, Page } from '../../../common/hooks/use_navigate';
-import { useTelemetry } from '../telemetry';
+import { PAGE_RESTRICT_WIDTH } from '../../integration_management/constants';
+import { LicensePaywallCard } from '../../license_paywall/license_paywall_card';
+import { useTelemetry } from '../../telemetry_context';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
 
+const extractPackageNameFromZip = async (file: Blob): Promise<string | null> => {
+  try {
+    const zip = await JSZip.loadAsync(file);
+    // Top-level manifest one directory deep: <name>-<version>/manifest.yml
+    const manifestEntry = Object.values(zip.files).find(
+      (f) => !f.dir && /^[^/]+\/manifest\.yml$/.test(f.name)
+    );
+    if (!manifestEntry) return null;
+    const content = await manifestEntry.async('string');
+    const parsed = parseYaml(content);
+    return typeof parsed?.name === 'string' ? parsed.name : null;
+  } catch {
+    return null;
+  }
+};
+
 export const CreateIntegrationUpload = React.memo(() => {
-  const telemetry = useTelemetry();
-  const navigate = useNavigate();
-  const { http } = useKibana().services;
+  const services = useKibana().services;
+  const { http, application } = services;
+  const license = useObservable(services.licensing.license$);
+  const hasEnterpriseLicense = useMemo(
+    () =>
+      Boolean(
+        license?.isAvailable && license?.isActive && license?.hasAtLeast(MINIMUM_LICENSE_TYPE)
+      ),
+    [license]
+  );
+  const { reportCancelButtonClicked } = useTelemetry();
+
   const [file, setFile] = useState<Blob>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<string>();
   const [integrationName, setIntegrationName] = useState<string>();
+  const validateAbortRef = useRef<AbortController | null>(null);
+  const integrationsHref = useMemo(() => application.getUrlForApp('integrations'), [application]);
 
   const onBack = useCallback(() => {
-    navigate(Page.landing);
-  }, [navigate]);
+    application.navigateToUrl(integrationsHref);
+  }, [application, integrationsHref]);
 
-  const onChangeFile = useCallback((files: FileList | null) => {
-    setFile(files?.[0]);
-    setError(undefined);
-  }, []);
+  const handlePaywallCancel = useCallback(() => {
+    reportCancelButtonClicked();
+    application.navigateToUrl(integrationsHref);
+  }, [application, integrationsHref, reportCancelButtonClicked]);
+
+  const onClose = useCallback(() => {
+    application.navigateToUrl(integrationsHref);
+  }, [application, integrationsHref]);
+
+  const onChangeFile = useCallback(
+    async (files: FileList | null) => {
+      validateAbortRef.current?.abort();
+      const abortController = new AbortController();
+      validateAbortRef.current = abortController;
+
+      const selectedFile = files?.[0];
+      if (!selectedFile || !http) return;
+
+      setFile(selectedFile);
+      setError(undefined);
+      setIsValidating(true);
+
+      try {
+        const packageName = await extractPackageNameFromZip(selectedFile);
+        if (!packageName || abortController.signal.aborted) return;
+        const takenNames = await fetchTakenPackageNames({
+          http,
+          abortSignal: abortController.signal,
+        });
+        if (!abortController.signal.aborted && takenNames.has(packageName)) {
+          setError(i18n.DUPLICATE_PACKAGE_NAME_ERROR(packageName));
+        }
+      } catch {
+        // Silently ignore — the install step will surface any errors
+      } finally {
+        if (!abortController.signal.aborted) setIsValidating(false);
+      }
+    },
+    [http]
+  );
 
   const onConfirm = useCallback(() => {
     if (http == null || file == null) {
@@ -54,77 +128,104 @@ export const CreateIntegrationUpload = React.memo(() => {
 
         const integrationNameFromResponse = getIntegrationNameFromResponse(response);
         if (integrationNameFromResponse) {
-          telemetry.reportUploadZipIntegrationComplete({
-            integrationName: integrationNameFromResponse,
-          });
           setIntegrationName(integrationNameFromResponse);
         } else {
           throw new Error('Integration name not found in response');
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          const errorMessage = e.body?.message ?? e.message;
-          telemetry.reportUploadZipIntegrationComplete({ error: errorMessage });
+          const errorMessage = e?.body?.message ?? e?.message ?? 'Unknown error';
           setError(`${i18n.UPLOAD_ERROR}: ${errorMessage}`);
         }
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [file, http, telemetry, setIntegrationName, setError]);
+  }, [file, http]);
+
+  if (!hasEnterpriseLicense) {
+    return (
+      <>
+        <KibanaPageTemplate restrictWidth={PAGE_RESTRICT_WIDTH}>
+          <KibanaPageTemplate.Header
+            pageTitle={i18n.UPLOAD_TITLE}
+            description={<DocsLinkSubtitle />}
+          />
+          <KibanaPageTemplate.Section grow>
+            <LicensePaywallCard />
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+        <ButtonsFooter hideActionButton onCancel={handlePaywallCancel} />
+      </>
+    );
+  }
 
   return (
-    <KibanaPageTemplate>
-      <IntegrationImageHeader />
+    <>
+      <KibanaPageTemplate>
+        <KibanaPageTemplate.Header
+          pageTitle={i18n.UPLOAD_TITLE}
+          description={<DocsLinkSubtitle />}
+        />
+        <KibanaPageTemplate.Section grow>
+          {integrationName ? (
+            <EuiCallOut
+              announceOnMount
+              title={i18n.SUCCESS_TITLE}
+              iconType="check"
+              color="success"
+              data-test-subj="createIntegrationUploadSuccess"
+            >
+              <p>{integrationName}</p>
+            </EuiCallOut>
+          ) : (
+            <EuiFlexGroup
+              direction="row"
+              alignItems="center"
+              justifyContent="center"
+              gutterSize="xl"
+            >
+              <EuiFlexItem>
+                <EuiFilePicker
+                  id="integrationUploadFilePicker"
+                  initialPromptText={i18n.UPLOAD_INPUT_TEXT}
+                  onChange={onChangeFile}
+                  display="large"
+                  aria-label="Upload .zip file"
+                  accept="application/zip"
+                  isLoading={isLoading || isValidating}
+                  fullWidth
+                  isInvalid={error != null}
+                />
+                <EuiSpacer size="xs" />
+                {error && (
+                  <EuiText color="danger" size="xs">
+                    {error}
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </KibanaPageTemplate.Section>
+      </KibanaPageTemplate>
       {integrationName ? (
-        <>
-          <KibanaPageTemplate.Section grow>
-            <SuccessSection integrationName={integrationName} />
-          </KibanaPageTemplate.Section>
-          <ButtonsFooter cancelButtonText={i18n.CLOSE_BUTTON} />
-        </>
+        <ButtonsFooter
+          hideCancel
+          actionButtonText={i18n.CLOSE_BUTTON}
+          onAction={onClose}
+          isActionDisabled={false}
+        />
       ) : (
-        <>
-          <KibanaPageTemplate.Section grow>
-            <SectionWrapper title={i18n.UPLOAD_TITLE} subtitle={<DocsLinkSubtitle />}>
-              <EuiFlexGroup
-                direction="row"
-                alignItems="center"
-                justifyContent="center"
-                gutterSize="xl"
-              >
-                <EuiFlexItem>
-                  <EuiFilePicker
-                    id="logsSampleFilePicker"
-                    initialPromptText={i18n.UPLOAD_INPUT_TEXT}
-                    onChange={onChangeFile}
-                    display="large"
-                    aria-label="Upload .zip file"
-                    accept="application/zip"
-                    isLoading={isLoading}
-                    fullWidth
-                    isInvalid={error != null}
-                  />
-                  <EuiSpacer size="xs" />
-                  {error && (
-                    <EuiText color="danger" size="xs">
-                      {error}
-                    </EuiText>
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </SectionWrapper>
-          </KibanaPageTemplate.Section>
-          <ButtonsFooter
-            isNextDisabled={file == null}
-            isNextLoading={isLoading}
-            nextButtonText={i18n.INSTALL_BUTTON}
-            onBack={onBack}
-            onNext={onConfirm}
-          />
-        </>
+        <ButtonsFooter
+          cancelButtonText={i18n.BACK_BUTTON}
+          actionButtonText={i18n.INSTALL_BUTTON}
+          isActionDisabled={file == null || isValidating || error != null}
+          isActionLoading={isLoading}
+          onCancel={onBack}
+          onAction={onConfirm}
+        />
       )}
-    </KibanaPageTemplate>
+    </>
   );
 });
 CreateIntegrationUpload.displayName = 'CreateIntegrationUpload';

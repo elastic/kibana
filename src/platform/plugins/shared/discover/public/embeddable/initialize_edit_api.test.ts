@@ -151,44 +151,108 @@ describe('initialize edit api', () => {
     });
   });
 
-  test('on edit calls `navigateToEditor`', async () => {
-    const mockedNavigate = jest.fn();
-    discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
-      navigateToEditor: mockedNavigate,
-    }));
-    mockedApi.dataViews$.next([dataViewMock]);
-    mockedApi.savedObjectId$.next('test-id'); // Assuming a by-reference scenario for onEdit
-    await waitOneTick();
-
-    (discoverServiceMock.locator.getLocation as jest.Mock).mockReset().mockResolvedValueOnce({
-      app: 'discover',
-      path: '/mock-url-for-onedit',
-      state: {},
-    });
-
-    const { onEdit } = initializeEditApi({
-      uuid: 'test',
-      parentApi: {
-        getAppContext: jest.fn().mockReturnValue({
-          getCurrentPath: jest.fn().mockReturnValue('/current-parent-path'),
-          currentAppId: 'dashboard',
-        }),
-      },
-      partialApi: mockedApi,
-      isEditable: () => true,
-      discoverServices: discoverServiceMock,
-      getTitle: () => 'test-title',
-    });
-
-    await onEdit();
-    expect(mockedNavigate).toBeCalledTimes(1);
-    expect(mockedNavigate).toBeCalledWith('discover', {
-      path: '/mock-url-for-onedit',
-      state: expect.objectContaining({
-        embeddableId: 'test',
-        originatingApp: 'dashboard',
-        originatingPath: '/current-parent-path',
+  describe('on edit', () => {
+    const mockedParentApi = {
+      getAppContext: jest.fn().mockReturnValue({
+        getCurrentPath: jest.fn().mockReturnValue('/current-parent-path'),
+        currentAppId: 'dashboard',
       }),
+    };
+
+    let mockedNavigate: jest.Mock;
+    let getLocationMock: jest.Mock;
+
+    beforeEach(() => {
+      mockedNavigate = jest.fn();
+      discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockReturnValue({
+        navigateToEditor: mockedNavigate,
+      });
+      mockedApi.dataViews$.next([dataViewMock]);
+      mockedApi.savedObjectId$.next('test-id');
+
+      getLocationMock = jest.mocked(discoverServiceMock.locator.getLocation);
+
+      getLocationMock.mockReset().mockResolvedValue({
+        app: 'discover',
+        path: '/mock-url-for-onedit',
+        state: {},
+      });
+    });
+
+    it('should call navigateToEditor', async () => {
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      expect(mockedNavigate).toHaveBeenCalledTimes(1);
+      expect(mockedNavigate).toHaveBeenCalledWith('discover', {
+        path: '/mock-url-for-onedit',
+        state: expect.objectContaining({
+          embeddableId: 'test',
+          originatingApp: 'dashboard',
+          originatingPath: '/current-parent-path',
+        }),
+      });
+    });
+
+    it('should pass the selected tab id to the locator for by-reference embeddables', async () => {
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => 'tab-1' },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          savedSearchId: 'test-id',
+          tab: { id: 'tab-1' },
+        })
+      );
+    });
+
+    it('should not pass a tab param when getSelectedTabId returns undefined', async () => {
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => undefined },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      const locatorCallArgs = getLocationMock.mock.calls[0][0];
+      expect(locatorCallArgs).not.toHaveProperty('tab');
+    });
+
+    it('should ignore selected tab id for by-value embeddables', async () => {
+      mockedApi.savedObjectId$.next(undefined);
+
+      const editApi = initializeEditApi({
+        uuid: 'test',
+        parentApi: mockedParentApi,
+        partialApi: { ...mockedApi, getSelectedTabId: () => 'tab-2' },
+        isEditable: () => true,
+        discoverServices: discoverServiceMock,
+        getTitle: () => 'test-title',
+      });
+
+      await editApi?.onEdit();
+
+      expect(discoverServiceMock.locator.getLocation).toHaveBeenCalledWith({});
     });
   });
 });

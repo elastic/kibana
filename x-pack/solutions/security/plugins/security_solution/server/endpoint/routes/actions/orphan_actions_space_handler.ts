@@ -104,7 +104,6 @@ export const registerOrphanActionsSpaceRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {
@@ -127,7 +126,6 @@ export const registerOrphanActionsSpaceRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

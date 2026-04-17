@@ -8,39 +8,26 @@
  */
 
 import { useMemo } from 'react';
-import type { MetricField, Dimension } from '../../../../types';
+import type { ParsedMetricItem } from '../../../../types';
 
 export const useMetricFieldsFilter = ({
-  fields,
-  dimensions,
+  metricItems,
   searchTerm,
 }: {
-  fields: MetricField[];
+  metricItems: ParsedMetricItem[];
   searchTerm: string;
-  dimensions: Dimension[];
 }) => {
-  const filteredFields = useMemo(() => {
-    const dimensionFieldNamesSet = new Set(dimensions.map((d) => d.name));
+  const filteredMetricItems = useMemo(() => {
     const searchTermLower = searchTerm?.toLowerCase();
 
-    const hasClientFilters = dimensionFieldNamesSet.size > 0 || searchTermLower?.length > 0;
-
-    if (!hasClientFilters) {
-      return fields;
-    }
-
-    return fields.filter((field) => {
-      if (searchTermLower && !field.name.toLowerCase().includes(searchTermLower)) {
+    return metricItems.filter((metricItem) => {
+      if (searchTermLower && !metricItem.metricName.toLowerCase().includes(searchTermLower)) {
         return false;
-      }
-
-      if (dimensionFieldNamesSet.size > 0) {
-        return field.dimensions.some((d) => dimensionFieldNamesSet.has(d.name));
       }
 
       return true;
     });
-  }, [fields, searchTerm, dimensions]);
+  }, [metricItems, searchTerm]);
 
-  return { filteredFields };
+  return { filteredMetricItems };
 };

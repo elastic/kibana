@@ -34,7 +34,7 @@ export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
           onChange={field.onChange}
           value={field.value}
           inputRef={field.ref}
-          icon="search"
+          icon="magnify"
           fullWidth
           placeholder={i18n.translate(
             'xpack.searchPlayground.searchMode.queryView.searchBar.placeholder',

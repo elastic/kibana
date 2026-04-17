@@ -85,7 +85,7 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
             ]}
           />
         </Chart>
-        {down === 0 && <GreenCheckIcon className="greenCheckIcon" type="checkInCircleFilled" />}
+        {down === 0 && <GreenCheckIcon className="greenCheckIcon" type="checkCircleFill" />}
       </EuiFlexItem>
       <EuiFlexItem>
         <DonutChartLegend down={down} up={up} />

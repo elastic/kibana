@@ -141,6 +141,12 @@ steps:
       index: "{{consts.alerts_index_name}}"
     on-failure:
       continue: true
+  - name: create_index
+    type: elasticsearch.indices.create
+    with:
+      index: "{{consts.alerts_index_name}}"
+    on-failure:
+      continue: true
   - name: create_obs_alert_rule
     type: kibana.request
     with:

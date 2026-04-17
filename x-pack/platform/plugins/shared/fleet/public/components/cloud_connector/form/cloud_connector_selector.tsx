@@ -23,12 +23,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
+  GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ,
   getCloudConnectorEditIconTestSubj,
 } from '../../../../common/services/cloud_connectors/test_subjects';
 import type { AccountType } from '../../../types';
 import type { CloudConnectorCredentials, CloudProviders } from '../types';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
-import { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from '../utils';
+import {
+  isAwsCloudConnectorVars,
+  isAzureCloudConnectorVars,
+  isGcpCloudConnectorVars,
+} from '../utils';
 import { CloudConnectorPoliciesFlyout } from '../cloud_connector_policies_flyout';
 import { AccountBadge } from '../components/account_badge';
 import { IntegrationCountBadge } from '../components/integration_count_badge';
@@ -39,6 +44,8 @@ interface CloudConnectorSelectorProps {
   credentials: CloudConnectorCredentials;
   setCredentials: (credentials: CloudConnectorCredentials) => void;
   accountType?: AccountType;
+  packageName?: string;
+  policyTemplate?: string;
 }
 
 export const CloudConnectorSelector = ({
@@ -47,10 +54,14 @@ export const CloudConnectorSelector = ({
   credentials,
   setCredentials,
   accountType,
+  packageName,
+  policyTemplate,
 }: CloudConnectorSelectorProps) => {
   const { data: cloudConnectors = [] } = useGetCloudConnectors({
     cloudProvider: provider,
     accountType,
+    packageName,
+    policyTemplate,
   });
   const [flyoutConnectorId, setFlyoutConnectorId] = useState<string | null>(null);
   const [selectKey, setSelectKey] = useState(0);
@@ -58,7 +69,7 @@ export const CloudConnectorSelector = ({
   const label = (
     <FormattedMessage
       id="xpack.fleet.cloudConnector.selector.label"
-      defaultMessage="Cloud Connector Name"
+      defaultMessage="Federated Identity Name"
     />
   );
 
@@ -88,6 +99,8 @@ export const CloudConnectorSelector = ({
         identifier = connector.vars.role_arn?.value || '';
       } else if (isAzureCloudConnectorVars(connector.vars, provider)) {
         identifier = connector.vars.azure_credentials_cloud_connector_id?.value || '';
+      } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
+        identifier = connector.vars.gcp_credentials_cloud_connector_id?.value?.id || '';
       }
 
       return {
@@ -103,7 +116,7 @@ export const CloudConnectorSelector = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={i18n.translate('xpack.fleet.cloudConnector.selector.editTooltip', {
-                  defaultMessage: 'View and edit connector details',
+                  defaultMessage: 'View and edit identity details',
                 })}
               >
                 <EuiButtonIcon
@@ -188,15 +201,31 @@ export const CloudConnectorSelector = ({
             connector.vars.azure_credentials_cloud_connector_id?.value,
           cloudConnectorId: connector.id,
         });
+      } else if (isGcpCloudConnectorVars(connector.vars, provider)) {
+        setCredentials({
+          serviceAccount: connector.vars.service_account?.value,
+          audience: connector.vars.audience?.value,
+          gcp_credentials_cloud_connector_id:
+            connector.vars.gcp_credentials_cloud_connector_id?.value,
+          cloudConnectorId: connector.id,
+        });
       }
     },
     [cloudConnectors, provider, setCredentials]
   );
 
-  const testSubj =
-    provider === 'aws'
-      ? AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ
-      : AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+  const getTestSubj = () => {
+    switch (provider) {
+      case 'aws':
+        return AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+      case 'gcp':
+        return GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+      case 'azure':
+      default:
+        return AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ;
+    }
+  };
+  const testSubj = getTestSubj();
 
   return (
     <>
@@ -208,7 +237,7 @@ export const CloudConnectorSelector = ({
           onChange={handleChange}
           fullWidth
           placeholder={i18n.translate('xpack.fleet.cloudConnector.selector.placeholder', {
-            defaultMessage: 'Select a cloud connector',
+            defaultMessage: 'Select a Federated Identity',
           })}
           hasDividers
           data-test-subj={testSubj}

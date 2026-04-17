@@ -9,14 +9,15 @@
 
 import React from 'react';
 import { EuiPageTemplate, EuiTitle, EuiText } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { tryPollutingPrototypes } from '../common/pollute';
 
 export const renderApp = (_core: CoreStart, { element }: AppMountParameters) => {
   const result = JSON.stringify(tryPollutingPrototypes(), null, 2);
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <EuiPageTemplate restrictWidth="1000px">
       <EuiPageTemplate.Header>
         <EuiTitle size="l">
@@ -42,9 +43,8 @@ export const renderApp = (_core: CoreStart, { element }: AppMountParameters) => 
           <pre data-test-subj="pollution-result">{result}</pre>
         </EuiText>
       </EuiPageTemplate.Section>
-    </EuiPageTemplate>,
-    element
+    </EuiPageTemplate>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

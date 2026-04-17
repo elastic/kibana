@@ -30,7 +30,7 @@ export const AddConnector = ({ onAddConnector, ...props }: AddConnectorProps) =>
   <AssistantCallToAction description={translations.description} {...props}>
     <EuiButton
       onClick={onAddConnector}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       data-test-subj={DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON}
     >
       {translations.addButton}

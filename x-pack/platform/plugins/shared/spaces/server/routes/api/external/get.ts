@@ -21,6 +21,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
       path: '/api/spaces/space/{id}',
       access: 'public',
       summary: `Get a space`,
+      description: 'Retrieve a single Kibana space by its identifier.',
       options: {
         tags: ['oas-tag:spaces'],
       },

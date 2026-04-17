@@ -83,8 +83,14 @@ export const bulkMigrateLegacyActions = async ({
 
       rule.attributes.actions = [...existingActionsWithFrequencies, ...transformedActions];
       rule.references = [...rule.references, ...transformedReferences];
-      rule.attributes.throttle = undefined;
-      rule.attributes.notifyWhen = undefined;
+      // Only clear rule-level throttle when there are actual migrated actions from
+      // the sidecar (throttled sidecars). For no_actions/rule sidecars (empty
+      // transformedActions), the original throttle value should be preserved since
+      // there are no per-action frequencies being migrated from the sidecar.
+      if (transformedActions.length > 0) {
+        rule.attributes.throttle = undefined;
+      }
+      rule.attributes.notifyWhen = null;
     });
     return Object.keys(transformed);
   } catch (e) {

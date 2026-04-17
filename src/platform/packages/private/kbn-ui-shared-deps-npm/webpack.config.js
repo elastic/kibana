@@ -100,6 +100,7 @@ module.exports = (_, argv) => {
         'styled-components',
         'tslib',
         'uuid',
+        'zod/v4',
       ],
     },
     context: __dirname,

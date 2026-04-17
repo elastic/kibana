@@ -26,16 +26,18 @@ export const LayoutGlobalCSS = () => {
     sidebarWidth,
     applicationTopBarHeight,
     applicationBottomBarHeight,
+    applicationMarginTop,
     applicationMarginBottom,
     applicationMarginRight,
   } = useLayoutState();
 
   // Pre-calculate composite values for simplified CSS expressions
   const headerAndBannerHeight = bannerHeight + headerHeight;
+  const applicationTop = headerAndBannerHeight + applicationMarginTop;
   const applicationBottom = footerHeight + applicationMarginBottom;
   const applicationRight = applicationMarginRight + sidebarWidth;
   const applicationHorizontalOffset = navigationWidth + applicationRight;
-  const contentTop = headerAndBannerHeight + applicationTopBarHeight;
+  const contentTop = applicationTop + applicationTopBarHeight;
   const contentBottom = applicationBottom + applicationBottomBarHeight;
 
   const banner = css`
@@ -84,24 +86,24 @@ export const LayoutGlobalCSS = () => {
   `;
 
   const application = css`
+    ${layoutVarName('application.marginTop')}: ${applicationMarginTop}px;
     ${layoutVarName('application.marginBottom')}: ${applicationMarginBottom}px;
     ${layoutVarName('application.marginRight')}: ${applicationMarginRight}px;
-    ${layoutVarName('application.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('application.top')}: ${applicationTop}px;
     ${layoutVarName('application.bottom')}: ${applicationBottom}px;
     ${layoutVarName('application.left')}: ${navigationWidth}px;
     ${layoutVarName('application.right')}: ${applicationRight}px;
-    ${layoutVarName('application.height')}: calc(100vh - ${headerAndBannerHeight +
-    applicationBottom}px);
+    ${layoutVarName('application.height')}: calc(100vh - ${applicationTop + applicationBottom}px);
     ${layoutVarName('application.width')}: calc(100vw - ${applicationHorizontalOffset}px);
   `;
 
   const applicationTopBar = css`
     ${layoutVarName('application.topBar.height')}: ${applicationTopBarHeight}px;
-    ${layoutVarName('application.topBar.top')}: ${headerAndBannerHeight}px;
+    ${layoutVarName('application.topBar.top')}: ${applicationTop}px;
     ${layoutVarName('application.topBar.left')}: ${navigationWidth}px;
     ${layoutVarName('application.topBar.right')}: ${applicationRight}px;
     ${layoutVarName('application.topBar.width')}: calc(100vw - ${applicationHorizontalOffset}px);
-    ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${headerAndBannerHeight +
+    ${layoutVarName('application.topBar.bottom')}: calc(100vh - ${applicationTop +
     applicationTopBarHeight}px);
   `;
 

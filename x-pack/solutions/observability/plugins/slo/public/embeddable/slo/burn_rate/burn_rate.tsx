@@ -56,7 +56,7 @@ export function BurnRate({ sloId, sloInstanceId, duration, reloadSubject }: Embe
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.slo.sloEmbeddable.overview.sloNotFoundText', {
             defaultMessage:
-              'The SLO has been deleted. You can safely delete the widget from the dashboard.',
+              'Unable to find SLO. You can safely delete the widget from the dashboard.',
           })}
         </EuiFlexItem>
       </EuiFlexGroup>

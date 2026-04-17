@@ -108,7 +108,7 @@ export class NewGroupInput extends Component {
             <EuiFormRow className="new-group-input">
               <EuiButtonIcon
                 onClick={this.addNewGroup}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 aria-label={i18n.translate(
                   'xpack.ml.jobsList.multiJobActions.groupSelector.addButtonAriaLabel',
                   {

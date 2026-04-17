@@ -19,7 +19,7 @@ describe('LeftPanel', () => {
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
         isRiskScoreExist
-        service={{ name: 'test service', email: [] }}
+        identityFields={{ 'service.name': 'test service' }}
         scopeId={'scopeId'}
       />,
       {
@@ -39,7 +39,7 @@ describe('LeftPanel', () => {
           tab: EntityDetailsLeftPanelTab.RISK_INPUTS,
         }}
         isRiskScoreExist={false}
-        service={{ name: 'test service', email: [] }}
+        identityFields={{ 'service.name': 'test service' }}
         scopeId={'scopeId'}
       />,
       {

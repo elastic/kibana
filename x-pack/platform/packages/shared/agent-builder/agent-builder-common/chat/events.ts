@@ -26,6 +26,8 @@ export enum ChatEventType {
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
   conversationIdSet = 'conversation_id_set',
+  compactionStarted = 'compaction_started',
+  compactionCompleted = 'compaction_completed',
 }
 
 export type ChatEventBase<
@@ -140,6 +142,10 @@ export const isPromptRequestEvent = (
 export interface ReasoningEventData {
   /** plain text reasoning content */
   reasoning: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  tool_call_id?: string;
+  /** when reasoning is bound to a tool call, the corresponding tool call group */
+  tool_call_group_id?: string;
   /** if true, will not be persisted or displaying in the thinking panel, only displayed as "current thinking" **/
   transient?: boolean;
 }
@@ -285,6 +291,44 @@ export const isConversationIdSetEvent = (
   return event.type === ChatEventType.conversationIdSet;
 };
 
+// Compaction started
+
+export interface CompactionStartedEventData {
+  /** Estimated token count before compaction */
+  token_count_before: number;
+}
+
+export type CompactionStartedEvent = ChatEventBase<
+  ChatEventType.compactionStarted,
+  CompactionStartedEventData
+>;
+
+export const isCompactionStartedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionStartedEvent => {
+  return event.type === ChatEventType.compactionStarted;
+};
+
+// Compaction completed
+
+export interface CompactionCompletedEventData {
+  /** Estimated token count after compaction */
+  token_count_after: number;
+  /** Number of rounds that were summarized */
+  summarized_round_count: number;
+}
+
+export type CompactionCompletedEvent = ChatEventBase<
+  ChatEventType.compactionCompleted,
+  CompactionCompletedEventData
+>;
+
+export const isCompactionCompletedEvent = (
+  event: AgentBuilderEvent<string, any>
+): event is CompactionCompletedEvent => {
+  return event.type === ChatEventType.compactionCompleted;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
@@ -299,7 +343,9 @@ export type ChatAgentEvent =
   | MessageChunkEvent
   | MessageCompleteEvent
   | ThinkingCompleteEvent
-  | RoundCompleteEvent;
+  | RoundCompleteEvent
+  | CompactionStartedEvent
+  | CompactionCompletedEvent;
 
 /**
  * All types of events that can be emitted from the chat API.

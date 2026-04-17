@@ -28,6 +28,12 @@ fi
 # Bootstrap workspace deps + download build artifacts (same setup as FTR/Scout CI steps)
 source .buildkite/scripts/steps/functional/common.sh
 
+EVAL_SUITE_INFO="$(
+  node x-pack/platform/packages/shared/kbn-evals/scripts/ci/get_suite_info.js "$EVAL_SUITE_ID" || true
+)"
+EVAL_SUITE_NAME="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.name // empty' 2>/dev/null || true)"
+EVAL_SUITE_SLACK_CHANNEL="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.slackChannel // empty' 2>/dev/null || true)"
+
 cleanup() {
   if [[ -n "${SCOUT_PID:-}" ]]; then
     kill "$SCOUT_PID" 2>/dev/null || true
@@ -36,7 +42,45 @@ cleanup() {
     rm -f "$FANOUT_PIPELINE_FILE" 2>/dev/null || true
   fi
 }
-trap cleanup EXIT
+
+record_suite_failure() {
+  local exit_status="$1"
+  if [[ "$exit_status" -eq 0 ]]; then
+    return 0
+  fi
+  if [[ "${KBN_EVALS:-}" != "1" ]]; then
+    return 0
+  fi
+  if [[ -z "${EVAL_SUITE_ID:-}" || -z "${EVAL_PROJECT:-}" ]]; then
+    return 0
+  fi
+  if ! command -v buildkite-agent >/dev/null 2>&1; then
+    return 0
+  fi
+
+  local suite_key_safe
+  suite_key_safe="$(printf '%s' "$EVAL_SUITE_ID" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+  local project_key_safe
+  project_key_safe="$(printf '%s' "$EVAL_PROJECT" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
+  # Use one key per failing project to avoid non-atomic read/modify/write races when fanout steps fail concurrently.
+  local failure_key="kbn-evals:suite-failures:${suite_key_safe}:${project_key_safe}"
+  buildkite-agent meta-data set "$failure_key" "${EVAL_PROJECT}" >/dev/null 2>&1 || true
+}
+
+on_exit() {
+  local exit_status=$?
+  trap - EXIT
+  cleanup
+  record_suite_failure "$exit_status"
+  exit "$exit_status"
+}
+
+trap on_exit EXIT
+
+# Generate LiteLLM connectors (or skip when only EIS models are requested).
+# This must run after bootstrap so Node is available for the generator script.
+source .buildkite/scripts/steps/evals/setup_connectors.sh
 
 # Fan out into one Buildkite step per connector project when requested.
 # This is the only practical way to run all connector projects within the 1h job timeout.
@@ -112,24 +156,31 @@ steps:
     steps:
 EOF
 
+      fanout_step_keys=()
       while IFS= read -r connector_id; do
         [[ -z "$connector_id" ]] && continue
         key_safe="$(printf '%s' "$connector_id" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        step_key="kbn-evals-${group_key_safe}-${key_safe}"
+        fanout_step_keys+=("$step_key")
 
         # Default BK step timeout is 120m to allow slower models/suites without
         # needing per-suite/per-model special-casing. Can be overridden if needed.
         timeout_in_minutes="${EVAL_STEP_TIMEOUT_IN_MINUTES:-120}"
 
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
-      - label: "${connector_id}"
-        key: "kbn-evals-${group_key_safe}-${key_safe}"
+      - label: "LLM Evals: ${EVAL_SUITE_ID} / ${connector_id}"
+        key: "${step_key}"
         command: "bash .buildkite/scripts/steps/evals/run_suite.sh"
         env:
           KBN_EVALS: "1"
+          KBN_EVALS_WEEKLY: "${KBN_EVALS_WEEKLY:-}"
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
+          EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
           EVALUATION_CONNECTOR_ID: "${EVALUATION_CONNECTOR_ID:-}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+          EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
@@ -149,6 +200,37 @@ EOF
               limit: 3
 EOF
       done <<<"$CONNECTOR_IDS"
+
+      if [[ "${KBN_EVALS_WEEKLY:-}" =~ ^(1|true)$ ]] && [[ -n "${EVAL_SUITE_SLACK_CHANNEL:-}" ]]; then
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (suite owner notify)"
+        key: "kbn-evals-${group_key_safe}-suite-owner-notify"
+        command: "bash .buildkite/scripts/steps/evals/suite_owner_notify.sh"
+        env:
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+        notify:
+          - slack:
+              channels: ["${EVAL_SUITE_SLACK_CHANNEL}"]
+              message: ":rotating_light: LLM eval suite *${EVAL_SUITE_NAME:-$EVAL_SUITE_ID}* failed in <${BUILDKITE_BUILD_URL}|${BUILDKITE_PIPELINE_NAME:-Buildkite} #${BUILDKITE_BUILD_NUMBER:-}>."
+            if: step.outcome == "hard_failed"
+EOF
+      fi
 
       if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
         echo "Fanout pipeline upload failed. Dumping generated YAML with line numbers:"

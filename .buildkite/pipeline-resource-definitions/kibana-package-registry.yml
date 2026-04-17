@@ -19,14 +19,15 @@ spec:
       description: Verify and promote docker.elastic.co/package-registry/distribution:lite
     spec:
       env:
-        SLACK_NOTIFICATIONS_CHANNEL: "#kibana-operations-alerts"
-        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: "true"
-        REPORT_FAILED_TESTS_TO_GITHUB: "true"
-        FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE: "docker.elastic.co/package-registry/distribution:lite"
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+        SCOUT_REPORTER_ENABLED: 'true'
+        FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE: 'docker.elastic.co/package-registry/distribution:lite'
       repository: elastic/kibana
       branch_configuration: main
       default_branch: main
-      pipeline_file: ".buildkite/pipelines/fleet/package_registry.yml"
+      pipeline_file: '.buildkite/pipelines/fleet/package_registry.yml'
       provider_settings:
         trigger_mode: none
       schedules:

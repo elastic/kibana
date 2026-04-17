@@ -28,6 +28,7 @@ import {
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
   getDateHistogramCompletionItem,
+  getTimeseriesDateHistogramCompletionItem,
 } from '../complete_items';
 import { columnExists as _columnExists } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
@@ -39,7 +40,8 @@ import {
 import { getAllFunctions } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { getPosition, getCommaAndPipe, rightAfterColumn } from './utils';
-import { isMarkerNode, findAstPosition } from '../../definitions/utils/ast';
+import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
+import { findAstPosition } from '../../definitions/utils/ast';
 import { getAssignmentExpressionRoot } from '../../definitions/utils/expressions';
 import { inOperators, nullCheckOperators } from '../../definitions/all_operators';
 import { buildExpressionFunctionParameterContext } from '../../definitions/utils';
@@ -55,6 +57,7 @@ export async function autocomplete(
     return [];
   }
   const isInlineStats = command.name === 'inline stats';
+  const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
   const columnExists = (name: string) => _columnExists(name, context);
 
@@ -70,11 +73,10 @@ export async function autocomplete(
     foundFunction &&
     (foundFunction.subtype === 'variadic-call' || foundFunction.subtype === 'binary-expression')
   ) {
-    filteringContext = buildCustomFilteringContext(command, foundFunction, context);
+    filteringContext = buildCustomFilteringContext(command, foundFunction, innerText, context);
 
     if (filteringContext) {
       const isInBy = isNodeWithinByClause(foundFunction, command);
-      const isTimeseriesSource = query.trimStart().toLowerCase().startsWith('ts ');
 
       let location: Location;
 
@@ -108,7 +110,7 @@ export async function autocomplete(
 
   switch (pos) {
     case 'expression_without_assignment': {
-      const isNewMultipleExpression = /,\s*$/.test(innerText);
+      const isNewMultipleExpression = TRAILING_COMMA_REGEX.test(innerText);
 
       const expressionRoot = isNewMultipleExpression
         ? undefined // we're in a new expression, but there isn't an AST node for it yet
@@ -127,14 +129,7 @@ export async function autocomplete(
         context,
         callbacks,
         emptySuggestions: [
-          ...(!isNewMultipleExpression && !isInlineStats
-            ? [
-                {
-                  ...byCompleteItem,
-                  sortText: 'D',
-                },
-              ]
-            : []),
+          ...(!isNewMultipleExpression && !isInlineStats ? [byCompleteItem] : []),
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
         ],
         afterCompleteSuggestions: [
@@ -180,8 +175,7 @@ export async function autocomplete(
 
     case 'after_where': {
       const whereFn = command.args[command.args.length - 1] as ESQLFunction;
-      // TODO do we still need this check?
-      const expressionRoot = isMarkerNode(whereFn.args[1]) ? undefined : whereFn.args[1]!;
+      const expressionRoot = whereFn.args[1];
 
       if (expressionRoot && !!Array.isArray(expressionRoot)) {
         return [];
@@ -226,7 +220,11 @@ export async function autocomplete(
         location: Location.STATS_BY,
         context,
         callbacks,
-        emptySuggestions: [getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0)],
+        emptySuggestions: [
+          (isTimeseriesSource
+            ? getTimeseriesDateHistogramCompletionItem
+            : getDateHistogramCompletionItem)(context?.histogramBarTarget ?? 0),
+        ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
         ignoredColumns,
@@ -236,7 +234,7 @@ export async function autocomplete(
 
     case 'grouping_expression_without_assignment': {
       let expressionRoot: ESQLAstItem | undefined;
-      if (!/,\s*$/.test(innerText)) {
+      if (!TRAILING_COMMA_REGEX.test(innerText)) {
         const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
 
         expressionRoot = byNode.args[byNode.args.length - 1];
@@ -258,7 +256,9 @@ export async function autocomplete(
         callbacks,
         emptySuggestions: [
           getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-          getDateHistogramCompletionItem(context?.histogramBarTarget ?? 0),
+          (isTimeseriesSource
+            ? getTimeseriesDateHistogramCompletionItem
+            : getDateHistogramCompletionItem)(context?.histogramBarTarget ?? 0),
         ],
         afterCompleteSuggestions: getCommaAndPipe(innerText, expressionRoot, columnExists),
         addSpaceAfterFirstField: false,
@@ -386,13 +386,19 @@ interface StatsFilteringContext {
 function buildCustomFilteringContext(
   command: ESQLAstAllCommands,
   foundFunction: ESQLFunction | null,
+  innerText: string,
   context?: ICommandContext
 ): StatsFilteringContext | undefined {
   if (!foundFunction) {
     return undefined;
   }
 
-  const basicContext = buildExpressionFunctionParameterContext(foundFunction, context);
+  const shouldGetNextArgument = TRAILING_COMMA_REGEX.test(innerText);
+  const basicContext = buildExpressionFunctionParameterContext(
+    foundFunction,
+    context,
+    shouldGetNextArgument
+  );
 
   if (!basicContext) {
     return undefined;

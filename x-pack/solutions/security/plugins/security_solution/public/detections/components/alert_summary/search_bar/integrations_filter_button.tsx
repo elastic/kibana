@@ -97,7 +97,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
       `}
       data-test-subj={INTEGRATION_BUTTON_TEST_ID}
       hasActiveFilters={!!items.find((item) => item.checked === 'on')}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       isSelected={isPopoverOpen}
       numActiveFilters={items.filter((item) => item.checked === 'on').length}
       numFilters={items.filter((item) => item.checked !== 'off').length}

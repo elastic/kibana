@@ -231,6 +231,7 @@ export function ContentFrameworkTable({
         customRenderCellValue={cellValueRenderer}
         customRenderCellPopover={cellPopoverRenderer}
         gridStyle={{ stripes: false, rowHover: 'none', header: 'shade' }}
+        headerVisibility={false}
       />
     </div>
   );

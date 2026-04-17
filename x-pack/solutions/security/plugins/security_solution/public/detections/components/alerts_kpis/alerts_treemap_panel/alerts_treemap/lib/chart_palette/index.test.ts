@@ -90,15 +90,15 @@ describe('getFillColor', () => {
     const colorPalette = euiPaletteWarm(RISK_SCORE_STEPS);
 
     it('returns the expected fill color', () => {
-      expect(getFillColor({ riskScore: 50, colorPalette })).toEqual('#ffaea5');
+      expect(getFillColor({ riskScore: 50, colorPalette })).toEqual('#ffb4ac');
     });
 
     it('returns the expected fill color when risk score is zero', () => {
-      expect(getFillColor({ riskScore: 0, colorPalette })).toEqual('#ffe7e4');
+      expect(getFillColor({ riskScore: 0, colorPalette })).toEqual('#fff2f0');
     });
 
     it('returns the expected fill color when risk score is less than zero', () => {
-      expect(getFillColor({ riskScore: -1, colorPalette })).toEqual('#ffe7e4');
+      expect(getFillColor({ riskScore: -1, colorPalette })).toEqual('#fff2f0');
     });
 
     it('returns the expected fill color when risk score is 100', () => {

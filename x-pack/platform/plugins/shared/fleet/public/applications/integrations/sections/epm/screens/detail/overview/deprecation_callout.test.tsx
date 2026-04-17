@@ -11,7 +11,14 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
-import { DeprecationCallout, DeprecatedFeaturesCallout } from './deprecation_callout';
+import type { DeprecationInfo } from '../../../../../../../../common/types';
+
+import {
+  DeprecatedFeaturesCallout,
+  DeprecationCallout,
+  getPackageDeprecationInfo,
+  isUpcomingDeprecation,
+} from './deprecation_callout';
 
 const mockUseLink = jest.fn();
 
@@ -275,6 +282,79 @@ describe('DeprecationCallout', () => {
 
     expect(screen.queryByTestId('deprecationCallout')).not.toBeInTheDocument();
   });
+
+  describe('With upcoming deprecations', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockUseLink.mockReturnValue({ getHref: mockGetHref });
+    });
+
+    it('renders the upcoming deprecation callout with since version', () => {
+      render(
+        <I18nProvider>
+          <DeprecationCallout
+            packageInfo={
+              {
+                name: 'test-package',
+                version: '1.0.0',
+                deprecated: { description: 'Will be gone soon', since: '2.0.0' },
+              } as PackageInfo
+            }
+          />
+        </I18nProvider>
+      );
+
+      expect(
+        screen.getByText('This integration will be deprecated starting from version 2.0.0')
+      ).toBeInTheDocument();
+      expect(screen.getByText('Will be gone soon')).toBeInTheDocument();
+    });
+
+    it('renders the replaced_by link when provided', () => {
+      render(
+        <I18nProvider>
+          <DeprecationCallout
+            packageInfo={
+              {
+                name: 'test-package',
+                version: '1.0.0',
+                deprecated: {
+                  description: 'Will be replaced',
+                  since: '3.0.0',
+                  replaced_by: { package: 'new-package' },
+                },
+              } as PackageInfo
+            }
+          />
+        </I18nProvider>
+      );
+
+      const link = screen.getByText('new-package');
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/app/integrations/detail/new-package/overview');
+    });
+
+    it('does not render a replaced_by link when not provided', () => {
+      render(
+        <I18nProvider>
+          <DeprecationCallout
+            packageInfo={
+              {
+                name: 'test-package',
+                version: '1.0.0',
+                deprecated: {
+                  description: 'Will be replaced',
+                  since: '3.0.0',
+                },
+              } as PackageInfo
+            }
+          />
+        </I18nProvider>
+      );
+
+      expect(screen.queryByText(/Use.*instead/)).not.toBeInTheDocument();
+    });
+  });
 });
 
 describe('DeprecatedFeaturesCallout', () => {
@@ -511,5 +591,80 @@ describe('DeprecatedFeaturesCallout', () => {
     expect(screen.getByTestId('deprecatedFeaturesCallout')).toBeInTheDocument();
     expect(screen.getByText(/Old Input/)).toBeInTheDocument();
     expect(screen.getByText(/Old Var/)).toBeInTheDocument();
+  });
+});
+
+describe('getPackageDeprecationInfo', () => {
+  it('returns undefined when no deprecation fields are set', () => {
+    const packageInfo = { name: 'test-package', version: '1.0.0' } as PackageInfo;
+    expect(getPackageDeprecationInfo(packageInfo)).toBeUndefined();
+  });
+
+  it('returns packageInfo.deprecated when set', () => {
+    const deprecated = { description: 'Deprecated' };
+    const packageInfo = { name: 'test-package', version: '1.0.0', deprecated } as PackageInfo;
+    expect(getPackageDeprecationInfo(packageInfo)).toBe(deprecated);
+  });
+
+  it('returns conditions.deprecated when set (takes priority over package.deprecated)', () => {
+    const conditionsDeprecated = { description: 'Via conditions' };
+    const packageDeprecated = { description: 'Via package' };
+    const packageInfo = {
+      name: 'test-package',
+      version: '1.0.0',
+      conditions: { deprecated: conditionsDeprecated },
+      deprecated: packageDeprecated,
+    } as unknown as PackageInfo;
+    expect(getPackageDeprecationInfo(packageInfo)).toBe(conditionsDeprecated);
+  });
+
+  it('returns integrationInfo.deprecated for multi-integration packages', () => {
+    const integrationDeprecated = { description: 'Integration deprecated' };
+    const packageInfo = {
+      name: 'test-package',
+      version: '1.0.0',
+      policy_templates: [{ name: 'a' }, { name: 'b' }],
+    } as unknown as PackageInfo;
+    const integrationInfo = {
+      name: 'a',
+      deprecated: integrationDeprecated,
+    } as unknown as RegistryPolicyTemplate;
+    expect(getPackageDeprecationInfo(packageInfo, integrationInfo)).toBe(integrationDeprecated);
+  });
+});
+
+describe('isUpcomingDeprecation', () => {
+  it('returns false when deprecated is undefined', () => {
+    expect(isUpcomingDeprecation('1.0.0', undefined)).toBe(false);
+  });
+
+  it('returns false when deprecated has no since field', () => {
+    const deprecated: DeprecationInfo = { description: 'Deprecated' };
+    expect(isUpcomingDeprecation('1.0.0', deprecated)).toBe(false);
+  });
+
+  it('returns true when current version is less than since', () => {
+    const deprecated: DeprecationInfo = { description: 'Will be deprecated', since: '2.0.0' };
+    expect(isUpcomingDeprecation('1.9.9', deprecated)).toBe(true);
+  });
+
+  it('returns false when current version equals since', () => {
+    const deprecated: DeprecationInfo = { description: 'Deprecated', since: '2.0.0' };
+    expect(isUpcomingDeprecation('2.0.0', deprecated)).toBe(false);
+  });
+
+  it('returns false when current version is greater than since', () => {
+    const deprecated: DeprecationInfo = { description: 'Deprecated', since: '2.0.0' };
+    expect(isUpcomingDeprecation('3.0.0', deprecated)).toBe(false);
+  });
+
+  it('returns false for an invalid version string', () => {
+    const deprecated: DeprecationInfo = { description: 'Will be deprecated', since: '2.0.0' };
+    expect(isUpcomingDeprecation('not-a-version', deprecated)).toBe(false);
+  });
+
+  it('handles pre-release version comparison correctly', () => {
+    const deprecated: DeprecationInfo = { description: 'Will be deprecated', since: '2.0.0' };
+    expect(isUpcomingDeprecation('2.0.0-beta.1', deprecated)).toBe(true);
   });
 });

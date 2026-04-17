@@ -141,9 +141,10 @@ export const createFilter = async (
 
 const createFilterFromRawColumnsESQL = async (
   column: DatatableColumn,
-  value: string | number | boolean
+  value: string | number | boolean | (string | number | boolean)[]
 ) => {
   const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
+
   if (!indexPattern) {
     return [];
   }
@@ -152,19 +153,26 @@ const createFilterFromRawColumnsESQL = async (
     query: 'FROM ' + indexPattern,
     dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
   });
-  const field = dataView.getFieldByName(column.name);
+
+  // `column.name` can be a custom Lens label;
+  // `column.id` matches the ES|QL column / field used for lookup and filters
+  const fieldName = column.id;
+
+  const field = dataView.getFieldByName(fieldName);
 
   // Field should be present in the data view and filterable
   if (!field || !field.filterable) {
     return [];
   }
+
   // Match phrase or phrases filter based on whether value is an array
   // The advantage of match_phrase is that you get a term query when it's not a text and
   // match phrase if it is a text. So you don't have to worry about the field type.
-  if (Array.isArray(value)) {
-    return [buildPhrasesFilter({ name: column.name, type: column.meta?.type }, value, dataView)];
-  }
-  return [buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView)];
+  const fieldDescriptor = { name: fieldName, type: column.meta?.type };
+  const filter = Array.isArray(value)
+    ? buildPhrasesFilter(fieldDescriptor, value, dataView)
+    : buildPhraseFilter(fieldDescriptor, value, dataView);
+  return [filter];
 };
 
 export const createFilterESQL = async (
@@ -285,7 +293,8 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           column.name,
           value,
           getOperationForWhere(value, negate || false),
-          column.meta?.type
+          column.meta?.type,
+          column.meta?.esType
         );
 
         if (queryWithWhere) {

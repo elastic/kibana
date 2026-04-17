@@ -59,7 +59,7 @@ const PopoverWrapper: React.FC<React.ComponentProps<typeof EuiBadgeGroup>> = (pr
 };
 
 /**
- * Component to render list of items in popover, wicth configurabe number of display items by default
+ * Component to render list of items in popover, which has a configurable number of display items by default
  * @param items - array of items to render
  * @param renderItem - render function that render item, arguments: item, index, items[]
  * @param popoverTitle - title of popover
@@ -101,6 +101,7 @@ const PopoverItemsComponent = <T extends unknown>({
       <EuiPopover
         ownFocus
         data-test-subj={`${dataTestPrefix}DisplayPopover`}
+        aria-label={popoverTitle ?? popoverButtonTitle}
         button={
           <EuiBadge
             iconType={popoverButtonIcon}

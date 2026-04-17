@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  * Simple region map generated from kibana
@@ -185,7 +186,7 @@ export const regionMapAttributesWithEms = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -271,7 +272,7 @@ export const regionMapAttributesWithFilterForRegion = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -380,7 +381,7 @@ export const regionMapESQLAttributes = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 } satisfies LensAttributes;
 
@@ -485,6 +486,6 @@ export const regionmapESQLAttributesWithEms = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 } satisfies LensAttributes;

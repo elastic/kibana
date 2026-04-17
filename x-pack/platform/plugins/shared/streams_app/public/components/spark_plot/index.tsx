@@ -143,7 +143,7 @@ export function SparkPlot({
         locale={i18n.getLocale()}
         noResults={
           <EuiIcon
-            type="visLine"
+            type="chartLine"
             aria-label={i18n.translate('xpack.streams.columns.euiIcon.noOccurrencesLabel', {
               defaultMessage: 'No occurrences',
             })}

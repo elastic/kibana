@@ -7,6 +7,8 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
@@ -28,6 +30,8 @@ export const AllRules = React.memo(() => {
   useSyncRulesTableSavedState();
   const [{ tabName }] = useRouteSpy();
 
+  const { application, cps } = useKibana().services;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   if (tabName !== AllRulesTabs.updates) {
     return (
       <>

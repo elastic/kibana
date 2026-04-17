@@ -15,6 +15,7 @@ export type {
 export {
   scheduleBodySchema as scheduleBodySchemaV1,
   scheduleResponseSchema as scheduleResponseSchemaV1,
+  scheduleBackfillExamples as scheduleBackfillExamplesV1,
 } from './schemas/v1';
 export type {
   ScheduleBackfillRequestBody as ScheduleBackfillRequestBodyV1,

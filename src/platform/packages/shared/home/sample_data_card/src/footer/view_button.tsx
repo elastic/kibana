@@ -77,7 +77,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
   const items = sortedItems.map(({ path, label, icon, ...rest }) => {
     return {
       name: label,
-      icon: <EuiIcon type={icon} size="m" />,
+      icon: <EuiIcon type={icon} size="m" aria-hidden={true} />,
       href: addBasePath(path),
       onClick: getAppNavigationHandler(path),
       ...(rest['data-test-subj'] ? { 'data-test-subj': rest['data-test-subj'] } : {}),
@@ -95,7 +95,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
     <EuiButton
       aria-label={viewDataButtonAriaLabel}
       onClick={togglePopover}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
     >
       {viewDataButtonLabel}
@@ -111,6 +111,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
       panelPaddingSize="none"
       anchorPosition="downCenter"
       data-test-subj={`launchSampleDataSet${id}`}
+      aria-label={viewDataButtonAriaLabel}
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

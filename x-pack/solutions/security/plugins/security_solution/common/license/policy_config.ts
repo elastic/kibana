@@ -51,7 +51,10 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
     const defaults = policyFactoryWithSupportedFeatures();
 
     // only platinum or higher may enable ransomware protection
-    if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
+    if (
+      policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
+      policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+    ) {
       return false;
     }
     return true;
@@ -62,21 +65,32 @@ function isEndpointRansomwarePolicyValidForLicense(policy: PolicyConfig, license
   // (which can be blank or what Endpoint defaults)
   const defaults = policyFactoryWithoutPaidFeatures();
 
-  if (policy.windows.ransomware.supported !== defaults.windows.ransomware.supported) {
-    return false;
-  }
-
-  if (policy.windows.ransomware.mode !== defaults.windows.ransomware.mode) {
-    return false;
-  }
-
-  if (policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled) {
+  if (
+    policy.windows.ransomware.supported !== defaults.windows.ransomware.supported ||
+    policy.mac.ransomware.supported !== defaults.mac.ransomware.supported
+  ) {
     return false;
   }
 
   if (
-    policy.windows.popup.ransomware.message !== '' &&
-    policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage
+    policy.windows.ransomware.mode !== defaults.windows.ransomware.mode ||
+    policy.mac.ransomware.mode !== defaults.mac.ransomware.mode
+  ) {
+    return false;
+  }
+
+  if (
+    policy.windows.popup.ransomware.enabled !== defaults.windows.popup.ransomware.enabled ||
+    policy.mac.popup.ransomware.enabled !== defaults.mac.popup.ransomware.enabled
+  ) {
+    return false;
+  }
+
+  if (
+    (policy.windows.popup.ransomware.message !== '' &&
+      policy.windows.popup.ransomware.message !== DefaultPolicyNotificationMessage) ||
+    (policy.mac.popup.ransomware.message !== '' &&
+      policy.mac.popup.ransomware.message !== DefaultPolicyNotificationMessage)
   ) {
     return false;
   }

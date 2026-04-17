@@ -368,7 +368,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   const createButton = canSave ? (
     <EuiButton
       fill={true}
-      iconType="plusInCircle"
+      iconType="plusCircle"
       onClick={() => setShowCreateDialog(true)}
       data-test-subj="createDataViewButton"
     >

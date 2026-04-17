@@ -8,6 +8,7 @@
 // Cloud Connector test subjects
 export const AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'aws-cloud-connector-super-select';
 export const AZURE_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'azure-cloud-connector-super-select';
+export const GCP_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ = 'gcp-cloud-connector-super-select';
 export const CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ = 'cloudConnectorNameInput';
 export const CLOUD_CONNECTOR_EDIT_ICON_TEST_SUBJ = 'cloudConnectorEditIcon';
 export const getCloudConnectorEditIconTestSubj = (connectorId: string) =>
@@ -26,6 +27,17 @@ export const AZURE_INPUT_FIELDS_TEST_SUBJECTS = {
   CLIENT_CERTIFICATE_PATH: 'cloudSetupAzureClientCertificatePath',
   CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
   CLOUD_CONNECTOR_ID: 'cloudSetupAzureCloudConnectorId',
+};
+
+// GCP-specific test subjects
+export const GCP_CLOUD_CONNECTOR_SETUP_INSTRUCTIONS_TEST_SUBJ =
+  'launchCloudConnectorGcpAccordianInstructions';
+export const GCP_LAUNCH_CLOUD_CONNECTOR_CLOUD_SHELL_TEST_SUBJ = 'gcpLaunchCloudConnectorCloudShell';
+
+export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
+  SERVICE_ACCOUNT: 'gcpCredentialsServiceAccountInput',
+  AUDIENCE: 'gcpCredentialsAudienceInput',
+  CLOUD_CONNECTOR_ID: 'gcpCredentialsCloudConnectorIdInput',
 };
 
 export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {

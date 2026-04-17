@@ -9,7 +9,6 @@ import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import styled from '@emotion/styled';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { MLSingleMetricLink } from '../../links/machine_learning_links/mlsingle_metric_link';
@@ -18,18 +17,6 @@ interface Props {
   hasValidMlLicense?: boolean;
   mlJobId?: string;
 }
-
-const ShiftedIconWrapper = styled.span`
-  padding-right: 5px;
-  position: relative;
-  top: -1px;
-  display: inline-block;
-`;
-
-const ShiftedEuiText = styled(EuiText)`
-  position: relative;
-  top: 5px;
-`;
 
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
   const { transactionType, serviceName } = useApmServiceContext();
@@ -69,8 +56,8 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
 
   return (
     <EuiFlexItem grow={false}>
-      <ShiftedEuiText size="xs">
-        <ShiftedIconWrapper>{icon}</ShiftedIconWrapper>
+      <EuiText size="xs">
+        <span css={{ paddingRight: 5, display: 'inline-block' }}>{icon}</span>
         <span>
           {i18n.translate('xpack.apm.metrics.transactionChart.machineLearningLabel', {
             defaultMessage: 'Machine learning:',
@@ -85,7 +72,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
             defaultMessage: 'View Job',
           })}
         </MLSingleMetricLink>
-      </ShiftedEuiText>
+      </EuiText>
     </EuiFlexItem>
   );
 }

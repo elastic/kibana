@@ -121,7 +121,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         await this.waitForTransformState(transformId, TRANSFORM_STATE.STOPPED);
 
         const { body: deleteRspBody, status: deleteRspstatus } = await esSupertest.delete(
-          `/_transform/${transformId}`
+          `/_transform/${transformId}?force=true`
         );
         this.assertResponseStatusCode(200, deleteRspstatus, deleteRspBody);
 

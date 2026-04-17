@@ -1018,7 +1018,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"expired\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"realm\" | \"expired\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
             "lineNumber": 42,
@@ -1250,7 +1250,7 @@
         "label": "QueryApiKeySortOptions",
         "description": [],
         "signature": [
-          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"expired\" | \"realm\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"profile_uid\" | \"creation\" | \"access\" | \"realm\" | \"expired\" | \"role_descriptors\" | \"expiration\" | \"invalidated\" | \"invalidation\" | \"realm_type\" | \"limited_by\" | \"certificate_identity\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
         ],
         "path": "x-pack/platform/packages/shared/security/api_key_management/src/components/api_keys_api_client.ts",
         "lineNumber": 37,
@@ -1276,7 +1276,7 @@
           "UpdateRestAPIKeyWithKibanaPrivilegesParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 218,
+        "lineNumber": 219,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1295,7 +1295,7 @@
           "SecurityUpdateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 213,
+        "lineNumber": 214,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

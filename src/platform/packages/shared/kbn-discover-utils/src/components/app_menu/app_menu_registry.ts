@@ -12,7 +12,6 @@ import type {
   DiscoverAppMenuItemType,
   DiscoverAppMenuPopoverItem,
   DiscoverAppMenuPrimaryActionItem,
-  DiscoverAppMenuSecondaryActionItem,
 } from '../../types';
 
 /**
@@ -23,7 +22,6 @@ export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;
   private items: Map<string, DiscoverAppMenuItemType & { isCustom?: boolean }> = new Map();
   private primaryActionItem?: DiscoverAppMenuPrimaryActionItem;
-  private secondaryActionItem?: DiscoverAppMenuSecondaryActionItem;
 
   /**
    * Register a custom menu item.
@@ -73,14 +71,6 @@ export class AppMenuRegistry {
   }
 
   /**
-   * Set the secondary action item for the app menu.
-   * @param item The secondary action item
-   */
-  public setSecondaryActionItem(item: DiscoverAppMenuSecondaryActionItem) {
-    this.secondaryActionItem = item;
-  }
-
-  /**
    * Register a popover item for a specific parent menu item.
    * @param parentId The ID of the parent menu item
    * @param popoverItem The popover item to register
@@ -111,7 +101,6 @@ export class AppMenuRegistry {
     return {
       items: cleanItems,
       primaryActionItem: this.primaryActionItem,
-      secondaryActionItem: this.secondaryActionItem,
     };
   }
 }

@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BooleanFromString } from '@kbn/zod-helpers';
+
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { Streams, isIlmLifecycle, type IlmPolicyWithUsage } from '@kbn/streams-schema';
-import { z } from '@kbn/zod';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -158,12 +159,10 @@ const lifecycleIlmPoliciesRoute = createServerRoute({
   },
 });
 
-const ilmPhaseSchema = z
-  .object({
-    min_age: z.string().optional(),
-    actions: z.record(z.string(), z.any()).optional(),
-  })
-  .passthrough();
+const ilmPhaseSchema = z.looseObject({
+  min_age: z.string().optional(),
+  actions: z.record(z.string(), z.any()).optional(),
+});
 
 const lifecycleIlmPoliciesUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/streams/lifecycle/_policy',

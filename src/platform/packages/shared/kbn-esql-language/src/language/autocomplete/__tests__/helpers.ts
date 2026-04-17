@@ -387,8 +387,7 @@ export function createCustomCallbackMocks(
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
-      // from * is called in the empty state
-      if (queryString.includes('logs*') || queryString === 'from *') {
+      if (queryString.includes('logs*') || queryString.includes('a_index')) {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
           recommendedFields: editorExtensions.recommendedFields,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Base schema for all Security Solution agent-builder attachments.
@@ -14,5 +14,5 @@ import { z } from '@kbn/zod';
  * which must be included in the schema in order for the attachment validate method to persist the label
  */
 export const securityAttachmentDataSchema = z.object({
-  attachmentLabel: z.string(),
+  attachmentLabel: z.string().optional(),
 });

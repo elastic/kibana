@@ -20,7 +20,7 @@ import type {
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
@@ -34,15 +34,15 @@ export function fetchAndValidate$({
 }: {
   api: DataControlStateManager['api'] &
     Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
-    Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
+    Pick<DSLOptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
   requestSize$: PublishingSubject<number>;
-  runPastTimeout$: PublishingSubject<boolean | undefined>;
-  selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
-  searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
-  sort$: PublishingSubject<OptionsListSortingType | undefined>;
+  runPastTimeout$: PublishingSubject<boolean>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[]>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique>;
+  sort$: PublishingSubject<OptionsListSortingType>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;

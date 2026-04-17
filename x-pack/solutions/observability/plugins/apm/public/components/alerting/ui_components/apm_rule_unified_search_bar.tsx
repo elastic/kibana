@@ -55,7 +55,7 @@ export function ApmRuleUnifiedSearchBar({
         appName={i18n.translate('xpack.apm.appName', {
           defaultMessage: 'APM',
         })}
-        iconType="search"
+        iconType="magnify"
         placeholder={placeholder || searchbarPlaceholder}
         indexPatterns={dataView ? [dataView] : undefined}
         showQueryInput={true}

@@ -58,7 +58,7 @@ export const DragHandle = ({
       })}
       css={styles.dragHandle}
     >
-      <EuiIcon type="grabHorizontal" />
+      <EuiIcon type="dragHorizontal" aria-hidden={true} />
       {children}
     </div>
   );

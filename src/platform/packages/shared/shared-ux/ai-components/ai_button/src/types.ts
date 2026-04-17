@@ -18,27 +18,43 @@ export type AiButtonVariant = 'accent' | 'base' | 'empty' | 'outlined';
 export type AiButtonIconType = 'sparkles' | 'productAgent' | 'aiAssistantLogo';
 type AiButtonTextSize = 'xs' | 's' | 'm';
 
+/** Event handler prop names from DOMAttributes (onClick, onKeyDown, …). */
+type ButtonDomHandlerKeys = Extract<keyof React.DOMAttributes<HTMLButtonElement>, `on${string}`>;
+
+/** Keys to relax: event handlers and ref, so they accept both button and anchor elements. */
+type RelaxKeys = ButtonDomHandlerKeys | 'buttonRef';
+
+/** Relaxed replacements: handlers and ref that accept both element types. */
+type RelaxedOverrides = Pick<
+  React.DOMAttributes<HTMLButtonElement | HTMLAnchorElement>,
+  ButtonDomHandlerKeys
+> & {
+  buttonRef?: React.Ref<HTMLButtonElement | HTMLAnchorElement>;
+};
+
+/** Makes P accept handlers/ref that work for both button and anchor. */
+type RelaxForButtonOrAnchor<P> = Omit<P, RelaxKeys> & RelaxedOverrides;
+
 /** Props for the `AiButton` component. */
 export type AiButtonProps =
-  | (DistributiveOmit<
-      React.ComponentProps<typeof EuiButton>,
-      'fill' | 'iconType' | 'disabled' | 'size'
+  | (RelaxForButtonOrAnchor<
+      DistributiveOmit<React.ComponentProps<typeof EuiButton>, 'fill' | 'iconType' | 'size'>
     > & {
-      /** Selects text button vs icon-only button rendering. */
       iconOnly?: false;
       fill?: never;
       size?: AiButtonTextSize;
       variant?: 'base' | 'accent';
       iconType?: AiButtonIconType;
     })
-  | (DistributiveOmit<React.ComponentProps<typeof EuiButtonEmpty>, 'iconType' | 'disabled'> & {
+  | (RelaxForButtonOrAnchor<
+      DistributiveOmit<React.ComponentProps<typeof EuiButtonEmpty>, 'iconType'>
+    > & {
       iconOnly?: false;
       variant: 'empty' | 'outlined';
       iconType?: AiButtonIconType;
     })
-  | (DistributiveOmit<
-      React.ComponentProps<typeof EuiButtonIcon>,
-      'display' | 'iconType' | 'disabled'
+  | (RelaxForButtonOrAnchor<
+      DistributiveOmit<React.ComponentProps<typeof EuiButtonIcon>, 'display' | 'iconType'>
     > & {
       iconOnly: true;
       display?: never;

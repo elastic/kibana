@@ -8,6 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const ccrReadExceptionsParamsSchema = stackMonitoringCommonSchema.extends({});
+export const ccrReadExceptionsParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      title: 'CCR Read Exceptions Rule Params',
+      description:
+        'The parameters for the CCR read exceptions rule. These parameters are appropriate when `rule_type_id` is `monitoring_ccr_read_exceptions`.',
+    },
+  }
+);
 
 export type CcrReadExceptionsParams = TypeOf<typeof ccrReadExceptionsParamsSchema>;

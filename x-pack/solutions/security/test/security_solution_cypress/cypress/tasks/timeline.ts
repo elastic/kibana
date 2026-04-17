@@ -104,10 +104,31 @@ import { getDataTestSubjectSelector } from '../helpers/common';
 
 const hostExistsQuery = 'host.name: *';
 
+const typeAndVerifyValue = (
+  selector: string,
+  value: string,
+  options?: Partial<Cypress.TypeOptions>
+) => {
+  recurse(
+    () => {
+      cy.get(selector).focus();
+      cy.get(selector).clear();
+      cy.get(selector).type(value, options);
+      return cy.get(selector).invoke('val');
+    },
+    (nextValue) => `${nextValue ?? ''}` === value,
+    {
+      limit: 5,
+      delay: 100,
+    }
+  );
+};
+
 export const addNameToTimelineAndSave = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
+  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -116,7 +137,8 @@ export const addNameToTimelineAndSave = (name: string) => {
 export const addNameToTimelineAndSaveAsNew = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
-  cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
+  typeAndVerifyValue(TIMELINE_TITLE_INPUT, name);
+  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
   cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).click();
@@ -131,9 +153,10 @@ export const addNameAndDescriptionToTimeline = (
   if (!modalAlreadyOpen) {
     cy.get(SAVE_TIMELINE_ACTION).click();
   }
-  cy.get(TIMELINE_TITLE_INPUT).type(`${timeline.title}{enter}`);
+  typeAndVerifyValue(TIMELINE_TITLE_INPUT, timeline.title);
+  cy.get(TIMELINE_TITLE_INPUT).type('{enter}');
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
-  cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
+  typeAndVerifyValue(TIMELINE_DESCRIPTION_INPUT, timeline.description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
   cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
@@ -172,7 +195,7 @@ export const addNotesToTimeline = (notes: string) => {
     .invoke('text')
     .then(parseInt)
     .then((notesCount) => {
-      cy.get(NOTES_TEXT_AREA).type(notes, {
+      typeAndVerifyValue(NOTES_TEXT_AREA, notes, {
         parseSpecialCharSequences: false,
       });
 
@@ -317,7 +340,8 @@ export const executeTimelineKQL = (query: string) => {
 };
 
 export const executeTimelineSearch = (query: string) => {
-  cy.get(TIMELINE_QUERY).type(`${query} {enter}`);
+  typeAndVerifyValue(TIMELINE_QUERY, query);
+  cy.get(TIMELINE_QUERY).type(' {enter}');
 };
 
 /**

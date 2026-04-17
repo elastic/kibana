@@ -7,7 +7,7 @@
 
 import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
-import { checkActionItemsInResults, loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
+import { loadRuleAlerts, navigateToRule } from '../../tasks/live_query';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -41,13 +41,9 @@ describe(
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: true,
-      });
-      cy.contains('View in Discover')
+      cy.getBySel('osquery-results-comment').first().should('exist');
+      cy.get('[aria-label="View in Discover"]')
+        .first()
         .should('exist')
         .should('have.attr', 'href')
         .then(($href) => {
@@ -66,12 +62,7 @@ describe(
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');
-      checkActionItemsInResults({
-        lens: true,
-        discover: true,
-        cases: true,
-        timeline: true,
-      });
+      cy.getBySel('osquery-results-comment').first().should('exist');
       cy.getBySel('osquery-results-comment')
         .first()
         .within(() => {
@@ -104,21 +95,12 @@ describe(
         cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
         cy.getBySel('securitySolutionFlyoutResponseButton').click();
         cy.getBySel('responseActionsViewWrapper').should('exist');
-        checkActionItemsInResults({
-          lens: true,
-          discover: true,
-          cases: true,
-          timeline: true,
-        });
         cy.getBySel('osquery-results-comment')
           .first()
           .within(() => {
-            cy.get('.euiTableRow')
-              .first()
-              .within(() => {
-                cy.getBySel('add-to-timeline').click();
-              });
+            cy.get('[data-test-subj^="packQueriesTableKebab-"]').first().click();
           });
+        cy.getBySel('add-to-timeline').click();
         cy.contains(timelineRegex);
         cy.getBySel('securitySolutionFlyoutNavigationCollapseDetailButton').click();
         cy.getBySel('timeline-bottom-bar').contains('Untitled timeline').click();

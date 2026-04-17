@@ -754,7 +754,7 @@ export class IndexUpdateService {
                 },
                 {
                   strategy: 'esql_async',
-                  retrieveResults: true,
+                  returnIntermediateResults: true,
                 }
               )
               .pipe(

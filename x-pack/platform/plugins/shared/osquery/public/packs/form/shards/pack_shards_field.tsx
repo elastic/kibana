@@ -114,6 +114,7 @@ const PackShardsFieldComponent = ({ options }: PackShardsFieldProps) => {
     if (shardsArrayState.isDirty && !deepEqual(parsedShards, rootShards)) {
       setValueRoot('shards', parsedShards, {
         shouldTouch: true,
+        shouldDirty: true,
       });
     }
   }, [setValueRoot, formValue, shardsArrayState.isDirty, rootShards, resetField, setValue]);

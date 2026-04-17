@@ -207,6 +207,7 @@ export const createParser = (): ConsoleParser => {
     }
   };
   const newLine = function () {
+    if (ch === '\r') ch = next(); // handle CRLF: skip \r before \n
     if (ch === '\n') ch = next();
   };
   const word = function () {
@@ -355,7 +356,7 @@ export const createParser = (): ConsoleParser => {
 
   const url = function () {
     let parsedUrl = '';
-    while (ch && ch !== '\n') {
+    while (ch && ch !== '\n' && ch !== '\r') {
       parsedUrl += ch;
       next();
     }

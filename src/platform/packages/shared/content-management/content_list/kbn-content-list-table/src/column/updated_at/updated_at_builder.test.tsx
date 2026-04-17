@@ -22,7 +22,15 @@ const defaultContext: ColumnBuilderContext = {
   itemConfig: undefined,
   isReadOnly: false,
   entityName: 'dashboard',
-  supports: { sorting: true, pagination: true, search: true, selection: true },
+  supports: {
+    sorting: true,
+    pagination: true,
+    search: true,
+    selection: true,
+    tags: false,
+    starred: false,
+    userProfiles: false,
+  },
 };
 
 describe('updated at column builder', () => {
@@ -72,6 +80,9 @@ describe('updated at column builder', () => {
           pagination: true,
           search: true,
           selection: true,
+          tags: false,
+          starred: false,
+          userProfiles: false,
         },
       };
 

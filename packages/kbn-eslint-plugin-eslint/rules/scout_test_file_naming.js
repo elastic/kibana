@@ -150,7 +150,7 @@ module.exports = {
       // File is in /test/scout but not in the correct subdirectory structure
       // Only report if it looks like a test file (has test/spec in name or is .ts)
       const basename = path.basename(filename, '.ts');
-      if (basename.includes('test') || basename.includes('spec') || hasSpecExtension(filename)) {
+      if (basename.includes('spec') || hasSpecExtension(filename)) {
         return {
           Program(node) {
             context.report({

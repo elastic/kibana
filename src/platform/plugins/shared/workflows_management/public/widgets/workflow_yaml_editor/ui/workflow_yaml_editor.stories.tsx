@@ -8,9 +8,11 @@
  */
 
 import type { Decorator, StoryContext, StoryObj } from '@storybook/react';
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import type { monaco } from '@kbn/monaco';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowYAMLEditor } from './workflow_yaml_editor';
@@ -22,6 +24,10 @@ import {
   WorkflowDetailStoreProvider,
 } from '../../../entities/workflows/store';
 import type { AppDispatch } from '../../../entities/workflows/store/store';
+
+const storyQueryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+});
 
 /**
  * Helper function to create a mock workflow definition
@@ -85,6 +91,19 @@ steps:
 `;
 
 /**
+ * Wrapper that provides the required editorRef to WorkflowYAMLEditor
+ */
+const EditorWithRef: React.FC<{
+  onStepRun: (params: { stepId: string; actionType: string }) => void;
+  highlightDiff?: boolean;
+}> = ({ onStepRun, highlightDiff }) => {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  return (
+    <WorkflowYAMLEditor editorRef={editorRef} onStepRun={onStepRun} highlightDiff={highlightDiff} />
+  );
+};
+
+/**
  * Inner component that can access the Redux store and dispatch actions based on story args
  */
 const StoryWrapper: React.FC<{
@@ -136,27 +155,29 @@ const StoryProviders: Decorator = (story: () => React.ReactElement, context: Sto
     (context.args?.stepExecutions as WorkflowStepExecutionDto[] | undefined);
 
   return (
-    <MemoryRouter>
-      <WorkflowDetailStoreProvider>
-        <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
-          <StoryWrapper
-            story={story}
-            isExecutionYaml={isExecutionYaml}
-            stepExecutions={stepExecutions}
-          />
-        </div>
-      </WorkflowDetailStoreProvider>
-    </MemoryRouter>
+    <QueryClientProvider client={storyQueryClient}>
+      <MemoryRouter>
+        <WorkflowDetailStoreProvider>
+          <div css={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
+            <StoryWrapper
+              story={story}
+              isExecutionYaml={isExecutionYaml}
+              stepExecutions={stepExecutions}
+            />
+          </div>
+        </WorkflowDetailStoreProvider>
+      </MemoryRouter>
+    </QueryClientProvider>
   );
 };
 
 export default {
   title: 'Workflows Management/Workflow YAML Editor',
-  component: WorkflowYAMLEditor,
+  component: EditorWithRef,
   decorators: [kibanaReactDecorator, StoryProviders],
 };
 
-type Story = StoryObj<typeof WorkflowYAMLEditor>;
+type Story = StoryObj<typeof EditorWithRef>;
 
 export const Default: Story = {
   args: {

@@ -8,6 +8,7 @@ import { badRequest } from '@hapi/boom';
 import * as rt from 'io-ts';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
 
 export const commentAttachmentType: UnifiedAttachmentTypeSetup = {
@@ -37,6 +38,9 @@ export const decodeCommentAttachmentData = (data: unknown): CommentAttachmentDat
 
   if (validated.content.trim().length === 0) {
     throw badRequest('Comment content must be a non-empty string');
+  }
+  if (validated.content.length > MAX_COMMENT_LENGTH) {
+    throw badRequest(`Comment content exceeds maximum length of ${MAX_COMMENT_LENGTH} characters`);
   }
 
   return validated;

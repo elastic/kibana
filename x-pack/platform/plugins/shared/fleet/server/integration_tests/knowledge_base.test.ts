@@ -22,7 +22,8 @@ import { getPackageKnowledgeBase } from '../services/epm/packages/get';
 
 import type { KnowledgeBaseItem } from '../../common/types/models/epm';
 
-describe('Knowledge Base End-to-End Integration Test', () => {
+// Failing: See https://github.com/elastic/kibana/issues/239020
+describe.skip('Knowledge Base End-to-End Integration Test', () => {
   let esServer: TestElasticsearchUtils;
   let kbnServer: TestKibanaUtils;
   let esClient: ElasticsearchClient;

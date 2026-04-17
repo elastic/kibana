@@ -12,7 +12,7 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import type {
   XYByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYState,
+  XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
@@ -150,7 +150,7 @@ describe('annotation group save action', () => {
           preferredSeriesType: 'area',
           legend: { isVisible: true, position: 'bottom' },
           layers: [{ layerId } as XYAnnotationLayerConfig],
-        } as XYState,
+        } as XYVisualizationState,
         layer: byValueLayer,
         registerLibraryAnnotationGroup: jest.fn(),
         setState: jest.fn(),

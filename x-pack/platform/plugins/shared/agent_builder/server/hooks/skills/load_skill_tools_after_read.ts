@@ -11,8 +11,8 @@ import type { SkillsService, ToolManager } from '@kbn/agent-builder-server/runne
 import { ToolManagerToolType } from '@kbn/agent-builder-server/runner';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { pickTools } from '../../services/agents/modes/utils/select_tools';
-import { isSkillFileEntry } from '../../services/runner/store/volumes/skills/utils';
+import { pickTools } from '../../services/execution/run_agent/utils/select_tools';
+import { isSkillFileEntry } from '../../services/execution/runner/store/volumes/skills/utils';
 
 const MAX_SKILL_REGISTRY_TOOLS = 25;
 

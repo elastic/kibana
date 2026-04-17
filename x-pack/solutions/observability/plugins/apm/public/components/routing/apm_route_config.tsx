@@ -19,9 +19,11 @@ import { mobileServiceDetailRoute } from './mobile_service_detail';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
-import { ApmMainTemplate } from './templates/apm_main_template';
+import { ServiceGroupTemplate } from './templates/service_group_template';
 import { ServiceGroupsList } from '../app/service_groups';
 import { offsetRt } from '../../../common/comparison_rt';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { environmentRt } from '../../../common/environment_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 
@@ -106,25 +108,25 @@ const apmRoutes = {
             parentHref={'/services'}
             omitOnServerless
           >
-            <ApmMainTemplate
-              pageTitle={ServiceInventoryTitle}
-              environmentFilter={false}
-              showServiceGroupSaveButton={false}
-              showServiceGroupsNav
-              selectedNavButton="serviceGroups"
+            <ServiceGroupTemplate
+              pageTitle={ServiceGroupsTitle}
+              pagePath="/service-groups"
+              serviceGroupContextTab="service-groups"
             >
               <ServiceGroupsList />
-            </ApmMainTemplate>
+            </ServiceGroupTemplate>
           </Breadcrumb>
         ),
         params: t.type({
           query: t.intersection([
+            environmentRt,
             t.type({
               rangeFrom: t.string,
               rangeTo: t.string,
+              kuery: t.string,
               comparisonEnabled: toBooleanRt,
             }),
-            t.partial({
+            t.type({
               serviceGroup: t.string,
             }),
             t.partial({
@@ -134,6 +136,13 @@ const apmRoutes = {
             offsetRt,
           ]),
         }),
+        defaults: {
+          query: {
+            environment: ENVIRONMENT_ALL.value,
+            kuery: '',
+            serviceGroup: '',
+          },
+        },
       },
       ...tutorialRedirectRoute,
       ...onboarding,

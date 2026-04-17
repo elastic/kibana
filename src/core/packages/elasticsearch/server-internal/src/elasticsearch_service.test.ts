@@ -72,6 +72,7 @@ beforeEach(() => {
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createInternalSetup(),
+    loggingSystem: loggingSystemMock.create(),
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -103,7 +104,7 @@ beforeEach(() => {
 
   isScriptingEnabledMock.mockResolvedValue(true);
 
-  getClusterInfoMock.mockReturnValue(of({}));
+  getClusterInfoMock.mockReturnValue(of({ cluster_uuid: 'test-cluster-uuid' }));
 
   // @ts-expect-error TS does not get that `pollEsNodesVersion` is mocked
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
@@ -267,6 +268,16 @@ describe('#setup', () => {
     tick();
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+  });
+
+  it("should inject the cluster's ID in the logging system", async () => {
+    const setupContract = await elasticsearchService.setup(setupDeps);
+
+    await firstValueFrom(setupContract.clusterInfo$);
+
+    expect(setupDeps.loggingSystem.setGlobalContext).toHaveBeenCalledWith({
+      service: { id: 'test-cluster-uuid' },
+    });
   });
 });
 

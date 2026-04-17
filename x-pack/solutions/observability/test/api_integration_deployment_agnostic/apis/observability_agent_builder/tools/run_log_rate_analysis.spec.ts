@@ -92,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('when filtering the analysis with searchQuery', () => {
+    describe('when filtering the analysis with kqlFilter', () => {
       function executeToolWithRegionFilter(region?: string) {
         return agentBuilderApiClient.executeTool<RunLogRateAnalysisToolResult>({
           id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
@@ -100,7 +100,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             index: LOG_RATE_ANALYSIS_SPIKE_DATA_STREAM,
             baseline: LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
             deviation: LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
-            ...(region ? { searchQuery: { term: { 'cloud.region': region } } } : {}),
+            ...(region ? { kqlFilter: `cloud.region: "${region}"` } : {}),
           },
         });
       }

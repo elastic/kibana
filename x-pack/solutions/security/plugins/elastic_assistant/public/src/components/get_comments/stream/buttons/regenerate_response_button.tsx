@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { EuiButtonEmptyProps } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { AiButton, type AiButtonProps } from '@kbn/shared-ux-ai-components';
 
-export function RegenerateResponseButton(props: Partial<EuiButtonEmptyProps>) {
+export function RegenerateResponseButton(props: AiButtonProps) {
   return (
-    <EuiButtonEmpty
-      size="s"
-      data-test-subj="regenerateResponseButton"
-      iconType="sparkles"
+    <AiButton
       {...props}
+      iconType="sparkles"
+      size="s"
+      variant="empty"
+      data-test-subj="regenerateResponseButton"
     >
       {i18n.translate('xpack.elasticAssistantPlugin.aiAssistant.regenerateResponseButtonLabel', {
         defaultMessage: 'Regenerate',
       })}
-    </EuiButtonEmpty>
+    </AiButton>
   );
 }

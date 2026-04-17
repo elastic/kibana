@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+FROM mcr.microsoft.com/devcontainers/base:bookworm
 
 ARG KBN_DIR
 
@@ -67,6 +67,9 @@ RUN mkdir -p $NVM_DIR && \
   chown -R 1000:1000 "${HOME}/.npm"
 
 USER root
+
+# Install Chromium and chromedriver from Debian repos (native amd64 and arm64 support).
+RUN apt-get update && apt-get install -y --no-install-recommends chromium chromium-driver
 
 # Reload the env everytime a new shell is opened incase the .env file changed.
 RUN echo "source ${KBN_DIR}/.devcontainer/scripts/env.sh" >> ${HOME}/.bashrc && \

@@ -25,7 +25,7 @@ export async function autocomplete(
     return [pipeCompleteItem];
   }
 
-  return buildConstantsDefinitions(['.1', '.01', '.001'], '', undefined, {
+  return buildConstantsDefinitions(['.1', '.01', '.001'], '', {
     advanceCursorAndOpenSuggestions: true,
   });
 }

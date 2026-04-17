@@ -13,13 +13,14 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const EIS_MODELS_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
-// Whilst we're waiting on EIS returning metadata about which models can reason
-// and use tools, we need to manually exclude the smaller models
-const EXCLUDED_MODEL_IDS = ['google-gemini-2.5-flash-lite'];
-
 export interface DiscoveredModel {
   inferenceId: string;
   modelId: string;
+  metadata?: {
+    heuristics?: {
+      properties?: string[];
+    };
+  };
 }
 
 export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
@@ -29,7 +30,9 @@ export const getPreDiscoveredEisModels = (): DiscoveredModel[] => {
   try {
     const data = JSON.parse(readFileSync(EIS_MODELS_PATH, 'utf8'));
     const models: DiscoveredModel[] = data.models || [];
-    return models.filter((model) => !EXCLUDED_MODEL_IDS.includes(model.modelId));
+    // 'efficient' is a heuristic property that indicates whether the model is efficient for reasoning and using tools
+    // we exclude models that are not efficient for reasoning and using tools from running in our test suite.
+    return models.filter((model) => !model.metadata?.heuristics?.properties?.includes('efficient'));
   } catch {
     return [];
   }

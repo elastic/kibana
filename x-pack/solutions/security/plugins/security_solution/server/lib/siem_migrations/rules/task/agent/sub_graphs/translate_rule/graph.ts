@@ -31,7 +31,7 @@ export function getTranslateRuleGraph({
     logger,
   });
   const translationResultNode = getTranslationResultNode();
-  const inlineQueryNode = getInlineQueryNode({ model, logger });
+  const inlineQueryNode = getInlineQueryNode({ model, logger, telemetryClient });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
@@ -51,16 +51,7 @@ export function getTranslateRuleGraph({
     .addNode('ecsMapping', ecsMappingNode)
     .addNode('translationResult', translationResultNode)
     // Edges
-    .addConditionalEdges(START, getVendorRouter('splunk'), {
-      /**
-       *  For now inlineQuery node is only for splunk rules because we resolve dependencies such as `lookups` and `macros`
-       *  in this step. For new vendors and for splunk, resolve dependencies node should be used instead of inlineQuery node.
-       *
-       *  TODO : as of now we do not want to change splunk rule migration flow, so keeping inlineQuery node for splunk as it is.
-       */
-      is_splunk: 'inlineQuery',
-      is_not_splunk: 'retrieveIntegrations',
-    })
+    .addEdge(START, 'inlineQuery')
     .addConditionalEdges('inlineQuery', translatableRouter, [
       'retrieveIntegrations',
       'translationResult',
@@ -82,7 +73,10 @@ export function getTranslateRuleGraph({
 }
 
 const translatableRouter = (state: TranslateRuleState) => {
-  if (!state.inline_query) {
+  if (
+    (state.original_rule.vendor === 'splunk' && !state.inline_query) ||
+    (state.original_rule.vendor === 'qradar' && !state.nl_query)
+  ) {
     return 'translationResult';
   }
   return 'retrieveIntegrations';

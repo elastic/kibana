@@ -234,6 +234,9 @@ const NarrowError = ({ error }: { error: ErrorLike }) => {
       panelProps={{
         css: styles.popoverErrorStyles,
       }}
+      aria-label={i18n.translate('presentationPanel.error.popover.ariaLabel', {
+        defaultMessage: 'An error occurred. View more...',
+      })}
     >
       <Markdown data-test-subj="errorMessageMarkdown" readOnly css={errorTextStyle}>
         {error.message?.length

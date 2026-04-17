@@ -13,6 +13,7 @@ import {
   EuiSwitch,
   EuiFieldText,
   EuiText,
+  EuiTitle,
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
@@ -110,6 +111,21 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     // Hide deprecated variables on new installations
     if (!isEditPage && !!varDef.deprecated) {
       return null;
+    }
+
+    if (type === 'section_header') {
+      return (
+        <>
+          <EuiTitle size="xxs">
+            <h4>{title || name}</h4>
+          </EuiTitle>
+          {description && (
+            <EuiText size="s" color="subdued">
+              <ReactMarkdown children={description} />
+            </EuiText>
+          )}
+        </>
+      );
     }
 
     if (name === DATASET_VAR_NAME && packageType === 'input') {

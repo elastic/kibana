@@ -146,7 +146,7 @@ function BottomSection({
             <EuiButtonEmpty
               data-test-subj="apmBottomSectionCreateCustomLinkButton"
               isDisabled={!canSave}
-              iconType="plusInCircle"
+              iconType="plusCircle"
               size="xs"
               onClick={onClickCreate}
             >
@@ -167,7 +167,7 @@ function BottomSection({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj="apmBottomSectionButton"
-            iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
+            iconType={showAllLinks ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={toggleShowAll}
           >
             <EuiText size="s">

@@ -23,7 +23,7 @@ import { CAI_SCHEDULER_TASK_ID } from '@kbn/cases-plugin/server/cases_analytics/
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
-  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
+  const hash = createHash('sha1');
   const hashFeed = parts.join('-');
   return hash.update(hashFeed).digest('hex');
 };
@@ -33,6 +33,10 @@ const getExternalReferenceAttachmentTypeHash = (type: ExternalReferenceAttachmen
 };
 
 const getPersistableStateAttachmentTypeHash = (type: PersistableStateAttachmentTypeSetup) => {
+  return hashParts([type.id]);
+};
+
+const getUnifiedAttachmentTypeHash = (type: { id: string }) => {
   return hashParts([type.id]);
 };
 
@@ -125,6 +129,39 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
 
         const hashMap = allTypes.reduce((map, type) => {
           map[type.id] = getPersistableStateAttachmentTypeHash(type);
+          return map;
+        }, {} as Record<string, string>);
+
+        return response.ok({
+          body: hashMap,
+        });
+      } catch (error) {
+        logger.error(`Error : ${error}`);
+        throw error;
+      }
+    }
+  );
+
+  router.get(
+    {
+      path: '/api/cases_fixture/registered_unified_attachments',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (context, request, response) => {
+      try {
+        const [_, { cases }] = await core.getStartServices();
+        const unifiedAttachmentTypeRegistry = cases.getUnifiedAttachmentTypeRegistry();
+
+        const allTypes = unifiedAttachmentTypeRegistry.list();
+
+        const hashMap = allTypes.reduce((map, type) => {
+          map[type.id] = getUnifiedAttachmentTypeHash(type);
           return map;
         }, {} as Record<string, string>);
 

@@ -11,7 +11,7 @@
 // Types
 // =============================================================================
 
-export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type';
+export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred' | 'createdBy';
 
 export interface ActiveColumn {
   instanceId: string;
@@ -28,7 +28,7 @@ export interface ActiveAction {
   type: ActionType;
 }
 
-export type FilterType = 'sort';
+export type FilterType = 'sort' | 'tags' | 'starred' | 'createdBy';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -45,6 +45,9 @@ export interface PlaygroundState {
     sorting: boolean;
     pagination: boolean;
     search: boolean;
+    starred: boolean;
+    tags: boolean;
+    userProfiles: boolean;
     initialPageSize: number;
   };
   item: {
@@ -93,9 +96,11 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     type: 'name',
     label: 'Column.Name',
     allowMultiple: false,
-    defaultProps: { showDescription: true },
+    defaultProps: { showDescription: true, showTags: false, showStarred: false },
     configurableProps: [
       { name: 'showDescription', label: 'showDescription', type: 'boolean', defaultValue: true },
+      { name: 'showTags', label: 'showTags', type: 'boolean', defaultValue: false },
+      { name: 'showStarred', label: 'showStarred', type: 'boolean', defaultValue: false },
       { name: 'width', label: 'width', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
@@ -121,6 +126,23 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     ],
   },
   {
+    type: 'starred',
+    label: 'Column.Starred',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [{ name: 'width', label: 'width', type: 'string', defaultValue: '' }],
+  },
+  {
+    type: 'createdBy',
+    label: 'Column.CreatedBy',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [
+      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
+    ],
+  },
+  {
     type: 'actions',
     label: 'Column.Actions',
     allowMultiple: false,
@@ -133,6 +155,9 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
 ];
 
 export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
+  { type: 'starred', label: 'Filters.Starred' },
+  { type: 'tags', label: 'Filters.Tags' },
+  { type: 'createdBy', label: 'Filters.CreatedBy' },
   { type: 'sort', label: 'Filters.Sort' },
 ];
 
@@ -187,6 +212,9 @@ export const INITIAL_STATE: PlaygroundState = {
     sorting: true,
     pagination: true,
     search: true,
+    starred: false,
+    tags: true,
+    userProfiles: true,
     initialPageSize: 10,
   },
   item: {

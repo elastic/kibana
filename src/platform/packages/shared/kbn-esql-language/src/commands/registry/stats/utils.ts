@@ -26,10 +26,10 @@ import {
 } from '@elastic/esql';
 import { commaCompleteItem, pipeCompleteItem } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import { getFragmentData } from '../../definitions/utils/autocomplete/helpers';
 import type { ISuggestionItem } from '../types';
 import { getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
+import { TRAILING_COMMA_REGEX } from '../../definitions/utils/shared';
 
 /**
  * Position of the caret in the sort command:
@@ -50,8 +50,6 @@ export type CaretPosition =
   | 'grouping_expression_after_assignment'
   | 'after_where';
 
-const ENDS_WITH_COMMA_AND_WHITESPACE_REGEX = /,\s*$/;
-
 export const getPosition = (command: ESQLAstAllCommands, innerText: string): CaretPosition => {
   const lastCommandArg = command.args[command.args.length - 1];
 
@@ -59,18 +57,18 @@ export const getPosition = (command: ESQLAstAllCommands, innerText: string): Car
     // in the BY clause
 
     const lastOptionArg = lastCommandArg.args[lastCommandArg.args.length - 1];
-    if (isAssignment(lastOptionArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
+    if (isAssignment(lastOptionArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
       return 'grouping_expression_after_assignment';
     }
 
     return 'grouping_expression_without_assignment';
   }
 
-  if (isAssignment(lastCommandArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
+  if (isAssignment(lastCommandArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
     return 'expression_after_assignment';
   }
 
-  if (isWhereExpression(lastCommandArg) && !ENDS_WITH_COMMA_AND_WHITESPACE_REGEX.test(innerText)) {
+  if (isWhereExpression(lastCommandArg) && !TRAILING_COMMA_REGEX.test(innerText)) {
     return 'after_where';
   }
 
@@ -82,7 +80,6 @@ export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'BY ',
   kind: 'Reference',
   detail: 'By',
-  sortText: '1',
 });
 
 export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -90,7 +87,6 @@ export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
   text: 'WHERE ',
   kind: 'Reference',
   detail: 'Where',
-  sortText: '1',
 });
 
 function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {
@@ -202,15 +198,10 @@ export const getCommaAndPipe = (
   }
   // special case: cursor right after a column name
   else if (isColumn(expressionRoot) && rightAfterColumn(innerText, expressionRoot, columnExists)) {
-    const { fragment, rangeToReplace } = getFragmentData(innerText);
+    pipeSuggestion.text = ` ${pipeSuggestion.text}`;
+    pipeSuggestion.preserveTypedPrefix = true;
 
-    pipeSuggestion.filterText = fragment;
-    pipeSuggestion.text = fragment + ' ' + pipeSuggestion.text;
-    pipeSuggestion.rangeToReplace = rangeToReplace;
-
-    commaSuggestion.filterText = fragment;
-    commaSuggestion.text = fragment + commaSuggestion.text;
-    commaSuggestion.rangeToReplace = rangeToReplace;
+    commaSuggestion.preserveTypedPrefix = true;
   }
 
   return [pipeSuggestion, commaSuggestion];

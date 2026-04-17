@@ -19,6 +19,7 @@ import {
   TOAST_CLOSE_BTN,
   TOAST_CLOSE_BTN_SEL,
 } from '../screens/integrations';
+import { suppressGlobalAnnouncements } from './common';
 
 export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
   cy.getBySel(ADD_POLICY_BTN).click();
@@ -45,6 +46,7 @@ export const addCustomIntegration = (integrationName: string, policyName: string
 };
 
 export const policyContainsIntegration = (integrationName: string, policyName: string) => {
+  suppressGlobalAnnouncements();
   cy.visit('app/fleet/policies');
   closeFleetTourIfVisible();
   cy.contains(policyName).click();

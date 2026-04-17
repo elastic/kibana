@@ -145,6 +145,7 @@ const RunByFilterPopoverComponent: React.FC<RunByFilterPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={PANEL_PROPS}
+      aria-label={RUN_BY_LABEL}
     >
       <EuiSelectable
         searchable

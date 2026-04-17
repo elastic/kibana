@@ -36,6 +36,15 @@ If you are migrating from a version prior to version 9.0, you must first upgrade
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+## 9.3.2 [kibana-9.3.2-breaking-changes]
+$$$kibana-255122$$$
+::::{dropdown} The `_source` field mode is now saved to the template index settings
+
+**Details**<br> The index and component template forms in **Index Management** previously saved the `_source` field mode (`stored` and `synthetic`) in the `mappings._source.mode` setting. This path is deprecated and has no effect in {{es}}. The form now uses the correct `settings.index.mapping.source.mode` setting. When you edit a template in the UI, any existing `mappings._source.mode` setting is automatically moved to the index settings and removed from mappings. Other `_source` options (`enabled`, `includes`, and `excludes`) remain in mappings.
+
+View [#255122]({{kib-pull}}255122).
+::::
+
 ## 9.3.0 [kibana-9.3.0-breaking-changes]
 
 There are no breaking changes in this version.

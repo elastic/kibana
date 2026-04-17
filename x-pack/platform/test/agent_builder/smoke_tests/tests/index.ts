@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
+import { getAvailableConnectors, takeRandomLlmSample } from '@kbn/gen-ai-functional-testing';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { converseApiSuite } from './converse';
 import { getPreDiscoveredEisModels, enableCcm } from './eis_helpers';
@@ -20,15 +20,29 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
 
-  const eisModels = getPreDiscoveredEisModels();
+  const allStaticConnectors = getAvailableConnectors();
+  const sampledStaticConnectors = takeRandomLlmSample(allStaticConnectors);
+  const allEisModels = getPreDiscoveredEisModels();
+  const sampledEisModels = takeRandomLlmSample(allEisModels);
 
   describe('Agent Builder - LLM Smoke tests', function () {
+    before(function () {
+      log.info(
+        `[FTR] LLM smoke — static connectors (${sampledStaticConnectors.length}/${
+          allStaticConnectors.length
+        }): ${sampledStaticConnectors.map((c) => c.id).join(', ')}`
+      );
+      log.info(
+        `[FTR] LLM smoke — EIS models (${sampledEisModels.length}/${
+          allEisModels.length
+        }): ${sampledEisModels.map((m) => m.modelId).join(', ')}`
+      );
+    });
+
     describe('Static Preconfigured Connectors (from Vault)', function () {
       this.timeout(300000);
 
-      const connectors = getAvailableConnectors();
-
-      for (const connector of connectors) {
+      for (const connector of sampledStaticConnectors) {
         converseApiSuite(connector.id, connector.id, providerContext);
       }
     });
@@ -36,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('EIS Models (dynamically configured)', function () {
       this.timeout(300000);
 
-      if (eisModels.length === 0) {
+      if (allEisModels.length === 0) {
         it('should skip - no EIS models discovered', function () {
           log.warning('[EIS] No models in target/eis_models.json');
           log.warning('[EIS] Run: node scripts/discover_eis_models.js');
@@ -53,7 +67,7 @@ export default function (providerContext: FtrProviderContext) {
           await enableCcm(es, eisCcmApiKey, log); // Enable CCM to provision EIS endpoints
         });
 
-        for (const model of eisModels) {
+        for (const model of sampledEisModels) {
           const connectorId = `eis-${model.modelId}`;
           converseApiSuite(model.modelId, connectorId, providerContext);
         }
