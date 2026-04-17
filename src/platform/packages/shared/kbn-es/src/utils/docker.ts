@@ -16,7 +16,7 @@ import { resolve, basename, join } from 'path';
 import type { ClientOptions } from '@elastic/elasticsearch';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { REPO_ROOT } from '@kbn/repo-info';
+import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
 import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
   MOCK_IDP_REALM_NAME,
@@ -221,7 +221,7 @@ const DEFAULT_DOCKER_ESARGS: Array<[string, string]> = [
 ];
 
 export const DOCKER_REPO = `${DOCKER_REGISTRY}/elasticsearch/elasticsearch`;
-export const DOCKER_TAG = `9.4.0-SNAPSHOT`;
+export const DOCKER_TAG = `${pkg.version}-SNAPSHOT`;
 export const DOCKER_IMG = `${DOCKER_REPO}:${DOCKER_TAG}`;
 
 export const ES_SERVERLESS_REPO_KIBANA = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch-serverless`;
