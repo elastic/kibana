@@ -48,10 +48,15 @@ toc:
               - file: case-study-top-level-imports.md
               - file: case-study-uncommon-code-in-common.md
       - file: building-blocks.md
-      - file: kibana-api-authorization.md
-      - file: security-kibana-system-user.md
-      - file: creating-feature-privileges.md
-      - file: rbac-and-the-saved-objects-client.md
+      - folder: security
+        children:
+          - file: overview.md
+          - file: api-authorization.md
+          - file: feature-privileges.md
+          - file: rbac-and-saved-objects.md
+          - file: system-user.md
+          - file: encrypted-saved-objects.md
+          - file: audit-logging.md
       - file: saved-objects.md
         children:
           - file: saved-objects/structure.md
@@ -64,9 +69,7 @@ toc:
           - file: saved-objects/share.md
           - file: saved-objects/migrations.md
       - file: legacy-url-aliases.md
-      - file: encrypted-saved-objects.md
       - file: persistable-state.md
-      - file: audit-logging.md
       - file: data-views.md
       - file: routing-navigation-and-url.md
       - file: embeddables.md

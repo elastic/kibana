@@ -109,6 +109,6 @@ Once we have authorized the user to perform a specific action, we can execute th
 
 ## Related topics
 
-- [Creating feature privileges](./creating-feature-privileges.md) — register features and define the privileges that map to them.
-- [Kibana API authorization](./kibana-api-authorization.md) — how API routes declare required privileges.
-- [Security: Kibana system user](./security-kibana-system-user.md) — what the `kibana_system` service account can and cannot do.
+- [Feature privileges](./feature-privileges.md) — register features and define the privileges that map to them.
+- [API authorization](./api-authorization.md) — how API routes declare required privileges.
+- [Kibana system user](./system-user.md) — what the `kibana_system` service account can and cannot do.

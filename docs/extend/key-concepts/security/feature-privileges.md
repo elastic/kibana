@@ -51,7 +51,7 @@ features.registerKibanaFeature({
 
 ### Control access to UI elements
 
-![image](../assets/feature_privileges_example_plugin.png)
+![image](../../assets/feature_privileges_example_plugin.png)
 
 With regards to feature privileges, we control access to UI elements by declaring UI capabilities.
 
@@ -194,7 +194,7 @@ public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
 }
 ```
 :::{note}
-For more information on the `security.authz` object and API authorization, please refer to our guide on [Configuring authorization on routes](./kibana-api-authorization.md)
+For more information on the `security.authz` object and API authorization, please refer to our guide on [Configuring authorization on routes](./api-authorization.md)
 :::
 
 Notice, we've added a `security.authz.requiredPrivileges` property for the API route that returns sensitive information. This added configuration is then used in the privileges object as follow

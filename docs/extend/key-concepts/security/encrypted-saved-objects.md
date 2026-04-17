@@ -7,7 +7,7 @@ description: "Configure your saved object types to secure sensitive data."
 
 ## Overview
 
-"Encrypted Saved Objects" (ESO) are [Saved Object types](./saved-objects.md) that have been registered with the Encrypted Saved Objects
+"Encrypted Saved Objects" (ESO) are [Saved Object types](../saved-objects.md) that have been registered with the Encrypted Saved Objects
 Service (ESO Service) to specify which attributes should be protected (encrypted attributes) and which attributes, if any, should be present and unchanged
 in order to decrypt the protected attributes ("Additional Authenticated Data", or AAD).
 
@@ -35,7 +35,7 @@ When in doubt, consult with the Kibana Security team (Application Experience/Pla
 ### Registration
 
 To register a Saved Object type, the type must first be registered with the Saved Objects Repository. This can be achieved by calling the Saved Object Service's
-`registerType` function. More information can be found in the [Register a new saved object type](./saved-objects/create.md) tutorial. Once the
+`registerType` function. More information can be found in the [Register a new saved object type](../saved-objects/create.md) tutorial. Once the
 Saved Object type is registered, use the ESO Plugin's `registerType` function, and provide an `EncryptedSavedObjectTypeRegistration` object that defines how the
 object should be encrypted.
 
@@ -152,7 +152,7 @@ The optional `shouldTransformIfDecryptionFails` parameter defines whether an ESO
 Some examples of `createModelVersion` can be found in the ESO Model Version example plugin (
 [examples/eso_model_version_example/server/plugin.ts](https://github.com/elastic/kibana/blob/06fc22a0f15e692857ba689a7b0ddec91ed2dac2/examples/eso_model_version_example/server/plugin.ts))
 
-For more information see our developer documentation for [Model Versions](./saved-objects/create.md).
+For more information see our developer documentation for [Model Versions](../saved-objects/create.md).
 
 #### Serverless Considerations
 

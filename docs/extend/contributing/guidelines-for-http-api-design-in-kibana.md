@@ -585,10 +585,10 @@ For questions about APM and telemetry please reach out to the Core team.
 
 ### Security
 
-User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../key-concepts/kibana-api-authorization.md)). This depends on the actions your API performs.
+User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../key-concepts/security/api-authorization.md)). This depends on the actions your API performs.
 
 :::{warning} Do not expose sensitive information
-Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../key-concepts/audit-logging.md) that you can use to log sensitive information about user actions.
+Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../key-concepts/security/audit-logging.md) that you can use to log sensitive information about user actions.
 :::
 
 Assigning specific privilege requirements to your API will surface them in the code-generated OpenAPI spec. See the [documentation section](#documentation).
