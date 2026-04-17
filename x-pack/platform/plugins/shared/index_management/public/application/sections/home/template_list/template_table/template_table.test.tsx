@@ -193,7 +193,7 @@ describe('TemplateTable', () => {
     mockTrackMetric.mockClear();
     mockedUseServices.mockReturnValue({
       uiMetricService: { trackMetric: mockTrackMetric },
-    } as ReturnType<typeof useServices>);
+    } as unknown as ReturnType<typeof useServices>);
     mockedUseAppContext.mockReturnValue({
       privs: {
         manageIndexTemplates: true,
