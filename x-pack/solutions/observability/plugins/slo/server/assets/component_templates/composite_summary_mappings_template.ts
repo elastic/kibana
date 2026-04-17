@@ -64,6 +64,7 @@ export const COMPOSITE_SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateReq
         fiveMinuteBurnRate: { type: 'double' },
         oneHourBurnRate: { type: 'double' },
         oneDayBurnRate: { type: 'double' },
+        unresolvedMemberIds: { type: 'keyword' },
       },
     },
   },

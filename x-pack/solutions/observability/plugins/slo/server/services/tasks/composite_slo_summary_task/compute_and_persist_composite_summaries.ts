@@ -244,6 +244,7 @@ function buildBulkOps(
 
     for (const { compositeSlo } of items) {
       try {
+        const unresolvedMemberIds: string[] = [];
         const memberSummaries: MemberSummaryData[] = compositeSlo.members.flatMap((member) => {
           const key = buildMemberSummaryKey(
             member.sloId,
@@ -252,7 +253,10 @@ function buildBulkOps(
           );
           const slo = memberDefinitionMap.get(member.sloId);
           const result = summaryResultMap.get(key);
-          if (!slo || !result) return [];
+          if (!slo || !result) {
+            unresolvedMemberIds.push(member.sloId);
+            return [];
+          }
           return [
             {
               member,
@@ -263,11 +267,17 @@ function buildBulkOps(
           ];
         });
 
+        if (unresolvedMemberIds.length > 0) {
+          logger.warn(
+            `Composite SLO [${compositeSlo.id}] in space [${spaceId}] has ${unresolvedMemberIds.length} unresolved member SLO(s) — they may have been deleted: ${unresolvedMemberIds.join(', ')}`
+          );
+        }
+
         const { compositeSummary } = computeCompositeSummary(compositeSlo, memberSummaries);
         bulkOps.push({
           index: { _index: COMPOSITE_SUMMARY_INDEX_NAME, _id: `${spaceId}:${compositeSlo.id}` },
         });
-        bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId));
+        bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId, unresolvedMemberIds));
       } catch (err) {
         stats.computeErrors++;
         logger.warn(
@@ -372,12 +382,14 @@ interface CompositeSummaryDoc {
   fiveMinuteBurnRate: number;
   oneHourBurnRate: number;
   oneDayBurnRate: number;
+  unresolvedMemberIds: string[];
 }
 
 function buildSummaryDoc(
   compositeSlo: CompositeSLODefinition,
   summary: ReturnType<typeof computeCompositeSummary>['compositeSummary'],
-  spaceId: string
+  spaceId: string,
+  unresolvedMemberIds: string[]
 ): CompositeSummaryDoc {
   return {
     spaceId,
@@ -405,5 +417,6 @@ function buildSummaryDoc(
     fiveMinuteBurnRate: summary.fiveMinuteBurnRate,
     oneHourBurnRate: summary.oneHourBurnRate,
     oneDayBurnRate: summary.oneDayBurnRate,
+    unresolvedMemberIds,
   };
 }

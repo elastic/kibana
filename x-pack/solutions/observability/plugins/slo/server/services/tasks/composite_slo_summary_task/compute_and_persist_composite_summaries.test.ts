@@ -274,6 +274,7 @@ describe('computeAndPersistCompositeSummaries', () => {
         fiveMinuteBurnRate: 0.5,
         oneHourBurnRate: 0.4,
         oneDayBurnRate: 0.3,
+        unresolvedMemberIds: [],
       });
     });
 
@@ -379,6 +380,28 @@ describe('computeAndPersistCompositeSummaries', () => {
       expect(mockComputeSummaries).not.toHaveBeenCalled();
       // computeCompositeSummary is still called with empty member summaries
       expect(mockComputeCompositeSummary).toHaveBeenCalledWith(expect.anything(), []);
+    });
+
+    it('sets unresolvedMemberIds and logs a warning when member SLOs are missing', async () => {
+      mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+
+      await computeAndPersistCompositeSummaries({
+        esClient,
+        soClient: soClient as any,
+        logger,
+        abortController,
+      });
+
+      const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
+      const doc = bulkCall.operations[1];
+      expect(doc.unresolvedMemberIds).toEqual([MEMBER_ID]);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(MEMBER_ID));
     });
 
     it('passes timeWindowOverride from composite to summary client', async () => {
