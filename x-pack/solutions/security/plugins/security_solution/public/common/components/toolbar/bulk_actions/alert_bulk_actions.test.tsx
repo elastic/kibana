@@ -30,6 +30,7 @@ function renderAlertBulkActions(props?: Partial<StatefulAlertBulkActionsProps>) 
         id={TableId.alertsOnAlertsPage}
         selectedEventIds={mockSelectedEventIds}
         totalItems={10}
+        data={[]}
         clearSelected={clearSelected}
         {...props}
       />

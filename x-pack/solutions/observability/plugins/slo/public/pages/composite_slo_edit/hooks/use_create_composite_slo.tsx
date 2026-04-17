@@ -39,7 +39,7 @@ export function useCreateCompositeSlo() {
     },
     {
       onSuccess: (_data, { compositeSlo }) => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+        queryClient.invalidateQueries({ queryKey: sloKeys.compositeLists(), exact: false });
         toasts.addSuccess({
           title: toMountPoint(
             <span>

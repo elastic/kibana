@@ -18,6 +18,7 @@ import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schem
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { telemetryHandler } from '../telemetry_handler';
+import { writeErrorHandler } from '../write_error_handler';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -57,6 +58,9 @@ export function registerUpdateRoute(
             body: () => getUpdateResponseBodySchema(isDashboardAppRequest),
             description: 'created',
           },
+          400: {
+            description: 'invalid request',
+          },
           403: {
             description: 'forbidden',
           },
@@ -77,10 +81,7 @@ export function registerUpdateRoute(
             ? res.created({ body: result })
             : res.ok({ body: result });
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            return res.forbidden({ body: { message: e.message } });
-          }
-          return res.badRequest({ body: { message: e.message } });
+          return writeErrorHandler(e, res);
         }
       })
   );

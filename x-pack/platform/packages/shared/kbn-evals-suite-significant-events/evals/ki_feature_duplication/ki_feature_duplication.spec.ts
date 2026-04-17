@@ -100,10 +100,11 @@ evaluate.describe('KI feature duplication', { tag: tags.serverless.observability
           await executorClient.runExperiment(
             {
               dataset: {
-                name: `sigevents: KI feature duplication: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature duplication across ${scenario.input.runs} runs on ${scenario.input.scenario_id}`,
+                name: `sigevents: KI feature duplication (${dataset.id})`,
+                description: `[${dataset.id}] KI feature duplication across scenarios`,
                 examples: [
                   {
+                    id: scenario.input.scenario_id,
                     input: {
                       stream_name: MANAGED_STREAM_NAME,
                       runs: scenario.input.runs,

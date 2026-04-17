@@ -38,6 +38,7 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { ZodObject } from '@kbn/zod/v4';
+import type { SmlTypeDefinition } from './agent_builder/sml_types/types';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
 
 export interface WorkflowsServerPluginSetup {
@@ -66,6 +67,9 @@ export interface AgentBuilderPluginSetupContract {
   hooks: HooksServiceSetup;
   skills: {
     register: (definition: SkillDefinition) => void;
+  };
+  sml: {
+    registerType: (definition: SmlTypeDefinition) => void;
   };
 }
 

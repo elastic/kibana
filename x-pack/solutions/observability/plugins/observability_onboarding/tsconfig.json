@@ -40,7 +40,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/custom-integrations-plugin",
     "@kbn/server-route-repository-utils",
-    "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
     "@kbn/logs-shared-plugin",
     "@kbn/tooling-log",
@@ -55,7 +54,8 @@
     "@kbn/streams-plugin",
     "@kbn/data-views-plugin",
     "@kbn/ingest-hub-plugin",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

@@ -56,7 +56,6 @@ export interface UsageStats {
   'agentBuilder:externalMcp': boolean;
   'agentBuilder:experimentalFeatures': boolean;
   'workflows:ui:enabled': boolean;
-  'workflows:aiAgent:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;
@@ -194,7 +193,9 @@ export interface UsageStats {
   'observability:streamsEnableQueryStreams': boolean;
   'observability:streamsEnableWiredStreamViews': boolean;
   'observability:streamsEnableOverviewPage': boolean;
+  'observability:streamsEnableDraftStreams': boolean;
   'observability:streamsSigEventsIndexPatterns': string;
+  'observability:streamsEnableMemory': boolean;
   'securitySolution:entityStoreEnableV2': boolean;
   'elasticRamen:enabled': boolean;
   'query_activity:minRunningTime': number;

@@ -87,12 +87,20 @@ describe('TopThreatHuntingLeads', () => {
     expect(screen.queryByTestId('leadCard-lead-6')).not.toBeInTheDocument();
   });
 
-  it('renders empty state when no leads', () => {
+  it('renders empty state when no leads and never generated', () => {
     render(<TopThreatHuntingLeads {...defaultProps} />);
 
     expect(screen.getByTestId('topThreatHuntingLeads')).toBeInTheDocument();
     expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('No hunting leads yet')).toBeInTheDocument();
     expect(screen.queryByTestId('leadsLoadingSpinner')).not.toBeInTheDocument();
+  });
+
+  it('renders "no data found" empty state after generation with no results', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} hasGenerated />);
+
+    expect(screen.getByTestId('leadsEmptyPrompt')).toBeInTheDocument();
+    expect(screen.getByText('No data found')).toBeInTheDocument();
   });
 
   it('renders loading state (spinner visible)', () => {
@@ -149,33 +157,5 @@ describe('TopThreatHuntingLeads', () => {
 
     expect(onLeadClick).toHaveBeenCalledTimes(1);
     expect(onLeadClick).toHaveBeenCalledWith(lead);
-  });
-
-  it('info button calls onLeadInfoClick when prop is defined', () => {
-    const onLeadInfoClick = jest.fn();
-    const lead = createMockLead({ id: 'lead-info' });
-
-    render(
-      <TopThreatHuntingLeads
-        {...defaultProps}
-        leads={[lead]}
-        totalCount={1}
-        onLeadInfoClick={onLeadInfoClick}
-      />
-    );
-
-    fireEvent.click(screen.getByTestId('leadInfoButton-lead-info'));
-
-    expect(onLeadInfoClick).toHaveBeenCalledTimes(1);
-    expect(onLeadInfoClick).toHaveBeenCalledWith(lead);
-  });
-
-  it('info button not rendered when onLeadInfoClick is undefined', () => {
-    const lead = createMockLead({ id: 'lead-no-info' });
-
-    render(<TopThreatHuntingLeads {...defaultProps} leads={[lead]} totalCount={1} />);
-
-    expect(screen.getByTestId('leadCard-lead-no-info')).toBeInTheDocument();
-    expect(screen.queryByTestId('leadInfoButton-lead-no-info')).not.toBeInTheDocument();
   });
 });

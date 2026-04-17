@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { deleteAllAlerts, deleteAllRules } from '@kbn/detections-response-ftr-services';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
 import {
   createAndSyncRuleAndAlertsFactory,
   readRiskScores,
@@ -41,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
   });
   const entityStoreUtils = EntityStoreUtils(getService);
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
-  const entityStoreIndex = '.entities.v2.latest.security_default';
+  const entityStoreIndex = getEntitiesAlias(ENTITY_LATEST, 'default');
 
   // Failing: See https://github.com/elastic/kibana/issues/261113
   describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {

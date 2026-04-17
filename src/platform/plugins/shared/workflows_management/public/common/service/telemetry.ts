@@ -441,6 +441,24 @@ export class WorkflowsBaseTelemetry {
     });
   };
 
+  /**
+   * Reports a bulk cancellation request for all non-terminal executions of a workflow (current space).
+   * Use {@link reportWorkflowRunCancelled} when cancelling a single execution by id.
+   */
+  reportWorkflowExecutionsCancelled = (params: {
+    workflowId: string;
+    error?: Error;
+    origin?: WorkflowTelemetryOrigin;
+  }) => {
+    const { workflowId, error, origin } = params;
+    this.telemetryService.reportEvent(WorkflowExecutionEventTypes.WorkflowExecutionsCancelled, {
+      eventName: workflowEventNames[WorkflowExecutionEventTypes.WorkflowExecutionsCancelled],
+      workflowId,
+      ...(origin && { origin }),
+      ...this.getBaseResultParams(error),
+    });
+  };
+
   // UI interaction actions
 
   /**
@@ -499,6 +517,24 @@ export class WorkflowsBaseTelemetry {
     this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowCreateOpened, {
       eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowCreateOpened],
       ...(params.editorType && { editorType: params.editorType }),
+    });
+  };
+
+  reportWorkflowAccessDeniedPrivileges = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedPrivileges],
+    });
+  };
+
+  reportWorkflowAccessDeniedLicense = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedLicense, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedLicense],
+    });
+  };
+
+  reportWorkflowAccessDeniedServerlessTier = () => {
+    this.telemetryService.reportEvent(WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier, {
+      eventName: workflowEventNames[WorkflowUIEventTypes.WorkflowAccessDeniedServerlessTier],
     });
   };
 

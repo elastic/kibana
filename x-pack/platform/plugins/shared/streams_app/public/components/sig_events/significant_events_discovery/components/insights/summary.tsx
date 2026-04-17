@@ -277,7 +277,7 @@ export function Summary({ count }: { count: number }) {
             'xpack.streams.sigEventsDiscovery.insightsTab.significantEventsFoundTitle',
             {
               defaultMessage:
-                '{count} {count, plural, one {event} other {events}} found in your system',
+                '{count, number} {count, plural, one {event} other {events}} found in your system',
               values: { count },
             }
           )}

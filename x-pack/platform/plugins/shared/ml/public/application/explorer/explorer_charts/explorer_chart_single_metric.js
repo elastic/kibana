@@ -75,6 +75,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     cursor$: PropTypes.object,
     id: PropTypes.string.isRequired,
     euiTheme: PropTypes.object.isRequired,
+    isEmbeddable: PropTypes.bool,
   };
 
   constructor(props) {
@@ -703,7 +704,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   };
 
   render() {
-    const { seriesConfig } = this.props;
+    const { seriesConfig, isEmbeddable } = this.props;
 
     if (typeof seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -712,12 +713,16 @@ export class ExplorerChartSingleMetric extends React.Component {
 
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
+    const telemetrySource = isEmbeddable
+      ? 'embeddable_single_metric_chart'
+      : 'explorer_single_metric_chart';
 
     return (
       <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout
@@ -734,6 +739,9 @@ export class ExplorerChartSingleMetric extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate('xpack.ml.explorerChart.anomalyActionsPopoverAriaLabel', {
+                defaultMessage: 'Anomaly actions',
+              })}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"
