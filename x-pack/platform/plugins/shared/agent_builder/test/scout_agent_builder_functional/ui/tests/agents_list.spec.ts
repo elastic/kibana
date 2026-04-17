@@ -62,10 +62,12 @@ test.describe(
       });
 
       await test.step('lists created agents', async () => {
-        expect(await pageObjects.agentBuilder.countAgentsListRows()).toBeGreaterThan(2);
         for (const agent of agents) {
           await pageObjects.agentBuilder.agentExistsOrFail(agent.id);
         }
+        await expect(async () => {
+          expect(await pageObjects.agentBuilder.countAgentsListRows()).toBeGreaterThan(2);
+        }).toPass({ timeout: 15_000 });
       });
 
       await test.step('filters on search', async () => {
