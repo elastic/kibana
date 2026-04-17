@@ -41,6 +41,11 @@ paths:
                   example: ["user:john.doe", "host:web-01"]
               required:
                 - euids
+            examples:
+              assignEntities:
+                summary: Assign two entities to a watchlist
+                value:
+                  euids: ["user:john.doe", "host:web-01"]
       responses:
         "200":
           description: Assignment successful
@@ -75,6 +80,19 @@ paths:
                   - not_found
                   - total
                   - items
+              examples:
+                assignEntitiesResponse:
+                  summary: Successful assignment of two entities
+                  value:
+                    successful: 1
+                    failed: 0
+                    not_found: 1
+                    total: 2
+                    items:
+                      - euid: "user:john.doe"
+                        status: "success"
+                      - euid: "host:web-01"
+                        status: "not_found"
 
 components:
   schemas:
