@@ -152,11 +152,11 @@ export function ESQLEditor({
         return;
       }
 
-      const q = submittedQueryRef.current;
+      const lastSubmittedQuery = submittedQueryRef.current;
       // Refresh the ES|QL results table for the last submitted query (time/filters may have changed).
-      if (isOfAggregateQueryType(q)) {
+      if (isOfAggregateQueryType(lastSubmittedQuery)) {
         void getSuggestions(
-          q,
+          lastSubmittedQuery,
           data,
           http,
           uiSettings,
