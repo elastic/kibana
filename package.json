@@ -139,7 +139,7 @@
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
     "@elastic/elasticsearch": "9.3.4",
-    "@elastic/ems-client": "8.6.3",
+    "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "2.0.0",
     "@elastic/eui": "114.1.0",
     "@elastic/eui-theme-borealis": "7.0.0",
