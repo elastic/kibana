@@ -15,6 +15,7 @@ import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
+import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
@@ -50,6 +51,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const { basePath } = useService(CoreStart('http'));
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
+  const [expandedRule, setExpandedRule] = useState<RuleApiResponse | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const deleteRuleMutation = useDeleteRule();
@@ -132,6 +134,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
+        onExpand={(r) => setExpandedRule(r)}
         onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
         onClone={(r) =>
           navigateToUrl(
@@ -142,6 +145,9 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         onTableChange={onTableChange}
       />
+      {expandedRule ? (
+        <RuleSummaryFlyout rule={expandedRule} onClose={() => setExpandedRule(null)} />
+      ) : null}
       {ruleToDelete ? (
         <DeleteConfirmationModal
           ruleName={ruleToDelete.metadata?.name ?? ruleToDelete.id}

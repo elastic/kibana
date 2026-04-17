@@ -189,6 +189,7 @@ export interface RulesListTableProps {
 
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
+  onExpand: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
@@ -220,6 +221,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDisable,
   onBulkDelete,
   onNavigateToDetails,
+  onExpand,
   onEdit,
   onClone,
   onDelete,
@@ -427,6 +429,24 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       },
       {
         name: (
+          <FormattedMessage id="xpack.alertingV2.rulesList.column.expand" defaultMessage="Expand" />
+        ),
+        width: '40px',
+        align: 'right',
+        render: (rule: RuleApiResponse) => (
+          <EuiButtonIcon
+            iconType="expand"
+            color="text"
+            onClick={() => onExpand(rule)}
+            aria-label={i18n.translate('xpack.alertingV2.rulesList.action.expand', {
+              defaultMessage: 'Open rule summary',
+            })}
+            data-test-subj={`expandRule-${rule.id}`}
+          />
+        ),
+      },
+      {
+        name: (
           <FormattedMessage
             id="xpack.alertingV2.rulesList.column.actions"
             defaultMessage="Actions"
@@ -451,6 +471,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onSelectPage,
       onSelectRow,
       onNavigateToDetails,
+      onExpand,
       onEdit,
       onClone,
       onDelete,
