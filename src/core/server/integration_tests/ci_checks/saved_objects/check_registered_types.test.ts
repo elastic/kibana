@@ -10,36 +10,25 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-    });
-
-    esServer = await startES();
     root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
-    await root.setup();
-    const coreStart = await root.start();
-    typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const coreSetup: InternalCoreSetup = await root.setup();
+    typeRegistry = coreSetup.savedObjects.getTypeRegistry();
   });
 
   afterAll(async () => {
     await root?.shutdown();
-    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
@@ -134,7 +123,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "498c2ba7abd4329a0d8b40efd98b4b16991107512d38141707f9f2e10521b367",
         "ingest-agent-policies": "ce61ba4808deecd27dce770799be59f212ebe1c0d76bcc4298aafa4cfce7aa15",
         "ingest-download-sources": "c87e062ef293585e85fccec0c865d7cef48e0ff9a919d7781d5f7627d275484b",
-        "ingest-outputs": "b5c8354ebfb71f5d50322c19787bbee2c5bb8fff5bfff46dc5683d19e94797a3",
+        "ingest-outputs": "8ea9ade69e9ced03cf5700086f454adf3fc46918317b6150e127fdd5829a56a6",
         "ingest-package-policies": "7817460ef093393f7fce067f91186003e41246a69f32344b1cd68fe19f43a24e",
         "ingest_manager_settings": "6cd91fe6c52c516676d99021f51a4b3a162686880198ba3c556983f5fffbb5a3",
         "integration-config": "5f95ba3784d5d50d04d8ad3489fc4c0a50db34da049a69e754a48c80172ee948",
@@ -852,8 +841,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest-download-sources|10.1.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "================================================================================================",
         "ingest-outputs|global: 3e72116f17fda6ec9c5269cb42eb42e3f686b313",
-        "ingest-outputs|mappings: bdde67dc29cfd86a1195ed34a4417073728691c4",
+        "ingest-outputs|mappings: a48fa4cb62d321c8ed0ffe84c80db2cbf7f7258b",
         "ingest-outputs|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "ingest-outputs|10.10.0: 25066fec2f6c80607e652ddd82d32976ec25492c26e18fec0b22b1c01c0eae65",
         "ingest-outputs|10.9.0: 50a325af05e7b9b3f7383f1e525388c9cecf00a14b9924409a262f6c3058840b",
         "ingest-outputs|10.8.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "ingest-outputs|10.7.0: 2f5dfca42d489deaa60da45c020e92fdae21e5e3d0e5e60153c0d18039715bd7",
@@ -1488,7 +1478,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "10.0.0",
         "ingest-agent-policies": "10.10.0",
         "ingest-download-sources": "10.1.0",
-        "ingest-outputs": "10.9.0",
+        "ingest-outputs": "10.10.0",
         "ingest-package-policies": "10.22.0",
         "ingest_manager_settings": "10.8.0",
         "integration-config": "10.3.0",
@@ -1653,7 +1643,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "7.16.2",
         "ingest-agent-policies": "10.10.0",
         "ingest-download-sources": "10.1.0",
-        "ingest-outputs": "10.9.0",
+        "ingest-outputs": "10.10.0",
         "ingest-package-policies": "10.22.0",
         "ingest_manager_settings": "10.8.0",
         "integration-config": "10.3.0",

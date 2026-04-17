@@ -13,7 +13,6 @@ import {
   PRIVILEGED_USER_WATCHLIST_ID,
   PRIVILEGED_USER_WATCHLIST_NAME,
 } from '../../../../../common/entity_analytics/watchlists/constants';
-import { getMatchersFor } from '../../privilege_monitoring/data_sources/matchers';
 import { getStreamPatternFor } from '../../privilege_monitoring/data_sources/constants';
 import type { WatchlistConfigClient } from '../management/watchlist_config';
 import { WatchlistConfigClient as WatchlistConfigClientClass } from '../management/watchlist_config';
@@ -21,6 +20,25 @@ import { WatchlistEntitySourceClient } from '../entity_sources/infra';
 
 // Bump this when PREBUILT_WATCHLISTS definitions change
 export const PREBUILT_WATCHLISTS_VERSION = 1;
+
+const OKTA_PRIVILEGED_ROLES = [
+  'Super Administrator',
+  'Organization Administrator',
+  'Group Administrator',
+  'Application Administrator',
+  'Mobile Administrator',
+  'Help Desk Administrator',
+  'Report Administrator',
+  'API Access Management Administrator',
+  'Group Membership Administrator',
+  'Read-only Administrator',
+];
+
+const buildKqlValuesFilter = (field: string, values: string[]): string =>
+  `${field}: (${values.map((v) => `"${v}"`).join(' OR ')})`;
+
+const OKTA_QUERY_RULE = buildKqlValuesFilter('user.roles', OKTA_PRIVILEGED_ROLES);
+const AD_QUERY_RULE = 'entityanalytics_ad.user.privileged_group_member: true';
 
 const PREBUILT_WATCHLISTS = [
   {
@@ -36,7 +54,7 @@ const PREBUILT_WATCHLISTS = [
         indexPattern: getStreamPatternFor('entityanalytics_okta', 'default'),
         integrationName: 'entityanalytics_okta',
         enabled: true,
-        matchers: getMatchersFor('entityanalytics_okta'),
+        queryRule: OKTA_QUERY_RULE,
       },
       {
         type: 'entity_analytics_integration' as const,
@@ -44,7 +62,7 @@ const PREBUILT_WATCHLISTS = [
         indexPattern: getStreamPatternFor('entityanalytics_ad', 'default'),
         integrationName: 'entityanalytics_ad',
         enabled: true,
-        matchers: getMatchersFor('entityanalytics_ad'),
+        queryRule: AD_QUERY_RULE,
       },
     ],
   },

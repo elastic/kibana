@@ -27,11 +27,6 @@ export const QUERY_TYPE_LABEL = i18n.translate(
   { defaultMessage: 'Query' }
 );
 
-export const CONFIDENCE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicators.columns.confidenceLabel',
-  { defaultMessage: 'Confidence' }
-);
-
 export const STREAM_COLUMN_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicators.columns.streamLabel',
   { defaultMessage: 'Stream' }
