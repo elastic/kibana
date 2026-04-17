@@ -7,58 +7,69 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SelectionOption } from '@kbn/workflows/types/v1';
+import { safeJsonStringify } from '@kbn/std';
+import type {
+  SelectionDetails,
+  SelectionOption,
+  StepSelectionValues,
+} from '@kbn/workflows/types/v1';
+import type { CustomPropertyItem } from '../../features/validate_workflow_yaml/model/types';
 
-const resolvedEntityCache = new Map<string, { option: SelectionOption; timestamp: number }>();
 const searchOptionsCache = new Map<string, SelectionOption[]>();
+
+const validationOutcomeCache = new Map<
+  string,
+  { timestamp: number; resolvedOption: SelectionOption | null; details: SelectionDetails }
+>();
+
 // The cache purpose is to reduce the number of server requests during heavy UI editing.
 // However, long TTL has a bad impact on UX, showing stale data should be avoided.
 const CACHE_TTL_MS = 30 * 1000; // 30 seconds
 
-function getCacheKey(stepType: string, scope: string, propertyKey: string, value: unknown): string {
-  return `${stepType}:${scope}:${propertyKey}:${String(value)}`;
+function getFingerprintFromValues(values?: StepSelectionValues): string | undefined {
+  if (!values) {
+    return undefined;
+  }
+  const hasConfig = Object.keys(values.config).length > 0;
+  const hasInput = Object.keys(values.input).length > 0;
+  if (!hasConfig && !hasInput) {
+    return undefined;
+  }
+  return safeJsonStringify(values);
 }
 
-function getSearchCacheKey(stepType: string, scope: string, propertyKey: string): string {
+function getSearchCacheKey(
+  stepType: string,
+  scope: string,
+  propertyKey: string,
+  values?: StepSelectionValues
+): string {
+  const fingerprint = getFingerprintFromValues(values);
+  if (fingerprint) {
+    return `${stepType}:${scope}:${propertyKey}:search:${fingerprint}`;
+  }
   return `${stepType}:${scope}:${propertyKey}:search`;
-}
-
-export function getCachedOption(key: string): SelectionOption | null {
-  const cached = resolvedEntityCache.get(key);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-    return cached.option;
-  }
-  if (cached) {
-    resolvedEntityCache.delete(key);
-  }
-  return null;
-}
-
-export function setCachedOption(key: string, option: SelectionOption): void {
-  resolvedEntityCache.set(key, { option, timestamp: Date.now() });
 }
 
 export function cacheSearchOptions(
   stepType: string,
   scope: string,
   propertyKey: string,
-  options: SelectionOption[]
+  options: SelectionOption[],
+  values?: StepSelectionValues
 ): void {
-  const cacheKey = getSearchCacheKey(stepType, scope, propertyKey);
+  const cacheKey = getSearchCacheKey(stepType, scope, propertyKey, values);
   searchOptionsCache.set(cacheKey, options);
-  for (const option of options) {
-    const valueKey = getCacheKey(stepType, scope, propertyKey, option.value);
-    setCachedOption(valueKey, option);
-  }
 }
 
 export function getCachedSearchOption(
   stepType: string,
   scope: string,
   propertyKey: string,
-  value: unknown
+  value: unknown,
+  values?: StepSelectionValues
 ): SelectionOption | null {
-  const cacheKey = getSearchCacheKey(stepType, scope, propertyKey);
+  const cacheKey = getSearchCacheKey(stepType, scope, propertyKey, values);
   const cachedOptions = searchOptionsCache.get(cacheKey);
   if (cachedOptions) {
     const matchingOption = cachedOptions.find(
@@ -71,16 +82,44 @@ export function getCachedSearchOption(
   return null;
 }
 
-export function getCacheKeyForValue(
-  stepType: string,
-  scope: string,
-  propertyKey: string,
-  value: unknown
-): string {
-  return getCacheKey(stepType, scope, propertyKey, value);
+function stableSerializePropertyValue(value: unknown): string {
+  return safeJsonStringify(value) ?? String(value);
+}
+
+export function getCustomPropertyValidationOutcomeCacheKey(item: CustomPropertyItem): string {
+  const { stepType, scope, propertyKey, values } = item.context;
+  const fp = getFingerprintFromValues(values) ?? '';
+  const valueKey = stableSerializePropertyValue(item.propertyValue);
+  return `${item.stepId}\0${stepType}\0${scope}\0${propertyKey}\0${fp}\0${valueKey}`;
+}
+
+export function getCachedCustomPropertyValidationOutcome(
+  key: string
+): { resolvedOption: SelectionOption | null; details: SelectionDetails } | null {
+  const cached = validationOutcomeCache.get(key);
+  if (!cached) {
+    return null;
+  }
+  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    validationOutcomeCache.delete(key);
+    return null;
+  }
+  return { resolvedOption: cached.resolvedOption, details: cached.details };
+}
+
+export function setCachedCustomPropertyValidationOutcome(
+  key: string,
+  resolvedOption: SelectionOption | null,
+  details: SelectionDetails
+): void {
+  validationOutcomeCache.set(key, { timestamp: Date.now(), resolvedOption, details });
+}
+
+export function clearCustomPropertyValidationOutcomeCache(): void {
+  validationOutcomeCache.clear();
 }
 
 export function clearCache(): void {
-  resolvedEntityCache.clear();
   searchOptionsCache.clear();
+  validationOutcomeCache.clear();
 }
