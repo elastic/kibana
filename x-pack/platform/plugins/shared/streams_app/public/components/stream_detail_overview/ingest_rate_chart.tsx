@@ -36,6 +36,7 @@ import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import React, { useCallback, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import { isDraftGetResponse, getEsqlViewName } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import {
@@ -80,8 +81,13 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
     : false;
   const streamName = definition.stream.name;
   const isQueryStream = Streams.QueryStream.GetResponse.is(definition);
+  const isDraft = isDraftGetResponse(definition);
 
-  const esqlSource = isQueryStream ? definition.stream.query.view : streamName;
+  const esqlSource = isQueryStream
+    ? definition.stream.query.view
+    : isDraft
+    ? getEsqlViewName(streamName)
+    : streamName;
 
   const { timeState } = useTimefilter();
   const minInterval = Math.floor(
@@ -91,7 +97,7 @@ function IngestRateChartContent({ definition }: { definition: Streams.all.GetRes
 
   const { getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
-    getCanReadFailureStore: () => canReadFailureStore,
+    getCanReadFailureStore: () => (isDraft ? false : canReadFailureStore),
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });
 

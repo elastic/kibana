@@ -234,7 +234,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   });
                   expect(response.views).to.have.length(1);
                   expect(response.views[0].name).to.eql(`$.${streamName}`);
-                  expect(response.views[0].query).to.eql(`FROM ${streamName}`);
+                  expect(response.views[0].query).to.eql(`FROM ${streamName} METADATA _source`);
                 }
               },
               undefined,
@@ -445,7 +445,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(response.views).to.have.length(1);
           expect(response.views[0].name).to.eql(`$.${childStreamName}`);
-          expect(response.views[0].query).to.eql(`FROM ${childStreamName}`);
+          expect(response.views[0].query).to.eql(`FROM ${childStreamName} METADATA _source`);
         });
 
         it(`updates parent $.${rootStream} view to reference the forked child's view`, async () => {
@@ -458,7 +458,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
           expect(response.views).to.have.length(1);
           expect(response.views[0].name).to.eql(`$.${rootStream}`);
-          expect(response.views[0].query).to.eql(`FROM ${rootStream}, $.${rootStream}.nginx`);
+          expect(response.views[0].query).to.eql(
+            `FROM ${rootStream}, $.${rootStream}.nginx METADATA _source`
+          );
         });
       }
 
