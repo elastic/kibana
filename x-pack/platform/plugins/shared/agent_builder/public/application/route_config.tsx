@@ -28,6 +28,7 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
+import { appPaths } from './utils/app_paths';
 
 export type SidebarView = 'conversation' | 'manage';
 
@@ -226,6 +227,28 @@ export const getAgentIdFromPath = (pathname: string): string | undefined => {
 export const getConversationIdFromPath = (pathname: string): string | undefined => {
   const match = pathname.match(/^\/agents\/[^/]+\/conversations\/([^/]+)/);
   return match ? match[1] : undefined;
+};
+
+export const getPathWithSwitchedAgent = (pathname: string, newAgentId: string): string => {
+  const currentAgentId = getAgentIdFromPath(pathname);
+  if (!currentAgentId) {
+    return appPaths.agent.root({ agentId: newAgentId });
+  }
+
+  if (getConversationIdFromPath(pathname)) {
+    return appPaths.agent.conversations.new({ agentId: newAgentId });
+  }
+
+  const agentBase = `/agents/${currentAgentId}`;
+  if (pathname === agentBase || pathname === `${agentBase}/`) {
+    return appPaths.agent.root({ agentId: newAgentId });
+  }
+
+  if (pathname.startsWith(`${agentBase}/`)) {
+    return `/agents/${newAgentId}${pathname.slice(agentBase.length)}`;
+  }
+
+  return appPaths.agent.root({ agentId: newAgentId });
 };
 
 export interface SidebarNavItem {
