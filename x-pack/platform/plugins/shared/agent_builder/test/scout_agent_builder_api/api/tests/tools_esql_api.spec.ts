@@ -123,6 +123,7 @@ apiTest.describe(
 
     apiTest('POST /tools/_execute executes indexed ES|QL tool', async ({ apiClient, esClient }) => {
       const testIndex = 'test-agent-builder-index';
+      await esClient.indices.delete({ index: testIndex }, { ignore: [404] });
       await esClient.indices.create({
         index: testIndex,
         mappings: {

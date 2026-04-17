@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { createSystemIndicesEsClient } from '../../../scout_agent_builder_shared/lib/system_indices_es_client';
 import { apiTest } from '../fixtures';
 import { API_AGENT_BUILDER, COMMON_HEADERS } from '../fixtures/constants';
 
@@ -17,6 +19,7 @@ apiTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.search] },
   () => {
     let adminCredentials: RoleApiCredentials;
+    let sysEsClient: Client;
     const legacyToolId = 'legacy-esql-tool-types-migration';
     const dummyToolId = `dummy-tool-${Date.now()}`;
     const toolIndex = chatSystemIndex('tools');
@@ -49,8 +52,9 @@ apiTest.describe(
       },
     };
 
-    apiTest.beforeAll(async ({ requestAuth, apiClient, esClient }) => {
+    apiTest.beforeAll(async ({ requestAuth, apiClient, esClient, config }) => {
       adminCredentials = await requestAuth.getApiKeyForAdmin();
+      sysEsClient = await createSystemIndicesEsClient(esClient, config);
       await apiClient.post(`${API_AGENT_BUILDER}/tools`, {
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
         body: {
@@ -62,7 +66,7 @@ apiTest.describe(
         },
         responseType: 'json',
       });
-      await esClient.index({
+      await sysEsClient.index({
         index: toolIndex,
         id: legacyToolId,
         refresh: 'wait_for',
@@ -77,10 +81,10 @@ apiTest.describe(
           updated_at: timestamp,
         },
       });
-      await esClient.indices.refresh({ index: toolIndex });
+      await sysEsClient.indices.refresh({ index: toolIndex });
     });
 
-    apiTest.afterAll(async ({ apiClient, esClient }) => {
+    apiTest.afterAll(async ({ apiClient }) => {
       await apiClient.delete(`${API_AGENT_BUILDER}/tools/${encodeURIComponent(legacyToolId)}`, {
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       });
@@ -88,7 +92,7 @@ apiTest.describe(
         headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
       });
       try {
-        await esClient.delete({ index: toolIndex, id: legacyToolId, refresh: true });
+        await sysEsClient.delete({ index: toolIndex, id: legacyToolId, refresh: true });
       } catch {
         // ignore
       }

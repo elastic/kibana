@@ -20,67 +20,64 @@ import { getConversation, postConverse, type ExecutionMode } from '../fixtures/c
 
 const EXECUTION_MODES: ExecutionMode[] = ['local', 'task_manager'];
 
-apiTest.describe(
-  'Agent Builder — converse simple & multi-round API',
-  { tag: [...tags.stateful.classic, ...tags.serverless.search] },
-  () => {
-    let adminCredentials: RoleApiCredentials;
-    let llmProxy: LlmProxy;
-    let connectorId: string;
-    const conversationIds: string[] = [];
+for (const mode of EXECUTION_MODES) {
+  apiTest.describe(
+    `Agent Builder — converse simple & multi-round API [${mode}]`,
+    { tag: [...tags.stateful.classic, ...tags.serverless.search] },
+    () => {
+      let adminCredentials: RoleApiCredentials;
+      let llmProxy: LlmProxy;
+      let connectorId: string;
+      const conversationIds: string[] = [];
 
-    apiTest.beforeAll(async ({ requestAuth, log, kbnClient }) => {
-      adminCredentials = await requestAuth.getApiKeyForAdmin();
-      llmProxy = await createLlmProxy(log);
-      const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
-      connectorId = id;
-    });
+      apiTest.beforeAll(async ({ requestAuth, log, kbnClient }) => {
+        adminCredentials = await requestAuth.getApiKeyForAdmin();
+        llmProxy = await createLlmProxy(log);
+        const { id } = await createGenAiConnectorForProxy(kbnClient, llmProxy);
+        connectorId = id;
+      });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
-      for (const id of conversationIds) {
-        await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
-          headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
-        });
-      }
-      llmProxy.close();
-      await deleteConnectorById(kbnClient, connectorId);
-    });
-
-    for (const mode of EXECUTION_MODES) {
-      apiTest(
-        `[${mode}] simple conversation persists title and response`,
-        async ({ apiClient }) => {
-          const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
-          const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
-          await setupAgentDirectAnswer({
-            proxy: llmProxy,
-            title: MOCKED_LLM_TITLE,
-            response: MOCKED_LLM_RESPONSE,
+      apiTest.afterAll(async ({ apiClient, kbnClient }) => {
+        for (const id of conversationIds) {
+          await apiClient.delete(`${API_AGENT_BUILDER}/conversations/${encodeURIComponent(id)}`, {
+            headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           });
-
-          const res = await postConverse(
-            apiClient,
-            adminCredentials.apiKeyHeader,
-            { input: 'Hello AgentBuilder', connector_id: connectorId },
-            mode
-          );
-          expect(res).toHaveStatusCode(200);
-          const body = res.body as { conversation_id: string; response: { message: string } };
-          conversationIds.push(body.conversation_id);
-          await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-
-          expect(body.response.message).toBe(MOCKED_LLM_RESPONSE);
-          const conversation = await getConversation(
-            apiClient,
-            adminCredentials.apiKeyHeader,
-            body.conversation_id
-          );
-          expect(conversation.title).toBe(MOCKED_LLM_TITLE);
-          expect(conversation.rounds[0].response.message).toBe(MOCKED_LLM_RESPONSE);
         }
-      );
+        llmProxy.close();
+        await deleteConnectorById(kbnClient, connectorId);
+      });
 
-      apiTest(`[${mode}] multi-round conversation`, async ({ apiClient }) => {
+      apiTest(`simple conversation persists title and response`, async ({ apiClient }) => {
+        const MOCKED_LLM_RESPONSE = 'Mocked LLM response';
+        const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
+        await setupAgentDirectAnswer({
+          proxy: llmProxy,
+          title: MOCKED_LLM_TITLE,
+          response: MOCKED_LLM_RESPONSE,
+        });
+
+        const res = await postConverse(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          { input: 'Hello AgentBuilder', connector_id: connectorId },
+          mode
+        );
+        expect(res).toHaveStatusCode(200);
+        const body = res.body as { conversation_id: string; response: { message: string } };
+        conversationIds.push(body.conversation_id);
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        expect(body.response.message).toBe(MOCKED_LLM_RESPONSE);
+        const conversation = await getConversation(
+          apiClient,
+          adminCredentials.apiKeyHeader,
+          body.conversation_id
+        );
+        expect(conversation.title).toBe(MOCKED_LLM_TITLE);
+        expect(conversation.rounds[0].response.message).toBe(MOCKED_LLM_RESPONSE);
+      });
+
+      apiTest(`multi-round conversation`, async ({ apiClient }) => {
         const MOCKED_LLM_RESPONSE_1 = 'Response 1';
         const MOCKED_LLM_RESPONSE_2 = 'Response 2';
         const MOCKED_LLM_TITLE = 'Mocked Conversation Title';
@@ -132,7 +129,7 @@ apiTest.describe(
         expect(conversation.rounds[1].response.message).toBe(MOCKED_LLM_RESPONSE_2);
       });
 
-      apiTest(`[${mode}] invalid converse payload returns 400`, async ({ apiClient }) => {
+      apiTest(`invalid converse payload returns 400`, async ({ apiClient }) => {
         const res = await apiClient.post(`${API_AGENT_BUILDER}/converse`, {
           headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
           body: { _execution_mode: mode },
@@ -141,5 +138,5 @@ apiTest.describe(
         expect(res).toHaveStatusCode(400);
       });
     }
-  }
-);
+  );
+}

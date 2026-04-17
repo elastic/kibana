@@ -22,6 +22,8 @@
     "@kbn/gen-ai-functional-testing",
     "@kbn/agent-builder-server",
     "@kbn/repo-info",
+    "@kbn/test",
+    "@kbn/test-es-server",
     "@kbn/test-suites-xpack-platform"
   ]
 }
