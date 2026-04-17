@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiCode,
@@ -21,14 +21,13 @@ import {
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDebouncedValue } from '@kbn/react-hooks';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useFetchRules } from '../../../../../hooks/use_fetch_rules';
 import { mergeRuleIdsIntoMatcher, parseRuleIdsFromMatcher } from '../../matcher_quick_filter_utils';
-import { SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
+import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 interface RuleSelectableMeta {
   value: string;
@@ -38,16 +37,11 @@ interface RuleSelectableMeta {
 const kindLabel = (kind: RuleResponse['kind']): string =>
   kind === 'alert'
     ? i18n.translate('xpack.alertingV2.notificationPolicy.form.quickFilters.rule.kind.alert', {
-        defaultMessage: 'Alert',
+        defaultMessage: 'Alerting',
       })
     : i18n.translate('xpack.alertingV2.notificationPolicy.form.quickFilters.rule.kind.signal', {
-        defaultMessage: 'Signal',
+        defaultMessage: 'Detect only',
       });
-
-const RULE_LIST_ROW_ESTIMATE_PX = 72;
-const RULE_LIST_MIN_HEIGHT_PX = 120;
-const RULE_LIST_MAX_HEIGHT_PX = 260;
-const RULE_LIST_VERTICAL_PADDING_PX = 24;
 
 export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -97,27 +91,14 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     return [...synthetic, ...fromApi];
   }, [items, selectedRuleIds]);
 
-  const handleRuleSelectableChange = useCallback(
-    (newOptions: Array<EuiSelectableOption<RuleSelectableMeta>>) => {
-      const ids = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-      onChange(mergeRuleIdsIntoMatcher(matcher, ids));
-    },
-    [matcher, onChange]
-  );
+  const handleRuleSelectableChange = (
+    newOptions: Array<EuiSelectableOption<RuleSelectableMeta>>
+  ) => {
+    const ids = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
+    onChange(mergeRuleIdsIntoMatcher(matcher, ids));
+  };
 
-  const ruleListHeight = useMemo(() => {
-    const n = ruleOptions.length;
-    if (n === 0) return RULE_LIST_MIN_HEIGHT_PX;
-    return Math.min(
-      RULE_LIST_MAX_HEIGHT_PX,
-      Math.max(
-        RULE_LIST_MIN_HEIGHT_PX,
-        n * RULE_LIST_ROW_ESTIMATE_PX + RULE_LIST_VERTICAL_PADDING_PX
-      )
-    );
-  }, [ruleOptions.length]);
-
-  const renderRuleOption = useCallback((option: EuiSelectableOption<RuleSelectableMeta>) => {
+  const renderRuleOption = (option: EuiSelectableOption<RuleSelectableMeta>) => {
     const { rule } = option;
     if (!rule) {
       return (
@@ -151,19 +132,12 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xs" />
-        <EuiText
-          size="xs"
-          color="subdued"
-          css={css`
-            font-family: monospace;
-            overflow-wrap: anywhere;
-          `}
-        >
+        <EuiText size="xs" color="subdued">
           {rule.id}
         </EuiText>
       </>
     );
-  }, []);
+  };
 
   return (
     <EuiPopover
@@ -176,6 +150,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
       panelPaddingSize="none"
+      panelStyle={POPOVER_PANEL_STYLE}
       button={
         <EuiFilterButton
           iconType="arrowDown"
@@ -200,7 +175,6 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
         searchable
         isPreFiltered
         isLoading={isLoading}
-        height={ruleListHeight}
         options={ruleOptions}
         onChange={handleRuleSelectableChange}
         renderOption={renderRuleOption}

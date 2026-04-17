@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiCode,
   EuiFilterButton,
@@ -24,7 +24,7 @@ import {
   mergeRuleTagsIntoMatcher,
   parseRuleTagsFromMatcher,
 } from '../../matcher_quick_filter_utils';
-import { SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
+import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 interface TagSelectableMeta {
   value: string;
@@ -64,13 +64,10 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     return [...orphaned, ...fromApi];
   }, [apiTags, selectedTags]);
 
-  const handleTagsChange = useCallback(
-    (newOptions: Array<EuiSelectableOption<TagSelectableMeta>>) => {
-      const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-      onChange(mergeRuleTagsIntoMatcher(matcher, tags));
-    },
-    [matcher, onChange]
-  );
+  const handleTagsChange = (newOptions: Array<EuiSelectableOption<TagSelectableMeta>>) => {
+    const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
+    onChange(mergeRuleTagsIntoMatcher(matcher, tags));
+  };
 
   return (
     <EuiPopover
@@ -83,6 +80,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
       panelPaddingSize="none"
+      panelStyle={POPOVER_PANEL_STYLE}
       button={
         <EuiFilterButton
           iconType="arrowDown"

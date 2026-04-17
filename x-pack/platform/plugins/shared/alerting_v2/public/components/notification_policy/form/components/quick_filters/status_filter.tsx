@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiCode,
@@ -27,7 +27,7 @@ import {
   mergeEpisodeStatusIntoMatcher,
   parseEpisodeStatusesFromMatcher,
 } from '../../matcher_quick_filter_utils';
-import { SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
+import { POPOVER_PANEL_STYLE, SELECTABLE_LIST_PROPS, type QuickFiltersProps } from './constants';
 
 interface StatusSelectableMeta {
   value: EpisodeStatusFilterOption['value'];
@@ -48,15 +48,12 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     }));
   }, [selectedStatuses]);
 
-  const handleStatusChange = useCallback(
-    (newOptions: Array<EuiSelectableOption<StatusSelectableMeta>>) => {
-      const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
-      onChange(mergeEpisodeStatusIntoMatcher(matcher, statuses));
-    },
-    [matcher, onChange]
-  );
+  const handleStatusChange = (newOptions: Array<EuiSelectableOption<StatusSelectableMeta>>) => {
+    const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
+    onChange(mergeEpisodeStatusIntoMatcher(matcher, statuses));
+  };
 
-  const renderStatusOption = useCallback((option: EuiSelectableOption<StatusSelectableMeta>) => {
+  const renderStatusOption = (option: EuiSelectableOption<StatusSelectableMeta>) => {
     const opt = EPISODE_STATUS_FILTER_OPTIONS.find((o) => o.value === option.value);
     if (!opt) return option.label;
     return (
@@ -77,7 +74,7 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
         </EuiText>
       </>
     );
-  }, []);
+  };
 
   return (
     <EuiPopover
@@ -90,6 +87,7 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
       closePopover={() => setIsOpen(false)}
       anchorPosition="downLeft"
       panelPaddingSize="none"
+      panelStyle={POPOVER_PANEL_STYLE}
       button={
         <EuiFilterButton
           iconType="arrowDown"

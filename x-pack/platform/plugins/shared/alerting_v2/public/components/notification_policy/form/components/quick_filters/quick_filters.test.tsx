@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QuickFilters } from './quick_filters';
 import { RuleFilter } from './rule_filter';
@@ -34,6 +34,11 @@ const MOCK_RULES = [
 ];
 
 const MOCK_TAGS = ['production', 'staging', 'critical'];
+
+const USER_EVENT_OPTIONS = {
+  pointerEventsCheck: PointerEventsCheckLevel.Never,
+  skipHover: true,
+};
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -69,8 +74,11 @@ describe('QuickFilters', () => {
 });
 
 describe('RuleFilter', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    user = userEvent.setup(USER_EVENT_OPTIONS);
     mockUseFetchRules.mockReturnValue({
       data: { items: MOCK_RULES, total: 2 },
       isLoading: false,
@@ -84,7 +92,6 @@ describe('RuleFilter', () => {
   });
 
   it('enables fetching when popover opens', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterRule'));
@@ -93,7 +100,6 @@ describe('RuleFilter', () => {
   });
 
   it('displays rules from API', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterRule'));
@@ -103,17 +109,15 @@ describe('RuleFilter', () => {
   });
 
   it('shows kind badges for rules', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<RuleFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterRule'));
 
-    expect(screen.getByText('Alert')).toBeInTheDocument();
-    expect(screen.getByText('Signal')).toBeInTheDocument();
+    expect(screen.getByText('Alerting')).toBeInTheDocument();
+    expect(screen.getByText('Detect only')).toBeInTheDocument();
   });
 
   it('calls onChange with rule.id clause when selecting a rule', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<RuleFilter matcher="" onChange={onChange} />);
 
@@ -124,7 +128,6 @@ describe('RuleFilter', () => {
   });
 
   it('produces OR group when selecting multiple rules', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<RuleFilter matcher='rule.id : "rule-1"' onChange={onChange} />);
 
@@ -135,7 +138,6 @@ describe('RuleFilter', () => {
   });
 
   it('reflects existing rule.id from matcher as checked', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<RuleFilter matcher='rule.id : "rule-1"' onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterRule'));
@@ -159,7 +161,6 @@ describe('RuleFilter', () => {
   });
 
   it('clears rule.id from matcher when deselecting', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(
       <RuleFilter matcher='rule.id : "rule-1" AND episode_status : "active"' onChange={onChange} />
@@ -172,7 +173,6 @@ describe('RuleFilter', () => {
   });
 
   it('shows synthetic entries for rule IDs in matcher but not in API results', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<RuleFilter matcher='rule.id : "unknown-id"' onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterRule'));
@@ -182,7 +182,6 @@ describe('RuleFilter', () => {
   });
 
   it('preserves unrelated clauses when modifying rule selection', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(
       <RuleFilter matcher='episode_status : "active" AND rule.tags : "prod"' onChange={onChange} />
@@ -198,8 +197,13 @@ describe('RuleFilter', () => {
 });
 
 describe('StatusFilter', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
+  beforeEach(() => {
+    user = userEvent.setup(USER_EVENT_OPTIONS);
+  });
+
   it('displays all four status options', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<StatusFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterStatus'));
@@ -211,7 +215,6 @@ describe('StatusFilter', () => {
   });
 
   it('shows descriptions for each status', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<StatusFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterStatus'));
@@ -221,7 +224,6 @@ describe('StatusFilter', () => {
   });
 
   it('calls onChange with episode_status clause when selecting a status', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<StatusFilter matcher="" onChange={onChange} />);
 
@@ -232,7 +234,6 @@ describe('StatusFilter', () => {
   });
 
   it('produces OR group when selecting multiple statuses', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<StatusFilter matcher='episode_status : "active"' onChange={onChange} />);
 
@@ -245,7 +246,6 @@ describe('StatusFilter', () => {
   });
 
   it('reflects existing episode_status from matcher as checked', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<StatusFilter matcher='episode_status : "active"' onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterStatus'));
@@ -260,7 +260,6 @@ describe('StatusFilter', () => {
   });
 
   it('removes status clause when deselecting all', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(
       <StatusFilter matcher='episode_status : "active" AND rule.id : "x"' onChange={onChange} />
@@ -281,8 +280,11 @@ describe('StatusFilter', () => {
 });
 
 describe('TagsFilter', () => {
+  let user: ReturnType<typeof userEvent.setup>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    user = userEvent.setup(USER_EVENT_OPTIONS);
     mockUseFetchRuleTags.mockReturnValue({ data: MOCK_TAGS, isLoading: false });
   });
 
@@ -293,7 +295,6 @@ describe('TagsFilter', () => {
   });
 
   it('enables fetching when popover opens', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
@@ -304,7 +305,6 @@ describe('TagsFilter', () => {
   });
 
   it('displays tags from API', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<TagsFilter matcher="" onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
@@ -315,7 +315,6 @@ describe('TagsFilter', () => {
   });
 
   it('calls onChange with rule.tags clause when selecting a tag', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<TagsFilter matcher="" onChange={onChange} />);
 
@@ -326,7 +325,6 @@ describe('TagsFilter', () => {
   });
 
   it('produces OR group when selecting multiple tags', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(<TagsFilter matcher='rule.tags : "production"' onChange={onChange} />);
 
@@ -337,7 +335,6 @@ describe('TagsFilter', () => {
   });
 
   it('reflects existing rule.tags from matcher as checked', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<TagsFilter matcher='rule.tags : "production"' onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
@@ -352,7 +349,6 @@ describe('TagsFilter', () => {
   });
 
   it('shows orphaned tags from matcher that are not in API results', async () => {
-    const user = userEvent.setup();
     renderWithI18n(<TagsFilter matcher='rule.tags : "legacy-tag"' onChange={jest.fn()} />);
 
     await user.click(screen.getByTestId('quickFilterTags'));
@@ -378,7 +374,6 @@ describe('TagsFilter', () => {
   });
 
   it('removes tags clause when deselecting all', async () => {
-    const user = userEvent.setup();
     const onChange = jest.fn();
     renderWithI18n(
       <TagsFilter matcher='rule.tags : "production" AND rule.id : "x"' onChange={onChange} />

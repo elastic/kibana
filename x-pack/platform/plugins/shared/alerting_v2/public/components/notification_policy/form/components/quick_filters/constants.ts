@@ -10,6 +10,8 @@ export interface QuickFiltersProps {
   onChange: (matcher: string) => void;
 }
 
+export const POPOVER_PANEL_STYLE = { maxWidth: 360 };
+
 export const SELECTABLE_LIST_PROPS = {
   isVirtualized: false as const,
   textWrap: 'wrap' as const,
