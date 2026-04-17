@@ -547,6 +547,90 @@ describe('module_lookup', () => {
     });
   });
 
+  describe('getAffectedModulesGit – scout test-only changes skip downstream', () => {
+    function addScoutTestFile(
+      root: string,
+      moduleRelDir: string,
+      scoutDir: string,
+      fileName: string
+    ): void {
+      const dir = path.join(root, moduleRelDir, 'test', scoutDir);
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, fileName), `// test ${fileName}\n`);
+    }
+
+    it('does not expand downstream when only test/scout/ files change', () => {
+      addScoutTestFile(tmpDir, 'packages/core', 'scout', 'core.spec.ts');
+      commitAll(tmpDir, 'add scout test in core');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: true });
+      expect(affected).toEqual(new Set(['@kbn/core']));
+    });
+
+    it('does not expand downstream when only test/scout_custom_flag/ files change', () => {
+      addScoutTestFile(tmpDir, 'packages/core', 'scout_custom_flag', 'core.spec.ts');
+      commitAll(tmpDir, 'add scout_custom_flag test in core');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: true });
+      expect(affected).toEqual(new Set(['@kbn/core']));
+    });
+
+    it('expands downstream when module has both code and test/scout changes', () => {
+      modifyFile(tmpDir, 'packages/core/src/index.ts', 'export const v2 = true;\n');
+      addScoutTestFile(tmpDir, 'packages/core', 'scout', 'core.spec.ts');
+      commitAll(tmpDir, 'code + scout test in core');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: true });
+      expect(affected).toEqual(
+        new Set(['@kbn/core', '@kbn/utils', '@kbn/my-plugin', '@kbn/analytics'])
+      );
+    });
+
+    it('handles mixed: code change in A + test-only in B', () => {
+      modifyFile(tmpDir, 'packages/core/src/index.ts', 'export const v2 = true;\n');
+      addScoutTestFile(tmpDir, 'packages/logging', 'scout', 'logging.spec.ts');
+      commitAll(tmpDir, 'code in core, test in logging');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: true });
+      // core expands downstream; logging does not (test-only)
+      expect(affected).toContain('@kbn/core');
+      expect(affected).toContain('@kbn/utils');
+      expect(affected).toContain('@kbn/my-plugin');
+      expect(affected).toContain('@kbn/analytics');
+      expect(affected).toContain('@kbn/logging');
+      expect(affected.size).toBe(5);
+    });
+
+    it('test-only changes in multiple modules: no downstream for any', () => {
+      addScoutTestFile(tmpDir, 'packages/core', 'scout', 'core.spec.ts');
+      addScoutTestFile(tmpDir, 'packages/logging', 'scout', 'logging.spec.ts');
+      commitAll(tmpDir, 'test-only in core and logging');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: true });
+      expect(affected).toEqual(new Set(['@kbn/core', '@kbn/logging']));
+    });
+
+    it('returns test-only modules without downstream when includeDownstream is false', () => {
+      addScoutTestFile(tmpDir, 'packages/core', 'scout', 'core.spec.ts');
+      commitAll(tmpDir, 'add scout test in core');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: false });
+      expect(affected).toEqual(new Set(['@kbn/core']));
+    });
+
+    it('non-scout test paths still trigger downstream', () => {
+      const dir = path.join(tmpDir, 'packages', 'core', 'test', 'unit');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, 'core.test.ts'), '// unit test\n');
+      commitAll(tmpDir, 'add non-scout test in core');
+
+      const affected = getAffectedModulesGit({ mergeBase: baseCommit, includeDownstream: true });
+      expect(affected).toEqual(
+        new Set(['@kbn/core', '@kbn/utils', '@kbn/my-plugin', '@kbn/analytics'])
+      );
+    });
+  });
+
   describe('getAffectedModulesGit – ignorePatterns', () => {
     it('excludes files matching a single glob pattern', () => {
       addFileInModule(tmpDir, 'packages/core', 'feature.ts');

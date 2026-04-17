@@ -15,6 +15,8 @@ import { filterIgnoredFiles } from './utils';
 
 const isCI = !!process.env.CI?.match(/^(1|true)$/i);
 
+const SCOUT_TEST_MARKER = '/test/scout';
+
 export function getAffectedModulesGit({
   mergeBase,
   includeDownstream,
@@ -32,19 +34,47 @@ export function getAffectedModulesGit({
 
   const changedFiles = filterIgnoredFiles(allChangedFiles, ignorePatterns);
 
-  const directlyAffected = new Set<string>();
+  const codeChangedModules = new Set<string>();
+  const scoutTestOnlyModules = new Set<string>();
+
+  // Pass 1: process non-scout files to populate codeChangedModules
+  const deferredScoutFiles: string[] = [];
+
   for (const file of changedFiles) {
+    if (file.includes(SCOUT_TEST_MARKER)) {
+      deferredScoutFiles.push(file);
+      continue;
+    }
     const moduleId = findModuleForPath(file);
     if (moduleId) {
-      directlyAffected.add(moduleId);
+      codeChangedModules.add(moduleId);
     }
   }
 
-  if (ignoreUncategorizedChanges) {
-    directlyAffected.delete(UNCATEGORIZED_MODULE_ID);
+  // Pass 2: scout-test files — skip findModuleForPath when module is already code-changed
+  for (const file of deferredScoutFiles) {
+    const moduleId = findModuleForPath(file);
+    if (!moduleId || codeChangedModules.has(moduleId)) continue;
+    scoutTestOnlyModules.add(moduleId);
   }
 
-  return includeDownstream ? getDownstreamDependents(directlyAffected) : directlyAffected;
+  if (ignoreUncategorizedChanges) {
+    codeChangedModules.delete(UNCATEGORIZED_MODULE_ID);
+    scoutTestOnlyModules.delete(UNCATEGORIZED_MODULE_ID);
+  }
+
+  if (!includeDownstream) {
+    for (const id of scoutTestOnlyModules) {
+      codeChangedModules.add(id);
+    }
+    return codeChangedModules;
+  }
+
+  const expanded = getDownstreamDependents(codeChangedModules);
+  for (const id of scoutTestOnlyModules) {
+    expanded.add(id);
+  }
+  return expanded;
 }
 
 /** Paths changed from `git merge-base mergeBase HEAD` to `commit` (plus local untracked when not CI). */
