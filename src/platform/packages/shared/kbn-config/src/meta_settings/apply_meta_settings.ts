@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep, get, merge, unset } from 'lodash';
-import { ensureDeepObject, getFlattenedObject } from '@kbn/std';
+import { ensureDeepObject } from '@kbn/std';
 import type { MetaSetting } from './types';
 
 /**
