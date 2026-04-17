@@ -56,5 +56,5 @@ Lens visualizations are rendered through the [Kibana embeddable framework](./emb
 
 ## Further reading
 
-- [Lens Config Builder API reference](../lens-config-api/lens-config-builder-api-documentation.md) — class, constructor, and `build` method reference
+- [Lens Config Builder API reference](./lens-config-api/lens-config-builder-api-documentation.md) — class, constructor, and `build` method reference
 - [How to create Lens visualizations with the Config Builder API](../tutorials/lens-config-builder-api-examples.md) — worked examples for metric, pie, and XY charts

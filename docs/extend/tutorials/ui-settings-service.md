@@ -12,7 +12,7 @@ The UI settings service is available both server and client side.
 
 ## Overview [_overview]
 
-UI settings are configurable from the Advanced Settings page in Management and control the behavior of {{kib}}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other [Saved Objects](/extend/saved-objects.md).
+UI settings are configurable from the Advanced Settings page in Management and control the behavior of {{kib}}. uiSettings are stored in a config saved object and, as such, conform to the same conditions as other [Saved Objects](/extend/key-concepts/saved-objects.md).
 
 There are several ways to configure an advanced setting:
 

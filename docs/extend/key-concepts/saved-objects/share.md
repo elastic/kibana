@@ -12,7 +12,7 @@ From 8.7.0, as a step towards *zero downtime upgrades*, plugins are no longer al
 
 ## Overview [sharing-saved-objects-overview]
 
-[Saved objects](/extend/saved-objects.md) (hereinafter "objects") are used to store all sorts of things in {{kib}}, from Dashboards to Index Patterns to Machine Learning Jobs. The effort to make objects shareable can be summarized in a single picture:
+[Saved objects](/extend/key-concepts/saved-objects.md) (hereinafter "objects") are used to store all sorts of things in {{kib}}, from Dashboards to Index Patterns to Machine Learning Jobs. The effort to make objects shareable can be summarized in a single picture:
 
 ![Sharing Saved Objects overview](images/overview.png)
 
@@ -79,7 +79,7 @@ The image below shows two different examples of object links from a "case" objec
 
 ![Sharing Saved Objects step 1](images/step-1.png)
 
-If your objects *do not* use the root-level `references` field, you'll need to [add a migration](/extend/saved-objects/update.md) *before the 8.0 release* to fix that. Here's a migration function for the example above:
+If your objects *do not* use the root-level `references` field, you'll need to [add a migration](/extend/key-concepts/saved-objects/update.md) *before the 8.0 release* to fix that. Here's a migration function for the example above:
 
 ```ts
 function migrateCaseToV716(
@@ -440,7 +440,7 @@ Users will need a way to view what spaces your objects are currently assigned to
     3. The `noun` field is optional. It just changes "object" in the flyout to whatever you specify; you may want the flyout to say "dashboard" or "data view" instead.
     4. The `behaviorContext` field is optional. It controls how the space list is displayed. When using an `"outside-space"` behavior context, the space list is rendered outside of any particular space, so the active space is included in the list. On the other hand, when using a `"within-space"` behavior context, the space list is rendered within the active space, so the active space is excluded from the list.
 
-2. Allow users to access your objects in the [Saved Objects Management page](docs-content://explore-analyze/find-and-organize/saved-objects.md) in [Stack Management](docs-content://deploy-manage/index.md). You can do this by ensuring that your objects are marked as [importable and exportable](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_management.ts) in your [saved object type registration](/extend/saved-objects/create.md#saved-objects-type-registration):
+2. Allow users to access your objects in the [Saved Objects Management page](docs-content://explore-analyze/find-and-organize/saved-objects.md) in [Stack Management](docs-content://deploy-manage/index.md). You can do this by ensuring that your objects are marked as [importable and exportable](https://github.com/elastic/kibana/blob/master/src/core/packages/saved-objects/server/src/saved_objects_management.ts) in your [saved object type registration](/extend/key-concepts/saved-objects/create.md#saved-objects-type-registration):
 
     ```ts
     name: 'my-object-type',

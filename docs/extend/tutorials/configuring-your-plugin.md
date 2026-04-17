@@ -11,14 +11,6 @@ The `ConfigService` in {{kib}} enables plugin developers to support adjustable r
 The Configuration service is only available server side.
 ::::
 
-
-```js
-// in Legacy platform
-const basePath = config.get('server.basePath');
-// in Kibana Platform 'basePath' belongs to the http service
-const basePath = core.http.basePath.get(request);
-```
-
 To access your plugin's configuration, you *should*:
 
 * Declare a plugin-specific `configPath` in your plugin definition (defaults to the plugin `id` if not specified).

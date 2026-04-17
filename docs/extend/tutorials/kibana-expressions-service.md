@@ -5,6 +5,29 @@ description: "Kibana Expressions Service"
 
 # Kibana Expressions Service
 
+## What are expressions?
+
+An expression pipeline is a chain of functions that **pipe** output to the input of the next function. Functions can be configured using arguments provided by the user. The final output of the expression pipeline can be rendered using one of the **renderers** registered in the `expressions` plugin.
+
+All function arguments, inputs, and outputs must be serializable. Expression functions should stay *pure* — this makes them easy to reuse and enables the entire chain (and its intermediate outputs) to be serialized.
+
+Expressions can include comments: `//` for single-line, `/* ... */` for multi-line.
+
+Expressions power visualizations in Dashboard and Lens. Every element in Canvas is backed by an expression. Here is an example Canvas expression that fetches data from Elasticsearch, applies a calculation, and renders a metric:
+
+```
+filters
+| essql
+  query="SELECT COUNT(timestamp) as total_errors
+    FROM kibana_sample_data_logs
+    WHERE tags LIKE '%warning%' OR tags LIKE '%error%'"
+| math "total_errors"
+| metric "TOTAL ISSUES"
+  metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=48 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}
+  labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=30 align="left" color="#FFFFFF" weight="lighter" underline=false italic=false}
+| render
+```
+
 ## Expressions service
 
 Expression service exposes a registry of reusable functions primary used for fetching and transposing data and a registry of renderer functions that can render data into a DOM element.

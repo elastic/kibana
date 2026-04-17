@@ -8,7 +8,7 @@ This page describes how changes to **Saved Object type** schemas and mappings ar
 
 Model versions decouple Saved Object versioning from the stack version and support both traditional upgrades (with downtime) and zero-downtime Serverless upgrades. The legacy migration API was tied to stack versions and did not meet backward-compatibility and zero-downtime requirements for Serverless, so it has been deprecated in favor of `modelVersions`.
 
-![multiple migration per stack version schema](images/model_versions.png)
+![multiple migration per stack version schema](images/model-versions.png)
 
 ## Migration algorithms
 
@@ -61,7 +61,7 @@ Kibana has multiple system indices (e.g. `.kibana`, `.kibana_task_manager`). Typ
 
 From a high level, the state machine consists of three main phases:
 
-![ZDT overview](images/zdt_overview.png)
+![ZDT overview](images/zdt-overview.png)
 
 1. **INIT** — Fetches the system indices to understand their current state (aliases, mappings, model versions stored in `_meta`).
 2. **Index state update** — Creates the index if it does not exist, updates mappings and aliases. This phase is executed by **all Kibana node roles** (`ui`, `background_tasks`) as well as the `migrator` role.
@@ -83,7 +83,7 @@ If the index does not exist, the machine transitions to **CREATE_TARGET_INDEX** 
 
 #### Phase 2: Index state update
 
-![Index state update](images/index_state_update.png)
+![Index state update](images/index-state-update.png)
 
 | Stage | Description |
 |-------|-------------|
@@ -96,7 +96,7 @@ If the index does not exist, the machine transitions to **CREATE_TARGET_INDEX** 
 
 #### Phase 3: Document conversion
 
-![Document conversion](images/document_conversion.png)
+![Document conversion](images/document-conversion.png)
 
 | Stage | Description |
 |-------|-------------|

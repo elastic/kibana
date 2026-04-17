@@ -63,7 +63,7 @@ note: Currently there is no recommended way on how to store version in url and i
 In order to support import and export, and space-sharing capabilities, Saved Objects need to explicitly list any references they contain to other Saved Objects.
 To support persisting your state in saved objects owned by another plugin, the `extract` and `inject` methods of Persistable State interface should be implemented.
 
-[Learn how to define Saved Object references](../saved-objects/create.md)
+[Learn how to define Saved Object references](./saved-objects/create.md)
 
 [See example embeddable providing extract/inject functions](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
 
@@ -71,7 +71,7 @@ To support persisting your state in saved objects owned by another plugin, the `
 
 As your plugin evolves, you may need to change your state in a breaking way. If that happens, you should write a migration to upgrade the state that existed prior to the change.
 
-[How to write a migration](../saved-objects/create.md).
+[How to write a migration](./saved-objects/create.md).
 
 [See an example saved object storing embeddable state implementing saved object migration function](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/server/searchable_list_saved_object.ts)
 

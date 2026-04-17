@@ -120,7 +120,7 @@ _todo: fully worked out example_
 
 ## Saved object model versions [integration-tests-model-versions]
 
-_Also see [Defining model versions](../saved-objects/create.md)._
+_Also see [Defining model versions](../key-concepts/saved-objects/create.md)._
 
 During integration tests with a real Elasticsearch cluster, you can manipulate saved object documents in a way that closely mirrors production runtime. You can even simulate two Kibana instances with different model versions running simultaneously.
 

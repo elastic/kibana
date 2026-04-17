@@ -151,3 +151,33 @@ When implementing index initialization:
 - Use `asScoped` or `asCurrentUser` for user-initiated actions to enforce security
 - Use `asInternalUser` only for trusted, internal operations that must not be restricted by user permissions.
 - Never use `asInternalUser` in route handlers that respond to user requests.
+
+---
+
+## Logging
+
+The Elasticsearch service logs all requests and responses at the `debug` log level.
+
+By default, requests are logged under the logger `elasticsearch.query.data`, where `data` is the default client name. Custom clients created via `core.elasticsearch.createClient(type, options)` are logged as `elasticsearch.query.<type>`.
+
+To group specific queries for easier troubleshooting, pass a `loggerName` via the `loggingOptions` context parameter:
+
+```typescript
+client.search(searchParams, {
+  context: {
+    loggingOptions: {
+      loggerName: 'myqueries',
+    },
+  },
+});
+```
+
+This request will be logged under `elasticsearch.query.myqueries`.
+
+To see these logs, enable the `debug` level for that logger in `kibana.yml`:
+
+```yaml
+logging.loggers:
+  - name: elasticsearch.query.myqueries
+    level: debug
+```
