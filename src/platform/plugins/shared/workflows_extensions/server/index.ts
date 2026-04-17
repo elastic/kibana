@@ -19,22 +19,12 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type {
-  EventChainContext,
   ServerTriggerDefinition,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStartDeps,
 } from './types';
-
-export {
-  EVENT_CHAIN_DEPTH_HEADER,
-  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-  getEventChainContext,
-  getOutboundEventChainHeaders,
-  setWorkflowEventChainContext,
-} from './event_chain_context';
 
 export type {
   ServerStepDefinition,

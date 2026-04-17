@@ -8,12 +8,9 @@
  */
 
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { z } from '@kbn/zod/v4';
-import type { TriggerEventHandler } from './emit_event';
-import type { EventChainContext } from './event_chain_context';
 import type { ServerStepDefinition } from './step_registry/types';
 import type { CommonTriggerDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
@@ -21,21 +18,6 @@ import type { WorkflowsExtensionsStartContract } from '../common/types';
 /** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
 export type ServerTriggerDefinition<EventSchema extends z.ZodType = z.ZodType> =
   CommonTriggerDefinition<EventSchema>;
-
-export type { EventChainContext };
-
-/**
- * Emit an event for the given trigger. Subscribed workflows in the current request's space will run.
- * @param triggerId - Must match a trigger registered via registerTriggerDefinition
- * @param payload - Event payload; available in workflows as context.event
- * @throws Error if triggerId is not registered
- */
-export type EventEmitter = (triggerId: string, payload: Record<string, unknown>) => Promise<void>;
-
-export type GetEventEmitter = (
-  request: KibanaRequest,
-  triggerEventHandler: TriggerEventHandler
-) => EventEmitter;
 
 /**
  * Server-side plugin setup contract.
@@ -63,7 +45,7 @@ export interface WorkflowsExtensionsServerPluginSetup {
 
 /**
  * Server-side plugin start contract.
- * Exposes step definitions (from common contract), trigger definitions, and emitEvent.
+ * Exposes step definitions (from common contract) and trigger definitions.
  */
 export type WorkflowsExtensionsServerPluginStart =
   WorkflowsExtensionsStartContract<ServerStepDefinition> & {
@@ -74,10 +56,10 @@ export type WorkflowsExtensionsServerPluginStart =
     getAllTriggerDefinitions(): ServerTriggerDefinition[];
 
     /**
-     * Emit a trigger event.
-     * @throws Error if triggerId is not registered
+     * Get a registered trigger definition by id.
+     * @returns The trigger definition, or undefined if not registered
      */
-    getEventEmitter: GetEventEmitter;
+    getTriggerDefinition(triggerId: string): ServerTriggerDefinition | undefined;
   };
 
 /**

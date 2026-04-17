@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TriggerResolutionStats } from './resolve_workflow_subscriptions';
+/** Counts along the subscription -> match funnel for one emit. */
+export interface TriggerResolutionStats {
+  subscribedCount: number;
+  disabledCount: number;
+  kqlFalseCount: number;
+  kqlErrorCount: number;
+  matchedCount: number;
+}
 
 /** Scheduling outcomes after KQL-matched workflows are considered. */
 export interface TriggerEventScheduleStats {

@@ -11,7 +11,6 @@ import type { IContextProvider, Logger } from '@kbn/core/server';
 import { REQUIRED_LICENSE_TYPE } from './constants';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
-import { createTriggerEventHandler } from '../event_driven/trigger_event_handler';
 import type { WorkflowsRequestHandlerContext } from '../types';
 
 export const createWorkflowsRouteHandlerContextProvider = (
@@ -19,13 +18,10 @@ export const createWorkflowsRouteHandlerContextProvider = (
   workflowsService: WorkflowsService,
   logger: Logger
 ): IContextProvider<WorkflowsRequestHandlerContext, 'workflows'> => {
-  const triggerEventHandler = createTriggerEventHandler({ logger, api, workflowsService });
-
   return async (context, request) => {
-    const workflowsExtensions = await workflowsService.getWorkflowsExtensions();
     const { license } = await context.licensing;
+    const executionEngine = await workflowsService.getWorkflowsExecutionEngine();
 
-    // license for stateful and config.available for serverless
     const isWorkflowsAvailable =
       license.hasAtLeast(REQUIRED_LICENSE_TYPE) && api.isWorkflowsAvailable;
 
@@ -34,12 +30,14 @@ export const createWorkflowsRouteHandlerContextProvider = (
       getWorkflowsClient: () => {
         if (isWorkflowsAvailable) {
           return {
-            emitEvent: workflowsExtensions.getEventEmitter(request, triggerEventHandler),
+            emitEvent: async (triggerId, payload) => {
+              await executionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
+            },
           };
         }
         return {
           emitEvent: async (triggerId) => {
-            logger.warn(
+            logger.debug(
               `Workflows event '${triggerId}' ignored: workflows is not available in this environment.`
             );
           },

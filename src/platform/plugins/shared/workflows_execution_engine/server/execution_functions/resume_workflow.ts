@@ -34,7 +34,7 @@ export async function resumeWorkflow({
   config: WorkflowsExecutionEngineConfig;
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
-  workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart;
+  workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   meteringService?: WorkflowsMeteringService;
 }): Promise<void> {
   const {
@@ -78,8 +78,7 @@ export async function resumeWorkflow({
     await emitWorkflowExecutionFailedEventIfFailed({
       workflowRuntime,
       workflowExecutionState,
-      workflowsExtensions: dependencies.workflowsExtensions,
-      spaceId,
+      emitEvent: workflowsExecutionEngine.triggerEvents.emitEvent,
       request: fakeRequest,
       logger,
       workflowRunId,

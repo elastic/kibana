@@ -24,12 +24,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
-import {
-  triggerEventDispatchedSchema,
-  WORKFLOWS_TRIGGER_EVENT_DISPATCHED,
-} from './telemetry/events';
 import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
-import { initializeTriggerEventsDataStream } from './trigger_events_log';
 import type {
   AgentBuilderPluginSetupContract,
   WorkflowsRequestHandlerContext,
@@ -68,10 +63,6 @@ export class WorkflowsPlugin
     this.aiTelemetryClient = new WorkflowsAiTelemetryClient(core.analytics, this.logger);
 
     registerUISettings(core, plugins);
-    core.analytics.registerEventType({
-      eventType: WORKFLOWS_TRIGGER_EVENT_DISPATCHED,
-      schema: triggerEventDispatchedSchema,
-    });
 
     // Register the workflows management feature and its privileges
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
@@ -97,8 +88,6 @@ export class WorkflowsPlugin
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
     }
-
-    initializeTriggerEventsDataStream(core.dataStreams);
 
     core.http.registerRouteHandlerContext(
       'workflows',

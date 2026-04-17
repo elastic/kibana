@@ -40,9 +40,6 @@ describe('resumeWorkflow', () => {
     jest.clearAllMocks();
     dependencies = mockContextDependencies();
     mockEmitEvent = jest.fn().mockResolvedValue(undefined);
-    (dependencies as any).workflowsExtensions = {
-      emitEvent: mockEmitEvent,
-    };
     mockGetWorkflowExecutionById = jest.fn();
     mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
     mockGetWorkflowExecutionStatus = jest.fn();
@@ -100,6 +97,7 @@ describe('resumeWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
+        workflowsExecutionEngine: { emitEvent: mockEmitEvent } as any,
       })
     ).rejects.toThrow('Step failed');
 
@@ -154,6 +152,7 @@ describe('resumeWorkflow', () => {
         config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
         fakeRequest,
         dependencies,
+        workflowsExecutionEngine: { emitEvent: mockEmitEvent } as any,
       })
     ).rejects.toThrow('Runtime error');
 

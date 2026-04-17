@@ -11,6 +11,7 @@ import type { RootSchema } from '@kbn/core/server';
 import type { WellKnownWorkflowTriggerSource } from '@kbn/workflows';
 import {
   type EventDrivenExecutionSuppressedParams,
+  type TriggerEventDispatchedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
@@ -23,6 +24,7 @@ export const workflowExecutionEventNames = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled]: 'Workflow execution cancelled',
   [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]:
     'Event-driven workflow execution suppressed at runtime',
+  [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: 'Trigger event dispatched',
 };
 
 const baseWorkflowExecutionSchema: RootSchema<{
@@ -866,6 +868,114 @@ const eventDrivenExecutionSuppressedSchema: RootSchema<EventDrivenExecutionSuppr
   },
 };
 
+const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
+  eventName: {
+    type: 'keyword',
+    _meta: { description: 'Human-readable name of this telemetry event', optional: false },
+  },
+  triggerId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Event trigger id handled by workflows trigger event handler',
+      optional: false,
+    },
+  },
+  executionEnabled: {
+    type: 'boolean',
+    _meta: { description: 'Whether event-driven execution is enabled', optional: false },
+  },
+  logEventsEnabled: {
+    type: 'boolean',
+    _meta: { description: 'Whether trigger event audit logging is enabled', optional: false },
+  },
+  eventChainDepth: {
+    type: 'integer',
+    _meta: {
+      description: 'Event-chain depth at this emit (from request chain context; 0 for root emits)',
+      optional: false,
+    },
+  },
+  eventId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'UUID for this trigger dispatch; correlates with trigger-events audit, context.metadata.eventId, and execution dispatchEventId',
+      optional: false,
+    },
+  },
+  sourceExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Workflow execution id of the chain hop that emitted this event, when set',
+      optional: true,
+    },
+  },
+  auditOnly: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True when event-driven execution is disabled but trigger event logging still ran (audit path)',
+      optional: false,
+    },
+  },
+  subscriberResolutionMs: {
+    type: 'long',
+    _meta: {
+      description:
+        'Elapsed milliseconds spent resolving/filtering subscribed workflows for this trigger dispatch',
+      optional: true,
+    },
+  },
+  subscribedCount: {
+    type: 'integer',
+    _meta: { description: 'Number of subscribed workflows returned from storage', optional: false },
+  },
+  disabledCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of subscribed workflows skipped because disabled',
+      optional: false,
+    },
+  },
+  kqlFalseCount: {
+    type: 'integer',
+    _meta: { description: 'Number of workflows filtered out by KQL false result', optional: false },
+  },
+  kqlErrorCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of workflows filtered out by KQL evaluation error',
+      optional: false,
+    },
+  },
+  matchedCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of workflows matched after enabled + KQL checks',
+      optional: false,
+    },
+  },
+  depthSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description: 'Number of matched workflows skipped by max event chain depth',
+      optional: false,
+    },
+  },
+  scheduledAttemptCount: {
+    type: 'integer',
+    _meta: { description: 'Number of schedule attempts sent to execution engine', optional: false },
+  },
+  scheduledSuccessCount: {
+    type: 'integer',
+    _meta: { description: 'Number of successful schedule calls', optional: false },
+  },
+  scheduledFailureCount: {
+    type: 'integer',
+    _meta: { description: 'Number of failed schedule calls', optional: false },
+  },
+};
+
 export const workflowExecutionEventSchemas = {
   [WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCompleted]:
     workflowExecutionCompletedSchema,
@@ -874,4 +984,5 @@ export const workflowExecutionEventSchemas = {
     workflowExecutionCancelledSchema,
   [WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed]:
     eventDrivenExecutionSuppressedSchema,
+  [WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched]: triggerEventDispatchedSchema,
 };

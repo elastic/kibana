@@ -16,6 +16,7 @@ import type {
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { TriggerType, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { validateWorkflowForExecution } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { api } from './api';
 import { ExecutorParamsSchema, WorkflowsRuleActionParamsSchema } from './schema';
@@ -32,7 +33,6 @@ import type {
   WorkflowsActionParamsType,
   WorkflowsExecutorResultData,
 } from './types';
-import { validateWorkflowForExecution } from './validate_workflow_for_execution';
 import { buildAlertEvent } from '../../../common/utils/build_alert_event';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
 

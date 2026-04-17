@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WORKFLOWS_EVENTS_DATA_STREAM } from './constants';
-export {
-  initializeTriggerEventsDataStream,
-  initializeTriggerEventsClient,
-  type TriggerEventDocument,
-  type TriggerEventsDataStreamClient,
-} from './trigger_events_data_stream';
+export { TriggerEventHandler, type EmitEvent, type EmitEventParams } from './trigger_event_handler';
+
+export { initializeTriggerEventsDataStream } from './event_logs';

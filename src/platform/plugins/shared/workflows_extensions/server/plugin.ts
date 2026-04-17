@@ -8,7 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { emitEvent } from './emit_event';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -16,7 +15,6 @@ import { registerInternalStepDefinitions } from './steps';
 import { TriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
-  GetEventEmitter,
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStart,
@@ -46,9 +44,7 @@ export class WorkflowsExtensionsServerPlugin
   ): WorkflowsExtensionsServerPluginSetup {
     const router = core.http.createRouter();
 
-    // Register HTTP route to expose step definitions for testing
     registerGetStepDefinitionsRoute(router, this.stepRegistry);
-    // Register HTTP route to expose trigger definitions for testing
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
     registerInternalStepDefinitions(core, this.stepRegistry);
@@ -66,21 +62,9 @@ export class WorkflowsExtensionsServerPlugin
 
   public start(
     _core: CoreStart,
-    plugins: WorkflowsExtensionsServerPluginStartDeps
+    _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
-
-    const spacesService = plugins.spaces?.spacesService;
-
-    const getEventEmitter: GetEventEmitter = (request, triggerEventHandler) => {
-      const spaceId = spacesService?.getSpaceId(request) ?? 'default';
-      return async (triggerId, payload) => {
-        emitEvent(
-          { triggerId, payload, request, spaceId },
-          { triggerRegistry: this.triggerRegistry, triggerEventHandler }
-        );
-      };
-    };
 
     return {
       getStepDefinition: (stepTypeId: string) => {
@@ -95,7 +79,9 @@ export class WorkflowsExtensionsServerPlugin
       getAllTriggerDefinitions: () => {
         return this.triggerRegistry.list();
       },
-      getEventEmitter,
+      getTriggerDefinition: (triggerId: string) => {
+        return this.triggerRegistry.get(triggerId);
+      },
     };
   }
 

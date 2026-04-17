@@ -16,7 +16,6 @@ const createSetupMock: () => jest.Mocked<WorkflowsExtensionsServerPluginSetup> =
   return {
     registerStepDefinition: jest.fn(),
     registerTriggerDefinition: jest.fn(),
-    registerTriggerEventHandler: jest.fn(),
   };
 };
 
@@ -26,7 +25,7 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
     hasStepDefinition: jest.fn(),
     getAllStepDefinitions: jest.fn(),
     getAllTriggerDefinitions: jest.fn(),
-    getEventEmitter: jest.fn(),
+    getTriggerDefinition: jest.fn(),
   };
 };
 

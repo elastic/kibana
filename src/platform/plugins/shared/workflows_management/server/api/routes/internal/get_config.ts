@@ -25,10 +25,10 @@ export function registerGetConfigRoute({ router, service }: RouteDependencies) {
         validate: false,
       },
       withAvailabilityCheck(async (_context, _request, response) => {
-        const engine = await service.getWorkflowsExecutionEngine();
+        const { triggerEvents } = await service.getWorkflowsExecutionEngine();
         return response.ok({
           body: {
-            eventDrivenExecutionEnabled: engine.isEventDrivenExecutionEnabled(),
+            eventDrivenExecutionEnabled: triggerEvents.isEnabled,
           },
         });
       })

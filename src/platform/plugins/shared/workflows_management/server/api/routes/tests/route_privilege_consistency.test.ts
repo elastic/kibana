@@ -478,8 +478,12 @@ describe('Route privilege/ES-operation consistency', () => {
     const mockExecutionEngineStart = {
       ...mockExecutionEngine,
       workflowEventLoggerService: { search: mockEventLoggerSearch },
-      isEventDrivenExecutionEnabled: jest.fn().mockReturnValue(true),
-      isLogTriggerEventsEnabled: jest.fn().mockReturnValue(true),
+      triggerEvents: {
+        isEnabled: true,
+        isLogEventsEnabled: true,
+        maxEventChainDepth: 10,
+        maxWorkflowDepth: 10,
+      },
     };
 
     // ── WorkflowsService ──
@@ -553,8 +557,8 @@ describe('Route privilege/ES-operation consistency', () => {
 
     const deps: RouteDependencies = {
       router: mockRouter,
-      api: api as any,
-      service: service,
+      api,
+      service,
       logger: mockLogger,
       spaces: mockSpaces,
       audit: mockAudit,
