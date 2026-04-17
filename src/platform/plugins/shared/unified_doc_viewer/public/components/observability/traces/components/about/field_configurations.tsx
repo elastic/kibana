@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { type ReactNode } from 'react';
 
 import {
   AGENT_NAME,
@@ -43,7 +43,7 @@ export const getSharedFieldConfigurations = (
   return {
     [SERVICE_NAME]: {
       title: fieldLabels.SERVICE_NAME_LABEL,
-      formatter: (value: unknown, formattedValue: string) => (
+      formatter: (value, formattedValue: ReactNode) => (
         <>
           <HighlightField value={value as string} formattedValue={formattedValue}>
             {({ content }) => (
@@ -88,7 +88,7 @@ export const getSpanFieldConfigurations = (
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE]: {
       title: fieldLabels.SPAN_DESTINATION_SERVICE_RESOURCE_LABEL,
-      formatter: (value: unknown, formattedValue: string) => (
+      formatter: (value, formattedValue: ReactNode) => (
         <HighlightField value={value as string} formattedValue={formattedValue}>
           {({ content }) => (
             <DependencyNameLink
