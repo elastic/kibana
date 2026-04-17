@@ -45,19 +45,11 @@ export const registerDashboardAppIntegration = ({
     attachments: undefined,
     conversationId: undefined,
   };
-  const setState = (newState: Partial<State>) => {
-    Object.assign(state, newState);
-  };
-
-  const getAttachments = (): undefined | DashboardAttachment[] => state.attachments;
 
   const addAttachmentFromDashboard = () => {
     const dashboardId = api.savedObjectId$.getValue();
-    const attachments = getAttachments();
-    const syncAttachment = dashboardId
-      ? attachments?.find(({ origin }) => origin === dashboardId)
-      : attachments?.find(({ origin }) => origin === undefined);
-
+    const syncAttachment = state.attachments?.find(({ origin }) => origin === dashboardId);
+    // update an existing linked attachment, or add a draft attachment only when the conversation is new
     if (syncAttachment || !state.conversationId) {
       agentBuilder.addAttachment({
         id: syncAttachment?.id ?? draftAttachmentId.current,
@@ -68,94 +60,64 @@ export const registerDashboardAppIntegration = ({
     }
   };
 
-  const createOpenChatSubscriptions = () => {
-    const unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
-      ({ id: conversationId, attachments }) => {
-        const dashboardAttachments = attachments
-          ?.filter(isDashboardAttachment)
-          .flatMap((attachment): DashboardAttachment[] => {
-            const latestVersionData = getLatestVersion(attachment)?.data;
+  const unsubscribeConversationChanges = agentBuilder.subscribeToConversationChanges(
+    ({ id: conversationId, attachments }) => {
+      const dashboardAttachments = attachments
+        ?.filter(isDashboardAttachment)
+        .flatMap((attachment): DashboardAttachment[] => {
+          const latestVersionData = getLatestVersion(attachment)?.data;
 
-            return latestVersionData
-              ? [
-                  {
-                    id: attachment.id,
-                    type: attachment.type,
-                    data: latestVersionData,
-                    origin: attachment.origin,
-                  },
-                ]
-              : [];
-          });
-
-        setState({
-          attachments: dashboardAttachments,
-          conversationId,
+          return latestVersionData
+            ? [
+                {
+                  id: attachment.id,
+                  type: attachment.type,
+                  data: latestVersionData,
+                  origin: attachment.origin,
+                },
+              ]
+            : [];
         });
 
-        addAttachmentFromDashboard();
-      }
-    );
-
-    // when agent creates a new version of dashboard, update the dashboard app to this new state
-    const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
-      agentBuilder,
-      api,
-    });
-
-    // Keep one stable id for the current draft attachment, then rotate it once that draft
-    // has been created in the conversation so future edits do not target the committed attachment
-    const newAttachmentIdRegenerationSubscription = createNewAttachmentIdRegenerationSubscription({
-      agentBuilder,
-      draftAttachmentId,
-    });
-
-    // keep the attachment's origin in sync with the dashboard's saved object id on dashboard save, so that the attachment always points to the correct dashboard even after saving to a new dashboard or saving an unsaved dashboard
-    const originSyncSubscription = createOriginSyncSubscription({
-      api,
-      checkSavedDashboardExist,
-      getAttachments,
-      updateOrigin: (id: string, origin: string) =>
-        state.conversationId
-          ? agentBuilder.updateAttachmentOrigin(state.conversationId, id, origin)
-          : undefined,
-    });
-
-    // when the dashboard state is manually changed, update the attachment with the new state so that it is up to date when the user tries to share or save the conversation
-    const manualChangesSubscription = createManualChangesSubscription({
-      api,
-      onManualChanges: addAttachmentFromDashboard,
-    });
-
-    return () => {
-      agentLiveUpdatesSubscription.unsubscribe();
-      newAttachmentIdRegenerationSubscription.unsubscribe();
-      originSyncSubscription.unsubscribe();
-      manualChangesSubscription.unsubscribe();
-      unsubscribeConversationChanges();
-      setState({
-        attachments: undefined,
-        conversationId: undefined,
-      });
-    };
-  };
-
-  let stopOpenChatSubscriptions: (() => void) | undefined;
-  const chatOpenSubscription = agentBuilder.chatOpen$.subscribe((isOpen) => {
-    if (isOpen) {
-      if (!stopOpenChatSubscriptions) {
-        stopOpenChatSubscriptions = createOpenChatSubscriptions();
-      }
-      return;
+      state.attachments = dashboardAttachments;
+      state.conversationId = conversationId;
+      addAttachmentFromDashboard();
     }
+  );
 
-    stopOpenChatSubscriptions?.();
-    stopOpenChatSubscriptions = undefined;
+  const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
+    agentBuilder,
+    api,
+  });
+
+  const newAttachmentIdRegenerationSubscription = createNewAttachmentIdRegenerationSubscription({
+    agentBuilder,
+    draftAttachmentId,
+  });
+
+  const originSyncSubscription = createOriginSyncSubscription({
+    api,
+    checkSavedDashboardExist,
+    getAttachments: () => state.attachments,
+    updateOrigin: (id: string, origin: string) =>
+      state.conversationId
+        ? agentBuilder.updateAttachmentOrigin(state.conversationId, id, origin)
+        : undefined,
+  });
+
+  const manualChangesSubscription = createManualChangesSubscription({
+    api,
+    onManualChanges: addAttachmentFromDashboard,
   });
 
   return () => {
-    chatOpenSubscription.unsubscribe();
-    stopOpenChatSubscriptions?.();
+    agentLiveUpdatesSubscription.unsubscribe();
+    newAttachmentIdRegenerationSubscription.unsubscribe();
+    originSyncSubscription.unsubscribe();
+    manualChangesSubscription.unsubscribe();
+    unsubscribeConversationChanges();
+    state.attachments = undefined;
+    state.conversationId = undefined;
   };
 };
 

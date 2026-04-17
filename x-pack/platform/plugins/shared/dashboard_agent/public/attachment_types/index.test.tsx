@@ -168,9 +168,11 @@ describe('registerDashboardAttachmentUiDefinition', () => {
   let uiDefinition: AttachmentUIDefinition<DashboardAttachment>;
   let unregister: () => void;
   let chat$: Subject<ChatEvent>;
+  let chatOpen$: BehaviorSubject<boolean>;
 
   const createMockDeps = () => {
     chat$ = new Subject<ChatEvent>();
+    chatOpen$ = new BehaviorSubject<boolean>(true);
     const dashboardAppClientApi$ = new Subject<DashboardApi | undefined>();
     const addAttachmentType = jest.fn();
     const updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
@@ -204,7 +206,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     const agentBuilder: AgentBuilderPluginStart = {
       attachments: { addAttachmentType },
       addAttachment: mockAddAttachment,
-      chatOpen$: new BehaviorSubject<boolean>(true),
+      chatOpen$,
       subscribeToConversationChanges,
       updateAttachmentOrigin,
       events: { chat$ },
@@ -241,6 +243,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
       findDashboardsService,
       emitConversationChange,
       chat$,
+      chatOpen$,
     };
   };
 
@@ -323,7 +326,7 @@ describe('registerDashboardAttachmentUiDefinition', () => {
     expect(() => {
       cleanup = registerDashboardAttachmentUiDefinition(syncDeps);
     }).not.toThrow();
-    cleanup();
+    cleanup?.();
   });
 
   describe('dashboard app integration - origin sync', () => {
@@ -426,6 +429,73 @@ describe('registerDashboardAttachmentUiDefinition', () => {
 
       mockApi.setSavedObjectId('new-id-after-cleanup');
       expect(deps.updateAttachmentOrigin).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('dashboard app integration - activation lifecycle', () => {
+    it('does not attach the dashboard when navigating to a dashboard with an existing conversation already open', () => {
+      const mockApi = createMockDashboardApi();
+
+      deps.emitConversationChange({ id: 'conversation-1', attachments: [] });
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+      expect(deps.addAttachment).not.toHaveBeenCalled();
+    });
+
+    it('attaches the dashboard when navigating to a dashboard with a new conversation already open', () => {
+      const mockApi = createMockDashboardApi();
+
+      deps.emitConversationChange({ id: undefined, attachments: undefined });
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          origin: undefined,
+        })
+      );
+    });
+
+    it('does not attach the dashboard when opening an existing conversation from a dashboard', () => {
+      const mockApi = createMockDashboardApi();
+
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      deps.emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+      expect(deps.addAttachment).not.toHaveBeenCalled();
+    });
+
+    it('attaches the dashboard when opening a new conversation from a dashboard', () => {
+      const mockApi = createMockDashboardApi();
+
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      deps.emitConversationChange({ id: undefined, attachments: undefined });
+
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          origin: undefined,
+        })
+      );
+    });
+
+    it('waits for the chat to open before activating dashboard integration', () => {
+      const mockApi = createMockDashboardApi();
+
+      deps.chatOpen$.next(false);
+      deps.dashboardAppClientApi$.next(mockApi as unknown as DashboardApi);
+      deps.emitConversationChange({ id: undefined, attachments: undefined });
+
+      expect(deps.addAttachment).not.toHaveBeenCalled();
+
+      deps.chatOpen$.next(true);
+
+      expect(deps.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: DASHBOARD_ATTACHMENT_TYPE,
+          origin: undefined,
+        })
+      );
     });
   });
 

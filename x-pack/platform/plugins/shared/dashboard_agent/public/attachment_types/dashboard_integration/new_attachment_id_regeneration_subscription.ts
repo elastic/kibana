@@ -32,6 +32,8 @@ interface NewAttachmentIdRegenerationSubscriptionParams {
   draftAttachmentId: IdGenerator;
 }
 
+// Keep one stable id for the current draft attachment, then rotate it once that draft
+// has been created in the conversation so future edits do not target the existing attachment
 export const createNewAttachmentIdRegenerationSubscription = ({
   agentBuilder,
   draftAttachmentId,

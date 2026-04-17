@@ -10,6 +10,11 @@ import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/pub
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
 
+/*
+ * keep the attachment's origin in sync with the dashboard's saved object id on dashboard save,
+ * so that the attachment always points to the correct dashboard even after saving to a new dashboard
+ * or saving an unsaved dashboard
+ */
 export const createOriginSyncSubscription = ({
   api,
   getAttachments,

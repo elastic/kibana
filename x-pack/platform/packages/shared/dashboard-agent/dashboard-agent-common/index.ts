@@ -22,10 +22,8 @@ export type {
   PendingDashboardAttachment,
 } from './types';
 
-export {
-  dashboardStateToAttachmentData,
-  attachmentDataToDashboardState,
-  DEFAULT_TIME_RANGE,
-} from './converters';
+export { dashboardStateToAttachmentData, attachmentDataToDashboardState } from './converters';
+
+export { DEFAULT_TIME_RANGE } from './dashboard_state_helpers';
 
 export { isDashboardAttachment } from './is_dashboard_attachment';

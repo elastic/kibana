@@ -160,7 +160,6 @@ const createDashboardAttachment = (
 describe('registerDashboardAppIntegration', () => {
   let mockApi: MockDashboardApi;
   let chat$: Subject<ChatEvent>;
-  let chatOpen$: BehaviorSubject<boolean>;
   let addAttachment: jest.Mock;
   let updateAttachmentOrigin: jest.Mock;
   let checkSavedDashboardExist: jest.Mock;
@@ -174,7 +173,6 @@ describe('registerDashboardAppIntegration', () => {
     jest.useFakeTimers();
     mockApi = createMockDashboardApi();
     chat$ = new Subject<ChatEvent>();
-    chatOpen$ = new BehaviorSubject<boolean>(true);
     addAttachment = jest.fn();
     updateAttachmentOrigin = jest.fn().mockResolvedValue(undefined);
     checkSavedDashboardExist = jest.fn().mockResolvedValue(true);
@@ -191,7 +189,6 @@ describe('registerDashboardAppIntegration', () => {
     >();
     const agentBuilder = {
       addAttachment,
-      chatOpen$,
       updateAttachmentOrigin,
       subscribeToConversationChanges: jest.fn((listener) => {
         listeners.add(listener);
@@ -356,30 +353,6 @@ describe('registerDashboardAppIntegration', () => {
     emitConversationChange({ id: 'conversation-1', attachments: [] });
 
     expect(addAttachment).not.toHaveBeenCalled();
-  });
-
-  it('does not run dashboard sync subscriptions while chat is closed', () => {
-    chatOpen$.next(false);
-    register();
-
-    emitConversationChange({
-      id: 'conversation-1',
-      attachments: [
-        createVersionedAttachment(createDashboardAttachment({ origin: 'dashboard-1' })),
-      ],
-    });
-    mockApi.title$.next('Updated Title');
-    jest.advanceTimersByTime(200);
-
-    expect(addAttachment).not.toHaveBeenCalled();
-
-    mockApi.onSave$.next({
-      previousDashboardId: 'dashboard-1',
-      dashboardId: 'dashboard-2',
-      dashboardState: createDashboardSaveState(),
-    });
-
-    expect(updateAttachmentOrigin).not.toHaveBeenCalled();
   });
 
   it('does not create a pending attachment on save when none exists yet', async () => {

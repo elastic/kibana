@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EMPTY, switchMap } from 'rxjs';
+import { combineLatest, EMPTY, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -48,13 +48,16 @@ export const registerDashboardAttachmentUiDefinition = ({
     return result.status === 'success';
   };
 
-  const dashboardAppApiSubscription = dashboardPlugin.dashboardAppClientApi$
+  const dashboardAppApiSubscription = combineLatest([
+    dashboardPlugin.dashboardAppClientApi$,
+    agentBuilder.chatOpen$,
+  ])
     .pipe(
-      switchMap((api) => {
+      switchMap(([api, isChatOpen]) => {
         // maintains a dashboardApi reference for access in getActionButtons
         dashboardApi = api;
-        // integrates dashboard app with agent
-        return api
+        // integrates dashboard app with agent only when both dashboard and chat are active
+        return api && isChatOpen
           ? createDashboardAppIntegration$({
               agentBuilder,
               api,
