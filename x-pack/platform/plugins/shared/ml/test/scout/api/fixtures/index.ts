@@ -6,11 +6,7 @@
  */
 
 import { apiTest } from '@kbn/scout';
-import type { RoleSessionCredentials, ApiServicesFixture, SamlAuth } from '@kbn/scout';
-import type { MlPluginApiService } from '../services/ml_api_service';
-import { getMlApiService } from '../services/ml_api_service';
-import type { MlTestResourcesService } from '../services/ml_test_resources';
-import { getMlTestResourcesService } from '../services/ml_test_resources';
+import type { RoleSessionCredentials, SamlAuth } from '@kbn/scout';
 import { ML_USERS } from './constants';
 
 export interface MlSamlAuthFixture extends SamlAuth {
@@ -19,14 +15,8 @@ export interface MlSamlAuthFixture extends SamlAuth {
   asMlUnauthorized: () => Promise<RoleSessionCredentials>;
 }
 
-export interface MlApiServicesFixture extends ApiServicesFixture {
-  mlApi: MlPluginApiService;
-  mlTestResources: MlTestResourcesService;
-}
-
 export const mlApiTest = apiTest.extend<{
   samlAuth: MlSamlAuthFixture;
-  apiServices: MlApiServicesFixture;
 }>({
   samlAuth: async ({ samlAuth }, use) => {
     const extendedSamlAuth: MlSamlAuthFixture = {
@@ -36,19 +26,6 @@ export const mlApiTest = apiTest.extend<{
       asMlUnauthorized: () => samlAuth.asInteractiveUser(ML_USERS.mlUnauthorized),
     };
     await use(extendedSamlAuth);
-  },
-
-  apiServices: async ({ apiServices, kbnClient, esClient, log }, use) => {
-    const extendedServices: MlApiServicesFixture = {
-      ...apiServices,
-      mlApi: getMlApiService({ kbnClient, esClient, log, scoutMlApi: apiServices.ml }),
-      mlTestResources: getMlTestResourcesService({
-        kbnClient,
-        log,
-        dataViews: apiServices.dataViews,
-      }),
-    };
-    await use(extendedServices);
   },
 });
 
