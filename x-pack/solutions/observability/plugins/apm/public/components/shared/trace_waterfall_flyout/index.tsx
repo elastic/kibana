@@ -18,7 +18,7 @@ import { css } from '@emotion/react';
 import type { FullTraceWaterfallOnErrorClick } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createLazyFullTraceWaterfallRenderer } from '../trace_waterfall/lazy_create_full_trace_waterfall_renderer';
 
 export type TraceWaterfallDocumentType = 'spanDetailFlyout' | 'logsFlyout';
@@ -40,8 +40,8 @@ export interface TraceWaterfallFlyoutProps {
   rangeTo: string;
   core: CoreStart;
   serviceName?: string;
-  highlightedSpanId?: string;
-  scrollToHighlightedOnMount?: boolean;
+  contextSpanIds?: string[];
+  scrollToContextOnMount?: boolean;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: TraceWaterfallDocumentType | null;
@@ -61,8 +61,8 @@ export function TraceWaterfallFlyout({
   rangeTo,
   core,
   serviceName,
-  highlightedSpanId: initialHighlightedSpanId,
-  scrollToHighlightedOnMount,
+  contextSpanIds,
+  scrollToContextOnMount,
   docId,
   docIndex,
   activeFlyoutType,
@@ -107,10 +107,6 @@ export function TraceWaterfallFlyout({
       style.remove();
     };
   }, [euiTheme.levels.menu]);
-
-  const [highlightedSpanId, setHighlightedSpanId] = useState<string | undefined>(
-    initialHighlightedSpanId
-  );
 
   const traceWaterfallTitleId = useGeneratedHtmlId({ prefix: 'traceWaterfallTitle' });
 
@@ -162,17 +158,11 @@ export function TraceWaterfallFlyout({
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             serviceName={serviceName}
-            highlightedSpanId={highlightedSpanId}
-            scrollToHighlightedOnMount={scrollToHighlightedOnMount}
+            contextSpanIds={contextSpanIds}
+            scrollToContextOnMount={scrollToContextOnMount}
             scrollStrategy="parent"
-            onNodeClick={(nodeSpanId) => {
-              setHighlightedSpanId(nodeSpanId);
-              onNodeClick(nodeSpanId);
-            }}
-            onErrorClick={(params) => {
-              setHighlightedSpanId(params.errorCount > 1 ? params.docId : undefined);
-              onErrorClick(params);
-            }}
+            onNodeClick={onNodeClick}
+            onErrorClick={onErrorClick}
           />
         </div>
       </EuiFlyoutBody>
@@ -184,10 +174,7 @@ export function TraceWaterfallFlyout({
             traceId,
             type: activeFlyoutType,
             hasAnimation: !skipOpenAnimation,
-            onClose: (event) => {
-              setHighlightedSpanId(undefined);
-              onCloseFlyout(event);
-            },
+            onClose: onCloseFlyout,
             activeSection,
           })
         : null}

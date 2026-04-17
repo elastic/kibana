@@ -251,8 +251,8 @@ function InternalTraceWaterfall({ traceId, docId, serviceName, dataView }: Props
           rangeTo={rangeTo}
           dataView={dataView}
           serviceName={serviceName}
-          highlightedSpanId={activeDocId ?? docId}
-          scrollToHighlightedOnMount={docId != null}
+          contextSpanIds={docId ? [docId] : undefined}
+          scrollToContextOnMount={docId != null}
           docId={activeDocId}
           docIndex={activeDocIndex}
           activeFlyoutType={activeFlyoutType}

@@ -81,7 +81,9 @@ export function FocusedTraceWaterfall({
       <TraceWaterfall
         traceItems={traceItems}
         showAccordion={false}
-        highlightedSpanId={reparentedItems?.focusedTraceDoc.id}
+        contextSpanIds={
+          reparentedItems?.focusedTraceDoc.id ? [reparentedItems.focusedTraceDoc.id] : undefined
+        }
         onErrorClick={onErrorClick}
         isEmbeddable={isEmbeddable}
         getServiceBadgeHref={getServiceBadgeHref}

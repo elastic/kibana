@@ -248,8 +248,8 @@ export interface ObservabilityTraceWaterfallFlyoutFeature {
     rangeFrom: string;
     rangeTo: string;
     serviceName?: string;
-    highlightedSpanId?: string;
-    scrollToHighlightedOnMount?: boolean;
+    contextSpanIds?: string[];
+    scrollToContextOnMount?: boolean;
     docId: string | null;
     docIndex?: string;
     activeFlyoutType: 'spanDetailFlyout' | 'logsFlyout' | null;

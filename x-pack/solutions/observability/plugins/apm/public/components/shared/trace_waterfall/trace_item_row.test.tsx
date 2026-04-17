@@ -91,7 +91,7 @@ describe('TraceItemRow', () => {
       showAccordion: true,
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
-      highlightedSpanId: 'highlighted-id',
+      contextSpanIds: ['highlighted-id'],
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
@@ -99,7 +99,7 @@ describe('TraceItemRow', () => {
     mockUseEuiTheme.mockReturnValue({
       euiTheme: {
         border: { thin: '1px solid #eee', width: { thick: '2px' } },
-        colors: { danger: 'red', lightestShade: '#fafafa' },
+        colors: { danger: 'red', lightestShade: '#fafafa', backgroundBaseWarning: '#fff7e2' },
       },
     } as any);
   });
@@ -150,7 +150,7 @@ describe('TraceItemRow', () => {
       showAccordion: false,
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
-      highlightedSpanId: 'highlighted-id',
+      contextSpanIds: ['highlighted-id'],
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
@@ -160,21 +160,21 @@ describe('TraceItemRow', () => {
     expect(container.querySelector('.euiAccordion')).not.toBeInTheDocument();
   });
 
-  it('applies highlight background when isHighlighted is true', () => {
+  it('applies context background when isContext is true', () => {
     mockUseTraceWaterfallContext.mockReturnValue({
       duration: 100,
       margin: { left: 20, right: 10 },
       showAccordion: true,
       onClick: jest.fn(),
       onErrorClick: jest.fn(),
-      highlightedSpanId: 'span-1',
+      contextSpanIds: ['span-1'],
       criticalPathSegmentsById: {},
       showCriticalPath: false,
     } as unknown as TraceWaterfallContextProps);
     const { getByTestId } = render(
       <TraceItemRow item={baseItem} childrenCount={0} state="closed" onToggle={jest.fn()} />
     );
-    expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #fafafa');
+    expect(getByTestId('trace-item-container')).toHaveStyle('background-color: #fff7e2');
   });
 
   describe('with critical path', () => {
@@ -193,7 +193,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
@@ -210,7 +210,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'other-span': [],
@@ -230,7 +230,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [
@@ -255,7 +255,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [
@@ -278,7 +278,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [
@@ -301,7 +301,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {
           'span-1': [{ item, offset: 20, duration: 30, self: true }],
@@ -322,7 +322,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: true,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
@@ -342,7 +342,7 @@ describe('TraceItemRow', () => {
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
-        highlightedSpanId: 'highlighted-id',
+        contextSpanIds: ['highlighted-id'],
         showCriticalPath: false,
         criticalPathSegmentsById: {},
       } as unknown as TraceWaterfallContextProps);
@@ -362,7 +362,7 @@ describe('TraceItemRow', () => {
         showAccordion: true,
         onClick: jest.fn(),
         onErrorClick: jest.fn(),
-        highlightedSpanId: 'some-other-span',
+        contextSpanIds: ['some-other-span'],
         criticalPathSegmentsById: {},
         showCriticalPath: false,
       } as unknown as TraceWaterfallContextProps);
@@ -382,7 +382,7 @@ describe('TraceItemRow', () => {
         showAccordion: true,
         onClick: undefined,
         onErrorClick: jest.fn(),
-        highlightedSpanId: undefined,
+        contextSpanIds: undefined,
         criticalPathSegmentsById: {},
         showCriticalPath: false,
       } as unknown as TraceWaterfallContextProps);
@@ -395,14 +395,14 @@ describe('TraceItemRow', () => {
       expect(getByTestId('traceItemRowContent')).toHaveAttribute('tabIndex', '-1');
     });
 
-    it('remains interactive when onClick is provided and current item is highlighted', () => {
+    it('remains interactive when onClick is provided and current item is context', () => {
       mockUseTraceWaterfallContext.mockReturnValue({
         duration: 100,
         margin: { left: 20, right: 10 },
         showAccordion: true,
         onClick: jest.fn(),
         onErrorClick: jest.fn(),
-        highlightedSpanId: 'span-1', // this item is highlighted
+        contextSpanIds: ['span-1'], // this item is the context span
         criticalPathSegmentsById: {},
         showCriticalPath: false,
       } as unknown as TraceWaterfallContextProps);

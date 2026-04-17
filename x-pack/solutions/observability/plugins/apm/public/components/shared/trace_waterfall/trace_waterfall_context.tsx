@@ -47,8 +47,8 @@ export interface TraceWaterfallContextProps {
   showCriticalPathControl?: boolean;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
-  highlightedSpanId?: string;
-  scrollToHighlightedOnMount?: boolean;
+  contextSpanIds?: string[];
+  scrollToContextOnMount?: boolean;
   getRelatedErrorsHref?: IWaterfallGetRelatedErrorsHref;
   getServiceBadgeHref?: WaterfallGetServiceBadgeHref;
   isEmbeddable: boolean;
@@ -109,7 +109,7 @@ interface Props {
   children: React.ReactNode;
   traceItems: TraceItem[];
   showAccordion: boolean;
-  highlightedSpanId?: string;
+  contextSpanIds?: string[];
   scrollStrategy?: TraceWaterfallScrollStrategy;
   onClick?: OnNodeClick;
   onErrorClick?: OnErrorClick;
@@ -126,7 +126,7 @@ interface Props {
   defaultShowCriticalPath?: boolean;
   onShowCriticalPathChange?: (value: boolean) => void;
   entryTransactionId?: string;
-  scrollToHighlightedOnMount?: boolean;
+  scrollToContextOnMount?: boolean;
   scrollElement?: Element;
 }
 
@@ -136,7 +136,7 @@ export function TraceWaterfallContextProvider({
   children,
   traceItems,
   showAccordion,
-  highlightedSpanId,
+  contextSpanIds,
   scrollStrategy = 'window',
   onClick,
   onErrorClick,
@@ -154,7 +154,7 @@ export function TraceWaterfallContextProvider({
   defaultShowCriticalPath = false,
   onShowCriticalPathChange,
   entryTransactionId,
-  scrollToHighlightedOnMount,
+  scrollToContextOnMount,
 }: Props) {
   const { duration, traceWaterfall, rootItem, legends, colorBy, traceState, message, errorMarks } =
     useTraceWaterfall({
@@ -183,7 +183,9 @@ export function TraceWaterfallContextProvider({
   const [accordionStatesMap, setAccordionStateMap] = useState<
     Record<string, EuiAccordionProps['forceState']>
   >(() => {
-    const ancestorIds = getAncestorIds(traceWaterfall, highlightedSpanId);
+    const ancestorIds = new Set(
+      contextSpanIds?.flatMap((id) => [...getAncestorIds(traceWaterfall, id)]) ?? []
+    );
 
     return traceWaterfall.reduce<Record<string, EuiAccordionProps['forceState']>>((acc, item) => {
       acc[item.id] = item.depth < maxLevelOpen || ancestorIds.has(item.id) ? 'open' : 'closed';
@@ -265,8 +267,8 @@ export function TraceWaterfallContextProvider({
         onClick,
         onErrorClick,
         getServiceBadgeHref,
-        highlightedSpanId,
-        scrollToHighlightedOnMount,
+        contextSpanIds,
+        scrollToContextOnMount,
         getRelatedErrorsHref,
         isEmbeddable,
         legends,

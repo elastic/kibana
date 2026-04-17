@@ -5,8 +5,8 @@
  * 2.0.
  */
 type FullTraceWaterfallScrollProps =
-  | { scrollStrategy?: 'window'; highlightedSpanId?: string }
-  | { scrollStrategy: 'parent'; highlightedSpanId?: string; scrollToHighlightedOnMount?: boolean };
+  | { scrollStrategy?: 'window'; contextSpanIds?: string[] }
+  | { scrollStrategy: 'parent'; contextSpanIds?: string[]; scrollToContextOnMount?: boolean };
 
 export type FullTraceWaterfallProps = {
   traceId: string;

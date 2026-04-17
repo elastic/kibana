@@ -24,8 +24,8 @@ export interface FullScreenWaterfallProps {
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
   serviceName?: string;
-  highlightedSpanId?: string;
-  scrollToHighlightedOnMount?: boolean;
+  contextSpanIds?: string[];
+  scrollToContextOnMount?: boolean;
   docId: string | null;
   docIndex?: string;
   activeFlyoutType: DocumentType | null;
@@ -44,8 +44,8 @@ export const FullScreenWaterfall = ({
   rangeTo,
   dataView,
   serviceName,
-  highlightedSpanId,
-  scrollToHighlightedOnMount,
+  contextSpanIds,
+  scrollToContextOnMount,
   docId,
   docIndex,
   activeFlyoutType,
@@ -80,8 +80,8 @@ export const FullScreenWaterfall = ({
       rangeFrom={rangeFrom}
       rangeTo={rangeTo}
       serviceName={serviceName}
-      highlightedSpanId={highlightedSpanId}
-      scrollToHighlightedOnMount={scrollToHighlightedOnMount}
+      contextSpanIds={contextSpanIds}
+      scrollToContextOnMount={scrollToContextOnMount}
       docId={docId}
       docIndex={docIndex}
       activeFlyoutType={activeFlyoutType}

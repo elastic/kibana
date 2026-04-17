@@ -56,7 +56,7 @@ jest.mock('./waterfall_flyout/document_detail_flyout', () => ({
 }));
 
 let capturedWaterfallProps: {
-  highlightedSpanId?: string;
+  contextSpanIds?: string[];
   onNodeClick?: (id: string) => void;
   onErrorClick?: (params: any) => void;
 } = {};
@@ -188,17 +188,17 @@ describe('FullScreenWaterfall', () => {
     });
   });
 
-  describe('highlight state management', () => {
-    it('passes initial highlightedSpanId to FullTraceWaterfall', () => {
+  describe('context span state management', () => {
+    it('passes initial contextSpanIds to FullTraceWaterfall', () => {
       renderWithHistoryKey(
         <FullScreenWaterfall
           {...defaultProps}
           skipOpenAnimation={true}
-          highlightedSpanId="initial-span"
+          contextSpanIds={['initial-span']}
         />
       );
 
-      expect(capturedWaterfallProps.highlightedSpanId).toBe('initial-span');
+      expect(capturedWaterfallProps.contextSpanIds).toEqual(['initial-span']);
     });
   });
 });
