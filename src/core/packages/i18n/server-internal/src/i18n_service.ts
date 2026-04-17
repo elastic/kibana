@@ -102,14 +102,10 @@ export class I18nService {
     this.log.debug(`Using translation files: [${allTranslationFiles.join(', ')}]`);
     await initTranslations(locale, allTranslationFiles);
 
-    // Eagerly load and hash all supported locales so that per-locale cache-busting
-    // URLs can be injected into the page metadata at render time.
-    // TODO: [Phase 2 — server-side locale switching] The translation data for every
-    // supported locale is now loaded into memory (cached by i18nLoader). A future
-    // change can use i18nLoader.getTranslationsByLocale(userLocale) here to
-    // re-initialize i18n with the user's preferred locale for server-rendered strings
-    // (e.g. error messages, CSV exports). This is the right place to wire that in
-    // because all translation files are already registered and loaded.
+    // Eagerly load and hash all supported locales. Hashes let the rendering
+    // service build cache-busted URLs and the translation route validate requests.
+    // TODO: [Phase 2] Use i18nLoader.getTranslationsByLocale(userLocale) here to
+    // re-initialize i18n per-request for server-rendered strings (errors, exports).
     const translationHashes: Record<string, string> = {};
     for (const supportedLocale of SUPPORTED_LOCALE_IDS) {
       const translationData = await i18nLoader.getTranslationsByLocale(supportedLocale);
