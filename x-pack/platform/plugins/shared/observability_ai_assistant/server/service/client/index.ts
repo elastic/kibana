@@ -100,7 +100,12 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
-      inference: InferenceServerStart;
+      getConnectorById: (connectorId: string) =>
+        plugins.inference.getConnectorByIdWithoutClientRequest(
+          connectorId,
+          actionsClient,
+          asInternalUser
+        ),
       inferenceClient: InferenceClient;
       logger: Logger;
       user?: {
