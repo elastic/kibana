@@ -74,7 +74,7 @@ The Microsoft Teams connector has the following actions:
     - `top` (optional): Number of messages to return, up to 50.
 
 **Search messages**
-:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports KQL syntax. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth.
+:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth.
     - `query` (required): Search query string (for example, `from:alice sent>2024-01-01`).
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return, up to 25.
@@ -104,13 +104,13 @@ To use the Microsoft Teams connector, you need a Microsoft Azure AD application 
 
 1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
-3. Under **Authentication**, select **Add a platform**, choose **Web**, and enter your Kibana redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_redirect`).
+3. Under **Authentication**, select **Add a platform**, choose **Web**, and enter your {{kib}} redirect URI (for example, `https://your-kibana-url/api/actions/connector/_oauth_redirect`).
 4. Under **API permissions**, add the following **Delegated** permissions for Microsoft Graph:
    - `Team.ReadBasic.All` — List joined teams
    - `Channel.ReadBasic.All` — List channels
    - `Chat.Read` — Read chat messages
    - `ChannelMessage.Read.All` — Read channel messages
-   - `offline_access` — Maintain access via refresh tokens
+   - `offline_access` — Maintain access through refresh tokens
 5. Copy the **Application (client) ID** and your **tenant ID** from the app registration **Overview** page.
 6. Under **Certificates & secrets**, create a new client secret and copy the value.
 7. In the connector configuration, enter:
