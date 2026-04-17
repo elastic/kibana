@@ -77,7 +77,6 @@ export const postParsePipelineDefinitionSchema = z
 export type PipelineDefinition = z.infer<typeof pipelineDefinitionSchema>;
 export type PostParsePipelineDefinition = z.infer<typeof postParsePipelineDefinitionSchema>;
 
-<<<<<<< HEAD
 export const FULL_PIPELINE_ACTIONS = new Set([
   'grok',
   'dissect',
@@ -88,8 +87,6 @@ export const FULL_PIPELINE_ACTIONS = new Set([
 ]);
 export const POST_PARSE_PIPELINE_ACTIONS = new Set(['date', 'remove', 'rename', 'convert']);
 
-=======
->>>>>>> upstream/main
 /** Zod schema passed to `suggestProcessingPipeline` to constrain tool calls; chosen by the caller. */
 export type SuggestPipelineAgentSchema =
   | typeof pipelineDefinitionSchema

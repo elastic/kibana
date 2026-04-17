@@ -74,7 +74,6 @@ const createIngestDefinition = (): Streams.ClassicStream.Definition => ({
   },
 });
 
-<<<<<<< HEAD
 async function invokeSimulateCallback(toolCallbacks: Record<string, Function>, pipeline: object) {
   const simCallback = toolCallbacks.simulate_pipeline;
   const toolResult = await simCallback({
@@ -87,8 +86,6 @@ async function invokeSimulateCallback(toolCallbacks: Record<string, Function>, p
   return toolResult.response;
 }
 
-=======
->>>>>>> upstream/main
 describe('suggestProcessingPipeline workflow', () => {
   const mockEsClient = {
     fieldCaps: jest.fn().mockResolvedValue({ fields: {} }),
@@ -228,15 +225,7 @@ describe('suggestProcessingPipeline workflow', () => {
       mappedFields: {},
     });
 
-<<<<<<< HEAD
     expect(result).toMatchSnapshot();
-=======
-    expect(result.pipeline?.steps.length).toBe(1);
-    expect(result.pipeline?.steps[0]).toMatchObject({
-      action: 'date',
-      customIdentifier: 'root.steps[0]',
-    });
->>>>>>> upstream/main
   });
 
   it('uses full processor schema when agentPipelineSchema is the default', async () => {
@@ -273,12 +262,11 @@ describe('suggestProcessingPipeline workflow', () => {
     });
 
     expect(simulatePipeline).not.toHaveBeenCalled();
-<<<<<<< HEAD
     expect(result).toMatchSnapshot();
   });
 
   it('simulate_pipeline callback returns processors and temporary_fields in response', async () => {
-    let capturedToolResponse: any;
+    let capturedToolResponse: unknown;
 
     const simulatePipeline = jest.fn().mockImplementation(() =>
       Promise.resolve(
@@ -340,7 +328,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('no longer rejects pipelines based on aggregate 80% parse rate gate', async () => {
-    let capturedToolResponse: any;
+    let capturedToolResponse: unknown;
 
     const simulatePipeline = jest.fn().mockImplementation(() =>
       Promise.resolve(
@@ -413,7 +401,7 @@ describe('suggestProcessingPipeline workflow', () => {
   });
 
   it('simulate_pipeline callback returns formatted Zod errors for invalid pipeline', async () => {
-    let capturedToolResponse: any;
+    let capturedToolResponse: unknown;
 
     const simulatePipeline = jest.fn();
 
@@ -451,8 +439,5 @@ describe('suggestProcessingPipeline workflow', () => {
     expect(simulatePipeline).not.toHaveBeenCalled();
     expect(capturedToolResponse.valid).toBe(false);
     expect(capturedToolResponse).toMatchSnapshot();
-=======
-    expect(result.pipeline?.steps).toEqual([]);
->>>>>>> upstream/main
   });
 });
