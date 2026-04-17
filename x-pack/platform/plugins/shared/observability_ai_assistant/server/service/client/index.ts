@@ -34,9 +34,9 @@ import type {
   ChatCompleteResponse,
   FunctionCallingMode,
   InferenceClient,
+  InferenceConnector,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
@@ -100,12 +100,7 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
-      getConnectorById: (connectorId: string) =>
-        plugins.inference.getConnectorByIdWithoutClientRequest(
-          connectorId,
-          actionsClient,
-          asInternalUser
-        ),
+      getConnectorById: (connectorId: string) => Promise<InferenceConnector>;
       inferenceClient: InferenceClient;
       logger: Logger;
       user?: {
@@ -288,13 +283,7 @@ export class ObservabilityAIAssistantClient {
       );
 
       const connector$ = defer(() =>
-        from(
-          this.dependencies.inference.getConnectorByIdWithoutClientRequest(
-            connectorId,
-            this.dependencies.actionsClient,
-            this.dependencies.esClient.asInternalUser
-          )
-        ).pipe(
+        from(this.dependencies.getConnectorById(connectorId)).pipe(
           catchError((error) => {
             this.dependencies.logger.debug(
               `Failed to fetch connector for analytics: ${error.message}`

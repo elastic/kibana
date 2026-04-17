@@ -136,13 +136,11 @@ describe('Observability AI Assistant client', () => {
     getInstructions: jest.fn(),
   } as any;
 
-  const inferenceMock = {
-    getConnectorByIdWithoutClientRequest: jest.fn().mockResolvedValue({
-      connectorId: 'test-connector-id',
-      name: 'Test Connector',
-      type: 'openai',
-    }),
-  };
+  const getConnectorByIdMock = jest.fn().mockResolvedValue({
+    connectorId: 'test-connector-id',
+    name: 'Test Connector',
+    type: 'openai',
+  });
 
   const analyticsMock = { reportEvent: jest.fn() } as unknown as AnalyticsServiceStart;
 
@@ -211,7 +209,7 @@ describe('Observability AI Assistant client', () => {
         asInternalUser: internalUserEsClientMock,
         asCurrentUser: currentUserEsClientMock,
       },
-      inference: inferenceMock as any,
+      getConnectorById: getConnectorByIdMock,
       inferenceClient: inferenceClientMock,
       knowledgeBaseService: knowledgeBaseServiceMock,
       logger: loggerMock,

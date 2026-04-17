@@ -240,7 +240,7 @@ export function continueConversation({
   connectorId: string;
   simulateFunctionCalling: boolean;
   analytics: AnalyticsServiceStart;
-  connector?: InferenceConnectorType;
+  connector?: InferenceConnector;
   scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   let nextFunctionCallsLeft = functionCallsLeft;
