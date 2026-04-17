@@ -110,6 +110,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     licensing,
     scheduleNotificationResponseActionsService,
     endpointAppContextService,
+    getEntityStore,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -176,7 +177,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             params;
           const { savedObjectsClient, ruleMonitoringService, ruleResultService } = services;
           const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
-
+          const entityStoreCrudClient = (await getEntityStore()).createCRUDClient(
+            services.scopedClusterClient.asCurrentUser,
+            spaceId
+          );
           const ruleExecutionLogger = await ruleExecutionLoggerFactory({
             savedObjectsClient,
             ruleMonitoringService,
@@ -413,6 +417,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     experimentalFeatures,
                     intendedTimestamp,
                     spaceId,
+                    entityStoreCrudClient,
                     ignoreFields: ignoreFieldsObject,
                     ignoreFieldsRegexes,
                     eventsTelemetry,

@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter } from '@kbn/es-query';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 
 import type {
   DetectionAlertLatest,
@@ -15,6 +16,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/model/alerts';
 import type { SecurityRuleServices } from '../../types';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
+import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 
 export type EnrichmentType = estypes.SearchHit<unknown>;
 
@@ -45,6 +47,7 @@ interface BasedEnrichParameters<T extends DetectionAlertLatest> {
   services: SecurityRuleServices;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
+  entityStoreCrudClient?: EntityStoreCRUDClient | null;
 }
 
 export type GetEventValue = <T extends DetectionAlertLatest>(
@@ -91,6 +94,7 @@ export type CreateCriticalityEnrichment = <T extends DetectionAlertLatest>(
 ) => Promise<EventsMapByEnrichments>;
 
 export type CreateEnrichmentFunction = (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
+export type CreateV2EnrichmentFunction = (fields: Record<string, unknown[]>) => EnrichmentFunction;
 
 export type CreateFieldsMatchEnrichment = <T extends DetectionAlertLatest>(
   params: BasedEnrichParameters<T> & {
@@ -112,6 +116,8 @@ export type CreateFieldsMatchEnrichment = <T extends DetectionAlertLatest>(
 export type EnrichEvents = <T extends DetectionAlertLatest>(
   params: BasedEnrichParameters<T> & {
     spaceId: string;
+    experimentalFeatures: ExperimentalFeatures;
+    entityStoreCrudClient?: EntityStoreCRUDClient | null;
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 

@@ -5,91 +5,92 @@
  * 2.0.
  */
 
-import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
-
-import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
-
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
 import {
+  createV2HostRiskEnrichments,
+  createHostRiskEnrichments,
+} from './enrichment_by_type/host_risk';
+import {
+  createV2UserRiskEnrichments,
+  createUserRiskEnrichments,
+} from './enrichment_by_type/user_risk';
+import {
+  createV2ServiceRiskEnrichments,
+  createServiceRiskEnrichments,
+} from './enrichment_by_type/service_risk';
+import {
+  createV2HostAssetCriticalityEnrichments,
+  createV2ServiceAssetCriticalityEnrichments,
+  createV2UserAssetCriticalityEnrichments,
   createHostAssetCriticalityEnrichments,
-  createServiceAssetCriticalityEnrichments,
   createUserAssetCriticalityEnrichments,
+  createServiceAssetCriticalityEnrichments,
 } from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import type { EnrichEvents, EventsMapByEnrichments } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
 import { getRiskIndex } from '../../../../../../common/search_strategy';
-import { createServiceRiskEnrichments } from './enrichment_by_type/service_risk';
 
-export const enrichEvents: EnrichEvents = async ({ services, logger, events, spaceId }) => {
+export const enrichEvents: EnrichEvents = async ({
+  services,
+  logger,
+  events,
+  spaceId,
+  experimentalFeatures,
+  entityStoreCrudClient,
+}) => {
   try {
     const enrichments: Array<Promise<EventsMapByEnrichments>> = [];
+    const enrichmentOpts = { services, logger, events, spaceId, entityStoreCrudClient };
 
     logger.debug('Alert enrichments started');
 
-    const isRiskScoreIndexExist = await isIndexExist({
-      services,
-      index: getRiskIndex(spaceId, true),
-    });
+    if (experimentalFeatures.entityAnalyticsEntityStoreV2) {
+      if (entityStoreCrudClient != null) {
+        // V2: read risk and asset criticality from the entity store via listEntities.
+        const entityStoreIndexExists = await isIndexExist({
+          services,
+          index: getLatestEntitiesIndexName(spaceId),
+        });
 
-    if (isRiskScoreIndexExist) {
-      enrichments.push(
-        createHostRiskEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
+        if (entityStoreIndexExists) {
+          enrichments.push(createV2HostRiskEnrichments(enrichmentOpts));
+          enrichments.push(createV2UserRiskEnrichments(enrichmentOpts));
+          enrichments.push(createV2ServiceRiskEnrichments(enrichmentOpts));
+          enrichments.push(createV2HostAssetCriticalityEnrichments(enrichmentOpts));
+          enrichments.push(createV2UserAssetCriticalityEnrichments(enrichmentOpts));
+          enrichments.push(createV2ServiceAssetCriticalityEnrichments(enrichmentOpts));
+        }
+      } else {
+        logger.warn(
+          'Enrichments: entityStoreCrudClient is not available, skipping entity store enrichments'
+        );
+      }
+    } else {
+      // Legacy: read risk from the risk score index and asset criticality from the
+      // asset criticality index, matched by entity name fields.
+      const riskScoreIndexExists = await isIndexExist({
+        services,
+        index: getRiskIndex(spaceId, true),
+      });
 
-      enrichments.push(
-        createUserRiskEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
+      if (riskScoreIndexExists) {
+        enrichments.push(createHostRiskEnrichments(enrichmentOpts));
+        enrichments.push(createUserRiskEnrichments(enrichmentOpts));
+        enrichments.push(createServiceRiskEnrichments(enrichmentOpts));
+      }
 
-      enrichments.push(
-        createServiceRiskEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
-    }
+      const assetCriticalityIndexExists = await isIndexExist({
+        services,
+        index: getAssetCriticalityIndex(spaceId),
+      });
 
-    const assetCriticalityIndexExist = await isIndexExist({
-      services,
-      index: getAssetCriticalityIndex(spaceId),
-    });
-    if (assetCriticalityIndexExist) {
-      enrichments.push(
-        createUserAssetCriticalityEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
-      enrichments.push(
-        createHostAssetCriticalityEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
-      enrichments.push(
-        createServiceAssetCriticalityEnrichments({
-          services,
-          logger,
-          events,
-          spaceId,
-        })
-      );
+      if (assetCriticalityIndexExists) {
+        enrichments.push(createHostAssetCriticalityEnrichments(enrichmentOpts));
+        enrichments.push(createUserAssetCriticalityEnrichments(enrichmentOpts));
+        enrichments.push(createServiceAssetCriticalityEnrichments(enrichmentOpts));
+      }
     }
 
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
