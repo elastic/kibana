@@ -50,7 +50,7 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
 
   const handleStatusChange = useCallback(
     (newOptions: Array<EuiSelectableOption<StatusSelectableMeta>>) => {
-      const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value as string);
+      const statuses = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
       onChange(mergeEpisodeStatusIntoMatcher(matcher, statuses));
     },
     [matcher, onChange]

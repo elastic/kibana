@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiCode,
@@ -47,9 +47,13 @@ const kindLabel = (kind: RuleResponse['kind']): string =>
 const RULE_LIST_ROW_ESTIMATE_PX = 72;
 const RULE_LIST_MIN_HEIGHT_PX = 120;
 const RULE_LIST_MAX_HEIGHT_PX = 260;
+const RULE_LIST_VERTICAL_PADDING_PX = 24;
 
 export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const hasBeenOpened = useRef(false);
+  if (isOpen) hasBeenOpened.current = true;
+
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -57,6 +61,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     page: 1,
     perPage: 50,
     search: debouncedSearch || undefined,
+    enabled: hasBeenOpened.current,
   });
   const items = data?.items;
 
@@ -105,7 +110,10 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     if (n === 0) return RULE_LIST_MIN_HEIGHT_PX;
     return Math.min(
       RULE_LIST_MAX_HEIGHT_PX,
-      Math.max(RULE_LIST_MIN_HEIGHT_PX, n * RULE_LIST_ROW_ESTIMATE_PX + 24)
+      Math.max(
+        RULE_LIST_MIN_HEIGHT_PX,
+        n * RULE_LIST_ROW_ESTIMATE_PX + RULE_LIST_VERTICAL_PADDING_PX
+      )
     );
   }, [ruleOptions.length]);
 

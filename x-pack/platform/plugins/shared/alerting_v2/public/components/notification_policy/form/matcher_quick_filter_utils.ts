@@ -9,14 +9,68 @@ const escapeKqlValue = (v: string): string => v.replace(/\\/g, '\\\\').replace(/
 
 const unescapeKqlValue = (v: string): string => v.replace(/\\"/g, '"').replace(/\\\\/g, '\\');
 
+const escapeRegExp = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Splits a matcher string on top-level ` AND ` boundaries while respecting
+ * quoted strings so that values like `"Dev AND Staging"` are never broken.
+ */
+const splitOnTopLevelAnd = (matcher: string): string[] => {
+  const segments: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let escaped = false;
+
+  for (let i = 0; i < matcher.length; i++) {
+    const ch = matcher[i];
+
+    if (escaped) {
+      current += ch;
+      escaped = false;
+      continue;
+    }
+
+    if (ch === '\\') {
+      current += ch;
+      escaped = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      inQuotes = !inQuotes;
+      current += ch;
+      continue;
+    }
+
+    if (!inQuotes) {
+      const remaining = matcher.slice(i);
+      const andMatch = remaining.match(/^(\s+AND\s+)/i);
+      if (andMatch) {
+        segments.push(current);
+        current = '';
+        i += andMatch[1].length - 1;
+        continue;
+      }
+    }
+
+    current += ch;
+  }
+
+  if (current) {
+    segments.push(current);
+  }
+
+  return segments;
+};
+
 /**
  * Extracts all quoted values for a given KQL field from a matcher string.
  * Handles both single-value (`field : "v"`) and multi-value OR groups
  * (`(field : "v1" or field : "v2")`).
  */
 const parseFieldValues = (matcher: string, fieldName: string): string[] => {
-  const escaped = fieldName.replace(/\./g, '\\.');
-  const re = new RegExp(`${escaped}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 'gi');
+  const escapedField = escapeRegExp(fieldName);
+  const re = new RegExp(`${escapedField}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 'gi');
   const found = new Set<string>();
   let m: RegExpExecArray | null = re.exec(matcher);
   while (m !== null) {
@@ -29,18 +83,16 @@ const parseFieldValues = (matcher: string, fieldName: string): string[] => {
 /**
  * Removes AND-separated segments that reference the given field.
  * Handles both bare clauses and parenthesized OR groups.
+ * Uses a quote-aware split so values containing ` AND ` are preserved.
  */
 const stripFieldClauses = (matcher: string, fieldName: string): string => {
-  const escaped = fieldName.replace(/\./g, '\\.');
-  const fieldPattern = new RegExp(`${escaped}\\s*:`, 'i');
+  const escapedField = escapeRegExp(fieldName);
+  const fieldPattern = new RegExp(`${escapedField}\\s*:`, 'i');
 
-  return matcher
-    .split(/\s+AND\s+/i)
+  return splitOnTopLevelAnd(matcher)
     .map((segment) => segment.trim())
     .filter((segment) => {
       if (!segment) return false;
-      // Remove segments that contain the target field
-      // Strip outer parens for inspection so we catch `(field : "a" or field : "b")`
       const unwrapped = segment.replace(/^\(/, '').replace(/\)$/, '');
       return !fieldPattern.test(unwrapped);
     })

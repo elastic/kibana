@@ -165,6 +165,36 @@ describe('matcher_quick_filter_utils', () => {
     });
   });
 
+  describe('values containing AND keyword', () => {
+    it('preserves unrelated clause when tag value contains AND', () => {
+      const base = 'rule.id : "x" AND rule.tags : "Dev AND Staging"';
+      expect(mergeRuleTagsIntoMatcher(base, ['Prod'])).toBe('rule.id : "x" AND rule.tags : "Prod"');
+    });
+
+    it('parses tag value containing AND without corruption', () => {
+      const matcher = 'rule.tags : "Dev AND Staging" AND rule.id : "x"';
+      expect(parseRuleTagsFromMatcher(matcher)).toEqual(['Dev AND Staging']);
+    });
+
+    it('preserves clause with AND in value when stripping a different field', () => {
+      const matcher = 'rule.name : "CPU AND Memory" AND rule.id : "abc"';
+      expect(mergeRuleIdsIntoMatcher(matcher, [])).toBe('rule.name : "CPU AND Memory"');
+    });
+
+    it('round-trips a tag containing AND through merge and parse', () => {
+      const tags = ['Dev AND Staging'];
+      const merged = mergeRuleTagsIntoMatcher('', tags);
+      expect(parseRuleTagsFromMatcher(merged)).toEqual(tags);
+    });
+
+    it('handles multiple clauses where one value contains AND', () => {
+      const matcher = 'rule.tags : "A AND B" AND episode_status : "active" AND rule.id : "id-1"';
+      expect(mergeEpisodeStatusIntoMatcher(matcher, ['pending'])).toBe(
+        'rule.tags : "A AND B" AND rule.id : "id-1" AND episode_status : "pending"'
+      );
+    });
+  });
+
   describe('escaping', () => {
     it('escapes double quotes in values', () => {
       expect(mergeRuleIdsIntoMatcher('', ['foo"bar'])).toBe('rule.id : "foo\\"bar"');

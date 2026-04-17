@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiCode,
   EuiFilterButton,
@@ -32,9 +32,14 @@ interface TagSelectableMeta {
 
 export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const hasBeenOpened = useRef(false);
+  if (isOpen) hasBeenOpened.current = true;
+
   const tagsPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterTags' });
 
-  const { data: apiTags = [], isLoading } = useFetchRuleTags();
+  const { data: apiTags = [], isLoading } = useFetchRuleTags({
+    enabled: hasBeenOpened.current,
+  });
   const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
 
   const tagOptions = useMemo((): Array<EuiSelectableOption<TagSelectableMeta>> => {
@@ -61,7 +66,7 @@ export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
 
   const handleTagsChange = useCallback(
     (newOptions: Array<EuiSelectableOption<TagSelectableMeta>>) => {
-      const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value as string);
+      const tags = newOptions.filter((o) => o.checked === 'on').map((o) => o.value);
       onChange(mergeRuleTagsIntoMatcher(matcher, tags));
     },
     [matcher, onChange]
