@@ -167,8 +167,14 @@ export const SpaceSettingsResponseSchema = schema.object({
     namespace_index_templates_enabled_for: schema.arrayOf(schema.string(), { maxSize: 100 }),
     namespace_templates_summary: schema.maybe(
       schema.object({
-        created: schema.recordOf(schema.string(), schema.arrayOf(schema.string())),
-        removed: schema.recordOf(schema.string(), schema.arrayOf(schema.string())),
+        created: schema.recordOf(
+          schema.string(),
+          schema.arrayOf(schema.string(), { maxSize: 1000 })
+        ),
+        removed: schema.recordOf(
+          schema.string(),
+          schema.arrayOf(schema.string(), { maxSize: 1000 })
+        ),
       })
     ),
   }),
