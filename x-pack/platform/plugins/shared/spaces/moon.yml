@@ -32,6 +32,7 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/utility-types'
   - '@kbn/std'
+  - '@kbn/ai-assistant-common'
   - '@kbn/core-saved-objects-server'
   - '@kbn/utils'
   - '@kbn/shared-ux-page-kibana-template'

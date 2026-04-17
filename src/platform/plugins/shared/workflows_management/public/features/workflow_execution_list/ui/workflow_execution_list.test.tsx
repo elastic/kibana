@@ -16,16 +16,19 @@ import { TestWrapper } from '../../../shared/test_utils';
 jest.mock('./workflow_execution_list_item', () => ({
   WorkflowExecutionListItem: ({
     status,
+    startedAt,
     onClick,
     selected,
   }: {
     status: string;
+    startedAt: Date | null;
     onClick: () => void;
     selected: boolean;
   }) => (
     <div
       data-test-subj="workflowExecutionListItem"
       data-selected={selected}
+      data-started-at={startedAt ? startedAt.toISOString() : 'null'}
       onClick={onClick}
       role="button"
       onKeyDown={() => {}}
@@ -205,6 +208,39 @@ describe('WorkflowExecutionList', () => {
       const setPaginationObserver = jest.fn();
       renderComponent({ setPaginationObserver });
       expect(setPaginationObserver).toHaveBeenCalled();
+    });
+  });
+
+  describe('startedAt date handling', () => {
+    it('passes a valid Date when startedAt is a valid ISO string', () => {
+      renderComponent();
+      const items = screen.getAllByTestId('workflowExecutionListItem');
+      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00.000Z');
+    });
+
+    it('passes null when startedAt is an empty string', () => {
+      const withEmptyStartedAt: WorkflowExecutionListDto = {
+        results: [
+          {
+            id: 'exec-empty',
+            spaceId: 'default',
+            status: ExecutionStatus.PENDING,
+            isTestRun: false,
+            startedAt: '',
+            finishedAt: '',
+            error: null,
+            duration: null,
+            workflowId: 'wf-1',
+            workflowName: 'Test Workflow',
+          },
+        ],
+        page: 1,
+        size: 100,
+        total: 1,
+      };
+      renderComponent({ executions: withEmptyStartedAt });
+      const items = screen.getAllByTestId('workflowExecutionListItem');
+      expect(items[0]).toHaveAttribute('data-started-at', 'null');
     });
   });
 

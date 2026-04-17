@@ -80,7 +80,9 @@ const getTableCellsText = (row: HTMLElement) => {
   const cells = within(row).getAllByRole('cell');
   return cells.map((cell) => {
     const normalized = (cell.textContent ?? '').replace(/\s+/g, ' ').trim();
-    if (normalized === 'Edit Delete') return 'EditDelete';
+    if (normalized.includes('Edit this pipeline') && normalized.includes('Delete this pipeline')) {
+      return 'EditDelete';
+    }
     return normalized;
   });
 };

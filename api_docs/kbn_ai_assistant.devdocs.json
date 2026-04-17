@@ -11,7 +11,7 @@
         "label": "ChatBody",
         "description": [],
         "signature": [
-          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  eisCalloutZIndex,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}: { connectors: ",
+          "({\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  eisCalloutZIndex,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToModelManagementApp,\n}: { connectors: ",
           {
             "pluginId": "observabilityAIAssistant",
             "scope": "public",
@@ -61,7 +61,7 @@
             "section": "def-public.FlyoutPositionMode",
             "text": "FlyoutPositionMode"
           },
-          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; navigateToConnectorsManagementApp: (application: ",
+          ") => void) | undefined; navigateToConversation?: ((conversationId?: string | undefined) => void) | undefined; setIsUpdatingConversationList: (isUpdating: boolean) => void; refreshConversations: () => void; updateDisplayedConversation: (id?: string | undefined) => void; navigateToModelManagementApp: (application: ",
           "ApplicationStart",
           ") => void; }) => React.JSX.Element"
         ],
@@ -76,7 +76,7 @@
             "id": "def-public.ChatBody.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  eisCalloutZIndex,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToConnectorsManagementApp,\n}",
+            "label": "{\n  connectors,\n  currentUser,\n  flyoutPositionMode,\n  initialConversationId,\n  initialMessages,\n  initialTitle,\n  knowledgeBase,\n  showLinkToConversationsApp,\n  eisCalloutZIndex,\n  onConversationUpdate,\n  onToggleFlyoutPositionMode,\n  navigateToConversation,\n  setIsUpdatingConversationList,\n  refreshConversations,\n  updateDisplayedConversation,\n  onConversationDuplicate,\n  navigateToModelManagementApp,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
             "lineNumber": 138,
@@ -531,10 +531,10 @@
               },
               {
                 "parentPluginId": "@kbn/ai-assistant",
-                "id": "def-public.ChatBody.$1.navigateToConnectorsManagementApp",
+                "id": "def-public.ChatBody.$1.navigateToModelManagementApp",
                 "type": "Function",
                 "tags": [],
-                "label": "navigateToConnectorsManagementApp",
+                "label": "navigateToModelManagementApp",
                 "description": [],
                 "signature": [
                   "(application: ",
@@ -549,7 +549,7 @@
                 "children": [
                   {
                     "parentPluginId": "@kbn/ai-assistant",
-                    "id": "def-public.ChatBody.$1.navigateToConnectorsManagementApp.$1",
+                    "id": "def-public.ChatBody.$1.navigateToModelManagementApp.$1",
                     "type": "Object",
                     "tags": [],
                     "label": "application",
@@ -559,7 +559,7 @@
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/chat/chat_body.tsx",
                     "lineNumber": 155,
-                    "columnNumber": 39,
+                    "columnNumber": 34,
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": true

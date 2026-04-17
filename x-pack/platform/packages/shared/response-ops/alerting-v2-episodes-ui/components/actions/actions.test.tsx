@@ -98,6 +98,28 @@ describe('AlertEpisodeActionsCell', () => {
     expect(screen.getByText('Unresolve')).toBeInTheDocument();
   });
 
+  it('shows Open in Discover in popover when openInDiscoverHref is provided', async () => {
+    const user = userEvent.setup();
+    render(
+      <AlertEpisodeActions
+        http={mockHttp}
+        expressions={mockExpressions}
+        openInDiscoverHref="/app/discover#/?_a=esql"
+      />
+    );
+    await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
+    const link = screen.getByTestId('alertingEpisodeOpenInDiscoverButton');
+    expect(link).toHaveTextContent('Open in Discover');
+    expect(link).toHaveAttribute('href', '/app/discover#/?_a=esql');
+  });
+
+  it('does not show Open in Discover when openInDiscoverHref is omitted', async () => {
+    const user = userEvent.setup();
+    render(<AlertEpisodeActions http={mockHttp} expressions={mockExpressions} />);
+    await user.click(screen.getByTestId('alertingEpisodeActionsMoreButton'));
+    expect(screen.queryByTestId('alertingEpisodeOpenInDiscoverButton')).not.toBeInTheDocument();
+  });
+
   it('shows Edit Tags in the more-actions menu', async () => {
     const user = userEvent.setup();
     render(

@@ -105,13 +105,6 @@ export const allowedExperimentalValues = Object.freeze({
   leadGenerationEnabled: false,
 
   /**
-   * Enables lead generation details: the "i" icon on lead cards/list items
-   * and the "How this lead was generated" flyout.
-   * Requires `leadGenerationEnabled` to also be true.
-   */
-  leadGenerationDetailsEnabled: false,
-
-  /**
    * disables ES|QL rules
    */
   esqlRulesDisabled: false,
@@ -252,11 +245,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 9.4
    */
   prebuiltRulesDeprecationUIEnabled: false,
-
-  /**
-   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
-   */
-  securityClassicNavUpdate: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
