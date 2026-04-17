@@ -46,6 +46,12 @@ Important: Do not post GitHub comments unless explicitly stated.
 - **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
 - **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
+### Files to skip
+
+Do not review or comment on:
+
+- **`.meta` manifest files** (e.g., `**/.meta/**/*.json`): these are auto-generated for CI test planning and lane distribution. No manual regeneration is needed.
+
 ### Severity classification
 
 Use these definitions when assigning severity:
