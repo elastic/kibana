@@ -83,8 +83,6 @@ describe('MicrosoftTeams', () => {
       expect(oauthType).toMatchObject({
         type: 'oauth_authorization_code',
         defaults: {
-          authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
           scope: expect.stringContaining('offline_access'),
         },
       });

@@ -76,13 +76,12 @@ export const MicrosoftTeams: ConnectorSpec = {
       {
         type: 'oauth_authorization_code',
         defaults: {
-          authorizationUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
           scope:
             'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
         },
         overrides: {
           meta: {
+            scope: { hidden: true },
             authorizationUrl: {
               label: i18n.translate(
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.label',
