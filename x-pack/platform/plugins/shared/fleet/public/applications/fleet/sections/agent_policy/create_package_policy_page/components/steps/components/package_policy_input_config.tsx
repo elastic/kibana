@@ -46,7 +46,7 @@ const renderVarsWithSections = (
 
   const sectionSet = new Set(sectionDefs.map((s) => s.name));
   const varsBySectionName = new Map<string, RegistryVarsEntry[]>();
-  const ungroupedVars: RegistryVarsEntry[] = [];
+  const varsWithoutSection: RegistryVarsEntry[] = [];
 
   for (const varDef of vars) {
     const sectionName = varDef.section;
