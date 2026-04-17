@@ -103,7 +103,7 @@ export const RuleTitleWithBadges: React.FC<RuleTitleWithBadgesProps> = ({ varian
       })}
     </EuiBadge>
   ) : (
-    <EuiBadge color="subdued" data-test-subj="disabledBadge">
+    <EuiBadge color="default" data-test-subj="disabledBadge">
       {i18n.translate('xpack.alertingV2.ruleDetails.disabled', {
         defaultMessage: 'Disabled',
       })}

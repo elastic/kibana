@@ -51,8 +51,10 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const { basePath } = useService(CoreStart('http'));
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
-  const [expandedRule, setExpandedRule] = useState<RuleApiResponse | null>(null);
+  const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
+
+  const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
 
   const deleteRuleMutation = useDeleteRule();
   const bulkDeleteMutation = useBulkDeleteRules();
@@ -106,7 +108,10 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
       return;
     }
     deleteRuleMutation.mutate(ruleToDelete.id, {
-      onSettled: () => setRuleToDelete(null),
+      onSettled: () => {
+        setRuleToDelete(null);
+        setExpandedRuleId(null);
+      },
     });
   };
 
@@ -134,7 +139,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
-        onExpand={(r) => setExpandedRule(r)}
+        onExpand={(r) => setExpandedRuleId(r.id)}
         onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
         onClone={(r) =>
           navigateToUrl(
@@ -148,17 +153,14 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
       {expandedRule ? (
         <RuleSummaryFlyout
           rule={expandedRule}
-          onClose={() => setExpandedRule(null)}
+          onClose={() => setExpandedRuleId(null)}
           onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
           onClone={(r) =>
             navigateToUrl(
               basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
             )
           }
-          onDelete={(r) => {
-            setRuleToDelete(r);
-            setExpandedRule(null);
-          }}
+          onDelete={(r) => setRuleToDelete(r)}
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
         />
       ) : null}

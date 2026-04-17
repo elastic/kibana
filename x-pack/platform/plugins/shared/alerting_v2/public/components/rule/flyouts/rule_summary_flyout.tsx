@@ -61,6 +61,7 @@ export const RuleSummaryFlyout = ({
     <RuleProvider rule={rule}>
       <EuiFlyout
         type="push"
+        hasAnimation
         size="s"
         ownFocus
         hideCloseButton
