@@ -186,8 +186,14 @@ query. This is a genuinely new signal dimension.
   - `f IN ("a", "b")` vs `f == "a" OR f == "b"` (IN vs equality OR chain)
   - Same predicate with a redundant filter added or removed (e.g., scoping to
     `service.name == "X"` when the stream only contains service "X")
-  - Threshold rewording that doesn't change intent (`> 50` vs `>= 50`,
-    `error_rate > 5` vs `error_rate > 5.0`)
+  - Literal-formatting differences that don't change the comparison
+    (`error_rate > 5` vs `error_rate > 5.0`, `duration > 1000` vs
+    `duration > 1_000`)
+  - Boundary changes are NOT equivalent: `> 50` and `>= 50` match different
+    documents at the boundary value, so do **not** treat them as the same
+    query. The same applies to `<` vs `<=` and to threshold value changes
+    (e.g., `> 50` vs `> 100`) — these are Case 2 (REPLACE) or Case 3 (NEW)
+    candidates, never Case 1 (SKIP).
 - **Strict subset/superset is also a SKIP.** If your candidate query adds a
   filter to an existing query (or removes one), it matches a subset/superset
   of the existing documents — not a new signal. In particular,
