@@ -3333,7 +3333,7 @@
           "<Options>"
         ],
         "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-        "lineNumber": 189,
+        "lineNumber": 197,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3349,7 +3349,7 @@
               "Options"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 191,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3703,7 +3703,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 771,
+        "lineNumber": 774,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3719,7 +3719,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 776,
+            "lineNumber": 779,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -5429,7 +5429,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\" | \"uiamOAuth\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 77,
@@ -5448,7 +5448,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 81,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5466,7 +5466,7 @@
               "\"info\" | \"error\" | \"all\" | \"warn\" | \"silent\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 82,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5491,7 +5491,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 88,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5513,7 +5513,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 95,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5529,7 +5529,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 96,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5547,7 +5547,7 @@
               "TestEsClusterNodesOptions[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 97,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5565,7 +5565,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 119,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5583,7 +5583,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 125,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5601,7 +5601,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 146,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5619,7 +5619,7 @@
               "string | number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 150,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5637,7 +5637,7 @@
               "((msg: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 155,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5653,7 +5653,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-                "lineNumber": 159,
+                "lineNumber": 167,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5675,7 +5675,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 160,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5693,7 +5693,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 164,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5711,7 +5711,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 168,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

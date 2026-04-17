@@ -1,0 +1,37 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { createAction } from 'redux-actions';
+import { i18n } from '@kbn/i18n';
+import type { AppDispatch } from '../types';
+import { deleteIndices as request } from '../../services';
+import { clearRowStatus } from '.';
+import { getHttpErrorToastMessage } from '../http_error';
+import type { AppDependencies } from '../../app_context';
+
+export const deleteIndicesSuccess = createAction('INDEX_MANAGEMENT_DELETE_INDICES_SUCCESS');
+export const deleteIndices =
+  ({ indexNames }: { indexNames: string[] }) =>
+  async (
+    dispatch: AppDispatch,
+    _getState: () => unknown,
+    { notificationService }: AppDependencies['services']
+  ) => {
+    try {
+      await request(indexNames);
+    } catch (error) {
+      notificationService.showDangerToast(getHttpErrorToastMessage(error));
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    notificationService.showSuccessToast(
+      i18n.translate('xpack.idxMgmt.deleteIndicesAction.successfullyDeletedIndicesMessage', {
+        defaultMessage: 'Successfully deleted {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
+      })
+    );
+    dispatch(deleteIndicesSuccess({ indexNames }));
+  };

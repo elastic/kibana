@@ -116,7 +116,7 @@ export const createRiskScoreMaintainer = ({
       });
 
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-      await initSavedObjects({ savedObjectsClient: soClient, namespace });
+      await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
       await riskScoreDataClient.init();
       await ensureLookupIndex({ esClient, namespace });
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
@@ -210,7 +210,7 @@ const initializeRunContext = async ({
   });
 
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-  await initSavedObjects({ savedObjectsClient: soClient, namespace });
+  await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
   await riskScoreDataClient.init();
   const lookupIndex = await ensureLookupIndex({ esClient, namespace });
 
@@ -277,7 +277,7 @@ const loadRunConfiguration = async ({
   entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
-    (await getConfiguration({ savedObjectsClient: soClient })) ??
+    (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
