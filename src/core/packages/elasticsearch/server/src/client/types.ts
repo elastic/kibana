@@ -16,6 +16,13 @@ import type { Headers, KibanaRequest } from '@kbn/core-http-server';
 export interface FakeRequest {
   /** Headers used for authentication against Elasticsearch */
   headers: Headers;
+  /**
+   * The space ID this request is scoped to.
+   * When set, this is the preferred mechanism for identifying the active space
+   * in non-HTTP contexts (background tasks, scheduled jobs) instead of
+   * constructing a fake URL with `/s/{spaceId}`.
+   */
+  spaceId?: string;
 }
 
 /**
@@ -23,6 +30,9 @@ export interface FakeRequest {
  * non-HTTP contexts - for example, background tasks or scheduled jobs - where no real
  * {@link KibanaRequest} is available. The space is derived from the URL pathname
  * (e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.
+ *
+ * Prefer setting {@link FakeRequest.spaceId} directly for space-scoped background tasks
+ * rather than constructing a synthetic URL with `/s/{spaceId}`.
  *
  * In route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies
  * {@link ScopeableUrlRequest} without needing this type.
