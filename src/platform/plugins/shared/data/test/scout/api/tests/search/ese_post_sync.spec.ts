@@ -19,7 +19,10 @@ import {
   verifyErrorResponse,
 } from '../../fixtures';
 
-apiTest.describe('ese search - post sync and validation', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe(
+  'ese search - post sync and validation',
+  { tag: [...tags.stateful.all, ...tags.serverless.search] },
+  () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esClient }) => {

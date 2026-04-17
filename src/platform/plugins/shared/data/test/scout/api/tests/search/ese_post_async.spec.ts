@@ -21,7 +21,7 @@ import {
 
 apiTest.describe(
   'ese search - post async (SNAPSHOT only)',
-  { tag: tags.deploymentAgnostic },
+  { tag: [...tags.stateful.all, ...tags.serverless.search] },
   () => {
     let cookieHeader: Record<string, string>;
 

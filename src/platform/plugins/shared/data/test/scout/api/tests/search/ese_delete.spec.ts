@@ -19,7 +19,10 @@ import {
   waitFor,
 } from '../../fixtures';
 
-apiTest.describe('ese search - delete', { tag: tags.deploymentAgnostic }, () => {
+apiTest.describe(
+  'ese search - delete',
+  { tag: [...tags.stateful.all, ...tags.serverless.search] },
+  () => {
   let cookieHeader: Record<string, string>;
   let isSnapshot: boolean;
 
