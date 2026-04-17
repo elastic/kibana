@@ -121,9 +121,9 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps, isLoading }) => {
                     data: {
                       execution_id: step.execution_id,
                       status: step.status,
-                      ...(step.response ? { response: step.response } : {}),
-                      ...(step.error ? { error: step.error } : {}),
-                      ...(step.completed_at ? { completed_at: step.completed_at } : {}),
+                      response: step.response,
+                      error: step.error,
+                      completed_at: step.completed_at,
                     },
                   },
                 ]);
