@@ -74,4 +74,29 @@ describe('useLeadingControlColumns', () => {
     const { result } = renderHook(() => useLeadingControlColumns(defaultArgs));
     expect(result.current.find((c) => c.id === 'entity-analytics-ai-action')).toBeUndefined();
   });
+
+  it('sets explicit width on timeline column so the Actions header text fits', () => {
+    const { result } = renderHook(() =>
+      useLeadingControlColumns({ ...defaultArgs, canUseTimeline: true })
+    );
+    const timelineCol = result.current.find((c) => c.id === 'entity-analytics-timeline-action');
+    expect(timelineCol).toBeDefined();
+    expect(typeof timelineCol!.width).toBe('number');
+    expect(timelineCol!.width).toBeGreaterThan(24);
+  });
+
+  it('sets explicit width on AI column so the Actions header text fits', () => {
+    mockUseAgentBuilderAvailability.mockReturnValue({ isAgentBuilderEnabled: true });
+    mockUseKibana.mockReturnValue({
+      services: { agentBuilder: { openChat: mockOpenChat } },
+    });
+
+    const { result } = renderHook(() =>
+      useLeadingControlColumns({ ...defaultArgs, canUseTimeline: true })
+    );
+    const aiCol = result.current.find((c) => c.id === 'entity-analytics-ai-action');
+    expect(aiCol).toBeDefined();
+    expect(typeof aiCol!.width).toBe('number');
+    expect(aiCol!.width).toBeGreaterThan(24);
+  });
 });

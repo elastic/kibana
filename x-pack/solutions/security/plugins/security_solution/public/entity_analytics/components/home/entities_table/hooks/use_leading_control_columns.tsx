@@ -15,7 +15,7 @@ import { SecurityAgentBuilderAttachments } from '../../../../../../common/consta
 import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useKibana } from '../../../../../common/lib/kibana/use_kibana';
 import { getEntityFields } from '../utils';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
+import { ENTITY_ANALYTICS_TABLE_ID, LEADING_CONTROL_COLUMN_WIDTH } from '../constants';
 import { useSecurityAgentId } from '../../../../../agent_builder/hooks/use_security_agent_id';
 
 const createEntityDataProviders = (
@@ -52,6 +52,7 @@ export const useLeadingControlColumns = ({
     if (canUseTimeline) {
       columns.push({
         id: 'entity-analytics-timeline-action',
+        width: LEADING_CONTROL_COLUMN_WIDTH,
         render: (Control, { record }) => {
           const { entityType, entityName } = getEntityFields(record);
           if (!entityName || !entityType) {
@@ -82,6 +83,7 @@ export const useLeadingControlColumns = ({
     if (isAgentBuilderEnabled && agentBuilder?.openChat) {
       columns.push({
         id: 'entity-analytics-ai-action',
+        width: LEADING_CONTROL_COLUMN_WIDTH,
         render: (Control, { record }) => {
           const { entityType, entityName } = getEntityFields(record);
           if (!entityName || !entityType) {

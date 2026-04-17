@@ -15,6 +15,10 @@ export {
   ENTITY_LATEST,
 } from '../constants';
 
+// Width for each leading control column, larger than the default 24px to ensure
+// the combined actions column is wide enough for the "Actions" header text.
+export const LEADING_CONTROL_COLUMN_WIDTH = 36;
+
 export const MAX_ENTITIES_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
