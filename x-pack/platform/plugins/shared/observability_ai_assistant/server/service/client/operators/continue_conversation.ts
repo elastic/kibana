@@ -26,7 +26,7 @@ import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { createToolNotFoundError } from '@kbn/inference-plugin/common/chat_complete/errors';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import { isToolValidationError } from '@kbn/inference-common';
+import { type InferenceConnector, isToolValidationError } from '@kbn/inference-common';
 import { getInferenceConnectorInfo } from '../../../../common/utils/get_inference_connector';
 import type { ToolCallEvent } from '../../../analytics/tool_call';
 import { toolCallEventType } from '../../../analytics/tool_call';
@@ -75,7 +75,7 @@ export function executeFunctionAndCatchError({
   connectorId: string;
   simulateFunctionCalling: boolean;
   analytics: AnalyticsServiceStart;
-  connector?: InferenceConnectorType;
+  connector?: InferenceConnector;
   scopes: AssistantScope[];
 }): Observable<MessageOrChatEvent> {
   return withExecuteToolSpan(name, { tool: { input: args } }, (span) => {

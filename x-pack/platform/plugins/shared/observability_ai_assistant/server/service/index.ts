@@ -124,6 +124,7 @@ export class ObservabilityAIAssistantService {
         asInternalUser,
         asCurrentUser,
       },
+      inference: plugins.inference,
       inferenceClient,
       logger: this.logger,
       user: user

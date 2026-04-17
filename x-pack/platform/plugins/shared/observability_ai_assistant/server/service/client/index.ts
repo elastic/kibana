@@ -36,7 +36,7 @@ import type {
   InferenceClient,
 } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
-import { getConnectorByIdWithoutClientRequest } from '@kbn/inference-plugin/server/util/get_connector_by_id';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { CONTEXT_FUNCTION_NAME } from '../../../common';
 import { resourceNames } from '..';
@@ -100,6 +100,7 @@ export class ObservabilityAIAssistantClient {
         asInternalUser: ElasticsearchClient;
         asCurrentUser: ElasticsearchClient;
       };
+      inference: InferenceServerStart;
       inferenceClient: InferenceClient;
       logger: Logger;
       user?: {
@@ -283,19 +284,18 @@ export class ObservabilityAIAssistantClient {
 
       const connector$ = defer(() =>
         from(
-          getConnectorByIdWithoutClientRequest({
+          this.dependencies.inference.getConnectorByIdWithoutClientRequest(
             connectorId,
-            actionsClient: this.dependencies.actionsClient,
-            esClient: this.dependencies.esClient.asInternalUser,
-            logger: this.dependencies.logger,
-          })
+            this.dependencies.actionsClient,
+            this.dependencies.esClient.asInternalUser
+          )
         ).pipe(
           catchError((error) => {
             this.dependencies.logger.debug(
               `Failed to fetch connector for analytics: ${error.message}`
             );
             return of(undefined);
-          }),
+          }),z
           shareReplay()
         )
       );
