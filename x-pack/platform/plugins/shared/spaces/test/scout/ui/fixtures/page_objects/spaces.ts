@@ -19,7 +19,7 @@ export class SpacesPage {
     await this.dismissWelcomeScreen();
     await this.page.testSubj.locator('homeApp').waitFor({
       state: 'visible',
-      timeout: 30_000,
+      timeout: 30_000, // home app can be slow to render after navigation + welcome screen dismiss
     });
   }
 
