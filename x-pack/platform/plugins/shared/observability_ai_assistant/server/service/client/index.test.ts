@@ -200,6 +200,12 @@ describe('Observability AI Assistant client', () => {
       isSystemAction: false,
     } as any);
 
+    getConnectorByIdMock.mockResolvedValue({
+      connectorId: 'test-connector-id',
+      name: 'Test Connector',
+      type: 'openai',
+    });
+
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
       core: {} as CoreSetup<ObservabilityAIAssistantPluginStartDependencies>,
