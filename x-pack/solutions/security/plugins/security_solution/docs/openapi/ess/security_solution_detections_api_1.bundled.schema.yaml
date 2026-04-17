@@ -25,6 +25,27 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              paginatedDefaults:
+                summary: First page with default page size
+                value:
+                  page: 1
+                  per_page: 20
+              withFilterSortAndFacets:
+                summary: KQL filter, sort, free-text search, and facet counts
+                value:
+                  aggregations:
+                    counts:
+                      - tags
+                      - enabled
+                  filter: alert.attributes.enabled:true
+                  page: 1
+                  per_page: 50
+                  search:
+                    mode: legacy
+                    term: powershell
+                  sort_field: name
+                  sort_order: asc
             schema:
               additionalProperties: false
               type: object
