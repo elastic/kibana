@@ -53,9 +53,24 @@ export type FindEndpointListItemsRequestQueryInput = z.input<
 
 export type FindEndpointListItemsResponse = z.infer<typeof FindEndpointListItemsResponse>;
 export const FindEndpointListItemsResponse = z.object({
+  /**
+   * The list of endpoint exception list items.
+   */
   data: z.array(EndpointListItem),
+  /**
+   * The current page number.
+   */
   page: z.number().int().min(0),
+  /**
+   * The number of items per page.
+   */
   per_page: z.number().int().min(0),
+  /**
+   * The total number of endpoint exception list items.
+   */
   total: z.number().int().min(0),
+  /**
+   * The point-in-time ID for pagination.
+   */
   pit: z.string().optional(),
 });
