@@ -212,10 +212,6 @@ export function ErrorsWarningsFooterPopover({
           ownFocus={false}
           isOpen={isPopoverOpen}
           closePopover={closePopover}
-          aria-label={i18n.translate('esqlEditor.errorsWarningsPopover.ariaLabel', {
-            defaultMessage: 'Popover for {type}s',
-            values: { type },
-          })}
         >
           {visibleItems.length > 0 && (
             <ErrorsWarningsContent
