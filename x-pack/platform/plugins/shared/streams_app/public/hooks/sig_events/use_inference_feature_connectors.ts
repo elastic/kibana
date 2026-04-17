@@ -26,8 +26,11 @@ export function useInferenceFeatureConnectors(
     settings: core.settings,
   });
 
+  const connectors = query.data;
+  const recommended = connectors?.find((c) => c.isRecommended) ?? connectors?.[0];
+
   return {
-    resolvedConnectorId: query.data?.[0]?.id,
+    resolvedConnectorId: recommended?.id,
     loading: query.isLoading,
     error: query.error ?? undefined,
   };
