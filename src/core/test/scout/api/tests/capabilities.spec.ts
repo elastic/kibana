@@ -34,7 +34,7 @@ apiTest.describe('capabilities', { tag: tags.deploymentAgnostic }, () => {
     expect(response.body).toStrictEqual({
       statusCode: 400,
       error: 'Bad Request',
-      message: '[request body.applications.2]: Invalid application id: bad%app',
+      message: '[request body.applications.2]: Invalid application id',
     });
   });
 });
