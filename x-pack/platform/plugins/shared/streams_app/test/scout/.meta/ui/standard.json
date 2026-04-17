@@ -1,5 +1,5 @@
 {
-  "sha1": "9cada4fc510650932ed4b6f81ca37e0752be8af6",
+  "sha1": "20559615f411cbc59e54192c2e9da6cad4d20720",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -71,28 +71,28 @@
     {
       "id": "ca5617d2526fece-4f1df209bb20bf0",
       "title": "Advanced tab with basic license should NOT show enterprise features on wired stream Advanced tab with basic license",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 37,
+        "line": 38,
         "column": 7
       }
     },
     {
       "id": "ca5617d2526fece-6a2b3b1f642b875",
       "title": "Advanced tab with basic license should NOT show enterprise features on classic stream Advanced tab with basic license",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_advanced/license_basic.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 7
       }
     },
@@ -2357,112 +2357,112 @@
     {
       "id": "9349667e5bca40e-4c30a41802efe9b",
       "title": "Stream data routing - AI suggestions button should show button when AI features are enabled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 46,
+        "column": 9
       }
     },
     {
       "id": "9349667e5bca40e-2cd846c5324c829",
       "title": "Stream data routing - AI suggestions button should disable button when no connector is selected",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 52,
+        "column": 9
       }
     },
     {
       "id": "9349667e5bca40e-8238485c9b8c08f",
       "title": "Stream data routing - AI suggestions button should show connector dropdown when multiple connectors exist",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 66,
+        "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-098e105b5880d71",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with empty name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 62,
+        "line": 63,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-c9fb9d27893c2ba",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name containing dots",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-fe89c36564d8512",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with name exceeding max length",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-c0db288e902915d",
       "title": "Stream data routing - AI suggestions editing validation should show error when editing suggestion with duplicate name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 109,
+        "line": 110,
         "column": 9
       }
     },
     {
       "id": "954b6fa16b3e83e-255ea6600fc8ce1",
       "title": "Stream data routing - AI suggestions editing validation should allow editing suggestion with valid condition",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 145,
+        "line": 146,
         "column": 9
       }
     },
@@ -3378,7 +3378,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 38,
+        "line": 42,
         "column": 7
       }
     },
@@ -3392,22 +3392,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 47,
+        "line": 51,
         "column": 7
       }
     },
     {
       "id": "7ce2670a3e19b7c-0f0cfefb9e93b08",
       "title": "Query streams - Create query stream should create a query stream as a child of an ingest stream",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/query_streams/create_query_stream.spec.ts",
-        "line": 77,
-        "column": 8
+        "line": 80,
+        "column": 7
       }
     },
     {
