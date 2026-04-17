@@ -13,7 +13,7 @@ import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
 import type { MutableRefObject } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQLLangEditor, useESQLQueryStats } from '@kbn/esql/public';
 import { type ESQLControlVariable, type ESQLQueryStats } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
@@ -117,10 +117,12 @@ export function ESQLEditor({
   const currentAttributesRef = useRef(currentAttributes);
   currentAttributesRef.current = currentAttributes;
 
-  const adHocDataViews =
-    attributes && attributes.state.adHocDataViews
-      ? Object.values(attributes.state.adHocDataViews)
-      : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
+  const adHocDataViews = useMemo(() => {
+    if (attributes && attributes.state.adHocDataViews) {
+      return Object.values(attributes.state.adHocDataViews);
+    }
+    return Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
+  }, [attributes, framePublicAPI.dataViews.indexPatterns]);
 
   const lensAdaptersRef = useRef(lensAdapters);
   useEffect(() => {
