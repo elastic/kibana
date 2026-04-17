@@ -9,7 +9,14 @@
 import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
-export type StateTransitionDelayMode = 'immediate' | 'breaches' | 'recoveries' | 'duration';
+export const DELAY_MODE = {
+  immediate: 'immediate',
+  breaches: 'breaches',
+  recoveries: 'recoveries',
+  duration: 'duration',
+} as const;
+
+export type StateTransitionDelayMode = (typeof DELAY_MODE)[keyof typeof DELAY_MODE];
 
 /**
  * Rule metadata containing identification and categorization info.
