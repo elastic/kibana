@@ -2,8 +2,7 @@ spec_id: .salesforce
 name: "Salesforce (testing)"
 auth_type: oauth_authorization_code
 secrets:
-  scopes:
-    value: "api refresh_token"
+  scope:
   tokenUrl:
     vault: secret/ent-search-team/connectors-sources/salesforce-external-client-app
     field: token_url
