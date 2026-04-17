@@ -110,6 +110,13 @@ export interface IBasePath {
   readonly assetsHrefBase: string;
 
   /**
+   * The active space ID derived from the current basePath.
+   * Always populated — defaults to `'default'` when no `/s/{spaceId}` prefix is present.
+   * This is a static string; space changes trigger a full page navigation.
+   */
+  readonly spaceId: string;
+
+  /**
    * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the
    * {@link IBasePath.serverBasePath}.
    *
