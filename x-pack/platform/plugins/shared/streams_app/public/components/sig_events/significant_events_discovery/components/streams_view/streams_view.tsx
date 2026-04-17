@@ -62,6 +62,7 @@ export function StreamsView() {
     setOnboardingConfig,
     featuresConnectors,
     queriesConnectors,
+    generatingStreamNames,
     streamStatusMap,
     cancelOnboardingTask,
     bulkScheduleOnboardingTask,
@@ -87,10 +88,11 @@ export function StreamsView() {
 
   const isStreamActionable = useCallback(
     (streamName: string) => {
+      if (generatingStreamNames.includes(streamName)) return false;
       const result = streamStatusMap[streamName];
       return !!result && !IN_PROGRESS_STATUSES.has(result.status);
     },
-    [streamStatusMap]
+    [generatingStreamNames, streamStatusMap]
   );
 
   const [selectedStreams, setSelectedStreams] = useState<TableRow[]>([]);

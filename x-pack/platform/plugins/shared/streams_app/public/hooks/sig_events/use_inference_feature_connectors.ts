@@ -49,7 +49,7 @@ export function useInferenceFeatureConnectors(
 
   return {
     resolvedConnectorId,
-    loading: query.isLoading,
+    loading: query.isLoading || query.isFetching,
     error: query.error ?? undefined,
   };
 }
