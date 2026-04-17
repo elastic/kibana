@@ -75,6 +75,23 @@ test.describe(
         await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
       });
 
+      await test.step('disable custom time range and verify panel uses global time', async () => {
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.disableCustomTimeRange();
+        await pageObjects.dashboard.saveCustomizePanel();
+
+        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
+      });
+
+      await test.step('change global time range to empty range and verify no data', async () => {
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: 'Jan 1, 2000 @ 00:00:00.000',
+          to: 'Jan 2, 2000 @ 00:00:00.000',
+        });
+
+        await expect(page.getByText('No services available')).toBeVisible();
+      });
+
       await test.step('TODO: open a service node popover by clicking a map item', async () => {
         test.info().annotations.push({
           type: 'todo',
