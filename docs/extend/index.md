@@ -10,7 +10,7 @@ mapped_pages:
 This documentation is organized into five sections. Pick the one that matches what you need.
 
 - **[Getting started](./getting-started/welcome.md)** — set up a local environment, run {{kib}}, and build your first "Hello World" plugin.
-- **[Key concepts](./key-concepts/plugins-packages-and-the-platform.md)** — the mental models and architecture you need to build on the platform: plugins vs. packages vs. core, the lifecycle, saved objects, security, performance, embeddables, and more.
+- **[Key concepts](./key-concepts/platform-architecture/plugins-packages-and-the-platform.md)** — the mental models and architecture you need to build on the platform: plugins vs. packages vs. core, the lifecycle, saved objects, security, performance, embeddables, and more.
 - **[Tutorials](./tutorials/index.md)** — task-focused, hands-on walkthroughs for common plugin development tasks (registering routes, configuring your plugin, accessing data, adding logging, and so on).
 - **[Testing](./testing/index.md)** — the testing pyramid for {{kib}} plugins: Jest unit/integration, Scout (Playwright) for UI and API, and legacy FTR.
 - **[Contributing](./contributing/principles/developer-principles.md)** — how to work inside the {{kib}} repository: standards, pull requests, CI, linting, debugging, and build.

@@ -43,21 +43,13 @@ toc:
           - file: debugging-fips-test-failures.md
   - folder: key-concepts
     children:
-      - file: plugins-packages-and-the-platform.md
-      - file: anatomy-of-a-plugin.md
-      - file: scoped-services.md
-      - folder: plugin-performance-and-optimization
+      - folder: platform-architecture
         children:
-          - file: plugin-performance-and-optimization.md
-          - file: client-performance.md
-          - file: server-performance.md
-          - folder: case-studies
-            children:
-              - file: performance-case-studies.md
-              - file: case-study-async-too-early.md
-              - file: case-study-top-level-imports.md
-              - file: case-study-uncommon-code-in-common.md
-      - file: building-blocks.md
+          - file: plugins-packages-and-the-platform.md
+          - file: anatomy-of-a-plugin.md
+          - file: scoped-services.md
+          - file: routing-navigation-and-url.md
+          - file: api-documentation.md
       - folder: security
         children:
           - file: overview.md
@@ -78,28 +70,42 @@ toc:
           - file: saved-objects/export.md
           - file: saved-objects/share.md
           - file: saved-objects/migrations.md
-      - file: legacy-url-aliases.md
-      - file: persistable-state.md
-      - file: data-views.md
-      - file: routing-navigation-and-url.md
-      - file: embeddables.md
-      - file: uiactions-plugin.md
-      - file: lens.md
+          - file: saved-objects/legacy-url-aliases.md
+          - file: saved-objects/persistable-state.md
+      - folder: data
         children:
-          - folder: lens-config-api
+          - file: data-views.md
+      - folder: ui
+        children:
+          - file: building-blocks.md
+          - file: embeddables.md
+          - file: ui-actions.md
+          - file: lens.md
             children:
-              - file: lens-config-builder-api-documentation.md
-              - file: lens-config-builder-api-metric.md
-              - file: lens-config-builder-api-gauge.md
-              - file: lens-config-builder-api-pie.md
-              - file: lens-config-builder-api-mosaic.md
-              - file: lens-config-builder-api-treemap.md
-              - file: lens-config-builder-api-tag-cloud.md
-              - file: lens-config-builder-api-region-map.md
-              - file: lens-config-builder-api-table.md
-              - file: lens-config-builder-api-heatmap.md
-              - file: lens-config-builder-api-xy-chart.md
-      - file: api-documentation.md
+              - folder: lens-config-api
+                children:
+                  - file: lens-config-builder-api-documentation.md
+                  - file: lens-config-builder-api-metric.md
+                  - file: lens-config-builder-api-gauge.md
+                  - file: lens-config-builder-api-pie.md
+                  - file: lens-config-builder-api-mosaic.md
+                  - file: lens-config-builder-api-treemap.md
+                  - file: lens-config-builder-api-tag-cloud.md
+                  - file: lens-config-builder-api-region-map.md
+                  - file: lens-config-builder-api-table.md
+                  - file: lens-config-builder-api-heatmap.md
+                  - file: lens-config-builder-api-xy-chart.md
+      - folder: performance
+        children:
+          - file: plugin-performance-and-optimization.md
+          - file: client-performance.md
+          - file: server-performance.md
+          - folder: case-studies
+            children:
+              - file: performance-case-studies.md
+              - file: case-study-async-too-early.md
+              - file: case-study-top-level-imports.md
+              - file: case-study-uncommon-code-in-common.md
   - folder: tutorials
     children:
       - file: index.md

@@ -56,7 +56,7 @@ Check out the Map Embeddable if you wish to embed a map in your application.
 
 All Kibana pages should use KibanaPageTemplate to setup their pages. It's a thin wrapper around [EuiPageTemplate](https://elastic.github.io/eui/#/layout/page) that makes setting up common types of Kibana pages quicker and easier while also adhering to any Kibana-specific requirements.
 
-Check out [the KibanaPageTemplate tutorial](../tutorials/kibana-page-template.md) for more implementation guidance.
+Check out [the KibanaPageTemplate tutorial](../../tutorials/kibana-page-template.md) for more implementation guidance.
 
 **Github labels**: `EUI`
 
@@ -103,7 +103,7 @@ access the Expression language directly.{' '}
 
 ## Saved Objects
 
-[Saved Objects](./saved-objects.md) should be used if you need to persist
+[Saved Objects](../saved-objects.md) should be used if you need to persist
 application-level information. If you were building a TODO application, each TODO item would be a `Saved
 Object`. Saved objects come pre-wired with support for bulk export/import, security features like space
 sharing and space isolation, and tags.
@@ -112,7 +112,7 @@ sharing and space isolation, and tags.
 
 ## Advanced Settings
 
-[Advanced Settings and the uiSettings service](../tutorials/ui-settings.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
+[Advanced Settings and the uiSettings service](../../tutorials/ui-settings.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
 
 **Github labels**: `Team:Core`, `Feature:uiSettings`, `Feature:Advanced Settings`
 

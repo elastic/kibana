@@ -25,7 +25,7 @@ mkdir hello_world
 cd hello_world
 ```
 
-2. Create the [kibana.jsonc manifest file](../key-concepts/anatomy-of-a-plugin.md#kibana-jsonc).
+2. Create the [kibana.jsonc manifest file](../key-concepts/platform-architecture/anatomy-of-a-plugin.md#kibana-jsonc).
 
 ```sh
 touch kibana.jsonc
@@ -48,7 +48,7 @@ and add the following:
 }
 ```
 
-3. Create a [tsconfig.json file](../key-concepts/anatomy-of-a-plugin.md#tsconfig-json).
+3. Create a [tsconfig.json file](../key-concepts/platform-architecture/anatomy-of-a-plugin.md#tsconfig-json).
 
 ```sh
 touch tsconfig.json
@@ -75,7 +75,7 @@ And add the following to it:
 }
 ```
 
-4. Create a [`public/plugin.tsx` file ](../key-concepts/anatomy-of-a-plugin.md).
+4. Create a [`public/plugin.tsx` file ](../key-concepts/platform-architecture/anatomy-of-a-plugin.md).
 
 ```sh
 mkdir public
@@ -121,7 +121,7 @@ export class HelloWorldPlugin implements Plugin<void, void, SetupDeps> {
 }
 ```
 
-5. Create a [`public/index.ts` file ](../key-concepts/anatomy-of-a-plugin.md).
+5. Create a [`public/index.ts` file ](../key-concepts/platform-architecture/anatomy-of-a-plugin.md).
 
 ```
 touch index.ts

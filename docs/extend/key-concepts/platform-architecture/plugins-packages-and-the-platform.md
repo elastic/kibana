@@ -11,13 +11,13 @@ From a developer perspective, Kibana is a platform that provides a set of tools 
 already existing applications. Did you know that almost everything you see in the
 Kibana UI is built inside a plugin? If you removed all plugins from Kibana, you'd be left with an empty navigation menu, and a set of developer tools. The Kibana platform is a blank canvas, just waiting for a developer to come along and create something!
 
-![Kibana personas](../assets/kibana_platform_plugin_end_user.png)
+![Kibana personas](../../assets/kibana_platform_plugin_end_user.png)
 
 ## 1,000 foot view
 
 At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana packages**.
 
-![Kibana 1000 ft arch](../assets/1000_ft_arch.png)
+![Kibana 1000 ft arch](../../assets/1000_ft_arch.png)
 
 **Plugins** provide the majority of all functionality in Kibana. All applications and UIs are defined here.
 
@@ -32,7 +32,7 @@ At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana
 Benefits to packages:
 
 1. <b>_Potentially_ reduced page load time</b>. All code that is statically exported from plugins will be downloaded on _every single page load_, even if that code isn't needed. With packages, only code that is imported is downloaded, which can be minimized by using async imports.
-2. <b>Puts the consumer is in charge of how and when to async import</b>. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our [performance docs](./plugin-performance-and-optimization/plugin-performance-and-optimization.md).
+2. <b>Puts the consumer is in charge of how and when to async import</b>. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our [performance docs](../performance/plugin-performance-and-optimization.md).
 
 :::
 
@@ -42,7 +42,7 @@ We try to put only the most stable and fundamental code into `Core`, while optio
 
 Today it looks something like this.
 
-![Core vs platform plugins vs plugins](../assets/platform_plugins_core.png)
+![Core vs platform plugins vs plugins](../../assets/platform_plugins_core.png)
 
 "Platform plugins" provide core-like functionality, just outside of core, and their public APIs tend to be more volatile. Other plugins may still expose shared services, but they are intended only for usage by a small subset of specific plugins, and may not be generic or "platform-like".
 :::
@@ -61,7 +61,7 @@ A plugin may register many applications, or none.
 
 Applications are top level pages in the Kibana UI. Discover, Dashboard, Dev Tools, Maps, etc, are all examples of applications:
 
-![applications in kibana](../assets/applications.png)
+![applications in kibana](../../assets/applications.png)
 
 A plugin can register an application by
 adding it to core's application registry.
@@ -108,4 +108,4 @@ An extension point is a function provided by core, or a plugin's plugin API, tha
 
 ## Follow up material
 
-Learn how to build your own plugin by following [Hello World](../getting-started/hello-world.md).
+Learn how to build your own plugin by following [Hello World](../../getting-started/hello-world.md).

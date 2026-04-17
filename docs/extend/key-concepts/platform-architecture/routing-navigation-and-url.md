@@ -255,7 +255,7 @@ Historically Kibana Analyze groups apps achieve that behavior relying on state i
 If you'd have a closer look on a link in the navigation,
 you'd notice that state is stored inside that link, and it also gets updated whenever relevant state changes happen:
 
-![image](../assets/state_inside_the_link.png)
+![image](../../assets/state_inside_the_link.png)
 
 This is where separation into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
 This is backed by [KbnUrlTracker](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57) util. You can use it to achieve similar behavior.

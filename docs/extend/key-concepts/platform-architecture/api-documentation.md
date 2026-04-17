@@ -6,7 +6,7 @@ description: "How to use our automatically generated API documentation"
 # API documentation
 
 Welcome to our automatically generated typescript API 
-documentation for every plugin that exposes a [public API](../key-concepts/plugins-packages-and-the-platform.md#public-plugin-api)!
+documentation for every plugin that exposes a [public API](./plugins-packages-and-the-platform.md#public-plugin-api)!
 
 :::{warning} Experimental
 This documentation is being automatically generated using an
@@ -23,7 +23,7 @@ To learn more about how to write docs specifically for our [API references](http
 ## What is included
 
 Every plugin that 
-[exposes functionality for other plugins to use](../key-concepts/plugins-packages-and-the-platform.md#public-plugin-api) will have
+[exposes functionality for other plugins to use](./plugins-packages-and-the-platform.md#public-plugin-api) will have
 API documentation automatically generated (note this system 
 does *not* handle REST APIs).
 

@@ -23,7 +23,7 @@ Build with scalability in mind.
 - Consider large data sets, that span a long time range
 - Consider slow internet and low bandwidth environments
 
-[Read more about performance.](../../key-concepts/plugin-performance-and-optimization/plugin-performance-and-optimization.md)
+[Read more about performance.](../../key-concepts/performance/plugin-performance-and-optimization.md)
 
 ## Accessibility
 
@@ -111,11 +111,11 @@ Use [EUI](https://elastic.github.io/eui) for all your basic UI components to cre
 
 ## Don't export code that doesn't need to be public
 
-Don't export [public APIs](../../key-concepts/plugins-packages-and-the-platform.md#public-plugin-api) without reason. Make your public APIs as small as possible. You will have to maintain them, and consider backward compatibility when making changes.
+Don't export [public APIs](../../key-concepts/platform-architecture/plugins-packages-and-the-platform.md#public-plugin-api) without reason. Make your public APIs as small as possible. You will have to maintain them, and consider backward compatibility when making changes.
 
 ## Re-inventing the wheel
 
-Over-refactoring can be a problem in it's own right, but it's still important to be aware of the existing services that are out there and use them when it makes sense. Check out our [building blocks](../../key-concepts/building-blocks.md) to see what high-level services are at your disposal. In addition, our [API documentation](../../key-concepts/api-documentation.md) lists additional services.
+Over-refactoring can be a problem in it's own right, but it's still important to be aware of the existing services that are out there and use them when it makes sense. Check out our [building blocks](../../key-concepts/ui/building-blocks.md) to see what high-level services are at your disposal. In addition, our [API documentation](../../key-concepts/platform-architecture/api-documentation.md) lists additional services.
 
 Some commonly overlooked services worth knowing about:
 
@@ -255,11 +255,11 @@ Does the feature work efficiently on the below listed browsers
 
 Any time you change state that is part of a Saved Object you will have to write a [migration](../../key-concepts/saved-objects.md).
 
-Never store state from another plugin in your Saved Objects or URLs unless it implements the [persistable state interface](../../key-concepts/persistable-state.md). Remember to check for migrations when deserializing that state.
+Never store state from another plugin in your Saved Objects or URLs unless it implements the [persistable state interface](../../key-concepts/saved-objects/persistable-state.md). Remember to check for migrations when deserializing that state.
 
-If you expose state and you wish to allow other plugins to persist you must ensure it implements the [persistable state interface](../../key-concepts/persistable-state.md). This is very common for `by value` entities, like visualizations that exist on a dashboard but are not part of the visualization library. If you make a breaking change to this state you must remember to register a migration for it.
+If you expose state and you wish to allow other plugins to persist you must ensure it implements the [persistable state interface](../../key-concepts/saved-objects/persistable-state.md). This is very common for `by value` entities, like visualizations that exist on a dashboard but are not part of the visualization library. If you make a breaking change to this state you must remember to register a migration for it.
 
-Saved objects exported from past Kibana versions should always continue to work. Bookmarked URLs should also always work. Check out [URL Locators](../../key-concepts/routing-navigation-and-url.md#specifying-state) to learn about migrating state in URLs.
+Saved objects exported from past Kibana versions should always continue to work. Bookmarked URLs should also always work. Check out [URL Locators](../../key-concepts/platform-architecture/routing-navigation-and-url.md#specifying-state) to learn about migrating state in URLs.
 
 ## Avoid these common mistakes
 

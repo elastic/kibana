@@ -254,7 +254,7 @@ node scripts/build_kibana_platform_plugins --focus {pluginId} --update-limits
 
 This runs the optimizer in distributable mode, which takes longer and spawns a worker per CPU. Changes to `limits.yml` trigger review from the Operations team, who verify the increase is justified — findings from the steps above help that review.
 
-For broader guidance on lazy-loading patterns, see [Plugin performance and optimization](/extend/key-concepts/plugin-performance-and-optimization/plugin-performance-and-optimization.md).
+For broader guidance on lazy-loading patterns, see [Plugin performance and optimization](/extend/key-concepts/performance/plugin-performance-and-optimization.md).
 
 
 ### Actions to reduce `page load bundle size` [ci-metric-quick-actions]

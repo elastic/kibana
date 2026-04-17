@@ -497,7 +497,7 @@ Ideally, if a secondary object on a deep link page resolves to an `'aliasMatch'`
 
 ### 4. What is a "legacy URL alias"? [sharing-saved-objects-faq-legacy-url-alias]
 
-As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To preserve its old ID, we also create a special object called a [*legacy URL alias*](/extend/key-concepts/legacy-url-aliases.md) ("alias" for short); this alias retains the target object's old ID (*sourceId*), and it contains a pointer to the target object's new ID (*targetId*).
+As depicted above, when an object is converted to become share-capable, if it exists in a non-Default space, its ID gets changed. To preserve its old ID, we also create a special object called a [*legacy URL alias*](/extend/key-concepts/saved-objects/legacy-url-aliases.md) ("alias" for short); this alias retains the target object's old ID (*sourceId*), and it contains a pointer to the target object's new ID (*targetId*).
 
 Aliases are meant to be mostly invisible to end-users by design. There is no UI to manage them directly. Our vision is that aliases will be used as a stop-gap to help us through the 8.0 upgrade process, but we will nudge users away from relying on aliases so we can eventually deprecate and remove them.
 
