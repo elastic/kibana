@@ -14,6 +14,8 @@ import {
   isUnifiedAttachmentRequest,
   isUnifiedReferenceAttachmentRequest,
   isUnifiedValueAttachmentRequest,
+  isPersistableType,
+  toUnifiedPersistableStateAttachmentType,
 } from '../../../common/utils/attachments';
 import type { AttachmentRequest, AttachmentRequestV2 } from '../../../common/types/api';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../attachment_framework/external_reference_registry';
@@ -24,10 +26,12 @@ export const validateLegacyRegisteredAttachments = ({
   query,
   persistableStateAttachmentTypeRegistry,
   externalReferenceAttachmentTypeRegistry,
+  unifiedAttachmentTypeRegistry,
 }: {
   query: AttachmentRequest;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
 }) => {
   if (
     isCommentRequestTypeExternalReference(query) &&
@@ -38,13 +42,19 @@ export const validateLegacyRegisteredAttachments = ({
     );
   }
 
-  if (
-    isCommentRequestTypePersistableState(query) &&
-    !persistableStateAttachmentTypeRegistry.has(query.persistableStateAttachmentTypeId)
-  ) {
-    throw Boom.badRequest(
-      `Attachment type ${query.persistableStateAttachmentTypeId} is not registered.`
-    );
+  if (isCommentRequestTypePersistableState(query)) {
+    const typeId = query.persistableStateAttachmentTypeId;
+
+    if (isPersistableType(typeId)) {
+      const unifiedTypeId = toUnifiedPersistableStateAttachmentType(typeId);
+      if (!unifiedAttachmentTypeRegistry.has(unifiedTypeId)) {
+        throw Boom.badRequest(
+          `Attachment type ${typeId} (unified: ${unifiedTypeId}) is not registered in unified attachment type registry.`
+        );
+      }
+    } else if (!persistableStateAttachmentTypeRegistry.has(typeId)) {
+      throw Boom.badRequest(`Attachment type ${typeId} is not registered.`);
+    }
   }
 };
 
@@ -97,6 +107,7 @@ export const validateRegisteredAttachments = ({
       query,
       persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry,
+      unifiedAttachmentTypeRegistry,
     });
   } else if (isUnifiedAttachmentRequest(query)) {
     validateUnifiedRegisteredAttachments({
