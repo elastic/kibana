@@ -116,7 +116,6 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-context-theme",
-    "@kbn/test-jest-helpers",
     "@kbn/security-plugin-types-common",
     "@kbn/server-route-repository-utils",
     "@kbn/core-analytics-browser",
@@ -155,6 +154,10 @@
     "@kbn/shared-ux-column-presets",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/zod",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
   ],
   "exclude": ["target/**/*"]
 }
