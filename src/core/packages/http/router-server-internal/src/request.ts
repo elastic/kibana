@@ -36,6 +36,7 @@ import type {
   RouteSecurity,
   RequestTiming,
 } from '@kbn/core-http-server';
+import { DEFAULT_SPACE_ID } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -152,6 +153,8 @@ export class CoreKibanaRequest<
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
+  /** {@inheritDoc KibanaRequest.spaceId} */
+  public readonly spaceId: string;
   /** {@inheritDoc KibanaRequest.timing} */
   public readonly serverTiming: RequestTiming;
 
@@ -180,6 +183,7 @@ export class CoreKibanaRequest<
 
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
+    this.spaceId = appState?.spaceId ?? DEFAULT_SPACE_ID;
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });

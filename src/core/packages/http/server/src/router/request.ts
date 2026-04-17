@@ -52,6 +52,8 @@ export interface KibanaRequestState extends RequestApplicationState {
   requestUuid: string;
   rewrittenUrl?: URL;
   traceId?: string;
+  /** The resolved space ID for this request. Defaults to 'default'. */
+  spaceId?: string;
   /** The top HTTP Otel Span for this request. */
   httpSpan?: OTelSpan;
   /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
@@ -212,6 +214,12 @@ export interface KibanaRequest<
    * See {@link KibanaRequestAuth}.
    */
   readonly auth: KibanaRequestAuth;
+
+  /**
+   * The resolved Kibana space ID for this request.
+   * Always populated; defaults to {@link DEFAULT_SPACE_ID} ('default') when no explicit space is present in the URL.
+   */
+  readonly spaceId: string;
 
   /**
    * URL rewritten in onPreRouting request interceptor.
