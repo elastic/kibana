@@ -46,7 +46,7 @@ export const DuplicateOptionsRadioGroup = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
-          'data-test-subj': 'duplicate-with-exceptions-including-expired',
+          'data-test-subj': DuplicateOptions.withExceptions,
         },
         {
           id: DuplicateOptions.withExceptionsExcludeExpiredExceptions,
@@ -60,12 +60,12 @@ export const DuplicateOptionsRadioGroup = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
-          'data-test-subj': 'duplicate-with-exceptions-exclude-expired',
+          'data-test-subj': DuplicateOptions.withExceptionsExcludeExpiredExceptions,
         },
         {
           id: DuplicateOptions.withoutExceptions,
           label: i18n.DUPLICATE_WITHOUT_EXCEPTIONS_TEXT(rulesCount),
-          'data-test-subj': 'duplicate-without-exceptions',
+          'data-test-subj': DuplicateOptions.withoutExceptions,
         },
       ]}
       idSelected={selectedOption}
