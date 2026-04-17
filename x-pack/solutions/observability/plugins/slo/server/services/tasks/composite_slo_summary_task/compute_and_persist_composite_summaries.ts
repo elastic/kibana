@@ -35,6 +35,13 @@ type MemberDefinitionMap = Map<string, SLODefinition>;
 type SummaryResult = Awaited<ReturnType<DefaultSummaryClient['computeSummaries']>>[number];
 type SummaryResultMap = Map<string, SummaryResult>;
 
+interface RunStats {
+  decodeErrors: number;
+  spaceErrors: number;
+  computeErrors: number;
+  bulkErrors: number;
+}
+
 interface Dependencies {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
@@ -55,6 +62,8 @@ export async function computeAndPersistCompositeSummaries({
   const summaryClient = new DefaultSummaryClient(esClient, burnRatesClient);
 
   let totalProcessed = 0;
+  const stats: RunStats = { decodeErrors: 0, spaceErrors: 0, computeErrors: 0, bulkErrors: 0 };
+  const startTime = Date.now();
 
   const finder = soClient.createPointInTimeFinder<StoredCompositeSLODefinition>({
     type: SO_SLO_COMPOSITE_TYPE,
@@ -77,15 +86,16 @@ export async function computeAndPersistCompositeSummaries({
         `Processing ${response.saved_objects.length} composite SLOs (${totalProcessed} processed so far)`
       );
 
-      const bySpace = groupBySpace(response.saved_objects, logger);
-      const memberMapBySpace = await fetchMemberDefinitions(bySpace, soClient, logger);
+      const bySpace = groupBySpace(response.saved_objects, logger, stats);
+      const memberMapBySpace = await fetchMemberDefinitions(bySpace, soClient, logger, stats);
       const summaryResultBySpace = await fetchMemberSummaries(
         bySpace,
         memberMapBySpace,
         summaryClient,
-        logger
+        logger,
+        stats
       );
-      const bulkOps = buildBulkOps(bySpace, memberMapBySpace, summaryResultBySpace, logger);
+      const bulkOps = buildBulkOps(bySpace, memberMapBySpace, summaryResultBySpace, logger, stats);
 
       if (bulkOps.length > 0) {
         const bulkResponse = await esClient.bulk(
@@ -94,6 +104,7 @@ export async function computeAndPersistCompositeSummaries({
         );
         if (bulkResponse.errors) {
           const failed = bulkResponse.items.filter((item) => item.index?.error);
+          stats.bulkErrors += failed.length;
           logger.error(`Bulk upsert had ${failed.length} errors`);
         }
       }
@@ -115,18 +126,27 @@ export async function computeAndPersistCompositeSummaries({
     await finder.close();
   }
 
-  logger.info(`Composite SLO summary task completed: ${totalProcessed} processed`);
+  logger.info(
+    `Composite SLO summary task completed in ${Date.now() - startTime}ms: ` +
+      `${totalProcessed} processed, ${stats.decodeErrors} decode errors, ` +
+      `${stats.spaceErrors} space errors, ${stats.computeErrors} compute errors, ` +
+      `${stats.bulkErrors} bulk errors`
+  );
 }
 
 function groupBySpace(
   savedObjects: SavedObject<StoredCompositeSLODefinition>[],
-  logger: Logger
+  logger: Logger,
+  stats: RunStats
 ): Map<string, SpaceItems> {
   const bySpace = new Map<string, SpaceItems>();
   for (const so of savedObjects) {
     const spaceId = so.namespaces?.[0] ?? 'default';
     const compositeSlo = decodeCompositeSLO(so, logger);
-    if (!compositeSlo) continue;
+    if (!compositeSlo) {
+      stats.decodeErrors++;
+      continue;
+    }
     const items = bySpace.get(spaceId) ?? [];
     items.push({ compositeSlo });
     bySpace.set(spaceId, items);
@@ -137,7 +157,8 @@ function groupBySpace(
 async function fetchMemberDefinitions(
   bySpace: Map<string, SpaceItems>,
   soClient: SavedObjectsClientContract,
-  logger: Logger
+  logger: Logger,
+  stats: RunStats
 ): Promise<Map<string, MemberDefinitionMap>> {
   const memberMapBySpace = new Map<string, MemberDefinitionMap>();
   await Promise.allSettled(
@@ -149,6 +170,7 @@ async function fetchMemberDefinitions(
         const slos = await findMemberSLOs(allIds, spaceId, soClient, logger);
         memberMapBySpace.set(spaceId, new Map(slos.map((slo) => [slo.id, slo])));
       } catch (err) {
+        stats.spaceErrors++;
         logger.error(
           `Failed to fetch member SLOs for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
         );
@@ -162,7 +184,8 @@ async function fetchMemberSummaries(
   bySpace: Map<string, SpaceItems>,
   memberMapBySpace: Map<string, MemberDefinitionMap>,
   summaryClient: DefaultSummaryClient,
-  logger: Logger
+  logger: Logger,
+  stats: RunStats
 ): Promise<Map<string, SummaryResultMap>> {
   const summaryResultBySpace = new Map<string, SummaryResultMap>();
   await Promise.allSettled(
@@ -196,6 +219,7 @@ async function fetchMemberSummaries(
         const results = await summaryClient.computeSummaries([...seen.values()]);
         summaryResultBySpace.set(spaceId, new Map(keys.map((k, i) => [k, results[i]])));
       } catch (err) {
+        stats.spaceErrors++;
         logger.error(
           `Failed to compute member summaries for space [${spaceId}]: ${items.length} composite SLOs will not be updated this run: ${err}`
         );
@@ -209,7 +233,8 @@ function buildBulkOps(
   bySpace: Map<string, SpaceItems>,
   memberMapBySpace: Map<string, MemberDefinitionMap>,
   summaryResultBySpace: Map<string, SummaryResultMap>,
-  logger: Logger
+  logger: Logger,
+  stats: RunStats
 ): object[] {
   const bulkOps: object[] = [];
   for (const [spaceId, items] of bySpace) {
@@ -244,6 +269,7 @@ function buildBulkOps(
         });
         bulkOps.push(buildSummaryDoc(compositeSlo, compositeSummary, spaceId));
       } catch (err) {
+        stats.computeErrors++;
         logger.warn(
           `Failed to compute summary for composite SLO [${compositeSlo.id}] in space [${spaceId}]: ${err}`
         );
