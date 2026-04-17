@@ -15,13 +15,13 @@ import {
 describe('getColorPalette', () => {
   test('Should create RGB color ramp', () => {
     expect(getColorPalette('Blues')).toEqual([
-      '#d8e7ff',
-      '#c8ddff',
-      '#b8d4ff',
-      '#a8caff',
-      '#98c0ff',
-      '#87b6ff',
-      '#75acff',
+      '#e0ecff',
+      '#cfe1ff',
+      '#bed7ff',
+      '#adccff',
+      '#9bc2ff',
+      '#89b7ff',
+      '#76adff',
       '#61a2ff',
     ]);
   });
@@ -29,7 +29,7 @@ describe('getColorPalette', () => {
 
 describe('getColorRampCenterColor', () => {
   test('Should get center color from color ramp', () => {
-    expect(getColorRampCenterColor('Blues')).toBe('#98c0ff');
+    expect(getColorRampCenterColor('Blues')).toBe('#9bc2ff');
   });
 });
 
@@ -37,19 +37,19 @@ describe('getOrdinalMbColorRampStops', () => {
   test('Should create color stops', () => {
     expect(getOrdinalMbColorRampStops('Blues', 0, 1000, false)).toEqual([
       0,
-      '#d8e7ff',
+      '#e0ecff',
       125,
-      '#c8ddff',
+      '#cfe1ff',
       250,
-      '#b8d4ff',
+      '#bed7ff',
       375,
-      '#a8caff',
+      '#adccff',
       500,
-      '#98c0ff',
+      '#9bc2ff',
       625,
-      '#87b6ff',
+      '#89b7ff',
       750,
-      '#75acff',
+      '#76adff',
       875,
       '#61a2ff',
     ]);
@@ -60,19 +60,19 @@ describe('getOrdinalMbColorRampStops', () => {
       0,
       '#61a2ff',
       125,
-      '#75acff',
+      '#76adff',
       250,
-      '#87b6ff',
+      '#89b7ff',
       375,
-      '#98c0ff',
+      '#9bc2ff',
       500,
-      '#a8caff',
+      '#adccff',
       625,
-      '#b8d4ff',
+      '#bed7ff',
       750,
-      '#c8ddff',
+      '#cfe1ff',
       875,
-      '#d8e7ff',
+      '#e0ecff',
     ]);
   });
 
@@ -92,13 +92,13 @@ describe('getPercentilesMbColorRampStops', () => {
     ];
     expect(getPercentilesMbColorRampStops('Blues', percentiles, false)).toEqual([
       5567.83,
-      '#cee1ff',
+      '#d6e5ff',
       8069,
-      '#b5d2ff',
+      '#bad5ff',
       9581.13,
-      '#9bc2ff',
+      '#9fc4ff',
       11145.5,
-      '#80b2ff',
+      '#82b3ff',
       16958.18,
       '#61a2ff',
     ]);
@@ -116,13 +116,13 @@ describe('getPercentilesMbColorRampStops', () => {
       5567.83,
       '#61a2ff',
       8069,
-      '#80b2ff',
+      '#82b3ff',
       9581.13,
-      '#9bc2ff',
+      '#9fc4ff',
       11145.5,
-      '#b5d2ff',
+      '#bad5ff',
       16958.18,
-      '#cee1ff',
+      '#d6e5ff',
     ]);
   });
 });

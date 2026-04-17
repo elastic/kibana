@@ -10,12 +10,13 @@
 import type { Reference } from '@kbn/content-management-utils';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import {
+  optionsListDSLControlSchema,
   type LegacyStoredOptionsListExplicitInput,
   type OptionsListDSLControlState,
 } from '@kbn/controls-schemas';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { convertCamelCasedKeysToSnakeCase } from '@kbn/presentation-publishing';
-import { omitBy } from 'lodash';
+
 import { transformDataControlIn, transformDataControlOut } from './data_control_transforms';
 
 const OPTIONS_LIST_REF_NAME = 'optionsListDataView' as const;
@@ -26,6 +27,7 @@ const OPTIONS_LIST_LEGACY_REF_NAMES = [
 
 export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(OPTIONS_LIST_CONTROL, {
+    getSchema: () => optionsListDSLControlSchema,
     getTransforms: () => ({
       transformIn: (state: OptionsListDSLControlState) => {
         const { state: dataControlState, references } = transformDataControlIn(
@@ -46,7 +48,7 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
         panelReferences: Reference[] | undefined,
         containerReferences: Reference[] | undefined,
         id: string | undefined
-      ): OptionsListDSLControlState => {
+      ): Partial<OptionsListDSLControlState> => {
         const dataControlState = transformDataControlOut(
           id,
           state,
@@ -73,20 +75,19 @@ export const registerOptionsListControlTransforms = (embeddable: EmbeddableSetup
 
         // Optional legacy props may have been stored as `null` instead of `undefined`, so drop all
         // null or undefined keys
-        return omitBy(
-          {
-            ...dataControlState,
-            exclude,
-            sort,
-            exists_selected,
-            display_settings,
-            run_past_timeout,
-            search_technique,
-            selected_options,
-            single_select,
-          },
-          (v) => v === null || v === undefined
-        ) as OptionsListDSLControlState;
+        return {
+          ...dataControlState,
+          ...(typeof exclude === 'boolean' && { exclude }),
+          ...(sort && { sort: sort as OptionsListDSLControlState['sort'] }),
+          ...(typeof exists_selected === 'boolean' && { exists_selected }),
+          ...(display_settings && { display_settings }),
+          ...(typeof run_past_timeout === 'boolean' && { run_past_timeout }),
+          ...(search_technique && {
+            search_technique: search_technique as OptionsListDSLControlState['search_technique'],
+          }),
+          ...(selected_options && { selected_options }),
+          ...(typeof single_select === 'boolean' && { single_select }),
+        };
       },
     }),
   });

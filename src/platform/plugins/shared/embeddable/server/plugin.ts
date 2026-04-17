@@ -59,7 +59,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
-  getAllEmbeddableSchemas: () => ObjectType[];
+  getAllEmbeddableSchemas: () => { [key: string]: ObjectType };
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
@@ -75,7 +75,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry = getTransformsRegistry(this.drilldownRegistry);
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
@@ -90,7 +90,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,

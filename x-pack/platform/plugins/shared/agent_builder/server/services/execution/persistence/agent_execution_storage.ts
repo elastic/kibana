@@ -33,6 +33,7 @@ const storageSettings = {
       }),
       event_count: types.long({}),
       events: types.object({ dynamic: false, properties: {} }),
+      metadata: types.flattened(),
     },
   },
 } satisfies IndexStorageSettings;
@@ -47,6 +48,7 @@ export interface AgentExecutionProperties {
   error?: SerializedExecutionError;
   event_count?: number;
   events?: ChatEvent[];
+  metadata?: Record<string, string>;
 }
 
 export type AgentExecutionStorageSettings = typeof storageSettings;

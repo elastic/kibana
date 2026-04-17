@@ -190,6 +190,7 @@ const okResponseSchema = () =>
     successCount: schema.number({
       meta: { description: 'Indicates the number of successfully imported records.' },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response body populated server-side by importer, not user input
     errors: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
       meta: {
         description: `Indicates the import was unsuccessful and specifies the objects that failed to import.
@@ -197,6 +198,7 @@ const okResponseSchema = () =>
 NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a \`missing_references\` error and conflict error.`,
       },
     }),
+    // codeql[js/kibana/unbounded-array-in-schema] Response body populated server-side by importer, not user input
     successResults: schema.arrayOf(schema.object({}, { unknowns: 'allow' }), {
       meta: {
         description: `Indicates the objects that are successfully imported, with any metadata if applicable.

@@ -91,6 +91,40 @@ describe('QradarRulesXmlParser', () => {
       expect(rules[0].rule_data).not.toContain('&lt;');
       expect(rules[0].rule_data).not.toContain('&gt;');
     });
+
+    it('should strip nested HTML tag fragments without leaving injectable tags', async () => {
+      const ruleData = `<rule buildingBlock="false">
+  <name>Test Rule</name>
+  <notes>Test notes</notes>
+  <testDefinitions>
+    <test><text>payload &lt;&lt;script&gt;script&gt;alert(1)&lt;/script&gt; end</text></test>
+  </testDefinitions>
+</rule>`;
+      const ruleDataBase64 = Buffer.from(ruleData).toString('base64');
+      const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
+      const parser = new QradarRulesXmlParser(xml);
+      const rules = await parser.getRules();
+
+      expect(rules[0].rule_data).not.toContain('<script>');
+      const textContent = rules[0].rule_data.match(/<text>(.*?)<\/text>/)?.[1] ?? '';
+      expect(textContent).not.toMatch(/<[a-z][^>]*>/i);
+    });
+
+    it('should not double-unescape entities like &amp;quot;', async () => {
+      const ruleData = `<rule buildingBlock="false">
+  <name>Test Rule</name>
+  <notes>Test notes</notes>
+  <testDefinitions>
+    <test><text>value is &amp;quot;safe&amp;quot;</text></test>
+  </testDefinitions>
+</rule>`;
+      const ruleDataBase64 = Buffer.from(ruleData).toString('base64');
+      const xml = `<content><custom_rule><rule_data>${ruleDataBase64}</rule_data></custom_rule></content>`;
+      const parser = new QradarRulesXmlParser(xml);
+      const rules = await parser.getRules();
+
+      expect(rules[0].rule_data).toContain('<text>value is "safe"</text>');
+    });
   });
 
   describe('getResources', () => {

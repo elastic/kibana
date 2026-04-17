@@ -11,7 +11,11 @@ import {
 } from '@kbn/elastic-assistant/impl/assistant_context/constants';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TraceOptions } from '@kbn/elastic-assistant/impl/assistant/types';
-import type { LangSmithOptions } from '../../../common';
+
+export interface LangSmithOptions {
+  projectName: string;
+  apiKey: string;
+}
 
 const sessionStorage = new Storage(window.sessionStorage);
 
@@ -30,8 +34,14 @@ export const getLangSmithOptions = (
   if (!sessionStorageTraceOptions) {
     return;
   }
+
+  const { langSmithProject, langSmithApiKey } = sessionStorageTraceOptions;
+  if (!langSmithProject || !langSmithApiKey) {
+    return;
+  }
+
   return {
-    projectName: sessionStorageTraceOptions.langSmithProject,
-    apiKey: sessionStorageTraceOptions.langSmithApiKey,
+    projectName: langSmithProject,
+    apiKey: langSmithApiKey,
   };
 };

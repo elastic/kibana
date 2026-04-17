@@ -65,6 +65,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     },
     uiSettings,
     embeddingOrigin,
+    cps,
   } = useAiopsAppContext();
 
   const { filters, query } = useFilterQueryUpdates();
@@ -227,6 +228,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           minTimeRange,
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           {
             [AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
           }
@@ -238,6 +240,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           { to: minTimeRange.to, from: minTimeRange.from },
           searchQuery,
           runtimeMappings,
+          cps?.cpsManager?.getProjectRouting(),
           intervalMs,
           minTimeRange.useSubAgg ? additionalFilter : undefined
         ),
@@ -287,6 +290,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     }
   }, [
     cancelRequest,
+    cps?.cpsManager,
     dataView,
     earliest,
     embeddingOrigin,

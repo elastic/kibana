@@ -7,7 +7,7 @@
 
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common/tools';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * DISCLAIMER: This skill is a sample skill. It is not registered.

@@ -32,6 +32,7 @@ import {
 } from '../../../../../common/data_sources';
 import { handleSourceColumnState } from '../../../../utils/state_helpers';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import type { DefaultEsqlQueryConfig } from '../../../../context_awareness';
 
 export function getInitialAppState({
   initialUrlState,
@@ -39,12 +40,14 @@ export function getInitialAppState({
   persistedTab,
   dataView,
   services,
+  defaultProfileEsqlQuery,
 }: {
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState?: boolean;
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
+  defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }) {
   const defaultAppState = getDefaultAppState({
     persistedTab,
@@ -52,12 +55,21 @@ export function getInitialAppState({
     services,
     initialUrlState,
     hasGlobalState,
+    defaultProfileEsqlQuery,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
   // https://github.com/elastic/kibana/issues/122555
   if (typeof mergedState.hideChart !== 'boolean') {
     mergedState.hideChart = undefined;
+  }
+
+  if (typeof mergedState.hideTable !== 'boolean') {
+    mergedState.hideTable = undefined;
+  }
+
+  if (mergedState.hideChart && mergedState.hideTable) {
+    mergedState.hideTable = false;
   }
 
   // Don't allow URL state to overwrite the data source if there's an ES|QL query
@@ -90,12 +102,14 @@ function getDefaultQuery({
   persistedTab,
   services,
   dataView,
+  defaultProfileEsqlQuery,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   services: DiscoverServices;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
+  defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }): Query | AggregateQuery | undefined {
   if (persistedTab?.serializedSearchSource.query) return persistedTab.serializedSearchSource.query;
 
@@ -113,7 +127,7 @@ function getDefaultQuery({
   const canUseEsql = services.uiSettings.get(ENABLE_ESQL) && dataView instanceof DataView;
   const isEsqlDefault = services.discoverFeatureFlags.getIsEsqlDefault();
   if (canUseEsql && (queryMode === 'esql' || isEsqlDefault))
-    return { esql: getInitialESQLQuery(dataView, true) };
+    return { esql: defaultProfileEsqlQuery?.query ?? getInitialESQLQuery(dataView) };
 
   // Lastly, fall back to classic if we can't use anything else
   return services.data.query.queryString.getDefaultQuery();
@@ -125,12 +139,14 @@ function getDefaultAppState({
   services,
   initialUrlState,
   hasGlobalState,
+  defaultProfileEsqlQuery,
 }: {
   persistedTab: DiscoverSessionTab | undefined;
   dataView: DataView | Pick<DataView, 'id' | 'timeFieldName'> | undefined;
   services: DiscoverServices;
   initialUrlState: DiscoverAppState | undefined;
   hasGlobalState: boolean;
+  defaultProfileEsqlQuery?: DefaultEsqlQueryConfig;
 }) {
   const { uiSettings, storage } = services;
   const query = getDefaultQuery({
@@ -139,6 +155,7 @@ function getDefaultAppState({
     dataView,
     initialUrlState,
     hasGlobalState,
+    defaultProfileEsqlQuery,
   });
   const isEsqlQuery = isOfAggregateQueryType(query);
   // If the data view doesn't have a getFieldByName method (e.g. if it's a spec or list item),
@@ -186,6 +203,9 @@ function getDefaultAppState({
   }
   if (persistedTab?.hideChart !== undefined) {
     defaultState.hideChart = persistedTab.hideChart;
+  }
+  if (persistedTab?.hideTable !== undefined) {
+    defaultState.hideTable = persistedTab.hideTable;
   }
   if (persistedTab?.rowHeight !== undefined) {
     defaultState.rowHeight = persistedTab.rowHeight;

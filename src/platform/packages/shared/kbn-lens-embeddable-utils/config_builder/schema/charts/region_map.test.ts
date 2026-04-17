@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import type { RegionMapState } from './region_map';
 import { regionMapStateSchema } from './region_map';
@@ -16,15 +17,15 @@ type RegionMapWithoutDefaultsConfig = Omit<RegionMapState, 'sampling' | 'ignore_
 
 type RegionTerms = Extract<RegionMapState['region'], { operation: 'terms' }>;
 interface RegionMapTermsRegionBaseConfig {
-  region: Omit<RegionTerms, 'size'>;
+  region: Omit<RegionTerms, 'limit'>;
 }
 
 describe('Region Map Schema', () => {
   const baseRegionMapConfig: Omit<RegionMapWithoutDefaultsConfig, 'metric' | 'region'> = {
     type: 'region_map',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   };
 
@@ -53,7 +54,7 @@ describe('Region Map Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        region: { ...input.region, size: 5 },
+        region: { ...input.region, limit: 5 },
       });
     });
 
@@ -69,8 +70,8 @@ describe('Region Map Schema', () => {
           filters: [
             {
               filter: {
-                language: 'kuery',
-                query: 'location: "US"',
+                language: 'kql',
+                expression: 'location: "US"',
               },
               label: 'US',
             },
@@ -94,7 +95,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['location'],
-          size: 5,
+          limit: 5,
           ems: {
             boundaries: 'world_countries',
             join: 'iso',
@@ -121,8 +122,8 @@ describe('Region Map Schema', () => {
           filters: [
             {
               filter: {
-                language: 'kuery',
-                query: 'location: "US"',
+                language: 'kql',
+                expression: 'location: "US"',
               },
               label: 'US',
             },
@@ -152,7 +153,12 @@ describe('Region Map Schema', () => {
 
     it('throws on missing ems join field', () => {
       const input: Omit<RegionMapWithoutDefaultsConfig, 'region'> & {
-        region: { operation: 'terms'; fields: string[]; size: number; ems: { boundaries: string } };
+        region: {
+          operation: 'terms';
+          fields: string[];
+          limit: number;
+          ems: { boundaries: string };
+        };
       } = {
         ...baseRegionMapConfig,
         metric: {
@@ -162,7 +168,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['location'],
-          size: 5,
+          limit: 5,
           ems: {
             boundaries: 'world_countries',
           },
@@ -175,18 +181,17 @@ describe('Region Map Schema', () => {
     it('throw when using term buckets operation in an esql configuration', () => {
       const input: RegionMapWithoutDefaultsConfig = {
         type: 'region_map',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'count',
         },
         region: {
           operation: 'terms',
           fields: ['category'],
-          size: 5,
+          limit: 5,
         },
       };
       expect(() => regionMapStateSchema.validate(input)).toThrow();
@@ -206,7 +211,7 @@ describe('Region Map Schema', () => {
         region: {
           operation: 'terms',
           fields: ['geo.dest'],
-          size: 10,
+          limit: 10,
           ems: {
             boundaries: 'world_countries',
             join: 'iso-code2',
@@ -223,16 +228,14 @@ describe('Region Map Schema', () => {
         type: 'region_map',
         title: 'Region map',
         description: 'Top 10 countries by average bytes',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM my-index | LIMIT 100',
         },
         metric: {
-          operation: 'value',
           column: 'avg_bytes',
         },
         region: {
-          operation: 'value',
           column: 'location',
           ems: {
             boundaries: 'world_countries',

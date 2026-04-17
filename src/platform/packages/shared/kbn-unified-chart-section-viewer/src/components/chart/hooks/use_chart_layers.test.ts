@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { MetricField } from '../../../types';
+import type { ParsedMetricItem, MetricUnit, NullableMetricUnit } from '../../../types';
 import { useChartLayers } from './use_chart_layers';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -19,19 +19,19 @@ jest.mock('../../../common/utils', () => ({
 }));
 
 describe('useChartLayers', () => {
-  const mockMetric: MetricField = {
-    name: 'system.cpu.total.norm.pct',
-    type: ES_FIELD_TYPES.DOUBLE,
-    instrument: 'gauge',
-    unit: 'percent',
-    index: 'metrics-*',
-    dimensions: [],
+  const mockMetric: ParsedMetricItem = {
+    metricName: 'system.cpu.total.norm.pct',
+    dataStream: 'metrics-*',
+    fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+    metricTypes: ['gauge'],
+    units: ['percent', null],
+    dimensionFields: [],
   };
 
   it('should return an area chart configuration when no dimensions are provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
-        metric: mockMetric,
+        metricItem: mockMetric,
         dimensions: [],
         color: '#000',
       })
@@ -47,62 +47,115 @@ describe('useChartLayers', () => {
   it('should return a line chart configuration with a breakdown when single dimension is provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
-        metric: mockMetric,
-        dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
+        metricItem: mockMetric,
+        dimensions: [{ name: 'service.name' }],
         color: '#FFF',
       })
     );
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    expect(layer.breakdown).toBe('service.name'); // Single dimension as string
+    expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });
 
-  it('should return a line chart configuration with first dimension when multiple dimensions are provided', () => {
+  it('should return a line chart configuration with array when multiple dimensions are provided', () => {
     const { result } = renderHook(() =>
       useChartLayers({
-        metric: mockMetric,
-        dimensions: [
-          { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-          { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-        ],
+        metricItem: mockMetric,
+        dimensions: [{ name: 'service.name' }, { name: 'host.name' }],
         color: '#FFF',
       })
     );
 
     const [layer] = result.current;
     expect(layer.seriesType).toBe('line');
-    // Lens uses first dimension only after revert
-    expect(layer.breakdown).toBe('service.name');
+    // Lens natively supports multiple dimensions - pass all dimensions as array
+    expect(layer.breakdown).toEqual(['service.name', 'host.name']);
     expect(layer.yAxis[0].value).toBe('AVG(system.cpu.total.norm.pct)');
     expect(layer.yAxis[0].seriesColor).toBe('#FFF');
   });
 
   it('should include format options if the metric has a unit', () => {
-    const metricWithUnit: MetricField = { ...mockMetric, unit: 'bytes' };
+    const metricWithUnit: ParsedMetricItem = { ...mockMetric, units: ['bytes'] as MetricUnit[] };
     const { result } = renderHook(() =>
       useChartLayers({
-        metric: metricWithUnit,
+        metricItem: metricWithUnit,
         dimensions: [],
       })
     );
     const [layer] = result.current;
     expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
+  });
+
+  it('should normalize denormalized units like "byte" to "bytes"', () => {
+    const metricWithDenormalizedUnit: ParsedMetricItem = {
+      ...mockMetric,
+      units: ['byte'] as unknown as NullableMetricUnit[],
+    };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metricItem: metricWithDenormalizedUnit,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
     expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
+  });
+
+  it('should select the first non-null normalized unit when multiple units exist', () => {
+    const metricWithMultipleUnits: ParsedMetricItem = {
+      ...mockMetric,
+      units: [null, 'byte', 'bytes'] as unknown as NullableMetricUnit[],
+    };
+    const { result } = renderHook(() =>
+      useChartLayers({
+        metricItem: metricWithMultipleUnits,
+        dimensions: [],
+      })
+    );
+    const [layer] = result.current;
+    expect(layer.yAxis[0]).toHaveProperty('format');
+    expect(layer.yAxis[0].format).toBe('bytes');
   });
 
   it('should not include format options if the metric has no unit', () => {
-    const metricWithoutUnit: MetricField = { ...mockMetric, unit: undefined };
+    const metricWithoutUnit: ParsedMetricItem = { ...mockMetric, units: [] as MetricUnit[] };
     const { result } = renderHook(() =>
       useChartLayers({
-        metric: metricWithoutUnit,
+        metricItem: metricWithoutUnit,
         dimensions: [],
       })
     );
     const [layer] = result.current;
     expect(layer.yAxis[0]).not.toHaveProperty('format');
     expect(layer.yAxis[0]).not.toHaveProperty('formatString');
+  });
+
+  describe('when type or instrument is null or undefined', () => {
+    it('should return empty layers when fieldTypes is empty', () => {
+      const metricNoType: ParsedMetricItem = { ...mockMetric, fieldTypes: [] };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricNoType,
+          dimensions: [],
+        })
+      );
+      expect(result.current).toEqual([]);
+    });
+
+    it('should return empty layers when metricTypes is empty', () => {
+      const metricNoInstrument: ParsedMetricItem = { ...mockMetric, metricTypes: [] };
+      const { result } = renderHook(() =>
+        useChartLayers({
+          metricItem: metricNoInstrument,
+          dimensions: [],
+        })
+      );
+      expect(result.current).toEqual([]);
+    });
   });
 });

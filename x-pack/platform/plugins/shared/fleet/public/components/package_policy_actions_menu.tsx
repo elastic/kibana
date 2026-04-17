@@ -8,11 +8,14 @@
 import React, { useMemo, useState } from 'react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { EXCLUDED_FROM_PACKAGE_POLICY_COPY_PACKAGES } from '../../common/constants';
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
-import { useAgentPolicyRefresh, useAuthz, useLink } from '../hooks';
+import { useAgentPolicyRefresh, useAuthz, useLink, useUpgradeReviewActions } from '../hooks';
 import { policyHasFleetServer } from '../services';
+
+import { scheduleAutoOpenModal } from '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -57,6 +60,12 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const onEnrollmentFlyoutClose = useMemo(() => {
     return () => setIsEnrollmentFlyoutOpen(false);
   }, []);
+  const { handleReEnable: handleReviewUpgrade } = useUpgradeReviewActions({
+    pkgName: packagePolicy.package?.name || '',
+    pkgTitle: packagePolicy.package?.title || '',
+    targetVersion: packagePolicy.pendingUpgradeReview?.target_version || '',
+  });
+
   const menuItems = [
     // FIXME: implement View package policy action
     // <EuiContextMenuItem
@@ -74,7 +83,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsAddAgentItem"
-            icon="plusInCircle"
+            icon="plusCircle"
             onClick={() => {
               setIsActionsMenuOpen(false);
               setIsEnrollmentFlyoutOpen(true);
@@ -110,7 +119,30 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         defaultMessage="Edit integration"
       />
     </EuiContextMenuItem>,
-    ...(packagePolicy.hasUpgrade
+    ...(packagePolicy.hasUpgrade &&
+    packagePolicy.keepPoliciesUpToDate &&
+    packagePolicy.pendingUpgradeReview &&
+    packagePolicy.pendingUpgradeReview.action !== 'accepted'
+      ? [
+          <EuiContextMenuItem
+            data-test-subj="PackagePolicyActionsDeclinedUpgradeItem"
+            disabled={!canWriteIntegrationPolicies}
+            icon="refresh"
+            onClick={() => {
+              setIsActionsMenuOpen(false);
+              scheduleAutoOpenModal(packagePolicy.package?.name || '');
+              handleReviewUpgrade();
+            }}
+            key="packagePolicyDeclinedUpgrade"
+          >
+            <FormattedMessage
+              id="xpack.fleet.policyDetails.packagePoliciesTable.declinedUpgradeActionTitle"
+              data-test-subj="DeclinedUpgradeIntegrationPolicy"
+              defaultMessage="Review policy upgrade"
+            />
+          </EuiContextMenuItem>,
+        ]
+      : packagePolicy.hasUpgrade
       ? [
           <EuiContextMenuItem
             data-test-subj="PackagePolicyActionsUpgradeItem"
@@ -219,6 +251,10 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         isOpen={isActionsMenuOpen}
         items={menuItems}
         onChange={(open) => setIsActionsMenuOpen(open)}
+        aria-label={i18n.translate('xpack.fleet.packagePolicyActionsMenu.actionsAriaLabel', {
+          defaultMessage: 'Actions for {policyName}',
+          values: { policyName: packagePolicy.name },
+        })}
       />
     </>
   );

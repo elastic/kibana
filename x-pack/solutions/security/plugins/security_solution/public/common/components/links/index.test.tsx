@@ -11,6 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
+  EntityDetailsLink,
   GoogleLink,
   HostDetailsLink,
   NetworkDetailsLink,
@@ -28,6 +29,8 @@ import { SecurityPageName } from '../../../app/types';
 import { mockGetAppUrl, mockNavigateTo } from '@kbn/security-solution-navigation/mocks/navigation';
 import { APP_UI_ID } from '../../../../common';
 import { TestProviders } from '../../mock';
+import { getHostDetailsUrl, getUsersDetailsUrl } from '../link_to';
+import { EntityType } from '../../../../common/entity_analytics/types';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
 jest.mock('../navigation/use_url_state_query_params');
@@ -61,6 +64,10 @@ describe('Custom Links', () => {
   const ipv6Encoded = encodeIpv6(ipv6);
 
   describe('HostDetailsLink', () => {
+    const expectedHostDetailsHref = getHostDetailsUrl(hostName, undefined, undefined, {
+      'host.name': hostName,
+    });
+
     test('should render valid link to Host Details with hostName as the display text', () => {
       render(
         <TestProviders>
@@ -68,7 +75,7 @@ describe('Custom Links', () => {
         </TestProviders>
       );
       const link = screen.getByTestId('host-details-button');
-      expect(link).toHaveAttribute('href', `/name/${encodeURIComponent(hostName)}`);
+      expect(link).toHaveAttribute('href', expectedHostDetailsHref);
       expect(link).toHaveTextContent(hostName);
     });
 
@@ -79,8 +86,26 @@ describe('Custom Links', () => {
         </TestProviders>
       );
       const link = screen.getByTestId('host-details-button');
-      expect(link).toHaveAttribute('href', `/name/${encodeURIComponent(hostName)}`);
+      expect(link).toHaveAttribute('href', expectedHostDetailsHref);
       expect(link).toHaveTextContent(hostName);
+    });
+  });
+
+  describe('EntityDetailsLink', () => {
+    test('forwards entityId for user entities (parity with host branch)', () => {
+      const userName = 'test-user';
+      const entityId = 'entity-store-id';
+      const expectedHref = getUsersDetailsUrl(userName, undefined, undefined, entityId);
+      render(
+        <TestProviders>
+          <EntityDetailsLink
+            entityType={EntityType.user}
+            entityName={userName}
+            entityId={entityId}
+          />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('users-link-anchor')).toHaveAttribute('href', expectedHref);
     });
   });
 
@@ -280,7 +305,7 @@ describe('Custom Links', () => {
             </ExternalLink>
           </TestProviders>
         );
-        expect(container.querySelector('span [data-euiicon-type="popout"]')).toBeInTheDocument();
+        expect(container.querySelector('span [data-euiicon-type="external"]')).toBeInTheDocument();
       });
 
       test('it renders correct url', () => {
@@ -625,7 +650,7 @@ describe('Custom Links', () => {
             <ReputationLink domain={'192.0.2.0'} />
           </TestProviders>
         );
-        expect(container.querySelectorAll('span [data-euiicon-type="popout"]')).toHaveLength(5);
+        expect(container.querySelectorAll('span [data-euiicon-type="external"]')).toHaveLength(5);
       });
 
       test('it renders correct number of external icons', () => {
@@ -634,7 +659,7 @@ describe('Custom Links', () => {
             <ReputationLink domain={'192.0.2.0'} overflowIndexStart={1} />
           </TestProviders>
         );
-        expect(container.querySelectorAll('span [data-euiicon-type="popout"]')).toHaveLength(1);
+        expect(container.querySelectorAll('span [data-euiicon-type="external"]')).toHaveLength(1);
       });
     });
   });

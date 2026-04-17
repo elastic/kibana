@@ -37,11 +37,37 @@ paths:
                     args: "-param1 value1 -param2 value2"
       responses:
         '200':
-          description: Action request was successfully created
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../../../model/schema/common.schema.yaml#/components/schemas/ResponseActionCreateSuccessResponse'
+              examples:
+                RunScriptSuccess:
+                  summary: Run script action successfully created
+                  value:
+                    data:
+                      id: "233db9ea-6733-4849-9226-5a7039c7161d"
+                      agents:
+                        - "ed518850-681a-4d60-bb98-e22640cae2a8"
+                      command: "runscript"
+                      agentType: "sentinel_one"
+                      isExpired: false
+                      isCompleted: false
+                      wasSuccessful: false
+                      status: "pending"
+                      startedAt: "2022-07-29T19:08:49.126Z"
+                      createdBy: "elastic"
+                      hosts:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          name: "gke-node-1235412"
+                      agentState:
+                        ed518850-681a-4d60-bb98-e22640cae2a8:
+                          isCompleted: false
+                          wasSuccessful: false
+                      parameters:
+                        scriptId: "1111-2222-3333-4444-5555-6666-7777-8888"
+                      outputs: {}
 components:
   schemas:
     RunScriptRouteRequestBody:

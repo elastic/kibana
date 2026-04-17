@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ChromeStart } from '@kbn/core/public';
 import {
   routeToHome,
   routeToConnectors,
@@ -13,7 +14,20 @@ import {
   routeToLogs,
   legacyRouteToAlerts,
 } from '../constants';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
+
+/**
+ * Wraps chrome.setBreadcrumbs so that project-style (solution nav) breadcrumbs
+ * are set alongside classic breadcrumbs. Without this, apps that are not part of
+ * a solution's navigation tree only show the root deployment crumb.
+ */
+export const createSetBreadcrumbs =
+  (setBreadcrumbs: ChromeStart['setBreadcrumbs']): ChromeStart['setBreadcrumbs'] =>
+  (breadcrumbs, params) => {
+    setBreadcrumbs(breadcrumbs, {
+      ...params,
+      project: params?.project ?? { value: breadcrumbs, absolute: true },
+    });
+  };
 
 export const getAlertingSectionBreadcrumb = (
   type: string,
@@ -98,11 +112,7 @@ export const getRulesBreadcrumbWithHref = (
   getUrlForApp: (appId: string, options?: { path?: string }) => string
 ) => {
   const rulesBreadcrumb = getAlertingSectionBreadcrumb('rules', true);
-
-  const useUnifiedRulesPage = getIsExperimentalFeatureEnabled('unifiedRulesPage');
-  const breadcrumbHref = useUnifiedRulesPage
-    ? getUrlForApp('rules', { path: '/' })
-    : getUrlForApp('management', { path: 'insightsAndAlerting/triggersActions/rules' });
+  const breadcrumbHref = getUrlForApp('rules', { path: '/' });
 
   return {
     ...rulesBreadcrumb,

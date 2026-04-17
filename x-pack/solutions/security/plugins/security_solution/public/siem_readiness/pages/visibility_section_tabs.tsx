@@ -54,7 +54,7 @@ export const VisibilitySectionTabs: React.FC<VisibilitySectionTabsProps> = ({
       name: i18n.translate('xpack.securitySolution.siemReadiness.visibility.retention.tab.title', {
         defaultMessage: 'Retention',
       }),
-      content: <RetentionTab />,
+      content: <RetentionTab activeCategories={activeCategories} />,
     },
   ];
 

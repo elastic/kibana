@@ -41,12 +41,12 @@ interface ToolTaskOutput {
 }
 
 function createEvaluateEsqlDataset({
-  phoenixClient,
+  executorClient,
   chatClient,
   inferenceClient,
   log,
 }: {
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: AgentBuilderEvaluationChatClient;
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
@@ -57,7 +57,7 @@ function createEvaluateEsqlDataset({
     const executeToolTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
       const response = await chatClient.executeTool({
         toolId: platformCoreTools.generateEsql,
-        toolParams: { query: input.question },
+        toolParams: { query: input!.question },
       });
 
       const esql = (response.results as ToolResult[])
@@ -80,7 +80,7 @@ function createEvaluateEsqlDataset({
       groundTruthExtractor: (expected) => (expected as { query?: string } | undefined)?.query ?? '',
     });
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task: executeToolTask,
@@ -92,11 +92,11 @@ function createEvaluateEsqlDataset({
 
 const evaluate = base.extend<{ evaluateDataset: EvaluateDataset }, {}>({
   evaluateDataset: [
-    async ({ chatClient, phoenixClient, inferenceClient, log }, use) => {
+    async ({ chatClient, executorClient, inferenceClient, log }, use) => {
       await use(
         createEvaluateEsqlDataset({
           chatClient,
-          phoenixClient,
+          executorClient,
           inferenceClient,
           log,
         })

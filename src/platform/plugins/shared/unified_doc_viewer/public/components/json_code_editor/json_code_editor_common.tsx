@@ -81,7 +81,7 @@ export const JsonCodeEditorCommon = ({
         <div className="eui-textRight">
           <EuiCopy textToCopy={jsonValue}>
             {(copy) => (
-              <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+              <EuiButtonEmpty size="xs" flush="right" iconType="copy" onClick={copy}>
                 {copyToClipboardLabel}
               </EuiButtonEmpty>
             )}

@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import DOMPurify from 'dompurify';
-import { JSDOM } from 'jsdom';
-
 export function isBase64Encoded(str: unknown): boolean {
   if (typeof str !== 'string' || str.length === 0) {
     return false;
@@ -43,7 +40,12 @@ export function sanitizeSvg(svgContent: Buffer): Buffer {
       }
     }
 
-    // Create a DOM environment
+    // Create a DOM environment - both packages are loaded lazily to avoid paying
+    // the ~494 CJS module startup cost in processes that never sanitize SVGs.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { JSDOM } = require('jsdom') as typeof import('jsdom');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const DOMPurify = require('dompurify') as typeof import('dompurify');
     const window = new JSDOM('').window;
     const purify = DOMPurify(window);
 

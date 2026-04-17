@@ -188,12 +188,13 @@ describe('findUserActionsRoute', () => {
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
-      attachmentIDs: [
+      savedObjectIds: [
         userActionsMockData.userActions[1].comment_id,
         userActionsMockData.userActions[2].comment_id,
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
+      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -280,11 +281,12 @@ describe('findUserActionsRoute', () => {
     await findUserActionsRoute.handler({ context, request, response });
 
     expect(casesClientMock.attachments.bulkGet).toHaveBeenCalledWith({
-      attachmentIDs: [
+      savedObjectIds: [
         userActionsMockData.userActions[1].comment_id,
         userActionsMockData.userActions[3].comment_id,
       ],
       caseID: 'my_fake_case_id',
+      mode: 'unified',
     });
     expect(response.ok).toHaveBeenCalledWith(
       expect.objectContaining({

@@ -605,8 +605,6 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
         },
@@ -624,8 +622,6 @@ describe('asFiltersBySpaceId', () => {
           {
             type: AlertingAuthorizationFilterType.KQL,
             fieldNames: {
-              ruleTypeId: 'path.to.rule_type_id',
-              consumer: 'consumer-field',
               spaceIds: 'path.to.space.id',
             },
           },
@@ -640,10 +636,7 @@ describe('asFiltersBySpaceId', () => {
       asFiltersBySpaceId(
         {
           type: AlertingAuthorizationFilterType.ESDSL,
-          fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
-          },
+          fieldNames: {},
         },
         'space1'
       )
@@ -656,8 +649,6 @@ describe('asFiltersBySpaceId', () => {
         {
           type: AlertingAuthorizationFilterType.ESDSL,
           fieldNames: {
-            ruleTypeId: 'path.to.rule_type_id',
-            consumer: 'consumer-field',
             spaceIds: 'path.to.space.id',
           },
         },

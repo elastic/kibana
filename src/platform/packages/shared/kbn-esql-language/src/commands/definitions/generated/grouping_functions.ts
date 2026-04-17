@@ -1882,7 +1882,7 @@ const tbucketDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.TBUCKET,
   description: i18n.translate('kbn-esql-language.esql.definitions.tbucket', {
     defaultMessage:
-      'Creates groups of values - buckets - out of a @timestamp attribute. The size of the buckets must be provided directly.',
+      'Creates groups of values - buckets - out of a `@timestamp` attribute.\nThe size of the buckets can be provided directly as a duration or period.\nAlternatively, the bucket size can be chosen based on a recommended count\nand a range.\n\nWhen using ES|QL in Kibana, the range can be derived automatically from the\n`@timestamp` filter\nthat Kibana adds to the query.',
   }),
   preview: false,
   alias: undefined,
@@ -1893,7 +1893,8 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'date_period',
           optional: false,
-          description: 'Desired bucket size.',
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date',
@@ -1904,7 +1905,476 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'date_period',
           optional: false,
-          description: 'Desired bucket size.',
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'date',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'keyword',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'date',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'keyword',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'buckets',
+          type: 'integer',
+          optional: false,
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
+        },
+        {
+          name: 'from',
+          type: 'text',
+          optional: true,
+          description:
+            'Start of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
+        },
+        {
+          name: 'to',
+          type: 'text',
+          optional: true,
+          description:
+            'End of the range. Required with a numeric `buckets` when no `@timestamp` range is in the query filter.',
         },
       ],
       returnType: 'date_nanos',
@@ -1915,7 +2385,8 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
-          description: 'Desired bucket size.',
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date',
@@ -1926,7 +2397,8 @@ const tbucketDefinition: FunctionDefinition = {
           name: 'buckets',
           type: 'time_duration',
           optional: false,
-          description: 'Desired bucket size.',
+          description:
+            'Target number of buckets, or desired bucket size. When a number is provided, the actual bucket size is derived from `from`/`to` or the `@timestamp` range in the query filter. When a duration or period is provided, it is used as the explicit bucket size.',
         },
       ],
       returnType: 'date_nanos',
@@ -1934,6 +2406,8 @@ const tbucketDefinition: FunctionDefinition = {
   ],
   locationsAvailable: [Location.STATS, Location.STATS_BY],
   examples: [
+    'FROM sample_data\n| STATS count = COUNT(*) BY bucket = TBUCKET(3, "2023-10-23T12:00:00Z", "2023-10-23T14:00:00Z")\n| SORT bucket',
+    'FROM sample_data\n| STATS count = COUNT(*) BY bucket = TBUCKET(20, "2023-10-23T12:00:00Z", "2023-10-23T14:00:00Z")\n| SORT bucket',
     'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET(1 hour)\n| SORT min',
     'FROM sample_data\n| STATS min = MIN(@timestamp), max = MAX(@timestamp) BY bucket = TBUCKET("1 hour")\n| SORT min',
   ],

@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { ListToolsResponse } from '@kbn/agent-builder-plugin/common/http_api/tools';
 import type { ListAgentResponse } from '@kbn/agent-builder-plugin/common/http_api/agents';
 import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
@@ -97,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('Space support - Agent APIs', () => {
       for (const spaceId of ['default', 'space-1', 'space-2']) {
-        it(`should list the correct tools in the "${spaceId}" space`, async () => {
+        it(`should list the correct agents in the "${spaceId}" space`, async () => {
           const response = await supertest
             .get(spaceUrl('/api/agent_builder/agents', spaceId))
             .set('kbn-xsrf', 'kibana')
@@ -106,10 +107,12 @@ export default function ({ getService }: FtrProviderContext) {
           const res = response.body as ListAgentResponse;
           const agents = res.results.filter((agent) => !agent.readonly);
 
-          const expectedAgents = testAgents
-            .filter((agent) => agent.spaceId === spaceId)
-            .map((agent) => agent.agentId)
-            .sort();
+          const expectedAgents = [
+            agentBuilderDefaultAgentId,
+            ...testAgents
+              .filter((agent) => agent.spaceId === spaceId)
+              .map((agent) => agent.agentId),
+          ].sort();
           expect(agents.map((agent) => agent.id).sort()).to.eql(expectedAgents);
         });
       }

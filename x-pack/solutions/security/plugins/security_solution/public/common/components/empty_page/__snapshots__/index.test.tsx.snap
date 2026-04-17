@@ -73,7 +73,7 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
                     class="emotion-euiButtonDisplayContent"
                   >
                     <span
-                      class="eui-textTruncate"
+                      class="eui-textTruncate css-13ifi6d-m"
                     >
                       Do Something
                     </span>
@@ -133,7 +133,7 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
               class="emotion-euiButtonDisplayContent"
             >
               <span
-                class="eui-textTruncate"
+                class="eui-textTruncate css-13ifi6d-m"
               >
                 Do Something
               </span>

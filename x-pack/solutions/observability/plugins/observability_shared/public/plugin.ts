@@ -13,11 +13,12 @@ import type {
   SharePluginStart,
 } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
 import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
-export { updateGlobalNavigation } from './services/update_global_navigation';
+import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
   AssetDetailsFlyoutLocatorDefinition,
   AssetDetailsLocatorDefinition,
@@ -42,9 +43,9 @@ import {
   type MetricsExplorerLocator,
   type TransactionDetailsByTraceIdLocator,
 } from '../common';
-import { updateGlobalNavigation } from './services/update_global_navigation';
 import type { DependencyOverviewLocator } from '../common/locators/apm/dependency_overview_locator';
 import { DependencyOverviewLocatorDefinition } from '../common/locators/apm/dependency_overview_locator';
+
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -53,6 +54,7 @@ export interface ObservabilitySharedStart {
   spaces?: SpacesPluginStart;
   embeddable: EmbeddableStart;
   share: SharePluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;

@@ -8,7 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import { WORKFLOW_INSIGHTS } from '../../../pages/endpoint_hosts/view/translations';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
-import { ActionType } from '../../../../../common/endpoint/types/workflow_insights';
+import { WorkflowInsightActionType } from '../../../../../common/endpoint/types/workflow_insights';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { WORKFLOW_INSIGHTS_UPDATE_ROUTE } from '../../../../../common/endpoint/constants';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -27,7 +27,7 @@ export const useMarkInsightAsRemediated = (backUrl?: string) => {
           version: '1',
           body: JSON.stringify({
             action: {
-              type: ActionType.Remediated,
+              type: WorkflowInsightActionType.enum.remediated,
             },
           }),
         }

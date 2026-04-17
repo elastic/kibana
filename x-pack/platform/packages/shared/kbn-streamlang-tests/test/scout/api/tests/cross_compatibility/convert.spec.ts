@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { ConvertProcessor, SetProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpileIngestPipeline, transpileEsql } from '@kbn/streamlang';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
@@ -27,8 +28,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ attributes: { size: 4096 } }];
       await testBed.ingest('ingest-convert-value', docs, processors);
@@ -37,7 +38,7 @@ apiTest.describe(
       await testBed.ingest('esql-convert-value', docs);
       const esqlResult = await esql.queryOnIndex('esql-convert-value', query);
 
-      expect(ingestResult[0]?.attributes?.size).toBe('4096');
+      expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size).toBe('4096');
       expect(esqlResult.documentsOrdered[0]).toStrictEqual(
         expect.objectContaining({ 'attributes.size': '4096' })
       );
@@ -57,8 +58,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest('ingest-convert-value-to-target', docs, processors);
@@ -67,11 +68,11 @@ apiTest.describe(
         await testBed.ingest('esql-convert-value-to-target', docs);
         const esqlResult = await esql.queryOnIndex('esql-convert-value-to-target', query);
 
-        expect(ingestResult[0]?.attributes?.size).toBe(4096);
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size).toBe(4096);
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size': 4096 })
         );
-        expect(ingestResult[0]?.attributes?.size_str).toBe('4096');
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size_str).toBe('4096');
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size_str': '4096' })
         );
@@ -96,8 +97,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ attributes: { size: 4096 } }];
         await testBed.ingest('ingest-convert-value-to-target-with-where', docs, processors);
@@ -111,11 +112,11 @@ apiTest.describe(
           query
         );
 
-        expect(ingestResult[0]?.attributes?.size).toBe(4096);
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size).toBe(4096);
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size': 4096 })
         );
-        expect(ingestResult[0]?.attributes?.size_str).toBe('4096');
+        expect(asDoc(asDoc(ingestResult[0])?.attributes)?.size_str).toBe('4096');
         expect(esqlResult.documentsOrdered[0]).toStrictEqual(
           expect.objectContaining({ 'attributes.size_str': '4096' })
         );
@@ -149,10 +150,10 @@ apiTest.describe(
           };
 
           // Both transpilers should throw validation errors for Mustache templates
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed'
           );
         }

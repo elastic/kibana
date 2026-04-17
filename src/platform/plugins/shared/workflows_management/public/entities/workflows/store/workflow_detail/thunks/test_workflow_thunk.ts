@@ -9,14 +9,16 @@
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
+import { WorkflowApi } from '@kbn/workflows-ui';
 import { WorkflowsBaseTelemetry } from '../../../../../common/service/telemetry';
+import type { WorkflowTriggerTab } from '../../../../../features/run_workflow/ui/types';
 import type { WorkflowsServices } from '../../../../../types';
 import type { RootState } from '../../types';
 import { selectWorkflow, selectYamlString } from '../selectors';
 
 export interface TestWorkflowParams {
   inputs: Record<string, unknown>;
-  triggerTab?: 'manual' | 'alert' | 'index';
+  triggerTab?: WorkflowTriggerTab;
 }
 
 export interface TestWorkflowResponse {
@@ -31,6 +33,7 @@ export const testWorkflowThunk = createAsyncThunk<
   'detail/testWorkflowThunk',
   async ({ inputs, triggerTab }, { getState, rejectWithValue, extra: { services } }) => {
     const { http, notifications } = services;
+    const api = new WorkflowApi(http);
     const workflowsManagement = services.workflowsManagement;
     const telemetry = workflowsManagement?.telemetry
       ? new WorkflowsBaseTelemetry(workflowsManagement.telemetry)
@@ -44,18 +47,10 @@ export const testWorkflowThunk = createAsyncThunk<
         return rejectWithValue('No YAML content to test');
       }
 
-      const requestBody: Record<string, unknown> = {
+      const response = await api.testWorkflow({
         workflowYaml: yamlString,
+        workflowId: workflow?.id,
         inputs,
-      };
-
-      if (workflow?.id) {
-        requestBody.workflowId = workflow.id;
-      }
-
-      // Make the API call to test the workflow
-      const response = await http.post<TestWorkflowResponse>(`/api/workflows/test`, {
-        body: JSON.stringify(requestBody),
       });
 
       // Report telemetry for successful test run

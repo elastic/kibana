@@ -133,7 +133,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
           {currentStep > 1 ? (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 onClick={() => onBack()}
                 disabled={!validation.isValid}
                 data-test-subj="backButton"
@@ -149,7 +149,7 @@ export const RestoreSnapshotForm: React.FunctionComponent<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 onClick={() => onNext()}
                 disabled={!validation.isValid}
                 data-test-subj="nextButton"

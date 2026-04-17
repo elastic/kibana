@@ -14,26 +14,18 @@ import {
   type DrilldownEditorProps,
 } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  UrlDrilldownConfig,
-  UrlDrilldownGlobalScope,
-} from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  UrlDrilldownCollectConfig,
-  urlDrilldownCompileUrl,
-  urlDrilldownValidateUrlTemplate,
-} from '@kbn/ui-actions-enhanced-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { getInheritedViewMode } from '@kbn/presentation-publishing';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
-  CONTEXT_MENU_TRIGGER,
-  IMAGE_CLICK_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  ON_CLICK_IMAGE,
+  ON_CLICK_ROW,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { UrlDrilldownConfig, UrlDrilldownGlobalScope } from './types';
 import {
   DEFAULT_ENCODE_URL,
   DEFAULT_OPEN_IN_NEW_TAB,
@@ -43,6 +35,9 @@ import type { UrlDrilldownState } from '../../server';
 import { getEventScopeValues, getEventVariableList } from './variables/event_variables';
 import { getContextScopeValues, getContextVariableList } from './variables/context_variables';
 import { getGlobalVariableList } from './variables/global_variables';
+import { UrlDrilldownCollectConfig } from './components/url_drilldown_collect_config';
+import { validateUrlTemplate } from './url_validation';
+import { compile } from './url_template';
 
 type ExecutionContext = ChartActionContext & EmbeddableApiContext;
 type SetupContext = EmbeddableApiContext;
@@ -83,10 +78,7 @@ export function getUrlDrilldown(deps: {
     context: ExecutionContext
   ): Promise<string> {
     const scope = getRuntimeVariables(context);
-    const { isValid, error, invalidUrl } = await urlDrilldownValidateUrlTemplate(
-      drilldownState.url,
-      scope
-    );
+    const { isValid, error, invalidUrl } = await validateUrlTemplate(drilldownState.url, scope);
 
     if (!isValid) {
       const errorMessage = i18n.translate('xpack.urlDrilldown.invalidUrlErrorMessage', {
@@ -102,11 +94,7 @@ export function getUrlDrilldown(deps: {
 
     const doEncode = drilldownState.encode_url ?? DEFAULT_ENCODE_URL;
 
-    const url = await urlDrilldownCompileUrl(
-      drilldownState.url,
-      getRuntimeVariables(context),
-      doEncode
-    );
+    const url = await compile(drilldownState.url, getRuntimeVariables(context), doEncode);
 
     const validUrl = deps.externalUrl.validateUrl(url);
     if (!validUrl) {
@@ -133,14 +121,14 @@ export function getUrlDrilldown(deps: {
 
   function getExampleUrl(trigger?: string): string {
     switch (trigger) {
-      case SELECT_RANGE_TRIGGER:
+      case ON_SELECT_RANGE:
         return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
-      case CONTEXT_MENU_TRIGGER:
-      case IMAGE_CLICK_TRIGGER:
+      case ON_OPEN_PANEL_MENU:
+      case ON_CLICK_IMAGE:
         return 'https://www.example.com/?panel={{context.panel.title}}';
-      case ROW_CLICK_TRIGGER:
+      case ON_CLICK_ROW:
         return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
-      case VALUE_CLICK_TRIGGER:
+      case ON_CLICK_VALUE:
       default:
         return 'https://www.example.com/?{{event.key}}={{event.value}}';
     }

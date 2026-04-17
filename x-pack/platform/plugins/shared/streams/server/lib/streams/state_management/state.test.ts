@@ -23,6 +23,7 @@ import type { Streams } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 
 const placeholderStreamDefinition: Streams.WiredStream.Definition = {
+  type: 'wired',
   name: 'placeholder_stream',
   description: 'You know, for testing',
   updated_at: new Date().toISOString(),
@@ -54,6 +55,7 @@ describe('State', () => {
 
   it('loads the state and initializes the correct Stream class instances', async () => {
     const wiredStream: Streams.WiredStream.Definition = {
+      type: 'wired',
       name: 'wired_stream',
       description: '',
       updated_at: new Date().toISOString(),
@@ -69,6 +71,7 @@ describe('State', () => {
       },
     };
     const classicStream: Streams.ClassicStream.Definition = {
+      type: 'classic',
       name: 'classic_stream',
       description: '',
       updated_at: new Date().toISOString(),

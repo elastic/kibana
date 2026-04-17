@@ -6,12 +6,14 @@
  */
 
 import type React from 'react';
-import type { EuiCommentProps, IconType, EuiButtonProps } from '@elastic/eui';
+import type { EuiCommentProps, IconType, EuiButtonProps, EuiThemeComputed } from '@elastic/eui';
 import type {
   ExternalReferenceAttachmentPayload,
   PersistableStateAttachmentPayload,
+  UnifiedReferenceAttachmentPayload,
+  UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
-import type { CaseUI } from '../../containers/types';
+import type { CaseUI, CaseUser } from '../../containers/types';
 
 export enum AttachmentActionType {
   BUTTON = 'button',
@@ -45,11 +47,23 @@ export interface AttachmentViewObject<Props = {}> {
   event?: EuiCommentProps['event'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
+  deleteSuccessTitle?: string;
+  className?: string;
+  css?: EuiCommentProps['css'];
+}
+
+export interface AttachmentTabViewObject<Props = {}> {
+  children?: React.ComponentType<Props>;
 }
 
 export interface CommonAttachmentViewProps {
-  attachmentId: string;
+  savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+}
+
+/** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
+export interface CommonAttachmentTabViewProps {
+  caseData: CaseUI;
 }
 
 export interface ExternalReferenceAttachmentViewProps extends CommonAttachmentViewProps {
@@ -62,13 +76,24 @@ export interface PersistableStateAttachmentViewProps extends CommonAttachmentVie
   persistableStateAttachmentState: PersistableStateAttachmentPayload['persistableStateAttachmentState'];
 }
 
+export interface RowContext {
+  manageMarkdownEditIds: string[];
+  selectedOutlineCommentId: string;
+  loadingCommentIds: string[];
+  appId: string;
+  euiTheme: EuiThemeComputed<{}>;
+}
+
 /**
  * View props for reference-based unified attachments (e.g., alerts, events)
  * These attachments reference external entities by ID
  */
 export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentViewProps {
-  attachmentId: string;
-  metadata?: Record<string, unknown>;
+  attachmentId: UnifiedReferenceAttachmentPayload['attachmentId'];
+  metadata?: UnifiedReferenceAttachmentPayload['metadata'];
+  createdBy: CaseUser;
+  version: string;
+  rowContext: RowContext;
 }
 
 /**
@@ -76,18 +101,10 @@ export interface UnifiedReferenceAttachmentViewProps extends CommonAttachmentVie
  * These attachments contain data/content directly
  */
 export interface UnifiedValueAttachmentViewProps extends CommonAttachmentViewProps {
-  data: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
-}
-
-/**
- * @deprecated Use UnifiedReferenceAttachmentViewProps or UnifiedValueAttachmentViewProps instead
- * Kept for backward compatibility during migration
- */
-export interface UnifiedAttachmentViewProps extends CommonAttachmentViewProps {
-  attachmentId: string;
-  data: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
+  data: UnifiedValueAttachmentPayload['data'];
+  createdBy: CaseUser;
+  version: string;
+  rowContext: RowContext;
 }
 
 export interface AttachmentType<Props> {
@@ -96,14 +113,15 @@ export interface AttachmentType<Props> {
   displayName: string;
   getAttachmentViewObject: (props: Props) => AttachmentViewObject<Props>;
   getAttachmentRemovalObject?: (props: Props) => Pick<AttachmentViewObject<Props>, 'event'>;
+  getAttachmentTabViewObject?: (
+    props?: CommonAttachmentTabViewProps
+  ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
 export type PersistableStateAttachmentType = AttachmentType<PersistableStateAttachmentViewProps>;
 export type UnifiedReferenceAttachmentType = AttachmentType<UnifiedReferenceAttachmentViewProps>;
 export type UnifiedValueAttachmentType = AttachmentType<UnifiedValueAttachmentViewProps>;
-export type UnifiedAttachmentType = UnifiedReferenceAttachmentType | UnifiedValueAttachmentType;
-
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType

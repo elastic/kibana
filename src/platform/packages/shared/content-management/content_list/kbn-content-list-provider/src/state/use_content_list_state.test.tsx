@@ -50,44 +50,67 @@ describe('useContentListState', () => {
     consoleSpy.mockRestore();
   });
 
-  it('returns state, dispatch, and refetch', () => {
+  it('returns state, dispatch, and refetch when inside provider', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
-    expect(result.current.state).toBeDefined();
-    expect(result.current.dispatch).toBeInstanceOf(Function);
-    expect(result.current.refetch).toBeInstanceOf(Function);
+    expect(result.current).toHaveProperty('state');
+    expect(result.current).toHaveProperty('dispatch');
+    expect(result.current).toHaveProperty('refetch');
   });
 
-  it('provides state with expected shape', () => {
+  it('returns state with the expected shape', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
     const { state } = result.current;
-    expect(state).toHaveProperty('search');
-    expect(state).toHaveProperty('filters');
+
+    // Client state — queryText is a plain string.
+    expect(state).toHaveProperty('queryText');
+    expect(typeof state.queryText).toBe('string');
     expect(state).toHaveProperty('sort');
+    expect(state.sort).toHaveProperty('field');
+    expect(state.sort).toHaveProperty('direction');
+
+    // Query data.
     expect(state).toHaveProperty('items');
     expect(state).toHaveProperty('totalItems');
     expect(state).toHaveProperty('isLoading');
     expect(state).toHaveProperty('isFetching');
   });
 
-  it('dispatch updates search query text and filters atomically', () => {
+  it('dispatch updates queryText via SET_QUERY', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
     act(() => {
       result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'test query', filters: { search: 'test query' } },
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: {
+          queryText: 'test query',
+        },
       });
     });
 
-    expect(result.current.state.search.queryText).toBe('test query');
-    expect(result.current.state.filters).toEqual({ search: 'test query' });
+    expect(result.current.state.queryText).toBe('test query');
+  });
+
+  it('provides dispatch as a function', () => {
+    const { result } = renderHook(() => useContentListState(), {
+      wrapper: createWrapper(),
+    });
+
+    expect(typeof result.current.dispatch).toBe('function');
+  });
+
+  it('provides refetch as a function', () => {
+    const { result } = renderHook(() => useContentListState(), {
+      wrapper: createWrapper(),
+    });
+
+    expect(typeof result.current.refetch).toBe('function');
   });
 });

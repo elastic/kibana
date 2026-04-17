@@ -6,7 +6,7 @@
  */
 
 import type { Action, Middleware } from 'redux';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { selectTimelineById } from '../selectors';
 import { updateColumnWidth } from '../actions';

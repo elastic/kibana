@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/security-solution-flyout",
-  "owner": "@elastic/security-threat-hunting-investigations",
-  "group": "platform",
-  "visibility": "shared"
-}

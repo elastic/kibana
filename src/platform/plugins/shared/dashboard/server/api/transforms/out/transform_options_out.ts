@@ -12,6 +12,7 @@ import type { DashboardState } from '../../types';
 
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
+  hidePanelBorders: 'hide_panel_borders',
   useMargins: 'use_margins',
   syncColors: 'sync_colors',
   syncTooltips: 'sync_tooltips',
@@ -23,9 +24,9 @@ type ParsedSavedObjectOptions = { [key in keyof typeof savedObjectToAPIOptionsKe
 export function transformOptionsOut(
   optionsJSON: string,
   controlGroupShowApplyButtonSetting?: boolean
-): Required<DashboardState>['options'] {
+): Partial<DashboardState['options']> {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
-  const apiOptions: Writable<Required<DashboardState>['options']> = {};
+  const apiOptions: Writable<Partial<DashboardState['options']>> = {};
   Object.keys(options).forEach((key) => {
     const savedObjectKey = key as keyof ParsedSavedObjectOptions;
     const apiKey = savedObjectToAPIOptionsKeys[savedObjectKey];

@@ -15,6 +15,7 @@ import type { UnifiedHistogramServices } from '@kbn/unified-histogram/types';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { UnifiedMetricsGridProps } from '../../../types';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
@@ -121,10 +122,10 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    expect(layer.breakdown).toBe('service.name'); // Single dimension uses actual dimension name
+    expect(layer.breakdown).toEqual(['service.name']); // Single dimension as array
   });
 
-  it('maps columns correctly to yAxis and uses first dimension for multiple dimensions', async () => {
+  it('maps columns correctly to yAxis and uses array for multiple dimensions', async () => {
     getESQLQueryColumnsMock.mockResolvedValue([
       { name: '@timestamp', meta: { type: 'date' }, id: '@timestamp' },
       { name: 'value', meta: { type: 'number' }, id: 'value' },
@@ -161,8 +162,8 @@ describe('useChartLayers', () => {
     expect(layer.yAxis[0].label).toBe('value');
     expect(layer.yAxis[0].seriesColor).toBe('blue');
     expect(layer.seriesType).toBe('area');
-    // Lens natively supports multiple dimensions - pass first dimension as breakdown
-    expect(layer.breakdown).toBe('service.name');
+    // Lens natively supports multiple dimensions - pass all dimensions as array
+    expect(layer.breakdown).toEqual(['service.name', 'host.name']);
   });
 
   it('uses first date column as xAxis', async () => {
@@ -236,6 +237,41 @@ describe('useChartLayers', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
+    });
+  });
+
+  it('passes variables to getESQLQueryColumns', async () => {
+    getESQLQueryColumnsMock.mockResolvedValue([]);
+
+    useEsqlQueryInfoMock.mockReturnValue({
+      dimensions: [],
+      columns: [],
+      metricField: '',
+      indices: [],
+      filters: [],
+      metadataFields: [],
+    });
+
+    const variables = [
+      {
+        key: 'event_type',
+        value: 'Good',
+        type: ESQLVariableType.VALUES,
+      },
+    ];
+
+    renderHook(() =>
+      useChartLayersFromEsql({
+        query: 'FROM traces-apm*',
+        timeRange,
+        seriesType: 'line',
+        services: mockServices.services,
+        variables,
+      })
+    );
+
+    await waitFor(() => {
+      expect(getESQLQueryColumnsMock).toHaveBeenCalledWith(expect.objectContaining({ variables }));
     });
   });
 

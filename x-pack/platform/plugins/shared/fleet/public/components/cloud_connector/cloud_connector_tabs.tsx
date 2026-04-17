@@ -47,7 +47,7 @@ export const CloudConnectorTabs: React.FC<CloudConnectorTabsProps> = ({
             }}
             isSelected={tab.id === selectedTabId}
             disabled={
-              (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount) ||
+              (tab.id === TABS.EXISTING_CONNECTION && !cloudConnectorsCount && !isEditPage) ||
               (isEditPage && tab.id === TABS.NEW_CONNECTION)
             }
           >

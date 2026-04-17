@@ -1,0 +1,57 @@
+openapi: 3.0.0
+info:
+  title: Watchlists Entity Source Create Schema
+  description: Schema for creating entity source configurations in the watchlists system.
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/entity_source:
+    post:
+      operationId: CreateWatchlistEntitySource
+      x-codegen-enabled: true
+      summary: Create a new entity source configuration
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, name]
+              additionalProperties: false
+              properties:
+                type:
+                  $ref: "./common.schema.yaml#/components/schemas/EntitySourceType"
+                name:
+                  type: string
+                indexPattern:
+                  type: string
+                integrationName:
+                  type: string
+                  description: Required when type is entity_analytics_integration. One of entityanalytics_okta, entityanalytics_ad.
+                enabled:
+                  type: boolean
+                identifierField:
+                  type: string
+                  description: Field used to query the entity store for index-type sources
+                queryRule:
+                  type: string
+                  description: KQL query used to filter data from the provided index patterns
+                matchers:
+                  type: array
+                  items:
+                    $ref: "./common.schema.yaml#/components/schemas/Matcher"
+                filter:
+                  $ref: "./common.schema.yaml#/components/schemas/Filter"
+      responses:
+        "200":
+          description: Entity source created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "./common.schema.yaml#/components/schemas/MonitoringEntitySource"

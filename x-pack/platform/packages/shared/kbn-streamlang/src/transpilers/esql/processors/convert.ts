@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Builder } from '@kbn/esql-language';
-import type { ESQLAstCommand } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
+import type { ESQLAstCommand } from '@elastic/esql/types';
 import { isAlwaysCondition } from '../../../..';
 import type { ConvertType } from '../../../../types/formats';
 import type { ConvertProcessor } from '../../../../types/processors';

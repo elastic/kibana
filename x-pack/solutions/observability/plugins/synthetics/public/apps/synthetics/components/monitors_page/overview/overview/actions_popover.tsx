@@ -20,7 +20,7 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { useCreateSLO } from '../../hooks/use_create_slo';
 import { TEST_SCHEDULED_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import { useCanUsePublicLocById } from '../../hooks/use_can_use_public_loc_id';
@@ -188,10 +188,10 @@ export function ActionsPopover({
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     embeddableInput: {
       filters: {
-        monitorIds: [{ label: monitor.name, value: monitor.configId }],
+        monitor_ids: [{ label: monitor.name, value: monitor.configId }],
         tags: [],
         locations: [{ label: monitor.locationLabel, value: monitor.locationId }],
-        monitorTypes: [],
+        monitor_types: [],
         projects: [],
       },
       view,
@@ -224,7 +224,7 @@ export function ActionsPopover({
           {runTestManually}
         </NoPermissionsTooltip>
       ),
-      icon: 'beaker',
+      icon: 'flask',
       disabled: testInProgress || !canUsePublicLocations || !isServiceAllowed,
       onClick: () => {
         dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
@@ -260,7 +260,7 @@ export function ActionsPopover({
           {CREATE_SLO}
         </NoPermissionsTooltip>
       ),
-      icon: 'visGauge',
+      icon: 'chartGauge',
       disabled: !canEditSynthetics || !isServiceAllowed,
       onClick: () => {
         setIsPopoverOpen(false);
@@ -277,7 +277,7 @@ export function ActionsPopover({
           {enableLabel}
         </NoPermissionsTooltip>
       ),
-      icon: 'invert',
+      icon: 'contrast',
       disabled: !canEditSynthetics || !canUsePublicLocations,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
@@ -338,7 +338,7 @@ export function ActionsPopover({
               <EuiButtonIcon
                 data-test-subj="syntheticsActionsPopoverButton"
                 aria-label={openActionsMenuAria}
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 color="primary"
                 size={iconSize}
                 display="empty"

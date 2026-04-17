@@ -15,7 +15,7 @@ const brackets = [
 ];
 
 // These are extracted from the antler esql lexer rules file:
-// src/platform/packages/shared/kbn-esql-language/src/parser/antlr/esql_lexer.ts
+// https://github.com/elastic/esql-js/blob/main/src/parser/antlr/esql_lexer.ts
 export const keywords = [
   'dissect',
   'drop',

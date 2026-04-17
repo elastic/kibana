@@ -9,6 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+const runWorkflowExecutePrivilegeRequiredTooltip = i18n.translate(
+  'workflows.actionButtons.runWorkflow.executePrivilegeRequired',
+  {
+    defaultMessage: 'You need the Workflows "Execute" privilege to run workflows.',
+  }
+);
+
 interface GetRunTooltipContentProps {
   isValid: boolean;
   canRunWorkflow: boolean;
@@ -58,11 +65,32 @@ export function getTestRunTooltipContent({
     });
   }
   if (!canRunWorkflow) {
-    return i18n.translate('workflows.actionButtons.runWorkflow.notAllowed', {
-      defaultMessage: 'You are not allowed to run workflows',
-    });
+    return runWorkflowExecutePrivilegeRequiredTooltip;
   }
   return null;
+}
+
+interface GetRunStepTooltipContentProps {
+  isValid: boolean;
+  canExecuteWorkflow: boolean;
+}
+
+/** Tooltip for YAML editor per-step Run — mirrors full-workflow Run privilege (`executeWorkflow`). */
+export function getRunStepTooltipContent({
+  isValid,
+  canExecuteWorkflow,
+}: GetRunStepTooltipContentProps): string {
+  if (!isValid) {
+    return i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.disabled', {
+      defaultMessage: 'Fix errors to run the step',
+    });
+  }
+  if (!canExecuteWorkflow) {
+    return runWorkflowExecutePrivilegeRequiredTooltip;
+  }
+  return i18n.translate('workflows.workflowDetail.yamlEditor.stepActions.runStep.tooltip', {
+    defaultMessage: 'Run step',
+  });
 }
 
 interface GetSaveWorkflowTooltipContentProps {

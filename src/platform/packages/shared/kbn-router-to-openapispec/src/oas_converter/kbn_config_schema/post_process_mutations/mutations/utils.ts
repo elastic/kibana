@@ -9,6 +9,8 @@
 
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
+import { getXState } from '../../../../util';
+import type { IContext } from '../context';
 
 export const stripBadDefault = (schema: OpenAPIV3.SchemaObject): void => {
   if (schema.default?.special === 'deep') {
@@ -39,6 +41,24 @@ export const processDiscontinued = (schema: OpenAPIV3.SchemaObject): void => {
   if (metaFields.META_FIELD_X_OAS_DISCONTINUED in schema) {
     schema['x-discontinued'] = schema[metaFields.META_FIELD_X_OAS_DISCONTINUED] as string;
     deleteField(schema, metaFields.META_FIELD_X_OAS_DISCONTINUED);
+  }
+};
+
+export const processAvailability = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
+  if (metaFields.META_FIELD_X_OAS_AVAILABILITY in schema) {
+    const state = getXState(
+      schema[metaFields.META_FIELD_X_OAS_AVAILABILITY] as {
+        stability?: 'experimental' | 'beta' | 'stable';
+        since?: string;
+      },
+      ctx.getEnv()
+    );
+
+    if (state !== undefined) {
+      (schema as OpenAPIV3.SchemaObject & { 'x-state'?: string })['x-state'] = state;
+    }
+
+    deleteField(schema, metaFields.META_FIELD_X_OAS_AVAILABILITY);
   }
 };
 

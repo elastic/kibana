@@ -45,14 +45,24 @@ export const AttachmentPillsRow: React.FC<AttachmentPillsRowProps> = ({
       aria-label={labels.attachments}
       data-test-subj="agentBuilderAttachmentPillsRow"
     >
-      {attachments.map((attachment, index) => (
-        <EuiFlexItem key={attachment.id ?? `${attachment.type}-${index}`} grow={false}>
-          <AttachmentPill
-            attachment={attachment as Attachment}
-            onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
-          />
-        </EuiFlexItem>
-      ))}
+      {attachments.map((attachment, index) => {
+        const attachmentId = attachment.id ?? `${attachment.type}-${index}`;
+
+        return (
+          <EuiFlexItem key={attachmentId} grow={false}>
+            <AttachmentPill
+              attachment={{
+                id: attachmentId,
+                type: attachment.type,
+                data: (attachment.data ?? {}) as Record<string, unknown>,
+                hidden: attachment.hidden,
+                origin: attachment.origin,
+              }}
+              onRemoveAttachment={removable ? () => removeAttachment?.(index) : undefined}
+            />
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

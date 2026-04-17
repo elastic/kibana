@@ -74,8 +74,10 @@ describe(
     });
 
     it('shows callout with errors, opens logs flyout, and dismisses correctly', () => {
+      const testStartErrorTimestamp = new Date().toISOString();
+
       interceptGapAutoFillScheduler({ enabled: true });
-      interceptGapAutoFillSchedulerLogsWithErrors();
+      interceptGapAutoFillSchedulerLogsWithErrors({ timestamp: testStartErrorTimestamp });
 
       visitRulesManagementTable();
       cy.get(RULES_MONITORING_TAB).click();
@@ -111,7 +113,7 @@ describe(
 
       // Re-intercept after reload
       interceptGapAutoFillScheduler({ enabled: true });
-      interceptGapAutoFillSchedulerLogsWithErrors();
+      interceptGapAutoFillSchedulerLogsWithErrors({ timestamp: testStartErrorTimestamp });
 
       cy.get(RULES_MONITORING_TAB).click();
       cy.get(RULE_GAPS_OVERVIEW_PANEL).should('exist');

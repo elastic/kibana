@@ -35,6 +35,8 @@ export const IoTs = require('io-ts');
 export const IoTsReporter = require('io-ts/Reporter');
 export const IoTsPathReporter = require('io-ts/PathReporter');
 export const IoTsThrowReporter = require('io-ts/ThrowReporter');
+// eslint-disable-next-line @kbn/eslint/module_migration
+export const Zod = require('zod/v4');
 
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
@@ -75,6 +77,8 @@ Moment.tz.load(require('moment-timezone/data/packed/latest.json'));
 export const Rxjs = require('rxjs');
 export const ElasticNumeral = require('@elastic/numeral');
 export const ElasticCharts = require('@elastic/charts');
+export const ElasticEsql = require('@elastic/esql');
+export const ElasticEsqlTypes = require('@elastic/esql/types');
 export const ElasticEui = require('@elastic/eui');
 export const ElasticEuiLibComponentsUseIsNestedEuiProvider = require('@elastic/eui/optimize/es/components/provider/nested');
 export const ElasticEuiLibServicesThemeWarning = require('@elastic/eui/optimize/es/services/theme/warning');
@@ -119,4 +123,7 @@ export const KbnReactKibanaContextEnv = require('@kbn/react-kibana-context-env')
 export const KbnSharedUxRouter = require('@kbn/shared-ux-router');
 export const KbnReactKibanaMount = require('@kbn/react-kibana-mount');
 export const KbnVisualizationsCommon = require('@kbn/visualizations-common');
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+export const KbnCoreDi = require('@kbn/core-di-browser');
 export const KbnCoreSidebarContext = require('@kbn/core-chrome-sidebar-context');
+export const KbnCoreChromeBrowserContext = require('@kbn/core-chrome-browser-context');

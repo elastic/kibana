@@ -25,7 +25,9 @@ import {
   type MlAnomalyRecordDoc,
   type MlAnomalyResultType,
   ML_ANOMALY_RESULT_TYPE,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
+import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
@@ -33,6 +35,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ANOMALY_RESULT_TYPE_SCORE_FIELDS } from '../../../common/constants/alerts';
 import { getAnomalyDescription } from '../../../common/util/anomaly_description';
 import { getMetricChangeDescription } from '../../../common/util/metric_change_description';
+import { formatTimeValue } from '../../../common/util/format_time_value';
 import type { MlClient } from '../ml_client';
 import type {
   MlAnomalyDetectionAlertParams,
@@ -40,6 +43,7 @@ import type {
 } from '../../routes/schemas/alerting_schema';
 import type {
   AlertExecutionResult,
+  FormattedRecordAnomalyAlertDoc,
   InfluencerAnomalyAlertDoc,
   PreviewResponse,
   PreviewResultsKeys,
@@ -191,12 +195,21 @@ export function buildExplorerUrl(
 
 export interface AnomalyDetectionAlertFieldFormatters {
   numberFormatter: IFieldFormat['convert'];
+  dateFormatter?: IFieldFormat;
   fieldFormatters: Record<string, IFieldFormat['convert']>;
 }
 
 export interface AnomalyDetectionRuleState {
   contextFieldFormatters?: AnomalyDetectionAlertFieldFormatters;
 }
+
+const hasCurrentContextFieldFormatters = (
+  formatters?: AnomalyDetectionAlertFieldFormatters
+): formatters is AnomalyDetectionAlertFieldFormatters & { dateFormatter: IFieldFormat } => {
+  // Rule state can rehydrate formatter caches created before `dateFormatter` was added.
+  // Rebuild those stale caches so time-based alert values can be formatted consistently.
+  return formatters?.dateFormatter !== undefined;
+};
 
 /**
  * Alerting related server-side methods
@@ -220,7 +233,7 @@ export function alertingServiceProvider(
   const getFormatters = memoize(async (indexPattern: string) => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
     const numberFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.NUMBER });
-
+    const dateFormatter = fieldFormatsRegistry.deserialize({ id: FIELD_FORMAT_IDS.DATE });
     const fieldFormatMap = await getFieldsFormatMap(indexPattern);
 
     const fieldFormatters = fieldFormatMap
@@ -234,6 +247,7 @@ export function alertingServiceProvider(
     // store formatters to pass to the executor state update
     contextFieldFormatters = {
       numberFormatter: numberFormatter.convert.bind(numberFormatter),
+      dateFormatter,
       fieldFormatters,
     };
 
@@ -429,6 +443,38 @@ export function alertingServiceProvider(
     return alertInstanceKey;
   };
 
+  const isTimeFunction = (functionName: string): functionName is AnomalyDateFunction => {
+    return (
+      functionName === ML_JOB_AGGREGATION.TIME_OF_DAY ||
+      functionName === ML_JOB_AGGREGATION.TIME_OF_WEEK
+    );
+  };
+
+  const formatAlertTimeValue = (
+    value: number,
+    source: MlAnomalyRecordDoc,
+    formatters: AnomalyDetectionAlertFieldFormatters
+  ) => {
+    if (isTimeFunction(source.function) && formatters.dateFormatter) {
+      const timezone = 'UTC';
+      // `formatted` is the compact UI label from `formatTimeValue()`. Alerts need the
+      // fully qualified UTC date/time, so build the notification string from the
+      // resolved moment instead of reusing the shorter display text.
+      const { moment: resolvedMoment } = formatTimeValue(value, source.function, source, timezone);
+      const formattedDayOfWeek = resolvedMoment.format('ddd');
+      const formattedDate = formatters.dateFormatter.convert(resolvedMoment.valueOf(), 'text', {
+        timezone,
+      });
+      return `${formattedDayOfWeek} ${formattedDate} UTC`;
+    }
+
+    const fieldFormatter =
+      source.field_name !== undefined ? formatters.fieldFormatters[source.field_name] : undefined;
+    const formatter = fieldFormatter ?? formatters.numberFormatter;
+
+    return formatter(value);
+  };
+
   const getAlertMessage = (
     resultType: MlAnomalyResultType,
     source: Record<string, unknown>
@@ -613,19 +659,16 @@ export function alertingServiceProvider(
         topRecords: v.record_results.top_record_hits.hits.hits.map((h) => {
           const { actual, typical } = getTypicalAndActualValues(h._source);
 
-          const formatter =
-            formatters.fieldFormatters[h._source.field_name] ?? formatters.numberFormatter;
-
           return {
             ...h._source,
-            typical: typical?.map((t) => formatter(t)),
-            actual: actual?.map((a) => formatter(a)),
+            typical: typical?.map((t) => formatAlertTimeValue(t, h._source, formatters)),
+            actual: actual?.map((a) => formatAlertTimeValue(a, h._source, formatters)),
             score: Math.floor(
               h._source[getScoreFields(ML_ANOMALY_RESULT_TYPE.RECORD, useInitialScore)]
             ),
             unique_key: getRecordKey(h._source),
           };
-        }) as RecordAnomalyAlertDoc[],
+        }) as FormattedRecordAnomalyAlertDoc[],
         topInfluencers: v.influencer_results.top_influencer_hits.hits.hits.map((h) => {
           return {
             ...h._source,
@@ -750,8 +793,9 @@ export function alertingServiceProvider(
 
     const resultsLabel = getAggResultsLabel(params.resultType);
 
-    const fieldsFormatters =
-      contextFieldFormatters ?? (await getFormatters(datafeeds![0]!.indices[0]));
+    const fieldsFormatters = hasCurrentContextFieldFormatters(contextFieldFormatters)
+      ? contextFieldFormatters
+      : await getFormatters(datafeeds![0]!.indices[0]);
 
     const formatter = getResultsToContextFormatter(
       params.resultType,
@@ -968,7 +1012,9 @@ export function alertingServiceProvider(
     | { payload: AnomalyDetectionAlertPayload; context: AnomalyDetectionAlertContext; name: string }
     | undefined
   > => {
-    const formatters = contextFieldFormatters ?? (await getFormatters(indexPattern));
+    const formatters = hasCurrentContextFieldFormatters(contextFieldFormatters)
+      ? contextFieldFormatters
+      : await getFormatters(indexPattern);
 
     const context = getResultsToContextFormatter(resultType, false, formatters)(value);
     const payload = getResultsToPayloadFormatter(resultType, false)(value);

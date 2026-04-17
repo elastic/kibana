@@ -14,11 +14,7 @@ interface Props {
 
 export function CreateButton({ onClick }: Props) {
   return (
-    <EuiButton
-      iconType="plusInCircle"
-      data-test-subj="apmCreateServiceGroupButton"
-      onClick={onClick}
-    >
+    <EuiButton iconType="plusCircle" data-test-subj="apmCreateServiceGroupButton" onClick={onClick}>
       {i18n.translate('xpack.apm.serviceGroups.createGroupLabel', {
         defaultMessage: 'Create group',
       })}

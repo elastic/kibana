@@ -25,7 +25,12 @@ import type {
   SavedObjectsSearchOptions,
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import type {
+  Case,
+  CaseStatuses,
+  User,
+  AttachmentAttributesV2,
+} from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -80,7 +85,6 @@ import type {
   GetCategoryArgs,
   BulkCreateCasesArgs,
 } from './types';
-import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
 import {
   DEFAULT_ATTACHMENT_SEARCH_FIELDS,
@@ -550,7 +554,8 @@ export class CasesService {
   private async getAllComments({
     id,
     options,
-  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode = 'legacy',
+  }: FindCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       this.log.debug(`Attempting to GET all comments internal for id ${JSON.stringify(id)}`);
       if (options?.page !== undefined || options?.perPage !== undefined) {
@@ -559,6 +564,7 @@ export class CasesService {
             sortField: defaultSortField,
             ...options,
           },
+          mode,
         });
       }
 
@@ -569,6 +575,7 @@ export class CasesService {
           sortField: defaultSortField,
           ...options,
         },
+        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments internal for ${JSON.stringify(id)}: ${error}`);
@@ -585,7 +592,8 @@ export class CasesService {
   public async getAllCaseComments({
     id,
     options,
-  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentTransformedAttributes>> {
+    mode = 'legacy',
+  }: FindCaseCommentsArgs): Promise<SavedObjectsFindResponse<AttachmentAttributesV2>> {
     try {
       const refs = this.asArray(id).map((caseID) => ({ type: CASE_SAVED_OBJECT, id: caseID }));
       if (refs.length <= 0) {
@@ -606,6 +614,7 @@ export class CasesService {
           filter: options?.filter,
           ...options,
         },
+        mode,
       });
     } catch (error) {
       this.log.error(`Error on GET all comments for case ${JSON.stringify(id)}: ${error}`);

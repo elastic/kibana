@@ -7,7 +7,7 @@
 
 import { filter, some } from 'lodash';
 
-import type { IRouter } from '@kbn/core/server';
+import { type IRouter, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-utils';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -16,6 +16,7 @@ import { isSavedQueryPrebuilt } from './utils';
 import { PLUGIN_ID } from '../../../common';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { StartPlugins } from '../../types';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
 import type { UpdateSavedQueryResponse } from './types';
 import type {
@@ -27,6 +28,7 @@ import {
   updateSavedQueryRequestParamsSchema,
 } from '../../../common/api/saved_query/update_saved_query_route';
 import { getUserInfo } from '../../lib/get_user_info';
+import { updateSavedQueryResponseSchema } from './response_schemas';
 
 export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -53,6 +55,11 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               UpdateSavedQueryRequestBodySchema
             >(updateSavedQueryRequestBodySchema),
           },
+          response: {
+            200: {
+              body: () => updateSavedQueryResponseSchema,
+            },
+          },
         },
       },
       async (context, request, response) => {
@@ -64,12 +71,14 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         const space = await osqueryContext.service.getActiveSpace(request);
         const spaceId = space?.id ?? DEFAULT_SPACE_ID;
 
+        const [, startPlugins] = await osqueryContext.getStartServices();
         const currentUser = await getUserInfo({
           request,
-          security: osqueryContext.security,
+          security: (startPlugins as StartPlugins).security,
           logger: osqueryContext.logFactory.get('savedQuery'),
         });
         const username = currentUser?.username ?? undefined;
+        const profileUid = currentUser?.profile_uid ?? undefined;
 
         const {
           id,
@@ -112,27 +121,39 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           return response.conflict({ body: `Saved query with id "${id}" already exists.` });
         }
 
-        const updatedSavedQuerySO = await spaceScopedClient.update(
-          savedQuerySavedObjectType,
-          request.params.id,
-          {
-            id,
-            description: description || '',
-            platform,
-            query,
-            version,
-            interval,
-            timeout,
-            snapshot,
-            removed,
-            ecs_mapping: convertECSMappingToArray(ecs_mapping),
-            updated_by: username,
-            updated_at: new Date().toISOString(),
-          },
-          {
-            refresh: 'wait_for',
+        let updatedSavedQuerySO;
+        try {
+          updatedSavedQuerySO = await spaceScopedClient.update(
+            savedQuerySavedObjectType,
+            request.params.id,
+            {
+              id,
+              description: description || '',
+              platform,
+              query,
+              version,
+              interval,
+              timeout,
+              snapshot,
+              removed,
+              ecs_mapping: convertECSMappingToArray(ecs_mapping),
+              updated_by: username,
+              updated_by_profile_uid: profileUid,
+              updated_at: new Date().toISOString(),
+            },
+            {
+              refresh: 'wait_for',
+            }
+          );
+        } catch (err) {
+          if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+            return response.notFound({
+              body: { message: `Saved query ${request.params.id} not found` },
+            });
           }
-        );
+
+          throw err;
+        }
 
         if (ecs_mapping || updatedSavedQuerySO.attributes.ecs_mapping) {
           // @ts-expect-error update types
@@ -159,6 +180,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           query: attributes.query,
           updated_at: attributes.updated_at,
           updated_by: attributes.updated_by,
+          updated_by_profile_uid: attributes.updated_by_profile_uid,
           saved_object_id: updatedSavedQuerySO.id,
         };
 

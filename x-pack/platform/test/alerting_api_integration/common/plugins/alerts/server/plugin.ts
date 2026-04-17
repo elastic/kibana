@@ -59,6 +59,7 @@ export interface FixtureStartDeps {
 const testRuleTypes = [
   'test.always-firing',
   'test.cumulative-firing',
+  'test.consumer-metrics',
   'test.never-firing',
   'test.failing',
   'test.authorization',
@@ -174,6 +175,24 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
                   includeIn: 'all',
                   savedObject: { all: [], read: [] },
                   alerting: { rule: { enable: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Manage rule settings',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Manage rule settings',
+                  id: 'manage_rule_settings',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { manage_rule_settings: testAlertingFeatures } },
                   ui: [],
                 },
               ],

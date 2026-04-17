@@ -19,15 +19,17 @@ const YAML_STRINGIFY_OPTIONS = {
   lineWidth: -1,
 };
 
-const WORKFLOW_DEFINITION_KEYS_ORDER: Array<keyof WorkflowYaml> = [
+export const WORKFLOW_DEFINITION_KEYS_ORDER: Array<keyof WorkflowYaml> = [
+  'version',
   'name',
   'description',
   'enabled',
   'tags',
   'settings',
+  'consts',
   'triggers',
   'inputs',
-  'consts',
+  'outputs',
   'steps',
 ];
 

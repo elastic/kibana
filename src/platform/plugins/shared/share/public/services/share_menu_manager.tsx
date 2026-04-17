@@ -139,7 +139,7 @@ export class ShareMenuManager {
               'data-test-subj': 'exportItemDetailsFlyout',
               size: 's',
               ownFocus: true,
-              maskProps: { headerZindexLocation: 'above' },
+              container: null, // "global" flyout
             }
           );
         };
@@ -218,7 +218,7 @@ export class ShareMenuManager {
             {
               'data-test-subj': `exportDerivativeFlyout-${derivativeId}`,
               ownFocus: true,
-              maskProps: { headerZindexLocation: 'above' },
+              container: null, // "global" flyout
               ...(derivativeConfig.flyoutSizing || {}),
             }
           );

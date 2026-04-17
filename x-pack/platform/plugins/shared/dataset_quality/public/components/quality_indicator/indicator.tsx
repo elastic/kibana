@@ -41,11 +41,16 @@ export function QualityIndicator({
   };
 
   const BadgeIconType = () => (
-    <EuiIcon size="s" type={qualityIcons[quality]} color={qualityTextColors[quality]} />
+    <EuiIcon
+      size="s"
+      type={qualityIcons[quality]}
+      color={qualityTextColors[quality]}
+      aria-hidden={true}
+    />
   );
 
   return (
-    <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType}>
+    <EuiBadge color={qualityColors[quality]} iconType={BadgeIconType} tabIndex={0}>
       <EuiText
         color={qualityTextColors[quality]}
         size="xs"

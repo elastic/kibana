@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { Subject } from 'rxjs';
 import { css } from '@emotion/react';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { SloIncludedCount } from './components/slo_included_count';
@@ -24,7 +25,6 @@ interface Props {
   timeRange: TimeRange;
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
-  showAllGroupByInstances?: boolean;
   onEdit: () => void;
 }
 
@@ -34,7 +34,6 @@ export function SloAlertsWrapper({
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
-  showAllGroupByInstances,
   onEdit,
 }: Props) {
   const {
@@ -71,9 +70,21 @@ export function SloAlertsWrapper({
       onRenderComplete();
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
+  /**
+   * When every selected row is all-instances (*), show SloIncludedCount: "N SLOs (M Instances) included"
+   * (fetches total instance count from the SLO API). If any row is a specific instance id, show only
+   * "N SLOs included" (row count, no parenthetical) so mixed * + specific selections are not mislabeled.
+   */
+  const showInstanceCountBreakdown =
+    slos.length > 0 && slos.every((s) => s.slo_instance_id === ALL_VALUE);
+
   const handleGoToAlertsClick = () => {
     const kuery = slos
-      .map((slo) => `(slo.id:"${slo.id}" and slo.instanceId:"${slo.instanceId}")`)
+      .map((slo) =>
+        slo.slo_instance_id !== ALL_VALUE
+          ? `(slo.id:"${slo.slo_id}" and slo.instanceId:"${slo.slo_instance_id}")`
+          : `(slo.id:"${slo.slo_id}")`
+      )
       .join(' or ');
 
     navigateToUrl(
@@ -104,7 +115,7 @@ export function SloAlertsWrapper({
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
           >
-            {showAllGroupByInstances ? (
+            {showInstanceCountBreakdown ? (
               <SloIncludedCount slos={slos} />
             ) : (
               i18n.translate('xpack.slo.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
@@ -137,7 +148,6 @@ export function SloAlertsWrapper({
             deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsSummaryLoaded(true)}
-            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -147,7 +157,6 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
-            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

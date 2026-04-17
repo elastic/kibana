@@ -10,7 +10,14 @@
 import React, { Component } from 'react';
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { keys, EuiInMemoryTable, EuiFieldText, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
+import {
+  keys,
+  EuiInMemoryTable,
+  EuiFieldText,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -75,6 +82,15 @@ const cancelAria = i18n.translate(
   }
 );
 
+const matchesShowLessLabel = i18n.translate(
+  'indexPatternManagement.editIndexPattern.source.table.matches.showLessLabel',
+  {
+    defaultMessage: 'Show less',
+  }
+);
+
+const MAX_VISIBLE_MATCHES = 20;
+
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
 export interface TableProps {
@@ -89,6 +105,7 @@ export interface TableProps {
 export interface TableState {
   editingFilterId: string | number;
   editingFilterValue: string;
+  expandedMatchFilterIds: Array<string | number>;
 }
 
 class TableClass extends Component<
@@ -100,6 +117,7 @@ class TableClass extends Component<
     this.state = {
       editingFilterId: '',
       editingFilterValue: '',
+      expandedMatchFilterIds: [],
     };
   }
 
@@ -125,6 +143,17 @@ class TableClass extends Component<
     }
   };
 
+  toggleExpandedMatches = (filterId: string | number) => {
+    this.setState(({ expandedMatchFilterIds }) => {
+      const isExpanded = expandedMatchFilterIds.includes(filterId);
+      return {
+        expandedMatchFilterIds: isExpanded
+          ? expandedMatchFilterIds.filter((id) => id !== filterId)
+          : [...expandedMatchFilterIds, filterId],
+      };
+    });
+  };
+
   getColumns(): Array<EuiBasicTableColumn<SourceFiltersTableFilter>> {
     const { deleteFilter, fieldWildcardMatcher, indexPattern, saveFilter } = this.props;
 
@@ -133,6 +162,7 @@ class TableClass extends Component<
         field: 'value',
         name: filterHeader,
         description: filterDescription,
+        className: 'eui-alignTop',
         dataType: 'string',
         sortable: true,
         render: (value, filter) => {
@@ -168,7 +198,46 @@ class TableClass extends Component<
             .sort();
 
           if (matches.length) {
-            return <span>{matches.join(', ')}</span>;
+            const isExpanded = this.state.expandedMatchFilterIds.includes(filter.clientId);
+            const displayedMatches = isExpanded ? matches : matches.slice(0, MAX_VISIBLE_MATCHES);
+            const hiddenMatchesCount = matches.length - displayedMatches.length;
+
+            return (
+              <div>
+                <span>{displayedMatches.join(', ')}</span>
+                {matches.length > MAX_VISIBLE_MATCHES && (
+                  <div>
+                    <EuiButtonEmpty
+                      size="xs"
+                      flush="left"
+                      onClick={() => this.toggleExpandedMatches(filter.clientId)}
+                      aria-label={
+                        isExpanded
+                          ? matchesShowLessLabel
+                          : i18n.translate(
+                              'indexPatternManagement.editIndexPattern.source.table.matches.showMoreAria',
+                              {
+                                defaultMessage: 'Show {hiddenCount} more matches',
+                                values: { hiddenCount: hiddenMatchesCount },
+                              }
+                            )
+                      }
+                      data-test-subj={`toggle_matches_${filter.clientId}`}
+                    >
+                      {isExpanded
+                        ? matchesShowLessLabel
+                        : i18n.translate(
+                            'indexPatternManagement.editIndexPattern.source.table.matches.showMoreLabel',
+                            {
+                              defaultMessage: 'Show {hiddenCount} more',
+                              values: { hiddenCount: hiddenMatchesCount },
+                            }
+                          )}
+                    </EuiButtonEmpty>
+                  </div>
+                )}
+              </div>
+            );
           }
 
           return (
@@ -198,7 +267,7 @@ class TableClass extends Component<
                     });
                     this.stopEditingFilter();
                   }}
-                  iconType="checkInCircleFilled"
+                  iconType="checkCircleFill"
                   aria-label={saveAria}
                   data-test-subj={`save_filter-${filter.value}`}
                 />

@@ -24,10 +24,10 @@ describe('delete', () => {
     });
 
     it('refreshes when deleting', async () => {
-      await deleteComment({ caseID: 'mock-id-1', attachmentID: 'mock-comment-1' }, clientArgs);
+      await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
 
       expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
-        attachmentIds: ['mock-comment-1'],
+        savedObjectIds: ['mock-comment-1'],
         refresh: true,
       });
     });
@@ -41,7 +41,7 @@ describe('delete', () => {
       });
 
       it('delete alerts correctly', async () => {
-        await deleteComment({ caseID: 'mock-id-4', attachmentID: 'mock-comment-4' }, clientArgs);
+        await deleteComment({ caseID: 'mock-id-4', savedObjectId: 'mock-comment-4' }, clientArgs);
 
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).toHaveBeenCalledWith({
           alerts: [{ id: 'test-id', index: 'test-index' }],
@@ -51,7 +51,7 @@ describe('delete', () => {
 
       it('does not call the alert service when the attachment is not an alert', async () => {
         clientArgs.services.attachmentService.getter.get.mockResolvedValue(commentSO);
-        await deleteComment({ caseID: 'mock-id-1', attachmentID: 'mock-comment-1' }, clientArgs);
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
 
         expect(clientArgs.services.alertsService.removeCaseIdFromAlerts).not.toHaveBeenCalledWith();
       });
@@ -72,7 +72,7 @@ describe('delete', () => {
           ])
         );
 
-        await deleteComment({ caseID: 'mock-id-1', attachmentID: 'mock-comment-1' }, clientArgs);
+        await deleteComment({ caseID: 'mock-id-1', savedObjectId: 'mock-comment-1' }, clientArgs);
 
         const args = clientArgs.services.caseService.patchCase.mock.calls[0][0];
 
@@ -117,7 +117,7 @@ describe('delete', () => {
       await deleteAll({ caseID: 'mock-id-1' }, clientArgs);
 
       expect(clientArgs.services.attachmentService.bulkDelete).toHaveBeenCalledWith({
-        attachmentIds: [
+        savedObjectIds: [
           'mock-comment-1',
           'mock-comment-2',
           'mock-comment-3',

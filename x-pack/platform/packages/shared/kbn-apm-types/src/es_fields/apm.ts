@@ -123,6 +123,7 @@ export const ERROR_EXC_TYPE = 'error.exception.type';
 export const ERROR_PAGE_URL = 'error.page.url';
 export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_TYPE = 'error.type';
+export const ERROR_CODE = 'error.code';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';

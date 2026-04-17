@@ -137,11 +137,7 @@ const ShareModalComponent: React.FC<Props> = ({
       <EuiModalFooter>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="copyConversationUrl"
-              iconType="copyClipboard"
-              onClick={handleCopyUrl}
-            >
+            <EuiButton data-test-subj="copyConversationUrl" iconType="copy" onClick={handleCopyUrl}>
               {COPY_URL}
             </EuiButton>
           </EuiFlexItem>

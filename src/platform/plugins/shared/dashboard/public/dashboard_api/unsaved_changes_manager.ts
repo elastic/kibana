@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, type Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map } from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
@@ -18,14 +18,13 @@ import type {
 
 import { of } from 'rxjs';
 import type { DashboardState } from '../../common';
-import {
-  getDashboardBackupService,
-  type DashboardBackupState,
-} from '../services/dashboard_backup_service';
+import { type DashboardBackupState } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeProjectRoutingManager } from './project_routing_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { PublishesOnSave } from './types';
 
 const DEBOUNCE_TIME = 100;
 
@@ -38,7 +37,8 @@ export function initializeUnsavedChangesManager({
   storeUnsavedChanges,
   unifiedSearchManager,
   projectRoutingManager,
-  forcePublishOnReset$,
+  setState,
+  onSave$,
 }: {
   lastSavedState: DashboardState;
   storeUnsavedChanges?: boolean;
@@ -48,7 +48,8 @@ export function initializeUnsavedChangesManager({
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
   projectRoutingManager?: ReturnType<typeof initializeProjectRoutingManager>;
-  forcePublishOnReset$: Subject<void>;
+  setState: (state: DashboardState) => void;
+  onSave$: PublishesOnSave['onSave$'];
 }): {
   api: {
     hasUnsavedChanges$: PublishingSubject<boolean>;
@@ -57,12 +58,13 @@ export function initializeUnsavedChangesManager({
   cleanup: () => void;
   internalApi: {
     getLastSavedState: () => DashboardState;
-    onSave: (savedState: DashboardState) => void;
   };
 } {
   const hasUnsavedChanges$ = new BehaviorSubject(false);
-
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
+  const onSaveSubscription = onSave$.subscribe(({ dashboardState }) => {
+    lastSavedState$.next(dashboardState);
+  });
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing(lastSavedState$),
@@ -101,16 +103,7 @@ export function initializeUnsavedChangesManager({
   return {
     api: {
       asyncResetToLastSavedState: async () => {
-        const savedState = lastSavedState$.value;
-        layoutManager.internalApi.reset();
-        unifiedSearchManager.internalApi.reset(savedState);
-        projectRoutingManager?.internalApi.reset(savedState);
-        settingsManager.internalApi.reset(savedState);
-
-        // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
-        if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
-          forcePublishOnReset$.next();
-        }
+        setState(lastSavedState$.value);
       },
       hasUnsavedChanges$,
       lastSavedStateForChild$: (panelId: string) =>
@@ -119,12 +112,10 @@ export function initializeUnsavedChangesManager({
     },
     cleanup: () => {
       unsavedChangesSubscription.unsubscribe();
+      onSaveSubscription.unsubscribe();
     },
     internalApi: {
       getLastSavedState: () => lastSavedState$.value,
-      onSave: (savedState: DashboardState) => {
-        lastSavedState$.next(savedState);
-      },
     },
   };
 }

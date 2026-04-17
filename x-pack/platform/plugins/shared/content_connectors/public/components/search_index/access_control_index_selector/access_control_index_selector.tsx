@@ -10,6 +10,7 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormPrepend,
   EuiIcon,
   EuiSuperSelect,
   EuiText,
@@ -83,7 +84,7 @@ export const AccessControlIndexSelector: React.FC<IndexSelectorProps> = ({
       )}
       prepend={
         indexSelectorOptions.some((option) => option.error) ? (
-          <EuiIcon type={'warning'} />
+          <EuiFormPrepend iconLeft="warning" />
         ) : undefined
       }
       options={indexSelectorOptions.map((option) => {

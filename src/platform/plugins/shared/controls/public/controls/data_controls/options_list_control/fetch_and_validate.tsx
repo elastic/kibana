@@ -20,13 +20,12 @@ import type {
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
 import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { DSLOptionsListComponentApi, OptionsListControlApi } from './types';
 import { getFetchContextFilters, getFetchContextTimeRange } from '../utils';
 import type { DataControlStateManager } from '../data_control_manager';
 
 export function fetchAndValidate$({
   api,
-  allowExpensiveQueries$,
   requestSize$,
   runPastTimeout$,
   selectedOptions$,
@@ -35,16 +34,15 @@ export function fetchAndValidate$({
 }: {
   api: DataControlStateManager['api'] &
     Pick<OptionsListControlApi, 'parentApi' | 'uuid'> &
-    Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
+    Pick<DSLOptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
     };
-  allowExpensiveQueries$: PublishingSubject<boolean>;
   requestSize$: PublishingSubject<number>;
-  runPastTimeout$: PublishingSubject<boolean | undefined>;
-  selectedOptions$: PublishingSubject<OptionsListSelection[] | undefined>;
-  searchTechnique$: PublishingSubject<OptionsListSearchTechnique | undefined>;
-  sort$: PublishingSubject<OptionsListSortingType | undefined>;
+  runPastTimeout$: PublishingSubject<boolean>;
+  selectedOptions$: PublishingSubject<OptionsListSelection[]>;
+  searchTechnique$: PublishingSubject<OptionsListSearchTechnique>;
+  sort$: PublishingSubject<OptionsListSortingType>;
 }): Observable<OptionsListSuccessResponse | { error: Error }> {
   const requestCache = new OptionsListFetchCache();
   let abortController: AbortController | undefined;
@@ -58,7 +56,6 @@ export function fetchAndValidate$({
     ignoreValidations: api.ignoreValidations$,
     sort: sort$,
     searchTechnique: searchTechnique$,
-    allowExpensiveQueries: allowExpensiveQueries$,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
     loadMore: api.loadMoreSubject.pipe(
       startWith(null), // start with null so that `combineLatest` subscription fires
@@ -76,7 +73,6 @@ export function fetchAndValidate$({
     switchMap(
       async ([
         {
-          allowExpensiveQueries,
           dataViews,
           field,
           fetchContext,
@@ -96,7 +92,7 @@ export function fetchAndValidate$({
           !field ||
           !isValidSearch({ searchString, fieldType: field.type, searchTechnique })
         ) {
-          return { suggestions: [] };
+          return { suggestions: [], totalCardinality: 0 };
         }
 
         /** Fetch the suggestions list + perform validation */
@@ -116,7 +112,6 @@ export function fetchAndValidate$({
           ...fetchContext,
           timeRange: getFetchContextTimeRange(fetchContext, useGlobalFilters),
           filters: getFetchContextFilters(fetchContext, useGlobalFilters),
-          allowExpensiveQueries,
         };
 
         const newAbortController = new AbortController();

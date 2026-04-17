@@ -56,6 +56,7 @@ const migrationSchema = schema.object({
      *
      * Defaults to ["migrator"]
      */
+    // codeql[js/kibana/unbounded-array-in-schema] Config from kibana.yml, not user HTTP input
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
   /**

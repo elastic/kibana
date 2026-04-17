@@ -12,11 +12,15 @@ import type { InternalToolDefinition } from './internal';
 /**
  * Parameters for listing tools.
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ToolListParams {
-  // blank for now
-  // type?: ToolType[];
-  // tags?: string[];
+  /**
+   * Filter tools by type. Only tools matching one of the specified types will be returned.
+   */
+  types?: ToolType[];
+  /**
+   * Filter tools by tags. Only tools that have at least one of the specified tags will be returned.
+   */
+  tags?: string[];
 }
 
 /**
@@ -73,7 +77,7 @@ export interface ToolRegistry {
   /**
    * Execute a tool.
    */
-  execute<TParams extends object = Record<string, unknown>>(
+  execute<TParams extends Record<string, unknown> = Record<string, unknown>>(
     params: ScopedRunnerRunToolsParams<TParams>
   ): Promise<RunToolReturn>;
 }

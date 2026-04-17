@@ -74,13 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await common.navigateToApp('discover');
       await discover.waitUntilSearchingHasFinished();
-      const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await retry.waitFor('chart rendering complete', async () => {
-        const actualCount = await elasticChart.getVisualizationRenderingCount();
-        const expectedCount = prevRenderingCount;
-        log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount === expectedCount;
-      });
+      await elasticChart.waitForRenderComplete();
       let prevRowData = '';
       // to make sure the table is already rendered
       await retry.try(async () => {
@@ -90,13 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.brushHistogram();
       await discover.waitUntilSearchingHasFinished();
-      const renderingCountInc = 2;
-      await retry.waitFor('chart rendering complete after being brushed', async () => {
-        const actualCount = await elasticChart.getVisualizationRenderingCount();
-        const expectedCount = prevRenderingCount + renderingCountInc * 2;
-        log.debug(`renderings after brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount <= expectedCount;
-      });
+      await elasticChart.waitForRenderComplete();
       const newDurationHours = await timePicker.getTimeDurationInHours();
       expect(Math.round(newDurationHours)).to.be(23); // might fail if histogram's width changes
 
@@ -339,6 +327,51 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           timeInterval: 'auto',
         });
       });
+    });
+
+    it('should save chart interval in persisted discover session', async () => {
+      const savedSearchName = 'with chart interval';
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.setChartInterval('Second');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getChartInterval()).to.be('auto');
+
+      await discover.loadSavedSearch(savedSearchName);
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getChartInterval()).to.be('s');
+    });
+
+    it('should clear chart interval in persisted discover session', async () => {
+      const savedSearchName = 'with chart interval then cleared';
+      await common.navigateToApp('discover');
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      await timePicker.setDefaultAbsoluteRange();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.setChartInterval('Minute');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.setChartInterval('Auto');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.loadSavedSearch(savedSearchName);
+      await header.waitUntilLoadingHasFinished();
+      expect(await discover.getChartInterval()).to.be('auto');
     });
   });
 }

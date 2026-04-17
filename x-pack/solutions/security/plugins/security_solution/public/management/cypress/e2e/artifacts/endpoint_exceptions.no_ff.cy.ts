@@ -33,9 +33,9 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
       loginWithReadAccess();
       cy.visit(APP_PATH);
 
-      essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
+      essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ARTIFACTS);
       cy.getByTestSubj('solutionSideNavPanel')
-        .find(essSecurityHeaders.ENDPOINT_EXCEPTIONS)
+        .find('[data-test-subj="solutionSideNavPanelLink-endpoint_exceptions"]')
         .should('not.exist');
     });
 
@@ -54,10 +54,8 @@ describe('Endpoint exceptions - preserving behaviour without `endpointExceptions
       cy.visit(APP_PATH);
 
       serverlessSecurityHeaders.showMoreItems();
-      serverlessSecurityHeaders.openNavigationPanelFor(
-        serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS
-      );
-      cy.get(serverlessSecurityHeaders.ENDPOINT_EXCEPTIONS).should('not.exist');
+      serverlessSecurityHeaders.openNavigationPanelFor(serverlessSecurityHeaders.ARTIFACTS);
+      cy.get('[data-test-subj~="nav-item-id-endpoint_exceptions"]').should('not.exist');
     });
 
     it('should display Not Found page when opening url directly', () => {

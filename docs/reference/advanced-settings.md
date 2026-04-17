@@ -495,6 +495,9 @@ $$$rollups-enableindexpatterns$$$`rollups:enableIndexPatterns` {applies_to}`stac
 
 ### {{product.elasticsearch}} [kibana-search-settings]
 
+$$$query-activity-minrunningtime$$$`query_activity:minRunningTime` {applies_to}`stack: preview 9.4` {applies_to}`serverless: preview`
+:   The minimum time in milliseconds that a query must be running before it appears on the [Query activity](docs-content://deploy-manage/monitor/query-activity.md) page. Increase this value to filter out fast-completing queries and focus on long-running ones. `100` by default.
+
 $$$courier-ignorefilteriffieldnotinindex$$$`courier:ignoreFilterIfFieldNotInIndex` {applies_to}`stack: ga` {applies_to}`elasticsearch: ga`
 :   Enhances support for dashboards containing visualizations accessing several dissimilar {{data-sources}}. When activated, filters are ignored for a visualization when the visualization's data view does not contain the filtering field. When deactivated, all filters are applied to all visualizations. `false` by default.
 
@@ -541,7 +544,7 @@ $$$securitysolution-enablenewsfeed$$$`securitySolution:enableNewsFeed` {applies_
 $$$security-solution-exclude-cold-frozen-tiers-analyzer$$$`securitySolution:excludeColdAndFrozenTiersInAnalyzer` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
 :   Skips cold and frozen tiers in Analyzer's queries when activated. `false` by default.
 
-$$$security-solution-enable-graph-visualization$$$`securitySolution:enableGraphVisualization` {applies_to}`stack: preview` {applies_to}`security: preview`
+$$$security-solution-enable-graph-visualization$$$`securitySolution:enableGraphVisualization` {applies_to}`stack: removed 9.4, preview 9.1-9.3` {applies_to}`serverless: removed`
 :   Enables the Graph Visualization feature within the Security solution. `false` by default.
 
 $$$security-solution-enable-asset-inventory$$$`securitySolution:enableAssetInventory` {applies_to}`stack: preview` {applies_to}`security: preview`
@@ -572,7 +575,7 @@ $$$securitysolution-ipreputationlinks$$$`securitySolution:ipReputationLinks` {ap
     ```
     :::
 
-$$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {applies_to}`stack: ga` {applies_to}`serverless: unavailable`
+$$$securitysolution-enableCcsWarning$$$`securitySolution:enableCcsWarning` {applies_to}`stack: ga 9.0-9.3, removed 9.4+` {applies_to}`serverless: unavailable`
 :   Enables privilege check warnings in rules for CCS indices. `true` by default.
 
 $$$security-solution-suppression-behavior-on-alert-closure$$$`securitySolution:suppressionBehaviorOnAlertClosure` {applies_to}`stack: ga` {applies_to}`security: ga`

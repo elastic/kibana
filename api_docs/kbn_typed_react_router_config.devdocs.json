@@ -4,6 +4,115 @@
     "classes": [
       {
         "parentPluginId": "@kbn/typed-react-router-config",
+        "id": "def-public.InvalidRouteParamsException",
+        "type": "Class",
+        "tags": [],
+        "label": "InvalidRouteParamsException",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/typed-react-router-config",
+            "scope": "public",
+            "docId": "kibKbnTypedReactRouterConfigPluginApi",
+            "section": "def-public.InvalidRouteParamsException",
+            "text": "InvalidRouteParamsException"
+          },
+          " extends Error"
+        ],
+        "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/typed-react-router-config",
+            "id": "def-public.InvalidRouteParamsException.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/typed-react-router-config",
+                "id": "def-public.InvalidRouteParamsException.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts",
+                "lineNumber": 12,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/typed-react-router-config",
+                "id": "def-public.InvalidRouteParamsException.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "patched",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts",
+                "lineNumber": 13,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/typed-react-router-config",
+                    "id": "def-public.InvalidRouteParamsException.Unnamed.$2.path",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "path",
+                    "description": [],
+                    "signature": [
+                      "{ [x: string]: any; }"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts",
+                    "lineNumber": 13,
+                    "columnNumber": 32,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/typed-react-router-config",
+                    "id": "def-public.InvalidRouteParamsException.Unnamed.$2.query",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "query",
+                    "description": [],
+                    "signature": [
+                      "{ [x: string]: any; }"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/invalid_route_params_exception.ts",
+                    "lineNumber": 13,
+                    "columnNumber": 59,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/typed-react-router-config",
         "id": "def-public.NotFoundRouteException",
         "type": "Class",
         "tags": [],
@@ -19,8 +128,8 @@
           },
           " extends Error"
         ],
-        "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/create_router.ts",
-        "lineNumber": 25,
+        "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/not_found_route_exception.ts",
+        "lineNumber": 10,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -35,8 +144,8 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/create_router.ts",
-            "lineNumber": 26,
+            "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/not_found_route_exception.ts",
+            "lineNumber": 11,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -51,8 +160,8 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/create_router.ts",
-                "lineNumber": 26,
+                "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/errors/not_found_route_exception.ts",
+                "lineNumber": 11,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -103,7 +212,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/breadcrumbs/context.tsx",
                 "lineNumber": 40,
@@ -136,7 +245,7 @@
           "<TRoutes>"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/create_router.ts",
-        "lineNumber": 31,
+        "lineNumber": 50,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -152,7 +261,7 @@
               "TRoutes"
             ],
             "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/create_router.ts",
-            "lineNumber": 31,
+            "lineNumber": 50,
             "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
@@ -226,7 +335,7 @@
             "section": "def-public.Route",
             "text": "Route"
           },
-          ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }) => React.JSX.Element"
+          ">; element: React.ReactElement<any>; children: React.ReactElement<any>; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
         "lineNumber": 18,
@@ -286,7 +395,7 @@
                 "label": "element",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
                 "lineNumber": 24,
@@ -302,7 +411,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
                 "lineNumber": 25,
@@ -378,7 +487,7 @@
         "label": "Outlet",
         "description": [],
         "signature": [
-          "() => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+          "() => React.ReactElement<any> | null"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
         "lineNumber": 24,
@@ -397,7 +506,7 @@
         "label": "OutletContextProvider",
         "description": [],
         "signature": [
-          "({\n  element,\n  children,\n}: { element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; children: React.ReactNode; }) => React.JSX.Element"
+          "({\n  element,\n  children,\n}: { element: React.ReactElement<any>; children: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
         "lineNumber": 14,
@@ -426,7 +535,7 @@
                 "label": "element",
                 "description": [],
                 "signature": [
-                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                  "React.ReactElement<any>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
                 "lineNumber": 18,
@@ -442,7 +551,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/outlet.tsx",
                 "lineNumber": 19,
@@ -540,7 +649,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_router.tsx",
                 "lineNumber": 20,
@@ -602,7 +711,7 @@
           "<unknown>; children?: React.ReactNode; }) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/router_provider.tsx",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -615,7 +724,7 @@
             "label": "{\n  children,\n  router,\n  history,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/router_provider.tsx",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -646,7 +755,7 @@
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/router_provider.tsx",
-                "lineNumber": 22,
+                "lineNumber": 23,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -663,7 +772,7 @@
                   "<unknown>"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/router_provider.tsx",
-                "lineNumber": 23,
+                "lineNumber": 24,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -676,10 +785,10 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/router_provider.tsx",
-                "lineNumber": 24,
+                "lineNumber": 25,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -714,7 +823,7 @@
             "section": "def-public.Route",
             "text": "Route"
           },
-          ">; element: React.ReactElement<any, string | React.JSXElementConstructor<any>>; }"
+          ">; element: React.ReactElement<any>; }"
         ],
         "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/use_current_route.tsx",
         "lineNumber": 34,
@@ -940,7 +1049,7 @@
             "label": "element",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/types/index.ts",
             "lineNumber": 28,
@@ -1012,7 +1121,7 @@
             "label": "pre",
             "description": [],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-typed-react-router-config/src/types/index.ts",
             "lineNumber": 32,

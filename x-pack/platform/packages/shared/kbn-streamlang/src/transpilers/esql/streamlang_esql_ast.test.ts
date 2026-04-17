@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Builder, BasicPrettyPrinter } from '@kbn/esql-language';
+import { Builder, BasicPrettyPrinter } from '@elastic/esql';
 import { transpile } from '.';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import type { SetProcessor } from '../../../types/processors';
@@ -72,7 +72,7 @@ describe('ESQL - Wrapping OR within NOT', () => {
     expect(result).toEqual(`EVAL result = NOT (field1 == "value1" OR field2 == "value2")`);
   });
 
-  it('where.and.or should wrap correctly in parenthesis', () => {
+  it('where.and.or should wrap correctly in parenthesis', async () => {
     const dslWithAndOr: StreamlangDSL = {
       steps: [
         {
@@ -94,14 +94,14 @@ describe('ESQL - Wrapping OR within NOT', () => {
       ],
     };
 
-    const result = transpile(dslWithAndOr);
+    const result = await transpile(dslWithAndOr);
 
     expect(result.query).toEqual(
       `  | EVAL result_field = CASE(status == "active" AND (type == "premium" OR category == "gold"), "matched", result_field)`
     );
   });
 
-  it('where.or.and should wrap correctly in parenthesis', () => {
+  it('where.or.and should wrap correctly in parenthesis', async () => {
     const dslWithOrAnd: StreamlangDSL = {
       steps: [
         {
@@ -123,14 +123,14 @@ describe('ESQL - Wrapping OR within NOT', () => {
       ],
     };
 
-    const result = transpile(dslWithOrAnd);
+    const result = await transpile(dslWithOrAnd);
 
     expect(result.query).toEqual(
       `  | EVAL result_field = CASE(status == "active" OR type == "premium" AND category == "gold", "matched", result_field)`
     );
   });
 
-  it('where.not.or should wrap correctly in parenthesis', () => {
+  it('where.not.or should wrap correctly in parenthesis', async () => {
     const dslWithNotOr: StreamlangDSL = {
       steps: [
         {
@@ -149,14 +149,14 @@ describe('ESQL - Wrapping OR within NOT', () => {
       ],
     };
 
-    const result = transpile(dslWithNotOr);
+    const result = await transpile(dslWithNotOr);
 
     expect(result.query).toEqual(
       `  | EVAL result_field = CASE(NOT (status == "active" OR type == "premium"), "matched", result_field)`
     );
   });
 
-  it('where.not.and.or should wrap correctly in parenthesis', () => {
+  it('where.not.and.or should wrap correctly in parenthesis', async () => {
     const dslWithNotAndOr: StreamlangDSL = {
       steps: [
         {
@@ -180,7 +180,7 @@ describe('ESQL - Wrapping OR within NOT', () => {
       ],
     };
 
-    const result = transpile(dslWithNotAndOr);
+    const result = await transpile(dslWithNotAndOr);
 
     expect(result.query).toEqual(
       `  | EVAL result_field = CASE(NOT (status == "active" AND (type == "premium" OR category == "gold")), "matched", result_field)`

@@ -3,9 +3,10 @@
 exports[`Should remove selected fields from selectable 1`] = `
 <EuiPopover
   anchorPosition="leftCenter"
+  aria-label="Add tooltip field"
   button={
     <EuiButtonEmpty
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       isDisabled={false}
       onClick={[Function]}
       size="xs"
@@ -78,9 +79,10 @@ exports[`Should remove selected fields from selectable 1`] = `
 exports[`Should render 1`] = `
 <EuiPopover
   anchorPosition="leftCenter"
+  aria-label="Add tooltip field"
   button={
     <EuiButtonEmpty
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       isDisabled={false}
       onClick={[Function]}
       size="xs"

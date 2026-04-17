@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/agent-builder-common';
+import { platformCoreTools, platformStreamsSigEventsTools } from '@kbn/agent-builder-common';
 import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import type {
   ObservabilityAgentBuilderCoreSetup,
@@ -26,10 +26,6 @@ import {
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
   createGetLogGroupsTool,
 } from './get_log_groups/tool';
-import {
-  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
-  createGetCorrelatedLogsTool,
-} from './get_correlated_logs/tool';
 import { OBSERVABILITY_GET_HOSTS_TOOL_ID, createGetHostsTool } from './get_hosts/tool';
 import { createGetServicesTool, OBSERVABILITY_GET_SERVICES_TOOL_ID } from './get_services/tool';
 import {
@@ -58,20 +54,25 @@ import {
   createGetServiceTopologyTool,
 } from './get_service_topology/tool';
 import { OBSERVABILITY_GET_TRACES_TOOL_ID, createGetTracesTool } from './get_traces/tool';
+import { OBSERVABILITY_GET_LOGS_TOOL_ID, createGetLogsTool } from './get_logs/tool';
+import {
+  OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
+  createGetApmCorrelationsTool,
+} from './get_apm_correlations/tool';
 
-const PLATFORM_TOOL_IDS = [
+export const PLATFORM_TOOL_IDS = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.productDocumentation,
+  platformStreamsSigEventsTools.searchKnowledgeIndicators,
 ];
 
-const OBSERVABILITY_TOOL_IDS = [
+export const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
   OBSERVABILITY_GET_LOG_GROUPS_TOOL_ID,
-  OBSERVABILITY_GET_CORRELATED_LOGS_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
   OBSERVABILITY_GET_HOSTS_TOOL_ID,
   OBSERVABILITY_GET_TRACE_METRICS_TOOL_ID,
@@ -82,9 +83,9 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_TRACE_CHANGE_POINTS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,
   OBSERVABILITY_GET_SERVICE_TOPOLOGY_TOOL_ID,
+  OBSERVABILITY_GET_LOGS_TOOL_ID,
+  OBSERVABILITY_GET_APM_CORRELATIONS_TOOL_ID,
 ];
-
-export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
 
 export async function registerTools({
   core,
@@ -103,7 +104,6 @@ export async function registerTools({
     createGetAlertsTool({ core, logger }),
     createGetLogGroupsTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, dataRegistry, logger }),
-    createGetCorrelatedLogsTool({ core, logger }),
     createGetHostsTool({ core, logger, dataRegistry }),
     createGetTraceMetricsTool({ core, plugins, logger }),
     createGetTracesTool({ core, plugins, logger }),
@@ -113,6 +113,8 @@ export async function registerTools({
     createGetTraceChangePointsTool({ core, plugins, logger }),
     createGetIndexInfoTool({ core, plugins, logger }),
     createGetServiceTopologyTool({ core, plugins, dataRegistry, logger }),
+    createGetLogsTool({ core, logger }),
+    createGetApmCorrelationsTool({ core, plugins, logger }),
   ];
 
   for (const tool of observabilityTools) {

@@ -8,6 +8,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
 import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-common';
+import { ConfigSchema } from '../../common/step_types/run_agent_step';
+import { CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW } from '../../common/resolve_connector_or_inference_id';
 import { getRunAgentStepDefinition } from './run_agent_step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 
@@ -260,5 +262,132 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
     expect(res.error).toBeInstanceOf(Error);
     expect(res.error?.message).toContain('aborted');
+  });
+
+  it('propagates attachments to execution service nextInput', async () => {
+    const attachments = [
+      {
+        id: 'attachment-1',
+        type: 'security.alert',
+        data: { alertId: 'alert-123', severity: 'high' },
+      },
+      {
+        type: 'document',
+        data: { content: 'test content' },
+        hidden: true,
+      },
+    ];
+
+    const events$ = of({
+      type: ChatEventType.roundComplete,
+      data: {
+        round: {
+          id: 'r-1',
+          response: { message: 'ok' },
+        },
+      },
+    });
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: {
+        execution,
+      },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+          attachments,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          nextInput: {
+            message: 'hello',
+            attachments,
+          },
+        }),
+      })
+    );
+    expect(res.output?.message).toBe('ok');
+  });
+
+  describe('connector-id / inference-id', () => {
+    it('ConfigSchema rejects when both ids are meaningful', () => {
+      const parsed = ConfigSchema.safeParse({
+        'connector-id': 'a',
+        'inference-id': 'b',
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('ConfigSchema accepts when connector-id is whitespace-only and inference-id is set', () => {
+      const parsed = ConfigSchema.safeParse({
+        'connector-id': '   ',
+        'inference-id': 'b',
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('does not call executeAgent when both ids are meaningful (handler coalesce)', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+      const res = await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'a',
+            'inference-id': 'b',
+          },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(res.error?.message).toBe(CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW);
+    });
+
+    it('passes trimmed inference-id as connectorId to executeAgent', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      });
+      const execution = createExecutionMock(events$);
+      const serviceManager = { internalStart: { execution } } as any;
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: { 'inference-id': '  inf-1  ' },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'inf-1' }),
+        })
+      );
+    });
   });
 });

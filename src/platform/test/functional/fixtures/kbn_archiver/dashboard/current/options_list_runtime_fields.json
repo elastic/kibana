@@ -1,0 +1,58 @@
+
+{
+  "attributes": {
+    "allowHidden": false,
+    "name": "animals-runtime-field",
+    "fieldAttrs": "{\"testRuntimeField\":{}}",
+    "runtimeFieldMap": "{\"testRuntimeField\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit(doc['sound.keyword'].value.substring(0, 1).toUpperCase())\"}}}",
+    "fieldFormatMap": "{}",
+    "fields": "[{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true}]",
+    "timeFieldName": "@timestamp",
+    "title": "animals-*"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2026-04-09T23:20:24.313Z",
+  "id": "animals-runtime-field",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2026-04-09T23:24:30.533Z",
+  "version": "WzUxNiwxXQ=="
+}
+
+{
+  "id": "test-runtime-field",
+  "type": "dashboard",
+  "namespaces": [
+    "default"
+  ],
+  "updated_at": "2026-04-09T22:56:16.348Z",
+  "created_at": "2026-04-09T22:55:35.088Z",
+  "version": "WzMyNSwxXQ==",
+  "attributes": {
+    "description": "",
+    "title": "Test Options List on Runtime Field",
+    "pinned_panels": {
+      "panels": {}
+    },
+    "optionsJSON": "{\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+    "panelsJSON": "[{\"type\":\"visualization\",\"embeddableConfig\":{\"title\":\"Rendering Test: animal sounds pie\",\"savedVis\":{\"title\":\"Rendering Test: animal sounds pie\",\"description\":\"\",\"type\":\"pie\",\"params\":{\"type\":\"pie\",\"addTooltip\":true,\"legendPosition\":\"right\",\"isDonut\":true,\"labels\":{\"show\":false,\"values\":true,\"last_level\":true,\"truncate\":100},\"palette\":{\"type\":\"palette\",\"name\":\"kibana_palette\"},\"distinctColors\":true,\"legendDisplay\":\"show\",\"legendSize\":\"auto\",\"nestedLegend\":false,\"truncateLegend\":true,\"maxLegendLines\":1,\"emptySizeRatio\":0.3},\"uiState\":{},\"data\":{\"aggs\":[{\"id\":\"1\",\"enabled\":true,\"type\":\"count\",\"params\":{\"emptyAsNull\":false},\"schema\":\"metric\"},{\"id\":\"2\",\"enabled\":true,\"type\":\"terms\",\"params\":{\"field\":\"sound.keyword\",\"orderBy\":\"1\",\"order\":\"desc\",\"size\":5,\"otherBucket\":false,\"otherBucketLabel\":\"Other\",\"missingBucket\":false,\"missingBucketLabel\":\"Missing\",\"includeIsRegex\":true,\"excludeIsRegex\":true},\"schema\":\"segment\"}],\"searchSource\":{\"query\":{\"query\":\"\",\"language\":\"lucene\"},\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}}},\"drilldowns\":[]},\"panelIndex\":\"966cd45b-6566-4737-892e-074ed8aa3eea\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"966cd45b-6566-4737-892e-074ed8aa3eea\"}}]",
+    "timeFrom": "2018-01-01T00:00:00.000Z",
+    "timeTo": "2018-04-13T00:00:00.000Z",
+    "timeRestore": true,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+    }
+  },
+  "references": [
+    {
+      "name": "966cd45b-6566-4737-892e-074ed8aa3eea:kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern",
+      "id": "animals-runtime-field"
+    }
+  ],
+  "managed": false,
+  "coreMigrationVersion": "8.8.0",
+  "typeMigrationVersion": "10.3.0"
+}

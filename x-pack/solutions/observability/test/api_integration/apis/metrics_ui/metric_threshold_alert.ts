@@ -116,6 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -176,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -241,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -296,6 +299,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame,
             [{ key: 'middleware', bucketKey: { groupBy0: 'middleware' } }]
@@ -375,6 +379,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -459,6 +464,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
 
@@ -519,6 +525,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -558,6 +565,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -614,6 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
               true,
               logger,
               void 0,
+              void 0,
               timeFrame
             );
             expect(results).to.eql([
@@ -667,6 +676,7 @@ export default function ({ getService }: FtrProviderContext) {
               10000,
               true,
               logger,
+              void 0,
               void 0,
               timeFrame,
               [
@@ -783,6 +793,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -834,6 +845,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame
           );
           expect(results).to.eql([
@@ -873,6 +885,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -927,6 +940,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -992,6 +1006,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -1061,6 +1076,7 @@ export default function ({ getService }: FtrProviderContext) {
             true,
             logger,
             void 0,
+            void 0,
             timeFrame,
             [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
           );
@@ -1115,6 +1131,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             moment(gauge.midpoint).subtract(1, 'm').valueOf(),
             timeFrame,
             [{ key: 'dev', bucketKey: { groupBy0: 'dev' } }]
@@ -1135,6 +1152,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             gauge.max,
             timeFrame
           );
@@ -1223,6 +1241,7 @@ export default function ({ getService }: FtrProviderContext) {
           true,
           logger,
           void 0,
+          void 0,
           timeFrame
         );
         expect(results).to.eql([
@@ -1275,6 +1294,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );
@@ -1332,6 +1352,7 @@ export default function ({ getService }: FtrProviderContext) {
             10000,
             true,
             logger,
+            void 0,
             void 0,
             timeFrame
           );

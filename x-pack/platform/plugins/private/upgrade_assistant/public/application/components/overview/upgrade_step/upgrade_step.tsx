@@ -98,7 +98,7 @@ const UpgradeStep = () => {
               target="_blank"
               data-test-subj="upgradeSetupCloudLink"
               iconSide="right"
-              iconType="popout"
+              iconType="external"
               isLoading={isLoading}
               isDisabled={!readyForUpgrade}
             >
@@ -112,7 +112,7 @@ const UpgradeStep = () => {
               target="_blank"
               data-test-subj="upgradeSetupDocsLink"
               iconSide="right"
-              iconType="popout"
+              iconType="external"
             >
               {i18nTexts.upgradeGuideLink}
             </EuiButtonEmpty>
@@ -127,7 +127,7 @@ const UpgradeStep = () => {
         target="_blank"
         data-test-subj="upgradeSetupDocsLink"
         iconSide="right"
-        iconType="popout"
+        iconType="external"
       >
         {i18nTexts.upgradeGuideLink}
       </EuiButton>

@@ -38,7 +38,8 @@ export const GetMetadataListRequestSchema = {
             schema.literal(HostStatus.UPDATING.toString()),
             schema.literal(HostStatus.UNHEALTHY.toString()),
             schema.literal(HostStatus.INACTIVE.toString()),
-          ])
+          ]),
+          { maxSize: 20 }
         )
       ),
     },

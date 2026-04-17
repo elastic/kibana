@@ -18,6 +18,17 @@ export function getIndexPatternsForStream(stream: Streams.all.Definition | undef
   if (Streams.ClassicStream.Definition.is(stream)) {
     return [stream.name];
   }
+  // Returns [name, name.*] for ingest streams. The wildcard matches child ingest
+  // data streams but NOT query stream ES|QL views, which live in the $.namespace
+  // (e.g. $.name.child). This separation is intentional — see ESQL_VIEW_PREFIX.
   const dataStreamOfDefinition = stream.name;
   return [dataStreamOfDefinition, `${dataStreamOfDefinition}.*`];
+}
+
+export function getSourcesForStream(stream: Streams.all.Definition): string[] {
+  if (Streams.QueryStream.Definition.is(stream)) {
+    return [stream.query.view];
+  }
+
+  return getIndexPatternsForStream(stream);
 }

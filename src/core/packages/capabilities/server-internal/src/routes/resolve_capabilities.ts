@@ -24,6 +24,7 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
         },
         authc: {
           enabled: 'optional',
+          reason: 'This route can be accessed by both authenticated and unauthenticated users',
         },
       },
       validate: {
@@ -40,7 +41,8 @@ export function registerCapabilitiesRoutes(router: IRouter, resolver: Capabiliti
                   }`;
                 }
               },
-            })
+            }),
+            { maxSize: 500 }
           ),
         }),
       },

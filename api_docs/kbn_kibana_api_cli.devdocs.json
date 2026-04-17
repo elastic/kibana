@@ -357,7 +357,7 @@
           "; auth?: { basic: { username: string; password: string; }; } | undefined; }) => Promise<string>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
-        "lineNumber": 113,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -370,7 +370,7 @@
             "label": "{\n  baseUrl,\n  log,\n  auth,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
-            "lineNumber": 117,
+            "lineNumber": 115,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -386,7 +386,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
-                "lineNumber": 118,
+                "lineNumber": 116,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -408,7 +408,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
-                "lineNumber": 119,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -424,7 +424,7 @@
                   "{ basic: { username: string; password: string; }; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-kibana-api-cli/src/discover_kibana_url.ts",
-                "lineNumber": 120,
+                "lineNumber": 118,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

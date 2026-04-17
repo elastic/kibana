@@ -16,7 +16,8 @@ import {
   keys,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import React, { useCallback, useState } from 'react';
 
 import { PageScope } from '../../../../../data_view_manager/constants';
@@ -61,6 +62,7 @@ export const CreateFlyout: React.FC<Props> = React.memo(({ onClose }) => {
   const { alertsIndexPattern, http, settings } = useAssistantContext();
   const { data: aiConnectors, isLoading: isLoadingConnectors } = useLoadConnectors({
     http,
+    featureId: 'attack_discovery',
     settings,
   });
 

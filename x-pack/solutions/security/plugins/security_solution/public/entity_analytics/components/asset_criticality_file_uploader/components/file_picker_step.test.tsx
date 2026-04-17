@@ -24,6 +24,7 @@ describe('AssetCriticalityFilePickerStep', () => {
         onFileChange={mockOnFileChange}
         errorMessage={mockErrorMessage}
         isLoading={mockIsLoading}
+        isEntityStoreV2Enabled={false}
       />,
       { wrapper: TestProviders }
     );
@@ -37,6 +38,7 @@ describe('AssetCriticalityFilePickerStep', () => {
         onFileChange={mockOnFileChange}
         errorMessage={mockErrorMessage}
         isLoading={mockIsLoading}
+        isEntityStoreV2Enabled={false}
       />,
       { wrapper: TestProviders }
     );
@@ -53,6 +55,7 @@ describe('AssetCriticalityFilePickerStep', () => {
         onFileChange={mockOnFileChange}
         errorMessage={mockErrorMessage}
         isLoading={mockIsLoading}
+        isEntityStoreV2Enabled={false}
       />,
       { wrapper: TestProviders }
     );
@@ -66,10 +69,103 @@ describe('AssetCriticalityFilePickerStep', () => {
         onFileChange={mockOnFileChange}
         errorMessage={mockErrorMessage}
         isLoading={true}
+        isEntityStoreV2Enabled={false}
       />,
       { wrapper: TestProviders }
     );
 
     expect(container.querySelector('.euiProgress')).not.toBeNull();
+  });
+
+  describe('when isEntityStoreV2Enabled is true', () => {
+    const renderV2 = () =>
+      render(
+        <AssetCriticalityFilePickerStep
+          onFileChange={mockOnFileChange}
+          isLoading={mockIsLoading}
+          isEntityStoreV2Enabled={true}
+        />,
+        { wrapper: TestProviders }
+      );
+
+    it('should display the header row description', () => {
+      const { getByText } = renderV2();
+
+      expect(
+        getByText(/The first row of the file must contain a header/, { exact: false })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the V2 entity type description with "type" column requirement', () => {
+      const { getByText } = renderV2();
+
+      expect(
+        getByText(/The header for this column must be "type"/, { exact: false })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the V2 identifier fields description', () => {
+      const { getByText } = renderV2();
+
+      expect(
+        getByText(/Entities that match ALL of the identifiers specified in a row will be updated/, {
+          exact: false,
+        })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the V2 criticality level description with "criticality_level" column requirement', () => {
+      const { getByText } = renderV2();
+
+      expect(
+        getByText(/The header for this column must be "criticality_level"/, { exact: false })
+      ).toBeInTheDocument();
+    });
+
+    it('should display the V2 sample CSV with a header row', () => {
+      const { getByText } = renderV2();
+
+      expect(
+        getByText(
+          /type,user\.email,user\.name,user\.full_name,host\.name,host\.domain,service\.name,criticality_level/,
+          { exact: false }
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('when isEntityStoreV2Enabled is false', () => {
+    it('should not display the header row description', () => {
+      const { queryByText } = render(
+        <AssetCriticalityFilePickerStep
+          onFileChange={mockOnFileChange}
+          isLoading={mockIsLoading}
+          isEntityStoreV2Enabled={false}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(
+        queryByText(/The first row of the file must contain a header/, { exact: false })
+      ).not.toBeInTheDocument();
+    });
+
+    it('should not display the V2 identifier fields description', () => {
+      const { queryByText } = render(
+        <AssetCriticalityFilePickerStep
+          onFileChange={mockOnFileChange}
+          isLoading={mockIsLoading}
+          isEntityStoreV2Enabled={false}
+        />,
+        { wrapper: TestProviders }
+      );
+
+      expect(
+        queryByText(
+          /Entities that match ALL of the identifiers specified in a row will be updated/,
+          { exact: false }
+        )
+      ).not.toBeInTheDocument();
+    });
   });
 });

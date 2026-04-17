@@ -14,3 +14,5 @@ export { BaseMonacoConnectorHandler } from './base_monaco_connector_handler';
 export { ElasticsearchMonacoConnectorHandler } from './elasticsearch_connector_handler';
 export { KibanaMonacoConnectorHandler } from './kibana_monaco_connector_handler';
 export { GenericMonacoConnectorHandler } from './generic_monaco_connector_handler';
+export { HttpMonacoConnectorStepHandler } from './http_connector_step_handler';
+export { WorkflowExecuteMonacoConnectorHandler } from './workflow_execute_handler';

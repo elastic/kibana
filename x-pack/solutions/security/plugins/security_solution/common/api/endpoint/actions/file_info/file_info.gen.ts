@@ -14,10 +14,13 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type EndpointFileInfoRequestParams = z.infer<typeof EndpointFileInfoRequestParams>;
 export const EndpointFileInfoRequestParams = z.object({
+  /**
+   * The ID of the response action that generated the file.
+   */
   action_id: z.string(),
   /**
       * The file identifier is constructed in one of two ways:

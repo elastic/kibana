@@ -149,7 +149,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           <EuiButton
             {...reactRouterNavigate(history, linkToAddPolicy())}
             fill
-            iconType="plusInCircle"
+            iconType="plusCircle"
             data-test-subj="createPolicyButton"
           >
             <FormattedMessage

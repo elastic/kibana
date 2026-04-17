@@ -18,8 +18,10 @@ export interface SavedQueryResponse {
   ecs_mapping?: Array<{ key: string; value: Record<string, object> }>;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
   prebuilt?: boolean;
   version: number | string;
 }
@@ -37,8 +39,10 @@ export interface CopySavedQueryResponseData {
   ecs_mapping?: Array<{ key: string; value: Record<string, object> }>;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
 }
 
 export interface UpdateSavedQueryResponse {
@@ -54,8 +58,10 @@ export interface UpdateSavedQueryResponse {
   ecs_mapping?: Array<{ key: string; value: object }>;
   created_at: string;
   created_by: string | undefined;
+  created_by_profile_uid?: string;
   updated_at: string;
   updated_by: string | undefined;
+  updated_by_profile_uid?: string;
   prebuilt?: boolean;
   version: string;
 }

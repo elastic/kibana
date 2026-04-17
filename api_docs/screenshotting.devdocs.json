@@ -520,7 +520,36 @@
           "lineNumber": 39,
           "columnNumber": 3,
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "returnComment": [
+            "Observable with screenshotting results."
+          ],
+          "children": [
+            {
+              "parentPluginId": "screenshotting",
+              "id": "def-server.ScreenshottingStart.getScreenshots.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "options",
+              "description": [
+                "Screenshots session options."
+              ],
+              "signature": [
+                {
+                  "pluginId": "screenshotting",
+                  "scope": "server",
+                  "docId": "kibScreenshottingPluginApi",
+                  "section": "def-server.PngScreenshotOptions",
+                  "text": "PngScreenshotOptions"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/screenshotting/server/screenshots/screenshots.ts",
+              "lineNumber": 180,
+              "columnNumber": 18,
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",

@@ -67,6 +67,13 @@ export class ImageEmbeddablePlugin
       ]);
       return getImageEmbeddableFactory();
     });
+    plugins.embeddable.registerLegacyURLTransform(
+      IMAGE_EMBEDDABLE_TYPE,
+      async (transformDrilldownsOut) => {
+        const { getTransformOut } = await import('../common/transforms');
+        return getTransformOut(transformDrilldownsOut);
+      }
+    );
     return {};
   }
 

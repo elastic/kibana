@@ -61,7 +61,7 @@ export function ImageViewer({
   const src =
     imageConfig.src.type === 'url'
       ? imageConfig.src.url
-      : getImageDownloadHref(imageConfig.src.fileId);
+      : getImageDownloadHref(imageConfig.src.file_id);
 
   const [hasFailedToLoad, setFailedToLoad] = useState<boolean>(false);
 
@@ -91,7 +91,7 @@ export function ImageViewer({
           // uncomment to enable blurhash when it's ready
           // https://github.com/elastic/kibana/issues/145567
           // meta={imageConfig.src.type === 'file' ? imageConfig.src.fileImageMeta : undefined}
-          alt={imageConfig.altText ?? ''}
+          alt={imageConfig.alt_text ?? ''}
           className={classNames(className, { 'visually-hidden': hasFailedToLoad })}
           title={
             onChange
@@ -104,10 +104,10 @@ export function ImageViewer({
           style={{
             width: '100%',
             height: '100%',
-            objectFit: imageConfig?.sizing?.objectFit ?? 'contain',
+            objectFit: imageConfig?.object_fit,
             cursor: onChange || onClick ? 'pointer' : 'initial',
             display: 'block', // needed to remove gap under the image
-            backgroundColor: imageConfig.backgroundColor,
+            backgroundColor: imageConfig.background_color,
           }}
           wrapperProps={{
             style: { display: 'block', height: '100%', width: '100%' },

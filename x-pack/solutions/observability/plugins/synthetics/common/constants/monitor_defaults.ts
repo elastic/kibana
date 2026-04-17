@@ -296,3 +296,5 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
     ...DEFAULT_TLS_FIELDS,
   },
 };
+
+export const HEARTBEAT_BROWSER_MONITOR_TIMEOUT_OVERHEAD_SECONDS = 30;

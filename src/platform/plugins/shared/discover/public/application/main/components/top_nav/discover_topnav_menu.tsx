@@ -20,7 +20,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { ChromeBreadcrumbsBadge } from '@kbn/core-chrome-browser';
 import useObservable from 'react-use/lib/useObservable';
-import type { useDiscoverTopNav } from './use_discover_topnav';
+import type { DiscoverTopNavHookResult } from './use_discover_topnav';
 import type { DiscoverCustomizationContext } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getReadOnlyBadge } from '../../../discover_router';
@@ -82,10 +82,7 @@ export const DiscoverTopNavMenuProvider = ({
   );
 };
 
-export const DiscoverTopNavMenu = ({
-  topNavBadges,
-  topNavMenu,
-}: ReturnType<typeof useDiscoverTopNav>) => {
+export const DiscoverTopNavMenu = ({ topNavBadges, topNavMenu }: DiscoverTopNavHookResult) => {
   const { topNavBadges$, topNavMenu$ } = useContext(discoverTopNavMenuContext);
 
   useLayoutEffect(() => {

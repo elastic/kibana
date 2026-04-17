@@ -35,59 +35,58 @@ const defaultPlaceholder = i18n.translate(
 /**
  * `ContentListToolbar` component.
  *
- * Provides a toolbar with search and filter controls for content lists using `EuiSearchBar`.
- * Currently supports search and the Sort filter; additional filters will be added in subsequent PRs.
- *
- * When items are selected in the table, a "Delete N entities" button appears in the
- * toolbar's left tools area (via `EuiSearchBar`'s `toolsLeft`), matching the existing
- * `TableListView` pattern.
- *
- * **Smart Defaults**: When no children are provided, auto-renders filters
- * based on provider configuration.
- *
- * **Declarative Configuration**: Use {@link Filters} children
- * to customize filter order.
- *
- * @param props - The component props. See {@link ContentListToolbarProps}.
- * @returns A React element containing the toolbar.
- *
- * @example
- * ```tsx
- * const { Filters } = ContentListToolbar;
- *
- * // Smart defaults - auto-renders based on provider config.
- * <ContentListToolbar />
- *
- * // Custom filter order.
- * <ContentListToolbar>
- *   <Filters>
- *     <Filters.Sort />
- *   </Filters>
- * </ContentListToolbar>
- * ```
+ * `queryText` from state flows directly to `EuiSearchBar`'s `query` prop.
+ * When the user types, `onChange` stores `query.text` back to state.
+ * No displayText, no typingRef, no sync hacks — one source of truth.
  */
 const ContentListToolbarComponent = ({
   children,
   'data-test-subj': dataTestSubj = 'contentListToolbar',
 }: ContentListToolbarProps) => {
   const { labels, supports } = useContentListConfig();
-  const { search, setSearch, isSupported: searchIsSupported } = useContentListSearch();
+  const {
+    queryText,
+    setQueryFromEuiQuery,
+    isSupported: searchIsSupported,
+    fieldNames,
+  } = useContentListSearch();
   const filters = useFilters(children);
 
   const handleSearchChange = useCallback(
-    ({ queryText, error }: EuiSearchBarOnChangeArgs) => {
-      if (error) {
+    ({ query, error }: EuiSearchBarOnChangeArgs) => {
+      if (error || !query) {
+        // Return without updating state when EuiSearchBar reports a parse error.
+        //
+        // EuiSearchBar maintains its own internal `queryText` during error states,
+        // so the input continues to show what the user typed. Passing the raw
+        // error text to the controlled `query` prop is unsafe: EuiSearchBar's
+        // `getDerivedStateFromProps` calls `parseQuery` on any new prop value and
+        // would throw if the text is unparseable, crashing the component.
+        //
+        // Known limitation: if an external query change (e.g. a filter-toggle
+        // avatar click) fires while the user has an in-progress parse error, the
+        // input will snap to the new external query value.
         return;
       }
-      // `queryText` preserves the raw input (including whitespace) for display fidelity.
-      // `filters.search` is trimmed so data fetching ignores leading/trailing spaces.
-      setSearch(queryText, { search: queryText.trim() || undefined });
+      setQueryFromEuiQuery(query);
     },
-    [setSearch]
+    [setQueryFromEuiQuery]
   );
 
-  // Only include the selection bar when selection is supported to avoid
-  // running selection hooks unnecessarily in read-only or selection-disabled modes.
+  // Build an EuiSearchBar schema so it recognizes registered fields (e.g., `tag`,
+  // `createdBy`) and doesn't escape the colon when the user types `field:value`.
+  const boxSchema = useMemo(() => {
+    if (fieldNames.length === 0) {
+      return undefined;
+    }
+    const schemaFields: Record<string, { type: 'string' }> = {};
+    for (const name of fieldNames) {
+      schemaFields[name] = { type: 'string' };
+    }
+    return { strict: false, fields: schemaFields };
+  }, [fieldNames]);
+
+  // Only include the selection bar when selection is supported.
   const toolsLeft = useMemo(
     () =>
       supports.selection
@@ -98,12 +97,13 @@ const ContentListToolbarComponent = ({
 
   return (
     <EuiSearchBar
-      query={search}
+      query={queryText}
       box={{
         placeholder: labels.searchPlaceholder ?? defaultPlaceholder,
         incremental: true,
         'data-test-subj': `${dataTestSubj}-searchBox`,
         disabled: !searchIsSupported,
+        ...(boxSchema && { schema: boxSchema }),
       }}
       onChange={handleSearchChange}
       toolsLeft={toolsLeft}

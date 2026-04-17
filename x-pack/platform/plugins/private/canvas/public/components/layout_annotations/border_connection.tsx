@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
@@ -30,10 +29,3 @@ export const BorderConnection: FC<Props> = ({ transformMatrix, width, height }) 
     }}
   />
 );
-
-BorderConnection.propTypes = {
-  height: PropTypes.number.isRequired,
-  // @ts-expect-error upgrade typescript v5.9.3
-  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-  width: PropTypes.number.isRequired,
-};

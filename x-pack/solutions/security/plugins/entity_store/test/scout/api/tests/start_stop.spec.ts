@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-security/api';
 import { apiTest } from '@kbn/scout-security';
-import { COMMON_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 /**
@@ -25,7 +25,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
   });
 
@@ -40,7 +40,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
       const taskId = getExtractEntityTaskId('user');
 
       // 1. Install entity store for user only
-      const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      const installResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entityTypes },
@@ -54,7 +54,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
       expect(task.attributes?.taskType).toBe('entity_store:v2:extract_entity_task:user');
 
       // 3. Trigger stop endpoint
-      const stopResponse = await apiClient.put(ENTITY_STORE_ROUTES.STOP, {
+      const stopResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.STOP, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entityTypes },
@@ -71,7 +71,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
       expect(taskNotFoundAfterStop).toBe(true);
 
       // 5. Trigger start endpoint
-      const startResponse = await apiClient.put(ENTITY_STORE_ROUTES.START, {
+      const startResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.START, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entityTypes },
@@ -85,7 +85,7 @@ apiTest.describe('Entity Store stop/start API tests', { tag: ENTITY_STORE_TAGS }
       expect(task.attributes?.taskType).toBe('entity_store:v2:extract_entity_task:user');
 
       // 7. Trigger uninstall endpoint
-      const uninstallResponse = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      const uninstallResponse = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entityTypes },

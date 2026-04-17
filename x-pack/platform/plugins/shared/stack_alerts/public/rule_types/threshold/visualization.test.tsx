@@ -43,12 +43,21 @@ dataMock.fieldFormats = {
 } as unknown as DataPublicPluginStart['fieldFormats'];
 
 describe('ThresholdVisualization', () => {
-  beforeAll(() => {
+  beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         uiSettings: uiSettingsServiceMock.createSetupContract(),
+        http: { post: jest.fn() },
       },
     });
+    getThresholdRuleVisualizationData.mockImplementation(() =>
+      Promise.resolve({
+        results: [
+          { group: 'a', metrics: [['b', 2]] },
+          { group: 'a', metrics: [['b', 10]] },
+        ],
+      })
+    );
   });
 
   const ruleParams = {
@@ -207,5 +216,41 @@ describe('ThresholdVisualization', () => {
     expect(wrapper.find('[data-test-subj="noDataCallout"]').first().text()).toBe(
       `No data matches this queryCheck that your time range and filters are correct.`
     );
+  });
+
+  test('passes projectRouting from CPS manager to getThresholdRuleVisualizationData', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        uiSettings: uiSettingsServiceMock.createSetupContract(),
+        http: { post: jest.fn() },
+        cps: {
+          cpsManager: {
+            getProjectRouting: jest.fn(() => '_alias:*'),
+          },
+        },
+      },
+    });
+
+    await setup();
+
+    expect(getThresholdRuleVisualizationData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projectRouting: '_alias:*',
+      })
+    );
+  });
+
+  test('passes undefined projectRouting when CPS manager is absent', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        uiSettings: uiSettingsServiceMock.createSetupContract(),
+        http: { post: jest.fn() },
+      },
+    });
+
+    await setup();
+
+    const firstCallArg = getThresholdRuleVisualizationData.mock.calls[0][0];
+    expect(firstCallArg.projectRouting).toBeUndefined();
   });
 });

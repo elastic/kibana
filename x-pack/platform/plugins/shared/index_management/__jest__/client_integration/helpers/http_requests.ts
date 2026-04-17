@@ -267,20 +267,8 @@ const registerHttpRequestMockHelpers = (
       error
     );
 
-  const setDeleteDocumentResponse = (
-    indexName: string,
-    id: string,
-    response?: HttpResponse,
-    error?: ResponseError
-  ) =>
-    mockResponse(
-      'DELETE',
-      `${INTERNAL_API_BASE_PATH}/indices/${encodeURIComponent(
-        indexName
-      )}/documents/${encodeURIComponent(id)}`,
-      response,
-      error
-    );
+  const setLoadIndexDocCountResponse = (response?: HttpResponse, error?: ResponseError) =>
+    mockResponse('POST', `${INTERNAL_API_BASE_PATH}/index_doc_count`, response, error);
 
   return {
     setLoadTemplatesResponse,
@@ -316,7 +304,7 @@ const registerHttpRequestMockHelpers = (
     setGetMatchingDataStreams,
     setUserStartPrivilegesResponse,
     setLoadIndexDocumentsSampleResponse,
-    setDeleteDocumentResponse,
+    setLoadIndexDocCountResponse,
   };
 };
 

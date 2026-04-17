@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  describe('dashboard - add a value type ES|QL control', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/251388
+  describe.skip('dashboard - add a value type ES|QL control', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -81,6 +82,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // create the control
       await testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await testSubjects.click('saveEsqlControlsFlyoutButton');
+      // Wait for the control flyout to close before checking panel count,
+      // otherwise waitForRenderComplete may complete based on the old panel count
+      await testSubjects.waitForDeleted('saveEsqlControlsFlyoutButton');
       await dashboard.waitForRenderComplete();
       await retry.try(async () => {
         expect(await dashboard.getPanelCount()).to.be(panelCountBefore + 1);

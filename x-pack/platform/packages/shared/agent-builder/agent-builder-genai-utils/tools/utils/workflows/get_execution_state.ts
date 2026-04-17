@@ -7,10 +7,18 @@
 
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { WaitForInputStep } from '@kbn/workflows';
+import { ExecutionStatus, getStepByNameFromNestedSteps } from '@kbn/workflows';
 import { getWorkflowOutput } from './get_workflow_output';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
+
+export interface WaitingInputContext {
+  /** Human-readable prompt from the waitForInput step's `with.message`. */
+  message?: string;
+  /** JSON Schema describing the expected input, from the step's `with.schema`. */
+  schema?: Record<string, unknown>;
+}
 
 export interface WorkflowExecutionState {
   execution_id: string;
@@ -22,6 +30,8 @@ export interface WorkflowExecutionState {
   workflow_name?: string;
   /** Present when status is FAILED; contains the workflow error message. */
   error_message?: string;
+  /** Present when status is WAITING_FOR_INPUT; describes what input is needed to resume. */
+  waiting_input?: WaitingInputContext;
 }
 
 /**
@@ -58,6 +68,28 @@ export const getExecutionState = async ({
 
   if (execution.status === ExecutionStatus.FAILED && execution.error) {
     state.error_message = execution.error.message;
+  }
+
+  if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
+    const waitingStep = execution.stepExecutions.find(
+      (s) => s.status === ExecutionStatus.WAITING_FOR_INPUT
+    );
+
+    if (waitingStep) {
+      const step = getStepByNameFromNestedSteps(
+        execution.workflowDefinition.steps,
+        waitingStep.stepId
+      );
+      const stepConfig =
+        step?.type === 'waitForInput' ? (step as WaitForInputStep).with : undefined;
+      const waitContext: WaitingInputContext = {
+        ...(stepConfig?.message && { message: stepConfig.message }),
+        ...(stepConfig?.schema && { schema: stepConfig.schema as Record<string, unknown> }),
+      };
+      if (waitContext.message !== undefined || waitContext.schema !== undefined) {
+        state.waiting_input = waitContext;
+      }
+    }
   }
 
   return state;

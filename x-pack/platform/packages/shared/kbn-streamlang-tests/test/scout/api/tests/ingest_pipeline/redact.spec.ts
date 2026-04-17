@@ -28,7 +28,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Connection from 192.168.1.1 established' }];
       await testBed.ingest(indexName, docs, processors);
@@ -53,7 +53,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Contact user at john.doe@example.com for details' }];
       await testBed.ingest(indexName, docs, processors);
@@ -78,7 +78,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'User john@example.com connected from 10.0.0.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -105,7 +105,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Request from 172.16.0.1' }];
       await testBed.ingest(indexName, docs, processors);
@@ -130,7 +130,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Device MAC: 00:1A:2B:3C:4D:5E' }];
       await testBed.ingest(indexName, docs, processors);
@@ -158,7 +158,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
         await testBed.ingest(indexName, docs, processors);
@@ -184,7 +184,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'some_value' }]; // Not including 'nonexistent' field
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -209,7 +209,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [
         { message: 'Connection from 192.168.1.1', environment: 'production' },
@@ -221,11 +221,15 @@ apiTest.describe(
       expect(ingestedDocs).toHaveLength(2);
 
       // Production doc should have IP redacted
-      const prodDoc = ingestedDocs.find((d: any) => d.environment === 'production');
+      const prodDoc = ingestedDocs.find(
+        (d: Record<string, unknown>) => d.environment === 'production'
+      );
       expect(prodDoc).toStrictEqual(expect.objectContaining({ message: 'Connection from <ip>' }));
 
       // Development doc should keep original IP
-      const devDoc = ingestedDocs.find((d: any) => d.environment === 'development');
+      const devDoc = ingestedDocs.find(
+        (d: Record<string, unknown>) => d.environment === 'development'
+      );
       expect(devDoc).toStrictEqual(
         expect.objectContaining({ message: 'Connection from 192.168.1.2' })
       );
@@ -244,7 +248,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'User 550e8400-e29b-41d4-a716-446655440000 logged in' }];
       await testBed.ingest(indexName, docs, processors);
@@ -269,7 +273,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'Hello world, no IP here' }];
       await testBed.ingest(indexName, docs, processors);
@@ -302,7 +306,7 @@ apiTest.describe(
           ],
         };
 
-        expect(() => transpile(streamlangDSL)).toThrow(
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
           'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
         );
       });

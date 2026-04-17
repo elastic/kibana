@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types",
       "cypress",
@@ -18,7 +17,7 @@
   "include": [
     "**/*",
     "../../../../typings/**/*",
-    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
+    "../../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
@@ -75,7 +74,6 @@
     "@kbn/rison",
     "@kbn/dataset-quality-plugin",
     "@kbn/metrics-data-access-plugin",
-    "@kbn/observability-onboarding-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/cases-plugin",

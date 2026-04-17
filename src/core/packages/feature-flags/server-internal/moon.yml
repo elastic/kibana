@@ -4,20 +4,20 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/core-feature-flags-server-internal'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-core'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/core-feature-flags-server-internal'
+  title: '@kbn/core-feature-flags-server-internal'
   description: Moon project for @kbn/core-feature-flags-server-internal
   channel: ''
   owner: '@elastic/kibana-core'
-  metadata:
-    sourceRoot: src/core/packages/feature-flags/server-internal
+  sourceRoot: src/core/packages/feature-flags/server-internal
 dependsOn:
+  - '@kbn/apm-utils'
   - '@kbn/core-base-server-internal'
   - '@kbn/core-feature-flags-server'
   - '@kbn/logging'
@@ -37,16 +37,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

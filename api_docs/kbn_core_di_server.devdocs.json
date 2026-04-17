@@ -306,7 +306,10 @@
           "(args_0?: ",
           "SavedObjectsClientProviderOptions",
           " | undefined) => ",
-          "SavedObjectsClientContract"
+          "SavedObjectsClientContract",
+          " | Promise<",
+          "SavedObjectsClientContract",
+          ">"
         ],
         "path": "src/core/packages/di/server/src/services/saved_objects.ts",
         "lineNumber": 17,

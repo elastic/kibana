@@ -16,7 +16,6 @@ import { registerESQLControlTransforms } from './transforms/esql_control_transfo
 import { registerOptionsListControlTransforms } from './transforms/options_list_control_transforms';
 import { registerRangeSliderControlTransforms } from './transforms/range_slider_control_transforms';
 import { registerTimeSliderControlTransforms } from './transforms/time_slider_control_transforms';
-import { setupOptionsListClusterSettingsRoute } from './options_list/options_list_cluster_settings_route';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 
 interface SetupDeps {
@@ -32,7 +31,6 @@ export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
     registerRangeSliderControlTransforms(embeddable);
     registerTimeSliderControlTransforms(embeddable);
 
-    setupOptionsListClusterSettingsRoute(core);
     setupOptionsListSuggestionsRoute(core, kql.autocomplete.getAutocompleteSettings);
     return {};
   }

@@ -21,16 +21,12 @@ import { i18n } from '@kbn/i18n';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import {
-  getIndexManagementHref,
-  getStorageExplorerFeedbackHref,
-} from '../get_storage_explorer_links';
+import { getIndexManagementHref } from '../get_storage_explorer_links';
 
 export function TipsAndResources() {
   const router = useApmRouter();
   const { core } = useApmPluginContext();
   const { docLinks } = core;
-  const isFeedbackEnabled = core.notifications.feedback.isEnabled();
 
   const {
     query: { rangeFrom, rangeTo, environment, kuery, comparisonEnabled },
@@ -38,7 +34,7 @@ export function TipsAndResources() {
 
   const cards = [
     {
-      icon: 'beaker',
+      icon: 'flask',
       title: i18n.translate('xpack.apm.storageExplorer.resources.errorMessages.title', {
         defaultMessage: 'Reduce transactions',
       }),
@@ -49,7 +45,7 @@ export function TipsAndResources() {
       href: docLinks.links.apm.transactionSampling,
     },
     {
-      icon: 'visLine',
+      icon: 'chartLine',
       title: i18n.translate('xpack.apm.storageExplorer.resources.compressedSpans.title', {
         defaultMessage: 'Reduce spans',
       }),
@@ -97,7 +93,7 @@ export function TipsAndResources() {
           serviceGroup: '',
         },
       }),
-      iconType: 'tableDensityExpanded',
+      iconType: 'tableDensityLow',
     },
     {
       label: i18n.translate('xpack.apm.storageExplorer.resources.documentation', {
@@ -107,18 +103,6 @@ export function TipsAndResources() {
       target: '_blank',
       iconType: 'documentation',
     },
-    ...(isFeedbackEnabled
-      ? [
-          {
-            label: i18n.translate('xpack.apm.storageExplorer.resources.sendFeedback', {
-              defaultMessage: 'Give feedback',
-            }),
-            href: getStorageExplorerFeedbackHref(),
-            target: '_blank',
-            iconType: 'editorComment',
-          },
-        ]
-      : []),
   ];
 
   return (

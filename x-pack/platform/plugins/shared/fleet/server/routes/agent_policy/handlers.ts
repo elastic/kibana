@@ -8,9 +8,10 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import pMap from 'p-map';
-import { dump } from 'js-yaml';
 
 import { isEmpty, uniq } from 'lodash';
+
+import yaml from 'yaml';
 
 import {
   ALL_SPACES_ID,
@@ -125,7 +126,32 @@ export async function populateAssignedAgentsCount(
           kuery: `${policyKuery} and ${FIPS_AGENT_KUERY}`,
         })
         .then(({ total }) => (agentPolicy.fips_agents = total));
-      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents]);
+
+      const perVersionAgents = agentClient
+        .listAgents({
+          showInactive: true,
+          perPage: 0,
+          page: 1,
+          aggregations: {
+            versions: {
+              terms: {
+                field: 'agent.version',
+                size: 1000,
+              },
+            },
+          },
+          kuery: policyKuery,
+        })
+        .then(({ aggregations }) => {
+          const versions = (aggregations?.versions as any)?.buckets ?? [];
+          agentPolicy.agents_per_version = versions.map(
+            (version: { key: string; doc_count: number }) => ({
+              version: version.key,
+              count: version.doc_count,
+            })
+          );
+        });
+      return Promise.all([totalAgents, unprivilegedAgents, fipsAgents, perVersionAgents]);
     },
     { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10 }
   );
@@ -389,7 +415,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       for (const requestedSpaceId of spaceIds) {
         if (!authorizedSpaces.includes(requestedSpaceId)) {
           throw new FleetError(
-            `No enough permissions to create policies in space ${requestedSpaceId}`
+            `Not enough permissions to create policies in space ${requestedSpaceId}`
           );
         }
       }
@@ -827,7 +853,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
       });
     }
     const fullAgentPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,
@@ -869,7 +895,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         body: { message: 'Agent policy not found' },
       });
     }
-    const body = fullAgentPolicyToYaml(fullAgentPolicy, dump);
+    const body = fullAgentPolicyToYaml(fullAgentPolicy, yaml);
     const headers: ResponseHeaders = {
       'content-type': 'text/x-yaml',
       'content-disposition': `attachment; filename="elastic-agent.yml"`,

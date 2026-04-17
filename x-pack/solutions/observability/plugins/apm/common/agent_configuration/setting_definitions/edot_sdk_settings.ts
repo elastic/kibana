@@ -25,13 +25,15 @@ export const edotSDKSettings: RawSettingDefinition[] = [
           'The list of supported instrumentation names is language specific:\n' +
           '- [EDOT Java](https://ela.st/otel-agent-instructions): for example "akka-http,grpc"\n' +
           '- [EDOT Node.js](https://ela.st/edot-node-disable-instrs): for example "net,dns,http"\n' +
-          '- [EDOT PHP](https://ela.st/edot-php-deactivate-instrumentations): for example "curl,laravel,pdo"',
+          '- [EDOT PHP](https://ela.st/edot-php-deactivate-instrumentations): for example "curl,laravel,pdo"\n' +
+          '- [EDOT Python](https://ela.st/edot-python-deactivate-instrumentations) for example "opentelemetry.instrumentation.flask,opentelemetry.instrumentation.botocore*"',
       }
     ),
     includeAgents: [
       'opentelemetry/java/elastic',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
     ],
   },
   {

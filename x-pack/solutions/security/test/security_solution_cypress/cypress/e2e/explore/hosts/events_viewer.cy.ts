@@ -19,6 +19,7 @@ import {
 import {
   activateViewAll,
   activateViewSelected,
+  clearFieldsBrowser,
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../../tasks/fields_browser';
@@ -74,9 +75,13 @@ describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
 
     it('displays only the default selected fields when "view selected" option is enabled', () => {
       activateViewSelected();
-      defaultHeadersInDefaultEcsCategory.forEach((header) =>
-        cy.get(FIELDS_BROWSER_CHECKBOX(header.id)).should('be.checked')
-      );
+      // Selected columns can span multiple pages in the field table (name-sorted, page size 10).
+      // Filter by field id so each checkbox is rendered before we assert it is checked.
+      cy.wrap(defaultHeadersInDefaultEcsCategory).each(({ id }: { id: string }) => {
+        filterFieldsBrowser(id);
+        cy.get(FIELDS_BROWSER_CHECKBOX(id)).should('be.checked');
+      });
+      clearFieldsBrowser();
       activateViewAll();
     });
   });

@@ -66,7 +66,7 @@ export const RunTestManuallyContextItem = () => {
       >
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            {testInProgress ? <EuiLoadingSpinner size="s" /> : <EuiIcon type="beaker" size="s" />}
+            {testInProgress ? <EuiLoadingSpinner size="s" /> : <EuiIcon type="flask" size="s" />}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{<span>{RUN_TEST_LABEL}</span>}</EuiFlexItem>
         </EuiFlexGroup>

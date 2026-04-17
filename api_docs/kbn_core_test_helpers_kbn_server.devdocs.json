@@ -27,7 +27,7 @@
           "Root"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 135,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -38,14 +38,12 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "Any config overrides for this instance."
-            ],
+            "description": [],
             "signature": [
               "{}"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 142,
+            "lineNumber": 159,
             "columnNumber": 28,
             "deprecated": false,
             "trackAdoption": false,
@@ -64,7 +62,7 @@
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 142,
+            "lineNumber": 159,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -90,7 +88,7 @@
           "Root"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 146,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -101,14 +99,12 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [
-              "Any config overrides for this instance."
-            ],
+            "description": [],
             "signature": [
               "{}"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 154,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -127,7 +123,7 @@
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 155,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -144,7 +140,7 @@
               "string | undefined"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 156,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -160,7 +156,9 @@
         "type": "Function",
         "tags": [],
         "label": "createRootWithSettings",
-        "description": [],
+        "description": [
+          "\nCreates a test {@link Root} instance with the given configuration overrides.\n"
+        ],
         "signature": [
           "(settings: Record<string, any>, cliArgs: Partial<",
           "CliArgs",
@@ -168,7 +166,7 @@
           "Root"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 70,
+        "lineNumber": 71,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -179,12 +177,14 @@
             "type": "Object",
             "tags": [],
             "label": "settings",
-            "description": [],
+            "description": [
+              "- Config key/value pairs merged on top of the default test settings."
+            ],
             "signature": [
               "Record<string, any>"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 71,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -196,14 +196,16 @@
             "type": "Object",
             "tags": [],
             "label": "cliArgs",
-            "description": [],
+            "description": [
+              "- CLI argument overrides applied to the Kibana environment."
+            ],
             "signature": [
               "Partial<",
               "CliArgs",
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 72,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -215,12 +217,14 @@
             "type": "string",
             "tags": [],
             "label": "customKibanaVersion",
-            "description": [],
+            "description": [
+              "- When provided, overrides the Kibana version from `package.json`."
+            ],
             "signature": [
               "string | undefined"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 73,
+            "lineNumber": 84,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -244,7 +248,7 @@
           "Root"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 165,
+        "lineNumber": 267,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -260,7 +264,7 @@
               "{}"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-            "lineNumber": 165,
+            "lineNumber": 267,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -279,7 +283,7 @@
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-            "lineNumber": 165,
+            "lineNumber": 267,
             "columnNumber": 55,
             "deprecated": false,
             "trackAdoption": false,
@@ -301,13 +305,13 @@
           "\nSee docs in {@link TestUtils}. This function provides the same utilities but\nconfigured for serverless.\n"
         ],
         "signature": [
-          "({\n  adjustTimeout,\n  kibana = {},\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
+          "({\n  adjustTimeout,\n  kibana = {},\n  enableCPS = false,\n  esArgs = [],\n  projectType = DEFAULT_PROJECT_TYPE,\n  kibanaUrl = DEFAULT_KIBANA_URL,\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
           "CliArgs",
-          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; }) => ",
+          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; enableCPS?: boolean | undefined; esArgs?: string[] | undefined; projectType?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; kibanaUrl?: string | undefined; }) => ",
           "TestServerlessUtils"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 36,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -317,10 +321,10 @@
             "id": "def-server.createTestServerlessInstances.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  adjustTimeout,\n  kibana = {},\n}",
+            "label": "{\n  adjustTimeout,\n  kibana = {},\n  enableCPS = false,\n  esArgs = [],\n  projectType = DEFAULT_PROJECT_TYPE,\n  kibanaUrl = DEFAULT_KIBANA_URL,\n}",
             "description": [],
             "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-            "lineNumber": 45,
+            "lineNumber": 51,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -338,7 +342,7 @@
                   "> | undefined; } | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-                "lineNumber": 46,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -354,7 +358,7 @@
                   "((timeout: number) => void) | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-                "lineNumber": 50,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -370,7 +374,7 @@
                       "number"
                     ],
                     "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-                    "lineNumber": 50,
+                    "lineNumber": 56,
                     "columnNumber": 20,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -378,6 +382,82 @@
                   }
                 ],
                 "returnComment": []
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.enableCPS",
+                "type": "CompoundType",
+                "tags": [
+                  "default"
+                ],
+                "label": "enableCPS",
+                "description": [
+                  "\nEnable Cross-Project Search (CPS) mode on the serverless ES instance.\nWhen true, starts ES with UIAM support and the required CPS settings:\n - `serverless.cross_project.enabled=true`\n - `remote_cluster_server.enabled=true`\n\nEquivalent to running:\n `yarn es serverless --projectType observability --uiam --kill --clean \\\n   --kibanaUrl http://localhost:5601/ \\\n   -E serverless.cross_project.enabled=true -E remote_cluster_server.enabled=true`\n"
+                ],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 57,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.esArgs",
+                "type": "Array",
+                "tags": [
+                  "default"
+                ],
+                "label": "esArgs",
+                "description": [
+                  "\nAdditional Elasticsearch arguments to pass when starting the cluster.\nThese are general-purpose ES configuration arguments that will be appended\nto any default arguments (including CPS args when enableCPS is true).\n\nExample: `['script.allowed_types=inline']`\n"
+                ],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 71,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.projectType",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "projectType",
+                "description": [
+                  "\nThe serverless project type to run (`yarn es serverless --projectType`).\n\nDefaults to `es` for existing tests."
+                ],
+                "signature": [
+                  "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 81,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-server.createTestServerlessInstances.$1.kibanaUrl",
+                "type": "string",
+                "tags": [],
+                "label": "kibanaUrl",
+                "description": [
+                  "\nPassed through to the `@kbn/es` serverless docker runner as `--kibanaUrl`.\n\nThis is important for UIAM mode: the serverless runner only applies the\nUIAM-related ES args (including project metadata) when `kibanaUrl` is set.\n\nSee `resolveEsArgs()` in `src/platform/packages/shared/kbn-es/src/utils/docker.ts`."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
+                "lineNumber": 87,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -400,9 +480,9 @@
         "signature": [
           "({\n  adjustTimeout,\n  settings = {},\n}: { adjustTimeout: (timeout: number) => void; settings?: { es?: Partial<",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/test-es-server",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnTestEsServerPluginApi",
             "section": "def-common.CreateTestEsClusterOptions",
             "text": "CreateTestEsClusterOptions"
           },
@@ -410,7 +490,7 @@
           "TestUtils"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 236,
+        "lineNumber": 253,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -423,7 +503,7 @@
             "label": "{\n  adjustTimeout,\n  settings = {},\n}",
             "description": [],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 248,
+            "lineNumber": 265,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -439,7 +519,7 @@
                   "(timeout: number) => void"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 249,
+                "lineNumber": 266,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -455,7 +535,7 @@
                       "number"
                     ],
                     "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                    "lineNumber": 249,
+                    "lineNumber": 266,
                     "columnNumber": 19,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -474,16 +554,16 @@
                 "signature": [
                   "{ es?: Partial<",
                   {
-                    "pluginId": "@kbn/test",
+                    "pluginId": "@kbn/test-es-server",
                     "scope": "common",
-                    "docId": "kibKbnTestPluginApi",
+                    "docId": "kibKbnTestEsServerPluginApi",
                     "section": "def-common.CreateTestEsClusterOptions",
                     "text": "CreateTestEsClusterOptions"
                   },
                   "> | undefined; kbn?: { [key: string]: any; plugins?: { [key: string]: any; paths: string[]; } | undefined; } | undefined; users?: { username: string; password: string; roles: string[]; }[] | undefined; } | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 250,
+                "lineNumber": 267,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -513,7 +593,7 @@
           ".Test"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 120,
+        "lineNumber": 137,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -529,7 +609,7 @@
               "Root"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 126,
+            "lineNumber": 143,
             "columnNumber": 30,
             "deprecated": false,
             "trackAdoption": false,
@@ -546,7 +626,7 @@
               "HttpMethod"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 126,
+            "lineNumber": 143,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -563,7 +643,7 @@
               "string"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 126,
+            "lineNumber": 143,
             "columnNumber": 62,
             "deprecated": false,
             "trackAdoption": false,
@@ -583,7 +663,7 @@
         "label": "TestElasticsearchUtils",
         "description": [],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 216,
+        "lineNumber": 233,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -599,7 +679,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 217,
+            "lineNumber": 234,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -617,7 +697,7 @@
               "any"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 218,
+            "lineNumber": 235,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -633,7 +713,7 @@
               "string[]"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 219,
+            "lineNumber": 236,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -646,7 +726,7 @@
             "label": "username",
             "description": [],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 220,
+            "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -659,7 +739,7 @@
             "label": "password",
             "description": [],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 221,
+            "lineNumber": 238,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -675,7 +755,7 @@
         "label": "TestKibanaUtils",
         "description": [],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 224,
+        "lineNumber": 241,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -691,7 +771,7 @@
               "Root"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 225,
+            "lineNumber": 242,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -707,7 +787,7 @@
               "InternalCoreSetup"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 226,
+            "lineNumber": 243,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -723,7 +803,7 @@
               "InternalCoreStart"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 227,
+            "lineNumber": 244,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -739,7 +819,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 228,
+            "lineNumber": 245,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -757,7 +837,7 @@
         "label": "TestUtils",
         "description": [],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 231,
+        "lineNumber": 248,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -775,7 +855,7 @@
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 232,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -795,7 +875,7 @@
               ">"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 233,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -811,7 +891,7 @@
                   "AbortSignal | undefined"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 233,
+                "lineNumber": 250,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -837,7 +917,7 @@
           "\"get\" | \"delete\" | \"head\" | \"post\" | \"put\" | \"patch\""
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 34,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -853,12 +933,12 @@
         "signature": [
           "Pick<",
           "TestElasticsearchUtils",
-          ", \"stop\" | \"es\"> & { getClient: () => ",
+          ", \"es\" | \"stop\"> & { getClient: () => ",
           "default",
           "; }"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -875,7 +955,7 @@
           "TestKibanaUtils"
         ],
         "path": "src/core/test-helpers/kbn-server/src/create_serverless_root.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -891,7 +971,7 @@
         "label": "request",
         "description": [],
         "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-        "lineNumber": 204,
+        "lineNumber": 221,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -911,7 +991,7 @@
               ".Test"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 208,
+            "lineNumber": 225,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -927,7 +1007,7 @@
                   "Root"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 208,
+                "lineNumber": 225,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -944,7 +1024,7 @@
                   "string"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 208,
+                "lineNumber": 225,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -968,7 +1048,7 @@
               ".Test"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 209,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -984,7 +1064,7 @@
                   "Root"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 209,
+                "lineNumber": 226,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1001,7 +1081,7 @@
                   "string"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 209,
+                "lineNumber": 226,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1025,7 +1105,7 @@
               ".Test"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 210,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1041,7 +1121,7 @@
                   "Root"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 210,
+                "lineNumber": 227,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1058,7 +1138,7 @@
                   "string"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 210,
+                "lineNumber": 227,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1082,7 +1162,7 @@
               ".Test"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 211,
+            "lineNumber": 228,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1098,7 +1178,7 @@
                   "Root"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 211,
+                "lineNumber": 228,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1115,7 +1195,7 @@
                   "string"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 211,
+                "lineNumber": 228,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1139,7 +1219,7 @@
               ".Test"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 212,
+            "lineNumber": 229,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1155,7 +1235,7 @@
                   "Root"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 212,
+                "lineNumber": 229,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1172,7 +1252,7 @@
                   "string"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 212,
+                "lineNumber": 229,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1196,7 +1276,7 @@
               ".Test"
             ],
             "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-            "lineNumber": 213,
+            "lineNumber": 230,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1212,7 +1292,7 @@
                   "Root"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 213,
+                "lineNumber": 230,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1229,7 +1309,7 @@
                   "string"
                 ],
                 "path": "src/core/test-helpers/kbn-server/src/create_root.ts",
-                "lineNumber": 213,
+                "lineNumber": 230,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,

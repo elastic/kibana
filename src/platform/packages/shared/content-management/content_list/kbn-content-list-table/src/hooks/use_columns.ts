@@ -15,13 +15,34 @@ import type { ParsedPart } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../column/types';
 import { column } from '../column/part';
 
-/** Default columns when no children are provided. */
+/**
+ * Default columns when no children are provided.
+ *
+ * Provides Name, Last updated, and Actions columns out of the box.
+ * The Actions column auto-hides when the provider has no edit/delete handlers
+ * configured, and individual actions are shown/hidden based on the item config.
+ * Any explicit `<Column.*>` child replaces **all** defaults.
+ */
 const DEFAULT_PARTS: ParsedPart[] = [
   {
     type: 'part',
     part: 'column',
     preset: 'name',
     instanceId: 'name',
+    attributes: {},
+  },
+  {
+    type: 'part',
+    part: 'column',
+    preset: 'updatedAt',
+    instanceId: 'updatedAt',
+    attributes: {},
+  },
+  {
+    type: 'part',
+    part: 'column',
+    preset: 'actions',
+    instanceId: 'actions',
     attributes: {},
   },
 ];
@@ -53,7 +74,10 @@ const parseColumnParts = (children: ReactNode): ParsedPart[] => {
  * @param children - React children containing `Column` declarative components.
  * @returns Array of EUI table columns ready for `EuiBasicTable`.
  */
-export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<ContentListItem>> => {
+export const useColumns = (
+  children: ReactNode,
+  onDelete?: (items: ContentListItem[]) => void
+): Array<EuiBasicTableColumn<ContentListItem>> => {
   const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
 
   return useMemo(() => {
@@ -63,6 +87,7 @@ export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<Conte
       isReadOnly,
       entityName: labels.entity,
       supports,
+      actions: { onDelete },
     };
 
     return parts
@@ -72,5 +97,5 @@ export const useColumns = (children: ReactNode): Array<EuiBasicTableColumn<Conte
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete]);
 };

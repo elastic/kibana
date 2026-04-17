@@ -6,6 +6,7 @@
  */
 
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { ECS_CATEGORIZATION_REFERENCE } from '../../../util/ecs_category_doc/ecs_categorization_reference';
 
 export const TASK_DESCRIPTION = {
   migrate_rule: `Your task is to migrate a "detection rule" SPL search from Splunk to an Elasticsearch ES|QL query.`,
@@ -22,12 +23,12 @@ Here are some context for you to reference for your task, read it carefully as y
 <splunk_query>
 {splunk_query}
 </splunk_query>
-<index_mapping>
-The following is the mapping for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
+<index_knowledge_base>
+The following is the sample documents and more knowledge for the target index. Use this to ensure field names in your ES|QL query match the actual fields available in the index:
 \`\`\`json
-{index_mapping}
+{index_knowledge_base}
 \`\`\`
-</index_mapping>
+</index_knowledge_base>
 <placeholders_syntax>
 If you encounter any placeholders for macros or lookups in the SPL query, leave them as-is in the ES|QL query output. They are markers that need to be preserved.
 They are wrapped in brackets ("[]") and always start with "macro:" or "lookup:". Mention all placeholders you left in the final summary.
@@ -53,12 +54,16 @@ We do not define OUTPUTNEW or which fields is returned, only the index name and 
 
 Mention all translated lookups in the final summary.
 </lookup_syntax>
+<ecs_categorization>
+${ECS_CATEGORIZATION_REFERENCE}
+</ecs_categorization>
 </context>
 
 Go through each step and part of the splunk_query while following the below guide to produce the resulting ES|QL query:
 - Analyze all the information about the related splunk query and try to determine the intent of the query, in order to translate into an equivalent ES|QL query.
 - Go through each part of the SPL query and determine the steps required to produce the same end results using ES|QL. Only focus on translating the structure without modifying any of the field names.
-- Do NOT map any of the fields to the Elastic Common Schema (ECS), this will happen in a later step.
+- Do NOT map any of the field names to the Elastic Common Schema (ECS), this will happen in a later step.
+- However, DO use the ecs_categorization reference above to add appropriate ECS categorization fields (event.category, event.type, and event.outcome) as WHERE clauses in the ES|QL query, based on the intent of the rule. Only use the allowed values defined in the reference. If no categorization fits, leave these fields out.
 - Always remember to translate any lookup list using the lookup_syntax above
 
 <guidelines>

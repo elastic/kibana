@@ -152,4 +152,36 @@ steps:
       }
     });
   });
+
+  describe('JSON Schema format outputs', () => {
+    it('should preserve outputs in JSON Schema format', () => {
+      const yaml = `name: Test
+triggers:
+  - type: manual
+outputs:
+  required:
+    - b
+  properties:
+    a:
+      type: string
+      default: "aaaa"
+    b:
+      type: number
+steps:
+  - name: return
+    type: workflow.output
+    with:
+      a: hello`;
+
+      const result = parseWorkflowYamlForAutocomplete(yaml);
+
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.outputs).toBeDefined();
+        const outputs = result.data.outputs as Record<string, unknown>;
+        expect(outputs.properties).toBeDefined();
+        expect(outputs.required).toEqual(['b']);
+      }
+    });
+  });
 });

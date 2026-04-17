@@ -11,6 +11,7 @@ import type { CasesFeatureParams } from '../types';
 import {
   getCasesAddCommentsCasesSubFeature,
   getCasesAssignUsersCasesSubFeature,
+  getCasesManageTemplatesCasesSubFeature,
   getCasesReopenCaseSubFeature,
   getCasesSettingsCasesSubFeature,
   getDeleteCasesSubFeature,
@@ -26,6 +27,7 @@ export const getCasesBaseKibanaSubFeatureIdsV3 = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.createComment,
   CasesSubFeatureId.reopenCase,
   CasesSubFeatureId.assignUsers,
+  CasesSubFeatureId.manageTemplates,
 ];
 
 export const getCasesSubFeaturesMapV3 = (params: CasesFeatureParams) => {
@@ -36,5 +38,6 @@ export const getCasesSubFeaturesMapV3 = (params: CasesFeatureParams) => {
     [CasesSubFeatureId.reopenCase, getCasesReopenCaseSubFeature(params)],
     /* The below sub features were newly added in V3 */
     [CasesSubFeatureId.assignUsers, getCasesAssignUsersCasesSubFeature(params)],
+    [CasesSubFeatureId.manageTemplates, getCasesManageTemplatesCasesSubFeature(params)],
   ]);
 };

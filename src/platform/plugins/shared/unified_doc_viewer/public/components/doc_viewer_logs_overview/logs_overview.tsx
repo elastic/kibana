@@ -26,6 +26,7 @@ import type { LogDocument, ObservabilityIndexes } from '@kbn/discover-utils/src'
 import { getStacktraceFields } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
 import type { DocViewActions } from '@kbn/unified-doc-viewer/src/services/types';
+import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import { LogsOverviewHeader } from './logs_overview_header';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -36,21 +37,26 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
+import {
+  TraceWaterfall,
+  type TraceWaterfallRestorableState,
+} from '../observability/traces/components/trace_waterfall';
 import { DataSourcesProvider } from '../../hooks/use_data_sources';
 import { SimilarErrors } from './sub_components/similar_errors';
 import { hasErrorFields } from './utils/has_error_fields';
 import { DocViewerExtensionActionsProvider } from '../../hooks/use_doc_viewer_extension_actions';
 
-export type LogsOverviewProps = DocViewRenderProps & {
-  renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
-  renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
-  renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
-  renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
-  indexes: ObservabilityIndexes;
-  showTraceWaterfall?: boolean;
-  docViewActions?: DocViewActions;
-};
+export type LogsOverviewProps = DocViewRenderProps &
+  RestorableStateProviderProps<TraceWaterfallRestorableState> & {
+    renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
+    renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
+    renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
+    renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+    renderCpsWarning?: boolean;
+    indexes: ObservabilityIndexes;
+    showTraceWaterfall?: boolean;
+    docViewActions?: DocViewActions;
+  };
 
 export interface LogsOverviewApi {
   openAndScrollToSection: (section: 'stacktrace' | 'quality_issues') => void;
@@ -70,9 +76,12 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       renderAIInsight,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
+      renderCpsWarning,
       indexes,
       showTraceWaterfall = true,
       docViewActions,
+      initialState,
+      onInitialStateChange,
     },
     ref
   ) => {
@@ -129,6 +138,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             formattedDoc={parsedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
+            renderCpsWarning={renderCpsWarning}
             filter={filter}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
@@ -138,7 +148,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
             <DocViewerExtensionActionsProvider actions={docViewActions}>
               {showSimilarErrors ? <SimilarErrors hit={hit} /> : null}
               <div>
-                {renderFlyoutStreamField && renderFlyoutStreamField({ dataView, doc: hit })}
+                {renderFlyoutStreamField &&
+                  renderFlyoutStreamField({ dataView, doc: hit, renderCpsWarning })}
               </div>
               <LogsOverviewDegradedFields ref={qualityIssuesSectionRef} rawDoc={hit.raw} />
               {isStacktraceAvailable && (
@@ -154,6 +165,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
                   docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
                   serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                   dataView={dataView}
+                  initialState={initialState}
+                  onInitialStateChange={onInitialStateChange}
                 />
               ) : null}
             </DocViewerExtensionActionsProvider>

@@ -94,7 +94,7 @@ export function AssociateServiceLogs({ onClick }: { onClick?: () => void }) {
       onClick={onClick}
       href={associateServiceLogsProps.link}
       target="_blank"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
     >
       {associateServiceLogsProps.name}

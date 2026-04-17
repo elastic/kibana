@@ -9,27 +9,27 @@
 
 import {
   ALERT_RULE_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  APPLY_FILTER_TRIGGER,
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_CLICK_ROW,
+  ON_APPLY_FILTER,
+  ON_SELECT_RANGE,
+  ON_CLICK_VALUE,
   MULTI_VALUE_CLICK_TRIGGER,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export interface VisEventToTrigger {
-  ['applyFilter']: typeof APPLY_FILTER_TRIGGER;
-  ['brush']: typeof SELECT_RANGE_TRIGGER;
-  ['filter']: typeof VALUE_CLICK_TRIGGER;
+  ['applyFilter']: typeof ON_APPLY_FILTER;
+  ['brush']: typeof ON_SELECT_RANGE;
+  ['filter']: typeof ON_CLICK_VALUE;
   ['multiFilter']: typeof MULTI_VALUE_CLICK_TRIGGER;
-  ['tableRowContextMenuClick']: typeof ROW_CLICK_TRIGGER;
+  ['tableRowContextMenuClick']: typeof ON_CLICK_ROW;
   ['alertRule']: typeof ALERT_RULE_TRIGGER;
 }
 
 export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
-  applyFilter: APPLY_FILTER_TRIGGER,
-  brush: SELECT_RANGE_TRIGGER,
-  filter: VALUE_CLICK_TRIGGER,
+  applyFilter: ON_APPLY_FILTER,
+  brush: ON_SELECT_RANGE,
+  filter: ON_CLICK_VALUE,
   multiFilter: MULTI_VALUE_CLICK_TRIGGER,
-  tableRowContextMenuClick: ROW_CLICK_TRIGGER,
+  tableRowContextMenuClick: ON_CLICK_ROW,
   alertRule: ALERT_RULE_TRIGGER,
 };

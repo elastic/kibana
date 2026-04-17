@@ -72,6 +72,28 @@ export const StreamNameInput = ({
     [validationError, parts]
   );
 
+  const inputStyles = css`
+    .euiFormControlLayout__prepend,
+    .euiFormControlLayout__append {
+      /* Prevent truncation on labels */
+      max-width: none;
+      background: ${euiTheme.components.forms.backgroundReadOnly};
+
+      &::before {
+        height: 100%;
+      }
+    }
+
+    .euiFormControlLayout__prepend + .euiFormControlLayout__childrenWrapper {
+      border-start-start-radius: 0;
+      border-end-start-radius: 0;
+
+      .euiFieldText {
+        border-radius: inherit;
+      }
+    }
+  `;
+
   const getConnectedInputStyles = (isFirst: boolean, isLast: boolean, isInvalid: boolean) => {
     return css`
       flex: 1 1 0%;
@@ -97,12 +119,6 @@ export const StreamNameInput = ({
       &:focus-within {
         z-index: 1;
       }
-
-      /* Prevent truncation on labels */
-      .euiFormControlLayout__prepend,
-      .euiFormControlLayout__append {
-        max-width: none;
-      }
     `;
   };
 
@@ -126,23 +142,25 @@ export const StreamNameInput = ({
   if (!hasMultipleWildcards && inputGroups.length === 1) {
     const group = inputGroups[0];
     return (
-      <EuiFieldText
-        autoFocus
-        value={parts[group.wildcardIndex] ?? ''}
-        onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
-        placeholder="*"
-        fullWidth
-        isInvalid={isInputInvalid(group.wildcardIndex)}
-        prepend={group.prepend}
-        append={group.append}
-        aria-label={i18n.translate(
-          'xpack.createClassicStreamFlyout.streamNameInput.singleWildcardAriaLabel',
-          {
-            defaultMessage: 'Stream name',
-          }
-        )}
-        data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
-      />
+      <div css={inputStyles}>
+        <EuiFieldText
+          autoFocus
+          value={parts[group.wildcardIndex] ?? ''}
+          onChange={(e) => handleWildcardChange(group.wildcardIndex, e.target.value)}
+          placeholder="*"
+          fullWidth
+          isInvalid={isInputInvalid(group.wildcardIndex)}
+          prepend={group.prepend}
+          append={group.append}
+          aria-label={i18n.translate(
+            'xpack.createClassicStreamFlyout.streamNameInput.singleWildcardAriaLabel',
+            {
+              defaultMessage: 'Stream name',
+            }
+          )}
+          data-test-subj={`${dataTestSubj}-wildcard-${group.wildcardIndex}`}
+        />
+      </div>
     );
   }
 
@@ -163,7 +181,7 @@ export const StreamNameInput = ({
         return (
           <EuiFlexItem
             key={`wildcard-${group.wildcardIndex}`}
-            css={getConnectedInputStyles(isFirst, isLast, isInvalid)}
+            css={[inputStyles, getConnectedInputStyles(isFirst, isLast, isInvalid)]}
           >
             <EuiFieldText
               autoFocus={isFirst}

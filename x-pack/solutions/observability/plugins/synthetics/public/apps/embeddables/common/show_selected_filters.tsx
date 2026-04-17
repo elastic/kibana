@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
-import type { MonitorFilters } from '../../../../common/embeddables/stats_overview/types';
+import type { MonitorFilters } from '../../../../common/types';
 
 export const ShowSelectedFilters = ({ filters }: { filters: MonitorFilters }) => {
   return (
@@ -35,7 +35,7 @@ export const ShowSelectedFilters = ({ filters }: { filters: MonitorFilters }) =>
 };
 
 const labels: Record<string, string> = {
-  monitorIds: i18n.translate('xpack.synthetics.showSelectedFilters.monitorIdLabel', {
+  monitor_ids: i18n.translate('xpack.synthetics.showSelectedFilters.monitorIdLabel', {
     defaultMessage: 'Monitor',
   }),
   tags: i18n.translate('xpack.synthetics.showSelectedFilters.tagsLabel', {
@@ -44,7 +44,7 @@ const labels: Record<string, string> = {
   locations: i18n.translate('xpack.synthetics.showSelectedFilters.locationsLabel', {
     defaultMessage: 'Location',
   }),
-  monitorTypes: i18n.translate('xpack.synthetics.showSelectedFilters.monitorTypeLabel', {
+  monitor_types: i18n.translate('xpack.synthetics.showSelectedFilters.monitorTypeLabel', {
     defaultMessage: 'Type',
   }),
   projects: i18n.translate('xpack.synthetics.showSelectedFilters.presetLabel', {

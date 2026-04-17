@@ -22,10 +22,6 @@ export type ActionOutput = DefaultItemAction<ContentListItem>;
 
 /**
  * Context passed to action builder functions.
- *
- * Extends {@link BuilderContext} with action-specific fields. Today it is
- * identical to the base; the Delete Orchestration PR will add
- * `onRequestDelete` and related callbacks here.
  */
 export type ActionBuilderContext = BuilderContext;
 
@@ -79,6 +75,8 @@ export interface ActionNamespace {
 export interface EditActionProps {
   /** Custom label for the edit action. Defaults to `'Edit'`. */
   label?: string;
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
 }
 
 /**
@@ -87,4 +85,6 @@ export interface EditActionProps {
 export interface DeleteActionProps {
   /** Custom label for the delete action. Defaults to `'Delete'`. */
   label?: string;
+  /** Per-item guard. When provided, disables the action for items where this returns `false`. */
+  enabled?: (item: ContentListItem) => boolean;
 }

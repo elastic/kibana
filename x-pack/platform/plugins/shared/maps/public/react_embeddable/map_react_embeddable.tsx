@@ -21,8 +21,9 @@ import {
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, merge } from 'rxjs';
 import {
-  APPLY_FILTER_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { MapApi } from './types';
@@ -184,7 +185,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi>
       ...projectRoutingManager.api,
       serializeState,
       supportedTriggers: () => {
-        return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
+        return [ON_OPEN_PANEL_MENU, ON_APPLY_FILTER, ON_CLICK_VALUE];
       },
     });
 

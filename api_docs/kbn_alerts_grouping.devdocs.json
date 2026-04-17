@@ -222,7 +222,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "[]) => React.ReactElement<any>"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "lineNumber": 33,
@@ -363,7 +363,9 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[], groupNumber: number) => JSX.Element | undefined) | undefined"
+              "[], groupNumber: number, groupBucket: ",
+              "GroupingBucket",
+              "<T>, closePopover: () => void) => JSX.Element | undefined) | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "lineNumber": 54,

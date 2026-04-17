@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS } from '../../../common/constants';
@@ -53,6 +55,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get outputs',
+      description: 'List all Fleet outputs.',
       options: {
         tags: ['oas-tag:Fleet outputs'],
       },
@@ -60,6 +63,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_outputs.yaml'),
+        },
         validate: {
           request: GetOutputsRequestSchema,
           response: {
@@ -100,6 +106,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_output.yaml'),
+        },
         validate: {
           request: GetOneOutputRequestSchema,
           response: {
@@ -140,6 +149,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_output.yaml'),
+        },
         validate: {
           request: PutOutputRequestSchema,
           response: {
@@ -166,6 +178,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Create output',
+      description: 'Create a new Fleet output.',
       options: {
         tags: ['oas-tag:Fleet outputs'],
       },
@@ -173,6 +186,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_output.yaml'),
+        },
         validate: {
           request: PostOutputRequestSchema,
           response: {
@@ -207,6 +223,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_output.yaml'),
+        },
         validate: {
           request: DeleteOutputRequestSchema,
           response: {
@@ -237,6 +256,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Generate a Logstash API key',
+      description: 'Generate an API key for Logstash to use with a Fleet output.',
       options: {
         tags: ['oas-tag:Fleet outputs'],
       },
@@ -244,6 +264,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_logstash_api_key.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -270,6 +293,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Get the latest output health',
+      description: 'Get the latest health status of an output by ID.',
       options: {
         tags: ['oas-tag:Fleet outputs'],
       },
@@ -277,6 +301,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_output_health.yaml'),
+        },
         validate: {
           request: GetLatestOutputHealthRequestSchema,
           response: {

@@ -102,7 +102,7 @@
           "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationPopoverProps) => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/index.tsx",
-        "lineNumber": 84,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

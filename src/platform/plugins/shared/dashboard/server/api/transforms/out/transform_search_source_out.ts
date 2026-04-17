@@ -8,10 +8,12 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { fromStoredFilters } from '@kbn/as-code-filters-transforms';
 import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import type { DashboardState } from '../../types';
-import { migrateLegacyQuery, cleanFiltersForSerialize } from '../../../../common';
+import { migrateLegacyQuery } from '../../../../common';
 import { logger } from '../../../kibana_services';
 
 export function transformSearchSourceOut(
@@ -42,8 +44,9 @@ export function transformSearchSourceOut(
   }
 
   try {
-    const filters = cleanFiltersForSerialize(searchSource.filter);
-    const query = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
+    const filters = fromStoredFilters(searchSource.filter, logger);
+    const storedQuery = searchSource.query ? migrateLegacyQuery(searchSource.query) : undefined;
+    const query = toAsCodeQuery(storedQuery);
     return { filters, query };
   } catch (error) {
     logger.warn(

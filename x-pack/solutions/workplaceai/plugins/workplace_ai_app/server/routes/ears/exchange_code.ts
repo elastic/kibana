@@ -50,6 +50,7 @@ export function registerExchangeCodeRoute({
         }),
         body: schema.object({
           code: schema.string(),
+          pkce_verifier: schema.string(),
         }),
       },
     },
@@ -68,7 +69,7 @@ export function registerExchangeCodeRoute({
 
       const { provider } = request.params;
 
-      const { code } = request.body;
+      const { code, pkce_verifier } = request.body;
 
       try {
         const fetchOptions: RequestInit & { dispatcher?: Agent } = {
@@ -76,14 +77,15 @@ export function registerExchangeCodeRoute({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ code }),
+          body: JSON.stringify({ code, pkce_verifier }),
         };
 
         if (allowInsecure) {
           fetchOptions.dispatcher = insecureAgent;
         }
 
-        const earsResponse = await fetch(`${earsUrl}/${provider}/oauth/token`, fetchOptions);
+        const earsBaseUrl = earsUrl.replace(/\/$/, '');
+        const earsResponse = await fetch(`${earsBaseUrl}/v1/${provider}/oauth/token`, fetchOptions);
 
         if (!earsResponse.ok) {
           const errorText = await earsResponse.text();

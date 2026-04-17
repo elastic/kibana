@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from '@kbn/scout-oblt/ui';
 import type { ScoutPage } from '@kbn/scout-oblt';
 
 export class OnboardingApp {
@@ -138,15 +139,30 @@ export class OnboardingApp {
 
   async clickIntegrationCard(cardSelector: string) {
     const card = this.page.getByTestId(cardSelector);
-    await card.click();
 
     const nonRouting =
       /(aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/;
     if (!nonRouting.test(cardSelector)) {
-      await this.page.waitForURL(
-        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/,
-        { timeout: 30_000 }
-      );
+      const urlPattern =
+        /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual)/;
+
+      // Retry click + URL check to handle race conditions where the card
+      // is rendered but React click handlers aren't yet attached after a re-render
+      await expect(async () => {
+        if (!urlPattern.test(this.page.url())) {
+          await card.click();
+        }
+        expect(this.page.url()).toMatch(urlPattern);
+      }).toPass({ timeout: 30_000 });
+    } else {
+      await card.click();
+    }
+
+    // For flows that have the ingestion selector, wait for it to be visible
+    const flowsWithIngestionSelector =
+      /(auto-detect-logs|kubernetes-quick-start|otel-logs|otel-kubernetes)/;
+    if (flowsWithIngestionSelector.test(cardSelector)) {
+      await this.ingestionModeSelector.waitFor({ state: 'visible', timeout: 30000 });
     }
   }
 
@@ -183,5 +199,66 @@ export class OnboardingApp {
     await this.hostUseCaseTile.waitFor({ state: 'visible' });
     await this.kubernetesUseCaseTile.waitFor({ state: 'visible' });
     await this.cloudUseCaseTile.waitFor({ state: 'visible' });
+  }
+
+  public get ingestionModeSelector() {
+    return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
+  }
+
+  public get classicIngestionOption() {
+    return this.ingestionModeSelector.getByRole('button', { name: /Classic ingestion/i });
+  }
+
+  public get wiredStreamsOption() {
+    return this.ingestionModeSelector.getByRole('button', { name: /Wired Streams/i });
+  }
+
+  public get techPreviewBadge() {
+    return this.ingestionModeSelector.locator('.euiBetaBadge', { hasText: 'Tech Preview' });
+  }
+
+  async selectWiredStreams() {
+    await this.wiredStreamsOption.click();
+  }
+
+  async selectClassicIngestion() {
+    await this.classicIngestionOption.click();
+  }
+
+  public get autoDetectCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+  }
+
+  public get kubernetesCodeSnippet() {
+    return this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
+  }
+
+  async getAutoDetectCommandContent(): Promise<string> {
+    return (await this.autoDetectCodeSnippet.textContent()) ?? '';
+  }
+
+  async getKubernetesCommandContent(): Promise<string> {
+    return (await this.kubernetesCodeSnippet.textContent()) ?? '';
+  }
+
+  // Enable Wired Streams Modal
+  public get enableWiredStreamsModal() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsModal');
+  }
+
+  public get enableWiredStreamsCancelButton() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsCancelButton');
+  }
+
+  public get enableWiredStreamsConfirmButton() {
+    return this.page.getByTestId('observabilityOnboardingEnableWiredStreamsConfirmButton');
+  }
+
+  async cancelEnableWiredStreamsModal() {
+    await this.enableWiredStreamsCancelButton.click();
+  }
+
+  async confirmEnableWiredStreamsModal() {
+    await this.enableWiredStreamsConfirmButton.click();
   }
 }

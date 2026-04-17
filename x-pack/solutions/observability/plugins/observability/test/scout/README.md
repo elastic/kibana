@@ -16,10 +16,10 @@ Some tests are designed to run sequentially:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/observability/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+npx playwright test --config x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/observability/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_complete
+npx playwright test --config x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel.playwright.config.ts --project=local --grep serverless-observability_complete
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/observability/test/scout/ui/output`

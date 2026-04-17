@@ -6,13 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { gapStatus } from '../../../../common/constants';
+import { gapStatus, gapReasonType } from '../../../../common/constants';
 
 export const gapStatusSchema = schema.oneOf([
   schema.literal(gapStatus.UNFILLED),
   schema.literal(gapStatus.FILLED),
   schema.literal(gapStatus.PARTIALLY_FILLED),
 ]);
+
+export const gapReasonSchema = schema.object({
+  type: schema.oneOf([
+    schema.literal(gapReasonType.RULE_DISABLED),
+    schema.literal(gapReasonType.RULE_DID_NOT_RUN),
+  ]),
+});
 
 export const rangeSchema = schema.object({
   lte: schema.string(),
@@ -34,4 +41,5 @@ export const gapBaseSchema = schema.object({
   deleted: schema.maybe(schema.boolean()),
   updated_at: schema.maybe(schema.string()),
   failed_auto_fill_attempts: schema.maybe(schema.number()),
+  reason: schema.maybe(gapReasonSchema),
 });

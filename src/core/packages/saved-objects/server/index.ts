@@ -72,6 +72,7 @@ export {
 export type {
   SavedObjectsType,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectTypeVersionGuesser,
 } from './src/saved_objects_type';
 export type {
   ISavedObjectsSerializer,

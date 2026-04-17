@@ -8,7 +8,14 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export type { UsageApiSetup, UsageApiStart } from './plugin';
+export type {
+  UsageReportingService,
+  UsageRecord,
+  UsageMetrics,
+  UsageSource,
+} from './usage_reporting';
 export { config } from './config';
+
 export const plugin = async (initializerContext: PluginInitializerContext) => {
   const { UsageApiPlugin } = await import('./plugin');
   return new UsageApiPlugin(initializerContext);

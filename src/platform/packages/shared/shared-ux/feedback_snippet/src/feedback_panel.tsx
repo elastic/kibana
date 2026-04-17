@@ -151,7 +151,7 @@ export const FeedbackPanel = ({
       fill
       fullWidth
       size="s"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       id={`${feedbackSnippetId}PanelSurveyLink`}
       aria-label={i18n.translate(

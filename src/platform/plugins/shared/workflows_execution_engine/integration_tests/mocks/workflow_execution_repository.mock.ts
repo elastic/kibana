@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
@@ -142,6 +143,59 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
       _id: exec.id,
       _index: 'workflows-executions',
     }));
+  }
+
+  public async findNonTerminalExecutionIdsByWorkflowIdPage({
+    spaceId,
+    workflowId,
+    size,
+    searchAfter,
+  }: {
+    spaceId: string;
+    workflowId: string;
+    size: number;
+    searchAfter?: estypes.SortResults;
+  }): Promise<{
+    results: string[];
+    total: number;
+    nextSearchAfter?: estypes.SortResults;
+  }> {
+    const rows = Array.from(this.workflowExecutions.values())
+      .filter(
+        (exec) =>
+          exec.workflowId === workflowId &&
+          exec.spaceId === spaceId &&
+          !TerminalExecutionStatuses.includes(exec.status)
+      )
+      .sort((a, b) => {
+        const byCreated = a.createdAt.localeCompare(b.createdAt);
+        return byCreated !== 0 ? byCreated : a.id.localeCompare(b.id);
+      });
+
+    const total = rows.length;
+
+    let startIndex = 0;
+    if (searchAfter && searchAfter.length >= 2) {
+      const afterCreatedAt = String(searchAfter[0]);
+      const afterId = String(searchAfter[1]);
+      startIndex = rows.findIndex(
+        (r) => r.createdAt > afterCreatedAt || (r.createdAt === afterCreatedAt && r.id > afterId)
+      );
+      if (startIndex === -1) {
+        return { results: [], total, nextSearchAfter: undefined };
+      }
+    }
+
+    const page = rows.slice(startIndex, startIndex + size);
+    const results = page.map((r) => r.id);
+
+    let nextSearchAfter: estypes.SortResults | undefined;
+    if (page.length === size && page.length > 0) {
+      const last = page[page.length - 1];
+      nextSearchAfter = [last.createdAt, last.id];
+    }
+
+    return { results, total, nextSearchAfter };
   }
 
   public async getRunningExecutionsByConcurrencyGroup(

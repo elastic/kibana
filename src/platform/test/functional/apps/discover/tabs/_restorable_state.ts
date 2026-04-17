@@ -426,12 +426,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         const defaultQuery = 'FROM logstash-*';
 
-        const expectState = async (query: string, isDirty: boolean) => {
+        const expectState = async (query: string, _isDirty: boolean) => {
           await retry.try(async () => {
             expect(await monacoEditor.getCodeEditorValue()).to.be(query);
           });
           expect(await testSubjects.getAttribute('querySubmitButton', 'aria-label')).to.be(
-            isDirty ? 'Run query' : 'Refresh query'
+            'Search'
           );
         };
 
@@ -485,12 +485,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilTabIsLoaded();
         const defaultQuery = 'FROM logstash-*';
 
-        const expectState = async (query: string, isDirty: boolean) => {
+        const expectState = async (query: string, _isDirty: boolean) => {
           await retry.try(async () => {
             expect(await monacoEditor.getCodeEditorValue()).to.be(query);
           });
           expect(await testSubjects.getAttribute('querySubmitButton', 'aria-label')).to.be(
-            isDirty ? 'Run query' : 'Refresh query'
+            'Search'
           );
         };
 

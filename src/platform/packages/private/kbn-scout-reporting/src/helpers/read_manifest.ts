@@ -15,7 +15,7 @@ export interface KibanaJsoncMetadata {
   id: string;
   type: string;
   group: string;
-  owner: string[];
+  owner: string | string[];
   visibility: string;
   plugin?: { id: string };
 }
@@ -85,7 +85,8 @@ export const readKibanaModuleManifest = (filePath: string): KibanaModuleMetadata
     );
   }
 
-  return { id, type, group, visibility, owner: owner || [] };
+  const normalizedOwner = Array.isArray(owner) ? owner : owner ? [owner] : [];
+  return { id, type, group, visibility, owner: normalizedOwner };
 };
 
 /**

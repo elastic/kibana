@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { i18n } from '@kbn/i18n';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -39,13 +38,6 @@ const ATTACHMENT_TYPE_CONFIGS: AttachmentTypeConfig[] = [
     }),
     icon: 'user',
   },
-  {
-    type: SecurityAgentBuilderAttachments.rule,
-    label: i18n.translate('xpack.securitySolution.agentBuilder.attachments.rule.label', {
-      defaultMessage: 'Security Rule',
-    }),
-    icon: 'document',
-  },
 ];
 
 const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
@@ -56,11 +48,7 @@ const createAttachmentTypeConfig = (defaultLabel: string, icon: string) => ({
   getIcon: () => icon,
 });
 
-export const registerAttachmentUiDefinitions = ({
-  attachments,
-}: {
-  attachments: AttachmentServiceStartContract;
-}) => {
+export const registerAttachmentUiDefinitions = (attachments: AttachmentServiceStartContract) => {
   ATTACHMENT_TYPE_CONFIGS.forEach(({ type, label, icon }) => {
     attachments.addAttachmentType<UnknownAttachmentWithLabel>(
       type,

@@ -13,6 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList, htmlIdGenerator } from '@elastic/eui';
@@ -52,7 +53,7 @@ const AnomalyChartsCaseAttachment = ({
     const initialState: AnomalyChartsAttachmentState = rawState ?? {};
     const filters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters ?? []);
     const query$ = new BehaviorSubject<Query | undefined>(initialState.query ?? undefined);
-    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.time_range);
 
     const chartsManager = initializeAnomalyChartsControls(initialState);
     const combined: AnomalyChartsAttachmentApi = {
@@ -102,8 +103,10 @@ export const initializeAnomalyChartsAttachment = memoize(
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const inputProps =
-          persistableStateAttachmentState as unknown as AnomalyChartsAttachmentState;
+        const inputProps = transformTimeRangeOut(
+          persistableStateAttachmentState as unknown as AnomalyChartsAttachmentState &
+            Record<string, unknown>
+        );
 
         const descriptions = useMemo(() => {
           const listItems = [
@@ -118,7 +121,7 @@ export const initializeAnomalyChartsAttachment = memoize(
             },
           ];
 
-          if (isValidTimeRange(inputProps.timeRange)) {
+          if (isValidTimeRange(inputProps.time_range)) {
             listItems.push({
               title: (
                 <FormattedMessage
@@ -127,8 +130,8 @@ export const initializeAnomalyChartsAttachment = memoize(
                 />
               ),
               description: `${dataFormatter.convert(
-                inputProps.timeRange.from
-              )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+                inputProps.time_range.from
+              )} - ${dataFormatter.convert(inputProps.time_range.to)}`,
             });
           }
 
@@ -149,8 +152,8 @@ export const initializeAnomalyChartsAttachment = memoize(
           dataFormatter,
           inputProps.jobIds,
           inputProps.query?.query,
-          inputProps.timeRange?.from,
-          inputProps.timeRange?.to,
+          inputProps.time_range?.from,
+          inputProps.time_range?.to,
         ]);
         return (
           <>

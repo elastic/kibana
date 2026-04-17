@@ -147,7 +147,9 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          " | undefined; removeOlderThan?: moment.Duration | undefined; } & {}> | undefined; } & { type: \"rolling-file\"; policy: Readonly<{} & { type: \"size-limit\"; size: ",
+          " | undefined; removeOlderThan?: moment.Duration | undefined; } & {}> | undefined; } & { type: \"rolling-file\"; strategy: ",
+          "NumericRollingStrategyConfig",
+          "; policy: Readonly<{} & { type: \"size-limit\"; size: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -155,9 +157,7 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; strategy: ",
-          "NumericRollingStrategyConfig",
-          "; }>>"
+          "; }> | Readonly<{} & { type: \"time-interval\"; interval: moment.Duration; modulate: boolean; }>; layout: Readonly<{} & { type: \"json\"; }> | Readonly<{ pattern?: string | undefined; highlight?: boolean | undefined; } & { type: \"pattern\"; }>; fileName: string; }>>"
         ],
         "path": "src/core/packages/logging/server-internal/src/appenders/appenders.ts",
         "lineNumber": 27,
@@ -201,10 +201,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { name: string; level: \"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
-        "lineNumber": 102,
+        "lineNumber": 105,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -251,10 +251,10 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"info\" | \"error\" | \"off\" | \"all\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\">; }>"
+          "<\"info\" | \"error\" | \"all\" | \"off\" | \"trace\" | \"debug\" | \"warn\" | \"fatal\">; }>"
         ],
         "path": "src/core/packages/logging/server-internal/src/logging_config.ts",
-        "lineNumber": 61,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

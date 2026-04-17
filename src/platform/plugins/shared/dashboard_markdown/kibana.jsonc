@@ -19,6 +19,7 @@
       "charts",
       "dataViewFieldEditor",
       "visualizations",
-    ],
+      "kibanaUtils"
+    ]
   }
 }

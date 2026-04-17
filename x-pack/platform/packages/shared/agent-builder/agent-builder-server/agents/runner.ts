@@ -27,6 +27,10 @@ export interface RunAgentParams {
    */
   agentParams: AgentParams;
   /**
+   * ID of the agent execution to associate with the run.
+   */
+  executionId?: string;
+  /**
    * Optional event handler.
    */
   onEvent?: RunAgentOnEventFn;

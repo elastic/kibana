@@ -36,8 +36,8 @@ export const esArchiverFixture = coreWorkerFixtures.extend<{}, { esArchiver: EsA
    * we only expose capability to ingest the data indexes.
    */
   esArchiver: [
-    ({ log, esClient, kbnClient }, use) => {
-      const esArchiverInstance = getEsArchiver(esClient, kbnClient, log);
+    ({ log, esClient }, use) => {
+      const esArchiverInstance = getEsArchiver(esClient, log);
       const loadIfNeeded = async (name: string, performance?: LoadActionPerfOptions | undefined) =>
         esArchiverInstance!.loadIfNeeded(name, performance);
 

@@ -8,6 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
+import { LoopStepTypes } from '@kbn/workflows';
 import { getConnectorIdSuggestions } from './connector_id/get_connector_id_suggestions';
 import { getConnectorTypeSuggestions } from './connector_type/get_connector_type_suggestions';
 import { getCustomPropertySuggestions } from './custom_property/get_custom_property_suggestions';
@@ -19,147 +20,185 @@ import {
 } from './liquid/liquid_completions';
 import { getRRuleSchedulingSuggestions } from './rrule/get_rrule_scheduling_suggestions';
 import { getTimezoneSuggestions } from './timezone/get_timezone_suggestions';
+import { getTriggerConditionKqlSuggestions } from './trigger_condition/get_trigger_condition_kql_suggestions';
 import { getTriggerTypeSuggestions } from './trigger_type/get_trigger_type_suggestions';
 import { getVariableSuggestions } from './variable/get_variable_suggestions';
+import { getWorkflowInputsSuggestions } from './workflow/get_workflow_inputs_suggestions';
+import { getWorkflowOutputsSuggestions } from './workflow/get_workflow_outputs_suggestions';
+import { getWorkflowSuggestions } from './workflow/get_workflow_suggestions';
+import type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
 import { getPropertyHandler } from '../../../../../../common/schema';
-import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
+import type {
+  AutocompleteContext,
+  ExtendedAutocompleteContext,
+} from '../context/autocomplete.types';
 
-export async function getSuggestions(
+export type { WorkflowKqlCompletionServices } from './workflow_kql_completion_services';
+
+const loopStepTypes = new Set<string>(LoopStepTypes);
+
+/**
+ * Checks whether the current cursor position in the YAML document is inside
+ * the body (`steps` array) of a foreach or while loop step.
+ */
+export function isInsideLoopBody(ctx: Pick<AutocompleteContext, 'yamlDocument' | 'path'>): boolean {
+  const { yamlDocument, path } = ctx;
+  if (!yamlDocument || !path) return false;
+
+  for (let i = 0; i < path.length - 2; i++) {
+    if (path[i] === 'steps' && typeof path[i + 1] === 'number') {
+      const stepTypePath = [...path.slice(0, i + 2), 'type'];
+      const stepType = yamlDocument.getIn(stepTypePath);
+      if (typeof stepType === 'string' && loopStepTypes.has(stepType)) {
+        const remainingPath = path.slice(i + 2);
+        if (remainingPath[0] === 'steps') {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Creates an adjusted range for type suggestions that extends to the end of the line
+ */
+function createAdjustedRangeForType(
+  autocompleteContext: ExtendedAutocompleteContext,
+  lineParseResult: { valueStartIndex: number }
+): monaco.IRange {
+  return {
+    ...autocompleteContext.range,
+    startColumn: lineParseResult.valueStartIndex + 1,
+    endColumn: autocompleteContext.line.length + 1, // Go to end of line to allow multi-line insertion
+  };
+}
+
+/**
+ * Handles suggestions based on match type
+ */
+// event complex switch/case statement is good readable and maintainable
+// eslint-disable-next-line complexity
+async function handleMatchTypeSuggestions(
   autocompleteContext: ExtendedAutocompleteContext
-): Promise<monaco.languages.CompletionItem[]> {
-  // console.log('getSuggestions', autocompleteContext);
+): Promise<monaco.languages.CompletionItem[] | null> {
   const { lineParseResult } = autocompleteContext;
 
+  if (!lineParseResult) {
+    return null;
+  }
+
+  switch (lineParseResult.matchType) {
+    case 'connector-id':
+      return getConnectorIdSuggestions(autocompleteContext);
+
+    case 'workflow-id':
+      return getWorkflowSuggestions(autocompleteContext);
+
+    case 'variable-unfinished':
+    case 'variable-complete':
+    case 'foreach-variable':
+      return getVariableSuggestions(autocompleteContext);
+
+    case 'at':
+      // @ triggers should only work in value nodes (after colon)
+      if (!autocompleteContext.focusedYamlPair) {
+        return [];
+      }
+      return getVariableSuggestions(autocompleteContext);
+
+    case 'liquid-filter':
+    case 'liquid-block-filter':
+      return createLiquidFilterCompletions(
+        autocompleteContext.range,
+        lineParseResult.fullKey ?? ''
+      );
+
+    case 'liquid-syntax':
+      return createLiquidSyntaxCompletions(autocompleteContext.range);
+
+    case 'liquid-block-keyword':
+      if (autocompleteContext.isInLiquidBlock) {
+        return createLiquidBlockKeywordCompletions(
+          autocompleteContext.range,
+          lineParseResult.fullKey
+        );
+      }
+      return null;
+
+    case 'type':
+      if (autocompleteContext.isInTriggersContext) {
+        const adjustedRange = createAdjustedRangeForType(autocompleteContext, lineParseResult);
+        return getTriggerTypeSuggestions(lineParseResult.fullKey, adjustedRange);
+      }
+      if (autocompleteContext.isInStepsContext && autocompleteContext.dynamicConnectorTypes) {
+        const adjustedRange = createAdjustedRangeForType(autocompleteContext, lineParseResult);
+        return getConnectorTypeSuggestions(
+          lineParseResult.fullKey,
+          adjustedRange,
+          autocompleteContext.dynamicConnectorTypes,
+          isInsideLoopBody(autocompleteContext)
+        );
+      }
+      return null;
+
+    case 'timezone':
+      return getTimezoneSuggestions(
+        {
+          ...autocompleteContext.range,
+          startColumn: lineParseResult.valueStartIndex + 1,
+        },
+        lineParseResult.fullKey
+      );
+
+    case 'workflow-inputs':
+      return getWorkflowInputsSuggestions(autocompleteContext);
+
+    default:
+      return null;
+  }
+}
+
+export async function getSuggestions(
+  autocompleteContext: ExtendedAutocompleteContext,
+  kqlServices?: WorkflowKqlCompletionServices
+): Promise<monaco.languages.CompletionItem[]> {
+  if (
+    kqlServices &&
+    kqlServices?.kql &&
+    kqlServices?.fieldFormats &&
+    autocompleteContext.isInTriggerConditionField &&
+    autocompleteContext.triggerConditionDefinition
+  ) {
+    return getTriggerConditionKqlSuggestions(autocompleteContext, kqlServices);
+  }
+
   // Check if we're in a scheduled trigger's with block for RRule suggestions
-  // e.g.
-  // triggers:
-  // - type: scheduled
-  //   with:
-  //     |<-
   if (autocompleteContext.isInScheduledTriggerWithBlock) {
-    // We're in a scheduled trigger's with block - provide RRule suggestions
     return getRRuleSchedulingSuggestions(autocompleteContext.range);
   }
 
-  // Connector ID completion
-  // e.g.
-  // steps:
-  // - name: notify-slack
-  //   type: slack
-  //   connector-id: |<-
-  if (lineParseResult?.matchType === 'connector-id') {
-    return getConnectorIdSuggestions(autocompleteContext);
+  const matchTypeSuggestions = await handleMatchTypeSuggestions(autocompleteContext);
+  if (matchTypeSuggestions !== null) {
+    return matchTypeSuggestions;
   }
 
-  // Handle completions inside {{ }} or foreach variables
-  if (
-    lineParseResult?.matchType === 'variable-unfinished' ||
-    lineParseResult?.matchType === 'variable-complete' ||
-    lineParseResult?.matchType === 'foreach-variable'
-  ) {
-    return getVariableSuggestions(autocompleteContext);
-  }
-
-  // @ triggers should only work in value nodes (after colon)
-  // This prevents @ completions from appearing in keys, comments, or root-level positions
-  if (lineParseResult?.matchType === 'at') {
-    // Check if we're in a value node using focusedYamlPair
-    // focusedYamlPair is only set when cursor is in a Pair.value node
-    if (!autocompleteContext.focusedYamlPair) {
-      // Not in a value node, skip @ completions
-      return [];
+  // Path-based workflow inputs detection: when the YAML AST path indicates
+  // we're inside `with.inputs` of a workflow step, try input suggestions
+  // even if the line parser didn't produce a 'workflow-inputs' matchType.
+  if (autocompleteContext.isInWorkflowInputsContext) {
+    const inputsSuggestions = await getWorkflowInputsSuggestions(autocompleteContext);
+    if (inputsSuggestions !== null) {
+      return inputsSuggestions;
     }
-    return getVariableSuggestions(autocompleteContext);
   }
 
-  // Liquid filter completion
-  // e.g.
-  // steps:
-  //     message: "{{ user.name | |<-
-  if (
-    lineParseResult?.matchType === 'liquid-filter' ||
-    lineParseResult?.matchType === 'liquid-block-filter'
-  ) {
-    return createLiquidFilterCompletions(autocompleteContext.range, lineParseResult?.fullKey ?? '');
-  }
-
-  // Liquid syntax completion ({% %})
-  if (lineParseResult?.matchType === 'liquid-syntax') {
-    return createLiquidSyntaxCompletions(autocompleteContext.range);
-  }
-
-  // Liquid block keyword completion (inside {%- liquid ... -%})
-  if (
-    lineParseResult?.matchType === 'liquid-block-keyword' &&
-    autocompleteContext.isInLiquidBlock
-  ) {
-    return createLiquidBlockKeywordCompletions(autocompleteContext.range, lineParseResult?.fullKey);
-  }
-
-  // Trigger type completion
-  // e.g.
-  // triggers:
-  // - type: |<-
-  if (lineParseResult?.matchType === 'type' && autocompleteContext.isInTriggersContext) {
-    // For snippets, we need to replace from the start of the type value to the end of the line
-    const adjustedRange = {
-      ...autocompleteContext.range,
-      startColumn: lineParseResult.valueStartIndex + 1,
-      endColumn: autocompleteContext.line.length + 1, // Go to end of line to allow multi-line insertion
-    };
-    return getTriggerTypeSuggestions(lineParseResult.fullKey, adjustedRange);
-  }
-
-  // Connector type completion
-  // e.g.
-  // steps:
-  // - name: search-errors
-  //   type: |<-
-  if (
-    lineParseResult?.matchType === 'type' &&
-    autocompleteContext.isInStepsContext &&
-    autocompleteContext.dynamicConnectorTypes
-  ) {
-    const adjustedRange = {
-      ...autocompleteContext.range,
-      startColumn: lineParseResult.valueStartIndex + 1,
-      endColumn: autocompleteContext.line.length + 1, // Go to end of line to allow multi-line insertion
-    };
-    return getConnectorTypeSuggestions(
-      lineParseResult.fullKey,
-      adjustedRange,
-      autocompleteContext.dynamicConnectorTypes
-    );
-  }
-
-  // Timezone completion
-  // e.g.
-  // triggers:
-  // - type: scheduled
-  //   with:
-  //     rrule:
-  //       freq: DAILY
-  //       interval: 1
-  //       tzid: |<-
-  if (lineParseResult?.matchType === 'timezone') {
-    const adjustedRange = {
-      ...autocompleteContext.range,
-      startColumn: lineParseResult.valueStartIndex + 1,
-    };
-
-    return getTimezoneSuggestions(adjustedRange, lineParseResult.fullKey);
+  const workflowOutputSuggestions = await getWorkflowOutputsSuggestions(autocompleteContext);
+  if (workflowOutputSuggestions.length > 0) {
+    return workflowOutputSuggestions;
   }
 
   // JSON Schema autocompletion for inputs.properties
-  // e.g.
-  // inputs:
-  //   properties:
-  //     myProperty:
-  //       type: |<- (suggest: string, number, boolean, object, array, null)
-  //       format: |<- (suggest: email, uri, date-time, etc.)
-  //       enum: |<- (suggest enum values from schema)
-  // This should be checked BEFORE other type completions to avoid conflicts
-  // but AFTER variable/connector completions which are more specific
   const jsonSchemaSuggestions = getJsonSchemaSuggestions(autocompleteContext);
   if (jsonSchemaSuggestions.length > 0) {
     return jsonSchemaSuggestions;
@@ -171,19 +210,4 @@ export async function getSuggestions(
     (stepType: string, scope: 'config' | 'input', key: string) =>
       getPropertyHandler(stepType, scope, key)
   );
-
-  // TODO: Implement connector with block completion
-  // Connector with block completion
-  // e.g.
-  // steps:
-  // - name: search-alerts
-  //   type: elasticsearch.search
-  //   with:
-  //     index: "alerts-*"
-  //     query:
-  //       range:
-  //         "@timestamp":
-  //           gte: "now-1h"
-  //     |<-
-  // return [];
 }

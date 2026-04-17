@@ -13,4 +13,6 @@ export interface ArtifactManifest {
   formatVersion: string;
   productName: ProductName;
   productVersion: string;
+  /** Timestamp of the artifact creation */
+  ts?: number | string;
 }

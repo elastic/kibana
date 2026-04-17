@@ -25,6 +25,10 @@ import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 
 import { events } from './lib/telemetry/event_based_telemetry';
+import {
+  aiAssistantParentInferenceFeature,
+  elasticAiAssistantInferenceFeature,
+} from './inference_feature';
 import type {
   AssistantTool,
   ElasticAssistantPluginCoreSetupDependencies,
@@ -89,6 +93,11 @@ export class ElasticAssistantPlugin
     plugins: ElasticAssistantPluginSetupDependencies
   ) {
     this.logger.debug('elasticAssistant: Setup');
+
+    if (plugins.searchInferenceEndpoints) {
+      plugins.searchInferenceEndpoints.features.register(aiAssistantParentInferenceFeature);
+      plugins.searchInferenceEndpoints.features.register(elasticAiAssistantInferenceFeature);
+    }
 
     registerEventLogProvider(plugins.eventLog);
     const eventLogger = createEventLogger(plugins.eventLog); // must be created during setup phase
@@ -267,6 +276,7 @@ export class ElasticAssistantPlugin
     // Register the Attack Discovery Schedule type
     plugins.alerting.registerType(
       getAttackDiscoveryScheduleType({
+        core,
         logger: this.logger,
         publicBaseUrl: core.http.basePath.publicBaseUrl,
         telemetry: core.analytics,

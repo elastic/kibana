@@ -11,7 +11,7 @@ import { getSchemaNamePrefix } from './get_schema_name_prefix';
 
 // Utils used in the generated code, should be imported relative to @kbn/workflows/spec/elasticsearch/generated/ or @kbn/workflows/spec/kibana/generated/
 export const StaticImports = `
-import { getShapeAt, getZodLooseObjectFromProperty, getZodObjectFromProperty } from '../../../common/utils/zod';
+import { getShapeAt } from '../../../common/utils/zod';
 `;
 
 // TODO: unwrap and combine the shapes at the build time instead of at the runtime

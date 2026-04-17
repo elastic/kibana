@@ -203,7 +203,7 @@ export class SpacesGridPage extends Component<Props, State> {
     return (
       <EuiButton
         fill
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         {...reactRouterNavigate(this.props.history, '/create')}
         data-test-subj="createSpace"
       >

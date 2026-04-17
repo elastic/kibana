@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlyout, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiFlyout } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { RowControlColumn } from '@kbn/discover-utils';
 import { AppMenuActionId, getFieldValue } from '@kbn/discover-utils';
@@ -16,8 +16,7 @@ import React from 'react';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import { extractIndexPatternFrom } from '../../extract_index_pattern_from';
-import { useExampleContext } from '../example_context';
-import { ChartWithCustomButtons } from './components';
+import { ChartWithCustomButtons, CustomDocViewerFooter, CustomDocViewerHeader } from './components';
 import { CustomDocView } from './components/custom_doc_view';
 import { RestorableStateDocView } from './components/restorable_state_doc_view';
 
@@ -61,20 +60,6 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           </EuiBadge>
         );
       },
-      message: function Message(props) {
-        const { currentMessage, setCurrentMessage } = useExampleContext();
-        const message = getFieldValue(props.row, 'message') as string;
-
-        return (
-          <EuiLink
-            onClick={() => setCurrentMessage(message)}
-            css={{ fontWeight: currentMessage === message ? 'bold' : undefined }}
-            data-test-subj="exampleDataSourceProfileMessage"
-          >
-            {message}
-          </EuiLink>
-        );
-      },
     }),
     getDocViewer:
       (prev, { context }) =>
@@ -108,6 +93,8 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
             return prevValue.docViewsRegistry(registry);
           },
+          renderHeader: (props) => <CustomDocViewerHeader {...props} />,
+          renderFooter: (props) => <CustomDocViewerFooter {...props} />,
         };
       },
     /**
@@ -168,13 +155,13 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
             id: 'example-custom-action4',
             order: 101,
             label: 'Create SLO (Custom action)',
-            iconType: 'visGauge',
+            iconType: 'chartGauge',
             testId: 'example-custom-action-under-alerts',
             run: ({ context: { onFinishAction } }) => {
               // This is an example of a custom action that opens a flyout or any other custom modal.
               // To do so, simply return a React element and call onFinishAction when you're done.
               return (
-                <EuiFlyout onClose={onFinishAction}>
+                <EuiFlyout aria-label="Example custom action flyout" onClose={onFinishAction}>
                   <div>Example custom action clicked</div>
                 </EuiFlyout>
               );
@@ -202,7 +189,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
 
       return [
         ...additionalControls,
-        ...['visBarVerticalStacked', 'heart', 'inspect'].map(
+        ...['chartBarVerticalStack', 'heart', 'inspect'].map(
           (iconType): RowControlColumn => ({
             id: `exampleControl_${iconType}`,
             render: (Control, rowProps) => {

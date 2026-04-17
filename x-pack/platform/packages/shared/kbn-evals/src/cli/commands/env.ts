@@ -72,6 +72,12 @@ const ENV_DOCS = [
     example: 'EVALUATIONS_ES_API_KEY=...',
   },
   {
+    name: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT',
+    description:
+      'Skip the Elasticsearch export preflight check (not recommended for CI). Preflight runs a small sentinel write against the configured evaluations cluster.',
+    example: 'KBN_EVALS_SKIP_PREFLIGHT_EXPORT=true',
+  },
+  {
     name: 'SELECTED_EVALUATORS',
     description:
       'Comma-separated list of evaluator names to run. Supports patterns: Precision@K, Recall@K, F1@K match all K-specific evaluators.',

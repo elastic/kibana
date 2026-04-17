@@ -44,6 +44,10 @@ export function SelectionListButton({
           isOpen={availableColumnsIsOpen}
           onClick={() => setAvailableColumnsIsOpen(!availableColumnsIsOpen)}
           closePopover={() => setAvailableColumnsIsOpen(false)}
+          aria-label={i18n.translate(
+            'sharedUXPackages.data_cascade.selection_dropdown.available_columns_popover_aria_label',
+            { defaultMessage: 'Available columns' }
+          )}
           button={
             <EuiButtonEmpty
               aria-label={i18n.translate(
@@ -52,7 +56,7 @@ export function SelectionListButton({
               )}
               size="xs"
               flush="left"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               iconSide="right"
               disabled={
                 !selectionOptions?.length || selectedOptions.length - 1 >= MAX_SELECTABLE_COLUMNS

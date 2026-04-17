@@ -161,8 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       );
 
       const packagePolicy: PackagePolicy = apiResponse.body.items.find(
-        (pkgPolicy: PackagePolicy) =>
-          pkgPolicy.id === newMonitor.id + '-' + testFleetPolicyID + '-default'
+        (pkgPolicy: PackagePolicy) => pkgPolicy.id === newMonitor.id + '-' + testFleetPolicyID
       );
       expect(packagePolicy.name).to.contain(NEW_LOCATION_LABEL);
     });
@@ -196,7 +195,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       let defaultSpaceMonitorId = '';
 
       it('add a test private location in multiple spaces', async () => {
-        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2');
+        const apiRes = await testPrivateLocations.addFleetPolicy('Test Fleet Policy 2', [
+          'default',
+          SPACE_ID,
+        ]);
         testFleetPolicyID = apiRes.body.item.id;
 
         privateLocations = await testPrivateLocations.setTestLocations(

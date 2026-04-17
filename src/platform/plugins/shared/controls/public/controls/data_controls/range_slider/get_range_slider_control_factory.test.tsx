@@ -14,6 +14,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { PublishesUnifiedSearch, PresentationContainer } from '@kbn/presentation-publishing';
 import type { Query } from '@testing-library/react';
 import { render, waitFor } from '@testing-library/react';
+import { DEFAULT_RANGE_SLIDER_STATE } from '@kbn/controls-constants';
 
 import { dataService, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
@@ -99,6 +100,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -113,6 +115,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           value: ['5', '10'],
@@ -152,6 +155,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'notGonnaFindMeDataView',
           field_name: 'myFieldName',
           value: ['5', '10'],
@@ -175,6 +179,7 @@ describe('RangeSliderControlApi', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           value: ['5', '10'],
@@ -195,6 +200,7 @@ describe('RangeSliderControlApi', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -217,6 +223,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -232,6 +239,7 @@ describe('RangeSliderControlApi', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_RANGE_SLIDER_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           step: 1024,

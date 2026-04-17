@@ -84,7 +84,8 @@ describe('RPC -> update()', () => {
         },
         {
           input: { ...validInput, unknown: 'foo' },
-          expectedError: '[unknown]: definition for this key is missing',
+          expectedError:
+            "[unknown]: Additional properties are not allowed ('unknown' was unexpected)",
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);

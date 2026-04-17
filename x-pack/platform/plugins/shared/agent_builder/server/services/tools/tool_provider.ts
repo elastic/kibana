@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ToolType } from '@kbn/agent-builder-common';
 import type {
   InternalToolDefinition,
   ToolCreateParams,
@@ -16,12 +17,17 @@ import type {
 export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
+export interface ToolProviderListFilters {
+  types?: ToolType[];
+  tags?: string[];
+}
+
 export interface ReadonlyToolProvider {
   id: string;
   readonly: true;
   has(toolId: string): MaybePromise<boolean>;
   get(toolId: string): MaybePromise<InternalToolDefinition>;
-  list(): MaybePromise<Array<InternalToolDefinition>>;
+  list(filters?: ToolProviderListFilters): MaybePromise<Array<InternalToolDefinition>>;
 }
 
 export interface WritableToolProvider extends Omit<ReadonlyToolProvider, 'readonly'> {

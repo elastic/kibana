@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlexItem, EuiText, EuiButtonEmpty, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { Template } from '../../../../common/types/domain/template/v1';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { useBulkDeleteTemplates } from '../hooks/use_bulk_delete_templates';
 import { useBulkExportTemplates } from '../hooks/use_bulk_export_templates';
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
@@ -66,7 +66,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
         items: [
           {
             name: i18n.BULK_EXPORT_TEMPLATES,
-            icon: 'exportAction',
+            icon: 'upload',
             onClick: handleBulkExport,
             disabled: isLoading,
             'data-test-subj': 'templates-bulk-action-export',
@@ -106,7 +106,7 @@ const TemplatesBulkActionsComponent: React.FC<TemplatesBulkActionsProps> = ({
               onClick={togglePopover}
               size="xs"
               iconSide="right"
-              iconType="arrowDown"
+              iconType="chevronSingleDown"
               flush="left"
               data-test-subj="templates-bulk-actions-link-icon"
             >

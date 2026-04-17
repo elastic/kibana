@@ -19,6 +19,7 @@ import {
 } from '../../containers/mock';
 import {
   TestProviders,
+  buildCasesPermissions,
   noCasesSettingsPermission,
   renderWithTestingProviders,
 } from '../../common/mock';
@@ -26,7 +27,7 @@ import {
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
 
-import { useKibana } from '../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
 
@@ -44,9 +45,20 @@ import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/a
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useLicense } from '../../common/use_license';
+import { useLocation } from 'react-router-dom';
 import * as i18n from './translations';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest
+    .fn()
+    .mockReturnValue({ pathname: '/', search: '', hash: '', state: undefined, key: 'default' }),
+}));
+jest.mock('../templates_v2/pages/all_templates_page', () => ({
+  __esModule: true,
+  default: () => <div data-test-subj="all-cases-templates" />,
+}));
 jest.mock('../../containers/configure/use_get_supported_action_connectors');
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/configure/use_persist_configuration');
@@ -62,6 +74,7 @@ const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 const useLicenseMock = useLicense as jest.Mock;
+const useLocationMock = useLocation as jest.Mock;
 
 describe('ConfigureCases', () => {
   beforeAll(() => {
@@ -1487,6 +1500,91 @@ describe('ConfigureCases', () => {
       it('should not render the warning callout', () => {
         expect(screen.queryByTestId('configure-cases-warning-callout')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('back to cases button', () => {
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+      usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('renders when the templates feature flag is enabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.getByTestId('configure-cases-back-to-cases')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: i18n.BACK_TO_ALL })).toBeInTheDocument();
+    });
+
+    it('does not render when the templates feature flag is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: false },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(screen.queryByTestId('configure-cases-back-to-cases')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('templates tab', () => {
+    beforeEach(() => {
+      useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+      usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
+      useLocationMock.mockReturnValue({
+        pathname: '/cases/configure/templates',
+        search: '',
+        hash: '',
+        state: undefined,
+        key: 'default',
+      });
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+      useLocationMock.mockReturnValue({
+        pathname: '/',
+        search: '',
+        hash: '',
+        state: undefined,
+        key: 'default',
+      });
+    });
+
+    it('renders the templates page when user has manageTemplates permission', async () => {
+      renderWithTestingProviders(<ConfigureCases />);
+
+      expect(await screen.findByTestId('all-cases-templates')).toBeInTheDocument();
+    });
+
+    it('renders the no privileges page when user lacks manageTemplates permission', async () => {
+      renderWithTestingProviders(<ConfigureCases />, {
+        wrapperProps: { permissions: buildCasesPermissions({ manageTemplates: false }) },
+      });
+
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+      expect(screen.queryByTestId('all-cases-templates')).not.toBeInTheDocument();
     });
   });
 });

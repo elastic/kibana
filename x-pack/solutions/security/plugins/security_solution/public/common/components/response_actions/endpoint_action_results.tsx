@@ -13,11 +13,10 @@ import type {
   LogsEndpointActionWithHosts,
   ActionDetails,
 } from '../../../../common/endpoint/types/actions';
-import { useUserPrivileges } from '../user_privileges';
 import { useGetAutomatedActionResponseList } from '../../../management/hooks/response_actions/use_get_automated_action_list';
 import { ActionsLogExpandedTray } from '../../../management/components/endpoint_response_actions_list/components/action_log_expanded_tray';
 import { ENDPOINT_COMMANDS } from './translations';
-import { ResponseActionsEmptyPrompt } from './response_actions_empty_prompt';
+import { useUserPrivileges } from '../user_privileges';
 
 interface EndpointResponseActionResultsProps {
   action: LogsEndpointActionWithHosts;
@@ -64,17 +63,13 @@ export const EndpointResponseActionResults = ({
       event={eventText}
       data-test-subj={'endpoint-results-comment'}
     >
-      {canAccessEndpointActionsLogManagement ? (
-        expandedAction ? (
-          <ResponseActionDetailsWorkaround
-            actionId={expandedAction.id}
-            data-test-subj={`response-results-${hostName}`}
-          />
-        ) : (
-          <EuiLoadingSpinner />
-        )
+      {expandedAction ? (
+        <ResponseActionDetailsWorkaround
+          actionId={expandedAction.id}
+          data-test-subj={`response-results-${hostName}`}
+        />
       ) : (
-        <ResponseActionsEmptyPrompt type="endpoint" />
+        <EuiLoadingSpinner />
       )}
     </EuiComment>
   );
@@ -105,7 +100,13 @@ const ResponseActionDetailsWorkaround = memo<{
   actionId: string;
   'data-test-subj'?: string;
 }>(({ actionId, 'data-test-subj': dataTestSubj }) => {
-  const { data: actionDetailsApiResult, isLoading } = useGetActionDetails(actionId);
+  const {
+    endpointPrivileges: { canAccessEndpointActionsLogManagement },
+  } = useUserPrivileges();
+
+  const { data: actionDetailsApiResult, isLoading } = useGetActionDetails(actionId, {
+    enabled: canAccessEndpointActionsLogManagement,
+  });
 
   if (isLoading) {
     return <EuiLoadingSpinner />;

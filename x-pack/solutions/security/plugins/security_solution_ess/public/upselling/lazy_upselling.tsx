@@ -56,3 +56,13 @@ export const AIValueUpsellingPageLazy = withSuspenseUpsell(
     }))
   )
 );
+
+export const GraphVisualizationUpsellingSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('./sections/graph_visualization_upselling').then(
+      ({ GraphVisualizationUpsellingSectionESS }) => ({
+        default: GraphVisualizationUpsellingSectionESS,
+      })
+    )
+  )
+);

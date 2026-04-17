@@ -180,7 +180,7 @@ exports[`should render error for dupes 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         onClick={[Function]}
         size="xs"
       >
@@ -288,7 +288,7 @@ exports[`should render error for empty name 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         onClick={[Function]}
         size="xs"
       >
@@ -479,7 +479,7 @@ exports[`should render field editor 1`] = `
       grow={false}
     >
       <EuiButtonEmpty
-        iconType="plusInCircleFilled"
+        iconType="plusCircle"
         onClick={[Function]}
         size="xs"
       >

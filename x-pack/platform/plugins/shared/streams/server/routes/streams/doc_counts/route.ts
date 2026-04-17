@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { StreamDocsStat } from '../../../../common';
 import { createServerRoute } from '../../create_server_route';
@@ -62,13 +62,15 @@ const totalDocCountsRoute = createServerRoute({
       .optional(),
   }),
   handler: async ({ getScopedClients, request, server, params }): Promise<StreamDocsStat[]> => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
     const streamName = params?.query?.stream;
 
     return await getDocCountsForStreams({
       isServerless: server.isServerless,
       esClient: scopedClusterClient.asCurrentUser,
-      esClientAsSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
+      esClientAsSecondaryAuthUser: isSecurityEnabled
+        ? scopedClusterClient.asSecondaryAuthUser
+        : undefined,
       streamName,
     });
   },

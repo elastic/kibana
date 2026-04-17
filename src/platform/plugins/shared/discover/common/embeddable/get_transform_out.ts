@@ -7,59 +7,83 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTitlesOut } from '@kbn/presentation-publishing';
-import { flow } from 'lodash';
+import { injectReferences, parseSearchSourceJSON } from '@kbn/data-plugin/common';
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
+import { flow, omit } from 'lodash';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+import { extractTabs, SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './constants';
 import type {
-  SearchEmbeddableByReferenceState,
-  SearchEmbeddableByValueState,
-  StoredSearchEmbeddableByValueState,
+  SearchEmbeddablePanelApiState,
+  SearchEmbeddableState,
   StoredSearchEmbeddableState,
 } from './types';
-import { inject } from './search_inject_extract';
-import { SAVED_SEARCH_SAVED_OBJECT_REF_NAME } from './get_transform_in';
+import { isSearchEmbeddableByValueState } from './type_guards';
+import { fromStoredSearchEmbeddable } from './transform_utils';
 
-function isByValue(
-  state: StoredSearchEmbeddableState
-): state is StoredSearchEmbeddableByValueState {
-  return (
-    typeof (state as StoredSearchEmbeddableByValueState).attributes === 'object' &&
-    (state as StoredSearchEmbeddableByValueState).attributes !== null
-  );
-}
-
-export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['transformOut']) {
-  function transformOut(
+export function getTransformOut(
+  transformDrilldownsOut: DrilldownTransforms['transformOut'],
+  isEmbeddableTransformsEnabled: () => boolean
+) {
+  return function transformOut(
     storedState: StoredSearchEmbeddableState,
     references?: SavedObjectReference[]
-  ) {
+  ): SearchEmbeddablePanelApiState {
     const transformsFlow = flow(
       transformTitlesOut<StoredSearchEmbeddableState>,
+      transformTimeRangeOut<StoredSearchEmbeddableState>,
       (state: StoredSearchEmbeddableState) => transformDrilldownsOut(state, references)
     );
     const state = transformsFlow(storedState);
+    return !isEmbeddableTransformsEnabled()
+      ? legacyTransformOut(state, references)
+      : fromStoredSearchEmbeddable(state, references);
+  };
+}
 
-    if (isByValue(state)) {
-      const tabsState = {
-        ...state,
-        attributes: extractTabs(state.attributes),
-      };
-      const { attributes } = inject({ type: SavedSearchType, ...tabsState }, references ?? []);
-      return {
-        ...state,
-        attributes,
-      } as SearchEmbeddableByValueState;
-    }
+function legacyTransformOut(
+  state: StoredSearchEmbeddableState,
+  references: SavedObjectReference[] | undefined
+): SearchEmbeddableState {
+  if (isSearchEmbeddableByValueState(state)) {
+    const tabsState = { ...state, attributes: extractTabs(state.attributes) };
+    const tabs = tabsState.attributes.tabs.map((tab) => {
+      try {
+        const searchSourceValues = parseSearchSourceJSON(
+          tab.attributes.kibanaSavedObjectMeta.searchSourceJSON
+        );
+        const searchSourceFields = injectReferences(searchSourceValues, references ?? []);
+        return {
+          ...tab,
+          attributes: {
+            ...omit(tab.attributes, 'references'),
+            kibanaSavedObjectMeta: {
+              ...tab.attributes.kibanaSavedObjectMeta,
+              searchSourceJSON: JSON.stringify(searchSourceFields),
+            },
+          },
+        };
+      } catch (e) {
+        return tab;
+      }
+    });
 
-    const savedObjectRef = (references ?? []).find(
-      (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
-    );
     return {
       ...state,
-      ...(savedObjectRef?.id ? { savedObjectId: savedObjectRef.id } : {}),
-    } as SearchEmbeddableByReferenceState;
+      attributes: {
+        ...state.attributes,
+        tabs,
+      },
+    };
   }
-  return transformOut;
+
+  const savedObjectRef = (references ?? []).find(
+    (ref) => SavedSearchType === ref.type && ref.name === SAVED_SEARCH_SAVED_OBJECT_REF_NAME
+  );
+  if (!savedObjectRef) throw new Error(`Missing reference of type "${SavedSearchType}"`);
+  return {
+    ...state,
+    savedObjectId: savedObjectRef.id,
+  };
 }

@@ -19,7 +19,6 @@ export function ErrorMarkerWithLink({ mark }: { mark: ErrorMark }) {
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/errors-and-crashes',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
 

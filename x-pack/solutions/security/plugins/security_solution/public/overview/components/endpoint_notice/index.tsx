@@ -24,7 +24,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
   return (
     <EuiCallOut
       data-test-subj="endpoint-prompt-banner"
-      iconType="cheer"
+      iconType="popper"
       title={
         <>
           <b>

@@ -61,7 +61,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-        "lineNumber": 84,
+        "lineNumber": 85,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -77,7 +77,7 @@
               "LayoutConfigProviderProps"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-            "lineNumber": 84,
+            "lineNumber": 85,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -130,47 +130,6 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-layout-components",
-        "id": "def-public.SimpleDebugOverlay",
-        "type": "Function",
-        "tags": [],
-        "label": "SimpleDebugOverlay",
-        "description": [
-          "\nA minimal debug component for temporary overlays (sidebar, footer, banner, etc.)\nFills its parent container, with customizable background and text.\n"
-        ],
-        "signature": [
-          "({ label, background, color, style, children, }: SimpleDebugOverlayProps) => React.JSX.Element"
-        ],
-        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/simple_debug_overlay.tsx",
-        "lineNumber": 28,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-chrome-layout-components",
-            "id": "def-public.SimpleDebugOverlay.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  label = 'Debug Overlay',\n  background = '#e6f4ff',\n  color = '#0099ff',\n  style = {},\n  children,\n}",
-            "description": [],
-            "signature": [
-              "SimpleDebugOverlayProps"
-            ],
-            "path": "src/core/packages/chrome/layout/core-chrome-layout-components/debug/simple_debug_overlay.tsx",
-            "lineNumber": 28,
-            "columnNumber": 71,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "The rendered debug overlay."
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-layout-components",
         "id": "def-public.useLayoutUpdate",
         "type": "Function",
         "tags": [
@@ -178,21 +137,19 @@
         ],
         "label": "useLayoutUpdate",
         "description": [
-          "\nHook to access and update the layout configuration."
+          "\nHook to get the layout update function. Does not cause re-renders when config changes."
         ],
         "signature": [
-          "() => (updates: Partial<",
-          "LayoutConfig",
-          ">) => void"
+          "() => LayoutUpdateFn"
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-        "lineNumber": 138,
+        "lineNumber": 147,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
         "returnComment": [
-          "a function to update it"
+          "a function to update the layout config"
         ],
         "initialIsOpen": false
       }
@@ -208,7 +165,7 @@
           "\nProps for the LayoutConfigProvider component."
         ],
         "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-        "lineNumber": 71,
+        "lineNumber": 72,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -223,12 +180,12 @@
             "signature": [
               "Pick<Partial<",
               "LayoutDimensions",
-              ">, \"sidebarWidth\" | \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
+              ">, \"sidebarWidth\" | \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginTop\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
               "ChromeStyle",
               " | undefined; }"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -241,10 +198,10 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout_config_context.tsx",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -278,14 +235,18 @@
         "parentPluginId": "@kbn/core-chrome-layout-components",
         "id": "def-public.ChromeStyle",
         "type": "Type",
-        "tags": [],
+        "tags": [
+          "todo"
+        ],
         "label": "ChromeStyle",
-        "description": [],
+        "description": [
+          "\nChrome style variants.\n"
+        ],
         "signature": [
           "\"project\" | \"classic\""
         ],
-        "path": "src/core/packages/chrome/browser/src/types.ts",
-        "lineNumber": 33,
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-components/layout.types.ts",
+        "lineNumber": 67,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -303,7 +264,7 @@
         "signature": [
           "Pick<Partial<",
           "LayoutDimensions",
-          ">, \"sidebarWidth\" | \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
+          ">, \"sidebarWidth\" | \"bannerHeight\" | \"headerHeight\" | \"footerHeight\" | \"navigationWidth\" | \"applicationTopBarHeight\" | \"applicationBottomBarHeight\" | \"applicationMarginTop\" | \"applicationMarginBottom\" | \"applicationMarginRight\"> & { chromeStyle?: ",
           "ChromeStyle",
           " | undefined; }"
         ],

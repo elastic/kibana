@@ -11,6 +11,9 @@ import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { AsCodeFilter } from '@kbn/as-code-filters-schema';
+import { toStoredFilters, fromStoredFilters } from '@kbn/as-code-filters-transforms';
+import { toAsCodeQuery, toStoredQuery } from '@kbn/as-code-shared-transforms';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
@@ -32,10 +35,11 @@ import {
   tap,
 } from 'rxjs';
 import { dataService } from '../services/kibana_services';
+import { logger } from '../services/logger';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
 import type { DashboardState } from '../../common';
-import { cleanFiltersForSerialize } from '../../common';
+import { cleanFiltersForSerialize } from './clean_filters_for_serialize';
 
 export const COMPARE_DEBOUNCE = 100;
 
@@ -53,11 +57,15 @@ export function initializeUnifiedSearchManager(
   } = dataService.query;
 
   const reload$ = new Subject<void>();
-  const query$ = new BehaviorSubject<Query | undefined>(initialState.query);
+  const query$ = new BehaviorSubject<Query | undefined>(
+    initialState.query ? toStoredQuery(initialState.query) : undefined
+  );
+  const asCodeQuery$ = new BehaviorSubject<DashboardState['query']>(initialState.query);
   // setAndSyncQuery method not needed since query synced with 2-way data binding
-  function setQuery(query: Query) {
+  function setQuery(query: Query | undefined) {
     if (!fastIsEqual(query, query$.value)) {
       query$.next(query);
+      asCodeQuery$.next(query ? toAsCodeQuery(query) : undefined);
     }
   }
   const refreshInterval$ = new BehaviorSubject<RefreshInterval | undefined>(
@@ -89,12 +97,18 @@ export function initializeUnifiedSearchManager(
       timefilterService.setTime(timeRangeOrDefault);
     }
   }
+
+  const asCodeFilters$ = new BehaviorSubject<AsCodeFilter[] | undefined>(initialState.filters);
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters);
+  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(
+    toStoredFilters(initialState.filters, logger)
+  );
+
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
   function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(cleanFiltersForSerialize(unifiedSearchFilters));
+      asCodeFilters$.next(fromStoredFilters(unifiedSearchFilters, logger));
     }
   }
 
@@ -226,8 +240,8 @@ export function initializeUnifiedSearchManager(
   const comparators = {
     filters: (a, b) =>
       compareFilters(
-        (a ?? []).filter((f) => !isFilterPinned(f)),
-        (b ?? []).filter((f) => !isFilterPinned(f)),
+        toStoredFilters(a, logger) ?? [],
+        toStoredFilters(b, logger) ?? [],
         COMPARE_ALL_OPTIONS
       ),
     query: 'deepEquality',
@@ -248,8 +262,8 @@ export function initializeUnifiedSearchManager(
     DashboardState,
     'filters' | 'query' | 'refresh_interval' | 'time_range'
   > => {
-    // pinned filters are not serialized when saving the dashboard
-    const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
+    const serializableFilters = asCodeFilters$.value;
+    const asCodeQuery = query$.value ? toAsCodeQuery(query$.value) : undefined;
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -268,7 +282,7 @@ export function initializeUnifiedSearchManager(
         : undefined;
 
     return {
-      query: query$.value,
+      ...(asCodeQuery && { query: asCodeQuery }),
       ...(serializableFilters?.length && { filters: serializableFilters }),
       ...(refreshInterval && { refresh_interval: refreshInterval }),
       ...(timeRange && { time_range: timeRange }),
@@ -293,20 +307,22 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
-          unifiedSearchFilters$,
-          query$,
+          asCodeFilters$,
+          asCodeQuery$,
           refreshInterval$,
           timeRange$,
           timeRestore$,
         ]).pipe(
           debounceTime(COMPARE_DEBOUNCE),
 
-          map(([filters, query, refresh_interval, time_range]) => ({
-            filters,
-            query,
-            refresh_interval,
-            time_range,
-          })),
+          map(([filters, query, refresh_interval, time_range]) => {
+            return {
+              filters,
+              query,
+              refresh_interval,
+              time_range,
+            };
+          }),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
@@ -316,11 +332,10 @@ export function initializeUnifiedSearchManager(
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
           ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
-          ...(lastSavedState.filters ?? []),
+          ...(toStoredFilters(lastSavedState.filters, logger) ?? []),
         ]);
-        if (lastSavedState.query) {
-          setQuery(lastSavedState.query);
-        }
+        const storedQuery = lastSavedState.query ? toStoredQuery(lastSavedState.query) : undefined;
+        setQuery(storedQuery);
         if (lastSavedState.time_range) {
           setAndSyncTimeRange(lastSavedState.time_range);
         }

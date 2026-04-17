@@ -36,13 +36,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.testResources.resetKibanaTimeZone();
     });
 
-    // The data visualizer should work the same as with a trial license, except the missing create actions
-    // That's why the 'basic' version of 'index_data_visualizer_actions_panel' is loaded here
-    loadTestFile(
-      require.resolve(
-        '../../../../../functional/apps/ml/data_visualizer/group1/index_data_visualizer_grid_in_discover'
-      )
-    );
     loadTestFile(
       require.resolve(
         '../../../../../functional/apps/ml/data_visualizer/group3/index_data_visualizer_grid_in_discover_basic'

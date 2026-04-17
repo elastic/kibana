@@ -116,7 +116,7 @@ describe('kuery functions', () => {
         const result = is.toElasticsearchQuery(node, indexPattern);
 
         expect(result).toHaveProperty('bool');
-        expect((result.bool!.should! as estypes.QueryDslQueryContainer[]).length).toBe(
+        expect((result!.bool!.should! as estypes.QueryDslQueryContainer[]).length).toBe(
           indexPattern.fields.length
         );
       });
@@ -270,7 +270,7 @@ describe('kuery functions', () => {
         ) as KqlIsFunctionNode;
         const result = is.toElasticsearchQuery(node, indexPattern);
 
-        expect((result.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
+        expect((result!.bool!.should as estypes.QueryDslQueryContainer[])[0]).toHaveProperty(
           'script'
         );
       });

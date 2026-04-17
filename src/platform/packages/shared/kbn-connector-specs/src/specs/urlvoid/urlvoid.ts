@@ -32,7 +32,7 @@ export const URLVoidConnector: ConnectorSpec = {
       defaultMessage: 'Domain and URL reputation checking via multi-engine scanning',
     }),
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

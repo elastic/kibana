@@ -15,6 +15,14 @@ export {
   type AgentResearchStepConfiguration,
   type AgentAnswerStepConfiguration,
 } from './definition';
+export { VISIBILITY_ICON, VISIBILITY_BADGE_COLOR, AgentVisibility } from './visibility';
+export {
+  canCurrentUserEditAgent,
+  isAgentOwner,
+  canChangeAgentVisibility,
+  hasAgentReadAccess,
+  hasAgentWriteAccess,
+} from './access_control';
 export { agentIdRegexp, agentIdMaxLength, validateAgentId } from './agent_ids';
 export {
   type AgentCapabilities,
@@ -23,6 +31,7 @@ export {
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
 export {
+  type ConfirmPromptColor,
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,
   type ConfirmationPromptResponse,

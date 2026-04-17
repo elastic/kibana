@@ -22,6 +22,7 @@ export type EsqlConversionFailureReason =
   | 'drop_partials_not_supported'
   | 'include_empty_rows_not_supported'
   | 'terms_not_supported'
+  | 'saved_to_library_not_supported'
   | 'unsupported_settings'
   | 'unknown';
 
@@ -87,6 +88,13 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     defaultMessage:
       'Cannot convert to ES|QL: Top values (terms) aggregation will be supported in an upcoming update.',
   }),
+  saved_to_library_not_supported: i18n.translate(
+    'xpack.lens.config.cannotConvertSavedToLibraryTooltip',
+    {
+      defaultMessage:
+        'Cannot convert to ES|QL: Charts saved to library will be supported in an upcoming update.',
+    }
+  ),
   unsupported_settings: i18n.translate(
     'xpack.lens.config.cannotConvertToEsqlUnsupportedSettingsTooltip',
     {

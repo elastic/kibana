@@ -31,6 +31,7 @@ import { FlameGraphView } from '../views/flamegraphs/flamegraph';
 import { FunctionsView } from '../views/functions';
 import { DifferentialTopNFunctionsView } from '../views/functions/differential_topn';
 import { TopNFunctionsView } from '../views/functions/topn';
+import { ProfilingNotEnabledView } from '../views/profiling_not_enabled';
 import { Settings } from '../views/settings';
 import { StackTracesView } from '../views/stack_traces_view';
 import { StorageExplorerView } from '../views/storage_explorer';
@@ -93,6 +94,9 @@ const routes = {
       },
       '/delete_data_instructions': {
         element: <DeleteDataView />,
+      },
+      '/profiling-not-enabled': {
+        element: <ProfilingNotEnabledView />,
       },
       '/': {
         children: {

@@ -17,7 +17,12 @@ import { css } from '@emotion/react';
 import { TemplatesSearch } from './templates_search';
 import { MultiSelectFilter, mapToMultiSelectOption } from '../../all_cases/multi_select_filter';
 import type { TemplatesFindRequest } from '../../../../common/types/api/template/v1';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
+
+const STATUS_FILTER_OPTIONS = [
+  { key: 'true', label: i18n.TEMPLATE_ENABLED },
+  { key: 'false', label: i18n.TEMPLATE_DISABLED },
+];
 
 export interface TemplatesTableFiltersProps {
   queryParams: TemplatesFindRequest;
@@ -63,6 +68,20 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
     [onQueryParamsChange]
   );
 
+  const onStatusChange = useCallback(
+    ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
+      const bothOrNone = selectedOptionKeys.length !== 1;
+      onQueryParamsChange({
+        isEnabled: bothOrNone ? undefined : selectedOptionKeys[0] === 'true',
+        page: 1,
+      });
+    },
+    [onQueryParamsChange]
+  );
+
+  const statusSelectedKeys =
+    queryParams.isEnabled === undefined ? ['true', 'false'] : [String(queryParams.isEnabled)];
+
   return (
     <EuiFlexGroup
       gutterSize="s"
@@ -87,6 +106,15 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
             background-color: transparent;
           `}
         >
+          <MultiSelectFilter
+            id="status"
+            buttonLabel={i18n.STATUS}
+            options={STATUS_FILTER_OPTIONS}
+            selectedOptionKeys={statusSelectedKeys}
+            onChange={onStatusChange}
+            isLoading={false}
+            data-test-subj="templates-status-filter"
+          />
           <MultiSelectFilter
             id="tags"
             buttonLabel={i18n.TAGS}

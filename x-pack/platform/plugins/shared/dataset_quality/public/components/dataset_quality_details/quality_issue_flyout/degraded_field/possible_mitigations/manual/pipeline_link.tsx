@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { copyToClipboard, EuiButtonIcon, EuiFieldText, EuiLink, EuiSpacer } from '@elastic/eui';
+import { copyToClipboard, EuiFieldText, EuiFormAppend, EuiLink, EuiSpacer } from '@elastic/eui';
 import {
   manualMitigationCustomPipelineCopyPipelineNameAriaText,
   manualMitigationCustomPipelineCreateEditPipelineLink,
@@ -70,11 +70,12 @@ export function CreateEditPipelineLink({
       <EuiSpacer size="m" />
       <EuiFieldText
         append={
-          <EuiButtonIcon
-            iconType="copy"
-            data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
+          <EuiFormAppend
+            element="button"
+            iconLeft="copy"
             onClick={onClickHandler}
             aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
+            data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
           />
         }
         readOnly={true}

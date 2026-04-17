@@ -186,7 +186,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                     <EuiButtonIcon
                       size="xs"
                       data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                      iconType="copyClipboard"
+                      iconType="copy"
                       onClick={copy}
                       aria-label={i18n.translate(
                         'xpack.contentConnectors.connectorDeployment.copyConnectorId',
@@ -279,7 +279,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                               <EuiButtonIcon
                                 size="xs"
                                 data-test-subj="enterpriseSearchConnectorDeploymentButton"
-                                iconType="copyClipboard"
+                                iconType="copy"
                                 onClick={copy}
                                 aria-label={i18n.translate(
                                   'xpack.contentConnectors.connectorDeployment.copyIndexName',

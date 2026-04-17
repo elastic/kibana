@@ -8,14 +8,15 @@
 import { useMemo } from 'react';
 import { useOnboardingContext } from '../../onboarding_context';
 import { useTopicId } from '../../hooks/use_topic_id';
+import type { OnboardingTopicId } from '../../../constants';
 import type { OnboardingGroupConfig } from '../../../types';
 
 /**
  * Hook that returns the body config for the selected topic
  */
-export const useBodyConfig = (): OnboardingGroupConfig[] => {
-  const topicId = useTopicId();
+export const useBodyConfig = (topicIdOverride?: OnboardingTopicId): OnboardingGroupConfig[] => {
   const { config } = useOnboardingContext();
+  const topicId = useTopicId(topicIdOverride);
   const topicBodyConfig = useMemo(() => {
     let bodyConfig: OnboardingGroupConfig[] = [];
     const topicConfig = config.get(topicId);

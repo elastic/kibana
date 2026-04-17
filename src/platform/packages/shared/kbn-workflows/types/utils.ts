@@ -13,25 +13,29 @@ import type {
   EsWorkflowCreate,
   HttpMethod,
   InternalConnectorContract,
+  StepStabilityLevel,
+  WorkflowStepExecutionDto,
 } from './v1';
 import { ExecutionStatus, KNOWN_HTTP_METHODS, TerminalExecutionStatuses } from './v1';
+import { getBuiltInStepDefinition } from '../spec/builtin_step_definitions';
 import type {
   BuiltInStepProperty,
   BuiltInStepType,
   ElasticsearchStep,
   ForEachStep,
-  HttpStep,
   IfStep,
   KibanaStep,
   MergeStep,
   ParallelStep,
   Step,
+  SwitchStep,
   WaitStep,
+  WhileStep,
   WorkflowYaml,
 } from '../spec/schema';
 import { BuiltInStepProperties, BuiltInStepTypes } from '../spec/schema';
-import type { TriggerType } from '../spec/schema/triggers/trigger_schema';
-import { TriggerTypes } from '../spec/schema/triggers/trigger_schema';
+import type { TriggerType } from '../spec/schema/triggers';
+import { TriggerTypes } from '../spec/schema/triggers';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -65,26 +69,33 @@ export function isTerminalStatus(status: ExecutionStatus) {
   return TerminalExecutionStatuses.includes(status);
 }
 
+export function isFailedBeforeSteps(
+  status: ExecutionStatus,
+  stepExecutions: WorkflowStepExecutionDto[]
+) {
+  return status === ExecutionStatus.FAILED && stepExecutions.length === 0;
+}
+
 export function isCancelableStatus(status: ExecutionStatus) {
-  const CancelableStatus: readonly ExecutionStatus[] = [
-    ExecutionStatus.RUNNING,
-    ExecutionStatus.WAITING,
-    ExecutionStatus.WAITING_FOR_INPUT,
-    ExecutionStatus.PENDING,
-  ];
-  return CancelableStatus.includes(status);
+  return (
+    status === ExecutionStatus.RUNNING ||
+    status === ExecutionStatus.WAITING ||
+    status === ExecutionStatus.WAITING_FOR_INPUT ||
+    status === ExecutionStatus.PENDING
+  );
 }
 
 // Type guards for steps types
 export const isWaitStep = (step: Step): step is WaitStep => step.type === 'wait';
-export const isHttpStep = (step: Step): step is HttpStep => step.type === 'http';
 export const isElasticsearchStep = (step: Step): step is ElasticsearchStep =>
   step.type === 'elasticsearch';
 export const isKibanaStep = (step: Step): step is KibanaStep => step.type === 'kibana';
 export const isForeachStep = (step: Step): step is ForEachStep => step.type === 'foreach';
+export const isWhileStep = (step: Step): step is WhileStep => step.type === 'while';
 export const isIfStep = (step: Step): step is IfStep => step.type === 'if';
 export const isParallelStep = (step: Step): step is ParallelStep => step.type === 'parallel';
 export const isMergeStep = (step: Step): step is MergeStep => step.type === 'merge';
+export const isSwitchStep = (step: Step): step is SwitchStep => step.type === 'switch';
 export const isBuiltInStepType = (type: string): type is BuiltInStepType =>
   BuiltInStepTypes.includes(type as BuiltInStepType);
 export const isTriggerType = (type: string): type is TriggerType =>
@@ -103,3 +114,6 @@ export const isHttpMethod = (method: string): method is HttpMethod =>
 
 export const isBuiltInStepProperty = (property: string): property is BuiltInStepProperty =>
   BuiltInStepProperties.includes(property as BuiltInStepProperty);
+
+export const getBuiltInStepStability = (type: string): StepStabilityLevel | undefined =>
+  getBuiltInStepDefinition(type)?.stability;

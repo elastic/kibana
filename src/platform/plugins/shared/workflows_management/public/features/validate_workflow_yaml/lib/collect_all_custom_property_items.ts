@@ -15,6 +15,10 @@ import {
   type StepPropertyHandler,
 } from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
+import {
+  buildStepSelectionValues,
+  getValueFromValueNode,
+} from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { CustomPropertyItem } from '../model/types';
 
 export function collectAllCustomPropertyItems(
@@ -44,16 +48,20 @@ export function collectAllCustomPropertyItems(
           const key = scope === 'config' ? propKey : propKey.split('.').slice(1).join('.');
           const propertyHandler = getPropertyHandler(step.stepType, scope, key);
           if (propertyHandler && propertyHandler.selection) {
+            const selection = propertyHandler.selection;
             const [startOffset, endOffset] = prop.valueNode.range;
             const startPos = lineCounter.linePos(startOffset);
             const endPos = lineCounter.linePos(endOffset);
+            const contextValues = buildStepSelectionValues(step, selection.dependsOnValues);
             const context: SelectionContext = {
               stepType: step.stepType,
               scope,
               propertyKey: key,
+              values: contextValues,
             };
             customPropertyItems.push({
               id: `${step.stepId}-${key}-${startPos.line}-${startPos.col}-${endPos.line}-${endPos.col}`,
+              stepId: step.stepId,
               startLineNumber: startPos.line,
               startColumn: startPos.col,
               endLineNumber: endPos.line,
@@ -62,7 +70,7 @@ export function collectAllCustomPropertyItems(
               scope,
               stepType: step.stepType,
               propertyKey: key,
-              propertyValue: prop.valueNode.value,
+              propertyValue: getValueFromValueNode(prop.valueNode),
               selectionHandler: propertyHandler.selection,
               context,
               yamlPath: prop.path,

@@ -26,6 +26,7 @@ paths:
               properties:
                 savedObjectIds:
                   type: array
+                  maxItems: 100
                   items:
                     type: string
                   description: The list of IDs of the Timelines or Timeline templates to delete
@@ -33,6 +34,7 @@ paths:
                     - '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
                 searchIds:
                   type: array
+                  maxItems: 100
                   description: Saved search IDs that should be deleted alongside the timelines
                   items:
                     type: string

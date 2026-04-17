@@ -37,6 +37,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -235,6 +236,7 @@ const bulkEnableRulesWithOCC = async (
               });
             }
 
+            const nowIso = new Date().toISOString();
             const updatedAttributes = updateMetaAttributes(context, {
               ...rule.attributes,
               ...(!rule.attributes.apiKey &&
@@ -246,15 +248,19 @@ const bulkEnableRulesWithOCC = async (
                 }))),
               enabled: true,
               updatedBy: username,
-              updatedAt: new Date().toISOString(),
+              updatedAt: nowIso,
+              ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {
                 status: 'pending',
                 lastDuration: 0,
-                lastExecutionDate: new Date().toISOString(),
+                lastExecutionDate: nowIso,
                 error: null,
                 warning: null,
               },
               scheduledTaskId: rule.id,
+              ...(rule.attributes.lastRun
+                ? { lastRun: migrateLegacyLastRunOutcomeMsg(rule.attributes.lastRun) }
+                : {}),
             });
 
             const shouldScheduleTask = await getShouldScheduleTask(

@@ -112,7 +112,7 @@ const getActionsColumn = (openRightPanel: (props: FlyoutPanelProps) => void) => 
 
     return (
       <EuiButtonIcon
-        iconType="expand"
+        iconType="maximize"
         onClick={onClick}
         aria-label={i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.columns.preview.ariaLabel',

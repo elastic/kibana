@@ -121,6 +121,24 @@ describe('form_message', () => {
       expect(formMessages.SESSION_EXPIRED.content).toContain('session');
     });
 
+    it('should have SESSION_IDLE_TIMEOUT message with Info type', () => {
+      expect(formMessages.SESSION_IDLE_TIMEOUT).toEqual({
+        type: MessageType.Info,
+        content: expect.any(String),
+      });
+      expect(formMessages.SESSION_IDLE_TIMEOUT.content).toBeTruthy();
+      expect(formMessages.SESSION_IDLE_TIMEOUT.content).toContain('inactivity');
+    });
+
+    it('should have SESSION_LIFESPAN_TIMEOUT message with Info type', () => {
+      expect(formMessages.SESSION_LIFESPAN_TIMEOUT).toEqual({
+        type: MessageType.Info,
+        content: expect.any(String),
+      });
+      expect(formMessages.SESSION_LIFESPAN_TIMEOUT.content).toBeTruthy();
+      expect(formMessages.SESSION_LIFESPAN_TIMEOUT.content).toContain('lifespan');
+    });
+
     it('should have CONCURRENCY_LIMIT message with Info type', () => {
       expect(formMessages.CONCURRENCY_LIMIT).toEqual({
         type: MessageType.Info,
@@ -160,6 +178,8 @@ describe('form_message', () => {
     it('should have all LogoutReason types covered', () => {
       const expectedReasons = [
         'SESSION_EXPIRED',
+        'SESSION_IDLE_TIMEOUT',
+        'SESSION_LIFESPAN_TIMEOUT',
         'CONCURRENCY_LIMIT',
         'AUTHENTICATION_ERROR',
         'LOGGED_OUT',
@@ -182,7 +202,7 @@ describe('form_message', () => {
       const infoMessages = Object.entries(formMessages).filter(
         ([_key, value]) => value.type === MessageType.Info
       );
-      expect(infoMessages).toHaveLength(4);
+      expect(infoMessages).toHaveLength(6);
     });
   });
 });

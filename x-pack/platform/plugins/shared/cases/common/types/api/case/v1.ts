@@ -22,6 +22,7 @@ import {
   MAX_CATEGORY_FILTER_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  CASE_EXTENDED_FIELDS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -33,6 +34,7 @@ import {
   CaseCustomFieldToggleRt,
   CustomFieldTextTypeRt,
   CustomFieldNumberTypeRt,
+  CaseCloseReasonRt,
 } from '../../domain';
 import {
   CaseRt,
@@ -40,6 +42,7 @@ import {
   CaseSeverityRt,
   CasesRt,
   CaseStatusRt,
+  CaseTemplate,
   RelatedCaseRt,
   SimilarCaseRt,
 } from '../../domain/case/v1';
@@ -131,6 +134,12 @@ export const CaseBaseOptionalFieldsRequestRt = rt.exact(
      * The alert sync settings
      */
     settings: CaseSettingsRt,
+    template: rt.union([CaseTemplate, rt.null]),
+    [CASE_EXTENDED_FIELDS]: rt.union([rt.undefined, rt.record(rt.string, rt.string)]),
+    /**
+     * The close reason to sync to attached alerts
+     */
+    closeReason: CaseCloseReasonRt,
   })
 );
 
@@ -218,6 +227,8 @@ export const CasePostRequestRt = rt.intersection([
        * The list of custom field values of the case.
        */
       customFields: CaseRequestCustomFieldsRt,
+      template: rt.union([CaseTemplate, rt.null]),
+      [CASE_EXTENDED_FIELDS]: rt.record(rt.string, rt.string),
     })
   ),
 ]);
@@ -525,6 +536,17 @@ export const CasesPatchRequestRt = rt.strict({
   }),
 });
 
+export const UpdateSummaryRt = rt.strict({
+  syncedAlertCount: rt.number,
+});
+
+export const CaseWithUpdateSummaryRt = rt.intersection([
+  CaseRt,
+  rt.partial({ updateSummary: UpdateSummaryRt }),
+]);
+
+export const PatchCasesResponseRt = rt.array(CaseWithUpdateSummaryRt);
+
 /**
  * Push case
  */
@@ -614,6 +636,9 @@ export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFi
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
 export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
+export type UpdateSummary = rt.TypeOf<typeof UpdateSummaryRt>;
+export type CaseWithUpdateSummary = rt.TypeOf<typeof CaseWithUpdateSummaryRt>;
+export type CasesPatchResponse = rt.TypeOf<typeof PatchCasesResponseRt>;
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type GetTagsResponse = rt.TypeOf<typeof GetTagsResponseRt>;
 export type AllCategoriesFindRequest = rt.TypeOf<typeof AllCategoriesFindRequestRt>;

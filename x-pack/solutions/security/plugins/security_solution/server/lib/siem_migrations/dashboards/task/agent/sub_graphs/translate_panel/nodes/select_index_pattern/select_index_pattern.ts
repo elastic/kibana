@@ -27,6 +27,7 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
       nlQuery,
       limit: 1,
       esClient: params.esScopedClient.asInternalUser,
+      indexPattern: '*,-lookup*',
       model: {
         chatModel: params.model,
         connector: await params.inference.getConnectorById(params.connectorId, params.request),

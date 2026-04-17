@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { synth } from '../../../..';
+import { synth } from '@elastic/esql';
 import { summary } from './summary';
 
 describe('COMPLETION > summary', () => {

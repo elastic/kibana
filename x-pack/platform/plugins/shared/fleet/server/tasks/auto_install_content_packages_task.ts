@@ -5,6 +5,7 @@
  * 2.0.
  */
 import pMap from 'p-map';
+import semverGt from 'semver/functions/gt';
 import { type CoreSetup, type ElasticsearchClient, type Logger } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
@@ -234,7 +235,8 @@ export class AutoInstallContentPackagesTask {
       this.discoveryMap!
     ).reduce((acc, [dataset, mapValue]) => {
       const packages = mapValue.packages.filter(
-        (pkg) => !installedPackagesMap[pkg.name] || installedPackagesMap[pkg.name] !== pkg.version
+        (pkg) =>
+          !installedPackagesMap[pkg.name] || semverGt(pkg.version, installedPackagesMap[pkg.name])
       );
       if (packages.length > 0) {
         acc[dataset] = { packages };
@@ -251,7 +253,8 @@ export class AutoInstallContentPackagesTask {
         if (
           mapValue.packages.every(
             (pkg) =>
-              installedPackagesMap[pkg.name] && installedPackagesMap[pkg.name] === pkg.version
+              installedPackagesMap[pkg.name] &&
+              !semverGt(pkg.version, installedPackagesMap[pkg.name])
           )
         ) {
           acc.push(dataset);
@@ -275,7 +278,7 @@ export class AutoInstallContentPackagesTask {
 
       if (hasData) {
         for (const { name, version } of packages) {
-          if (!installedPackagesMap[name] || installedPackagesMap[name] !== version) {
+          if (!installedPackagesMap[name] || semverGt(version, installedPackagesMap[name])) {
             packagesToInstall[name] = version;
           }
         }

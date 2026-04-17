@@ -97,7 +97,7 @@ describe('fetchSizeStats', () => {
       const result = await fetchSizeStats(mockScopedClusterClient, false);
 
       expect(mockScopedClusterClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-        expand_wildcards: ['hidden', 'all'],
+        expand_wildcards: ['open', 'closed'],
         forbid_closed_indices: false,
         metric: ['docs', 'store'],
       });

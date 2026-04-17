@@ -11,8 +11,8 @@ import { z } from '@kbn/zod/v4';
 
 export function getShape(schema: z.ZodType): Record<string, z.ZodType> {
   let current: unknown = schema;
-  if (current instanceof z.ZodOptional) {
-    current = current.unwrap();
+  while (current instanceof z.ZodLazy || current instanceof z.ZodOptional) {
+    current = (current as z.ZodLazy | z.ZodOptional).unwrap();
   }
   if (current instanceof z.ZodIntersection) {
     return {

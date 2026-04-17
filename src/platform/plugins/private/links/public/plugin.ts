@@ -89,6 +89,11 @@ export class LinksPlugin
         return getLinksEmbeddableFactory();
       });
 
+      plugins.embeddable.registerLegacyURLTransform(LINKS_EMBEDDABLE_TYPE, async () => {
+        const { transformOut } = await import('../common/embeddable/transforms/transform_out');
+        return transformOut;
+      });
+
       plugins.visualizations.registerAlias({
         disableCreate: true, // do not allow creation through visualization listing page
         name: CONTENT_ID,

@@ -20,6 +20,8 @@ export interface ESQLSourceResult {
   name: string;
   hidden: boolean;
   title?: string;
+  description?: string;
+  links?: Array<{ label: string; url: string }>;
   dataStreams?: Array<{ name: string; title?: string }>;
   type?: string;
 }

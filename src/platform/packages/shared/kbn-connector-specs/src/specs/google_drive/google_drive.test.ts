@@ -25,6 +25,28 @@ describe('GoogleDriveConnector', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(GoogleDriveConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct Google defaults', () => {
+      const oauthType = GoogleDriveConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+      });
+    });
+  });
+
   describe('searchFiles action', () => {
     it('should search files with a query', async () => {
       const mockResponse = {

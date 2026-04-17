@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-examples-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/search-examples-plugin'
+  title: '@kbn/search-examples-plugin'
   description: Moon project for @kbn/search-examples-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/search_examples
+  sourceRoot: examples/search_examples
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

@@ -13,10 +13,11 @@ import type { ActionDefinition } from '../actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   ADD_PANEL_TRIGGER,
-  CONTEXT_MENU_TRIGGER,
-  ROW_CLICK_TRIGGER,
-  VALUE_CLICK_TRIGGER,
+  ON_OPEN_PANEL_MENU,
+  ON_CLICK_ROW,
+  ON_CLICK_VALUE,
 } from '../../common/trigger_ids';
+import { ACTION_HELLO_WORLD } from './test_samples/hello_world_action';
 
 const coreStart = coreMock.createStart();
 let action: ActionDefinition<{ name: string }>;
@@ -29,28 +30,32 @@ beforeEach(() => {
     execute: () => Promise.resolve(),
   };
 
-  uiActions.setup.registerAction(action as ActionDefinition);
+  uiActions.setup.registerActionAsync('test', async () => action as ActionDefinition);
 
-  uiActions.setup.addTriggerAction(CONTEXT_MENU_TRIGGER, action as ActionDefinition);
+  uiActions.setup.addTriggerActionAsync(
+    ON_OPEN_PANEL_MENU,
+    'test',
+    async () => action as ActionDefinition
+  );
 });
 
 test('can register action', async () => {
   const { setup } = uiActions;
   const helloWorldAction = createHelloWorldAction(coreStart);
 
-  setup.registerAction(helloWorldAction);
+  setup.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 });
 
 test('getTriggerCompatibleActions returns attached actions', async () => {
   const { setup, doStart } = uiActions;
   const helloWorldAction = createHelloWorldAction(coreStart);
 
-  setup.registerAction(helloWorldAction);
+  setup.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 
-  setup.addTriggerAction(VALUE_CLICK_TRIGGER, helloWorldAction);
+  setup.addTriggerActionAsync(ON_CLICK_VALUE, ACTION_HELLO_WORLD, async () => helloWorldAction);
 
   const start = doStart();
-  const actions = await start.getTriggerCompatibleActions(VALUE_CLICK_TRIGGER, {});
+  const actions = await start.getTriggerCompatibleActions(ON_CLICK_VALUE, {});
 
   expect(actions.length).toBe(1);
   expect(actions[0].id).toBe(helloWorldAction.id);
@@ -67,15 +72,15 @@ test('filters out actions not applicable based on the context', async () => {
     execute: () => Promise.resolve(),
   };
 
-  setup.registerAction(action1);
-  setup.addTriggerAction(ROW_CLICK_TRIGGER, action1);
+  setup.registerActionAsync('test1', async () => action1);
+  setup.addTriggerActionAsync(ON_CLICK_ROW, 'test1', async () => action1);
 
   const start = doStart();
-  let actions = await start.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, { accept: true });
+  let actions = await start.getTriggerCompatibleActions(ON_CLICK_ROW, { accept: true });
 
   expect(actions.length).toBe(1);
 
-  actions = await start.getTriggerCompatibleActions(ROW_CLICK_TRIGGER, { accept: false });
+  actions = await start.getTriggerCompatibleActions(ON_CLICK_ROW, { accept: false });
 
   expect(actions.length).toBe(0);
 });

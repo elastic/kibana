@@ -11,6 +11,7 @@ import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { processGapsBatch } from './process_gaps_batch';
 import { backfillInitiator } from '../../../../../common/constants';
+import { SCHEDULE_TRUNCATED_WARNING } from '../../../../backfill_client/lib/calculate_schedule';
 
 jest.mock('../../../backfill/methods/schedule', () => {
   return {
@@ -100,6 +101,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: testBatch.length,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [
           {
             processedGaps: 2,
@@ -128,6 +130,7 @@ describe('processGapsBatch', () => {
 
       expect(result).toEqual({
         hasErrors: true,
+        truncatedRuleIds: [],
         processedGapsCount: 2,
         results: [
           {
@@ -154,6 +157,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 0,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [],
       });
     });
@@ -196,6 +200,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 2,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [
           {
             ruleId: 'some-rule-id',
@@ -227,6 +232,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 0,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [],
       });
     });
@@ -268,6 +274,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 2,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [
           {
             status: 'success',
@@ -342,6 +349,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 4,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [
           {
             ruleId: 'rule-1',
@@ -392,6 +400,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 2,
         hasErrors: true,
+        truncatedRuleIds: [],
         results: [
           {
             ruleId: 'rule-success',
@@ -466,6 +475,7 @@ describe('processGapsBatch', () => {
       expect(result).toEqual({
         processedGapsCount: 3,
         hasErrors: false,
+        truncatedRuleIds: [],
         results: [
           {
             ruleId: 'rule-1',
@@ -565,6 +575,34 @@ describe('processGapsBatch', () => {
         ],
         multiRuleGapsBatch
       );
+    });
+  });
+
+  describe('when scheduleBackfill result contains truncation warning', () => {
+    beforeEach(async () => {
+      scheduleBackfillMock.mockResolvedValue([
+        { some: 'successful result', warnings: [SCHEDULE_TRUNCATED_WARNING] },
+      ]);
+      await callProcessGapsBatch();
+    });
+
+    it('should include the truncated rule ID', () => {
+      expect(result.truncatedRuleIds).toEqual(['some-rule-id']);
+    });
+
+    it('should still report success for the rule', () => {
+      expect(result).toEqual({
+        processedGapsCount: 2,
+        hasErrors: false,
+        truncatedRuleIds: ['some-rule-id'],
+        results: [
+          {
+            processedGaps: 2,
+            ruleId: 'some-rule-id',
+            status: 'success',
+          },
+        ],
+      });
     });
   });
 });

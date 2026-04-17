@@ -34,7 +34,7 @@ export function useTransactionActions({
   const { share } = useApmPluginContext();
 
   return useMemo(() => {
-    const discoverLocator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+    const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
 
     return [
       {
@@ -42,8 +42,8 @@ export function useTransactionActions({
         actions: [
           {
             id: 'transactionsTable-openInDiscover',
-            name: i18n.translate('xpack.apm.transactionsTable.openInDiscover', {
-              defaultMessage: 'Open in Discover',
+            name: i18n.translate('xpack.apm.transactionsTable.openTracesInDiscover', {
+              defaultMessage: 'Open traces in Discover',
             }),
             href: (item) => {
               const esqlQuery = getESQLQuery({
@@ -54,6 +54,7 @@ export function useTransactionActions({
                   environment,
                   transactionName: item.name,
                   transactionType: item.transactionType,
+                  sortDirection: 'DESC',
                 },
                 indexSettings,
               });

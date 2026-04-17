@@ -171,7 +171,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
           jobIds: [selectedJobId],
           selectedDetectorIndex,
           selectedEntities,
-          timeRange: globalTimeRange,
+          time_range: globalTimeRange,
         });
       }),
     });
@@ -290,7 +290,7 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                     color="text"
                     display="base"
                     isSelected={isMenuOpen}
-                    iconType="boxesHorizontal"
+                    iconType="boxesVertical"
                     onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                     data-test-subj="mlAnomalyTimelinePanelMenu"
                     size="m"

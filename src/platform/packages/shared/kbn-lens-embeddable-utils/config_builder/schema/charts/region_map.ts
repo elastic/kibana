@@ -12,11 +12,12 @@ import { schema } from '@kbn/config-schema';
 import {
   fieldMetricOrFormulaOperationDefinitionSchema,
   esqlColumnSchema,
-  esqlColumnOperationWithLabelAndFormatSchema,
+  esqlColumnWithFormatSchema,
 } from '../metric_ops';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
 import { mergeAllBucketsWithChartDimensionSchema } from './shared';
+import { objectUnion } from './utils/object_union';
 
 const regionMapStateRegionOptionsSchema = {
   ems: schema.maybe(
@@ -33,7 +34,7 @@ export const regionMapStateSchemaNoESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     /**
      * Metric configuration
      */
@@ -43,7 +44,7 @@ export const regionMapStateSchemaNoESQL = schema.object(
      */
     region: mergeAllBucketsWithChartDimensionSchema(regionMapStateRegionOptionsSchema),
   },
-  { meta: { id: 'regionMapNoESQL' } }
+  { meta: { id: 'regionMapNoESQL', title: 'Region Map (DSL)' } }
 );
 
 export const regionMapStateSchemaESQL = schema.object(
@@ -51,22 +52,22 @@ export const regionMapStateSchemaESQL = schema.object(
     type: schema.literal('region_map'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     /**
      * Metric configuration
      */
-    metric: esqlColumnOperationWithLabelAndFormatSchema,
+    metric: esqlColumnWithFormatSchema,
     /**
      * Configure how to break down to regions
      */
     region: esqlColumnSchema.extends(regionMapStateRegionOptionsSchema),
   },
-  { meta: { id: 'regionMapESQL' } }
+  { meta: { id: 'regionMapESQL', title: 'Region Map (ES|QL)' } }
 );
 
-export const regionMapStateSchema = schema.oneOf(
+export const regionMapStateSchema = objectUnion(
   [regionMapStateSchemaNoESQL, regionMapStateSchemaESQL],
-  { meta: { id: 'regionMapChartSchema' } }
+  { meta: { id: 'regionMapChart', title: 'Region Map' } }
 );
 
 export type RegionMapState = TypeOf<typeof regionMapStateSchema>;

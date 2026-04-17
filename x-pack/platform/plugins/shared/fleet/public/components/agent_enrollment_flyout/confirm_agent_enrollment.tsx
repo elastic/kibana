@@ -26,6 +26,7 @@ interface Props {
   agentCount: number;
   showLoading?: boolean;
   isLongEnrollment?: boolean;
+  isCollector?: boolean;
 }
 
 interface UsePollingAgentCountOptions {
@@ -102,6 +103,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   agentCount,
   showLoading = false,
   isLongEnrollment = false,
+  isCollector = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
@@ -150,6 +152,11 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
                 id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
                 defaultMessage="Listening for agent... this can take several minutes"
               />
+            ) : isCollector ? (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listeningCollector"
+                defaultMessage="Listening for collector"
+              />
             ) : (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.loading.listening"
@@ -160,13 +167,20 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
         />
         <EuiSpacer size="m" />
         <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.agentEnrollment.loading.instructions"
-            defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
-            values={{
-              link: <TroubleshootLink />,
-            }}
-          />
+          {isCollector ? (
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.loading.instructionsCollector"
+              defaultMessage="After the collector starts up, the Elastic Stack listens for the collector and monitoring will be available in Fleet."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentEnrollment.loading.instructions"
+              defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
+              values={{
+                link: <TroubleshootLink />,
+              }}
+            />
+          )}
         </EuiText>
       </>
     );
@@ -175,13 +189,23 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   return (
     <EuiCallOut
       data-test-subj="ConfirmAgentEnrollmentCallOut"
-      title={i18n.translate('xpack.fleet.agentEnrollment.confirmation.title', {
-        defaultMessage:
-          '{agentCount} {agentCount, plural, one {agent has} other {agents have}} been enrolled.',
-        values: {
-          agentCount,
-        },
-      })}
+      title={
+        isCollector
+          ? i18n.translate('xpack.fleet.agentEnrollment.confirmation.titleCollector', {
+              defaultMessage:
+                '{agentCount} {agentCount, plural, one {collector has} other {collectors have}} been connected.',
+              values: {
+                agentCount,
+              },
+            })
+          : i18n.translate('xpack.fleet.agentEnrollment.confirmation.title', {
+              defaultMessage:
+                '{agentCount} {agentCount, plural, one {agent has} other {agents have}} been enrolled.',
+              values: {
+                agentCount,
+              },
+            })
+      }
       color="success"
       iconType="check"
     >
@@ -191,9 +215,13 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           color="success"
           data-test-subj="ConfirmAgentEnrollmentButton"
         >
-          {i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
-            defaultMessage: 'View enrolled agents',
-          })}
+          {isCollector
+            ? i18n.translate('xpack.fleet.agentEnrollment.confirmation.buttonCollector', {
+                defaultMessage: 'View connected collectors',
+              })
+            : i18n.translate('xpack.fleet.agentEnrollment.confirmation.button', {
+                defaultMessage: 'View enrolled agents',
+              })}
         </EuiButton>
       )}
     </EuiCallOut>

@@ -195,5 +195,51 @@ describe('mappings utilities', () => {
 
       expect(res.data_stream.mappings).toEqual(mappingsA);
     });
+
+    it('batches requests when datastream names would exceed URL length', async () => {
+      const datastreams = Array.from(
+        { length: 100 },
+        (_, i) => `logs-elastic_agent.filebeat_input-${String(i).padStart(7, '0')}`
+      );
+
+      const makeResponse = (names: string[]): GetDataStreamMappingsRes => ({
+        data_streams: names.map((name) => ({
+          name,
+          effective_mappings: {
+            _doc: {
+              properties: { [`field_${name}`]: { type: 'text' } },
+            },
+          },
+        })),
+      });
+
+      esClient.transport.request.mockImplementation((params: any) => {
+        const path = params.path as string;
+        const namesStr = path.replace('/_data_stream/', '').replace('/_mappings', '');
+        const names = namesStr.split(',');
+        return Promise.resolve(makeResponse(names));
+      });
+
+      const result = await getDataStreamMappings({
+        datastreams,
+        esClient,
+        cleanup: false,
+      });
+
+      expect(esClient.transport.request.mock.calls.length).toBeGreaterThan(1);
+
+      for (const call of esClient.transport.request.mock.calls) {
+        const path = (call[0] as any).path as string;
+        expect(path.length).toBeLessThan(4096);
+      }
+
+      expect(Object.keys(result).length).toBe(100);
+      for (const ds of datastreams) {
+        expect(result[ds]).toBeDefined();
+        expect(result[ds].mappings).toEqual({
+          properties: { [`field_${ds}`]: { type: 'text' } },
+        });
+      }
+    });
   });
 });

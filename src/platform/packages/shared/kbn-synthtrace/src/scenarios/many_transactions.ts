@@ -15,6 +15,7 @@ import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 import { apm } from '@kbn/synthtrace-client';
 import { random, times } from 'lodash';
 import type { Scenario } from '../cli/scenario';
+import { getNumberOpt } from './helpers/scenario_opts_helpers';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';
 
@@ -22,7 +23,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions) => {
   const { logger } = runOptions;
-  const { numServices = 1 } = runOptions.scenarioOpts || {};
+  const numServices = getNumberOpt(runOptions.scenarioOpts, 'numServices', 1);
   const numTransactions = 2000;
 
   const transactionNames = ['GET', 'PUT', 'DELETE', 'UPDATE'].flatMap((method) =>

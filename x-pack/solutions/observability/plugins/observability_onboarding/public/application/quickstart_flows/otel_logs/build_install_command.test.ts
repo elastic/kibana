@@ -232,4 +232,141 @@ rm ./otel.yml && cp ./otel_samples/managed_otlp/platformlogs.yml ./otel.yml && m
       expect(command).toContain('-replace');
     });
   });
+
+  describe('Wired Streams', () => {
+    const baseConfig = {
+      isMetricsOnboardingEnabled: false,
+      isManagedOtlpServiceAvailable: false,
+      managedOtlpServiceUrl: 'http://example.com/otlp',
+      elasticsearchUrl: 'http://example.com/elasticsearch',
+      apiKeyEncoded: 'api_key_encoded',
+      agentVersion: '9.1.0',
+    };
+
+    describe('Linux', () => {
+      it('does not include wired streams config when useWiredStreams is false', () => {
+        const command = buildInstallCommand({
+          ...baseConfig,
+          platform: 'linux',
+          useWiredStreams: false,
+        });
+
+        expect(command).not.toContain('logs_index: logs.otel');
+      });
+
+      it('injects logs_index: logs.otel config when useWiredStreams is true', () => {
+        const command = buildInstallCommand({
+          ...baseConfig,
+          platform: 'linux',
+          useWiredStreams: true,
+        });
+
+        expect(command).toContain('logs_index: logs.otel');
+        expect(command).toContain("sed -i '/^[[:space:]]*elasticsearch\\/otel:/a");
+      });
+    });
+
+    describe('Mac', () => {
+      it('does not include wired streams config when useWiredStreams is false', () => {
+        const command = buildInstallCommand({
+          ...baseConfig,
+          platform: 'mac',
+          useWiredStreams: false,
+        });
+
+        expect(command).not.toContain('logs_index: logs.otel');
+      });
+
+      it('injects logs_index: logs.otel config when useWiredStreams is true', () => {
+        const command = buildInstallCommand({
+          ...baseConfig,
+          platform: 'mac',
+          useWiredStreams: true,
+        });
+
+        expect(command).toContain('logs_index: logs.otel');
+        expect(command).toContain("sed -i '' '/^[[:space:]]*elasticsearch\\/otel:/a");
+      });
+    });
+
+    describe('Windows', () => {
+      it('does not include wired streams config when useWiredStreams is false', () => {
+        const command = buildInstallCommand({
+          ...baseConfig,
+          platform: 'windows',
+          useWiredStreams: false,
+        });
+
+        expect(command).not.toContain('logs_index: logs.otel');
+      });
+
+      it('injects logs_index: logs.otel config when useWiredStreams is true', () => {
+        const command = buildInstallCommand({
+          ...baseConfig,
+          platform: 'windows',
+          useWiredStreams: true,
+        });
+
+        expect(command).toContain('logs_index: logs.otel');
+        expect(command).toContain('elasticsearch/otel:');
+      });
+    });
+
+    it('injects resource/wired_streams processor when managed OTLP service is available (linux)', () => {
+      const command = buildInstallCommand({
+        ...baseConfig,
+        platform: 'linux',
+        isManagedOtlpServiceAvailable: true,
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('logs_index: logs');
+      expect(command).toContain('resource\\/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain('managed_otlp/platformlogs.yml');
+      expect(command).toContain('ELASTIC_OTLP_ENDPOINT');
+    });
+
+    it('injects resource/wired_streams processor when managed OTLP service is available (mac)', () => {
+      const command = buildInstallCommand({
+        ...baseConfig,
+        platform: 'mac',
+        isManagedOtlpServiceAvailable: true,
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('logs_index: logs');
+      expect(command).toContain('resource\\/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain('managed_otlp/platformlogs.yml');
+      expect(command).toContain('ELASTIC_OTLP_ENDPOINT');
+    });
+
+    it('injects resource/wired_streams processor when managed OTLP service is available (windows)', () => {
+      const command = buildInstallCommand({
+        ...baseConfig,
+        platform: 'windows',
+        isManagedOtlpServiceAvailable: true,
+        useWiredStreams: true,
+      });
+
+      expect(command).not.toContain('logs_index: logs');
+      expect(command).toContain('resource/wired_streams');
+      expect(command).toContain('elasticsearch.index');
+      expect(command).toContain('managed_otlp\\platformlogs.yml');
+      expect(command).toContain('ELASTIC_OTLP_ENDPOINT');
+    });
+
+    it('works with metrics enabled when wired streams enabled', () => {
+      const command = buildInstallCommand({
+        ...baseConfig,
+        platform: 'linux',
+        isMetricsOnboardingEnabled: true,
+        useWiredStreams: true,
+      });
+
+      expect(command).toContain('logs_index: logs.otel');
+      expect(command).toContain('platformlogs_hostmetrics.yml');
+    });
+  });
 });

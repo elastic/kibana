@@ -98,7 +98,7 @@ const configSchema = schema.object(
         allowCredentials: schema.boolean({ defaultValue: false }),
         allowOrigin: schema.oneOf(
           [
-            schema.arrayOf(hostURISchema, { minSize: 1 }),
+            schema.arrayOf(hostURISchema, { minSize: 1, maxSize: 100 }),
             schema.arrayOf(schema.literal('*'), { minSize: 1, maxSize: 1 }),
           ],
           {
@@ -174,7 +174,7 @@ const configSchema = schema.object(
           schema.string({
             hostname: true,
           }),
-          { minSize: 1 }
+          { minSize: 1, maxSize: 100 }
         )
       ),
     }),
@@ -187,7 +187,7 @@ const configSchema = schema.object(
       disableProtection: schema.boolean({ defaultValue: false }),
       allowlist: schema.arrayOf(
         schema.string({ validate: match(/^\//, 'must start with a slash') }),
-        { defaultValue: [] }
+        { defaultValue: [], maxSize: 100 }
       ),
     }),
     excludeRoutes: schema.arrayOf(
@@ -213,7 +213,7 @@ const configSchema = schema.object(
     requestId: schema.object(
       {
         allowFromAnyIp: schema.boolean({ defaultValue: false }),
-        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [] }),
+        ipAllowlist: schema.arrayOf(schema.ip(), { defaultValue: [], maxSize: 100 }),
       },
       {
         validate(value) {
@@ -256,10 +256,28 @@ const configSchema = schema.object(
 
       /** This should not be configurable in serverless */
       useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
-        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 100 }),
         serverless: schema.never(),
       }),
     }),
+
+    serverTiming: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
+
+    serverTimingElasticsearch: schema.conditional(
+      schema.contextRef('dev'),
+      true,
+      /** In dev mode: allow true/false, default to true */
+      schema.boolean({ defaultValue: true }),
+      /** In production: only allow false, default to false */
+      schema.oneOf([schema.literal(false)], { defaultValue: false })
+    ),
   },
   {
     validate: (rawConfig) => {
@@ -375,6 +393,8 @@ export class HttpConfig implements IHttpConfig {
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;
   public rateLimiter: RateLimiterConfig;
+  public serverTiming: boolean;
+  public serverTimingElasticsearch: boolean;
 
   public eluMonitor: IHttpEluMonitorConfig;
 
@@ -425,6 +445,8 @@ export class HttpConfig implements IHttpConfig {
     this.requestId = rawHttpConfig.requestId;
     this.shutdownTimeout = rawHttpConfig.shutdownTimeout;
     this.rateLimiter = rawHttpConfig.rateLimiter;
+    this.serverTiming = rawHttpConfig.serverTiming;
+    this.serverTimingElasticsearch = rawHttpConfig.serverTimingElasticsearch;
 
     // defaults to `true` if not set through config.
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis;

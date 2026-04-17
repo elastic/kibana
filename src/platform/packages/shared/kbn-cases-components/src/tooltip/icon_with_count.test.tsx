@@ -14,13 +14,13 @@ import { IconWithCount } from './icon_with_count';
 
 describe('IconWithCount', () => {
   it('renders component correctly', () => {
-    const res = render(<IconWithCount count={5} icon={'editorComment'} />);
+    const res = render(<IconWithCount count={5} icon={'comment'} />);
 
     expect(res.getByTestId('comment-count-icon')).toBeInTheDocument();
   });
 
   it('renders count correctly', () => {
-    const res = render(<IconWithCount count={100} icon={'editorComment'} />);
+    const res = render(<IconWithCount count={100} icon={'comment'} />);
 
     expect(res.getByText(100)).toBeInTheDocument();
   });

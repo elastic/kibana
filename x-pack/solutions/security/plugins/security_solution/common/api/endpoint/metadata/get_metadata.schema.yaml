@@ -7,6 +7,7 @@ paths:
     get:
       summary: Get a metadata list
       operationId: GetEndpointMetadataList
+      description: Get a list of all endpoint host metadata.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
@@ -42,7 +43,7 @@ paths:
             $ref: '../model/schema/common.schema.yaml#/components/schemas/SortDirection'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -67,18 +68,20 @@ paths:
     get:
       summary: Get metadata
       operationId: GetEndpointMetadata
+      description: Get host metadata for a specific endpoint.
       x-codegen-enabled: false
       x-labels: [ess, serverless]
       parameters:
         - name: id
           in: path
           required: true
+          description: The agent ID of the endpoint.
           schema:
             type: string
             example: 'ed518850-681a-4d60-bb98-e22640cae2a8'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:

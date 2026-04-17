@@ -183,7 +183,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                   onClick={this.togglePopover.bind(null, 'semantic')}
                   size="s"
                   color="text"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   isDisabled={this.isSemanticTextCompatible() === false}
                 >
                   <FormattedMessage
@@ -209,7 +209,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
                   onClick={this.togglePopover.bind(null, 'geo')}
                   size="s"
                   color="text"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   isDisabled={this.isLatLonCompatible() === false}
                 >
                   <FormattedMessage

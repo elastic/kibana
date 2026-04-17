@@ -24,10 +24,10 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
       >
         <span
           color="inherit"
-          data-euiicon-type="visText"
+          data-euiicon-type="text"
         />
         <span
-          class="eui-textTruncate emotion-euiButtonGroupButton__iconOnly"
+          class="eui-textTruncate css-qv1h57-m-euiButtonGroupButton__iconOnly"
           data-text="Text"
         >
           Text

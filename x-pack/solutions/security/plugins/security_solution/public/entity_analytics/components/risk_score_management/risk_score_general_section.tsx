@@ -18,7 +18,8 @@ import {
 
 import * as i18n from '../../translations';
 
-import type { RiskScoreConfiguration } from './hooks/risk_score_configurable_risk_engine_settings_hooks';
+import type { RiskScoreConfiguration } from './common';
+import { RISK_SCORE_RETAIN_CHECKBOX_TEST_ID } from '../../test_ids';
 
 interface RiskScoreGeneralSectionProps {
   riskEngineSettings: RiskScoreConfiguration;
@@ -36,6 +37,7 @@ export const RiskScoreGeneralSection = (props: RiskScoreGeneralSectionProps) => 
         <EuiFlexItem grow={false}>
           <EuiCheckbox
             id={'riskScoreRetainCheckbox'}
+            data-test-subj={RISK_SCORE_RETAIN_CHECKBOX_TEST_ID}
             label={i18n.RISK_SCORE_RETAINMENT_CHECKBOX}
             checked={!props.riskEngineSettings.enableResetToZero}
             onChange={props.toggleScoreRetainment}

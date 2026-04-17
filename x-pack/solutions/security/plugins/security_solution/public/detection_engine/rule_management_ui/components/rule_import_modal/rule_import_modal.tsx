@@ -22,6 +22,7 @@ import { useToasts } from '../../../../common/lib/kibana';
 import * as i18nCommon from '../../../common/translations';
 import * as i18n from './translations';
 import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
+import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 
 interface RuleImportModalProps {
   isImportModalVisible: boolean;
@@ -46,16 +47,20 @@ export function RuleImportModal({ isImportModalVisible, hideImportModal }: RuleI
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidateFetchRuleManagementFilters = useInvalidateFetchRuleManagementFiltersQuery();
   const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
+  const invalidateFetchPrebuiltRulesDeprecationReview =
+    useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
   const invalidateRules = useCallback(() => {
     invalidateFindRulesQuery();
     invalidateFetchRuleManagementFilters();
     invalidateFetchCoverageOverviewQuery();
     invalidateFetchPrebuiltRuleBaseVerison();
+    invalidateFetchPrebuiltRulesDeprecationReview();
   }, [
     invalidateFindRulesQuery,
     invalidateFetchRuleManagementFilters,
     invalidateFetchCoverageOverviewQuery,
     invalidateFetchPrebuiltRuleBaseVerison,
+    invalidateFetchPrebuiltRulesDeprecationReview,
   ]);
 
   const handleModalClose = useCallback(() => {

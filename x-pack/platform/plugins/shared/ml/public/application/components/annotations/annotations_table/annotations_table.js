@@ -514,7 +514,7 @@ class AnnotationsTableUI extends Component {
         actions.push({
           name: viewDataFeedText,
           description: viewDataFeedText,
-          icon: 'visAreaStacked',
+          icon: 'chartAreaStack',
           type: 'icon',
           onClick: (annotation) => {
             this.setState({

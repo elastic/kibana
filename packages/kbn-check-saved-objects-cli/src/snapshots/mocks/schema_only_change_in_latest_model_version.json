@@ -1,0 +1,58 @@
+{
+  "meta": {
+    "timestamp": 1756914281687,
+    "date": "2025-09-03T15:44:41.687Z",
+    "kibanaCommitHash": "20b1ec4d471768b45fab2c61f781bbc5ce776452",
+    "buildUrl": "https://buildkite.com/elastic/kibana-on-merge/builds/76489",
+    "pullRequestUrl": "https://github.com/elastic/kibana/pulls/233325"
+  },
+  "typeDefinitions": {
+    "task": {
+      "name": "task",
+      "migrationVersions": ["7.4.0", "7.6.0", "8.0.0", "8.2.0", "8.5.0", "8.8.0"],
+      "hash": "689edead32ea09558ceb54f64fd9aa4d324d94d0",
+      "modelVersions": [
+        {
+          "version": "1",
+          "modelVersionHash": "aaa1000000000000000000000000000000000000000000000000000000000001",
+          "changeTypes": ["mappings_deprecation"],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": "bbb1000000000000000000000000000000000000000000000000000000000001",
+            "create": "ccc1000000000000000000000000000000000000000000000000000000000001"
+          }
+        },
+        {
+          "version": "2",
+          "modelVersionHash": "aaa2000000000000000000000000000000000000000000000000000000000002",
+          "changeTypes": ["mappings_addition"],
+          "hasTransformation": false,
+          "newMappings": ["partition.type"],
+          "schemas": {
+            "forwardCompatibility": "bbb2000000000000000000000000000000000000000000000000000000000002",
+            "create": "ccc2000000000000000000000000000000000000000000000000000000000002"
+          }
+        },
+        {
+          "version": "3",
+          "modelVersionHash": "aaa3000000000000000000000000000000000000000000000000000000000003",
+          "changeTypes": [],
+          "hasTransformation": false,
+          "newMappings": [],
+          "schemas": {
+            "forwardCompatibility": "bbb3000000000000000000000000000000000000000000000000000000000003",
+            "create": "ccc3000000000000000000000000000000000000000000000000000000000003"
+          }
+        }
+      ],
+      "schemaVersions": [],
+      "mappings": {
+        "dynamic": false,
+        "properties.taskType.type": "keyword",
+        "properties.status.type": "keyword",
+        "properties.partition.type": "integer"
+      }
+    }
+  }
+}

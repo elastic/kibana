@@ -45,6 +45,7 @@ const renderUseAlertsByStatus = (props: Partial<UseAlertsByStatusProps> = {}) =>
   renderHook(
     () =>
       useAlertsByStatus({
+        identityFields: {},
         queryId: 'test',
         signalIndexName: 'signal-alerts',
         from,

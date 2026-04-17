@@ -171,7 +171,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
         <EuiButton
           fill
           iconSide="right"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           data-test-subj="createPipelineDropdown"
           key="createPipelineDropdown"
           onClick={() => setShowPopover((previousBool) => !previousBool)}

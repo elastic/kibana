@@ -39,7 +39,7 @@ export const AddControl: FC<AddControlProps> = ({ onClick, ...rest }) => {
         data-test-subj={TEST_IDS.ADD_CONTROL}
         onClick={onClick}
         {...rest}
-        iconType="plusInCircle"
+        iconType="plusCircle"
       />
     </EuiToolTip>
   );
@@ -85,7 +85,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
       }}
     >
       <div style={{ maxWidth: '200px' }}>
-        <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" size="s" />
+        <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="warning" size="s" />
       </div>
     </EuiPopover>
   );

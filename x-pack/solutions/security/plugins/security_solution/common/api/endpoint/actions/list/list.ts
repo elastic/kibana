@@ -37,7 +37,7 @@ export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 250 }),
         schema.string({ minLength: 1 }),
       ])
     ),
@@ -48,7 +48,7 @@ export const EndpointActionListRequestSchema = {
       ])
     ),
     commands: schema.maybe(
-      schema.oneOf([schema.arrayOf(commandsSchema, { minSize: 1 }), commandsSchema])
+      schema.oneOf([schema.arrayOf(commandsSchema, { minSize: 1, maxSize: 50 }), commandsSchema])
     ),
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     pageSize: schema.maybe(
@@ -64,7 +64,7 @@ export const EndpointActionListRequestSchema = {
     ),
     userIds: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+        schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
         schema.string({ minLength: 1 }),
       ])
     ),
@@ -72,6 +72,7 @@ export const EndpointActionListRequestSchema = {
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), {
           minSize: 1,
+          maxSize: 50,
           validate: (actionIds) => {
             if (actionIds.map((v) => v.trim()).some((v) => !v.length)) {
               return 'actionIds cannot contain empty strings';

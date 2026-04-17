@@ -7,37 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS } from '../../../../page_objects/dashboard_page_controls';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const { dashboardControls, dashboard, header } = getPageObjects([
-    'dashboardControls',
-    'dashboard',
-    'header',
-  ]);
+  const { dashboardControls, dashboard } = getPageObjects(['dashboardControls', 'dashboard']);
 
   describe('Dashboard options list suggestions', () => {
     let controlId: string;
 
     before(async () => {
-      await dashboard.ensureDashboardIsInEditMode();
-      await dashboardControls.createControl({
-        controlType: OPTIONS_LIST_CONTROL,
-        dataViewTitle: 'animals-*',
-        fieldName: 'sound.keyword',
-      });
+      await dashboard.loadDashboardInEditMode('Test Options List Control');
       controlId = (await dashboardControls.getAllControlIds())[0];
-      await dashboard.clickQuickSave();
-      await header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await dashboardControls.deleteAllPinnedControls();
-      await dashboard.clickQuickSave();
+      await dashboard.clickDiscardChanges();
     });
 
     describe('sorting', () => {

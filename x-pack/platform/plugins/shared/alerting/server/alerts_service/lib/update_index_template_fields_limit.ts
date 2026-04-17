@@ -16,20 +16,29 @@ export const updateIndexTemplateFieldsLimit = ({
   template: IndicesGetIndexTemplateIndexTemplateItem;
   limit: number;
 }) => {
+  // Strip system-managed properties that ES returns in GET but rejects in PUT
+  const {
+    created_date: _createdDate,
+    created_date_millis: _createdDateMillis,
+    modified_date: _modifiedDate,
+    modified_date_millis: _modifiedDateMillis,
+    template: existingTemplate,
+    ignore_missing_component_templates: ignoreMissing,
+    ...rest
+  } = template.index_template;
+
   return esClient.indices.putIndexTemplate({
     name: template.name,
-    ...template.index_template,
+    ...rest,
     template: {
-      ...template.index_template.template,
+      ...existingTemplate,
       settings: {
-        ...template.index_template.template?.settings,
+        ...existingTemplate?.settings,
         'index.mapping.total_fields.limit': limit,
         'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
       },
     },
     // GET brings string | string[] | undefined but this PUT expects string[]
-    ignore_missing_component_templates: template.index_template.ignore_missing_component_templates
-      ? [template.index_template.ignore_missing_component_templates].flat()
-      : undefined,
+    ignore_missing_component_templates: ignoreMissing ? [ignoreMissing].flat() : undefined,
   });
 };

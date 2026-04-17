@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { Error } from '@kbn/apm-types';
+import type { History } from 'history';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import type { TraceItem } from '../../../../../../common/waterfall/unified_trace_item';
+import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
+import { TraceWaterfall } from '../../../../shared/trace_waterfall';
+import { useErrorClickHandler } from '../../../../shared/trace_waterfall/use_error_click_handler';
+import { useGetServiceBadgeHrefFromRouter } from '../../../../shared/trace_waterfall/use_get_service_badge_href_from_router';
+import { UnifiedWaterfallFlyout } from './waterfall/unified_waterfall_flyout';
+
+interface Props {
+  traceItems: TraceItem[];
+  errors: Error[];
+  agentMarks: Record<string, number>;
+  waterfallItemId?: string;
+  serviceName?: string;
+  showCriticalPath: boolean;
+  onShowCriticalPathChange: (value: boolean) => void;
+  entryTransactionId?: string;
+  traceDocsTotal?: number;
+  maxTraceItems?: number;
+  discoverHref?: string;
+}
+
+const toggleFlyout = ({
+  history,
+  waterfallItemId,
+  flyoutDetailTab,
+}: {
+  history: History;
+  waterfallItemId?: string;
+  flyoutDetailTab?: string;
+}) => {
+  history.replace({
+    ...history.location,
+    search: fromQuery({
+      ...toQuery(history.location.search),
+      flyoutDetailTab,
+      waterfallItemId,
+    }),
+  });
+};
+
+export function UnifiedWaterfallContainer({
+  traceItems,
+  errors,
+  agentMarks,
+  serviceName,
+  waterfallItemId,
+  showCriticalPath,
+  onShowCriticalPathChange,
+  entryTransactionId,
+  traceDocsTotal,
+  maxTraceItems,
+  discoverHref,
+}: Props) {
+  const history = useHistory();
+  const handleErrorClick = useErrorClickHandler(traceItems);
+  const getServiceBadgeHref = useGetServiceBadgeHrefFromRouter();
+
+  const handleNodeClick = (id: string, options?: { flyoutDetailTab?: string }) => {
+    toggleFlyout({
+      history,
+      waterfallItemId: id,
+      flyoutDetailTab: options?.flyoutDetailTab ?? 'metadata',
+    });
+  };
+
+  return (
+    <div data-test-subj="waterfallContainer">
+      <TraceWaterfall
+        traceItems={traceItems}
+        errors={errors}
+        onClick={handleNodeClick}
+        onErrorClick={handleErrorClick}
+        getServiceBadgeHref={getServiceBadgeHref}
+        serviceName={serviceName}
+        showLegend
+        showCriticalPathControl
+        agentMarks={agentMarks}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+        entryTransactionId={entryTransactionId}
+        traceDocsTotal={traceDocsTotal}
+        maxTraceItems={maxTraceItems}
+        discoverHref={discoverHref}
+      >
+        <UnifiedWaterfallFlyout
+          waterfallItemId={waterfallItemId}
+          traceItems={traceItems}
+          toggleFlyout={toggleFlyout}
+        />
+      </TraceWaterfall>
+    </div>
+  );
+}

@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('renders', async function () {
-      await agentBuilder.navigateToApp('agents');
+      await agentBuilder.navigateToApp('manage/agents');
 
       const titleSelector = 'agentBuilderAgentsListPageTitle';
       const newAgentButtonSelector = 'agentBuilderNewAgentButton';
@@ -62,11 +62,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('chats with agent', async function () {
       const agent = agents[0];
       await agentBuilder.clickAgentChat(agent.id);
-      await browser.waitForUrlToBe(`/app/agent_builder/conversations/new?agent_id=${agent.id}`);
+      await browser.waitForUrlToBe(`/app/agent_builder/agents/${agent.id}/conversations/new`);
       const agentText = await testSubjects.getVisibleText('agentBuilderAgentSelectorButton');
       expect(agentText).to.contain(agent.name);
       // go back to agents list
-      await agentBuilder.navigateToApp('agents');
+      await agentBuilder.navigateToApp('manage/agents');
     });
 
     it('has edit link with correct href', async function () {

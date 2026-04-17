@@ -29,8 +29,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Connection from 192.168.1.1 established' }];
         await testBed.ingest('ingest-redact-ip', docs, processors);
@@ -59,8 +59,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Contact user at john.doe@example.com for details' }];
         await testBed.ingest('ingest-redact-email', docs, processors);
@@ -89,8 +89,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'User john@example.com connected from 10.0.0.1' }];
         await testBed.ingest('ingest-redact-multiple', docs, processors);
@@ -121,8 +121,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Request from 172.16.0.1' }];
         await testBed.ingest('ingest-redact-custom-delim', docs, processors);
@@ -151,8 +151,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Device MAC: 00:1A:2B:3C:4D:5E' }];
         await testBed.ingest('ingest-redact-mac', docs, processors);
@@ -185,8 +185,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           { message: 'Connection from 192.168.1.1', environment: 'production' },
@@ -202,13 +202,17 @@ apiTest.describe(
         expect(ingestResult).toHaveLength(2);
         expect(esqlResult.documents).toHaveLength(2);
 
-        const ingestDoc1 = ingestResult.find((d: any) => d.environment === 'production');
-        const ingestDoc2 = ingestResult.find((d: any) => d.environment === 'development');
+        const ingestDoc1 = ingestResult.find(
+          (d: Record<string, unknown>) => d.environment === 'production'
+        );
+        const ingestDoc2 = ingestResult.find(
+          (d: Record<string, unknown>) => d.environment === 'development'
+        );
         const esqlDoc1 = esqlResult.documentsWithoutKeywords.find(
-          (d: any) => d.environment === 'production'
+          (d: Record<string, unknown>) => d.environment === 'production'
         );
         const esqlDoc2 = esqlResult.documentsWithoutKeywords.find(
-          (d: any) => d.environment === 'development'
+          (d: Record<string, unknown>) => d.environment === 'development'
         );
 
         expect(ingestDoc1).toStrictEqual(esqlDoc1);
@@ -235,8 +239,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Hello world, no IP here' }];
         await testBed.ingest('ingest-redact-no-match', docs, processors);
@@ -265,8 +269,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'User 550e8400-e29b-41d4-a716-446655440000 logged in' }];
         await testBed.ingest('ingest-redact-uuid', docs, processors);
@@ -295,8 +299,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ message: 'Visited https://example.com/path?query=value today' }];
         await testBed.ingest('ingest-redact-uri', docs, processors);
@@ -336,10 +340,10 @@ apiTest.describe(
           };
 
           // Both transpilers should reject Mustache template syntax
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
         }

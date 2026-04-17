@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS } from '../../common/constants/cases';
 import type { MlStartDependencies } from '../plugin';
 import { PLUGIN_ICON } from '../../common/constants/app';
@@ -18,7 +19,8 @@ import { getAnomalyChartsServiceDependencies } from '../embeddables/anomaly_char
 export function registerAnomalyChartsCasesAttachment(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
-  pluginStart: MlStartDependencies
+  pluginStart: MlStartDependencies,
+  usageCollection?: UsageCollectionSetup
 ) {
   cases.attachmentFramework.registerPersistableState({
     id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
@@ -36,7 +38,11 @@ export function registerAnomalyChartsCasesAttachment(
       timelineAvatar: PLUGIN_ICON,
       children: React.lazy(async () => {
         const { initializeAnomalyChartsAttachment } = await import('./anomaly_charts_attachments');
-        const services = await getAnomalyChartsServiceDependencies(coreStart, pluginStart);
+        const services = await getAnomalyChartsServiceDependencies(
+          coreStart,
+          pluginStart,
+          usageCollection
+        );
 
         return {
           default: initializeAnomalyChartsAttachment(pluginStart.fieldFormats, services),

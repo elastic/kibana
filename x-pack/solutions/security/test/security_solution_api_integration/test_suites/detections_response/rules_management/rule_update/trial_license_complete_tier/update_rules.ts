@@ -32,7 +32,6 @@ import type {
 import { v4 as uuidV4 } from 'uuid';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
 import { ROLE } from '../../../../../config/services/security_solution_edr_workflows_roles_users';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -53,6 +52,7 @@ import {
   getSomeActionsWithFrequencies,
   getCustomQueryRuleParams,
 } from '../../../utils';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -438,12 +438,13 @@ export default ({ getService }: FtrProviderContext) => {
           await createRule(supertest, log, existingRule);
 
           const { threshold, ...rule } = existingRule;
-          // @ts-expect-error we're testing the invalid payload here
+          // we're testing the invalid payload here
           const { body } = await detectionsApi.updateRule({ body: rule }).expect(400);
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: threshold: Required',
+            message:
+              '[request body]: threshold: Invalid input: expected object, received undefined',
             statusCode: 400,
           });
         });
@@ -463,7 +464,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: threshold.field: Array must contain at most 5 element(s)',
+            message: '[request body]: threshold.field: Too big: expected array to have <=5 items',
             statusCode: 400,
           });
         });
@@ -483,7 +484,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
+            message: '[request body]: threshold.value: Too small: expected number to be >=1',
             statusCode: 400,
           });
         });

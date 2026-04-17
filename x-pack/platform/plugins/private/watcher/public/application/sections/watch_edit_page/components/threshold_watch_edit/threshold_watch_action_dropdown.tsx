@@ -78,7 +78,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
   const button = (
     <EuiButton
       data-test-subj="addWatchActionButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={() => setIsPopOverOpen(!isPopoverOpen)}
     >

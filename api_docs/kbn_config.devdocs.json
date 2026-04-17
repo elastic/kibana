@@ -18,7 +18,7 @@
         "label": "Env",
         "description": [],
         "path": "src/platform/packages/shared/kbn-config/src/env.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               "; readonly dist: boolean; }"
             ],
             "path": "src/platform/packages/shared/kbn-config/src/env.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -59,10 +59,10 @@
               "\nMode Kibana currently run in (development or production)."
             ],
             "signature": [
-              "{ readonly name: \"production\" | \"development\"; readonly dev: boolean; readonly prod: boolean; }"
+              "{ readonly name: \"development\" | \"production\"; readonly dev: boolean; readonly prod: boolean; }"
             ],
             "path": "src/platform/packages/shared/kbn-config/src/env.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1007,7 +1007,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"production\" | \"development\""
+              "\"development\" | \"production\""
             ],
             "path": "src/platform/packages/shared/kbn-config/src/types.ts",
             "lineNumber": 28,

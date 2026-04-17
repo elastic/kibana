@@ -265,6 +265,57 @@ describe('convertQuery', () => {
     });
   });
 
+  test('collapses oneOf [scalar, array] query params to array', () => {
+    expect(
+      convertQuery(
+        schema.object({
+          status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+        })
+      )
+    ).toEqual({
+      query: [
+        {
+          in: 'query',
+          name: 'status',
+          required: false,
+          schema: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
+  test('collapses oneOf [enum, array[enum]] query params preserving enum', () => {
+    expect(
+      convertQuery(
+        schema.object({
+          status: schema.maybe(
+            schema.oneOf([
+              schema.oneOf([schema.literal('running'), schema.literal('finished')]),
+              schema.arrayOf(schema.oneOf([schema.literal('running'), schema.literal('finished')])),
+            ])
+          ),
+        })
+      )
+    ).toEqual({
+      query: [
+        {
+          in: 'query',
+          name: 'status',
+          required: false,
+          schema: {
+            type: 'array',
+            items: { type: 'string', enum: ['running', 'finished'] },
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
   test('conversion with refs is disallowed', () => {
     const sharedSchema = schema.object({ a: schema.string() }, { meta: { id: 'myparams' } });
     expect(() => convertQuery(sharedSchema)).toThrow(/myparams.*not supported/);

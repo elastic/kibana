@@ -156,7 +156,7 @@ async function refreshFieldsInDocs(
   freshResponses: MgetResponseItem[]
 ) {
   for (const [conflictRequest, freshResponse] of zip(conflictRequests, freshResponses)) {
-    if (!conflictRequest?.op.index || !freshResponse) continue;
+    if (!conflictRequest?.op?.index || !freshResponse) continue;
 
     // @ts-expect-error @elastic/elasticsearch _source is not in the type!
     const freshDoc = freshResponse._source;
@@ -191,7 +191,7 @@ async function refreshFieldsInDocs(
 /** Update the OCC info in the conflict request with the fresh info. */
 async function updateOCC(conflictRequests: NormalizedBulkRequest[], freshDocs: MgetResponseItem[]) {
   for (const [req, freshDoc] of zip(conflictRequests, freshDocs)) {
-    if (!req?.op.index || !freshDoc) continue;
+    if (!req?.op?.index || !freshDoc) continue;
 
     // @ts-expect-error @elastic/elasticsearch _seq_no is not in the type!
     const seqNo: number | undefined = freshDoc._seq_no;
@@ -214,7 +214,7 @@ async function getFreshDocs(
   const docs: Array<{ _id: string; _index: string }> = [];
 
   conflictRequests.forEach((req) => {
-    const [id, index] = [req.op.index?._id, req.op.index?._index];
+    const [id, index] = [req.op?.index?._id, req.op?.index?._index];
     if (!id || !index) return;
 
     docs.push({ _id: id, _index: index });
@@ -262,7 +262,7 @@ function normalizeRequest(bulkRequest: BulkRequest) {
   let index = 0;
   while (index < bulkRequest.operations.length) {
     // the "op" data
-    const op = bulkRequest.operations[index] as BulkOperationContainer;
+    const op = bulkRequest.operations[index] as NonNullable<BulkOperationContainer>;
 
     // now the "doc" data, if there is any (none for delete)
     if (op.create || op.index || op.update) {

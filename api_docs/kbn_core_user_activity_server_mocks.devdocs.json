@@ -1,0 +1,134 @@
+{
+  "id": "@kbn/core-user-activity-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-user-activity-server-mocks",
+        "id": "def-server.userActivityServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "userActivityServiceMock",
+        "description": [
+          "Mocks for the UserActivityService contracts."
+        ],
+        "path": "src/core/packages/user-activity/server-mocks/src/user_activity_service.mock.ts",
+        "lineNumber": 46,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-activity-server-mocks",
+            "id": "def-server.userActivityServiceMock.createInternalSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalSetupContract",
+            "description": [
+              "/** Creates a mock for {@link InternalUserActivityServiceSetup}. */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalUserActivityServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/user-activity/server-mocks/src/user_activity_service.mock.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server-mocks",
+            "id": "def-server.userActivityServiceMock.createInternalStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalStartContract",
+            "description": [
+              "/** Creates a mock for {@link InternalUserActivityServiceStart}. */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalUserActivityServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/user-activity/server-mocks/src/user_activity_service.mock.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server-mocks",
+            "id": "def-server.userActivityServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [
+              "/** Creates a mock for {@link UserActivityServiceSetup}. */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserActivityServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/user-activity/server-mocks/src/user_activity_service.mock.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-activity-server-mocks",
+            "id": "def-server.userActivityServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [
+              "/** Creates a mock for {@link UserActivityServiceStart}. */"
+            ],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserActivityServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/user-activity/server-mocks/src/user_activity_service.mock.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -17,7 +17,7 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('OpenLensButton', () => {
   const props = {
-    attachmentId: 'test',
+    savedObjectId: 'test',
     ...lensVisualization,
   };
 
@@ -54,10 +54,13 @@ describe('OpenLensButton', () => {
 
     await userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
 
+    const { timeRange, ...rest } = lensVisualization;
+
     expect(navigateToPrefilledEditor).toBeCalledWith(
       {
-        id: props.attachmentId,
-        ...lensVisualization,
+        id: props.savedObjectId,
+        ...rest,
+        time_range: timeRange,
       },
       { openInNewTab: true }
     );
@@ -77,7 +80,7 @@ describe('OpenLensButton', () => {
 
   it('does not show the button if the query is an ESQL', () => {
     const esqlProps = {
-      attachmentId: 'test',
+      savedObjectId: 'test',
       ...lensVisualization,
     };
 

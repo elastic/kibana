@@ -30,7 +30,15 @@ export type {
   UiamAPIKeysWithContextType,
   GrantUiamAPIKeyParams,
   InvalidateUiamAPIKeyParams,
+  ConvertUiamAPIKeyResult,
+  ConvertUiamAPIKeyResultSuccess,
+  ConvertUiamAPIKeyResultFailed,
+  ConvertUiamAPIKeysResponse,
 } from './api_keys';
 
 export { HTTPAuthorizationHeader } from './http_authentication';
-export { isCreateRestAPIKeyParams } from './api_keys';
+export {
+  isCreateRestAPIKeyParams,
+  extractApiKeyIdFromAuthzHeader,
+  decodeApiKeyId,
+} from './api_keys';

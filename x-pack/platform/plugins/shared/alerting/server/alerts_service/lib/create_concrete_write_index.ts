@@ -205,67 +205,127 @@ export async function updateAliasesAndSetConcreteWriteIndex(
   opts: UpdateAliasesAndSetConcreteWriteIndexOpts
 ): Promise<ConcreteIndexInfo> {
   const { logger, esClient, concreteIndices, alias } = opts;
-  const concreteWriteIndex = concreteIndices.find((index) => index.isWriteIndex);
-  const isHidden = concreteIndices.every((index) => index.isHidden);
-
-  if (isHidden && concreteWriteIndex) {
-    return concreteWriteIndex;
-  }
-
-  if (!isHidden) {
-    logger.debug(`Indices for alias ${alias} exist but some are not set as hidden`);
-    logger.debug(`Attempting to set index aliases as hidden for alias: ${alias}.`);
-  }
-
-  const actions: IndicesUpdateAliasesAction[] = [];
-  const lastIndex = concreteIndices.length - 1;
   const sortedConcreteIndices = sortBy(concreteIndices, ['index']);
-  const concreteIndex = sortedConcreteIndices[lastIndex];
+  const latestIndex = sortedConcreteIndices[sortedConcreteIndices.length - 1];
 
-  for (let i = 0; i < sortedConcreteIndices.length; i++) {
-    const index = sortedConcreteIndices[i];
-    //  If there is no write index, set last index as the write index
-    if (!concreteWriteIndex && i === lastIndex) {
-      logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
-      actions.push(
-        { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-        {
-          add: {
-            index: concreteIndex.index,
-            alias: concreteIndex.alias,
-            is_write_index: true,
-            is_hidden: true,
-          },
-        }
-      );
-      logger.debug(
-        `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
-      );
-    } else if (!index.isHidden) {
-      actions.push({
-        add: {
-          index: index.index,
-          alias: index.alias,
-          is_write_index: index.isWriteIndex,
-          is_hidden: true,
-        },
-      });
-    }
+  const concreteWriteIndex = await setConcreteWriteIndex({
+    logger,
+    esClient,
+    sortedConcreteIndices,
+    latestIndex,
+    alias,
+  });
+
+  await migrateAliasesToHidden({
+    logger,
+    esClient,
+    sortedConcreteIndices,
+    alias,
+  });
+
+  return concreteWriteIndex;
+}
+
+async function setConcreteWriteIndex({
+  logger,
+  esClient,
+  sortedConcreteIndices,
+  latestIndex,
+  alias,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  sortedConcreteIndices: ConcreteIndexInfo[];
+  latestIndex: ConcreteIndexInfo;
+  alias: string;
+}): Promise<ConcreteIndexInfo> {
+  const existingWriteIndex = sortedConcreteIndices.find((index) => index.isWriteIndex);
+  if (existingWriteIndex) {
+    return existingWriteIndex;
   }
+
+  logger.debug(`Indices for alias ${alias} exist but none are set as the write index`);
+  logger.debug(
+    `Attempting to set index: ${latestIndex.index} as the write index for alias: ${latestIndex.alias}.`
+  );
 
   try {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          actions,
+          actions: [
+            { remove: { index: latestIndex.index, alias: latestIndex.alias } },
+            {
+              add: {
+                index: latestIndex.index,
+                alias: latestIndex.alias,
+                is_write_index: true,
+                is_hidden: latestIndex.isHidden ? true : undefined,
+              },
+            },
+          ],
         }),
       { logger }
     );
 
-    logger.info(`Successfully updated index aliases for alias: ${alias}.`);
-    return concreteWriteIndex ?? concreteIndex;
+    logger.info(`Successfully set write index for alias: ${alias}.`);
+    return { ...latestIndex, isWriteIndex: true };
   } catch (error) {
-    throw new Error(`Failed to update index aliases for alias: ${alias}.`);
+    throw new Error(`Failed to set write index for alias: ${alias}. Error: ${error.message}`);
+  }
+}
+
+async function migrateAliasesToHidden({
+  logger,
+  esClient,
+  sortedConcreteIndices,
+  alias,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  sortedConcreteIndices: ConcreteIndexInfo[];
+  alias: string;
+}): Promise<void> {
+  const allHidden = sortedConcreteIndices.every((index) => index.isHidden);
+  if (allHidden) {
+    return;
+  }
+
+  logger.debug(`Indices for alias ${alias} exist but some are not set as hidden`);
+  logger.debug(`Attempting to set index aliases as hidden for alias: ${alias}.`);
+
+  try {
+    const allIndicesForAlias = await retryTransientEsErrors(
+      () =>
+        esClient.indices.getAlias({
+          name: alias,
+          expand_wildcards: ['open', 'hidden'],
+        }),
+      { logger }
+    );
+
+    const actions: IndicesUpdateAliasesAction[] = Object.entries(allIndicesForAlias)
+      .filter(([, indexInfo]) => !indexInfo.aliases[alias]?.is_hidden)
+      .map(([indexName, indexInfo]) => ({
+        add: {
+          index: indexName,
+          alias,
+          is_write_index: indexInfo.aliases[alias]?.is_write_index ?? false,
+          is_hidden: true,
+        },
+      }));
+
+    if (actions.length === 0) {
+      return;
+    }
+
+    await retryTransientEsErrors(() => esClient.indices.updateAliases({ actions }), { logger });
+
+    logger.info(`Successfully set index aliases to hidden for alias: ${alias}.`);
+  } catch (error) {
+    logger.warn(
+      `Failed to set index aliases to hidden for alias: ${alias}. Error: ${error.message}`
+    );
   }
 }
 

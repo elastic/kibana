@@ -30,6 +30,9 @@ import type {
   EXPRESSION_HEATMAP_GRID_NAME,
   HEATMAP_FUNCTION_RENDERER_NAME,
 } from '../constants';
+import type { HeatmapScaleTypes } from '../constants';
+
+export type HeatmapScaleType = (typeof HeatmapScaleTypes)[keyof typeof HeatmapScaleTypes];
 
 export interface HeatmapLegendConfig {
   /**
@@ -59,6 +62,10 @@ export type HeatmapLegendConfigResult = HeatmapLegendConfig & {
   type: typeof EXPRESSION_HEATMAP_LEGEND_NAME;
 };
 
+// TODO: move to @kbn/lens-common/visualizations/heatmap/types
+export type HeatmapSortPredicate = 'asc' | 'desc';
+
+// TODO: move to @kbn/lens-common/visualizations/heatmap/types
 export interface HeatmapGridConfig {
   // grid
   strokeWidth?: number;
@@ -69,11 +76,14 @@ export interface HeatmapGridConfig {
   isYAxisLabelVisible: boolean;
   isYAxisTitleVisible: boolean;
   yTitle?: string;
+  ySortPredicate?: HeatmapSortPredicate;
   // X-axis
   isXAxisLabelVisible: boolean;
   xAxisLabelRotation?: number;
   isXAxisTitleVisible: boolean;
   xTitle?: string;
+  xSortPredicate?: HeatmapSortPredicate;
+  xScaleType?: HeatmapScaleType;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {

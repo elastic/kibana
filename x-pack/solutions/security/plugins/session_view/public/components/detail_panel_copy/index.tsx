@@ -47,7 +47,7 @@ export const DetailPanelCopy = ({
             css={styles.copyButton}
             onClick={copy}
             display="base"
-            iconType="copyClipboard"
+            iconType="copy"
             size="xs"
             aria-label={i18n.translate('xpack.sessionView.detailPanelCopy.copyButton', {
               defaultMessage: 'Copy',

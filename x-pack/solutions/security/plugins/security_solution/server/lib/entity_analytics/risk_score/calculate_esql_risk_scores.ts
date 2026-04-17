@@ -6,7 +6,11 @@
  */
 
 import { isEmpty, omit } from 'lodash';
-import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  FieldValue,
+  MappingRuntimeFields,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
@@ -16,6 +20,7 @@ import {
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { toEntries } from 'fp-ts/Record';
 
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { getEntityAnalyticsEntityTypes } from '../../../../common/entity_analytics/utils';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -371,7 +376,9 @@ export const getESQL = (
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
     | STATS
         alert_count = count(risk_score),
-        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${sampleSize}, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = TOP(input, 10, "desc")
     BY ${identifierField}
     | SORT scores DESC
@@ -384,14 +391,9 @@ export const getESQL = (
 export const buildRiskScoreBucket =
   (entityType: EntityType, index: string) =>
   (row: FieldValue[]): RiskScoreBucket => {
-    const [count, score, _inputs, entity] = row as [
-      number,
-      number,
-      string | string[], // ES Multivalue nonsense: if it's just one value we get the value, if it's multiple we get an array
-      string
-    ];
+    const [count, score, _inputs, entity] = row as [number, number, string | string[], string];
 
-    const inputs = (Array.isArray(_inputs) ? _inputs : [_inputs]).map((input, i) => {
+    const inputs = [_inputs].flat().map((input, i) => {
       let parsedRiskInputData = JSON.parse('{}');
       let ruleName: string | undefined;
       let category: string | undefined;
@@ -453,3 +455,179 @@ export const buildRiskScoreBucket =
       },
     };
   };
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Phase 1 EUID-based query builders (V2 maintainer pipeline)
+// The functions above (calculateScoresWithESQL, getCompositeQuery, getESQL,
+// buildRiskScoreBucket) are NOT modified — they drive the legacy pipeline.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Builds a composite aggregation that paginates by entity_id (EUID).
+ * Uses a Painless runtime mapping from euid.painless.getEuidRuntimeMapping() to compute entity_id server-side.
+ * Returns bounds (first and last EUID on the page) that are passed to getBaseScoreESQL().
+ */
+export const getEuidCompositeQuery = (
+  entityType: EntityType,
+  filter: QueryDslQueryContainer[],
+  params: {
+    index: string;
+    pageSize: number;
+    afterKey?: Record<string, string>;
+    runtimeMappings?: MappingRuntimeFields;
+  }
+) => {
+  const runtimeMapping = euid.painless.getEuidRuntimeMapping(entityType);
+
+  return {
+    index: params.index,
+    size: 0,
+    runtime_mappings: { ...params.runtimeMappings, entity_id: runtimeMapping },
+    query: filter.length > 0 ? { bool: { filter } } : { match_all: {} },
+    aggs: {
+      by_entity_id: {
+        composite: {
+          size: params.pageSize,
+          sources: [{ entity_id: { terms: { field: 'entity_id' } } }],
+          ...(params.afterKey !== undefined ? { after: params.afterKey } : {}),
+        },
+      },
+    },
+  };
+};
+
+export interface EuidCompositeAggregation {
+  buckets: Array<{ key: Record<string, string> }>;
+  after_key?: Record<string, string>;
+}
+
+/**
+ * Returns an ES|QL query that:
+ * 1. Filters documents where the entity has an identifiable EUID
+ * 2. Uses the entity store EUID evaluation logic to compute entity_id
+ * 3. Filters to the EUID page bounds: WHERE entity_id > lower AND entity_id <= upper
+ * 4. STATs alert_count, scores (MV_PSERIES_WEIGHTED_SUM), risk_inputs BY entity_id
+ *
+ * Column order: [alert_count, scores, risk_inputs, entity_id]
+ * This order must match buildBaseScoreRiskScoreBucket().
+ */
+export const getBaseScoreESQL = (
+  entityType: EntityType,
+  bounds: { lower?: string; upper?: string },
+  sampleSize: number,
+  pageSize: number,
+  index: string
+): string => {
+  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
+  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+
+  if (!bounds.lower && !bounds.upper) {
+    throw new Error('Either lower or upper bound must be provided for EUID pagination');
+  }
+
+  const lower = bounds.lower ? `entity_id > "${bounds.lower}"` : undefined;
+  const upper = bounds.upper ? `entity_id <= "${bounds.upper}"` : undefined;
+  const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
+
+  const query = /* esql */ `
+  FROM ${index} METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | WHERE ${rangeClause}
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc")
+        BY entity_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+
+  return query;
+};
+
+export const getResolutionCompositeQuery = (
+  index: string,
+  pageSize: number,
+  afterKey?: Record<string, string>
+) => ({
+  index,
+  size: 0,
+  query: { exists: { field: 'resolution_target_id' } },
+  aggs: {
+    by_resolution_target: {
+      composite: {
+        size: pageSize,
+        sources: [{ resolution_target_id: { terms: { field: 'resolution_target_id' } } }],
+        ...(afterKey ? { after: afterKey } : {}),
+      },
+    },
+  },
+});
+
+export const getResolutionScoreESQL = (
+  entityType: EntityType,
+  bounds: { lower?: string; upper?: string },
+  sampleSize: number,
+  pageSize: number,
+  alertsIndex: string,
+  lookupIndex: string
+): string => {
+  const euidEval = euid.esql.getEuidEvaluation(entityType, { withTypeId: true });
+  const containsIdFilter = euid.esql.getEuidDocumentsContainsIdFilter(entityType);
+  const fieldEvals = euid.esql.getFieldEvaluations(entityType);
+  const fieldEvalsClause = fieldEvals ? `| EVAL ${fieldEvals}` : '';
+
+  if (!bounds.lower && !bounds.upper) {
+    throw new Error('Either lower or upper bound must be provided for resolution pagination');
+  }
+
+  const lower = bounds.lower ? `resolution_target_id > "${bounds.lower}"` : undefined;
+  const upper = bounds.upper ? `resolution_target_id <= "${bounds.upper}"` : undefined;
+  const rangeClause = [lower, upper].filter(Boolean).join(' AND ');
+
+  const query = /* esql */ `
+  FROM ${alertsIndex} METADATA _index
+    | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    | RENAME kibana.alert.risk_score as risk_score,
+             kibana.alert.rule.name as rule_name,
+             kibana.alert.rule.uuid as rule_id,
+             kibana.alert.uuid as alert_id,
+             event.kind as category,
+             @timestamp as time
+    ${fieldEvalsClause}
+    | EVAL entity_id = ${euidEval},
+           rule_name_b64 = TO_BASE64(rule_name),
+           category_b64 = TO_BASE64(category)
+    | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)
+    | LOOKUP JOIN ${lookupIndex} ON entity_id
+    | WHERE resolution_target_id IS NOT NULL AND (${rangeClause})
+    | EVAL entity_with_rel = CONCAT(entity_id, "|", relationship_type)
+    | STATS
+        alert_count = count(risk_score),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, ${
+          sampleSize ?? 10000
+        }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
+        risk_inputs = TOP(input, 10, "desc"),
+        contributing_entities_raw = VALUES(entity_with_rel)
+        BY resolution_target_id
+    | SORT scores DESC
+    | LIMIT ${pageSize}
+  `;
+
+  return query;
+};

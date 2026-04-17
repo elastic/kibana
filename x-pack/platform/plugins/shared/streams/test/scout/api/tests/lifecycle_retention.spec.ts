@@ -14,10 +14,12 @@ apiTest.describe(
   'Stream lifecycle - retention API',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    // Stream names must be exactly one level deep when forking from 'logs'
-    // Format: logs.<name> where name uses hyphens, not dots
+    // Stream names must be exactly one level deep when forking from 'logs.otel'
+    // Format: logs.otel.<name> where name uses hyphens, not dots
     // The prefix 'lc' is used for cleanup matching
-    const streamNamePrefix = 'logs.lc';
+    // Note: Using logs.otel as it's created by default in fresh installs
+    const rootStream = 'logs.otel';
+    const streamNamePrefix = `${rootStream}.lc`;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type ApiClient = any;
@@ -33,7 +35,7 @@ apiTest.describe(
       streamName: string,
       condition: { field: string; eq: string }
     ): Promise<{ success: boolean; error?: string }> {
-      const forkResponse = await apiClient.post('api/streams/logs/_fork', {
+      const forkResponse = await apiClient.post(`api/streams/${rootStream}/_fork`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           stream: { name: streamName },
@@ -97,7 +99,7 @@ apiTest.describe(
     }
 
     apiTest.afterEach(async ({ apiServices }) => {
-      // Cleanup test streams - matches any stream starting with 'logs.lc'
+      // Cleanup test streams - matches any stream starting with 'logs.otel.lc'
       await apiServices.streamsTest.cleanupTestStreams(streamNamePrefix);
     });
 
@@ -595,12 +597,12 @@ apiTest.describe(
     // Test: Child stream inherits lifecycle from parent stream
     apiTest('should inherit lifecycle from parent stream', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      // Parent is one level: logs.lc-parent
+      // Parent stream: logs.otel.lc-parent (forked from logs.otel)
       const parentStream = `${streamNamePrefix}-parent`;
-      // Child is two levels: logs.lc-parent.child (forked from logs.lc-parent)
+      // Child stream: logs.otel.lc-parent.child (forked from logs.otel.lc-parent)
       const childStream = `${parentStream}.child`;
 
-      // Create parent stream (forked from logs)
+      // Create parent stream (forked from logs.otel)
       const createParentResult = await createTestStream(apiClient, cookieHeader, parentStream, {
         field: 'service.name',
         eq: 'parent-service',
@@ -645,5 +647,52 @@ apiTest.describe(
       expect(childResult.stream!.stream.ingest.lifecycle.inherit).toBeDefined();
       expect(childResult.stream!.effective_lifecycle.from).toBe(parentStream);
     });
+
+    // Test: Update stream with DSL retention of 30 days and downsampling steps
+    apiTest(
+      'should update stream with DSL retention of 30 days and downsampling steps',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const testStream = `${streamNamePrefix}-dsl-30d-downsample`;
+
+        const createResult = await createTestStream(apiClient, cookieHeader, testStream, {
+          field: 'service.name',
+          eq: 'retention-30d',
+        });
+        expect(createResult.success, createResult.error).toBe(true);
+
+        const getResult = await getStream(apiClient, cookieHeader, testStream);
+        expect(getResult.success, getResult.error).toBe(true);
+
+        const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...getWriteableIngest(getResult.stream!),
+              lifecycle: {
+                dsl: {
+                  data_retention: '30d',
+                  downsample: [
+                    { after: '0d', fixed_interval: '1d' },
+                    { after: '10d', fixed_interval: '10d' },
+                  ],
+                },
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(updateResponse.statusCode).toBe(200);
+
+        const verifyResult = await getStream(apiClient, cookieHeader, testStream);
+        expect(verifyResult.success, verifyResult.error).toBe(true);
+        expect(verifyResult.stream!.stream.ingest.lifecycle.dsl.data_retention).toBe('30d');
+        expect(verifyResult.stream!.stream.ingest.lifecycle.dsl.downsample).toStrictEqual([
+          { after: '0d', fixed_interval: '1d' },
+          { after: '10d', fixed_interval: '10d' },
+        ]);
+      }
+    );
   }
 );

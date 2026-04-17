@@ -15,6 +15,7 @@ import { AnonymousAuthenticationProvider } from './anonymous';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
+import { sessionMock } from '../../session_management/session.mock';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { BasicHTTPAuthorizationHeaderCredentials } from '../http_authentication';
@@ -148,7 +149,7 @@ describe('AnonymousAuthenticationProvider', () => {
           const request = httpServerMock.createKibanaRequest({
             headers: { authorization: originalAuthorizationHeader },
           });
-          await expect(provider.authenticate(request, {})).resolves.toEqual(
+          await expect(provider.authenticate(request, sessionMock.createValue())).resolves.toEqual(
             AuthenticationResult.notHandled()
           );
 
@@ -163,7 +164,7 @@ describe('AnonymousAuthenticationProvider', () => {
           mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-          await expect(provider.authenticate(request, {})).resolves.toEqual(
+          await expect(provider.authenticate(request, sessionMock.createValue())).resolves.toEqual(
             AuthenticationResult.succeeded(user, { authHeaders: { authorization } })
           );
 
@@ -177,7 +178,7 @@ describe('AnonymousAuthenticationProvider', () => {
           mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
           mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-          await expect(provider.authenticate(request, {})).resolves.toEqual(
+          await expect(provider.authenticate(request, sessionMock.createValue())).resolves.toEqual(
             AuthenticationResult.succeeded(user, { authHeaders: { authorization } })
           );
 
@@ -237,7 +238,9 @@ describe('AnonymousAuthenticationProvider', () => {
             mockScopedClusterClient.asCurrentUser.security.authenticate.mockResponse(user);
             mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-            await expect(provider.authenticate(request, {})).resolves.toEqual(
+            await expect(
+              provider.authenticate(request, sessionMock.createValue())
+            ).resolves.toEqual(
               AuthenticationResult.succeeded(user, { authHeaders: { authorization } })
             );
 
@@ -247,14 +250,19 @@ describe('AnonymousAuthenticationProvider', () => {
       });
 
       describe('`logout` method', () => {
-        it('does not handle logout if state is not present', async () => {
+        it('does not handle logout if session is not present', async () => {
           await expect(provider.logout(httpServerMock.createKibanaRequest())).resolves.toEqual(
             DeauthenticationResult.notHandled()
           );
         });
 
         it('always redirects to the logged out page.', async () => {
-          await expect(provider.logout(httpServerMock.createKibanaRequest(), {})).resolves.toEqual(
+          await expect(
+            provider.logout(
+              httpServerMock.createKibanaRequest(),
+              sessionMock.createValue({ state: {} })
+            )
+          ).resolves.toEqual(
             DeauthenticationResult.redirectTo('/mock-server-basepath/security/logged_out')
           );
 

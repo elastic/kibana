@@ -9,7 +9,7 @@ import { useDispatch } from 'react-redux';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
-import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../embeddables/constants';
+import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../../../../common/embeddables/monitors_overview/constants';
 import { AddToDashboard } from '../../../common/components/add_to_dashboard';
 import { useOverviewStatus } from '../../hooks/use_overview_status';
 import { GroupFields } from './grid_by_group/group_fields';

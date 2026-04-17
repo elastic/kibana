@@ -48,7 +48,7 @@ export const CopyStatusIndicator = (props: Props) => {
         defaultMessage="Object was copied."
       />
     );
-    return <EuiIconTip type={'checkInCircleFilled'} color={'success'} content={message} />;
+    return <EuiIconTip type={'checkCircleFill'} color={'success'} content={message} />;
   }
 
   if (successful && pendingObjectRetry) {

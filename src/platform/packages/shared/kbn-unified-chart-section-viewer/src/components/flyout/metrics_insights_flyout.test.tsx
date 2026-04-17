@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MetricInsightsFlyout } from './metrics_insights_flyout';
-import type { MetricField } from '../../types';
+import type { ParsedMetricItem } from '../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 jest.mock('./metrics_flyout_body', () => ({
@@ -50,16 +50,19 @@ describe('MetricInsightsFlyout', () => {
   ).useFieldsMetadataContext;
   const mockUseIsWithinMinBreakpoint = jest.requireMock('@elastic/eui').useIsWithinMinBreakpoint;
 
-  const createMockMetric = (overrides: Partial<MetricField> = {}): MetricField => ({
-    name: 'test.metric',
-    index: 'test-index',
-    type: ES_FIELD_TYPES.DOUBLE,
-    dimensions: [],
-    ...overrides,
-  });
+  const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem =>
+    ({
+      metricName: 'test.metric',
+      dataStream: 'test-index',
+      units: ['count'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: ['host.name'],
+      ...overrides,
+    } as ParsedMetricItem);
 
   const defaultProps = {
-    metric: createMockMetric(),
+    metricItem: createMockMetric(),
     onClose: jest.fn(),
   };
 
@@ -137,12 +140,12 @@ describe('MetricInsightsFlyout', () => {
 
   describe('prop handling', () => {
     it('passes metric prop to MetricFlyoutBody', () => {
-      const metric = createMockMetric({ name: 'custom.metric' });
+      const metricItem = createMockMetric({ metricName: 'custom.metric' });
 
-      render(<MetricInsightsFlyout {...defaultProps} metric={metric} />);
+      render(<MetricInsightsFlyout {...defaultProps} metricItem={metricItem} />);
 
       expect(mockMetricFlyoutBody).toHaveBeenCalledWith(
-        expect.objectContaining({ metric }),
+        expect.objectContaining({ metricItem }),
         expect.anything()
       );
     });

@@ -47,18 +47,8 @@ export const ENDPOINTS = '[data-test-subj~="nav-item-id-endpoints"]';
 
 export const POLICIES = '[data-test-subj~="nav-item-id-policy"]';
 
-export const TRUSTED_APPS = '[data-test-subj~="nav-item-id-trusted_apps"]';
-
-export const TRUSTED_DEVICES = '[data-test-subj~="nav-item-id-trusted_devices"]';
-
-export const EVENT_FILTERS = '[data-test-subj~="nav-item-id-event_filters"]';
-
-export const BLOCKLIST = '[data-test-subj~="nav-item-id-blocklist"]';
-
-export const HOST_ISOLATION_EXCEPTIONS =
-  '[data-test-subj~="nav-item-id-host_isolation_exceptions"]';
-
-export const ENDPOINT_EXCEPTIONS = '[data-test-subj~="nav-item-id-endpoint_exceptions"]';
+/** Unified Artifacts entry (replaces per-type artifact nav items) */
+export const ARTIFACTS = '[data-test-subj~="nav-item-id-artifacts"]';
 
 export const RESPONSE_ACTIONS_HISTORY = '[data-test-subj~="nav-item-id-response_actions_history"]';
 
@@ -104,7 +94,7 @@ export const openNavigationPanelFor = (pageName: string) => {
       break;
     }
     case FLEET:
-    case ENDPOINT_EXCEPTIONS:
+    case ARTIFACTS:
     case ENDPOINTS: {
       panel = ASSETS_PANEL_BTN;
       break;

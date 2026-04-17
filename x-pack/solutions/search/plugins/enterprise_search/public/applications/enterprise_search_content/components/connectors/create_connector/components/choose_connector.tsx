@@ -21,6 +21,7 @@ import {
   useEuiTheme,
   EuiTextTruncate,
   EuiBadgeGroup,
+  EuiFormPrepend,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -104,7 +105,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
           <EuiBadge
             aria-label={TECH_PREVIEW_LABEL}
             key={key + '-preview'}
-            iconType="beaker"
+            iconType="flask"
             color="hollow"
           >
             {TECH_PREVIEW_LABEL}
@@ -150,7 +151,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         'xpack.enterpriseSearch.createConnector.chooseConnectorSelectable.euiComboBox.accessibleScreenReaderLabelLabel',
         { defaultMessage: 'Select a data source for your connector to use.' }
       )}
-      prepend={<EuiIcon type={selectedConnector?.iconPath ?? 'plugs'} size="l" />}
+      prepend={<EuiFormPrepend iconLeft={selectedConnector?.iconPath ?? 'plugs'} />}
       singleSelection
       fullWidth
       placeholder={i18n.translate(

@@ -14,6 +14,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/test"
   ]
 }

@@ -49,6 +49,14 @@ describe('Webhook Schema', () => {
       expect(result.hasAuth).toBe(true);
     });
 
+    it('does not default authType when hasAuth is false', () => {
+      const result = ConfigSchema.parse({
+        url: 'https://api.example.com/webhook',
+        hasAuth: false,
+      });
+      expect(result.authType).toBeNull();
+    });
+
     it('validates all HTTP methods', () => {
       const methods = ['post', 'put', 'patch', 'get', 'delete'];
       methods.forEach((method) => {

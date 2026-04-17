@@ -33,12 +33,12 @@ groups:
           Multiline string. Can include tables, lists, code examples, etc.
         # applies_to: MANDATORY applicability metadata
         #   Supports docs-builder applies_to syntax.
-        #   Replace "ga" with the correct availability information: "preview", "beta", "ga", "deprecated", "removed", "unavailable" are accepted values
+        #   Provide the correct availability information: "preview", "beta", "ga", "deprecated", "removed", "unavailable" are accepted values
         #   Only specify a version for the "stack" key; multiple values are accepted for this key, for example "stack: preview 9.4, ga 9.5, removed 9.8"
         #
         #   applies_to:
         #     - "stack: ga 9.2"
-        #     - "ess: ga"
+        #     - "ech: ga"
         #     - "self: ga"
         #
         # deprecation_details: "" OPTIONAL
@@ -51,10 +51,6 @@ groups:
         # options:
         #   - option: OPTIONAL
         #     description: "" OPTIONAL
-        # type: OPTIONAL ONe of static/dynamic
-        #   - cloud
-        #   - serverless
-        #   - self-managed
         # settings: OPTIONAL, nested settings list
         #   Child settings inherit applies_to from the parent unless overridden.
         #   - setting: "[n].url"
@@ -78,7 +74,7 @@ page_description: |
   This page demonstrates the full settings documentation schema.
 
   Settings descriptions can include inline applies annotations, for example:
-  {applies_to}`stack: ga 9.2` and {applies_to}`ess: ga`.
+  {applies_to}`stack: ga 9.2` and {applies_to}`ech: ga`.
 
 groups:
   - group: Example group
@@ -100,7 +96,7 @@ groups:
         default: ""
         applies_to:
           stack: ga 9.2
-          ess: ga
+          ech: ga
           self: ga
 
         settings:
@@ -109,13 +105,13 @@ groups:
               Child setting inheriting the parent's applicability.
             datatype: string
 
-          - setting: "[n].serverlessOnly"
+          - setting: "[n].selfOnly"
             description: |
-              Child setting overriding applicability using the inline list form.
+              Child setting overriding parent 'applies_to' settings.
             datatype: bool
             default: false
             applies_to:
-              - "serverless: ga"
+              - "ech: unavailable"
 
       - setting: my.deprecated.setting
         description: |
@@ -124,7 +120,7 @@ groups:
         default: false
         applies_to:
           - "stack: deprecated 9.3+"
-          - "ess: ga"
+          - "ech: ga"
           - "self: ga"
         deprecation_details: "Deprecated starting in 9.3."
 ---

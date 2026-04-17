@@ -11,7 +11,7 @@ import type { Filter, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { APPLY_FILTER_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { ON_APPLY_FILTER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 export type ValueClickActionContext = ValueClickContext;
 export const ACTION_VALUE_CLICK = 'ACTION_VALUE_CLICK';
@@ -65,7 +65,7 @@ export function createValueClickActionDefinition(
           const { createFiltersFromValueClickAction } = await import('./filters');
           const filters: Filter[] = await createFiltersFromValueClickAction(context.data);
           if (filters.length > 0) {
-            await getStartServices().uiActions.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+            await getStartServices().uiActions.executeTriggerActions(ON_APPLY_FILTER, {
               filters,
               embeddable: context.embeddable,
               timeFieldName: context.data.timeFieldName,
@@ -75,7 +75,7 @@ export function createValueClickActionDefinition(
       } catch (e) {
         // eslint-disable-next-line no-console
         console.warn(
-          `Error [ACTION_EMIT_APPLY_FILTER_TRIGGER]: can\'t extract filters from action context`
+          `Error [ACTION_EMIT_ON_APPLY_FILTER]: can\'t extract filters from action context`
         );
       }
     },

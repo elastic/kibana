@@ -6,7 +6,6 @@
  */
 
 import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
-import type { z, ZodObject } from '@kbn/zod';
 import type { ToolHandlerFn } from '@kbn/agent-builder-server';
 import { interpolateEsqlQuery } from '@kbn/agent-builder-genai-utils/tools/utils';
 import type { EsqlToolParamValue } from '@kbn/agent-builder-common';
@@ -44,19 +43,37 @@ export const resolveToolParameters = (
 
 export const createHandler = (
   configuration: EsqlToolConfig
-): ToolHandlerFn<z.infer<ZodObject<any>>> => {
+): ToolHandlerFn<Record<string, unknown>> => {
   return async (params, { esClient }) => {
     const client = esClient.asCurrentUser;
 
     // Apply default values for parameters that weren't provided by the LLM
-    const resolvedParams = resolveToolParameters(configuration.params, params);
+    const resolvedParams = resolveToolParameters(
+      configuration.params,
+      params as Record<string, EsqlToolParamValue>
+    );
 
-    const paramArray = Object.entries(resolvedParams).map(([param, value]) => ({ [param]: value }));
+    // Validate that all required parameters have values
+    const missingRequiredParams = Object.entries(configuration.params)
+      .filter(
+        ([paramName, definition]) => !definition.optional && resolvedParams[paramName] === null
+      )
+      .map(([paramName]) => paramName);
+
+    if (missingRequiredParams.length > 0) {
+      throw new Error(`Missing required ESQL tool parameters: ${missingRequiredParams.join(', ')}`);
+    }
+
+    // Filter out null params — they represent optional parameters that weren't provided.
+    // Elasticsearch cannot handle null parameter values in ES|QL queries.
+    const paramArray = Object.entries(resolvedParams)
+      .filter(([, value]) => value !== null)
+      .map(([param, value]) => ({ [param]: value }));
 
     const result = await client.esql.query({
       query: configuration.query,
       // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
-      params: paramArray as unknown as FieldValue[],
+      ...(paramArray.length > 0 ? { params: paramArray as unknown as FieldValue[] } : {}),
     });
 
     // need the interpolated query to return in the results / to display in the UI

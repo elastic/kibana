@@ -29,6 +29,7 @@ import {
   NativeRealm,
   parseEsLog,
   runDockerContainer,
+  stopDockerContainer,
   runServerlessCluster,
   stopServerlessCluster,
   teardownServerlessClusterSync,
@@ -111,6 +112,7 @@ export class Cluster {
   private process: execa.ExecaChildProcess | null;
   private outcome: Promise<void> | null;
   private serverlessNodes: string[];
+  private dockerContainerName: string | null;
   private setupPromise: Promise<unknown> | null;
   private stdioTarget: NodeJS.WritableStream | null;
 
@@ -120,6 +122,8 @@ export class Cluster {
     this.stopCalled = false;
     // Serverless Elasticsearch node names, started via Docker
     this.serverlessNodes = [];
+    // Docker snapshot container name, if running via Docker
+    this.dockerContainerName = null;
     // properties used exclusively for the locally started Elasticsearch cluster
     this.process = null;
     this.outcome = null;
@@ -317,6 +321,11 @@ export class Cluster {
       return await stopServerlessCluster(this.log, this.serverlessNodes);
     }
 
+    // Stop Docker container
+    if (this.dockerContainerName) {
+      return await stopDockerContainer(this.log, this.dockerContainerName);
+    }
+
     // Stop local ES process
     if (!this.process || !this.outcome) {
       throw new Error('ES has not been started');
@@ -487,11 +496,11 @@ export class Cluster {
       if (!skipSecuritySetup) {
         const nativeRealm = new NativeRealm({
           log: this.log,
-          elasticPassword: options.password,
+          elasticPassword: options.password ?? 'changeme',
           client,
         });
 
-        await nativeRealm.setPasswords(options);
+        await nativeRealm.setPasswords(options as Record<string, unknown>);
 
         const samlRealmConfigPrefix = `authc.realms.saml.${MOCK_IDP_REALM_NAME}.`;
         if (args.some((arg) => arg.includes(samlRealmConfigPrefix))) {
@@ -633,13 +642,18 @@ export class Cluster {
   }
 
   /**
-   * Run an Elasticsearch Docker container
+   * Run an Elasticsearch Docker container.
+   * Pass `snapshot: true` to activate snapshot-equivalent semantics
+   * (security, readiness check, detached mode, native realm setup).
    */
   async runDocker(options: DockerOptions) {
     if (this.process || this.outcome) {
       throw new Error('ES stateful cluster has already been started');
     }
 
-    await runDockerContainer(this.log, options);
+    const result = await runDockerContainer(this.log, options);
+    if (typeof result === 'string') {
+      this.dockerContainerName = result;
+    }
   }
 }

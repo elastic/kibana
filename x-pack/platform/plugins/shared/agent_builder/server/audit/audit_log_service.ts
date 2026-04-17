@@ -14,8 +14,10 @@ import { asError } from '../utils/as_error';
 import {
   AgentBuilderAuditAction,
   agentAuditEvent,
+  skillAuditEvent,
   toolAuditEvent,
   type AgentAuditEventParams,
+  type SkillAuditEventParams,
   type ToolAuditEventParams,
 } from './audit_events';
 import { getSerializedErrorMessage } from './helpers';
@@ -80,6 +82,36 @@ export class AuditLogService {
       agentAuditEvent({
         ...params,
         action: AgentBuilderAuditAction.AGENT_DELETE,
+      })
+    );
+  }
+
+  logSkillCreated(request: KibanaRequest, params: Omit<SkillAuditEventParams, 'action'>): void {
+    this.log(
+      request,
+      skillAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.SKILL_CREATE,
+      })
+    );
+  }
+
+  logSkillUpdated(request: KibanaRequest, params: Omit<SkillAuditEventParams, 'action'>): void {
+    this.log(
+      request,
+      skillAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.SKILL_UPDATE,
+      })
+    );
+  }
+
+  logSkillDeleted(request: KibanaRequest, params: Omit<SkillAuditEventParams, 'action'>): void {
+    this.log(
+      request,
+      skillAuditEvent({
+        ...params,
+        action: AgentBuilderAuditAction.SKILL_DELETE,
       })
     );
   }
@@ -168,6 +200,31 @@ export class AuditLogService {
         };
       })
     );
+  }
+
+  /**
+   * Bulk helper used by internal bulk skill delete.
+   */
+  logBulkSkillDeleteResults(
+    request: KibanaRequest,
+    params: { ids: string[]; deleteResults: Array<PromiseSettledResult<boolean>> }
+  ): void {
+    const { ids, deleteResults } = params;
+    for (let index = 0; index < deleteResults.length; index++) {
+      const settled = deleteResults[index];
+      const skillId = ids[index];
+      if (settled.status === 'fulfilled' && settled.value) {
+        this.logSkillDeleted(request, { skillId });
+      } else {
+        this.logSkillDeleted(request, {
+          skillId,
+          error:
+            settled.status === 'rejected'
+              ? asError(settled.reason)
+              : new Error('Skill delete returned false'),
+        });
+      }
+    }
   }
 
   /**

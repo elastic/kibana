@@ -8,6 +8,7 @@
  */
 
 import type { LensAttributes } from '../../types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 /**
  * Simple tag cloud generated from kibana
@@ -102,7 +103,7 @@ export const tagcloudAttributes = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -241,7 +242,7 @@ export const tagcloudAttributesWithFullConfig = {
     internalReferences: [],
     adHocDataViews: {},
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [
     {
       type: 'index-pattern',
@@ -336,6 +337,6 @@ export const tagcloudESQLAttributes = {
       },
     },
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   references: [],
 } satisfies LensAttributes;

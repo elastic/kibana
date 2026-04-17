@@ -7,7 +7,7 @@
 
 import { last } from 'lodash';
 import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
-import { createToolCallMessage } from '../llm_proxy';
+import { createToolCallMessage, createMultiToolCallMessage } from '../llm_proxy';
 
 const getToolChoiceFunctionName = (toolChoice: unknown): string | undefined => {
   if (!toolChoice || typeof toolChoice !== 'object') return undefined;
@@ -72,6 +72,26 @@ export const mockAgentToolCall = ({
       return !systemText.includes('You are a title-generation utility');
     },
     response: createToolCallMessage(toolName, toolArg),
+  });
+};
+
+export const mockAgentParallelToolCalls = ({
+  name = 'agent:parallel_tool_calls',
+  llmProxy,
+  toolCalls,
+}: {
+  name?: string;
+  llmProxy: LlmProxy;
+  toolCalls: Array<{ name: string; args: Record<string, any> }>;
+}) => {
+  void llmProxy.interceptors.userMessage({
+    name,
+    when: ({ messages }) => {
+      const systemMessage = messages.find((message) => message.role === 'system');
+      const systemText = String(systemMessage?.content ?? '');
+      return !systemText.includes('You are a title-generation utility');
+    },
+    response: createMultiToolCallMessage(toolCalls),
   });
 };
 

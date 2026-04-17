@@ -56,7 +56,7 @@ export const PresentationPanelTitle = ({
 
     const titleStyles = css`
       ${euiTextTruncate()};
-      font-weight: ${euiTheme.font.weight.bold};
+      font-weight: ${euiTheme.font.weight.medium};
 
       .kbnGridPanel--active & {
         pointer-events: none; // prevent drag event from triggering onClick
@@ -152,6 +152,9 @@ export const PresentationPanelTitle = ({
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
             tabIndex={0}
+            aria-label={i18n.translate('presentationPanel.header.descriptionIconAriaLabel', {
+              defaultMessage: 'Description',
+            })}
           />
         </div>
       </EuiToolTip>

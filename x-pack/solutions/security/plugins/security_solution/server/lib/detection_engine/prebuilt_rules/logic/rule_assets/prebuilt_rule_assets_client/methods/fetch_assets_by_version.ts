@@ -46,8 +46,15 @@ export async function fetchAssetsByVersion(
     namespaces: getPrebuiltRuleAssetsSearchNamespace(savedObjectsClient),
     size: MAX_PREBUILT_RULES_COUNT,
     query: {
-      terms: {
-        _id: soIds,
+      bool: {
+        must: {
+          terms: {
+            _id: soIds,
+          },
+        },
+        must_not: {
+          term: { [`${PREBUILT_RULE_ASSETS_SO_TYPE}.deprecated`]: true },
+        },
       },
     },
   });

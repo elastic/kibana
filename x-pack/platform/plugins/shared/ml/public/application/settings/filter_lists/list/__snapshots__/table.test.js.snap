@@ -27,7 +27,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                 <span
                   aria-hidden="true"
                   class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
+                  data-euiicon-type="magnify"
                 />
               </span>
             </div>
@@ -92,370 +92,374 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
       class="euiBasicTable ml-filter-lists-table"
       data-test-subj="mlFilterListsTable"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCellCheckbox emotion-euiTableHeaderCellCheckbox"
-              scope="col"
-            >
-              <div
-                class="euiTableCellContent"
-              >
-                <div
-                  class="euiCheckbox emotion-euiCheckbox"
-                >
-                  <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
-                  >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select all rows"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectAll"
-                      id="_selection_column-checkbox_generated-id"
-                      title="Select all rows"
-                      type="checkbox"
-                    />
-                  </div>
-                </div>
-              </div>
-            </th>
-            <th
-              aria-sort="ascending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_filter_id_0"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="ID"
-                    >
-                      ID
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortUp"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_description_1"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Description"
-                    >
-                      Description
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_item_count_2"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Item count"
-                    >
-                      Item count
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_used_by_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="In use"
-                    >
-                      In use
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow emotion-euiTableRow-desktop"
-            data-test-subj="mlFilterListRow row-safe_domains"
-          >
-            <td
-              class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
-            >
-              <div
-                class="euiTableCellContent"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCellCheckbox emotion-euiTableHeaderCellCheckbox"
+                scope="col"
               >
                 <div
-                  class="euiCheckbox emotion-euiCheckbox"
+                  class="euiTableCellContent"
                 >
                   <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-disabled-unselected"
+                    class="euiCheckbox emotion-euiCheckbox"
                   >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select row 1"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectRow-safe_domains"
-                      disabled=""
-                      id="__table_generated-id_selection_column_safe_domains-checkbox"
-                      title="Select row 1"
-                      type="checkbox"
-                    />
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select all rows"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectAll"
+                        id="_selection_column-checkbox_generated-id"
+                        title="Select all rows"
+                        type="checkbox"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnId"
-              scope="row"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <a
-                  href="/filter_lists/edit_filter_list/safe_domains"
-                >
-                  safe_domains
-                </a>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnDescription"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="ascending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_filter_id_0"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  List of known safe domains
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="ID"
+                      >
+                        ID
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortUp"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnItemCount"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_description_1"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  500
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Description"
+                      >
+                        Description
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnInUse"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_item_count_2"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  data-euiicon-type="check"
-                  data-test-subj="mlFilterListUsedByIcon inUse"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  In use
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Item count"
+                      >
+                        Item count
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            data-test-subj="mlFilterListRow row-us_east_instances"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_used_by_3"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="In use"
+                      >
+                        In use
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
           >
-            <td
-              class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
+            <tr
+              class="euiTableRow emotion-euiTableRow-desktop"
+              data-test-subj="mlFilterListRow row-safe_domains"
             >
-              <div
-                class="euiTableCellContent"
+              <td
+                class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
               >
                 <div
-                  class="euiCheckbox emotion-euiCheckbox"
+                  class="euiTableCellContent"
                 >
                   <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    class="euiCheckbox emotion-euiCheckbox"
                   >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select row 2"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectRow-us_east_instances"
-                      id="__table_generated-id_selection_column_us_east_instances-checkbox"
-                      title="Select row 2"
-                      type="checkbox"
-                    />
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-disabled-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select row 1"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-safe_domains"
+                        disabled=""
+                        id="__table_generated-id_selection_column_safe_domains-checkbox"
+                        title="Select row 1"
+                        type="checkbox"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnId"
-              scope="row"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnId"
+                scope="row"
               >
-                <a
-                  href="/filter_lists/edit_filter_list/us_east_instances"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  us_east_instances
-                </a>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnDescription"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  <a
+                    href="/filter_lists/edit_filter_list/safe_domains"
+                  >
+                    safe_domains
+                  </a>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnDescription"
               >
-                <span
-                  class="euiTableCellContent__text"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  US East AWS instances
-                </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnItemCount"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    List of known safe domains
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnItemCount"
               >
-                <span
-                  class="euiTableCellContent__text"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  20
-                </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnInUse"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    500
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnInUse"
               >
-                <span
-                  data-euiicon-type="cross"
-                  data-test-subj="mlFilterListUsedByIcon notInUse"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  Not in use
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                  <span
+                    data-euiicon-type="check"
+                    data-test-subj="mlFilterListUsedByIcon inUse"
+                  >
+                    In use
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+              data-test-subj="mlFilterListRow row-us_east_instances"
+            >
+              <td
+                class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <div
+                    class="euiCheckbox emotion-euiCheckbox"
+                  >
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select row 2"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-us_east_instances"
+                        id="__table_generated-id_selection_column_us_east_instances-checkbox"
+                        title="Select row 2"
+                        type="checkbox"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnId"
+                scope="row"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <a
+                    href="/filter_lists/edit_filter_list/us_east_instances"
+                  >
+                    us_east_instances
+                  </a>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnDescription"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    US East AWS instances
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnItemCount"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    20
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnInUse"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    data-euiicon-type="cross"
+                    data-test-subj="mlFilterListUsedByIcon notInUse"
+                  >
+                    Not in use
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -478,7 +482,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -486,7 +490,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                   </span>
                   <span
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </button>
@@ -518,7 +522,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="arrowLeft"
+                  data-euiicon-type="chevronSingleLeft"
                 />
               </button>
               <ul
@@ -540,7 +544,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>
@@ -559,7 +563,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="arrowRight"
+                  data-euiicon-type="chevronSingleRight"
                 />
               </button>
             </nav>
@@ -598,7 +602,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                 <span
                   aria-hidden="true"
                   class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="search"
+                  data-euiicon-type="magnify"
                 />
               </span>
             </div>
@@ -664,370 +668,374 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
       class="euiBasicTable ml-filter-lists-table"
       data-test-subj="mlFilterListsTable"
     >
-      <table
-        class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
-        id="__table_generated-id"
-        tabindex="-1"
+      <div
+        class="emotion-euiContainerCSS"
       >
-        <caption
-          class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
-        />
-        <thead>
-          <tr>
-            <th
-              class="euiTableHeaderCellCheckbox emotion-euiTableHeaderCellCheckbox"
-              scope="col"
-            >
-              <div
-                class="euiTableCellContent"
-              >
-                <div
-                  class="euiCheckbox emotion-euiCheckbox"
-                >
-                  <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
-                  >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select all rows"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectAll"
-                      id="_selection_column-checkbox_generated-id"
-                      title="Select all rows"
-                      type="checkbox"
-                    />
-                  </div>
-                </div>
-              </div>
-            </th>
-            <th
-              aria-sort="ascending"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_filter_id_0"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="ID"
-                    >
-                      ID
-                    </span>
-                    <span
-                      class="euiTableSortIcon"
-                      data-euiicon-type="sortUp"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_description_1"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Description"
-                    >
-                      Description
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_item_count_2"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="Item count"
-                    >
-                      Item count
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-            <th
-              aria-sort="none"
-              class="euiTableHeaderCell emotion-euiTableHeaderCell"
-              data-test-subj="tableHeaderCell_used_by_3"
-              role="columnheader"
-              scope="col"
-            >
-              <span
-                class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
-                id="generated-id-wrapper"
-              >
-                <button
-                  class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
-                  data-test-subj="tableHeaderSortButton"
-                  type="button"
-                >
-                  <div
-                    class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
-                  >
-                    <span
-                      class="eui-textTruncate"
-                      title="In use"
-                    >
-                      In use
-                    </span>
-                    <span
-                      class="euiTableSortIcon euiTableSortIcon--sortable"
-                      color="subdued"
-                      data-euiicon-type="sortable"
-                    />
-                  </div>
-                </button>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody
-          class="css-0"
+        <table
+          class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"
+          id="__table_generated-id"
+          tabindex="-1"
         >
-          <tr
-            class="euiTableRow emotion-euiTableRow-desktop"
-            data-test-subj="mlFilterListRow row-safe_domains"
-          >
-            <td
-              class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
-            >
-              <div
-                class="euiTableCellContent"
+          <caption
+            class="euiTableCaption emotion-euiTableCaptionStyles-euiScreenReaderOnly"
+          />
+          <thead>
+            <tr>
+              <th
+                class="euiTableHeaderCellCheckbox emotion-euiTableHeaderCellCheckbox"
+                scope="col"
               >
                 <div
-                  class="euiCheckbox emotion-euiCheckbox"
+                  class="euiTableCellContent"
                 >
                   <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-disabled-unselected"
+                    class="euiCheckbox emotion-euiCheckbox"
                   >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select row 1"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectRow-safe_domains"
-                      disabled=""
-                      id="__table_generated-id_selection_column_safe_domains-checkbox"
-                      title="Select row 1"
-                      type="checkbox"
-                    />
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select all rows"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectAll"
+                        id="_selection_column-checkbox_generated-id"
+                        title="Select all rows"
+                        type="checkbox"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnId"
-              scope="row"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
-              >
-                <a
-                  href="/filter_lists/edit_filter_list/safe_domains"
-                >
-                  safe_domains
-                </a>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnDescription"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="ascending"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_filter_id_0"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  List of known safe domains
+                  <button
+                    class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="ID"
+                      >
+                        ID
+                      </span>
+                      <span
+                        class="euiTableSortIcon"
+                        data-euiicon-type="sortUp"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnItemCount"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_description_1"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  class="euiTableCellContent__text"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  500
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Description"
+                      >
+                        Description
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnInUse"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_item_count_2"
+                role="columnheader"
+                scope="col"
               >
                 <span
-                  data-euiicon-type="check"
-                  data-test-subj="mlFilterListUsedByIcon inUse"
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
                 >
-                  In use
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="Item count"
+                      >
+                        Item count
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
                 </span>
-              </div>
-            </td>
-          </tr>
-          <tr
-            class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
-            data-test-subj="mlFilterListRow row-us_east_instances"
+              </th>
+              <th
+                aria-sort="none"
+                class="euiTableHeaderCell emotion-euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_used_by_3"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                  id="generated-id-wrapper"
+                >
+                  <button
+                    class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
+                    data-test-subj="tableHeaderSortButton"
+                    type="button"
+                  >
+                    <div
+                      class="euiTableCellContent emotion-euiTableCellContent-euiTableHeaderCell__content"
+                    >
+                      <span
+                        class="eui-textTruncate"
+                        title="In use"
+                      >
+                        In use
+                      </span>
+                      <span
+                        class="euiTableSortIcon euiTableSortIcon--sortable"
+                        color="subdued"
+                        data-euiicon-type="sortable"
+                      />
+                    </div>
+                  </button>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody
+            class="css-0"
           >
-            <td
-              class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
+            <tr
+              class="euiTableRow emotion-euiTableRow-desktop"
+              data-test-subj="mlFilterListRow row-safe_domains"
             >
-              <div
-                class="euiTableCellContent"
+              <td
+                class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
               >
                 <div
-                  class="euiCheckbox emotion-euiCheckbox"
+                  class="euiTableCellContent"
                 >
                   <div
-                    class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    class="euiCheckbox emotion-euiCheckbox"
                   >
-                    <span
-                      class="emotion-euiCheckbox__icon-check"
-                      data-euiicon-type="empty"
-                    />
-                    <input
-                      aria-label="Select row 2"
-                      class="euiCheckbox__input emotion-euiCheckbox__input"
-                      data-test-subj="checkboxSelectRow-us_east_instances"
-                      id="__table_generated-id_selection_column_us_east_instances-checkbox"
-                      title="Select row 2"
-                      type="checkbox"
-                    />
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-disabled-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select row 1"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-safe_domains"
+                        disabled=""
+                        id="__table_generated-id_selection_column_safe_domains-checkbox"
+                        title="Select row 1"
+                        type="checkbox"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnId"
-              scope="row"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnId"
+                scope="row"
               >
-                <a
-                  href="/filter_lists/edit_filter_list/us_east_instances"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  us_east_instances
-                </a>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnDescription"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  <a
+                    href="/filter_lists/edit_filter_list/safe_domains"
+                  >
+                    safe_domains
+                  </a>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnDescription"
               >
-                <span
-                  class="euiTableCellContent__text"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  US East AWS instances
-                </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnItemCount"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    List of known safe domains
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnItemCount"
               >
-                <span
-                  class="euiTableCellContent__text"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  20
-                </span>
-              </div>
-            </td>
-            <td
-              class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
-              data-test-subj="mlFilterListColumnInUse"
-            >
-              <div
-                class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    500
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnInUse"
               >
-                <span
-                  data-euiicon-type="cross"
-                  data-test-subj="mlFilterListUsedByIcon notInUse"
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
                 >
-                  Not in use
-                </span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                  <span
+                    data-euiicon-type="check"
+                    data-test-subj="mlFilterListUsedByIcon inUse"
+                  >
+                    In use
+                  </span>
+                </div>
+              </td>
+            </tr>
+            <tr
+              class="euiTableRow euiTableRow-isSelectable emotion-euiTableRow-desktop"
+              data-test-subj="mlFilterListRow row-us_east_instances"
+            >
+              <td
+                class="euiTableRowCellCheckbox emotion-euiTableRowCellCheckbox-desktop"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <div
+                    class="euiCheckbox emotion-euiCheckbox"
+                  >
+                    <div
+                      class="euiCheckbox__square emotion-euiCheckbox__square-unselected"
+                    >
+                      <span
+                        class="emotion-euiCheckbox__icon-check"
+                        data-euiicon-type="empty"
+                      />
+                      <input
+                        aria-label="Select row 2"
+                        class="euiCheckbox__input emotion-euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-us_east_instances"
+                        id="__table_generated-id_selection_column_us_east_instances-checkbox"
+                        title="Select row 2"
+                        type="checkbox"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnId"
+                scope="row"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <a
+                    href="/filter_lists/edit_filter_list/us_east_instances"
+                  >
+                    us_east_instances
+                  </a>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnDescription"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    US East AWS instances
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnItemCount"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    20
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell emotion-euiTableRowCell-middle-desktop"
+                data-test-subj="mlFilterListColumnInUse"
+              >
+                <div
+                  class="euiTableCellContent emotion-euiTableCellContent-wrapText"
+                >
+                  <span
+                    data-euiicon-type="cross"
+                    data-test-subj="mlFilterListUsedByIcon notInUse"
+                  >
+                    Not in use
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div>
         <div
           class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
@@ -1050,7 +1058,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                   class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Rows per page
                     : 
@@ -1058,7 +1066,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                   </span>
                   <span
                     color="inherit"
-                    data-euiicon-type="arrowDown"
+                    data-euiicon-type="chevronSingleDown"
                   />
                 </span>
               </button>
@@ -1090,7 +1098,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="arrowLeft"
+                  data-euiicon-type="chevronSingleLeft"
                 />
               </button>
               <ul
@@ -1112,7 +1120,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                       class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="eui-textTruncate euiButtonEmpty__text"
+                        class="eui-textTruncate euiButtonEmpty__text css-1ryezsz-s"
                       >
                         1
                       </span>
@@ -1131,7 +1139,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                   aria-hidden="true"
                   class="euiButtonIcon__icon"
                   color="inherit"
-                  data-euiicon-type="arrowRight"
+                  data-euiicon-type="chevronSingleRight"
                 />
               </button>
             </nav>

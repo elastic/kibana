@@ -10,46 +10,41 @@
 import { renderHook } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMetricFieldsFilter } from './use_metric_fields_filter';
-import type { MetricField, Dimension } from '../../../../types';
+import type { ParsedMetricItem } from '../../../../types';
 
 describe('useMetricFieldsFilter', () => {
-  const baseDimensions: Dimension[] = [
-    { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
-    { name: 'service.name', type: ES_FIELD_TYPES.KEYWORD },
-  ];
+  const baseDimensions = [{ name: 'host.name' }, { name: 'service.name' }];
 
-  const baseFields: MetricField[] = [
+  const baseMetricItems: ParsedMetricItem[] = [
     {
-      name: 'system.cpu.utilization',
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.DOUBLE,
-      dimensions: [baseDimensions[0], baseDimensions[1]],
+      metricName: 'system.cpu.utilization',
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: baseDimensions,
     },
     {
-      name: 'system.memory.utilization',
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.DOUBLE,
-      dimensions: [baseDimensions[0]],
-    },
-    {
-      name: 'system.disk.io',
-      index: 'metrics-*',
-      type: ES_FIELD_TYPES.LONG,
-      dimensions: [baseDimensions[1]],
+      metricName: 'system.memory.utilization',
+      dataStream: 'metrics-*',
+      units: ['ms'],
+      metricTypes: ['counter'],
+      fieldTypes: [ES_FIELD_TYPES.DOUBLE],
+      dimensionFields: baseDimensions,
     },
   ];
 
   const defaultParams = {
-    fields: baseFields,
+    metricItems: baseMetricItems,
     searchTerm: '',
-    dimensions: [] as Dimension[],
+    dimensions: [] as string[],
   };
 
   describe('when no filters are applied', () => {
-    it('returns all fields', () => {
+    it('returns all metric items', () => {
       const { result } = renderHook(() => useMetricFieldsFilter(defaultParams));
 
-      expect(result.current.filteredFields).toEqual(baseFields);
+      expect(result.current.filteredMetricItems).toEqual(baseMetricItems);
     });
   });
 
@@ -62,8 +57,8 @@ describe('useMetricFieldsFilter', () => {
         })
       );
 
-      expect(result.current.filteredFields).toHaveLength(1);
-      expect(result.current.filteredFields[0].name).toBe('system.cpu.utilization');
+      expect(result.current.filteredMetricItems).toHaveLength(1);
+      expect(result.current.filteredMetricItems[0].metricName).toBe('system.cpu.utilization');
     });
 
     it('filters fields by uppercase search term', () => {
@@ -74,8 +69,8 @@ describe('useMetricFieldsFilter', () => {
         })
       );
 
-      expect(result.current.filteredFields).toHaveLength(1);
-      expect(result.current.filteredFields[0].name).toBe('system.cpu.utilization');
+      expect(result.current.filteredMetricItems).toHaveLength(1);
+      expect(result.current.filteredMetricItems[0].metricName).toBe('system.cpu.utilization');
     });
 
     it('returns multiple matches for partial search term', () => {
@@ -86,8 +81,8 @@ describe('useMetricFieldsFilter', () => {
         })
       );
 
-      expect(result.current.filteredFields).toHaveLength(2);
-      expect(result.current.filteredFields.map((f) => f.name)).toEqual([
+      expect(result.current.filteredMetricItems).toHaveLength(2);
+      expect(result.current.filteredMetricItems.map((f) => f.metricName)).toEqual([
         'system.cpu.utilization',
         'system.memory.utilization',
       ]);
@@ -101,62 +96,7 @@ describe('useMetricFieldsFilter', () => {
         })
       );
 
-      expect(result.current.filteredFields).toEqual([]);
-    });
-  });
-
-  describe('dimension filtering', () => {
-    it('filters fields by selected dimension', () => {
-      const { result } = renderHook(() =>
-        useMetricFieldsFilter({
-          ...defaultParams,
-          dimensions: [{ name: 'service.name', type: ES_FIELD_TYPES.KEYWORD }],
-        })
-      );
-
-      expect(result.current.filteredFields).toHaveLength(2);
-      expect(result.current.filteredFields.map((f) => f.name).sort()).toEqual([
-        'system.cpu.utilization',
-        'system.disk.io',
-      ]);
-    });
-
-    it('filters fields by multiple dimensions (OR logic)', () => {
-      const { result } = renderHook(() =>
-        useMetricFieldsFilter({
-          ...defaultParams,
-          dimensions: baseDimensions,
-        })
-      );
-
-      // All fields have at least one of the dimensions
-      expect(result.current.filteredFields).toHaveLength(3);
-    });
-
-    it('returns empty array when no fields have the selected dimension', () => {
-      const { result } = renderHook(() =>
-        useMetricFieldsFilter({
-          ...defaultParams,
-          dimensions: [{ name: 'nonexistent.dimension', type: ES_FIELD_TYPES.KEYWORD }],
-        })
-      );
-
-      expect(result.current.filteredFields).toEqual([]);
-    });
-  });
-
-  describe('combined filters', () => {
-    it('applies both search term and dimension filters', () => {
-      const { result } = renderHook(() =>
-        useMetricFieldsFilter({
-          ...defaultParams,
-          searchTerm: 'cpu',
-          dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
-        })
-      );
-
-      expect(result.current.filteredFields).toHaveLength(1);
-      expect(result.current.filteredFields[0].name).toBe('system.cpu.utilization');
+      expect(result.current.filteredMetricItems).toEqual([]);
     });
   });
 });

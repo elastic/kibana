@@ -91,12 +91,6 @@ export function initTracing({
 
   trace.setGlobalTracerProvider(nodeTracerProvider);
 
-  propagation.setGlobalPropagator(
-    new core.CompositePropagator({
-      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
-    })
-  );
-
   const shutdown = async () => {
     await Promise.all(allSpanProcessors.map((processor) => processor.shutdown()));
   };

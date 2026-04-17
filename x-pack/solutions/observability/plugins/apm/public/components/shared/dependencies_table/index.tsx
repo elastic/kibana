@@ -97,7 +97,7 @@ export function DependenciesTable({
         return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
-      width: '30%',
+      minWidth: '14em', // Will grow to fill the space
     },
     ...getSpanMetricColumns({
       shouldShowSparkPlots,
@@ -147,6 +147,7 @@ export function DependenciesTable({
             initialPageSize={initialPageSize}
             onChangeRenderedItems={onChangeRenderedItems}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
+            tableLayout="auto"
           />
         </OverviewTableContainer>
       </EuiFlexItem>

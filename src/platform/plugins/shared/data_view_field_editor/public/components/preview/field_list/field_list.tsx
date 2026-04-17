@@ -163,7 +163,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
       <>
         <EuiSpacer />
         <EuiEmptyPrompt
-          iconType="search"
+          iconType="magnify"
           title={
             <EuiTextColor color="subdued">
               <h3 css={styles.emptySearchResult}>

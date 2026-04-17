@@ -221,7 +221,8 @@ const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';
 const VERSION_INPUT_TEST_ID = 'relatedIntegrationVersionDependency';
 const DEFINE_RULE_FORM_STEP = 'defineRuleFormStepQueryEditor';
 
-describe('StepDefineRule', () => {
+// Failing: See https://github.com/elastic/kibana/issues/237924
+describe.skip('StepDefineRule', () => {
   beforeEach(() => {
     mockUseRuleFromTimeline.mockReturnValue({ onOpenTimeline, loading: false });
     (useEsqlAvailability as jest.Mock).mockReturnValue({ isEsqlRuleTypeEnabled: true });

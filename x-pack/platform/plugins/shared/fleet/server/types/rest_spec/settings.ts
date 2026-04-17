@@ -9,10 +9,104 @@ import { schema } from '@kbn/config-schema';
 
 import { isDiffPathProtocol } from '../../../common/services';
 
-import { DownloadSourceResponseSchema, OutputSchema } from '../models';
+const EnrollmentSettingsProxySchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  url: schema.string(),
+});
 
-import { FleetProxySchema } from './fleet_proxies';
-import { FleetServerHostSchema } from './fleet_server_policy_config';
+const EnrollmentSettingsFleetServerHostSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  host_urls: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
+  is_default: schema.boolean({ defaultValue: false }),
+  is_preconfigured: schema.boolean({ defaultValue: false }),
+  is_internal: schema.maybe(schema.boolean()),
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  ssl: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        certificate: schema.maybe(schema.string()),
+        es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        es_certificate: schema.maybe(schema.string()),
+        agent_certificate_authorities: schema.maybe(
+          schema.arrayOf(schema.string(), { maxSize: 10 })
+        ),
+        agent_certificate: schema.maybe(schema.string()),
+        client_auth: schema.maybe(schema.string()),
+      }),
+    ])
+  ),
+});
+
+const EnrollmentSettingsOutputSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  type: schema.literal('elasticsearch'),
+  is_default: schema.boolean(),
+  is_default_monitoring: schema.boolean(),
+  is_internal: schema.maybe(schema.boolean()),
+  is_preconfigured: schema.maybe(schema.boolean()),
+  hosts: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 })),
+  ca_sha256: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  preset: schema.maybe(
+    schema.oneOf([
+      schema.literal('custom'),
+      schema.literal('balanced'),
+      schema.literal('throughput'),
+      schema.literal('scale'),
+      schema.literal('latency'),
+    ])
+  ),
+  write_to_logs_streams: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+  ssl: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        certificate: schema.maybe(schema.string()),
+        verification_mode: schema.maybe(schema.string()),
+      }),
+    ])
+  ),
+});
+
+const EnrollmentSettingsDownloadSourceSchema = schema.maybe(
+  schema.object({
+    id: schema.string(),
+    name: schema.string(),
+    host: schema.uri({ scheme: ['http', 'https'] }),
+    is_default: schema.boolean(),
+    proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+    ssl: schema.maybe(
+      schema.object({
+        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+        certificate: schema.maybe(schema.string()),
+      })
+    ),
+    auth: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.object({
+          username: schema.maybe(schema.string()),
+          headers: schema.maybe(
+            schema.arrayOf(schema.object({ key: schema.string(), value: schema.string() }), {
+              maxSize: 100,
+            })
+          ),
+        }),
+      ])
+    ),
+  })
+);
 
 export const GetSettingsRequestSchema = {};
 
@@ -155,19 +249,15 @@ export const GetEnrollmentSettingsResponseSchema = schema.object({
         is_managed: schema.boolean(),
         is_default_fleet_server: schema.maybe(schema.boolean()),
         has_fleet_server: schema.maybe(schema.boolean()),
-        fleet_server_host_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-        download_source_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-        space_ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
-        data_output_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
       }),
       { maxSize: 10000 }
     ),
     has_active: schema.boolean(),
-    host: schema.maybe(FleetServerHostSchema),
-    host_proxy: schema.maybe(FleetProxySchema),
-    es_output: schema.maybe(OutputSchema),
-    es_output_proxy: schema.maybe(FleetProxySchema),
+    host: schema.maybe(EnrollmentSettingsFleetServerHostSchema),
+    host_proxy: schema.maybe(EnrollmentSettingsProxySchema),
+    es_output: schema.maybe(EnrollmentSettingsOutputSchema),
+    es_output_proxy: schema.maybe(EnrollmentSettingsProxySchema),
   }),
-  download_source: DownloadSourceResponseSchema,
-  download_source_proxy: schema.maybe(FleetProxySchema),
+  download_source: EnrollmentSettingsDownloadSourceSchema,
+  download_source_proxy: schema.maybe(EnrollmentSettingsProxySchema),
 });

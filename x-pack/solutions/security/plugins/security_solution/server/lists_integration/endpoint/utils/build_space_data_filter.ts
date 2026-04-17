@@ -24,7 +24,7 @@ export const buildSpaceDataFilter = async (
   httpRequest: KibanaRequest
 ): Promise<{ filter: string }> => {
   const logger = endpointServices.createLogger('buildSpaceDataFilter');
-  const spaceId = (await endpointServices.getActiveSpace(httpRequest)).id;
+  const spaceId = endpointServices.getActiveSpaceId(httpRequest);
   const fleetServices = endpointServices.getInternalFleetServices(spaceId);
   const soScopedClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
   const { items: allEndpointPolicyIds } = await fleetServices.packagePolicy.listIds(

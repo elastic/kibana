@@ -1,0 +1,798 @@
+{
+  "id": "@kbn/response-ops-scheduling-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.IntervalSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "IntervalSchedule",
+        "description": [
+          "\nInterval-based schedule. Use this or RruleSchedule, never both."
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.IntervalSchedule.interval",
+            "type": "string",
+            "tags": [],
+            "label": "interval",
+            "description": [
+              "\nAn interval string (e.g. '5m', '30s'). If specified, this is a recurring schedule."
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.IntervalSchedule.rrule",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "rrule",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.RruleCommon",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleCommon",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 34,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleCommon.dtstart",
+            "type": "string",
+            "tags": [],
+            "label": "dtstart",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleCommon.freq",
+            "type": "Enum",
+            "tags": [],
+            "label": "freq",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rrule",
+                "scope": "common",
+                "docId": "kibKbnRrulePluginApi",
+                "section": "def-common.Frequency",
+                "text": "Frequency"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleCommon.interval",
+            "type": "number",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleCommon.tzid",
+            "type": "string",
+            "tags": [],
+            "label": "tzid",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.RruleDaily",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleDaily",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleDaily",
+            "text": "RruleDaily"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleCommon",
+            "text": "RruleCommon"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 57,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleDaily.freq",
+            "type": "number",
+            "tags": [],
+            "label": "freq",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rrule",
+                "scope": "common",
+                "docId": "kibKbnRrulePluginApi",
+                "section": "def-common.Frequency",
+                "text": "Frequency"
+              },
+              ".DAILY"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleDaily.byhour",
+            "type": "Array",
+            "tags": [],
+            "label": "byhour",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleDaily.byminute",
+            "type": "Array",
+            "tags": [],
+            "label": "byminute",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 60,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleDaily.byweekday",
+            "type": "Array",
+            "tags": [],
+            "label": "byweekday",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleDaily.bymonthday",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "bymonthday",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.RruleHourly",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleHourly",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleHourly",
+            "text": "RruleHourly"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleCommon",
+            "text": "RruleCommon"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleHourly.freq",
+            "type": "number",
+            "tags": [],
+            "label": "freq",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rrule",
+                "scope": "common",
+                "docId": "kibKbnRrulePluginApi",
+                "section": "def-common.Frequency",
+                "text": "Frequency"
+              },
+              ".HOURLY"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleHourly.byhour",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "byhour",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleHourly.byminute",
+            "type": "Array",
+            "tags": [],
+            "label": "byminute",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 68,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleHourly.byweekday",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "byweekday",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleHourly.bymonthday",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "bymonthday",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.RruleMonthly",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleMonthly",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleMonthly",
+            "text": "RruleMonthly"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleCommon",
+            "text": "RruleCommon"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleMonthly.freq",
+            "type": "number",
+            "tags": [],
+            "label": "freq",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rrule",
+                "scope": "common",
+                "docId": "kibKbnRrulePluginApi",
+                "section": "def-common.Frequency",
+                "text": "Frequency"
+              },
+              ".MONTHLY"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleMonthly.bymonthday",
+            "type": "Array",
+            "tags": [],
+            "label": "bymonthday",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleMonthly.byhour",
+            "type": "Array",
+            "tags": [],
+            "label": "byhour",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleMonthly.byminute",
+            "type": "Array",
+            "tags": [],
+            "label": "byminute",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleMonthly.byweekday",
+            "type": "Array",
+            "tags": [],
+            "label": "byweekday",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.RruleSchedule",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleSchedule",
+        "description": [
+          "\nRRule-based schedule. Use this or IntervalSchedule, never both."
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleSchedule.rrule",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "rrule",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-scheduling-types",
+                "scope": "common",
+                "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+                "section": "def-common.RruleMonthly",
+                "text": "RruleMonthly"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/response-ops-scheduling-types",
+                "scope": "common",
+                "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+                "section": "def-common.RruleWeekly",
+                "text": "RruleWeekly"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/response-ops-scheduling-types",
+                "scope": "common",
+                "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+                "section": "def-common.RruleDaily",
+                "text": "RruleDaily"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/response-ops-scheduling-types",
+                "scope": "common",
+                "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+                "section": "def-common.RruleHourly",
+                "text": "RruleHourly"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleSchedule.interval",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "interval",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.RruleWeekly",
+        "type": "Interface",
+        "tags": [],
+        "label": "RruleWeekly",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleWeekly",
+            "text": "RruleWeekly"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleCommon",
+            "text": "RruleCommon"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleWeekly.freq",
+            "type": "number",
+            "tags": [],
+            "label": "freq",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/rrule",
+                "scope": "common",
+                "docId": "kibKbnRrulePluginApi",
+                "section": "def-common.Frequency",
+                "text": "Frequency"
+              },
+              ".WEEKLY"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleWeekly.byweekday",
+            "type": "Array",
+            "tags": [],
+            "label": "byweekday",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleWeekly.byhour",
+            "type": "Array",
+            "tags": [],
+            "label": "byhour",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleWeekly.byminute",
+            "type": "Array",
+            "tags": [],
+            "label": "byminute",
+            "description": [],
+            "signature": [
+              "number[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-scheduling-types",
+            "id": "def-common.RruleWeekly.bymonthday",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "bymonthday",
+            "description": [],
+            "signature": [
+              "undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.Rrule",
+        "type": "Type",
+        "tags": [],
+        "label": "Rrule",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleMonthly",
+            "text": "RruleMonthly"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleWeekly",
+            "text": "RruleWeekly"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleDaily",
+            "text": "RruleDaily"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleHourly",
+            "text": "RruleHourly"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-scheduling-types",
+        "id": "def-common.Schedule",
+        "type": "Type",
+        "tags": [],
+        "label": "Schedule",
+        "description": [
+          "Schedule is either interval-based or rrule-based, never both, never neither."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.IntervalSchedule",
+            "text": "IntervalSchedule"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/response-ops-scheduling-types",
+            "scope": "common",
+            "docId": "kibKbnResponseOpsSchedulingTypesPluginApi",
+            "section": "def-common.RruleSchedule",
+            "text": "RruleSchedule"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/scheduling-types/schedule_types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

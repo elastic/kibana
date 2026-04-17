@@ -30,13 +30,21 @@ import {
   GetInstalledPackagesRequestSchema,
   GetFileRequestSchema,
   GetInfoRequestSchema,
+  GetInfoWithoutVersionRequestSchema,
   GetBulkAssetsRequestSchema,
   InstallPackageFromRegistryRequestSchema,
+  InstallPackageFromRegistryWithoutVersionRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  DeletePackageWithoutVersionRequestSchema,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  GetDependenciesRequestSchema,
+  GetDependenciesResponseSchema,
   UpdatePackageRequestSchema,
+  UpdatePackageWithoutVersionRequestSchema,
+  ReviewUpgradeRequestSchema,
+  ReviewUpgradeResponseSchema,
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
@@ -92,6 +100,7 @@ import {
   deletePackageHandler,
   bulkInstallPackagesFromRegistryHandler,
   getStatsHandler,
+  getDependenciesHandler,
   updatePackageHandler,
   getVerificationKeyIdHandler,
   reauthorizeTransformsHandler,
@@ -103,6 +112,7 @@ import {
   rollbackPackageHandler,
   rollbackAvailableCheckHandler,
   bulkRollbackAvailableCheckHandler,
+  reviewUpgradeHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
 import {
@@ -304,6 +314,79 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
 
   router.versioned
     .get({
+      path: EPM_API_ROUTES.DEPENDENCIES_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      summary: `Get package dependencies`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          stability: 'stable',
+          since: '9.4.0',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      dependenciesResponse: {
+                        value: {
+                          items: [
+                            { name: 'aws', version: '^2.0.0', title: 'AWS' },
+                            { name: 'system', version: '^1.0.0', title: 'System' },
+                          ],
+                        },
+                      },
+                      noDependenciesResponse: {
+                        value: {
+                          items: [],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      packageNotFoundResponse: {
+                        value: {
+                          message: '[my-package-1.0.0] package not found in registry',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+        validate: {
+          request: GetDependenciesRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetDependenciesResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getDependenciesHandler
+    );
+
+  router.versioned
+    .get({
       path: EPM_API_ROUTES.INPUTS_PATTERN,
       security: READ_PACKAGE_INFO_SECURITY,
       summary: `Get an inputs template`,
@@ -358,6 +441,40 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getFileHandler
+    );
+
+  router.versioned
+    // @ts-ignore TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
+    .get({
+      path: EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN,
+      fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
+        calculateRouteAuthz(
+          fleetAuthz,
+          getRouteRequiredAuthz('get', EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN)
+        ).granted,
+      summary: `Get a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: GetInfoWithoutVersionRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => GetInfoResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getInfoHandler
     );
 
   router.versioned
@@ -435,6 +552,35 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
 
   router.versioned
     .put({
+      path: EPM_API_ROUTES.INFO_WITHOUT_VERSION_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Update package settings`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: UpdatePackageWithoutVersionRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => UpdatePackageResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      updatePackageHandler
+    );
+
+  router.versioned
+    .put({
       path: EPM_API_ROUTES.INFO_PATTERN,
       security: INSTALL_PACKAGES_SECURITY,
       summary: `Update package settings`,
@@ -460,6 +606,107 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       updatePackageHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.REVIEW_UPGRADE_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Review a pending policy upgrade for a package with deprecations`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          since: '9.4.0',
+          stability: 'stable',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    acceptUpgrade: {
+                      value: { action: 'accept', target_version: '2.0.0' },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: { success: true },
+                      },
+                    },
+                  },
+                },
+              },
+              400: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: { message: 'Bad Request' },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
+        validate: {
+          request: ReviewUpgradeRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => ReviewUpgradeResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      reviewUpgradeHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.INSTALL_FROM_REGISTRY_WITHOUT_VERSION_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Install a package from the registry`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: InstallPackageFromRegistryWithoutVersionRequestSchema,
+          response: {
+            200: {
+              body: () => InstallPackageResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      installPackageFromRegistryHandler
     );
 
   router.versioned
@@ -921,6 +1168,43 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       createCustomIntegrationHandler
+    );
+
+  router.versioned
+    .delete({
+      path: EPM_API_ROUTES.DELETE_WITHOUT_VERSION_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+          ],
+        },
+      },
+      summary: `Delete a package`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: DeletePackageWithoutVersionRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => DeletePackageResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+
+      deletePackageHandler
     );
 
   router.versioned

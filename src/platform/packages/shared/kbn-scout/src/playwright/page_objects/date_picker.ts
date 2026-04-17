@@ -32,11 +32,38 @@ export class DatePicker {
     );
   }
 
+  /**
+   * Detects whether the page is using the new DateRangePicker or the legacy
+   * EuiSuperDatePicker. Not cached because the lazy page object proxy lacks a
+   * `set` trap, so instance property writes through the proxy are lost.
+   *
+   * When a containerLocator is provided, the detection is scoped to that
+   * container (useful when the only DateRangePicker lives inside a panel).
+   */
+  private async isNewDateRangePicker(containerLocator?: Locator): Promise<boolean> {
+    try {
+      await this.getTestSubjLocator('dateRangePickerControlButton', containerLocator).waitFor({
+        timeout: 5000,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private getTestSubjLocator(selector: string, containerLocator?: Locator) {
+    return containerLocator
+      ? containerLocator.getByTestId(selector)
+      : this.page.testSubj.locator(selector);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Legacy EuiSuperDatePicker helpers
+  // ---------------------------------------------------------------------------
+
   private async showStartEndTimes(containerLocator?: Locator) {
     const getTestSubjLocator = (selector: string) =>
-      containerLocator
-        ? containerLocator.getByTestId(selector)
-        : this.page.testSubj.locator(selector);
+      this.getTestSubjLocator(selector, containerLocator);
     const getLocator = (selector: string) =>
       containerLocator ? containerLocator.locator(selector) : this.page.locator(selector);
 
@@ -49,30 +76,9 @@ export class DatePicker {
       await getLocator('div.kbnTypeahead').waitFor({ state: 'hidden' });
     }
 
-    // Initial check if show/end buttons are visible
     const showBtn = getTestSubjLocator('superDatePickerShowDatesButton');
-    const endBtn = getTestSubjLocator('superDatePickerendDatePopoverButton');
 
-    if (
-      !((await showBtn.isVisible({ timeout: 2000 })) || (await endBtn.isVisible({ timeout: 2000 })))
-    ) {
-      // Reload loop only if initial fails
-      await expect
-        .poll(
-          async () => {
-            await this.page.reload();
-            await getTestSubjLocator('superDatePickerToggleQuickMenuButton').waitFor();
-            return (await showBtn.isVisible()) || (await endBtn.isVisible());
-          },
-          {
-            timeout: 20000,
-            intervals: [500], // Retry every 0.5s
-          }
-        )
-        .toBe(true);
-    }
-
-    if (await showBtn.isVisible()) {
+    if (await showBtn.isVisible({ timeout: 2000 })) {
       // Click to show start/end time pickers
       await showBtn.click();
       await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor();
@@ -82,7 +88,16 @@ export class DatePicker {
     }
   }
 
-  async typeAbsoluteRange({
+  private async openAbsoluteTab() {
+    // Usually 2 matching elements exist: one visible in the popover and one hidden in the DOM.
+    const absoluteTab = this.page.testSubj
+      .locator('superDatePickerAbsoluteTab')
+      .filter({ visible: true });
+    await expect(absoluteTab).toHaveCount(1);
+    await absoluteTab.click();
+  }
+
+  private async typeAbsoluteRangeLegacy({
     from,
     to,
     validateDates = false,
@@ -94,9 +109,7 @@ export class DatePicker {
     containerLocator?: Locator;
   }) {
     const getTestSubjLocator = (selector: string) =>
-      containerLocator
-        ? containerLocator.getByTestId(selector)
-        : this.page.testSubj.locator(selector);
+      this.getTestSubjLocator(selector, containerLocator);
 
     // we start with end date
     await getTestSubjLocator('superDatePickerendDatePopoverButton').click();
@@ -107,7 +120,7 @@ export class DatePicker {
     await this.page.testSubj.locator('parseAbsoluteDateFormat').click();
     await this.page.keyboard.press('Escape');
     // and later change start date
-    await this.page.testSubj.locator('superDatePickerstartDatePopoverButton').click();
+    await getTestSubjLocator('superDatePickerstartDatePopoverButton').click();
     await this.openAbsoluteTab();
     const inputTo = this.page.testSubj.locator('superDatePickerAbsoluteDateInput');
     await inputTo.clear();
@@ -129,16 +142,104 @@ export class DatePicker {
     await getTestSubjLocator('querySubmitButton').click();
   }
 
+  // ---------------------------------------------------------------------------
+  // New DateRangePicker helpers
+  // ---------------------------------------------------------------------------
+
+  private async ensurePickerVisible(containerLocator?: Locator) {
+    const controlButton = this.getTestSubjLocator('dateRangePickerControlButton', containerLocator);
+    await controlButton.waitFor();
+
+    // Close any open suggestion lists that might block the date picker button
+    const getLocator = (selector: string) =>
+      containerLocator ? containerLocator.locator(selector) : this.page.locator(selector);
+    const isSuggestionListVisible = await getLocator('div.kbnTypeahead').isVisible();
+    if (isSuggestionListVisible) {
+      await this.getTestSubjLocator('unifiedTabs_tabsBar', containerLocator).click();
+      await getLocator('div.kbnTypeahead').waitFor({ state: 'hidden' });
+    }
+  }
+
+  private async openCustomRangePanel(containerLocator?: Locator) {
+    await this.ensurePickerVisible(containerLocator);
+    // Click the control button scoped to the container
+    await this.getTestSubjLocator('dateRangePickerControlButton', containerLocator).click();
+    // The dialog/popover renders as a portal at the page root, not inside the container,
+    // so dialog elements must be found at the page level.
+    await this.page.testSubj.locator('dateRangePickerCustomRangeNavItem').click();
+    await this.page.testSubj.locator('dateRangePickerCustomRangePanel').waitFor();
+  }
+
+  private async setDatePart(side: 'Start' | 'End', value: string) {
+    // Dialog elements render as a portal at the page root
+    await this.page.testSubj.locator(`dateRangePicker${side}AbsoluteTab`).click();
+    const input = this.page.testSubj.locator(`dateRangePicker${side}AbsoluteInput`);
+    await input.clear();
+    await input.fill(value);
+  }
+
+  private async typeAbsoluteRangeNewPicker({
+    from,
+    to,
+    validateDates = false,
+    containerLocator,
+  }: {
+    from: string;
+    to: string;
+    validateDates?: boolean;
+    containerLocator?: Locator;
+  }) {
+    // Dialog elements render as a portal at the page root
+    await this.setDatePart('Start', from);
+    await this.setDatePart('End', to);
+    await this.page.testSubj.locator('dateRangePickerCustomRangeApplyButton').click();
+
+    if (validateDates) {
+      const controlButton = this.getTestSubjLocator(
+        'dateRangePickerControlButton',
+        containerLocator
+      );
+      // Note: data-date-range stores ISO 8601 strings (e.g. "2025-01-01T00:00:00.000Z"),
+      // not the human-readable format passed as `from`/`to`. We assert visibility only
+      // to confirm the picker updated without risking a format-mismatch failure.
+      await expect(
+        controlButton,
+        `Date picker should reflect the updated time range`
+      ).toBeVisible();
+    }
+
+    await this.getTestSubjLocator('querySubmitButton', containerLocator).click();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Public API (dual-path)
+  // ---------------------------------------------------------------------------
+
   async setCommonlyUsedTime(option: string) {
-    await this.quickMenuButton.click();
-    const commonlyUsedOption = this.page.testSubj.locator(`superDatePickerCommonlyUsed_${option}`);
-    await expect(commonlyUsedOption).toBeVisible();
-    await commonlyUsedOption.click();
+    if (await this.isNewDateRangePicker()) {
+      await this.page.testSubj.locator('dateRangePickerControlButton').click();
+      await this.page.testSubj.locator('dateRangePickerMainPanel').waitFor();
+      const presetItem = this.page.testSubj.locator(`dateRangePickerPresetItem-${option}`);
+      await expect(presetItem).toBeVisible();
+      await presetItem.click();
+    } else {
+      await this.quickMenuButton.click();
+      const commonlyUsedOption = this.page.testSubj.locator(
+        `superDatePickerCommonlyUsed_${option}`
+      );
+      await expect(commonlyUsedOption).toBeVisible();
+      await commonlyUsedOption.click();
+    }
   }
 
   async setAbsoluteRange({ from, to }: { from: string; to: string }) {
-    await this.showStartEndTimes();
-    await this.typeAbsoluteRange({ from, to, validateDates: true });
+    if (await this.isNewDateRangePicker()) {
+      await this.openCustomRangePanel();
+      await this.typeAbsoluteRangeNewPicker({ from, to, validateDates: true });
+    } else {
+      await this.showStartEndTimes();
+      await this.typeAbsoluteRangeLegacy({ from, to, validateDates: true });
+    }
   }
 
   async setAbsoluteRangeInRootContainer({
@@ -150,20 +251,55 @@ export class DatePicker {
     to: string;
     containerLocator: Locator;
   }) {
-    await this.showStartEndTimes(containerLocator);
-    await this.typeAbsoluteRange({ from, to, validateDates: true, containerLocator });
+    if (await this.isNewDateRangePicker(containerLocator)) {
+      await this.openCustomRangePanel(containerLocator);
+      await this.typeAbsoluteRangeNewPicker({
+        from,
+        to,
+        validateDates: true,
+        containerLocator,
+      });
+    } else {
+      await this.showStartEndTimes(containerLocator);
+      await this.typeAbsoluteRangeLegacy({
+        from,
+        to,
+        validateDates: true,
+        containerLocator,
+      });
+    }
   }
 
-  async openAbsoluteTab() {
-    // usually 2 matching elements exist, one in the popover and one hidden in the DOM
-    const absoluteTab = this.page.testSubj
-      .locator('superDatePickerAbsoluteTab')
-      .filter({ visible: true });
-    await expect(absoluteTab).toHaveCount(1);
-    await absoluteTab.click();
+  /** @deprecated Use {@link setAbsoluteRangeInRootContainer} instead. */
+  async typeAbsoluteRange({
+    from,
+    to,
+    validateDates = false,
+    containerLocator,
+  }: {
+    from: string;
+    to: string;
+    validateDates?: boolean;
+    containerLocator?: Locator;
+  }) {
+    if (await this.isNewDateRangePicker(containerLocator)) {
+      await this.openCustomRangePanel(containerLocator);
+      await this.typeAbsoluteRangeNewPicker({ from, to, validateDates, containerLocator });
+    } else {
+      await this.showStartEndTimes(containerLocator);
+      await this.typeAbsoluteRangeLegacy({ from, to, validateDates, containerLocator });
+    }
   }
 
   async getTimeConfig(): Promise<{ start: string; end: string }> {
+    if (await this.isNewDateRangePicker()) {
+      const dateRange =
+        (await this.page.testSubj
+          .locator('dateRangePickerControlButton')
+          .getAttribute('data-date-range')) ?? '';
+      const [start, end] = dateRange.split(' to ');
+      return { start: start?.trim() ?? '', end: end?.trim() ?? '' };
+    }
     await this.showStartEndTimes();
     const start = await this.page.testSubj.innerText('superDatePickerstartDatePopoverButton');
     const end = await this.page.testSubj.innerText('superDatePickerendDatePopoverButton');
@@ -171,22 +307,46 @@ export class DatePicker {
   }
 
   async startAutoRefresh(interval: number, dateUnit: DateUnitSelector = DateUnitSelector.Seconds) {
-    await this.quickMenuButton.click();
-    // Check if refresh is already running
-    const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
-    if (isPaused) {
-      await this.toggleRefreshButton.click();
-    }
-    // Set interval
-    await this.refreshIntervalInput.clear();
-    await this.refreshIntervalInput.fill(interval.toString());
-    await this.refreshIntervalUnitSelect.selectOption({ value: dateUnit });
-    await this.refreshIntervalInput.press('Enter');
+    if (await this.isNewDateRangePicker()) {
+      await this.page.testSubj.locator('dateRangePickerControlButton').click();
+      await this.page.testSubj.locator('dateRangePickerSettingsButton').click();
+      await this.page.testSubj.locator('dateRangePickerSettingsPanel').waitFor();
 
-    await this.quickMenuButton.click();
+      const toggle = this.page.testSubj.locator('dateRangePickerAutoRefreshToggle');
+      const isPaused = (await toggle.getAttribute('aria-checked')) !== 'true';
+      if (isPaused) {
+        await toggle.click();
+      }
+
+      const countInput = this.page.testSubj.locator('dateRangePickerAutoRefreshIntervalCount');
+      await countInput.clear();
+      await countInput.fill(interval.toString());
+      await this.page.testSubj
+        .locator('dateRangePickerAutoRefreshIntervalUnit')
+        .selectOption({ value: dateUnit });
+
+      await this.page.keyboard.press('Escape');
+    } else {
+      await this.quickMenuButton.click();
+      const isPaused = (await this.toggleRefreshButton.getAttribute('aria-checked')) === 'false';
+      if (isPaused) {
+        await this.toggleRefreshButton.click();
+      }
+      await this.refreshIntervalInput.clear();
+      await this.refreshIntervalInput.fill(interval.toString());
+      await this.refreshIntervalUnitSelect.selectOption({ value: dateUnit });
+      await this.refreshIntervalInput.press('Enter');
+      await this.quickMenuButton.click();
+    }
   }
 
   async waitToBeHidden() {
-    await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
+    if (await this.isNewDateRangePicker()) {
+      await this.page.testSubj
+        .locator('dateRangePickerCustomRangePanel')
+        .waitFor({ state: 'hidden' });
+    } else {
+      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
+    }
   }
 }

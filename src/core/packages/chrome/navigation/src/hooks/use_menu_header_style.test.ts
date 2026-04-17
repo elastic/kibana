@@ -38,7 +38,7 @@ describe('useMenuHeaderStyle', () => {
     expect(typeof result.current).toBe('object');
   });
 
-  it('adjusts padding in dark mode', () => {
+  it('returns sticky header styles in dark mode', () => {
     useEuiTheme.mockReturnValue({ euiTheme: baseTheme, colorMode: 'DARK' });
 
     const { result } = renderHook(() => useMenuHeaderStyle());

@@ -47,7 +47,7 @@ export const OpenFlyoutRowControlColumn = memo(({ alert }: ActionsCellProps) => 
       })}
       color="primary"
       data-test-subj={ROW_ACTION_FLYOUT_ICON_TEST_ID}
-      iconType="expand"
+      iconType="maximize"
       onClick={onOpenFlyout}
       size="xs"
     />

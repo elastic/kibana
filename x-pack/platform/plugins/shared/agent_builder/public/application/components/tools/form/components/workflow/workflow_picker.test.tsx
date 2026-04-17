@@ -63,7 +63,7 @@ describe('WorkflowPicker', () => {
     );
 
     expect(screen.getByRole('combobox', { name: /workflow selection/i })).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderWorkflowPicker')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowComboBox')).toBeInTheDocument();
   });
 
   it('shows workflow options when opened in single selection mode', async () => {

@@ -186,7 +186,7 @@ function DefaultEditorAgg({
       actionIcons.push({
         id: 'enableAggregation',
         color: 'text',
-        type: 'eyeClosed',
+        type: 'eyeSlash',
         onClick: () => onToggleEnableAgg(agg.id, true),
         tooltip: i18n.translate('visDefaultEditor.agg.enableAggButtonTooltip', {
           defaultMessage: 'Enable {schemaTitle} {aggTitle} aggregation',

@@ -116,7 +116,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "cwd",
-                "description": [],
+                "description": [
+                  "/**\n     * Root directory that all source files for packages are expected to be\n     * in, also the directory that package maps are resolved against.\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -133,7 +135,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "pkgsById",
-                "description": [],
+                "description": [
+                  "/**\n     * Map of package ids to normalized root-relative directories\n     * for each package\n     */"
+                ],
                 "signature": [
                   "Map<string, ",
                   "Package",
@@ -354,7 +358,7 @@
               " | null"
             ],
             "path": "src/platform/packages/private/kbn-import-resolver/src/import_resolver.ts",
-            "lineNumber": 327,
+            "lineNumber": 323,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -370,7 +374,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-import-resolver/src/import_resolver.ts",
-                "lineNumber": 330,
+                "lineNumber": 326,
                 "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -387,7 +391,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-import-resolver/src/import_resolver.ts",
-                "lineNumber": 330,
+                "lineNumber": 326,
                 "columnNumber": 24,
                 "deprecated": false,
                 "trackAdoption": false,

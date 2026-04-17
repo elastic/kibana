@@ -8,9 +8,10 @@
  */
 
 import type { Command } from '@kbn/dev-cli-runner';
-import { initLogsDir } from '@kbn/test';
 import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
+
+import { initLogsDir } from './init_logs_dir';
 import { TEST_FLAG_OPTIONS } from '../playwright/runner';
 import { parseTestFlags, runTests } from '../playwright/runner';
 
@@ -49,6 +50,9 @@ export const runTestsCmd: Command<void> = {
 
     On Elastic Cloud projects (MKI):
     node scripts/scout run-tests --location cloud --arch serverless --domain search --config <playwright_config_path>
+
+    Local flakiness validation (run each test N times):
+    node scripts/scout run-tests --arch stateful --domain classic --config <playwright_config_path> --repeatEach 5
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {

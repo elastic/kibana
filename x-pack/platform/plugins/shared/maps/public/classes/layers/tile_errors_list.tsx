@@ -100,7 +100,7 @@ export function TileErrorsList(props: Props) {
         button={
           <EuiButtonEmpty
             flush="left"
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
             iconSide="right"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
@@ -114,6 +114,9 @@ export function TileErrorsList(props: Props) {
         closePopover={() => {
           setIsPopoverOpen(false);
         }}
+        aria-label={i18n.translate('xpack.maps.tileErrorsList.popoverAriaLabel', {
+          defaultMessage: 'Tile errors',
+        })}
       >
         <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>

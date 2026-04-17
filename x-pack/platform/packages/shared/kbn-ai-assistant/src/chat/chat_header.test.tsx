@@ -64,7 +64,7 @@ describe('ChatHeader', () => {
     copyConversationToClipboard: jest.fn(),
     copyUrl: jest.fn(),
     handleArchiveConversation: jest.fn(),
-    navigateToConnectorsManagementApp: jest.fn(),
+    navigateToModelManagementApp: jest.fn(),
   };
 
   beforeEach(() => {

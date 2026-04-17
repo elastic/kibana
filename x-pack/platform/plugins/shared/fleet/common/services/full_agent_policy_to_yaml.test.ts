@@ -9,6 +9,20 @@ import type { FullAgentPolicy } from '../types';
 
 import { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 
+// Mock yaml module for testing (matches YamlModule shape)
+const mockYaml = {
+  Document: class {
+    private data: unknown;
+    constructor(data: unknown) {
+      this.data = data;
+    }
+    toString() {
+      return JSON.stringify(this.data);
+    }
+  },
+  isScalar: () => true,
+};
+
 describe('fullAgentPolicyToYaml', () => {
   it('should replace secrets', () => {
     const agentPolicyWithSecrets = {
@@ -45,9 +59,9 @@ describe('fullAgentPolicyToYaml', () => {
       fleet: {},
     } as unknown as FullAgentPolicy;
 
-    const yaml = fullAgentPolicyToYaml(agentPolicyWithSecrets, (policy) => JSON.stringify(policy));
+    const result = fullAgentPolicyToYaml(agentPolicyWithSecrets, mockYaml);
 
-    expect(yaml).toMatchInlineSnapshot(
+    expect(result).toMatchInlineSnapshot(
       `"{\\"id\\":\\"1234\\",\\"outputs\\":{\\"default\\":{\\"type\\":\\"elasticsearch\\",\\"hosts\\":[\\"http://localhost:9200\\"]}},\\"inputs\\":[{\\"id\\":\\"test_input-secrets-abcd1234\\",\\"revision\\":1,\\"name\\":\\"secrets-1\\",\\"type\\":\\"test_input\\",\\"data_stream\\":{\\"namespace\\":\\"default\\"},\\"use_output\\":\\"default\\",\\"package_policy_id\\":\\"abcd1234\\",\\"package_var_secret\\":\\"\${SECRET_0}\\",\\"input_var_secret\\":\\"\${SECRET_1}\\",\\"streams\\":[{\\"id\\":\\"test_input-secrets.log-abcd1234\\",\\"data_stream\\":{\\"type\\":\\"logs\\",\\"dataset\\":\\"secrets.log\\"},\\"package_var_secret\\":\\"\${SECRET_0}\\",\\"input_var_secret\\":\\"\${SECRET_1}\\",\\"stream_var_secret\\":\\"\${SECRET_2}\\"}],\\"meta\\":{\\"package\\":{\\"name\\":\\"secrets\\",\\"version\\":\\"1.0.0\\"}}}],\\"secret_references\\":[{\\"id\\":\\"secret-id-1\\"},{\\"id\\":\\"secret-id-2\\"},{\\"id\\":\\"secret-id-3\\"}],\\"revision\\":2,\\"agent\\":{},\\"signed\\":{},\\"output_permissions\\":{},\\"fleet\\":{}}"`
     );
   });

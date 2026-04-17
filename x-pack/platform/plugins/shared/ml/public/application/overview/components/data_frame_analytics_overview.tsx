@@ -11,7 +11,7 @@ import { EuiButton, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../locator';
-import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/analysis_monitors.png';
+import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/analysis_monitors.svg';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { mlNodesAvailable } from '../../ml_nodes_check';
@@ -106,11 +106,12 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
   }, [mlApi]);
 
   return !hasDFAs ? (
-    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} />
+    <AnalyticsEmptyPrompt customCss={overviewPageCardCustomCss} iconSize="m" />
   ) : (
     <MLEmptyPromptCard
       customCss={overviewPageCardCustomCss}
       iconSrc={dfaImage}
+      iconSize="m"
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Tailored predictive models',
       })}

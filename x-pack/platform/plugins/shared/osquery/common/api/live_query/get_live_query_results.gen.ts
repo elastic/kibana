@@ -14,10 +14,33 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * The response for getting live query results.
  */
 export type GetLiveQueryResultsResponse = z.infer<typeof GetLiveQueryResultsResponse>;
-export const GetLiveQueryResultsResponse = z.object({});
+export const GetLiveQueryResultsResponse = z.object({
+  data: z
+    .object({
+      /**
+       * The total number of result rows.
+       */
+      total: z.number().int().optional(),
+      /**
+       * The result rows from the query execution.
+       */
+      edges: z
+        .array(
+          z.object({
+            _id: z.string().optional(),
+            /**
+             * The Elasticsearch document source containing query results.
+             */
+            _source: z.object({}).optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+});

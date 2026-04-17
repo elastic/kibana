@@ -11,7 +11,11 @@ import {
   EXCEPTIONS_TABLE_SHOWING_LISTS,
   EXCEPTIONS_TABLE_LIST_NAME,
 } from '../../../../../../screens/exceptions';
-import { createExceptionList } from '../../../../../../tasks/api_calls/exceptions';
+import {
+  createEndpointExceptionList,
+  createExceptionList,
+  deleteExceptionLists,
+} from '../../../../../../tasks/api_calls/exceptions';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
   waitForExceptionsTableToBeLoaded,
@@ -41,6 +45,8 @@ const getExceptionList2 = () => ({
 describe('Filter Lists', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
+    deleteExceptionLists();
+    createEndpointExceptionList();
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>

@@ -16,12 +16,26 @@ import {
 import type { GroupingSort } from '@kbn/grouping/src';
 import * as i18n from './translations';
 
+import { useKibana } from '../../../../common/lib/kibana';
+import { AttacksEventTypes } from '../../../../common/lib/telemetry';
+
+jest.mock('../../../../common/lib/kibana');
+
 describe('AttacksTableSortSelect', () => {
   const defaultSort: GroupingSort = DEFAULT_ATTACKS_SORT;
   const onChange = jest.fn();
+  const reportEventMock = jest.fn();
 
   beforeEach(() => {
     onChange.mockClear();
+    reportEventMock.mockClear();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
   });
 
   it('renders correctly with default sort', () => {
@@ -53,6 +67,10 @@ describe('AttacksTableSortSelect', () => {
     fireEvent.click(leastRecentOption);
 
     expect(onChange).toHaveBeenCalledWith([{ latestTimestamp: { order: 'asc' } }]);
+    expect(reportEventMock).toHaveBeenCalledWith(AttacksEventTypes.TableSortChanged, {
+      field: 'latestTimestamp',
+      direction: 'asc',
+    });
   });
 
   it('displays correct label for non-default sort', () => {

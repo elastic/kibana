@@ -7,9 +7,9 @@
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import type { StreamsPluginSetup, StreamsPluginStart } from './types';
+import type { StreamsPluginSetup, StreamsPluginStart, WiredStreamsStatus } from './types';
 
-export type { StreamsPluginSetup, StreamsPluginStart };
+export type { StreamsPluginSetup, StreamsPluginStart, WiredStreamsStatus };
 
 export { STREAMS_API_PRIVILEGES, STREAMS_UI_PRIVILEGES } from '../common/constants';
 

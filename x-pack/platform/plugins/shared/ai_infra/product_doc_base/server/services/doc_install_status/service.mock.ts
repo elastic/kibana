@@ -24,6 +24,8 @@ const createInstallClientMock = (): InstallClientMock => {
     setSecurityLabsInstallationSuccessful: jest.fn(),
     setSecurityLabsInstallationFailed: jest.fn(),
     setSecurityLabsUninstalled: jest.fn(),
+    getOpenapiSpecInstallationStatus: jest.fn(),
+    setOpenapiSpecUninstalled: jest.fn(),
   } as unknown as InstallClientMock;
 };
 

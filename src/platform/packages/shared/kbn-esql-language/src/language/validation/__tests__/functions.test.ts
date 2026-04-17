@@ -15,7 +15,7 @@ import { getNoValidCallSignatureError } from '../../../commands/definitions/util
 import { Location } from '../../../commands/registry/types';
 import { setTestFunctions } from '../../../commands/definitions/utils/test_functions';
 import { setup } from './helpers';
-import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '../../../commands/definitions/utils/expressions';
+import { PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING } from '../../../commands/definitions/utils/signatures';
 
 describe('function validation', () => {
   afterEach(() => {

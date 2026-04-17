@@ -83,7 +83,7 @@
               "InternalCoreUsageDataSetup"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
-            "lineNumber": 459,
+            "lineNumber": 462,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -99,7 +99,7 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
-                "lineNumber": 459,
+                "lineNumber": 462,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -125,7 +125,7 @@
               ">; }"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
-            "lineNumber": 547,
+            "lineNumber": 550,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -141,7 +141,7 @@
                   "StartDeps"
                 ],
                 "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
-                "lineNumber": 547,
+                "lineNumber": 550,
                 "columnNumber": 9,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -161,7 +161,7 @@
               "() => void"
             ],
             "path": "src/core/packages/usage-data/server-internal/src/core_usage_data_service.ts",
-            "lineNumber": 558,
+            "lineNumber": 561,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

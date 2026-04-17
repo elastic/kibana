@@ -18,6 +18,7 @@
       "_ml/trained_models/{model_id}/_infer"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-ml-infer-trained-model",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-ml-infer-trained-model",
     "availability": {
       "stack": true,
       "serverless": true

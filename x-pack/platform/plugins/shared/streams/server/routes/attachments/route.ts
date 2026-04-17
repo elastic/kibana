@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
@@ -38,6 +38,7 @@ const listAttachmentsRoute = createServerRoute({
     description:
       'Fetches all attachments linked to a stream that are visible to the current user in the current space. Optionally filter by attachment types, search query, and tags.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -141,6 +142,7 @@ const linkAttachmentRoute = createServerRoute({
     description:
       'Links an attachment to a stream. Noop if the attachment is already linked to the stream.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -217,6 +219,7 @@ const unlinkAttachmentRoute = createServerRoute({
     description:
       'Unlinks an attachment from a stream. Noop if the attachment is not linked to the stream.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({
@@ -297,6 +300,7 @@ const bulkAttachmentsRoute = createServerRoute({
     description:
       'Bulk update attachments linked to a stream. Can link new attachments and delete existing ones. Supports mixed attachment types in a single request.',
     availability: {
+      since: '9.3.0',
       stability: 'experimental',
     },
     oasOperationObject: () => ({

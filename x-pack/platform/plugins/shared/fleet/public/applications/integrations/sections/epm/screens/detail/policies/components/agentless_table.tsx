@@ -6,15 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -37,6 +29,8 @@ import {
 
 import { Persona } from '../persona';
 import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
+
+import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -66,7 +60,6 @@ export const AgentlessPackagePoliciesTable = ({
   const [isAgentsLoading, setIsAgentsLoading] = useState<boolean>(false);
   const [agentsByPolicyId, setAgentsByPolicyId] = useState<Record<string, Agent>>({});
   const canReadAgents = authz.fleet.readAgents;
-  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
 
   // Kuery for all agents enrolled into the agent policies associated with the package policies
   // We use the first agent policy as agentless package policies have a 1:1 relationship with agent policies
@@ -192,25 +185,11 @@ export const AgentlessPackagePoliciesTable = ({
                     </EuiText>
                   </EuiFlexItem>
 
-                  {agentPolicies.length > 0 && packagePolicy.hasUpgrade && (
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        size="s"
-                        minWidth="0"
-                        href={`${getHref('upgrade_package_policy', {
-                          policyId: agentPolicies[0].id,
-                          packagePolicyId: packagePolicy.id,
-                        })}?from=${from || 'integrations-policy-list'}`}
-                        data-test-subj="integrationPolicyUpgradeBtn"
-                        isDisabled={!canWriteIntegrationPolicies}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.policyDetails.packagePoliciesTable.upgradeButton"
-                          defaultMessage="Upgrade"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  )}
+                  <PackagePolicyUpgradeCell
+                    packagePolicy={packagePolicy}
+                    agentPolicies={agentPolicies}
+                    from={from || 'integrations-policy-list'}
+                  />
                 </EuiFlexGroup>
               );
             },

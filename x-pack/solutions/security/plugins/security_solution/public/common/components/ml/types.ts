@@ -93,6 +93,8 @@ export interface AnomaliesTableCommonProps {
 export type AnomaliesHostTableProps = AnomaliesTableCommonProps & {
   hostName?: string;
   type: HostsType;
+  /** Entity Store / EUID identity fields; drives ML exists filter and anomaly row matching. */
+  identityFields?: Record<string, string>;
 };
 
 export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
@@ -104,6 +106,8 @@ export type AnomaliesNetworkTableProps = AnomaliesTableCommonProps & {
 export type AnomaliesUserTableProps = AnomaliesTableCommonProps & {
   userName?: string;
   type: UsersType;
+  /** Entity Store / EUID identity fields; drives ML exists filter and anomaly row matching. */
+  identityFields?: Record<string, string>;
 };
 
 const sourceOrDestination = ['source.ip', 'destination.ip'];

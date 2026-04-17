@@ -14,7 +14,6 @@ describe('initUiSettings', () => {
   let mockUiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   const mockExperimentalFeatures = {
     enableAlertsAndAttacksAlignment: false,
-    siemReadinessDashboard: false,
     extendedRuleExecutionLoggingEnabled: false,
   } as ExperimentalFeatures;
 
@@ -44,6 +43,7 @@ describe('initUiSettings', () => {
         name: 'Enable alerts and attacks alignment',
         value: false,
         type: 'boolean',
+        technicalPreview: true,
       })
     );
   });

@@ -637,17 +637,17 @@ Never assume the UI is ready immediately after an action. When an action trigger
 
 > **Don't add waits by default.** Playwright actions auto-wait for the element they interact with. Only add explicit waits when the **next action's stability** requires it (e.g., waiting for a panel to appear before clicking something inside it). Unnecessary waits increase execution time without benefit.
 
-**❌ Don't rely on the loading indicator to ensure page readiness**
+**❌ Don't rely on the global loading indicator to ensure page readiness**
 
 ```ts
 // perform action
 await this.page.testSubj.click('newItemButton');
 
-// deprecated, not reliable, flaky
-this.page.waitForLoadingIndicatorHidden();
+// DON'T: waiting for `globalLoadingIndicator-hidden` data-test-subj is unreliable and flaky
+await this.page.testSubj.waitForSelector('globalLoadingIndicator-hidden');
 ```
 
-Relying on the loading indicator can lead to **flakiness**, as it may disappear before the page or panel is fully ready for interaction.
+Relying on the global loading indicator (`data-test-subj="globalLoadingIndicator-hidden"`) can lead to **flakiness**, as it may disappear before the page or panel is fully ready for interaction. The `page.waitForLoadingIndicatorHidden()` method has been removed from the Scout page fixture for this reason.
 
 **✅ Do wait for a specific element that indicates the page is ready**
 

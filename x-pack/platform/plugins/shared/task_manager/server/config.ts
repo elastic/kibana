@@ -45,6 +45,11 @@ const FIVE_MIN_IN_MS = 5 * 60 * 1000;
 
 export const DEFAULT_KIBANAS_PER_PARTITION = 2;
 
+export enum ApiKeyType {
+  ES = 'es',
+  UIAM = 'uiam',
+}
+
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
     error_threshold: schema.number({
@@ -88,6 +93,10 @@ const validateDuration = (duration: string) => {
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
+    /* The API key type to switch between UIAM API keys and Elasticsearch API keys. */
+    api_key_type: schema.oneOf([schema.literal(ApiKeyType.ES), schema.literal(ApiKeyType.UIAM)], {
+      defaultValue: ApiKeyType.ES,
+    }),
     /* The number of normal cost tasks that this Kibana instance will run simultaneously */
     capacity: schema.maybe(schema.number({ min: MIN_CAPACITY, max: MAX_CAPACITY })),
     discovery: schema.object({

@@ -18,7 +18,7 @@ export const getMissingCapabilitiesToast = (
   core: CoreStart
 ): ToastInput => ({
   color: 'danger',
-  iconType: 'alert',
+  iconType: 'warning',
   title: i18n.translate(
     'xpack.securitySolution.siemMigrations.baseService.missingCapabilities.title',
     { defaultMessage: 'Insufficient privileges.' }

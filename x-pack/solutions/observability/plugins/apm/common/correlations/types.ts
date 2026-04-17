@@ -37,3 +37,35 @@ export interface CommonCorrelationsQueryParams {
   environment: Environment;
   query: QueryDslQueryContainer;
 }
+
+export type EntityType = 'transaction' | 'exit_span';
+export type Metric = 'latency' | 'failure_rate';
+
+export interface UnifiedCorrelation {
+  fieldName: string;
+  fieldValue: string | number;
+  correlation?: number;
+  ksTest?: number;
+  pValue?: number | null;
+  score?: number;
+  normalizedScore?: number;
+  histogram?: HistogramItem[];
+  isFallbackResult?: boolean;
+  doc_count?: number;
+  bg_count?: number;
+  failurePercentage?: number;
+  successPercentage?: number;
+}
+
+export interface CorrelationsResponse {
+  overallHistogram?: HistogramItem[];
+  errorHistogram?: HistogramItem[];
+  totalDocCount: number;
+  percentileThresholdValue?: number | null;
+  durationMin: number;
+  durationMax: number;
+  fieldCandidates: string[];
+  correlations: UnifiedCorrelation[];
+  ccsWarning: boolean;
+  fallbackResult?: UnifiedCorrelation;
+}

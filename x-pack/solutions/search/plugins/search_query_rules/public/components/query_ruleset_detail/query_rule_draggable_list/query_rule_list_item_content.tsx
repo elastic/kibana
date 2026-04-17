@@ -148,7 +148,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                   }
                 )}
               >
-                <EuiIcon type="grab" />
+                <EuiIcon type="dragVertical" />
               </EuiPanel>
             ) : (
               <EuiPanel
@@ -236,7 +236,7 @@ export const QueryRuleListItemContent: React.FC<QueryRuleListItemContentProps> =
                             )
                       }
                       data-test-subj="searchQueryRulesQueryRulesetDetailButton"
-                      iconType="boxesHorizontal"
+                      iconType="boxesVertical"
                       color="text"
                       onClick={() => {
                         openPopover();

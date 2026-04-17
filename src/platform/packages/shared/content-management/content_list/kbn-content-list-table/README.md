@@ -34,7 +34,11 @@ const { Column } = ContentListTable;
 
 | Component | Description |
 |-----------|-------------|
-| `Column.Name` | Title with optional description. |
+| `Column.Name` | Title with optional description and inline tag badges. |
+| `Column.UpdatedAt` | Relative timestamp from `item.updatedAt`. |
+| `Column.CreatedBy` | User avatar resolved via `ProfileCache`. Clickable to toggle `createdBy` filter. |
+| `Column.Starred` | Star toggle using the favorites service. Requires `services.favorites` on the provider. |
+| `Column.Actions` | Row-level action buttons (edit, delete). Configurable via `item` props on the provider. |
 
 Custom columns use the `Column` component with `id`, `name`, and `render` props.
 

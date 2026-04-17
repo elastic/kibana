@@ -1059,11 +1059,16 @@ export interface PolicyConfig {
       security: boolean;
     };
     malware: ProtectionFields & BlocklistFields & OnWriteScanFields;
+    ransomware: ProtectionFields & SupportedFields;
     behavior_protection: BehaviorProtectionFields & SupportedFields;
     memory_protection: ProtectionFields & SupportedFields;
     device_control?: DeviceControlFields;
     popup: {
       malware: {
+        message: string;
+        enabled: boolean;
+      };
+      ransomware: {
         message: string;
         enabled: boolean;
       };
@@ -1143,6 +1148,7 @@ export interface UIPolicyConfig {
   mac: Pick<
     PolicyConfig['mac'],
     | 'malware'
+    | 'ransomware'
     | 'events'
     | 'popup'
     | 'advanced'

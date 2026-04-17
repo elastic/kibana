@@ -188,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const styleObj = await lens.getDatatableCellStyle(0, 2);
       expect(styleObj['background-color']).to.be('rgb(140, 217, 187)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
     });
 
     it('should open the palette panel to customize the palette look', async () => {
@@ -239,10 +239,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(1, 1);
-      expect(styleObj['background-color']).to.be('rgb(200, 222, 255)');
+      expect(styleObj['background-color']).to.be('rgb(207, 225, 255)');
       // should also set text color when in cell mode
-      expect(styleObj.color).to.be('rgb(0, 0, 0)');
+      expect(styleObj.color).to.be('rgb(7, 16, 31)');
       await lens.closePalettePanel();
+    });
+
+    it('should render values as badges when badge coloring is enabled', async () => {
+      await lens.setTableDynamicColoring('badge');
+      await lens.waitForVisualization();
+      const cell = await lens.getDatatableCell(0, 2);
+      const badge = await cell.findByTestSubject('lnsTableCellContentBadge');
+      const badgeText = await badge.getVisibleText();
+      expect(badgeText).to.not.be.empty();
+      const cellStyle = await lens.getDatatableCellStyle(0, 2);
+      expect(cellStyle['background-color']).to.be(undefined);
     });
 
     it('should allow to show a summary table for metric columns', async () => {

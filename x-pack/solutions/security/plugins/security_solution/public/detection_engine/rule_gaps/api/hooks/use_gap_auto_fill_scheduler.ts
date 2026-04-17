@@ -46,6 +46,7 @@ const transformGapAutoFillSchedulerResponseBody = (
     updatedBy: response.updated_by,
     createdAt: response.created_at,
     updatedAt: response.updated_at,
+    excludedReasons: response.excluded_reasons,
   };
 };
 
@@ -73,7 +74,7 @@ export const useCreateGapAutoFillScheduler = () => {
   const schedulerId = getSchedulerId(spaceId);
 
   return useMutation(
-    async () => {
+    async (params?: { excludedReasons?: string[] }) => {
       const fullBody = {
         id: schedulerId,
         name: '',
@@ -89,6 +90,7 @@ export const useCreateGapAutoFillScheduler = () => {
         maxBackfills: DEFAULT_GAP_AUTO_FILL_SCHEDULER_MAX_BACKFILLS,
         numRetries: DEFAULT_GAP_AUTO_FILL_SCHEDULER_NUM_RETRIES,
         scope: DEFAULT_GAP_AUTO_FILL_SCHEDULER_SCOPE,
+        excludedReasons: params?.excludedReasons,
       };
       const response = await createGapAutoFillScheduler(fullBody);
       return transformGapAutoFillSchedulerResponseBody(response);

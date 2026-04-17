@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { controlsGroupSchema } from './src/controls_group_schema';
+export { getControlsGroupSchema } from './src/controls_group_schema';
 
 export type {
   ControlsGroupState,
@@ -39,3 +39,10 @@ export type {
   LegacyStoredRangeSliderExplicitInput,
   LegacyStoredTimeSliderExplicitInput,
 } from './src/legacy_types';
+
+export {
+  optionsListESQLControlSchema,
+  optionsListDSLControlSchema,
+} from './src/options_list_schema';
+export { rangeSliderControlSchema } from './src/range_slider_schema';
+export { timeSliderControlSchema } from './src/time_slider_schema';

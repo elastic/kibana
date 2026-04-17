@@ -11,7 +11,7 @@ import {
   ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
-import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod, stringifyZodError } from '@kbn/zod-helpers/v4';
 import {
   CreateEndpointListItemRequestBody,
   CreateEndpointListItemResponse,

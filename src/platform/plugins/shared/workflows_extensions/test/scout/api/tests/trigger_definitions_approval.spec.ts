@@ -8,14 +8,22 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { APPROVED_TRIGGER_DEFINITIONS } from '../fixtures/approved_trigger_definitions';
 import { COMMON_HEADERS } from '../fixtures/constants';
 
 apiTest.describe(
-  'Workflows Extensions - Custom Trigger Definitions Approval',
-  { tag: ['@ess', '@svlSearch', '@svlSecurity', '@svlOblt', '@svlWorkplaceAI'] },
+  'Workflows Extensions - Event-Driven Trigger Definitions Approval',
+  {
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.workplaceai,
+    ],
+  },
   () => {
     let adminApiCredentials: RoleApiCredentials;
 
@@ -24,7 +32,7 @@ apiTest.describe(
     });
 
     apiTest(
-      'should validate that all registered custom trigger definitions are approved by workflows-eng team',
+      'should validate that all registered event-driven trigger definitions are approved by workflows-eng team',
       async ({ apiClient }) => {
         const response = await apiClient.get('internal/workflows_extensions/trigger_definitions', {
           headers: {

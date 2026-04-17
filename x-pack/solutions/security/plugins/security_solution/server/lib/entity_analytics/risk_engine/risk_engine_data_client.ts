@@ -56,6 +56,7 @@ export class RiskEngineDataClient {
 
     try {
       await riskScoreDataClient.init();
+      await riskScoreDataClient.initLegacyTransforms();
       result.riskEngineResourcesInstalled = true;
     } catch (e) {
       result.errors.push(e.message);

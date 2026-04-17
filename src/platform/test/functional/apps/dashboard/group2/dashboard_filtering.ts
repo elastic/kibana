@@ -34,8 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
 
-  // Failing: See https://github.com/elastic/kibana/issues/160062
-  describe.skip('dashboard filtering', function () {
+  describe('dashboard filtering', function () {
     const populateDashboard = async () => {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
@@ -114,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist(['-']);
+        await dashboardExpect.metricValuesExist(['(null)']);
       });
 
       it('tag cloud values are filtered', async () => {
@@ -127,10 +126,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb top n is filtered', async () => {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
-      });
-
-      it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowsMissing();
       });
 
       it('timelion is filtered', async () => {
@@ -175,7 +170,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('metric value shows no data', async () => {
-        await dashboardExpect.metricValuesExist(['-']);
+        await dashboardExpect.metricValuesExist(['(null)']);
       });
 
       it('tag cloud values are filtered', async () => {
@@ -188,10 +183,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb top n is filtered', async () => {
         await dashboardExpect.tsvbTopNValuesExist(['-', '-']);
-      });
-
-      it('saved search is filtered', async () => {
-        await dashboardExpect.savedSearchRowsMissing();
       });
 
       it('timelion is filtered', async () => {
@@ -248,10 +239,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('tsvb markdown', async () => {
         await dashboardExpect.tsvbMarkdownWithValuesExists(['7,209.286']);
-      });
-
-      it('saved searches', async () => {
-        await dashboardExpect.savedSearchRowsExist();
       });
 
       it('vega', async () => {

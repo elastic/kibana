@@ -20,8 +20,10 @@ import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../../sourcerer/containers');
+jest.mock('../../../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -36,10 +38,37 @@ const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
 const openFlyoutMock = jest.fn();
+const mockOpenSystemFlyout = jest.fn();
+const mockDocumentFlyoutWrapper = jest.fn((_props?: unknown) => (
+  <div>{'MockDocumentFlyoutWrapper'}</div>
+));
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
 jest.mock('@kbn/expandable-flyout');
+jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
+jest.mock('../../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+}));
+jest.mock('../../../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      ...original.useKibana(),
+      services: {
+        ...original.useKibana().services,
+        overlays: {
+          ...original.useKibana().services.overlays,
+          openSystemFlyout: mockOpenSystemFlyout,
+        },
+      },
+    }),
+  };
+});
 
 const initialEnrichedColumns = getColumnHeaders(
   defaultUdtHeaders,
@@ -119,7 +148,9 @@ describe('unified data table', () => {
     (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
     (useExpandableFlyoutApi as jest.Mock).mockReturnValue({
       openFlyout: openFlyoutMock,
+      closeFlyout: jest.fn(),
     });
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -154,6 +185,28 @@ describe('unified data table', () => {
           },
         });
       });
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'opens the system flyout with the existing hit when newFlyoutSystemEnabled is enabled',
+    async () => {
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+      });
+
+      const flyoutElement = mockOpenSystemFlyout.mock.calls[0][0];
+      expect(flyoutElement.props.documentId).toBe(mockTimelineData[0]._id);
+      expect(flyoutElement.props.indexName).toBe(mockTimelineData[0].ecs._index);
+      expect(flyoutElement.props.onAlertUpdated).toBe(refetchMock);
     },
     SPECIAL_TEST_TIMEOUT
   );

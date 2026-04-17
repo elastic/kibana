@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 /** @public */
@@ -31,14 +31,5 @@ export class IpFormat extends FieldFormat {
     // shazzam!
     // eslint-disable-next-line no-bitwise
     return [val >>> 24, (val >>> 16) & 0xff, (val >>> 8) & 0xff, val & 0xff].join('.');
-  };
-
-  htmlConvert: HtmlContextTypeConvert = (val, options) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
-    }
-
-    return this.textConvert(val, options);
   };
 }

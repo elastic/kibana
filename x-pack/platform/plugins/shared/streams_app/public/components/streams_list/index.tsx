@@ -31,6 +31,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 
 export interface StreamListItem {
   stream: Streams.all.Definition;
@@ -183,6 +184,7 @@ function StreamNode({
       start: { share },
     },
   } = useKibana();
+  const { features } = useStreamsPrivileges();
   const discoverLocator = useMemo(
     () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
     [share.url.locators]
@@ -193,10 +195,10 @@ function StreamNode({
       return undefined;
     }
 
-    // Use index_mode from data_stream (from listing data)
     const esqlQuery = getDiscoverEsqlQuery({
       definition: node.stream,
       indexMode: node.data_stream?.index_mode,
+      useViews: features.wiredStreamViews.enabled,
     });
 
     if (!esqlQuery) {
@@ -208,7 +210,7 @@ function StreamNode({
         esql: esqlQuery,
       },
     });
-  }, [discoverLocator, node]);
+  }, [discoverLocator, node, features.wiredStreamViews.enabled]);
 
   return (
     <EuiFlexGroup
@@ -247,7 +249,7 @@ function StreamNode({
               margin-right: ${euiThemeVars.euiSizeXS};
             `}
           >
-            <EuiIcon type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'} />
+            <EuiIcon type={collapsed?.[node.name] ? 'chevronSingleRight' : 'chevronSingleDown'} />
           </button>
         )}
         <EuiLink
@@ -285,7 +287,7 @@ function StreamNode({
               aria-label={i18n.translate('xpack.streams.streamsTable.openInNewTab', {
                 defaultMessage: 'Open in new tab',
               })}
-              iconType="popout"
+              iconType="external"
               target="_blank"
               href={router.link('/{key}', { path: { key: node.name } })}
             />

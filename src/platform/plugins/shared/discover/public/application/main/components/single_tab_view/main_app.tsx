@@ -10,7 +10,6 @@
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useInternalStateSelector } from '../../state_management/redux';
-import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { addHelpMenuToAppChrome } from '../../../../components/help_menu/help_menu_util';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -19,14 +18,7 @@ import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
-export interface DiscoverMainProps {
-  /**
-   * Central state container
-   */
-  stateContainer: DiscoverStateContainer;
-}
-
-export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
+export function DiscoverMainApp() {
   const services = useDiscoverServices();
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const { chrome, docLinks, spaces, history } = services;
@@ -46,7 +38,7 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
 
   return (
     <RootDragDropProvider>
-      <DiscoverLayoutMemoized stateContainer={stateContainer} />
+      <DiscoverLayoutMemoized />
     </RootDragDropProvider>
   );
 }

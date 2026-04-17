@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { getCommonFieldDescriptions, getEntityFieldsDescriptions } from './common_fields';
+import {
+  ENTITY_SOURCE_FIELD_EVALUATION,
+  getCommonFieldDescriptions,
+  getEntityFieldsDescriptions,
+} from './common_fields';
 import type { EntityDefinitionWithoutId } from './entity_schema';
 import { collectValues as collect, newestValue, oldestValue } from './field_retention_operations';
 
 export const serviceEntityDefinition: EntityDefinitionWithoutId = {
   type: 'service',
   name: `Security 'service' Entity Store Definition`,
-  identityField: {
-    requiresOneOfFields: ['service.entity.id', 'service.name'],
-    euidFields: [[{ field: 'service.entity.id' }], [{ field: 'service.name' }]],
-  },
+  identityField: { singleField: 'service.name' },
   indexPatterns: [],
   entityTypeFallback: 'Service',
+  fieldEvaluations: [ENTITY_SOURCE_FIELD_EVALUATION],
   fields: [
     newestValue({ destination: 'entity.name', source: 'service.name' }),
     oldestValue({ source: 'service.entity.id' }),
@@ -35,24 +37,5 @@ export const serviceEntityDefinition: EntityDefinitionWithoutId = {
     newestValue({ source: 'service.version' }),
     ...getCommonFieldDescriptions('service'),
     ...getEntityFieldsDescriptions('service'),
-
-    collect({
-      source: `service.entity.relationships.Communicates_with`,
-      destination: 'entity.relationships.Communicates_with',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.Depends_on`,
-      destination: 'entity.relationships.Depends_on',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
-    collect({
-      source: `service.entity.relationships.Dependent_of`,
-      destination: 'entity.relationships.Dependent_of',
-      mapping: { type: 'keyword' },
-      allowAPIUpdate: true,
-    }),
   ],
 } as const satisfies EntityDefinitionWithoutId;

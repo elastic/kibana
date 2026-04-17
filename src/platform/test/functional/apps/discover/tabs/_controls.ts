@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 const savedSession = 'my ESQL session';
 const savedChart = 'ESQLChartWithControls';
+const savedSessionNoControls = 'my ESQL session without controls';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { discover, dashboardControls, dashboard, header } = getPageObjects([
@@ -192,6 +193,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const controlCount = await dashboardControls.getControlsCount();
         expect(controlCount).to.be(1);
+      });
+    });
+
+    it('should save a search after removing a control and verify no controls remain', async () => {
+      await discover.selectTextBaseLang();
+      await discover.waitUntilTabIsLoaded();
+
+      // Add a control
+      await esql.createEsqlControl('FROM logstash-* | WHERE geo.dest == ');
+      await discover.waitUntilTabIsLoaded();
+
+      // Verify control exists
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(true);
+      });
+
+      // Save the search with the control
+      await discover.saveSearch(savedSessionNoControls);
+      await discover.waitUntilTabIsLoaded();
+
+      // Remove the control
+      const controlId = (await dashboardControls.getAllControlIds())[0];
+      await dashboardControls.hoverOverExistingControl(controlId);
+      await testSubjects.click('embeddablePanelAction-deletePanel');
+      await discover.waitUntilTabIsLoaded();
+
+      // Verify controls are gone
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(false);
+      });
+
+      // Save the search again (overwriting the previous save)
+      await discover.saveSearch(savedSessionNoControls, false);
+      await discover.waitUntilTabIsLoaded();
+
+      // Click New search
+      await discover.clickNewSearchButton();
+      await discover.waitUntilTabIsLoaded();
+
+      // Reopen the saved search
+      await discover.loadSavedSearch(savedSessionNoControls);
+      await discover.waitUntilTabIsLoaded();
+
+      // Verify no controls exist
+      await retry.try(async () => {
+        const controlGroupVisible = await testSubjects.exists('controls-group-wrapper');
+        expect(controlGroupVisible).to.be(false);
       });
     });
   });

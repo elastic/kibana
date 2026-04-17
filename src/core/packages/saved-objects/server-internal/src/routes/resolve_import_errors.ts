@@ -83,11 +83,12 @@ export const registerResolveImportErrorsRoute = (
                   from: schema.string(),
                   to: schema.string(),
                 }),
-                { defaultValue: [] }
+                { defaultValue: [], maxSize: 100 }
               ),
               createNewCopy: schema.maybe(schema.boolean()),
               ignoreMissingReferences: schema.maybe(schema.boolean()),
-            })
+            }),
+            { maxSize: 10_000 }
           ),
         }),
       },

@@ -26,7 +26,7 @@ Run evaluations using the following base command:
 ```bash
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
 ```
 
 #### Configuration Options
@@ -52,14 +52,14 @@ USE_QUALITATIVE_EVALUATORS=true \
 SCENARIO_REPORTING=true \
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
     evals/alerts/alerts.spec.ts \
   --project="my-connector" \
 ```
 
-### Running Evaluations with Observability Agent (Agent Builder)
+### Running Evaluations with Elastic AI Agent (Agent Builder)
 
-The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Observability Agent early in the migration process.
+The evaluation suite supports running evaluations against both the Obs AI Assistant API and the Agent Builder API. This allows engineers to evaluate the Elastic AI Agent early in the migration process.
 
 #### Client Selection
 
@@ -72,18 +72,9 @@ When using `agent_builder`, you can optionally specify which agent to invoke usi
 
 #### Local Setup for Agent Builder Evaluations
 
-The Scout server **cannot be used for Observability Agent evaluations**, because the Observability Agent requires a feature flag enabled at Kibana start time. Instead, run evaluations against a local Kibana instance:
+Run Agent Builder evaluations against a local Kibana instance using these steps:
 
-**1. Enable the Observability Agent feature flag**
-
-Add the following to your Kibana config file (e.g., `config/kibana.dev.yml`):
-
-```yaml
-feature_flags.overrides:
-  observabilityAgent.enabled: true
-```
-
-**2. Start Kibana without base path**
+**1. Start Kibana without base path**
 
 ```bash
 yarn start --no-base-path
@@ -91,7 +82,7 @@ yarn start --no-base-path
 
 > The APM synthrace client fixture requires Kibana to run without a base path.
 
-**3. Configure local Scout server**
+**2. Configure local Scout server**
 
 Create `.scout/servers/local.json` with the following content:
 
@@ -110,15 +101,14 @@ Create `.scout/servers/local.json` with the following content:
 }
 ```
 
-**4. Run evaluations**
+**3. Run evaluations**
 
 ```bash
 EVALUATION_REPETITIONS=1 \
 EVALUATION_CLIENT="agent_builder" \
-AGENT_BUILDER_AGENT_ID="observability.agent" \
 EVALUATION_CONNECTOR_ID="your-connector-id" \
   node scripts/playwright test \
-  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/test/scout/ui/playwright.config.ts \
+  --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts \
     evals/esql/esql.spec.ts \
   --project="your-connector" \
   --debug
@@ -126,7 +116,7 @@ EVALUATION_CONNECTOR_ID="your-connector-id" \
 
 #### Important Notes
 
-- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Observability Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
+- Current evaluation criteria are designed for the Obs AI Assistant and may not be fully applicable to the Elastic AI Agent due to differences in tool implementations (e.g., knowledge base is now a tool rather than returned via the `context` tool, alerts tool behavior differs)
 - The Agent Builder client implementation and infrastructure are ready for when Agent-specific evaluation criteria are developed
 
 ### Evaluation Reporting

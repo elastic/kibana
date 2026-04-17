@@ -1024,15 +1024,15 @@
     "misc": [
       {
         "parentPluginId": "@kbn/security-solution-navigation",
-        "id": "def-common.ATTACKS_ALERTS_ALIGNMENT_ENABLED",
+        "id": "def-common.ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING",
         "type": "string",
         "tags": [],
-        "label": "ATTACKS_ALERTS_ALIGNMENT_ENABLED",
+        "label": "ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING",
         "description": [
-          "Feature flag for the alerts and attacks alignment feature"
+          "This Kibana Advanced Setting allows users to enable/disable the Alerts and Attacks Alignment feature"
         ],
         "signature": [
-          "\"securitySolution.attacksAlertsAlignment\""
+          "\"securitySolution:enableAlertsAndAttacksAlignment\""
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/constants.ts",
         "lineNumber": 40,

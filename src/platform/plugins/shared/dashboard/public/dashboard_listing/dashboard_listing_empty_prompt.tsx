@@ -17,11 +17,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-
-import {
-  DASHBOARD_PANELS_UNSAVED_ID,
-  getDashboardBackupService,
-} from '../services/dashboard_backup_service';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import {
@@ -60,7 +57,7 @@ export const DashboardListingEmptyPrompt = ({
         <EuiButton
           onClick={createItem}
           fill
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="newItemButton"
           disabled={disableCreateDashboardButton}
         >
@@ -112,7 +109,7 @@ export const DashboardListingEmptyPrompt = ({
   if (!getDashboardCapabilities().showWriteControls) {
     return (
       <EuiEmptyPrompt
-        iconType="glasses"
+        iconType="readOnly"
         title={
           <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
             {noItemsStrings.getReadonlyTitle()}

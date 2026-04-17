@@ -94,8 +94,6 @@ describe('RiskScoreDataClient', () => {
       assertComponentTemplate('default');
       assertIndexTemplate('default');
       assertDataStream('default');
-      assertIndex('default');
-      assertTransform('default');
 
       // Space-1 namespace
       esClient.cluster.existsComponentTemplate.mockResolvedValue(false);
@@ -103,16 +101,28 @@ describe('RiskScoreDataClient', () => {
       assertComponentTemplate('space-1');
       assertIndexTemplate('space-1');
       assertDataStream('space-1');
-      assertIndex('space-1');
-      assertTransform('space-1');
-
-      // Space with more than 36 characters
-      await riskScoreDataClientWithLongNameSpace.init();
-      assertTransform('a_a-'.repeat(200));
 
       expect(
         (createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('initLegacyTransforms success', () => {
+    it('should initialize legacy risk engine transforms in the appropriate space', async () => {
+      // Default namespace
+      await riskScoreDataClient.initLegacyTransforms();
+      assertIndex('default');
+      assertTransform('default');
+
+      // Space-1 namespace
+      await riskScoreDataClientWithNameSpace.initLegacyTransforms();
+      assertIndex('space-1');
+      assertTransform('space-1');
+
+      // Space with more than 36 characters
+      await riskScoreDataClientWithLongNameSpace.initLegacyTransforms();
+      assertTransform('a_a-'.repeat(200));
     });
   });
 
@@ -277,8 +287,25 @@ const assertIndex = (namespace: string) => {
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                   inputs: {
                     properties: {
@@ -356,6 +383,12 @@ const assertIndex = (namespace: string) => {
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   inputs: {
                     properties: {
                       category: {
@@ -381,6 +414,17 @@ const assertIndex = (namespace: string) => {
                   },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                 },
                 type: 'object',
@@ -435,8 +479,25 @@ const assertIndex = (namespace: string) => {
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                   inputs: {
                     properties: {

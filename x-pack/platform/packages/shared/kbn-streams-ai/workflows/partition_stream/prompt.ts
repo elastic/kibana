@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
 import contentPromptTemplate from './content_prompt.text';
+import { partitionStreamFeaturesTool } from './features_tool';
 
 export const SuggestStreamPartitionsPrompt = createPrompt({
   name: 'suggest_stream_partitions_prompt',
@@ -18,6 +19,9 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
     stream: Streams.all.Definition.right,
     condition_schema: z.string(),
     initial_clustering: z.string(),
+    user_prompt: z.string().optional(),
+    existing_partitions: z.string().optional(),
+    refinement_history: z.string().optional(),
   }),
 })
   .version({
@@ -32,6 +36,7 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
       },
     },
     tools: {
+      get_stream_features: partitionStreamFeaturesTool,
       partition_logs: {
         description: `Simulates the partioning conditions specified, and clusters documents within each partition.`,
         schema: {

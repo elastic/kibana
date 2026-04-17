@@ -41,14 +41,14 @@ export const getImageEmbeddableFactory = () => {
       const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
 
       const filesClient = filesService.filesClientFactory.asUnscoped<FileImageMetadata>();
-      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.imageConfig);
+      const imageConfig$ = new BehaviorSubject<ImageConfig>(initialState.image_config);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
 
       function serializeState() {
         return {
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
-          imageConfig: imageConfig$.getValue(),
+          image_config: imageConfig$.getValue(),
         };
       }
 
@@ -65,13 +65,13 @@ export const getImageEmbeddableFactory = () => {
           return {
             ...drilldownsManager.comparators,
             ...titleComparators,
-            imageConfig: 'deepEquality',
+            image_config: 'deepEquality',
           };
         },
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
           drilldownsManager.reinitializeState(lastSaved ?? {});
-          if (lastSaved) imageConfig$.next(lastSaved.imageConfig);
+          if (lastSaved) imageConfig$.next(lastSaved.image_config);
         },
       });
 

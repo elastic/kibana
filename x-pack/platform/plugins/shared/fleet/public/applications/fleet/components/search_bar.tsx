@@ -177,7 +177,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
 
   return (
     <NoWrapQueryStringInput
-      iconType="search"
+      iconType="magnify"
       disableLanguageSwitcher={true}
       indexPatterns={dataView ? [dataView] : []}
       query={{

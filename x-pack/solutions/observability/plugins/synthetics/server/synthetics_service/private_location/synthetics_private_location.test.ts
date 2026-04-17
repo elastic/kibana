@@ -7,10 +7,16 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { MonitorFields, HeartbeatConfig } from '../../../common/runtime_types';
-import { MonitorTypeEnum, ScheduleUnit, SourceType } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorTypeEnum,
+  ScheduleUnit,
+  SourceType,
+} from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { handleMultilineStringFormatter } from '../formatters/formatting_utils';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import type { SyntheticsServerSetup } from '../../types';
 import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
@@ -65,8 +71,9 @@ describe('SyntheticsPrivateLocation', () => {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: mockBuildPackagePolicy,
         bulkCreate: jest.fn(),
-        getByIDs: jest.fn(),
+        getByIDs: jest.fn().mockReturnValue([{ policy_ids: ['policyId'] }]),
       },
+      agentPolicyService: { getByIds: jest.fn().mockReturnValue([]) },
       runWithCache: async (cb: any) => await cb(),
     },
     spaces: {
@@ -81,6 +88,7 @@ describe('SyntheticsPrivateLocation', () => {
   } as unknown as SyntheticsServerSetup;
   beforeEach(() => {
     mockBuildPackagePolicy.mockReturnValue(undefined);
+    (serverMock.fleet.packagePolicyService.getByIDs as jest.Mock).mockResolvedValue([]);
   });
 
   describe('getPolicyNamespace', () => {
@@ -95,6 +103,194 @@ describe('SyntheticsPrivateLocation', () => {
       const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
       const result = await syntheticsPrivateLocation.getPolicyNamespace('default');
       expect(result).toEqual(undefined);
+    });
+  });
+
+  describe('getPolicyId', () => {
+    it('returns space-agnostic policy ID format', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-123', origin: SourceType.UI };
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
+      expect(result).toEqual('monitor-123-location-456');
+    });
+
+    it('returns same format for project monitors', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'project-monitor-123', origin: SourceType.PROJECT };
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
+      expect(result).toEqual('project-monitor-123-location-456');
+    });
+
+    it('does not include spaceId in policy ID (space-agnostic)', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-123', origin: SourceType.UI };
+      const result = syntheticsPrivateLocation.getPolicyId(config, 'location-456');
+      expect(result).toEqual('monitor-123-location-456');
+    });
+  });
+
+  describe('getLegacyPolicyId', () => {
+    it('returns legacy policy ID format with spaceId', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const result = syntheticsPrivateLocation.getLegacyPolicyId(
+        'monitor-123',
+        'location-456',
+        'space-789'
+      );
+      expect(result).toEqual('monitor-123-location-456-space-789');
+    });
+  });
+
+  describe('getPolicyName', () => {
+    it('returns correct policy name for UI monitors', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = {
+        ...testConfig,
+        [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.UI,
+        [ConfigKey.NAME]: 'My Monitor',
+      } as unknown as HeartbeatConfig;
+      const result = syntheticsPrivateLocation.getPolicyName(config, 'US East');
+      expect(result).toEqual('My Monitor-US East');
+    });
+
+    it('returns correct policy name for project monitors', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = {
+        ...testConfig,
+        id: 'project-monitor-123',
+        [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
+        [ConfigKey.NAME]: 'My Monitor',
+      } as unknown as HeartbeatConfig;
+      const result = syntheticsPrivateLocation.getPolicyName(config, 'US East');
+      expect(result).toEqual('project-monitor-123-US East');
+    });
+  });
+
+  describe('getPolicyIdFormatInfo', () => {
+    it('detects new format policy', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [{ id: 'monitor-1-loc-1' }];
+      const allSpaces = new Set(['default']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(true);
+      expect(result.hasAnyLegacyPolicyId).toBe(false);
+      expect(result.legacyPolicyIds).toEqual([]);
+    });
+
+    it('detects legacy format policy for known space', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [{ id: 'monitor-1-loc-1-space-a' }];
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(true);
+      expect(result.legacyPolicyIds).toEqual(['monitor-1-loc-1-space-a']);
+    });
+
+    it('does not match legacy policies from unknown spaces', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [{ id: 'monitor-1-loc-1-unknown-space' }];
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(false);
+      expect(result.legacyPolicyIds).toEqual([]);
+    });
+
+    it('avoids false positives from prefix collisions', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-a' };
+      const existingPolicies = [{ id: 'monitor-a-loc-b-default' }];
+      const allSpaces = new Set(['default']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-b',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(true);
+      expect(result.legacyPolicyIds).toEqual(['monitor-a-loc-b-default']);
+
+      // Monitor "monitor-a-loc-b" should NOT match the same policy
+      const otherConfig = { id: 'monitor-a-loc-b' };
+      const otherResult = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        otherConfig,
+        'default',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(otherResult.hasAnyLegacyPolicyId).toBe(false);
+      expect(otherResult.legacyPolicyIds).toEqual([]);
+    });
+
+    it('detects both new and legacy format policies', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const existingPolicies = [
+        { id: 'monitor-1-loc-1' },
+        { id: 'monitor-1-loc-1-default' },
+        { id: 'monitor-1-loc-1-space-a' },
+      ];
+      const allSpaces = new Set(['default', 'space-a']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        existingPolicies,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(true);
+      expect(result.hasAnyLegacyPolicyId).toBe(true);
+      expect(result.legacyPolicyIds).toEqual([
+        'monitor-1-loc-1-default',
+        'monitor-1-loc-1-space-a',
+      ]);
+    });
+
+    it('handles undefined existingPolicies', () => {
+      const syntheticsPrivateLocation = new SyntheticsPrivateLocation(serverMock);
+      const config = { id: 'monitor-1' };
+      const allSpaces = new Set(['default']);
+
+      const result = syntheticsPrivateLocation.getPolicyIdFormatInfo(
+        config,
+        'loc-1',
+        undefined,
+        allSpaces
+      );
+
+      expect(result.hasNewFormatPolicyId).toBe(false);
+      expect(result.hasAnyLegacyPolicyId).toBe(false);
+      expect(result.legacyPolicyIds).toEqual([]);
     });
   });
 
@@ -158,6 +354,7 @@ describe('SyntheticsPrivateLocation', () => {
         ...serverMock.fleet,
         packagePolicyService: {
           ...serverMock.fleet.packagePolicyService,
+          getByIDs: jest.fn().mockResolvedValue([{ id: 'testId-policyId' }]),
           delete(
             soClient: SavedObjectsClientContract,
             esClient: any,
@@ -176,7 +373,99 @@ describe('SyntheticsPrivateLocation', () => {
     }
   });
 
+  it('deleteMonitors only deletes legacy package policy ids that exist', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const getByIDsMock = jest.fn().mockResolvedValue([{ id: 'testId-policyId' }]);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: getByIDsMock,
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    expect(deleteMock).toHaveBeenCalledTimes(1);
+    const deletedIds = deleteMock.mock.calls[0][2] as string[];
+    expect(deletedIds).toContain('testId-policyId');
+    expect(deletedIds).not.toContain('testId-policyId-test-space');
+    expect(deletedIds.length).toBe(1);
+  });
+
+  it('deleteMonitors deletes legacy package policy ids when they exist', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const getByIDsMock = jest
+      .fn()
+      .mockResolvedValue([{ id: 'testId-policyId' }, { id: 'testId-policyId-test-space' }]);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: getByIDsMock,
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    const deletedIds = deleteMock.mock.calls[0][2] as string[];
+    expect(deletedIds).toContain('testId-policyId');
+    expect(deletedIds).toContain('testId-policyId-test-space');
+  });
+
+  it('deleteMonitors only deletes new-format id when that policy exists', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const getByIDsMock = jest.fn().mockResolvedValue([{ id: 'testId-policyId-test-space' }]);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: getByIDsMock,
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    const deletedIds = deleteMock.mock.calls[0][2] as string[];
+    expect(deletedIds).toEqual(['testId-policyId-test-space']);
+    expect(deletedIds).not.toContain('testId-policyId');
+  });
+
+  it('deleteMonitors does not call delete when no matching policies exist', async () => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const syntheticsPrivateLocation = new SyntheticsPrivateLocation({
+      ...serverMock,
+      fleet: {
+        ...serverMock.fleet,
+        packagePolicyService: {
+          ...serverMock.fleet.packagePolicyService,
+          getByIDs: jest.fn().mockResolvedValue([]),
+          delete: deleteMock,
+        },
+      },
+    });
+
+    await syntheticsPrivateLocation.deleteMonitors([testConfig], 'test-space');
+
+    expect(deleteMock).not.toHaveBeenCalled();
+  });
+
   it('formats monitors stream properly', () => {
+    const expectedInlineSource = Buffer.from(
+      handleMultilineStringFormatter(dummyBrowserConfig['source.inline.script'] as string)
+    ).toString('base64');
     const test = formatSyntheticsPolicy(
       testMonitorPolicy,
       MonitorTypeEnum.BROWSER,
@@ -247,8 +536,11 @@ describe('SyntheticsPrivateLocation', () => {
         },
         'source.inline.script': {
           type: 'yaml',
-          value:
-            "\"step('Go to https://www.elastic.co/', async () => {\\n  await page.goto('https://www.elastic.co/');\\n});\"",
+          value: expectedInlineSource,
+        },
+        'source.inline.encoding': {
+          type: 'text',
+          value: 'base64',
         },
         synthetics_args: {
           type: 'text',
@@ -271,6 +563,24 @@ describe('SyntheticsPrivateLocation', () => {
           value: 'browser',
         },
       },
+    });
+  });
+
+  it('formats browser timeout for private locations', () => {
+    const test = formatSyntheticsPolicy(
+      testMonitorPolicy,
+      MonitorTypeEnum.BROWSER,
+      {
+        ...dummyBrowserConfig,
+        timeout: '60',
+      },
+      {},
+      []
+    );
+
+    expect(test.formattedPolicy.inputs[3].streams[1].vars?.timeout).toStrictEqual({
+      type: 'text',
+      value: '30s',
     });
   });
 });

@@ -168,7 +168,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
   ) : null;
 
   const actionsButton = (
-    <EuiButton fill iconType="arrowDown" iconSide="right" onClick={toggleActionsPopover}>
+    <EuiButton fill iconType="chevronSingleDown" iconSide="right" onClick={toggleActionsPopover}>
       <FormattedMessage
         id="xpack.cloudConnect.connectedServices.actionsButton"
         defaultMessage="Actions"

@@ -158,7 +158,7 @@ function GroupSelection({
   const aggBasedTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.AGGBASED);
   const legacyTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.LEGACY);
 
-  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length;
+  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length > 0;
 
   const [tsvbProps] = legacyTypes.map((visType) => ({
     visType: {
@@ -303,7 +303,7 @@ const VisGroup = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCard
           </>
         }
         layout="horizontal"
-        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" />}
+        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" aria-hidden={true} />}
       />
     </EuiFlexItem>
   );

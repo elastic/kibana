@@ -97,7 +97,7 @@ export const StepEditHosts: React.FunctionComponent<Props> = ({
       {!showCreateAgentPolicy && (
         <EuiFlexItem>
           <EuiButton
-            iconType="plusInCircle"
+            iconType="plusCircle"
             onClick={() => {
               setShowCreateAgentPolicy(true);
               updateSelectedTab(SelectedPolicyTab.NEW);

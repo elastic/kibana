@@ -159,8 +159,9 @@ const CompatibleControlTypesComponent = ({
               label={action.getDisplayName(controlTypeContext)}
             >
               <EuiIcon
-                type={action.getIconType(controlTypeContext) ?? 'controlsHorizontal'}
+                type={action.getIconType(controlTypeContext) ?? 'controls'}
                 size="l"
+                aria-hidden={true}
               />
             </EuiKeyPadMenuItem>
           );

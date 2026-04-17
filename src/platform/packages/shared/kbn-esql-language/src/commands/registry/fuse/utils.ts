@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { isOptionNode } from '../../../..';
 import type {
   ESQLAstAllCommands,
   ESQLAstFuseCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLIdentifier,
-  ESQLMessage,
-} from '../../../types';
+} from '@elastic/esql/types';
+import { isOptionNode } from '@elastic/esql';
+import type { ESQLMessage } from '../../definitions/types';
 
 export const FUSE_OPTIONS = ['score by', 'key by', 'group by', 'with'] as const;
 export type FuseOption = (typeof FUSE_OPTIONS)[number];

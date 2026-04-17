@@ -34,7 +34,7 @@ export function useGroupActions(): Array<Action<Group>> {
           defaultMessage: 'View jobs',
         }
       ),
-      icon: 'list',
+      icon: 'listBullet',
       type: 'icon',
       onClick: async (item) => {
         const { url } = await mlManagementLocator?.getUrl(
@@ -60,7 +60,7 @@ export function useGroupActions(): Array<Action<Group>> {
           defaultMessage: 'View in Anomaly Explorer',
         }
       ),
-      icon: 'visTable',
+      icon: 'table',
       type: 'icon',
       onClick: async (item) => {
         const path = await locator?.getUrl({

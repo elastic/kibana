@@ -118,7 +118,7 @@ export const getTableColumns = (
                 content={i18n.translate('esqlEditor.query.querieshistory.success', {
                   defaultMessage: 'Query ran successfully',
                 })}
-                type="checkCircle"
+                type="checkCircleFill"
                 color="text"
                 size="m"
                 iconProps={{
@@ -318,7 +318,7 @@ export function QueryList({
                 >
                   {(copy) => (
                     <EuiButtonIcon
-                      iconType="copyClipboard"
+                      iconType="copy"
                       iconSize="m"
                       onClick={copy}
                       css={css`
@@ -433,7 +433,7 @@ export function QueryColumn({
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+          iconType={isRowExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
           size="xs"
           color="text"
           css={css`
@@ -465,12 +465,14 @@ export function HistoryAndStarredQueriesTabs({
   containerWidth,
   isSpaceReduced,
   onUpdateAndSubmit,
+  onClose,
   height,
   starredQueriesService = null,
 }: {
   containerCSS: Interpolation<Theme>;
   containerWidth: number;
   onUpdateAndSubmit: (qs: string, querySource: QuerySource) => void;
+  onClose: () => void;
   isSpaceReduced?: boolean;
   height: number;
   starredQueriesService: EsqlStarredQueriesService | null;
@@ -725,6 +727,26 @@ export function HistoryAndStarredQueriesTabs({
                 />
               </EuiFlexItem>
             )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('esqlEditor.history.closeLabel', {
+                  defaultMessage: 'Close',
+                })}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="cross"
+                  size="xs"
+                  color="text"
+                  onClick={onClose}
+                  aria-label={i18n.translate('esqlEditor.history.closeLabel', {
+                    defaultMessage: 'Close',
+                  })}
+                  data-test-subj="ESQLEditor-history-close-button"
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

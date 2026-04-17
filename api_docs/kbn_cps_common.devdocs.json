@@ -1,0 +1,103 @@
+{
+  "id": "@kbn/cps-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/cps-common",
+        "id": "def-common.getSpaceDefaultNpreName",
+        "type": "Function",
+        "tags": [],
+        "label": "getSpaceDefaultNpreName",
+        "description": [],
+        "signature": [
+          "(spaceId: string) => string"
+        ],
+        "path": "src/platform/packages/private/kbn-cps-common/src/common/get_space_default_npre_name.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cps-common",
+            "id": "def-common.getSpaceDefaultNpreName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-cps-common/src/common/get_space_default_npre_name.ts",
+            "lineNumber": 10,
+            "columnNumber": 41,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/cps-common",
+        "id": "def-common.ProjectRoutingValue",
+        "type": "Type",
+        "tags": [],
+        "label": "ProjectRoutingValue",
+        "description": [],
+        "signature": [
+          "\"_alias:*\" | \"_alias:_origin\""
+        ],
+        "path": "src/platform/packages/private/kbn-cps-common/src/common/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/cps-common",
+        "id": "def-common.PROJECT_ROUTING",
+        "type": "Object",
+        "tags": [],
+        "label": "PROJECT_ROUTING",
+        "description": [
+          "\nProject routing constants for Cross-project search\nThese are stored as strings in saved objects to explicitly override parent values"
+        ],
+        "signature": [
+          "{ readonly ALL: \"_alias:*\"; readonly ORIGIN: \"_alias:_origin\"; }"
+        ],
+        "path": "src/platform/packages/private/kbn-cps-common/src/common/constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

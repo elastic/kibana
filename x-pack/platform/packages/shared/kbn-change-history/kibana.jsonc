@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/change-history",
+  "owner": "@elastic/security-detection-rule-management",
+  "group": "platform",
+  "visibility": "shared"
+}

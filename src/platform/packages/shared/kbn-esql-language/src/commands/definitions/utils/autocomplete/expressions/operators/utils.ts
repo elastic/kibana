@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isList } from '../../../../../../ast/is';
-import { isMarkerNode } from '../../../ast';
+import { isList } from '@elastic/esql';
+import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { getOperatorSuggestion } from '../../../operators';
 import type { ISuggestionItem } from '../../../../../registry/types';
-import type { ESQLSingleAstItem } from '../../../../../../types';
 import { logicalOperators } from '../../../../all_operators';
 
 export const LIKE_OPERATOR_REGEX = /\b(not\s+)?(r?like)\s*$/i;
@@ -34,11 +33,7 @@ export function endsWithIsOrIsNotToken(innerText: string): boolean {
 }
 
 export function isOperandMissing(operand: ESQLSingleAstItem | undefined): boolean {
-  return (
-    !operand ||
-    isMarkerNode(operand) ||
-    (operand?.type === 'unknown' && operand?.incomplete === true)
-  );
+  return !operand || (operand?.type === 'unknown' && operand?.incomplete === true);
 }
 
 /** Returns true if we should suggest opening a list for the right operand */

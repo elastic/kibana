@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/response-ops-scheduling-types'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/response-ops'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/response-ops-scheduling-types'
+  title: '@kbn/response-ops-scheduling-types'
   description: Moon project for @kbn/response-ops-scheduling-types
   channel: ''
   owner: '@elastic/response-ops'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/response-ops/scheduling-types
+  sourceRoot: x-pack/platform/packages/shared/response-ops/scheduling-types
 dependsOn:
   - '@kbn/rrule'
 tags:

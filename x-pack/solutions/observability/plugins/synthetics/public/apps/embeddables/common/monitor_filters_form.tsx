@@ -21,7 +21,7 @@ export function MonitorFiltersForm() {
             'xpack.synthetics.monitorEdit.syntheticsAvailability.monitor.placeholder',
             { defaultMessage: 'Select the Synthetics monitor or choose all' }
           )}
-          name="monitorIds"
+          name="monitor_ids"
           dataTestSubj="syntheticsAvailabilityMonitorSelector"
         />
         <FieldSelector
@@ -73,7 +73,7 @@ export function MonitorFiltersForm() {
               defaultMessage: 'Select the monitor type',
             }
           )}
-          name="monitorTypes"
+          name="monitor_types"
           dataTestSubj="syntheticsAvailabilityProjectSelector"
         />
       </EuiFlexGroup>

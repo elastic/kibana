@@ -146,6 +146,7 @@ describe('slo transform template', () => {
         version: 3.6,
         managed: true,
         managed_by: 'observability',
+        deletion_protected: true,
       },
     });
   });
@@ -250,6 +251,7 @@ describe('slo transform template', () => {
         version: 3.6,
         managed: true,
         managed_by: 'observability',
+        deletion_protected: true,
       },
     });
   });

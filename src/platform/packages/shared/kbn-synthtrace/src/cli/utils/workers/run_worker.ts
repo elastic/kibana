@@ -19,7 +19,7 @@ interface WorkerServiceOptions<TWorkerData> {
   workerScriptPath: string;
 
   workerData: TWorkerData;
-  onMessage?: (message: any) => void;
+  onMessage?: (message: unknown) => void;
 }
 
 export function runWorker<TWorkerData>({

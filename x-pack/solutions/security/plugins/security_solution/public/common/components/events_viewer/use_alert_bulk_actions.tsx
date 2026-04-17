@@ -103,6 +103,7 @@ export const useAlertBulkActions = ({
               onActionSuccess={onAlertStatusActionSuccess}
               onActionFailure={onAlertStatusActionFailure}
               customBulkActions={additionalBulkActions}
+              data={data}
             />
           </Suspense>
         )}
@@ -110,6 +111,7 @@ export const useAlertBulkActions = ({
     ),
     [
       additionalBulkActions,
+      data,
       filterQuery,
       filterStatus,
       onAlertStatusActionFailure,

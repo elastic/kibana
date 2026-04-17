@@ -139,8 +139,8 @@ Object {
   "error": [ZodError: [
   {
     "code": "custom",
-    "message": "The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits.",
-    "path": []
+    "path": [],
+    "message": "The string does use the Semantic Versioning (Semver) format of {major}.{minor}.{patch} (e.g., 1.0.0), ensure each part contains only digits."
   }
 ]],
   "success": false,

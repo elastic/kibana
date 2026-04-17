@@ -1,0 +1,608 @@
+# Generate schema by calling:
+# node scripts/generate_openapi.js --rootDir x-pack/solutions/security/plugins/entity_store/
+openapi: 3.0.0
+info:
+  title: Common Entities Schemas
+  description: Common Entities schemas for the Entity Store
+  version: '1'
+paths: {}
+components:
+  schemas:
+    EntityRelationship:
+      type: object
+      additionalProperties: false
+      description: >-
+        One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys →
+        string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
+      properties:
+        raw_identifiers:
+          type: object
+          additionalProperties: false
+          properties:
+            entity.id:
+              type: array
+              items:
+                type: string
+            host.id:
+              type: array
+              items:
+                type: string
+            host.name:
+              type: array
+              items:
+                type: string
+            user.email:
+              type: array
+              items:
+                type: string
+            user.id:
+              type: array
+              items:
+                type: string
+            user.name:
+              type: array
+              items:
+                type: string
+            service.name:
+              type: array
+              items:
+                type: string
+        ids:
+          type: array
+          items:
+            type: string
+          description: >-
+            Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
+
+    EngineMetadata:
+      type: object
+      additionalProperties: false
+      properties:
+        Type:
+          type: string
+
+    EntityField:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        sub_type:
+          type: string
+        source:
+          type: array
+          items:
+            type: string
+        schema_version:
+          type: string
+        url:
+          type: string
+        EngineMetadata:
+          $ref: '#/components/schemas/EngineMetadata'
+        attributes:
+          type: object
+          additionalProperties: false
+          properties:
+            watchlists:
+              type: array
+              items:
+                type: string
+              description: Watchlist identifiers the entity belongs to (v2).
+            asset:
+              type: boolean
+            managed:
+              type: boolean
+            mfa_enabled:
+              type: boolean
+            storage_class:
+              type: string
+              description: Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+            permissions:
+              type: array
+              items:
+                type: string
+              description: Action-level permissions granted to this entity (not roles or groups).
+            known_redirects:
+              type: array
+              items:
+                type: string
+              description: Known redirect URIs or URLs (e.g. OAuth application callbacks).
+            oauth_consent_restriction:
+              type: string
+              description: OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+        behaviors:
+          type: object
+          additionalProperties: false
+          properties:
+            rule_names:
+              type: array
+              items:
+                type: string
+              description: Detection rule names that flagged this entity (v2).
+            anomaly_job_ids:
+              type: array
+              items:
+                type: string
+              description: ML anomaly job identifiers (v2).
+        lifecycle:
+          type: object
+          additionalProperties: false
+          properties:
+            first_seen:
+              type: string
+              format: date-time
+            last_seen:
+              type: string
+              format: date-time
+            last_activity:
+              type: string
+              format: date-time
+        relationships:
+          type: object
+          additionalProperties: false
+          properties:
+            administers:
+              $ref: '#/components/schemas/EntityRelationship'
+            communicates_with:
+              $ref: '#/components/schemas/EntityRelationship'
+            depends_on:
+              $ref: '#/components/schemas/EntityRelationship'
+            owns_inferred:
+              $ref: '#/components/schemas/EntityRelationship'
+            accesses_infrequently:
+              $ref: '#/components/schemas/EntityRelationship'
+            accesses_frequently:
+              $ref: '#/components/schemas/EntityRelationship'
+            owns:
+              $ref: '#/components/schemas/EntityRelationship'
+            supervises:
+              $ref: '#/components/schemas/EntityRelationship'
+            resolution:
+              type: object
+              additionalProperties: false
+              properties:
+                resolved_to:
+                  type: string
+                  description: entity.id of the entity this one resolves to
+                risk:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    calculated_level:
+                      $ref: '#/components/schemas/EntityRiskLevels'
+                      description: Lexical description of the resolution group's aggregated risk.
+                    calculated_score:
+                      type: number
+                      format: double
+                      description: The raw numeric value of the resolution group's aggregated risk score.
+                    calculated_score_norm:
+                      type: number
+                      format: double
+                      minimum: 0
+                      maximum: 100
+                      description: The normalized numeric value of the resolution group's aggregated risk score.
+        risk:
+          type: object
+          additionalProperties: false
+          properties:
+            calculated_level:
+              $ref: '#/components/schemas/EntityRiskLevels'
+              example: 'Critical'
+              description: Lexical description of the entity's risk.
+            calculated_score:
+              type: number
+              format: double
+              description: The raw numeric value of the given entity's risk score.
+            calculated_score_norm:
+              type: number
+              format: double
+              minimum: 0
+              maximum: 100
+              description: The normalized numeric value of the given entity's risk score. Useful for comparing with other entities.
+
+    Asset:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        serial_number:
+          type: string
+        model:
+          type: string
+        vendor:
+          type: string
+        environment:
+          type: string
+        criticality:
+          nullable: true
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        business_unit:
+          type: string
+
+    UserEntity:
+      type: object
+      additionalProperties: false
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          $ref: '#/components/schemas/EntityField'
+        user:
+          type: object
+          additionalProperties: false
+          properties:
+            full_name:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            roles:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            email:
+              type: array
+              items:
+                type: string
+            hash:
+              type: array
+              items:
+                type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskSummary'
+        asset:
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+        event:
+          type: object
+          additionalProperties: false
+          properties:
+            ingested:
+              type: string
+              format: date-time
+
+    HostEntity:
+      type: object
+      additionalProperties: false
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          $ref: '#/components/schemas/EntityField'
+        host:
+          type: object
+          additionalProperties: false
+          properties:
+            hostname:
+              type: array
+              items:
+                type: string
+            domain:
+              type: array
+              items:
+                type: string
+            ip:
+              type: array
+              items:
+                type: string
+            name:
+              type: string
+            id:
+              type: array
+              items:
+                type: string
+            type:
+              type: array
+              items:
+                type: string
+            mac:
+              type: array
+              items:
+                type: string
+            architecture:
+              type: array
+              items:
+                type: string
+            os:
+              type: object
+              additionalProperties: false
+              description: ECS host.os fields materialized on the entity latest index (v2).
+              properties:
+                name:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                type:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                family:
+                  type: string
+                full:
+                  type: string
+                kernel:
+                  type: string
+                platform:
+                  type: string
+                version:
+                  type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskSummary'
+        asset:
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+        event:
+          type: object
+          additionalProperties: false
+          properties:
+            ingested:
+              type: string
+              format: date-time
+
+    ServiceEntity:
+      type: object
+      additionalProperties: false
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          $ref: '#/components/schemas/EntityField'
+        service:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            address:
+              type: string
+            environment:
+              type: string
+            ephemeral_id:
+              type: string
+            id:
+              type: string
+            node:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                role:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+            state:
+              type: string
+            type:
+              type: string
+            version:
+              type: string
+            risk:
+              $ref: '#/components/schemas/EntityRiskSummary'
+        asset:
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+        event:
+          type: object
+          additionalProperties: false
+          properties:
+            ingested:
+              type: string
+              format: date-time
+
+    GenericEntity:
+      type: object
+      additionalProperties: false
+      properties:
+        "@timestamp":
+          type: string
+          format: date-time
+        entity:
+          $ref: '#/components/schemas/EntityField'
+        asset:
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
+        cloud:
+          type: object
+          additionalProperties: false
+          properties:
+            account:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            availability_zone:
+              type: string
+            instance:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            machine:
+              type: object
+              additionalProperties: false
+              properties:
+                type:
+                  type: string
+            project:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+            provider:
+              type: string
+            region:
+              type: string
+            service:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+        orchestrator:
+          type: object
+          additionalProperties: false
+          properties:
+            api_version:
+              type: string
+            cluster:
+              type: object
+              additionalProperties: false
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                url:
+                  type: string
+                version:
+                  type: string
+            namespace:
+              type: string
+            organization:
+              type: string
+            resource:
+              type: object
+              additionalProperties: false
+              properties:
+                annotation:
+                  type: string
+                id:
+                  type: string
+                ip:
+                  type: string
+                label:
+                  type: string
+                name:
+                  type: string
+                parent:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    type:
+                      type: string
+                type:
+                  type: string
+            type:
+              type: string
+        labels:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+        event:
+          type: object
+          additionalProperties: false
+          properties:
+            ingested:
+              type: string
+              format: date-time
+
+    # These entities represent the API of Entity Store
+    # where entity is a root field, as it's in the final
+    # index for entities. Note that this is different from the
+    # source logs mapping where `entity` will be nested under
+    # `host`, `user` and `service`
+    Entity:
+      oneOf:
+        - $ref: '#/components/schemas/UserEntity'
+        - $ref: '#/components/schemas/HostEntity'
+        - $ref: '#/components/schemas/ServiceEntity'
+        - $ref: '#/components/schemas/GenericEntity'
+
+    # Temporary addition of risk score and asset criticality assets
+    AssetCriticalityLevel:
+      type: string
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+      description: The criticality level of the asset.
+
+    EntityRiskSummary:
+      type: object
+      additionalProperties: false
+      description: A summary of the entity's risk score containing only the calculated level and scores.
+      properties:
+        calculated_level:
+          $ref: '#/components/schemas/EntityRiskLevels'
+          description: Lexical description of the entity's risk.
+        calculated_score:
+          type: number
+          format: double
+          description: The raw numeric value of the given entity's risk score.
+        calculated_score_norm:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          description: The normalized numeric value of the given entity's risk score.
+
+    EntityRiskLevels:
+      type: string
+      enum:
+        - "Unknown"
+        - "Low"
+        - "Moderate"
+        - "High"
+        - "Critical"

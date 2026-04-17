@@ -32,6 +32,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unif
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
+import type { ConfigType } from '../config';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -65,6 +66,8 @@ export interface CasesClientArgs {
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
   readonly fileService: FileServiceStart;
   readonly usageCounter?: IUsageCounter;
+  readonly config: ConfigType;
+  readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
 }
 
 export type CasesSearchParams = Partial<

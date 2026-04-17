@@ -188,7 +188,16 @@ export interface ConnectorItem {
   isSystemAction: boolean;
   isMissingSecrets?: boolean;
   isConnectorTypeDeprecated: boolean;
+  authMode?: 'shared' | 'per-user';
+  oauthStatus?: OAuthStatus;
 }
+
+export const OAUTH_STATUS = {
+  AUTHORIZED: 'authorized',
+  DISCONNECTED: 'disconnected',
+} as const;
+
+export type OAuthStatus = (typeof OAUTH_STATUS)[keyof typeof OAUTH_STATUS];
 
 export interface McpConnectorItem extends ConnectorItem {
   actionTypeId: typeof MCP_CONNECTOR_ID;
@@ -205,6 +214,27 @@ export interface ListConnectorsResponse {
 
 export interface GetConnectorResponse {
   connector: ConnectorItem;
+}
+
+interface BulkDeleteConnectorResultBase {
+  connectorId: string;
+}
+
+interface BulkDeleteConnectorSuccessResult extends BulkDeleteConnectorResultBase {
+  success: true;
+}
+
+interface BulkDeleteConnectorFailureResult extends BulkDeleteConnectorResultBase {
+  success: false;
+  reason: SerializedAgentBuilderError;
+}
+
+export type BulkDeleteConnectorResult =
+  | BulkDeleteConnectorSuccessResult
+  | BulkDeleteConnectorFailureResult;
+
+export interface BulkDeleteConnectorsResponse {
+  results: BulkDeleteConnectorResult[];
 }
 
 export interface ListMcpToolsResponse {

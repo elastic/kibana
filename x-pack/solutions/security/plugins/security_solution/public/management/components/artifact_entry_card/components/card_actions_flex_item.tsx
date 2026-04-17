@@ -64,7 +64,7 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
       <EuiFlexItem grow={false}>
         <ActionsContextMenu
           items={actions}
-          icon="boxesHorizontal"
+          icon="boxesVertical"
           isDisabled={isDisabled}
           disabledTooltip={disabledTooltip}
           data-test-subj={dataTestSubj}

@@ -31,7 +31,7 @@ const SUCCESSFUL_TOTAL_DURATION = SUCCESSFUL_TOTAL_COUNT * SUCCESSFUL_SPAN_DURAT
 const FAILED_TOTAL_DURATION = FAILED_TOTAL_COUNT * FAILED_SPAN_DURATION * 1000;
 
 describe('span destination metrics', () => {
-  let events: Array<Record<string, any>>;
+  let events: Array<Record<string, unknown>>;
 
   beforeEach(async () => {
     const javaService = apm.service({

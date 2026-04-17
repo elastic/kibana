@@ -15,15 +15,19 @@ import type {
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { Runner } from '@kbn/agent-builder-server';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import type { AgentsServiceSetup, AgentsServiceStart, ToolRefsParams } from './types';
-import type { AgentsUsingToolsResult } from './persisted/types';
+import type {
+  AgentsServiceSetup,
+  AgentsServiceStart,
+  PluginRefsParams,
+  SkillRefsParams,
+  ToolRefsParams,
+} from './types';
+import type { AgentsUsingSkillsResult, AgentsUsingToolsResult } from './persisted/types';
 import type { ToolsServiceStart } from '../tools';
 import {
   createBuiltinAgentRegistry,
   createBuiltinProviderFn,
-  registerBuiltinAgents,
   type BuiltinAgentRegistry,
 } from './builtin';
 import { createPersistedProviderFn } from './persisted';
@@ -40,7 +44,6 @@ export interface AgentsServiceStartDeps {
   elasticsearch: ElasticsearchServiceStart;
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
-  getRunner: () => Runner;
   toolsService: ToolsServiceStart;
 }
 
@@ -55,8 +58,6 @@ export class AgentsService {
 
   setup(setupDeps: AgentsServiceSetupDeps): AgentsServiceSetup {
     this.setupDeps = setupDeps;
-
-    registerBuiltinAgents({ registry: this.builtinRegistry });
 
     return {
       register: (agent) => {
@@ -75,8 +76,7 @@ export class AgentsService {
     }
 
     const { logger } = this.setupDeps;
-    const { getRunner, security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } =
-      startDeps;
+    const { security, elasticsearch, spaces, toolsService, uiSettings, savedObjects } = startDeps;
 
     const builtinProviderFn = createBuiltinProviderFn({ registry: this.builtinRegistry });
     const persistedProviderFn = createPersistedProviderFn({
@@ -126,13 +126,46 @@ export class AgentsService {
       return client.getAgentsUsingTools({ toolIds });
     };
 
+    const removePluginRefsFromAgents = async ({
+      request,
+      pluginIds,
+    }: PluginRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.removePluginRefsFromAgents({ pluginIds });
+    };
+
+    const getAgentsUsingPlugins = async ({
+      request,
+      pluginIds,
+    }: PluginRefsParams): Promise<AgentsUsingToolsResult> => {
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingPlugins({ pluginIds });
+    };
+
+    const removeSkillRefsFromAgents = async ({
+      request,
+      skillIds,
+    }: SkillRefsParams): Promise<AgentsUsingSkillsResult> => {
+      const client = await getAgentClient({ request });
+      return client.removeSkillRefsFromAgents({ skillIds });
+    };
+
+    const getAgentsUsingSkills = async ({
+      request,
+      skillIds,
+    }: SkillRefsParams): Promise<AgentsUsingSkillsResult> => {
+      const client = await getAgentClient({ request });
+      return client.getAgentsUsingSkills({ skillIds });
+    };
+
     return {
       getRegistry,
-      execute: async (args) => {
-        return getRunner().runAgent(args);
-      },
       removeToolRefsFromAgents,
       getAgentsUsingTools,
+      removePluginRefsFromAgents,
+      getAgentsUsingPlugins,
+      removeSkillRefsFromAgents,
+      getAgentsUsingSkills,
     };
   }
 }

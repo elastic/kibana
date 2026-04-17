@@ -182,6 +182,13 @@ actions:
             examples:
               createSpaceRequest:
                 $ref: '../examples/create_space_request.yaml'
+      responses:
+        200:
+          content:
+            application/json:
+              examples:
+                createSpaceResponseExample:
+                  $ref: '../examples/get_space_response.yaml'
   - target: "$.paths['/api/spaces/space/{id}']['put']"
     description: 'Add example to update space API'
     update:

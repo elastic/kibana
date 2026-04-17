@@ -7,10 +7,16 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
+import {
+  buildDataTableRecord,
+  type DataTableRecord,
+  type EsHitRecord,
+  getFieldValue,
+} from '@kbn/discover-utils';
+import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { INVESTIGATION_GUIDE_TEST_ID, INVESTIGATION_GUIDE_LOADING_TEST_ID } from './test_ids';
-import { InvestigationGuideView } from './investigation_guide_view';
+import { INVESTIGATION_GUIDE_LOADING_TEST_ID, INVESTIGATION_GUIDE_TEST_ID } from './test_ids';
+import { InvestigationGuideView } from '../../../../flyout_v2/investigation_guide/components/investigation_guide_view';
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 
 /**
@@ -18,11 +24,28 @@ import { FlyoutLoading } from '../../../shared/components/flyout_loading';
  * Renders a message saying the guide hasn't been set up or the full investigation guide.
  */
 export const InvestigationGuide: React.FC = () => {
-  const { dataFormattedForFieldBrowser, isRulePreview } = useDocumentDetailsContext();
+  const { isRulePreview, searchHit } = useDocumentDetailsContext();
 
-  const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
-    dataFormattedForFieldBrowser,
-  });
+  const hit: DataTableRecord = React.useMemo(
+    () => buildDataTableRecord(searchHit as unknown as EsHitRecord),
+    [searchHit]
+  );
+
+  const isAlert = React.useMemo(
+    () => Boolean(getFieldValue(hit, 'kibana.alert.rule.uuid') as string),
+    [hit]
+  );
+
+  const ruleId = React.useMemo(
+    () =>
+      (isAlert
+        ? (getFieldValue(hit, 'kibana.alert.rule.uuid') as string)
+        : (getFieldValue(hit, 'signal.rule.id') as string)) ?? '',
+    [hit, isAlert]
+  );
+
+  const { loading, error, rule } = useRuleWithFallback(ruleId);
+  const ruleNote = rule?.note;
 
   return (
     <div data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
@@ -33,13 +56,8 @@ export const InvestigationGuide: React.FC = () => {
         />
       ) : loading ? (
         <FlyoutLoading data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID} />
-      ) : !error && basicAlertData.ruleId && ruleNote ? (
-        <InvestigationGuideView
-          basicData={basicAlertData}
-          ruleNote={ruleNote}
-          showTitle={false}
-          showFullView={true}
-        />
+      ) : !error && ruleId && ruleNote ? (
+        <InvestigationGuideView hit={hit} investigationGuide={ruleNote} />
       ) : (
         <FormattedMessage
           id="xpack.securitySolution.flyout.left.investigation.noDataDescription"

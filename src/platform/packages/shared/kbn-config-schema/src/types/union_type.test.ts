@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expectType } from 'tsd';
+
+import type { TypeOf } from '../..';
 import { schema } from '../..';
 
 test('handles string', () => {
@@ -117,6 +120,32 @@ test('handles multiple types', () => {
   expect(type.validate(123)).toBe(123);
 });
 
+test('handles 17 literal types', () => {
+  const type = schema.oneOf([
+    schema.literal('v1'),
+    schema.literal('v2'),
+    schema.literal('v3'),
+    schema.literal('v4'),
+    schema.literal('v5'),
+    schema.literal('v6'),
+    schema.literal('v7'),
+    schema.literal('v8'),
+    schema.literal('v9'),
+    schema.literal('v10'),
+    schema.literal('v11'),
+    schema.literal('v12'),
+    schema.literal('v13'),
+    schema.literal('v14'),
+    schema.literal('v15'),
+    schema.literal('v16'),
+    schema.literal('v17'),
+  ]);
+
+  expect(type.validate('v1')).toBe('v1');
+  expect(type.validate('v17')).toBe('v17');
+  expect(() => type.validate('v18')).toThrow();
+});
+
 test('handles maybe', () => {
   const type = schema.maybe(schema.oneOf([schema.maybe(schema.string())]));
 
@@ -189,6 +218,36 @@ describe('#extendsDeep', () => {
     const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
     expect(() =>
       forbidSchema.validate({ foo: 'test', bar: 'test' })
-    ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+    );
+  });
+});
+
+describe('types', () => {
+  const seventeenLiteralType = schema.oneOf([
+    schema.literal('v1'),
+    schema.literal('v2'),
+    schema.literal('v3'),
+    schema.literal('v4'),
+    schema.literal('v5'),
+    schema.literal('v6'),
+    schema.literal('v7'),
+    schema.literal('v8'),
+    schema.literal('v9'),
+    schema.literal('v10'),
+    schema.literal('v11'),
+    schema.literal('v12'),
+    schema.literal('v13'),
+    schema.literal('v14'),
+    schema.literal('v15'),
+    schema.literal('v16'),
+    schema.literal('v17'),
+  ]);
+  type SeventeenLiteralType = TypeOf<typeof seventeenLiteralType>;
+
+  test('infers an exact 17-option literal union', () => {
+    expectType<SeventeenLiteralType>('v1');
+    expectType<SeventeenLiteralType>('v17');
   });
 });

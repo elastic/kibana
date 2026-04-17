@@ -82,7 +82,7 @@ export const ActivityItem: React.FunctionComponent<{
                       anchorProps={{
                         style: { display: 'flex', alignItems: 'center' },
                       }}
-                      type="timeRefresh"
+                      type="refreshTime"
                       content="Triggered by an automatic upgrade"
                     />
                   ) : null,
@@ -140,7 +140,7 @@ export const ActivityItem: React.FunctionComponent<{
         action.nbAgentsFailed > 0 ? (
           <EuiIcon size="m" type="warning" color="danger" />
         ) : (
-          <EuiIcon size="m" type="checkInCircleFilled" color="success" />
+          <EuiIcon size="m" type="checkCircleFill" color="success" />
         ),
       title: completeTitle,
       titleColor:
@@ -155,7 +155,7 @@ export const ActivityItem: React.FunctionComponent<{
         ),
     },
     COMPLETE: {
-      icon: <EuiIcon size="m" type="checkInCircleFilled" color="success" />,
+      icon: <EuiIcon size="m" type="checkCircleFill" color="success" />,
       title: completeTitle,
       titleColor: theme.euiTheme.colors.textSuccess,
       description:

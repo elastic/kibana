@@ -277,6 +277,9 @@ describe('kuery AST API', () => {
       expect(actual).toEqual(expected);
     });
 
+    // Performance thresholds allow for CI variance. Parser must be built with cache (grammar.peggy.config.json)
+    // or complex expressions drop to ~40 ops/sec. See https://github.com/elastic/kibana/issues/217598
+    //
     // FLAKY: https://github.com/elastic/kibana/issues/217598
     describe.skip('performance', () => {
       const NUM_RUNS = 100;

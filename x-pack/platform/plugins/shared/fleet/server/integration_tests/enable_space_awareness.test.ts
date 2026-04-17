@@ -165,6 +165,8 @@ describe('enableSpaceAwareness', () => {
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         attributes: {
           name: `package-policy-${i}`,
+          enabled: true,
+          inputs: [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },

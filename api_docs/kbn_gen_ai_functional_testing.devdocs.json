@@ -74,6 +74,71 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.parseFtrGenAiLlmSampleSize",
+        "type": "Function",
+        "tags": [],
+        "label": "parseFtrGenAiLlmSampleSize",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.FtrGenAiLlmSampleSize",
+            "text": "FtrGenAiLlmSampleSize"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.takeRandomLlmSample",
+        "type": "Function",
+        "tags": [],
+        "label": "takeRandomLlmSample",
+        "description": [
+          "\nReturns a random subset of `items` when the configured sample size is smaller\nthan the list length; otherwise returns the full list (copy)."
+        ],
+        "signature": [
+          "(items: readonly T[]) => T[]"
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/gen-ai-functional-testing",
+            "id": "def-common.takeRandomLlmSample.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "items",
+            "description": [],
+            "signature": [
+              "readonly T[]"
+            ],
+            "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
+            "lineNumber": 50,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -215,6 +280,61 @@
         "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts",
         "lineNumber": 20,
         "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE",
+        "description": [
+          "\nMax number of LLMs (connectors / EIS models) to run per FTR suite when unset.\nOverride with {@link FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV}."
+        ],
+        "signature": [
+          "1"
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV",
+        "type": "string",
+        "tags": [],
+        "label": "FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV",
+        "description": [
+          "\nSet to a positive integer to cap how many LLMs are exercised in each FTR run.\nSet to `all` to run every discovered LLM (slower; useful for local debugging)."
+        ],
+        "signature": [
+          "\"FTR_GEN_AI_LLM_SAMPLE_SIZE\""
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/gen-ai-functional-testing",
+        "id": "def-common.FtrGenAiLlmSampleSize",
+        "type": "Type",
+        "tags": [],
+        "label": "FtrGenAiLlmSampleSize",
+        "description": [],
+        "signature": [
+          "number | \"all\""
+        ],
+        "path": "src/platform/packages/private/kbn-gen-ai-functional-testing/src/random_llm_sample.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -168,7 +168,7 @@ function FieldListItemComponent(
           <EuiFlexItem grow={false}>
             <EuiToolTip content={addPropertyButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 onClick={addField}
                 data-test-subj="addPropertyButton"
                 aria-label={addPropertyButtonLabel}
@@ -231,6 +231,7 @@ function FieldListItemComponent(
           <EuiFlexGroup
             gutterSize="s"
             alignItems="center"
+            wrap
             css={[
               styles.content,
               !hasChildFields &&
@@ -244,7 +245,7 @@ function FieldListItemComponent(
                 <EuiButtonIcon
                   color="text"
                   onClick={toggleExpand}
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                   data-test-subj="toggleExpandButton"
                   aria-label={
                     isExpanded
@@ -265,18 +266,22 @@ function FieldListItemComponent(
               </EuiFlexItem>
             )}
 
-            {isMultiField && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon color="subdued" type="documents" />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false} responsive={false}>
+                {isMultiField && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon color="subdued" type="documents" aria-hidden="true" />
+                  </EuiFlexItem>
+                )}
 
-            <EuiFlexItem
-              grow={false}
-              data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
-              aria-label={i18nTexts.fieldListNameLabel}
-            >
-              {source.name}
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={`fieldName ${dataTestSubj}-fieldName`}
+                  aria-label={i18nTexts.fieldListNameLabel}
+                >
+                  {source.name}
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
 
             <EuiFlexGroup aria-label={i18nTexts.fieldListTypesLabel}>

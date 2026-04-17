@@ -46,7 +46,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
     ) : null}
     <MLOverviewCard
       layout="horizontal"
-      iconType="visTagCloud"
+      iconType="chartTagCloud"
       path="/data_drift_index_select"
       title={
         <FormattedMessage
@@ -83,7 +83,7 @@ export const DataVisualizerGrid: FC<{ isEsqlEnabled: boolean; cardTitleSize?: 's
       buttonDataTestSubj="mlDataVisualizerUploadFileButton"
     />
     <MLOverviewCard
-      iconType="tableDensityCompact"
+      iconType="tableDensityHigh"
       layout="horizontal"
       path="/datavisualizer_index_select"
       title={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {

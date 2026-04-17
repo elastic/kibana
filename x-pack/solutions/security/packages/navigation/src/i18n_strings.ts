@@ -41,12 +41,6 @@ export const i18nStrings = {
       defaultMessage: 'Explore',
     }),
   },
-  workflows: {
-    badgeTooltip: i18n.translate('securitySolutionPackages.navLinks.workflows.badgeTooltip', {
-      defaultMessage:
-        'This functionality is experimental and not supported. It may change or be removed at any time.',
-    }),
-  },
   assets: {
     title: i18n.translate('securitySolutionPackages.navLinks.assets', {
       defaultMessage: 'Assets',
@@ -64,6 +58,11 @@ export const i18nStrings = {
         defaultMessage: 'Endpoints',
       }),
     },
+    artifacts: {
+      title: i18n.translate('securitySolutionPackages.navLinks.assets.artifacts', {
+        defaultMessage: 'Artifacts',
+      }),
+    },
     integrationsCallout: {
       title: i18n.translate('securitySolutionPackages.navLinks.assets.integrationsCallout.title', {
         defaultMessage: 'Integrations',
@@ -76,6 +75,16 @@ export const i18nStrings = {
         { defaultMessage: 'Browse integrations' }
       ),
     },
+  },
+  clusterPerformance: {
+    title: i18n.translate('securitySolutionPackages.navLinks.clusterPerformance', {
+      defaultMessage: 'Cluster performance',
+    }),
+  },
+  projectPerformance: {
+    title: i18n.translate('securitySolutionPackages.navLinks.projectPerformance', {
+      defaultMessage: 'Project performance',
+    }),
   },
   ml: {
     title: i18n.translate('securitySolutionPackages.navLinks.ml', {
@@ -100,6 +109,12 @@ export const i18nStrings = {
       jobs: i18n.translate('securitySolutionPackages.navLinks.ml.anomalyDetection.jobs', {
         defaultMessage: 'Jobs',
       }),
+      manageJobs: i18n.translate(
+        'securitySolutionPackages.navLinks.ml.anomalyDetection.manageJobs',
+        {
+          defaultMessage: 'Manage jobs',
+        }
+      ),
       anomalyExplorer: i18n.translate(
         'securitySolutionPackages.navLinks.ml.anomalyDetection.anomalyExplorer',
         { defaultMessage: 'Anomaly explorer' }
@@ -158,6 +173,11 @@ export const i18nStrings = {
         { defaultMessage: 'Change point detection' }
       ),
     },
+  },
+  modelManagement: {
+    title: i18n.translate('securitySolutionPackages.navLinks.modelManagement', {
+      defaultMessage: 'Model Management',
+    }),
   },
   entityRiskScore: i18n.translate('securitySolutionPackages.navLinks.entityRiskScore', {
     defaultMessage: 'Entity risk score',
@@ -311,6 +331,12 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.kibana', {
         defaultMessage: 'Kibana',
       }),
+    },
+    v2AlertingPreview: {
+      title: i18n.translate(
+        'securitySolutionPackages.navLinks.stackManagement_v2.v2AlertingPreview',
+        { defaultMessage: 'V2 Alerting Preview' }
+      ),
     },
     // serverless only
     access: {

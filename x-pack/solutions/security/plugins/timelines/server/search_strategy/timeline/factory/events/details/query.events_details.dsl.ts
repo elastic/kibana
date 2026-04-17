@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { JsonObject } from '@kbn/utility-types';
 import type { RunTimeMappings } from '../../../../../../common/api/search_strategy/model/runtime_mappings';
 
@@ -58,7 +59,7 @@ export const buildTimelineDetailsQuery = ({
       },
     ],
     // Remove and instead pass index_pattern.id once issue resolved: https://github.com/elastic/kibana/issues/111762
-    runtime_mappings: runtimeMappings,
+    runtime_mappings: runtimeMappings as MappingRuntimeFields | undefined,
     stored_fields: ['*'],
     _source: true,
     size: 1,

@@ -12,9 +12,11 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 export function useResolvedDefinitionName({
   streamsRepositoryClient,
   doc,
+  cpsHasLinkedProjects,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
   doc: DataTableRecord;
+  cpsHasLinkedProjects?: boolean;
 }) {
   const flattenedDoc = doc.flattened;
   const index = doc.raw._index;
@@ -23,7 +25,21 @@ export function useResolvedDefinitionName({
   return useAbortableAsync(
     async ({ signal }) => {
       if (!index) {
-        return fallbackStreamName;
+        if (!fallbackStreamName) {
+          return undefined;
+        }
+        if (!cpsHasLinkedProjects) {
+          return { name: fallbackStreamName, existsLocally: true };
+        }
+        try {
+          await streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+            signal,
+            params: { path: { name: fallbackStreamName } },
+          });
+          return { name: fallbackStreamName, existsLocally: true };
+        } catch {
+          return { name: fallbackStreamName, existsLocally: false };
+        }
       }
       const definition = await streamsRepositoryClient.fetch(
         'GET /internal/streams/_resolve_index',
@@ -36,9 +52,9 @@ export function useResolvedDefinitionName({
           },
         }
       );
-      return definition?.stream?.name;
+      return { name: definition?.stream?.name, existsLocally: true };
     },
-    [streamsRepositoryClient, index, fallbackStreamName]
+    [streamsRepositoryClient, index, fallbackStreamName, cpsHasLinkedProjects]
   );
 }
 

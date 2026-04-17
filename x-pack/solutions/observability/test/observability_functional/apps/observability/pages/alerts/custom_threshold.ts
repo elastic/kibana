@@ -11,6 +11,7 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const comboBox = getService('comboBox');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
@@ -83,7 +84,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule', {
         clearWithKeyboard: true,
       });
-      await testSubjects.setValue('ruleDetailsTagsInput', 'tag1');
+      await comboBox.setCustom('ruleDetailsTagsInput', 'tag1');
+      await retry.waitFor('tag to be selected', async () => {
+        const ruleDetailsTags = await testSubjects.find('ruleDetailsTagsInput');
+        return (await ruleDetailsTags.getVisibleText()).includes('tag1');
+      });
     });
 
     it('can add data view', async () => {
@@ -246,8 +251,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           tags: ['tag1'],
           consumer: 'alerts',
           params: expect.objectContaining({
-            alertOnGroupDisappear: false,
-            alertOnNoData: false,
             criteria: [
               {
                 comparator: 'notBetween',
@@ -271,6 +274,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               },
             ],
             groupBy: ['docker.container.name'],
+            noDataBehavior: 'recover',
             searchConfiguration: {
               index: 'data-view-id_2',
               query: { query: '', language: 'kuery' },

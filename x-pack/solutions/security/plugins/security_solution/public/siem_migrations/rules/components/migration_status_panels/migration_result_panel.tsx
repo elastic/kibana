@@ -111,7 +111,7 @@ export const RuleMigrationResultPanel = React.memo<RuleMigrationResultPanelProps
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                iconType={isCollapsed ? 'arrowDown' : 'arrowUp'}
+                iconType={isCollapsed ? 'chevronSingleDown' : 'chevronSingleUp'}
                 onClick={toggleCollapsed}
                 aria-label={isCollapsed ? i18n.RULE_MIGRATION_EXPAND : i18n.RULE_MIGRATION_COLLAPSE}
               />

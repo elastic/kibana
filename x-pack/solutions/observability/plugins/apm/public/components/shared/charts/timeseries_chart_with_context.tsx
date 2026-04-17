@@ -62,7 +62,7 @@ export function TimeseriesChartWithContext({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
   const { core } = useApmPluginContext();
-  const timeZone = getTimeZone(core.uiSettings);
+  const timeZone = getTimeZone(core?.uiSettings);
   const { euiTheme } = useEuiTheme();
   const annotationColor = euiTheme.colors.accentSecondary;
   const { annotations } = useAnnotationsContext();

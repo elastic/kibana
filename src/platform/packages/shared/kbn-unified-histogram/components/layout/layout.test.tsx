@@ -45,6 +45,7 @@ interface MountComponentProps extends Partial<UseUnifiedHistogramProps> {
   hits?: UnifiedHistogramHitsContext | null;
   chart?: UnifiedHistogramChartContext | null;
   topPanelHeight?: number | null;
+  isMainPanelHidden?: boolean;
 }
 
 describe('Layout', () => {
@@ -53,6 +54,7 @@ describe('Layout', () => {
     hits,
     chart,
     topPanelHeight,
+    isMainPanelHidden,
     ...rest
   }: MountComponentProps = {}) => {
     mockedSearchSourceInstanceMockFetch$.mockImplementation(
@@ -104,6 +106,7 @@ describe('Layout', () => {
           {...unifiedHistogram.layoutProps}
           hits={hits === undefined ? unifiedHistogram.layoutProps.hits : hits ?? undefined}
           chart={chart === undefined ? unifiedHistogram.layoutProps.chart : chart ?? undefined}
+          isMainPanelHidden={isMainPanelHidden}
           topPanelHeight={
             topPanelHeight === undefined
               ? unifiedHistogram.layoutProps.topPanelHeight
@@ -116,7 +119,9 @@ describe('Layout', () => {
     const { rerender } = renderWithI18n(<Wrapper />);
 
     await waitFor(() => {
-      expect(screen.getByTestId('unifiedHistogramMainPanel')).toBeVisible();
+      expect(
+        screen.queryAllByTestId(/unifiedHistogram(MainPanel|ChartContainer)/).length
+      ).toBeGreaterThan(0);
     });
 
     const setBreakpoint = async (breakpoint: string) => {
@@ -125,7 +130,9 @@ describe('Layout', () => {
       rerender(<Wrapper />);
 
       await waitFor(() => {
-        expect(screen.getByTestId('unifiedHistogramMainPanel')).toBeVisible();
+        expect(
+          screen.queryAllByTestId(/unifiedHistogram(MainPanel|ChartContainer)/).length
+        ).toBeGreaterThan(0);
       });
     };
 
@@ -180,6 +187,31 @@ describe('Layout', () => {
       expect(screen.getByTestId('resizableLayoutSingleContainer')).toBeVisible();
       expect(screen.queryByTestId('unifiedHistogramResizableContainer')).not.toBeInTheDocument();
       expect(screen.queryByTestId('unifiedHistogramResizableButton')).not.toBeInTheDocument();
+    });
+
+    it('should set the layout mode to ResizableLayoutMode.Single if the main panel is hidden', async () => {
+      await mountComponent({ isMainPanelHidden: true });
+
+      expect(screen.getByTestId('resizableLayoutSingleContainer')).toBeVisible();
+      expect(screen.queryByTestId('unifiedHistogramResizableContainer')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedHistogramResizableButton')).not.toBeInTheDocument();
+    });
+
+    it('should hide the main panel and keep the chart visible if the main panel is hidden', async () => {
+      await mountComponent({ isMainPanelHidden: true });
+
+      expect(screen.queryByTestId('unifiedHistogramMainPanel')).not.toBeInTheDocument();
+      expect(screen.getByTestId('unifiedHistogramChartContainer')).toBeVisible();
+    });
+
+    it('should ignore isMainPanelHidden if the chart is hidden', async () => {
+      await mountComponent({
+        chart: { timeInterval: 'auto', hidden: true },
+        isMainPanelHidden: true,
+      });
+
+      expect(screen.getByTestId('resizableLayoutStaticContainer')).toBeVisible();
+      expect(screen.getByTestId('unifiedHistogramMainPanel')).toBeVisible();
     });
 
     it('should set a fixed height for Chart when layout mode is ResizableLayoutMode.Static and chart.hidden is false', async () => {

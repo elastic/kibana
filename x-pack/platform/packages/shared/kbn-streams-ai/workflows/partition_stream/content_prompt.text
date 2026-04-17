@@ -3,6 +3,23 @@ Stream name:
 
 Stream description:
 - {{{stream.description}}}
+{{#user_prompt}}
+
+User guidance:
+{{{user_prompt}}}
+{{/user_prompt}}
+{{#existing_partitions}}
+
+Current partitions (for context only — see system instructions for when to keep or discard these):
+{{{existing_partitions}}}
+{{/existing_partitions}}
+{{#refinement_history}}
+
+Refinement history (previous user prompts, oldest first):
+{{{refinement_history}}}
+{{/refinement_history}}
 
 Initial clustering:
 {{{initial_clustering}}}
+
+Before proposing partitions, use the `get_stream_features` tool to fetch features about this stream. Features provide valuable context about entities detected in the logs. This information can help you understand what systems are present and design more accurate partition conditions. If no features are returned, proceed based on the clustering data alone.

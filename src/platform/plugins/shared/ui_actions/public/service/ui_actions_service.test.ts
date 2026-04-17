@@ -13,8 +13,9 @@ import { ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import type { ActionRegistry } from '../types';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CONTEXT_MENU_TRIGGER } from '../../common/trigger_ids';
+import { ON_OPEN_PANEL_MENU } from '../../common/trigger_ids';
 import { triggers } from '../triggers';
+import { ACTION_HELLO_WORLD } from '../tests/test_samples/hello_world_action';
 
 const testAction1: ActionDefinition = {
   id: 'action1',
@@ -45,9 +46,9 @@ describe('UiActionsService', () => {
     test('can get Trigger from lookup table', () => {
       const service = new UiActionsService();
 
-      const trigger = service.getTrigger(CONTEXT_MENU_TRIGGER);
+      const trigger = service.getTrigger(ON_OPEN_PANEL_MENU);
 
-      expect(trigger).toMatchObject(triggers.CONTEXT_MENU_TRIGGER);
+      expect(trigger).toMatchObject(triggers[ON_OPEN_PANEL_MENU]);
     });
 
     test('throws if trigger does not exist', () => {
@@ -62,29 +63,14 @@ describe('UiActionsService', () => {
   describe('.registerAction()', () => {
     test('can register an action', () => {
       const service = new UiActionsService();
-      service.registerAction({
+      service.registerActionAsync('test', async () => ({
         id: 'test',
         execute: async () => {},
         getDisplayName: () => 'test',
         getIconType: () => '',
         isCompatible: async () => true,
         type: 'test',
-      });
-    });
-
-    test('return action instance', () => {
-      const service = new UiActionsService();
-      const action = service.registerAction({
-        id: 'test',
-        execute: async () => {},
-        getDisplayName: () => 'test',
-        getIconType: () => '',
-        isCompatible: async () => true,
-        type: 'test',
-      });
-
-      expect(action).toBeInstanceOf(ActionInternal);
-      expect(action.id).toBe('test');
+      }));
     });
   });
 
@@ -111,22 +97,22 @@ describe('UiActionsService', () => {
     test('returns actions set on trigger', async () => {
       const service = new UiActionsService();
 
-      service.registerAction(action1);
-      service.registerAction(action2);
+      service.registerActionAsync('action1', async () => action1);
+      service.registerActionAsync('action2', async () => action2);
 
-      const list0 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      const list0 = await service.getTriggerActions(ON_OPEN_PANEL_MENU);
 
       expect(list0).toHaveLength(0);
 
-      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action1);
-      const list1 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      service.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action1', async () => action1);
+      const list1 = await service.getTriggerActions(ON_OPEN_PANEL_MENU);
 
       expect(list1).toHaveLength(1);
       expect(list1[0]).toBeInstanceOf(ActionInternal);
       expect(list1[0].id).toBe(action1.id);
 
-      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action2);
-      const list2 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      service.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action2', async () => action2);
+      const list2 = await service.getTriggerActions(ON_OPEN_PANEL_MENU);
 
       expect(list2).toHaveLength(2);
       expect(!!list2.find(({ id }: { id: string }) => id === 'action1')).toBe(true);
@@ -143,7 +129,7 @@ describe('UiActionsService', () => {
       const helloWorldAction = createHelloWorldAction(coreStart);
       const length = actions.size;
 
-      service.registerAction(helloWorldAction);
+      service.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 
       expect(actions.size - length).toBe(1);
       const action = await actions.get(helloWorldAction.id)?.();
@@ -154,11 +140,15 @@ describe('UiActionsService', () => {
       const service = new UiActionsService();
       const helloWorldAction = createHelloWorldAction(coreStart);
 
-      service.registerAction(helloWorldAction);
+      service.registerActionAsync(ACTION_HELLO_WORLD, async () => helloWorldAction);
 
-      service.addTriggerAction(CONTEXT_MENU_TRIGGER, helloWorldAction);
+      service.addTriggerActionAsync(
+        ON_OPEN_PANEL_MENU,
+        ACTION_HELLO_WORLD,
+        async () => helloWorldAction
+      );
 
-      const compatibleActions = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
+      const compatibleActions = await service.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {
         hi: 'there',
       });
 
@@ -175,17 +165,17 @@ describe('UiActionsService', () => {
         execute: () => Promise.resolve(),
       };
 
-      service.registerAction(action);
+      service.registerActionAsync('test', async () => action);
 
-      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
+      service.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'test', async () => action);
 
-      const compatibleActions1 = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
+      const compatibleActions1 = await service.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {
         accept: true,
       });
 
       expect(compatibleActions1.length).toBe(1);
 
-      const compatibleActions2 = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
+      const compatibleActions2 = await service.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {
         accept: false,
       });
 
@@ -203,7 +193,7 @@ describe('UiActionsService', () => {
     test('returns empty list if trigger not attached to an action', async () => {
       const service = new UiActionsService();
 
-      const actions = await service.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {});
+      const actions = await service.getTriggerCompatibleActions(ON_OPEN_PANEL_MENU, {});
 
       expect(actions).toEqual([]);
     });
@@ -221,13 +211,13 @@ describe('UiActionsService', () => {
     test('forked service preserves trigger-to-actions mapping', async () => {
       const service1 = new UiActionsService();
 
-      service1.registerAction(testAction1);
-      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction1);
+      service1.registerActionAsync('action1', async () => testAction1);
+      service1.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action1', async () => testAction1);
 
       const service2 = service1.fork();
 
-      const actions1 = await service1.getTriggerActions(CONTEXT_MENU_TRIGGER);
-      const actions2 = await service2.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      const actions1 = await service1.getTriggerActions(ON_OPEN_PANEL_MENU);
+      const actions2 = await service2.getTriggerActions(ON_OPEN_PANEL_MENU);
 
       expect(actions1).toHaveLength(1);
       expect(actions2).toHaveLength(1);
@@ -238,51 +228,53 @@ describe('UiActionsService', () => {
     test('new attachments in fork do not appear in original service', async () => {
       const service1 = new UiActionsService();
 
-      service1.registerAction(testAction1);
-      service1.registerAction(testAction2);
-      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction1);
+      service1.registerActionAsync('action1', async () => testAction1);
+      service1.registerActionAsync('action2', async () => testAction2);
+      service1.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action1', async () => testAction1);
 
       const service2 = service1.fork();
 
-      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
-      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
+      expect(await service2.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
 
-      service2.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction2);
+      service2.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action2', async () => testAction2);
 
-      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
-      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(2);
+      expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
+      expect(await service2.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(2);
     });
 
     test('new attachments in original service do not appear in fork', async () => {
       const service1 = new UiActionsService();
 
-      service1.registerAction(testAction1);
-      service1.registerAction(testAction2);
-      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction1);
+      service1.registerActionAsync('action1', async () => testAction1);
+      service1.registerActionAsync('action2', async () => testAction2);
+      service1.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action1', async () => testAction1);
 
       const service2 = service1.fork();
 
-      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
-      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
+      expect(await service2.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
 
-      service1.addTriggerAction(CONTEXT_MENU_TRIGGER, testAction2);
+      service1.addTriggerActionAsync(ON_OPEN_PANEL_MENU, 'action2', async () => testAction2);
 
-      expect(await service1.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(2);
-      expect(await service2.getTriggerActions(CONTEXT_MENU_TRIGGER)).toHaveLength(1);
+      expect(await service1.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(2);
+      expect(await service2.getTriggerActions(ON_OPEN_PANEL_MENU)).toHaveLength(1);
     });
   });
 
   describe('registries', () => {
-    const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
-
     test('can register action', async () => {
       const actions: ActionRegistry = new Map();
       const service = new UiActionsService({ actions });
 
-      service.registerAction({
-        id: ACTION_HELLO_WORLD,
-        order: 13,
-      } as unknown as ActionDefinition);
+      service.registerActionAsync(
+        ACTION_HELLO_WORLD,
+        async () =>
+          ({
+            id: ACTION_HELLO_WORLD,
+            order: 13,
+          } as unknown as ActionDefinition)
+      );
 
       expect(await actions.get(ACTION_HELLO_WORLD)?.()).toMatchObject({
         id: ACTION_HELLO_WORLD,
@@ -298,9 +290,9 @@ describe('UiActionsService', () => {
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
+      service.addTriggerActionAsync(ON_OPEN_PANEL_MENU, ACTION_HELLO_WORLD, async () => action);
 
-      const actions = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      const actions = await service.getTriggerActions(ON_OPEN_PANEL_MENU);
 
       expect(actions.length).toBe(1);
       expect(actions[0].id).toBe(ACTION_HELLO_WORLD);
@@ -314,11 +306,11 @@ describe('UiActionsService', () => {
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.registerAction(action);
-      service.addTriggerAction(CONTEXT_MENU_TRIGGER, action);
-      service.detachAction(CONTEXT_MENU_TRIGGER, action.id);
+      service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
+      service.addTriggerActionAsync(ON_OPEN_PANEL_MENU, ACTION_HELLO_WORLD, async () => action);
+      service.detachAction(ON_OPEN_PANEL_MENU, action.id);
 
-      const actions2 = await service.getTriggerActions(CONTEXT_MENU_TRIGGER);
+      const actions2 = await service.getTriggerActions(ON_OPEN_PANEL_MENU);
       expect(actions2).toEqual([]);
     });
 
@@ -330,7 +322,7 @@ describe('UiActionsService', () => {
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.registerAction(action);
+      service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
       expect(() => service.detachAction('i do not exist', ACTION_HELLO_WORLD)).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = ACTION_HELLO_WORLD].'
       );
@@ -344,8 +336,10 @@ describe('UiActionsService', () => {
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.registerAction(action);
-      expect(() => service.addTriggerAction('i do not exist', action)).toThrowError(
+      service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
+      expect(() =>
+        service.addTriggerActionAsync('i do not exist', ACTION_HELLO_WORLD, async () => action)
+      ).toThrowError(
         'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
@@ -358,10 +352,10 @@ describe('UiActionsService', () => {
         order: 25,
       } as unknown as ActionDefinition;
 
-      service.registerAction(action);
-      expect(() => service.registerAction(action)).toThrowError(
-        'Action [action.id = ACTION_HELLO_WORLD] already registered.'
-      );
+      service.registerActionAsync(ACTION_HELLO_WORLD, async () => action);
+      expect(() =>
+        service.registerActionAsync(ACTION_HELLO_WORLD, async () => action)
+      ).toThrowError('Action [action.id = ACTION_HELLO_WORLD] already registered.');
     });
   });
 });

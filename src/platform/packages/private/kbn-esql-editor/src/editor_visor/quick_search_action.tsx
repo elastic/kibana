@@ -36,7 +36,7 @@ export function QuickSearchAction({
           <EuiToolTip position="top" content={quickSearchWithShortcut} disableScreenReaderOutput>
             <EuiButtonIcon
               onClick={toggleVisor}
-              iconType="search"
+              iconType="magnify"
               data-test-subj="toggle-quick-search-visor"
               aria-label={quickSearchWithShortcut}
             />

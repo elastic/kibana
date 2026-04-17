@@ -7,17 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDiscoverStateContainer } from '../application/main/state_management/discover_state';
+import { getExtendedDiscoverStateContainer } from '../customizations';
+import {
+  getDataStateContainer,
+  type DiscoverDataStateContainer,
+} from '../application/main/state_management/discover_data_state_container';
 import { savedSearchMockWithTimeField, savedSearchMock } from './saved_search';
-import { createDiscoverServicesMock } from './services';
+import { createDiscoverServicesMock, discoverServiceMock } from './services';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { mockCustomizationContext } from '../customizations/__mocks__/customization_context';
-import type { RuntimeStateManager, TabState } from '../application/main/state_management/redux';
+import type {
+  InternalStateStore,
+  RuntimeStateManager,
+  TabActionInjector,
+  TabState,
+} from '../application/main/state_management/redux';
 import {
   DEFAULT_TAB_STATE,
   internalStateActions,
   createInternalStateStore,
   createRuntimeStateManager,
+  createTabActionInjector,
   fromSavedSearchToSavedObjectTab,
   selectAllTabs,
   selectTab,
@@ -37,10 +47,9 @@ import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plug
 import { DiscoverSearchSessionManager } from '../application/main/state_management/discover_search_session';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
-import { omit } from 'lodash';
+import { isObject, omit } from 'lodash';
 import { getCurrentUrlState } from '../application/main/state_management/utils/cleanup_url_state';
 import { getInitialAppState } from '../application/main/state_management/utils/get_initial_app_state';
-import { updateSavedSearch } from '../application/main/state_management/utils/update_saved_search';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { SaveDiscoverSessionThunkParams } from '../application/main/state_management/redux/actions';
 import { filter, firstValueFrom, timeout } from 'rxjs';
@@ -51,6 +60,20 @@ interface CreateInternalStateStoreMockOptions {
   stateStorageContainer?: IKbnUrlStateStorage;
   customizationContext?: DiscoverCustomizationContext;
   services?: DiscoverServices;
+}
+
+/**
+ * @deprecated Used only by deprecated `getDiscoverStateMock`, `createDataStateContainer`,
+ * and `initializeDataStateInDiscoverStateMock`. Use `getDiscoverInternalStateMock` instead.
+ */
+export interface DiscoverStateMockParams {
+  internalState: InternalStateStore;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
+  runtimeStateManager: RuntimeStateManager;
+  stateStorage: IKbnUrlStateStorage;
+  searchSessionManager: DiscoverSearchSessionManager;
+  customizationContext: DiscoverCustomizationContext;
 }
 
 function createInternalStateStoreMock({
@@ -116,7 +139,9 @@ export function getDiscoverInternalStateMock({
 
     if (!dataView) {
       throw new Error(
-        `Data view with ID "${id}" not found in provided persistedDataViews mock array`
+        `Data view with ID "${id}" not found in provided persistedDataViews mock array (available: ${persistedDataViews
+          ?.map((dv) => dv.id)
+          .join(', ')})`
       );
     }
 
@@ -136,22 +161,39 @@ export function getDiscoverInternalStateMock({
     )
   );
 
+  jest.spyOn(services.dataViews, 'getIdsWithTitle').mockImplementation(() =>
+    Promise.resolve(
+      persistedDataViews?.map((dv) => ({
+        id: dv.id!,
+        title: dv.getIndexPattern(),
+        name: dv.name,
+        timeFieldName: dv.timeFieldName,
+      })) ?? []
+    )
+  );
+
   const originalSearchSourceCreate = services.data.search.searchSource.create;
 
-  services.data.search.searchSource.create = jest.fn((fields) => {
-    if (typeof fields?.index !== 'string') {
-      return originalSearchSourceCreate(fields);
+  services.data.search.searchSource.create = jest.fn(async (fields) => {
+    if (typeof fields?.index === 'string') {
+      const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
+
+      if (!dataView) {
+        throw new Error(
+          `Data view with ID "${fields.index}" not found in provided persistedDataViews mock array`
+        );
+      }
+
+      return createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView });
     }
 
-    const dataView = persistedDataViews?.find((dv) => dv.id === fields.index);
-
-    if (!dataView) {
-      throw new Error(
-        `Data view with ID "${fields.index}" not found in provided persistedDataViews mock array`
-      );
+    if (isObject(fields?.index) && fields.index.id) {
+      // Handle ad hoc data view specs by creating a data view from the spec
+      const adHocDataView = await services.dataViews.create(fields.index);
+      return createSearchSourceMock({ ...omit(fields, 'parent'), index: adHocDataView });
     }
 
-    return Promise.resolve(createSearchSourceMock({ ...omit(fields, 'parent'), index: dataView }));
+    return originalSearchSourceCreate(fields);
   });
 
   jest.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation((discoverSession) =>
@@ -180,6 +222,9 @@ export function getDiscoverInternalStateMock({
     internalState,
     runtimeStateManager,
     services,
+    customizationContext,
+    stateStorageContainer,
+    searchSessionManager,
     initializeTabs: async ({
       persistedDiscoverSession,
     }: { persistedDiscoverSession?: DiscoverSession } = {}) => {
@@ -192,6 +237,10 @@ export function getDiscoverInternalStateMock({
       internalState.dispatch(
         internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
       );
+
+      // Populate savedDataViews before initializing tabs,
+      // needed for computing default app state values (like default sort)
+      await internalState.dispatch(internalStateActions.loadDataViewList());
 
       await internalState
         .dispatch(
@@ -213,31 +262,37 @@ export function getDiscoverInternalStateMock({
 
         const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
 
-        if (tabRuntimeState.stateContainer$.getValue()) {
+        if (tabRuntimeState.dataStateContainer$.getValue()) {
           throw new Error(`Tab with ID "${tabId}" has already been initialized`);
         }
 
-        const stateContainer = getDiscoverStateContainer({
-          tabId: internalState.getState().tabs.unsafeCurrentId,
+        const injectCurrentTab = createTabActionInjector(tabId);
+        const getCurrentTab = () => selectTab(internalState.getState(), tabId);
+        const customizationService = await getConnectedCustomizationService({
+          customizationCallbacks: [],
+          internalState,
+          injectCurrentTab,
+          getCurrentTab,
+          runtimeStateManager,
+          stateStorage: stateStorageContainer,
           services,
-          customizationContext,
-          stateStorageContainer,
+        });
+
+        const dataStateContainer = getDataStateContainer({
+          services,
+          searchSessionManager,
           internalState,
           runtimeStateManager,
-          searchSessionManager,
-        });
-        const customizationService = await getConnectedCustomizationService({
-          stateContainer,
-          customizationCallbacks: [],
-          services,
+          injectCurrentTab,
+          getCurrentTab,
         });
 
         await internalState.dispatch(
           internalStateActions.initializeSingleTab({
             tabId,
             initializeSingleTabParams: {
-              stateContainer,
               customizationService,
+              dataStateContainer,
               dataViewSpec: undefined,
               esqlControls: undefined,
               defaultUrlState: undefined,
@@ -249,13 +304,16 @@ export function getDiscoverInternalStateMock({
           await toolkit.waitForDataFetching({ tabId });
         }
 
-        return { stateContainer, customizationService };
+        return {
+          customizationService,
+          dataStateContainer,
+        };
       }
     ),
     waitForDataFetching: assertTabsAreInitialized(async ({ tabId }: { tabId: string }) => {
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
-      const stateContainer = tabRuntimeState.stateContainer$.getValue();
-      const dataMain$ = stateContainer?.dataState.data$.main$;
+      const dataStateContainer = tabRuntimeState.dataStateContainer$.getValue();
+      const dataMain$ = dataStateContainer?.data$.main$;
 
       if (!dataMain$) {
         throw new Error(`Tab with ID "${tabId}" has not been initialized yet`);
@@ -292,6 +350,16 @@ export function getDiscoverInternalStateMock({
     }),
     getCurrentTab: assertTabsAreInitialized(() => {
       return selectTab(internalState.getState(), internalState.getState().tabs.unsafeCurrentId);
+    }),
+    injectCurrentTab: assertTabsAreInitialized(
+      <T, R>(action: (payload: T & { tabId: string }) => R) =>
+        (payload: T) =>
+          action({ ...payload, tabId: internalState.getState().tabs.unsafeCurrentId })
+    ),
+    getCurrentTabDataStateContainer: assertTabsAreInitialized(() => {
+      const tabId = internalState.getState().tabs.unsafeCurrentId;
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+      return tabRuntimeState.dataStateContainer$.getValue()!;
     }),
     addNewTab: assertTabsAreInitialized(async ({ tab }: { tab: TabState }) => {
       const currentState = internalState.getState();
@@ -345,10 +413,29 @@ export function getDiscoverInternalStateMock({
 }
 
 /**
- * @deprecated
+ * @deprecated Use `getDiscoverInternalStateMock` instead.
+ *
  * This util was from before we implemented Discover tabs,
  * and is not well suited for tabs-first state tests.
- * Prefer {@link getDiscoverInternalStateMock} for new tests.
+ *
+ * Migration example:
+ * ```typescript
+ * // Before:
+ * const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+ * stateContainer.internalState.dispatch(
+ *   stateContainer.injectCurrentTab(internalStateActions.setAppState)({ appState })
+ * );
+ *
+ * // After:
+ * const toolkit = getDiscoverInternalStateMock();
+ * await toolkit.initializeTabs();
+ * await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+ * toolkit.internalState.dispatch(
+ *   toolkit.injectCurrentTab(internalStateActions.setAppState)({ appState })
+ * );
+ * ```
+ *
+ * Access state via `toolkit.internalState`, `toolkit.runtimeStateManager`, `toolkit.injectCurrentTab()`.
  */
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -437,9 +524,11 @@ export function getDiscoverStateMock({
     )
   );
 
+  const currentTabId = internalState.getState().tabs.unsafeCurrentId;
+
   internalState.dispatch(
     internalStateActions.resetAppState({
-      tabId: internalState.getState().tabs.unsafeCurrentId,
+      tabId: currentTabId,
       appState: getInitialAppState({
         initialUrlState: getCurrentUrlState(stateStorageContainer, services),
         persistedTab: persistedDiscoverSession?.tabs[0],
@@ -449,15 +538,26 @@ export function getDiscoverStateMock({
     })
   );
 
-  const container = getDiscoverStateContainer({
-    tabId: internalState.getState().tabs.unsafeCurrentId,
-    services,
-    customizationContext,
-    stateStorageContainer,
+  const injectCurrentTab = createTabActionInjector(currentTabId);
+  const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
+  const extendedContainer = getExtendedDiscoverStateContainer({
     internalState,
+    injectCurrentTab,
+    getCurrentTab,
     runtimeStateManager,
-    searchSessionManager,
+    stateStorage: stateStorageContainer,
+    services,
   });
+  const stateContainer: DiscoverStateMockParams = {
+    internalState,
+    injectCurrentTab,
+    getCurrentTab,
+    runtimeStateManager,
+    stateStorage: stateStorageContainer,
+    searchSessionManager,
+    customizationContext,
+  };
+
   const tabRuntimeState = selectTabRuntimeState(
     runtimeStateManager,
     internalState.getState().tabs.unsafeCurrentId
@@ -465,24 +565,14 @@ export function getDiscoverStateMock({
 
   tabRuntimeState.customizationService$.next({
     ...createCustomizationService(),
+    stateContainer: extendedContainer,
     cleanup: async () => {},
   });
-  tabRuntimeState.stateContainer$.next(container);
 
   if (finalSavedSearch) {
-    const currentTab = selectTab(internalState.getState(), container.getCurrentTab().id);
     const dataView = finalSavedSearch.searchSource.getField('index');
 
-    container.savedSearchState.set(
-      updateSavedSearch({
-        savedSearch: finalSavedSearch,
-        dataView,
-        appState: currentTab.appState,
-        globalState: currentTab.globalState,
-        services,
-      })
-    );
-    tabRuntimeState.currentDataView$.next(finalSavedSearch.searchSource.getField('index'));
+    tabRuntimeState.currentDataView$.next(dataView);
 
     if (dataView) {
       internalState.dispatch(
@@ -491,5 +581,45 @@ export function getDiscoverStateMock({
     }
   }
 
-  return container;
+  return stateContainer;
+}
+
+/**
+ * Creates a `dataStateContainer` for testing purposes.
+ * This is primarily used when calling `initializeSingleTab` which stores the container.
+ *
+ * @deprecated Prefer using `toolkit.initializeSingleTab()` which creates and stores the dataStateContainer.
+ */
+export function createDataStateContainer(
+  stateContainer: DiscoverStateMockParams,
+  services: DiscoverServices = discoverServiceMock
+): DiscoverDataStateContainer {
+  return getDataStateContainer({
+    internalState: stateContainer.internalState,
+    services,
+    searchSessionManager: stateContainer.searchSessionManager,
+    runtimeStateManager: stateContainer.runtimeStateManager,
+    injectCurrentTab: stateContainer.injectCurrentTab,
+    getCurrentTab: stateContainer.getCurrentTab,
+  });
+}
+
+/**
+ * Initializes the `dataStateContainer` in the runtime state for the current tab.
+ * This is required for tests that use `initializeAndSync` directly without going through
+ * the full `initializeSingleTab` flow.
+ *
+ * @deprecated Prefer using `toolkit.initializeSingleTab()` which handles this automatically.
+ */
+export function initializeDataStateInDiscoverStateMock(
+  stateContainer: DiscoverStateMockParams,
+  services: DiscoverServices = discoverServiceMock
+): DiscoverDataStateContainer {
+  const { runtimeStateManager, internalState } = stateContainer;
+  const tabId = internalState.getState().tabs.unsafeCurrentId;
+  const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+  const dataStateContainer = createDataStateContainer(stateContainer, services);
+  tabRuntimeState.dataStateContainer$.getValue()?.cancel();
+  tabRuntimeState.dataStateContainer$.next(dataStateContainer);
+  return dataStateContainer;
 }

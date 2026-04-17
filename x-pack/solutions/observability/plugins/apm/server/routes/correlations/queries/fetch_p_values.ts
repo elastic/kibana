@@ -6,15 +6,21 @@
  */
 
 import { isCCSRemoteIndexName } from '@kbn/es-query';
+import pLimit from 'p-limit';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
-import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import type {
+  CommonCorrelationsQueryParams,
+  EntityType,
+} from '../../../../common/correlations/types';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { splitAllSettledPromises, getEventType } from '../utils';
+import { getEventTypeFromEntityType, splitAllSettledPromises } from '../utils';
 import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_range_steps';
 import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_correlation_p_values';
+
+// This helps avoid circuit breaker exceptions and HTTP 429 errors
+const limiter = pLimit(10);
 
 export interface PValuesResponse {
   failedTransactionsCorrelations: FailedTransactionsCorrelation[];
@@ -32,25 +38,25 @@ export const fetchPValues = async ({
   durationMin,
   durationMax,
   fieldCandidates,
+  entityType,
+  includeHistogram = true,
 }: CommonCorrelationsQueryParams & {
   apmEventClient: APMEventClient;
   durationMin?: number;
   durationMax?: number;
   fieldCandidates: string[];
+  entityType: EntityType;
+  includeHistogram?: boolean;
 }): Promise<PValuesResponse> => {
-  const chartType = LatencyDistributionChartType.failedTransactionsCorrelations;
-  const searchMetrics = false; // failed transactions correlations does not search metrics documents
-  const eventType = getEventType(chartType, searchMetrics);
-
+  const eventType = getEventTypeFromEntityType(entityType);
   const { rangeSteps } = await fetchDurationHistogramRangeSteps({
     apmEventClient,
-    chartType,
+    entityType,
     start,
     end,
     environment,
     kuery,
     query,
-    searchMetrics,
     durationMinOverride: durationMin,
     durationMaxOverride: durationMax,
   });
@@ -58,16 +64,20 @@ export const fetchPValues = async ({
   const { fulfilled, rejected } = splitAllSettledPromises(
     await Promise.allSettled(
       fieldCandidates.map((fieldName) =>
-        fetchFailedEventsCorrelationPValues({
-          apmEventClient,
-          start,
-          end,
-          environment,
-          kuery,
-          query,
-          fieldName,
-          rangeSteps,
-        })
+        limiter(() =>
+          fetchFailedEventsCorrelationPValues({
+            apmEventClient,
+            start,
+            end,
+            environment,
+            kuery,
+            query,
+            fieldName,
+            rangeSteps,
+            entityType,
+            includeHistogram,
+          })
+        )
       )
     )
   );
@@ -84,22 +94,19 @@ export const fetchPValues = async ({
       record.pValue < ERROR_CORRELATION_THRESHOLD
     ) {
       failedTransactionsCorrelations.push(record);
-    } else {
-      // If there's no result matching the criteria
-      // Find the next highest/closest result to the threshold
-      // to use as a fallback result
-      if (!fallbackResult) {
-        fallbackResult = record;
-      } else {
-        if (
-          record.pValue !== null &&
-          fallbackResult &&
-          fallbackResult.pValue !== null &&
-          record.pValue < fallbackResult.pValue
-        ) {
-          fallbackResult = record;
-        }
-      }
+    }
+    // If there's no result matching the criteria
+    // Find the next highest/closest result to the threshold
+    // to use as a fallback result
+    else if (
+      !fallbackResult ||
+      (record &&
+        typeof record.pValue === 'number' &&
+        fallbackResult &&
+        typeof fallbackResult.pValue === 'number' &&
+        record.pValue < fallbackResult.pValue)
+    ) {
+      fallbackResult = record;
     }
   });
 

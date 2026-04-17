@@ -17,11 +17,13 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
+import type { CriteriaWithPagination } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { useKibana, useRouterNavigate } from '../common/lib/kibana';
+import { usePersistedPageSize, PAGE_SIZE_OPTIONS } from '../common/use_persisted_page_size';
 import { useIsExperimentalFeatureEnabled } from '../common/experimental_features_context';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
@@ -70,7 +72,14 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
   }
 
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      aria-label={i18n.translate('xpack.osquery.packs.table.agentPoliciesPopoverAriaLabel', {
+        defaultMessage: 'Agent policies',
+      })}
+    >
       <EuiText size="s">
         {agentPolicyIds?.map((policyId) => (
           <div key={policyId}>
@@ -87,6 +96,8 @@ const PacksTableComponent = () => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { push } = useHistory();
   const { data, isLoading } = usePacks({});
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = usePersistedPageSize();
 
   const renderAgentPolicy = useCallback(
     (agentPolicyIds: any) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
@@ -233,6 +244,25 @@ const PacksTableComponent = () => {
     ]
   );
 
+  const pagination = useMemo(
+    () => ({
+      pageIndex,
+      pageSize,
+      pageSizeOptions: [...PAGE_SIZE_OPTIONS],
+    }),
+    [pageIndex, pageSize]
+  );
+
+  const onTableChange = useCallback(
+    ({ page }: CriteriaWithPagination<PackSavedObject>) => {
+      if (page) {
+        setPageIndex(page.index);
+        setPageSize(page.size);
+      }
+    },
+    [setPageIndex, setPageSize]
+  );
+
   const sorting = useMemo(
     () => ({
       sort: {
@@ -251,8 +281,9 @@ const PacksTableComponent = () => {
     <EuiInMemoryTable<PackSavedObject>
       items={data?.data ?? EMPTY_ARRAY}
       columns={columns}
-      pagination={true}
+      pagination={pagination}
       sorting={sorting}
+      onChange={onTableChange}
       tableCaption={i18n.translate('xpack.osquery.packs.table.caption', {
         defaultMessage: 'List of saved packs',
       })}

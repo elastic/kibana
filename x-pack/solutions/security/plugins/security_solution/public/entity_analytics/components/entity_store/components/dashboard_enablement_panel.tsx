@@ -15,16 +15,16 @@ import {
   EuiImage,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
-import type { GetEntityStoreStatusResponse } from '../../../../../common/api/entity_analytics/entity_store/status.gen';
+
 import type {
+  EngineDescriptor,
   RiskEngineStatusResponse,
   StoreStatus,
 } from '../../../../../common/api/entity_analytics';
 import { RiskEngineStatusEnum } from '../../../../../common/api/entity_analytics';
-import { useInitRiskEngineMutation } from '../../../api/hooks/use_init_risk_engine_mutation';
-import { useEnableEntityStoreMutation } from '../hooks/use_entity_store';
+
+import { useInstallEntityStoreMutation } from '../hooks/use_entity_store';
 import {
   ENABLEMENT_INITIALIZING_RISK_ENGINE,
   ENABLEMENT_INITIALIZING_ENTITY_STORE,
@@ -35,54 +35,56 @@ import {
   ENABLE_ENTITY_STORE_TITLE,
   ENABLEMENT_DESCRIPTION_ENTITY_STORE_ONLY,
 } from '../translations';
-import type { Enablements } from './enablement_modal';
-import { EntityStoreEnablementModal } from './enablement_modal';
+import { EnablementConfirmationModal } from './enablement_modal';
 import dashboardEnableImg from '../../../images/entity_store_dashboard.png';
 import { useEntityStoreTypes } from '../../../hooks/use_enabled_entity_types';
+import { useToggleEntityAnalytics } from '../../../hooks/use_toggle_entity_analytics';
+import { EntityAnalyticsErrorPanel } from '../../entity_analytics_toggle';
+import { useConfigurableRiskEngineSettings } from '../../risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks';
 
 interface EnableEntityStorePanelProps {
-  state: {
-    riskEngine: UseQueryResult<RiskEngineStatusResponse>;
-    entityStore: UseQueryResult<GetEntityStoreStatusResponse>;
-  };
+  riskEngineStatus?: RiskEngineStatusResponse['risk_engine_status'];
+  entityStoreStatus?: StoreStatus;
+  engines?: EngineDescriptor[];
 }
 
-export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }) => {
-  const riskEngineStatus = state.riskEngine.data?.risk_engine_status;
-  const entityStoreStatus = state.entityStore.data?.status;
-  const engines = state.entityStore.data?.engines;
+export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({
+  riskEngineStatus,
+  entityStoreStatus,
+  engines,
+}) => {
   const enabledEntityTypes = useEntityStoreTypes();
 
-  const [modal, setModalState] = useState({ visible: false });
-  const [riskEngineInitializing, setRiskEngineInitializing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const initRiskEngine = useInitRiskEngineMutation();
-  const storeEnablement = useEnableEntityStoreMutation();
+  const {
+    selectedSettingsMatchSavedSettings,
+    saveSelectedSettingsMutation,
+    selectedRiskEngineSettings,
+  } = useConfigurableRiskEngineSettings();
 
-  const enableEntityStore = useCallback(
-    (enable: Enablements) => () => {
-      if (enable.riskScore) {
-        const options = {
-          onSuccess: () => {
-            setRiskEngineInitializing(false);
-            if (enable.entityStore) {
-              storeEnablement.mutate({});
-            }
-          },
-        };
-        setRiskEngineInitializing(true);
-        initRiskEngine.mutate(undefined, options);
-        setModalState({ visible: false });
-        return;
-      }
+  const handleSaveSettings = useCallback(async () => {
+    if (selectedRiskEngineSettings) {
+      await saveSelectedSettingsMutation.mutateAsync(selectedRiskEngineSettings);
+    }
+  }, [selectedRiskEngineSettings, saveSelectedSettingsMutation]);
 
-      if (enable.entityStore) {
-        storeEnablement.mutate({});
-        setModalState({ visible: false });
-      }
-    },
-    [storeEnablement, initRiskEngine]
-  );
+  const {
+    toggle,
+    isLoading: isToggling,
+    errors: toggleErrors,
+  } = useToggleEntityAnalytics({
+    selectedSettingsMatchSavedSettings,
+    onSaveSettings: handleSaveSettings,
+    isSavingSettings: saveSelectedSettingsMutation.isLoading,
+  });
+
+  const storeEnablement = useInstallEntityStoreMutation();
+
+  const handleConfirmEnable = async () => {
+    setModalVisible(false);
+    await toggle();
+  };
 
   const installedTypes = engines?.map((engine) => engine.type);
   const uninstalledTypes = enabledEntityTypes.filter(
@@ -93,7 +95,12 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
     storeEnablement.mutate({ entityTypes: uninstalledTypes });
   };
 
+  const hasToggleErrors = toggleErrors.riskEngine.length > 0 || toggleErrors.entityStore.length > 0;
+
   if (storeEnablement.error) {
+    const errorMessage =
+      storeEnablement.error.body?.message ??
+      (storeEnablement.error instanceof Error ? storeEnablement.error.message : 'Unknown error');
     return (
       <EuiCallOut
         announceOnMount
@@ -106,12 +113,21 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         color="danger"
         iconType="error"
       >
-        <p>{storeEnablement.error.body.message}</p>
+        <p>{errorMessage}</p>
       </EuiCallOut>
     );
   }
 
-  if (riskEngineInitializing) {
+  if (hasToggleErrors) {
+    return (
+      <EntityAnalyticsErrorPanel
+        riskEngineErrors={toggleErrors.riskEngine}
+        entityStoreErrors={toggleErrors.entityStore}
+      />
+    );
+  }
+
+  if (isToggling) {
     return (
       <EuiPanel hasBorder data-test-subj="riskEngineInitializingPanel">
         <EuiEmptyPrompt
@@ -207,7 +223,7 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
             <EuiButton
               color="primary"
               fill
-              onClick={() => setModalState({ visible: true })}
+              onClick={() => setModalVisible(true)}
               data-test-subj={`entityStoreEnablementButton`}
             >
               <FormattedMessage
@@ -221,12 +237,10 @@ export const EnablementPanel: React.FC<EnableEntityStorePanelProps> = ({ state }
         data-test-subj="entityStoreEnablementPanel"
       />
 
-      <EntityStoreEnablementModal
-        visible={modal.visible}
-        toggle={(visible) => setModalState({ visible })}
-        enableStore={enableEntityStore}
-        riskEngineStatus={riskEngineStatus}
-        entityStoreStatus={entityStoreStatus}
+      <EnablementConfirmationModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={handleConfirmEnable}
       />
     </>
   );

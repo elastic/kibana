@@ -37,6 +37,7 @@ export const Template: FunctionComponent<Props> = ({
   const title = customBranding.pageTitle ?? 'Elastic';
   const favIcon = customBranding.faviconSVG ?? `${uiPublicUrl}/favicons/favicon.svg`;
   const favIconPng = customBranding.faviconPNG ?? `${uiPublicUrl}/favicons/favicon.png`;
+  const colorScheme = darkMode === 'system' ? 'light dark' : darkMode ? 'dark' : 'light';
   const logo = customBranding.logo ? (
     <img src={customBranding.logo} width="64" height="64" alt="logo" />
   ) : (
@@ -54,7 +55,7 @@ export const Template: FunctionComponent<Props> = ({
         <link rel="alternate icon" type="image/png" href={favIconPng} />
         <link rel="icon" type="image/svg+xml" href={favIcon} />
         <meta name="theme-color" content="#ffffff" />
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content={colorScheme} />
         {/* Inject EUI reset and global styles before all other component styles */}
         <meta name={EUI_STYLES_GLOBAL} />
         <meta name="emotion" />

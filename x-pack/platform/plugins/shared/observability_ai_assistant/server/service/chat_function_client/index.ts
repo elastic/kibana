@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import Ajv, { type ValidateFunction } from 'ajv';
+import { z } from '@kbn/zod/v4';
+import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import { compact, keyBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { createToolValidationError } from '@kbn/inference-plugin/common/chat_complete/errors';
@@ -22,15 +23,22 @@ import type {
 } from '../types';
 import { registerGetDataOnScreenFunction } from '../../functions/get_data_on_screen';
 
-const ajv = new Ajv({
-  strict: false,
-});
+const toZodSchema = (schema: unknown): z.ZodTypeAny => {
+  if (!schema || typeof schema !== 'object') {
+    return z.any();
+  }
+
+  const normalized =
+    'properties' in schema && !('type' in schema) ? { type: 'object', ...schema } : schema;
+
+  return fromJSONSchema(normalized as Record<string, unknown>) ?? z.any();
+};
 
 export class ChatFunctionClient {
   private readonly instructions: InstructionOrCallback[] = [];
 
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
-  private readonly validators: Map<string, ValidateFunction> = new Map();
+  private readonly validators: Map<string, z.ZodTypeAny> = new Map();
 
   private readonly actions: Required<ObservabilityAIAssistantScreenContextRequest>['actions'];
 
@@ -41,14 +49,14 @@ export class ChatFunctionClient {
 
     this.actions.forEach((action) => {
       if (action.parameters) {
-        this.validators.set(action.name, ajv.compile(action.parameters));
+        this.validators.set(action.name, toZodSchema(action.parameters));
       }
     });
   }
 
   registerFunction: RegisterFunction = (definition, respond) => {
     if (definition.parameters) {
-      this.validators.set(definition.name, ajv.compile(definition.parameters));
+      this.validators.set(definition.name, toZodSchema(definition.parameters));
     }
     this.functionRegistry.set(definition.name, { handler: { definition, respond } });
   };
@@ -63,11 +71,19 @@ export class ChatFunctionClient {
       return;
     }
 
-    const result = validator(parameters);
-    if (!result) {
+    try {
+      validator.parse(parameters);
+    } catch (error) {
+      const errorMessage =
+        error instanceof z.ZodError
+          ? error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ')
+          : error instanceof Error
+          ? error.message
+          : 'Unknown validation error';
+
       throw createToolValidationError(`Tool call arguments for ${name} were invalid`, {
         name,
-        errorsText: validator.errors?.map((error) => error.message).join(', '),
+        errorsText: errorMessage,
         arguments: JSON.stringify(parameters),
         toolCalls: [],
       });

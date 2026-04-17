@@ -9,7 +9,7 @@
 
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../transforms/columns/utils';
 import {
-  LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+  LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
   LENS_MOVING_AVERAGE_DEFAULT_WINDOW,
   LENS_PERCENTILE_DEFAULT_VALUE,
   LENS_PERCENTILE_RANK_DEFAULT_VALUE,
@@ -35,7 +35,6 @@ describe('Metric Operations Schemas', () => {
   describe('columnValueOperationSchema', () => {
     it('validates a valid metric operation configuration', () => {
       const input = {
-        operation: 'value',
         column: 'sum' as const,
       };
 
@@ -86,8 +85,8 @@ describe('Metric Operations Schemas', () => {
         empty_as_null: true,
         time_scale: 's' as const,
         filter: {
-          language: 'kuery' as const,
-          query: 'status:active',
+          language: 'kql' as const,
+          expression: 'status:active',
         },
       };
 
@@ -271,28 +270,28 @@ describe('Metric Operations Schemas', () => {
       const input = {
         operation: 'last_value' as const,
         field: 'status',
-        sort_by: 'timestamp',
+        time_field: 'timestamp',
       };
 
       const validated = lastValueOperationSchema.validate(input);
       expect(validated).toEqual({
         ...input,
-        show_array_values: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+        multi_value: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
       });
     });
 
-    it('validates last value operation with undefined show_array_values value', () => {
+    it('validates last value operation with undefined multi_value value', () => {
       const input = {
         operation: 'last_value' as const,
         field: 'status',
-        sort_by: 'timestamp',
-        show_array_values: undefined,
+        time_field: 'timestamp',
+        multi_value: undefined,
       };
 
       const validated = lastValueOperationSchema.validate(input);
       expect(validated).toEqual({
         ...input,
-        show_array_values: LENS_LAST_VALUE_DEFAULT_SHOW_ARRAY_VALUES,
+        multi_value: LENS_LAST_VALUE_DEFAULT_MULTI_VALUE,
       });
     });
   });

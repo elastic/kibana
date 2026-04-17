@@ -6,6 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { LoghubTimestampLayout } from '../loghub/create_loghub_generator';
 import { getLoghubGenerators } from '../loghub/get_loghub_generators';
 import { getServerlessGenerators } from '../serverless/get_serverless_generators';
 import type { StreamLogGenerator } from '../types';
@@ -35,6 +36,7 @@ export class SampleParserClient {
     distribution = 'uniform',
     systems = {},
     streamType = 'wired',
+    loghubTimestampLayout,
   }: {
     rpm?: number;
     distribution?: 'relative' | 'uniform';
@@ -43,6 +45,8 @@ export class SampleParserClient {
       serverless?: boolean | string[];
     };
     streamType?: 'classic' | 'wired';
+    /** LogHub only; default preserves upstream log timestamps. */
+    loghubTimestampLayout?: LoghubTimestampLayout;
   }): Promise<StreamLogGenerator[]> {
     const { loghub, serverless } = systems;
 
@@ -60,6 +64,7 @@ export class SampleParserClient {
             distribution,
             rpm,
             streamType,
+            timestampLayout: loghubTimestampLayout,
           })
         : Promise.resolve([]),
       includeServerless

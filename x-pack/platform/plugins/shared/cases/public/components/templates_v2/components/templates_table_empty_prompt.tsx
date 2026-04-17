@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiEmptyPrompt, EuiButtonEmpty } from '@elastic/eui';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 import { LinkButton } from '../../links';
 
 interface TemplatesTableEmptyPromptProps {
@@ -56,7 +56,7 @@ const TemplatesTableEmptyPromptComponent: React.FC<TemplatesTableEmptyPromptProp
           size="s"
           onClick={onCreateTemplate}
           href={createTemplateUrl}
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="templates-table-add-template"
         >
           {i18n.CREATE_TEMPLATE}

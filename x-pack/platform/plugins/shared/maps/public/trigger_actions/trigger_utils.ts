@@ -13,7 +13,7 @@ export function isUrlDrilldown(action: Action) {
   return action.type === 'url_drilldown';
 }
 
-// VALUE_CLICK_TRIGGER is coupled with expressions and Datatable type
+// ON_CLICK_VALUE is coupled with expressions and Datatable type
 // URL drilldown parses event scope from Datatable
 // https://github.com/elastic/kibana/blob/7.10/x-pack/plugins/drilldowns/url_drilldown/public/lib/url_drilldown_scope.ts#L140
 // In order to use URL drilldown, maps has to package its data in Datatable compatiable format.

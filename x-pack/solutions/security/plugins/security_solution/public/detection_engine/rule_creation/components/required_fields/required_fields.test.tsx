@@ -303,6 +303,51 @@ describe('RequiredFields form part', () => {
       expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeNull();
     });
 
+    it(`doesn't display a warning when a field is a subfield of a flattened field`, async () => {
+      const initialState = [{ name: 'event.properties.subcategory', type: 'keyword' }];
+
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({
+          name: 'event.properties',
+          esTypes: ['flattened'],
+        }),
+      ];
+
+      render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
+
+      expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeNull();
+    });
+
+    it(`doesn't display a warning for deeply nested subfields of a flattened field`, async () => {
+      const initialState = [{ name: 'event.properties.nested.deep.value', type: 'keyword' }];
+
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({
+          name: 'event.properties',
+          esTypes: ['flattened'],
+        }),
+      ];
+
+      render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
+
+      expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeNull();
+    });
+
+    it(`still displays a warning for unknown fields that are not subfields of a flattened field`, async () => {
+      const initialState = [{ name: 'other.unknown.field', type: 'keyword' }];
+
+      const indexPatternFields: DataViewFieldBase[] = [
+        createIndexPatternField({
+          name: 'event.properties',
+          esTypes: ['flattened'],
+        }),
+      ];
+
+      render(<TestForm initialState={initialState} indexPatternFields={indexPatternFields} />);
+
+      expect(screen.queryByTestId(REQUIRED_FIELDS_GENERAL_WARNING_TEST_ID)).toBeVisible();
+    });
+
     it(`doesn't display a warning for an empty row`, async () => {
       const indexPatternFields: DataViewFieldBase[] = [
         createIndexPatternField({ name: 'field1', esTypes: ['string'] }),

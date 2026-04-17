@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { schema } from '@kbn/config-schema';
 
 import type { SettingsConfig } from '../../../common/settings/types';
@@ -54,7 +54,7 @@ describe('form_settings', () => {
             test_foo: 'not valid',
           },
         })
-      ).toThrowError(/Expected boolean, received string/);
+      ).toThrowError(/Invalid input: expected boolean, received string/);
 
       expect(() =>
         apiSchema.validate({

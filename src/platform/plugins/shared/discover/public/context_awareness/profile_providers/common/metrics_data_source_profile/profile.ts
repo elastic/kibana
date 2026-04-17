@@ -9,11 +9,12 @@
 
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { Parser } from '@kbn/esql-language';
+import { Parser } from '@elastic/esql';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createChartSection } from './accessor/chart_section';
+import { getDefaultAppState } from './accessor/get_default_app_state';
 
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
@@ -26,6 +27,7 @@ export const createMetricsDataSourceProfileProvider =
     restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
     profile: {
       getChartSectionConfiguration: createChartSection(),
+      getDefaultAppState,
     },
     resolve: async ({ query, rootContext }) => {
       if (!isQuerySupported(query) || !isSolutionValid(rootContext.solutionType)) {

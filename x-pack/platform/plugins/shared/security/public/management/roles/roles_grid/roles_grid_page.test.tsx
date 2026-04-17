@@ -5,41 +5,18 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import type { ReactWrapper } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
-import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { PermissionDenied } from './permission_denied';
 import { RolesGridPage } from './roles_grid_page';
-import { DisabledBadge, ReservedBadge } from '../../badges';
 import { rolesAPIClientMock } from '../index.mock';
 import type { RolesAPIClient } from '../roles_api_client';
 
-const mock403 = () => ({ body: { statusCode: 403 } });
-
-const waitForRender = async (
-  wrapper: ReactWrapper<any>,
-  condition: (wrapper: ReactWrapper<any>) => boolean
-) => {
-  return new Promise<void>((resolve, reject) => {
-    const interval = setInterval(async () => {
-      await Promise.resolve();
-      wrapper.update();
-      if (condition(wrapper)) {
-        resolve();
-      }
-    }, 10);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      reject(new Error('waitForRender timeout after 2000ms'));
-    }, 2000);
-  });
-};
+const renderWithIntl = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
@@ -87,8 +64,8 @@ describe('<RolesGridPage />', () => {
     });
   });
 
-  it(`renders reserved roles as such`, async () => {
-    const wrapper = mountWithIntl(
+  it('renders reserved roles as such', async () => {
+    renderWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
@@ -101,18 +78,15 @@ describe('<RolesGridPage />', () => {
         rendering={rendering}
       />
     );
-    const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    await waitFor(() => {
+      expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
+      expect(screen.getByText('Reserved')).toBeInTheDocument();
     });
-
-    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(wrapper.find(ReservedBadge)).toHaveLength(1);
   });
 
-  it(`renders disabled roles as such`, async () => {
-    const wrapper = mountWithIntl(
+  it('renders disabled roles as such', async () => {
+    renderWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
@@ -125,20 +99,17 @@ describe('<RolesGridPage />', () => {
         rendering={rendering}
       />
     );
-    const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    await waitFor(() => {
+      expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
+      expect(screen.getByText('Disabled')).toBeInTheDocument();
     });
-
-    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-    expect(wrapper.find(DisabledBadge)).toHaveLength(1);
   });
 
   it('renders permission denied if required', async () => {
-    apiClientMock.queryRoles.mockRejectedValue(mock403());
+    apiClientMock.queryRoles.mockRejectedValue({ body: { statusCode: 403 } });
 
-    const wrapper = mountWithIntl(
+    const { container } = renderWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
@@ -151,14 +122,15 @@ describe('<RolesGridPage />', () => {
         rendering={rendering}
       />
     );
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(PermissionDenied).length > 0;
+
+    await waitFor(() => {
+      expect(screen.getByTestId('permissionDeniedMessage')).toBeInTheDocument();
     });
-    expect(wrapper.find(PermissionDenied).render()).toMatchSnapshot();
+    expect(container.children[0]).toMatchSnapshot();
   });
 
   it('renders role actions as appropriate, escaping when necessary', async () => {
-    const wrapper = mountWithIntl(
+    renderWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
@@ -171,40 +143,34 @@ describe('<RolesGridPage />', () => {
         rendering={rendering}
       />
     );
-    const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    await waitFor(() => {
+      const editButton = screen.getByTestId('edit-role-action-test-role-1');
+      expect(editButton).toBeInTheDocument();
+      expect(editButton).toHaveAttribute('href', '/edit/test-role-1');
+
+      const editSpecialButton = screen.getByTestId('edit-role-action-special%chars%role');
+      expect(editSpecialButton).toBeInTheDocument();
+      expect(editSpecialButton).toHaveAttribute('href', '/edit/special%25chars%25role');
+
+      const cloneButton = screen.getByTestId('clone-role-action-test-role-1');
+      expect(cloneButton).toBeInTheDocument();
+      expect(cloneButton).toHaveAttribute('href', '/clone/test-role-1');
+
+      const cloneSpecialButton = screen.getByTestId('clone-role-action-special%chars%role');
+      expect(cloneSpecialButton).toBeInTheDocument();
+      expect(cloneSpecialButton).toHaveAttribute('href', '/clone/special%25chars%25role');
+
+      expect(screen.getByTestId('edit-role-action-disabled-role')).toBeInTheDocument();
+      expect(screen.getByTestId('clone-role-action-disabled-role')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('roleRowDescription-test-role-with-description')
+      ).toBeInTheDocument();
     });
-
-    expect(wrapper.find(PermissionDenied)).toHaveLength(0);
-
-    let editButton = wrapper.find('a[data-test-subj="edit-role-action-test-role-1"]');
-    expect(editButton).toHaveLength(1);
-    expect(editButton.prop('href')).toBe('/edit/test-role-1');
-
-    editButton = wrapper.find('a[data-test-subj="edit-role-action-special%chars%role"]');
-    expect(editButton).toHaveLength(1);
-    expect(editButton.prop('href')).toBe('/edit/special%25chars%25role');
-
-    let cloneButton = wrapper.find('a[data-test-subj="clone-role-action-test-role-1"]');
-    expect(cloneButton).toHaveLength(1);
-    expect(cloneButton.prop('href')).toBe('/clone/test-role-1');
-
-    cloneButton = wrapper.find('a[data-test-subj="clone-role-action-special%chars%role"]');
-    expect(cloneButton).toHaveLength(1);
-    expect(cloneButton.prop('href')).toBe('/clone/special%25chars%25role');
-
-    expect(wrapper.find('a[data-test-subj="edit-role-action-disabled-role"]')).toHaveLength(1);
-    expect(wrapper.find('a[data-test-subj="clone-role-action-disabled-role"]')).toHaveLength(1);
-
-    expect(findTestSubject(wrapper, 'roleRowDescription-test-role-with-description')).toHaveLength(
-      1
-    );
   });
 
-  it('hides controls when `readOnly` is enabled', async () => {
-    const wrapper = mountWithIntl(
+  it('hides controls when readOnly is enabled', async () => {
+    renderWithIntl(
       <RolesGridPage
         rolesAPIClient={apiClientMock}
         history={history}
@@ -218,12 +184,10 @@ describe('<RolesGridPage />', () => {
         readOnly
       />
     );
-    const initialIconCount = wrapper.find(EuiIcon).length;
 
-    await waitForRender(wrapper, (updatedWrapper) => {
-      return updatedWrapper.find(EuiIcon).length > initialIconCount;
+    await waitFor(() => {
+      expect(screen.getByText('test-role-1')).toBeInTheDocument();
     });
-
-    expect(findTestSubject(wrapper, 'createRoleButton')).toHaveLength(0);
+    expect(screen.queryByTestId('createRoleButton')).not.toBeInTheDocument();
   });
 });

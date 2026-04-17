@@ -35,11 +35,16 @@ export interface UseFetchActiveAlerts {
 
 interface FindApiResponse {
   aggregations: {
-    perSloId: {
+    sloId: {
       buckets: Array<{
-        key: SloIdAndInstanceId;
-        key_as_string: string;
+        key: string;
         doc_count: number;
+        instanceId: {
+          buckets: Array<{
+            key: string;
+            doc_count: number;
+          }>;
+        };
       }>;
     };
   };
@@ -93,10 +98,18 @@ export function useFetchActiveAlerts({
               },
             },
             aggs: {
-              perSloId: {
-                multi_terms: {
-                  size: 10000,
-                  terms: [{ field: 'slo.id' }, { field: 'slo.instanceId' }],
+              sloId: {
+                terms: {
+                  size: 100,
+                  field: 'slo.id',
+                },
+                aggs: {
+                  instanceId: {
+                    terms: {
+                      size: 100,
+                      field: 'slo.instanceId',
+                    },
+                  },
                 },
               },
             },
@@ -104,10 +117,19 @@ export function useFetchActiveAlerts({
           signal,
         });
 
-        const activeAlertsData = response.aggregations.perSloId.buckets.reduce((acc, bucket) => {
-          return { ...acc, [bucket.key_as_string]: bucket.doc_count ?? 0 };
-        }, {} as Record<string, number>);
-        return new ActiveAlerts(activeAlertsData);
+        const entries: Array<[{ id: string; instanceId: string }, number]> = [];
+        for (const sloIdBucket of response.aggregations.sloId.buckets) {
+          entries.push([{ id: sloIdBucket.key, instanceId: ALL_VALUE }, sloIdBucket.doc_count]);
+          for (const instanceIdBucket of sloIdBucket.instanceId.buckets) {
+            if (instanceIdBucket.key !== ALL_VALUE) {
+              entries.push([
+                { id: sloIdBucket.key, instanceId: instanceIdBucket.key },
+                instanceIdBucket.doc_count,
+              ]);
+            }
+          }
+        }
+        return new ActiveAlerts(entries);
       } catch (error) {
         // ignore error
       }

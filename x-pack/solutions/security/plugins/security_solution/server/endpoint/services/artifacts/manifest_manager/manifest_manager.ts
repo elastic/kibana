@@ -60,6 +60,7 @@ import { InvalidInternalManifestError } from '../errors';
 import { wrapErrorIfNeeded } from '../../../utils';
 import { EndpointError } from '../../../../../common/endpoint/errors';
 import type { SavedObjectsClientFactory } from '../../saved_objects';
+import { getIsEndpointExceptionsPerPolicyEnabled } from '../../../lib/reference_data';
 
 interface ArtifactsBuildResult {
   defaultArtifacts: InternalArtifactCompleteSchema[];
@@ -194,6 +195,7 @@ export class ManifestManager {
     policyId,
     schemaVersion,
     exceptionItemDecorator,
+    isEndpointExceptionsPerPolicyEnabled,
   }: {
     elClient: ExceptionListClient;
     listId: ArtifactListId;
@@ -201,6 +203,7 @@ export class ManifestManager {
     policyId?: string;
     schemaVersion: string;
     exceptionItemDecorator?: (item: ExceptionListItemSchema) => ExceptionListItemSchema;
+    isEndpointExceptionsPerPolicyEnabled?: boolean;
   }): Promise<WrappedTranslatedExceptionList> {
     if (!this.cachedExceptionsListsByOs.has(`${listId}-${os}`)) {
       let itemsByListId: ExceptionListItemSchema[] = [];
@@ -232,7 +235,7 @@ export class ManifestManager {
 
     let exceptions: ExceptionListItemSchema[];
 
-    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (isEndpointExceptionsPerPolicyEnabled) {
       // with the feature enabled, we do not make an 'exception' with endpoint exceptions - it's filtered per-policy
       exceptions = allExceptionsByListId.filter(filter);
     } else {
@@ -256,9 +259,11 @@ export class ManifestManager {
     os,
     policyId,
     exceptionItemDecorator,
+    isEndpointExceptionsPerPolicyEnabled,
   }: {
     os: string;
     policyId?: string;
+    isEndpointExceptionsPerPolicyEnabled?: boolean;
   } & BuildArtifactsForOsOptions): Promise<InternalArtifactCompleteSchema> {
     return buildArtifact(
       await this.getCachedExceptions({
@@ -268,6 +273,7 @@ export class ManifestManager {
         policyId,
         listId,
         exceptionItemDecorator,
+        isEndpointExceptionsPerPolicyEnabled,
       }),
       this.schemaVersion,
       os,
@@ -283,14 +289,20 @@ export class ManifestManager {
   protected async buildArtifactsByPolicy(
     allPolicyIds: string[],
     supportedOSs: string[],
-    osOptions: BuildArtifactsForOsOptions
+    osOptions: BuildArtifactsForOsOptions,
+    isEndpointExceptionsPerPolicyEnabled?: boolean
   ): Promise<Record<string, InternalArtifactCompleteSchema[]>> {
     const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
     for (const policyId of allPolicyIds)
       for (const os of supportedOSs) {
         policySpecificArtifacts[policyId] = policySpecificArtifacts[policyId] || [];
         policySpecificArtifacts[policyId].push(
-          await this.buildArtifactsForOs({ os, policyId, ...osOptions })
+          await this.buildArtifactsForOs({
+            os,
+            policyId,
+            isEndpointExceptionsPerPolicyEnabled,
+            ...osOptions,
+          })
         );
       }
 
@@ -305,7 +317,8 @@ export class ManifestManager {
    * @throws Throws/rejects if there are errors building the list.
    */
   protected async buildExceptionListArtifacts(
-    allPolicyIds: string[]
+    allPolicyIds: string[],
+    isEndpointExceptionsPerPolicyEnabled: boolean
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
 
@@ -332,16 +345,23 @@ export class ManifestManager {
     };
 
     for (const os of ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS) {
-      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+      defaultArtifacts.push(
+        await this.buildArtifactsForOs({
+          os,
+          isEndpointExceptionsPerPolicyEnabled,
+          ...buildArtifactsForOsOptions,
+        })
+      );
     }
 
     let policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
-    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+    if (isEndpointExceptionsPerPolicyEnabled) {
       policySpecificArtifacts = await this.buildArtifactsByPolicy(
         allPolicyIds,
         ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS,
-        buildArtifactsForOsOptions
+        buildArtifactsForOsOptions,
+        isEndpointExceptionsPerPolicyEnabled
       );
     } else {
       allPolicyIds.forEach((policyId) => {
@@ -696,9 +716,15 @@ export class ManifestManager {
   public async buildNewManifest(
     baselineManifest: Manifest = ManifestManager.createDefaultManifest(this.schemaVersion)
   ): Promise<Manifest> {
+    const isEndpointExceptionsPerPolicyEnabled = await getIsEndpointExceptionsPerPolicyEnabled(
+      this.savedObjectsClientFactory.createInternalScopedSoClient({ readonly: false }),
+      this.experimentalFeatures,
+      this.logger
+    );
+
     const allPolicyIds = await this.listEndpointPolicyIds();
     const results = await Promise.all([
-      this.buildExceptionListArtifacts(allPolicyIds),
+      this.buildExceptionListArtifacts(allPolicyIds, isEndpointExceptionsPerPolicyEnabled),
       this.buildTrustedAppsArtifacts(allPolicyIds),
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),

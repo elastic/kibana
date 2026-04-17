@@ -165,7 +165,7 @@ All exports from `@kbn/content-list-mock-data` are available from this package:
 | `MOCK_FILES` | Array of 6 file mock items. |
 | `MOCK_TAGS` | Array of 8 tag items. |
 | `MOCK_USER_PROFILES` | Array of user profile objects. |
-| `mockUserProfileServices` | Mock `getUserProfile` and `bulkGetUserProfiles` implementations. |
+| `MOCK_USER_PROFILES_MAP` | Map of user UIDs to profile objects. |
 | `createMockFindItems` | Factory for custom `findItems` implementations. |
 | `createSimpleMockFindItems` | Simplified factory with optional delay. |
 

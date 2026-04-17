@@ -1,0 +1,61 @@
+{
+  "sha1": "b56b1a7b72c59bdeb6acf0a6582f1f7173f6021a",
+  "tests": [
+    {
+      "id": "afb06677eff5d09-36a05fbd4d8d379",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should discover OAuth protected resource metadata from Kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 51,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-1938dceffe88c67",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should discover authorization server metadata from UIAM OAuth",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 72,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-ad57d16ac34e2f2",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should return 401 with WWW-Authenticate resource_metadata on unauthenticated MCP request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "afb06677eff5d09-dd2663dbe7f9004",
+      "title": "[NON-MKI] MCP OAuth discovery and SDK client flow should complete full MCP handshake with OAuth token via SDK client",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/parallel_tests/uiam_oauth_mcp_flow.spec.ts",
+        "line": 148,
+        "column": 12
+      }
+    }
+  ]
+}

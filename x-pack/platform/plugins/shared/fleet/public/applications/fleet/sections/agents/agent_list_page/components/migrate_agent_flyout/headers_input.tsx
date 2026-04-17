@@ -107,7 +107,7 @@ export const HeadersInput: React.FC<HeadersInputProps> = ({ headers, onUpdate })
 
       <EuiFormRow>
         <EuiButtonEmpty
-          iconType="plusInCircle"
+          iconType="plusCircle"
           onClick={() => {
             addEmptyHeader();
           }}

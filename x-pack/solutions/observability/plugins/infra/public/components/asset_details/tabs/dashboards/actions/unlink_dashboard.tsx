@@ -106,7 +106,7 @@ export function UnlinkDashboard({
         <EuiButtonEmpty
           color="danger"
           size="s"
-          iconType="unlink"
+          iconType="linkSlash"
           data-test-subj="infraUnLinkDashboardMenu"
           onClick={onClick}
           disabled={!canDelete}

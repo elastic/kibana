@@ -16,3 +16,4 @@ export { AgentPolicyActionMenu } from './actions_menu';
 export { AgentPolicyIntegrationForm } from './agent_policy_integration';
 export { agentPolicyFormValidation } from './agent_policy_validation';
 export { AgentPolicyCreateInlineForm } from './agent_policy_create_inline';
+export { IncompatibleAgentVersionCallout } from './incompatible_agent_version_callout';
