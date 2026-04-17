@@ -170,4 +170,29 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'test_index' }));
   });
+
+  it('forwards transport options to esClient.bulk for create operations', async () => {
+    esClient.bulk.mockResolvedValueOnce({
+      errors: false,
+      items: [{ create: { _id: 'doc1', result: 'created', status: 201, _index: 'test_index' } }],
+      took: 1,
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.bulk(
+      {
+        operations: [{ create: { _id: 'doc1', document: { foo: 'bar' } } }],
+      },
+      transportOptions
+    );
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        require_alias: true,
+        operations: [{ create: { _id: 'doc1' } }, { foo: 'bar' }],
+      }),
+      transportOptions
+    );
+  });
 });

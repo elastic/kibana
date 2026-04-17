@@ -7,7 +7,7 @@
 
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
-import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +26,7 @@ import { NodeLabel } from './node_label';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
+import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
 
 type ServiceNodeType = Node<ServiceNodeData, 'service'>;
 
@@ -36,6 +37,7 @@ export const ServiceNode = memo(
     const { capabilities } = core.application;
     const canReadSlos = !!capabilities.slo?.read;
     const { onSloBadgeClick } = useServiceMapSloFlyout();
+    const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
 
     const borderColor = useMemo(() => {
@@ -161,8 +163,9 @@ export const ServiceNode = memo(
     const showSloBadge =
       canReadSlos && (data.sloStatus === 'violated' || data.sloStatus === 'degrading');
 
-    const alertsTooltip = i18n.translate('xpack.apm.serviceMap.serviceNode.alertsBadgeTooltip', {
-      defaultMessage: '{count, plural, one {# active alert} other {# active alerts}}',
+    const alertsTooltip = i18n.translate('xpack.apm.serviceHeader.alertsBadge.tooltip', {
+      defaultMessage:
+        '{count, plural, one {# active alert} other {# active alerts}}. Click to view.',
       values: { count: data.alertsCount ?? 0 },
     });
 
@@ -201,15 +204,24 @@ export const ServiceNode = memo(
               css={badgesRowStyles}
             >
               {showAlertsBadge && (
-                <span css={badgePointerEventsStyles}>
-                  <EuiBadge
-                    data-test-subj="serviceMapNodeAlertsBadge"
-                    color="danger"
-                    iconType="warning"
-                    title={alertsTooltip}
-                  >
-                    {data.alertsCount}
-                  </EuiBadge>
+                <span
+                  css={badgePointerEventsStyles}
+                  onClick={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => e.stopPropagation()}
+                >
+                  <EuiToolTip position="bottom" content={alertsTooltip}>
+                    <EuiBadge
+                      data-test-subj="serviceMapNodeAlertsBadge"
+                      color="danger"
+                      iconType="warning"
+                      onClick={navigateToAlertsTab}
+                      tabIndex={0}
+                      role="button"
+                      onClickAriaLabel={alertsTooltip}
+                    >
+                      {data.alertsCount}
+                    </EuiBadge>
+                  </EuiToolTip>
                 </span>
               )}
               {showSloBadge && data.sloStatus && (
