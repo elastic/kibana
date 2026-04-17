@@ -4094,6 +4094,10 @@ export function updatePackageInputs(
       // Per-source-type counters for positional stream matching when a stream declares
       // migrate_from. Shared across iterations so each source stream is consumed once.
       const streamMigrateFromCounters: Record<string, number> = {};
+      // Track whether any stream-level migrate_from succeeded so we can carry the old
+      // input's enabled state to the new input (Path B equivalent of applyStreamLevelMigration).
+      let pathBStreamMigrationOccurred = false;
+      let pathBOldInputForStream: NewPackagePolicyInput | undefined;
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -4127,6 +4131,8 @@ export function updatePackageInputs(
               originalInput.streams.push(
                 migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
               );
+              pathBStreamMigrationOccurred = true;
+              if (!pathBOldInputForStream) pathBOldInputForStream = oldInputForStream;
               continue;
             }
           }
@@ -4151,6 +4157,15 @@ export function updatePackageInputs(
           originalInput.streams[indexOfStream] = filteredVars;
           originalStream = originalInput.streams[indexOfStream];
         }
+      }
+      // When stream-level migrate_from succeeded, enable the new input if the old input
+      // was enabled. This mirrors the logic in applyStreamLevelMigration for Path A,
+      // covering the partial-migration case where the new input already existed in the
+      // old policy (e.g., cel existed alongside httpjson) but was disabled.
+      if (pathBStreamMigrationOccurred && !limitedPackage && pathBOldInputForStream?.enabled) {
+        const indexOfInput = inputs.indexOf(originalInput);
+        inputs[indexOfInput] = { ...originalInput, enabled: true };
+        originalInput = inputs[indexOfInput];
       }
     }
     // Filter all stream that have been removed from the input
