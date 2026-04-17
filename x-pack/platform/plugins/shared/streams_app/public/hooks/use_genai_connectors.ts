@@ -9,9 +9,10 @@ import { useCallback, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { InferenceConnector, InferenceConnectorType } from '@kbn/inference-common';
-import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import { STREAMS_INFERENCE_PARENT_FEATURE_ID } from '@kbn/streams-schema';
+import { toInferenceConnector } from './to_inference_connector';
 
 const STREAMS_CONNECTOR_STORAGE_KEY = 'xpack.streamsApp.lastUsedConnector';
 const OLD_STORAGE_KEY = 'xpack.observabilityAiAssistant.lastUsedConnector';
@@ -25,19 +26,6 @@ export interface UseGenAIConnectorsResult {
   reloadConnectors: () => Promise<void>;
   isConnectorSelectionRestricted: boolean;
 }
-
-export const toInferenceConnector = (c: AIConnector): InferenceConnector => ({
-  connectorId: c.id,
-  name: c.name,
-  type: c.actionTypeId as InferenceConnectorType,
-  config: 'config' in c ? (c.config as Record<string, unknown>) : {},
-  capabilities: {},
-  isPreconfigured: c.isPreconfigured,
-  isInferenceEndpoint: false,
-  isEis: c.isEis,
-  isDeprecated: c.isDeprecated,
-  isMissingSecrets: c.isMissingSecrets,
-});
 
 export function useGenAIConnectors({
   http,

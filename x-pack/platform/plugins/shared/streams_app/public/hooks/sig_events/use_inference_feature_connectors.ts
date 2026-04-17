@@ -7,57 +7,78 @@
 
 import { useMemo } from 'react';
 import type { InferenceConnector } from '@kbn/inference-common';
-import { useLoadConnectors } from '@kbn/inference-connectors';
+import { useLoadConnectors, type AIConnector } from '@kbn/inference-connectors';
 import { useKibana } from '../use_kibana';
-import { toInferenceConnector } from '../use_genai_connectors';
+import { toInferenceConnector } from '../to_inference_connector';
 
 const EMPTY_CONNECTORS: InferenceConnector[] = [];
 
 export interface UseInferenceFeatureConnectorsResult {
   /**
-   * Full connector list scoped to the feature: the feature's recommended
-   * endpoints first, followed by the rest of the catalog. This is what
-   * per-step model dropdowns should render to keep the recommended models
-   * at the top.
+   * Connector list scoped to the inference feature, ordered so that the
+   * feature's recommended endpoints (registry order) are listed first and the
+   * rest of the catalog follows. This is what per-step model dropdowns render.
    */
   connectors: InferenceConnector[];
   /**
-   * The connector the inference plugin resolves for this feature — the one
-   * that should be pre-selected and badged as "Default".
+   * Connector that should be pre-selected and badged as "Default" — the
+   * feature's first recommended endpoint, falling back to the first connector
+   * the API returns when nothing is recommended.
    */
   resolvedConnectorId: string | undefined;
   loading: boolean;
   error: Error | undefined;
 }
 
+/**
+ * Loads the connector list for a Significant Events inference feature.
+ *
+ * Delegates fetching, caching and error handling to the inference plugin's
+ * {@link useLoadConnectors}. The backend already merges the per-feature
+ * recommended endpoints with the rest of the catalog and flags the
+ * recommended ones with `isRecommended`. The route additionally prepends the
+ * user's `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR` (without the recommended
+ * flag) when no admin override is set, so we stable-sort recommended entries
+ * back to the top so the step's recommended models stay at the top of the
+ * dropdown.
+ */
 export function useInferenceFeatureConnectors(
   featureId: string
 ): UseInferenceFeatureConnectorsResult {
   const { core } = useKibana();
+  const { http, settings } = core;
 
-  const query = useLoadConnectors({
-    http: core.http,
-    toasts: core.notifications.toasts,
-    featureId,
-    settings: core.settings,
-  });
+  const {
+    data: aiConnectors,
+    isLoading,
+    error,
+    soEntryFound,
+  } = useLoadConnectors({ http, featureId, settings });
+
+  const orderedAiConnectors = useMemo<AIConnector[]>(() => {
+    if (!aiConnectors?.length) return [];
+    if (soEntryFound) return aiConnectors;
+    return [...aiConnectors].sort((a, b) => Number(!!b.isRecommended) - Number(!!a.isRecommended));
+  }, [aiConnectors, soEntryFound]);
 
   const connectors = useMemo<InferenceConnector[]>(
-    () => query.data?.map(toInferenceConnector) ?? EMPTY_CONNECTORS,
-    [query.data]
+    () =>
+      orderedAiConnectors.length === 0
+        ? EMPTY_CONNECTORS
+        : orderedAiConnectors.map(toInferenceConnector),
+    [orderedAiConnectors]
   );
 
-  // When an SO override is set, the API puts the configured connector first.
-  // Otherwise `useLoadConnectors` prepends `GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR`
-  // ahead of the feature's recommended endpoints — so we skip it and pick the
-  // first entry flagged `isRecommended` for this feature.
-  const data = query.data ?? [];
-  const picked = query.soEntryFound ? data[0] : data.find((c) => c.isRecommended) ?? data[0];
+  const resolvedConnectorId = useMemo<string | undefined>(() => {
+    if (!aiConnectors?.length) return undefined;
+    if (soEntryFound) return aiConnectors[0]?.id;
+    return aiConnectors.find((c) => c.isRecommended)?.id ?? aiConnectors[0]?.id;
+  }, [aiConnectors, soEntryFound]);
 
   return {
     connectors,
-    resolvedConnectorId: picked?.id,
-    loading: query.isLoading,
-    error: query.error ?? undefined,
+    resolvedConnectorId,
+    loading: isLoading,
+    error: error ?? undefined,
   };
 }
