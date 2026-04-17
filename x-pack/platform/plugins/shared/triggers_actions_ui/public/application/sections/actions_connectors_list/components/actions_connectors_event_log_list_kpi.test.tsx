@@ -70,7 +70,9 @@ describe('actions_connectors_event_log_list_kpi', () => {
       );
     });
 
-    expect(await within(successOutcome).findByText(`${mockKpiResponse.success}`)).toBeInTheDocument();
+    expect(
+      await within(successOutcome).findByText(`${mockKpiResponse.success}`)
+    ).toBeInTheDocument();
     expect(within(warningOutcome).getByText(`${mockKpiResponse.warning}`)).toBeInTheDocument();
     expect(within(failureOutcome).getByText(`${mockKpiResponse.failure}`)).toBeInTheDocument();
   });
