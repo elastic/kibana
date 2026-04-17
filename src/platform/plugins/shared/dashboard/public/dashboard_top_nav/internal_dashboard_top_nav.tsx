@@ -14,8 +14,8 @@ import UseUnmount from 'react-use/lib/useUnmount';
 import type { EuiBreadcrumb, UseEuiTheme } from '@elastic/eui';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiHorizontalRule,
-  EuiIcon,
   EuiLink,
   EuiPopover,
   EuiScreenReaderOnly,
@@ -177,12 +177,11 @@ export function InternalDashboardTopNav({
           viewMode === 'edit' ? (
             <>
               {dashboardTitle}
-              <EuiIcon
-                tabIndex={0}
-                role="button"
+              <EuiButtonIcon
                 aria-label={topNavStrings.settings.description}
-                size="s"
-                type="pencil"
+                iconSize="s"
+                iconType="pencil"
+                color="text"
                 onClick={() => openSettingsFlyout(dashboardApi)}
                 css={styles.updateIcon}
               />
@@ -455,8 +454,6 @@ const topNavStyles = {
     css({
       '.kbnBody &': {
         marginLeft: euiTheme.size.xs,
-        marginTop: `calc(-1 * ${euiTheme.size.xxs})`,
-        cursor: 'pointer',
       },
     }),
 };
