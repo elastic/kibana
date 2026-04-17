@@ -45,7 +45,12 @@ export const deleteCompositeSLORoute = createSloServerRoute({
     const repository = new DefaultCompositeSLORepository(soClient, logger);
 
     await repository.deleteById(params.path.id);
-    await deleteCompositeSummaryDoc(scopedClusterClient.asCurrentUser, spaceId, params.path.id, logger);
+    await deleteCompositeSummaryDoc(
+      scopedClusterClient.asCurrentUser,
+      spaceId,
+      params.path.id,
+      logger
+    );
 
     return response.noContent();
   },
