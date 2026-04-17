@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n as i18nFn } from '@kbn/i18n';
 import {
@@ -20,6 +20,8 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
+  EuiPanel,
   EuiTitle,
   EuiFieldSearch,
   useEuiTheme,
@@ -31,6 +33,7 @@ import type { DashboardApi } from '../../../../dashboard_api/types';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
+import { selectFeaturedVisualizationActions } from './select_featured_items';
 
 export function AddPanelFlyout({
   dashboardApi,
@@ -91,6 +94,11 @@ export function AddPanelFlyout({
     );
   }, [groups, searchTerm]);
 
+  const { lens, esql } = useMemo(
+    () => selectFeaturedVisualizationActions(filteredGroups),
+    [filteredGroups]
+  );
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -133,6 +141,78 @@ export function AddPanelFlyout({
                 </EuiFormRow>
               </EuiForm>
             </EuiFlexItem>
+            {(lens || esql) && (
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="m" responsive={false}>
+                  {lens && !lens.isDisabled && (
+                    <EuiFlexItem>
+                      <EuiPanel
+                        hasBorder
+                        paddingSize="m"
+                        onClick={lens.onClick}
+                        data-test-subj="dashboardAddPanelFeatured-visualization"
+                        css={{ cursor: 'pointer' }}
+                      >
+                        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="visBarVertical" size="m" aria-hidden={true} />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiText size="s">
+                              <strong>
+                                {i18nFn.translate(
+                                  'dashboard.addPanelFlyout.featured.visualizationTitle',
+                                  { defaultMessage: 'Visualization' }
+                                )}
+                              </strong>
+                            </EuiText>
+                            <EuiText size="xs" color="subdued">
+                              {i18nFn.translate(
+                                'dashboard.addPanelFlyout.featured.visualizationDescription',
+                                { defaultMessage: 'Build charts using the point and click editor' }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  )}
+                  {esql && !esql.isDisabled && (
+                    <EuiFlexItem>
+                      <EuiPanel
+                        hasBorder
+                        paddingSize="m"
+                        onClick={esql.onClick}
+                        data-test-subj="dashboardAddPanelFeatured-esqlVisualization"
+                        css={{ cursor: 'pointer' }}
+                      >
+                        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="editorCodeBlock" size="m" aria-hidden={true} />
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <EuiText size="s">
+                              <strong>
+                                {i18nFn.translate(
+                                  'dashboard.addPanelFlyout.featured.esqlVisualizationTitle',
+                                  { defaultMessage: 'Visualization (query)' }
+                                )}
+                              </strong>
+                            </EuiText>
+                            <EuiText size="xs" color="subdued">
+                              {i18nFn.translate(
+                                'dashboard.addPanelFlyout.featured.esqlVisualizationDescription',
+                                { defaultMessage: 'Build charts with ES|QL' }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiPanel>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
             <EuiFlexItem
               css={{
                 minHeight: '20vh',
