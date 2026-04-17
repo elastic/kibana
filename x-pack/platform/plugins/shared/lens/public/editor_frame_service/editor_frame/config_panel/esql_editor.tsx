@@ -9,7 +9,6 @@ import { css } from '@emotion/react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
@@ -123,7 +122,15 @@ export function ESQLEditor({
       ? Object.values(attributes.state.adHocDataViews)
       : Object.values(framePublicAPI.dataViews.indexPatterns).map((index) => index.spec);
 
-  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
+  const lensAdaptersRef = useRef(lensAdapters);
+  useEffect(() => {
+    lensAdaptersRef.current = lensAdapters;
+  }, [lensAdapters]);
+
+  /** Skips duplicate `getSuggestions` when chart reload follows a query submit (see `runQuery`). */
+  const suppressNextChartLoadGridRefreshRef = useRef(false);
+  const submittedQueryRef = useRef(submittedQuery);
+  submittedQueryRef.current = submittedQuery;
 
   const { esqlVariables } = useFetchContext({ uuid: panelId, parentApi });
   const esqlQueryStats = useESQLQueryStats(isTextBasedLanguage, lensAdapters?.requests);
@@ -131,15 +138,43 @@ export function ESQLEditor({
   const dispatch = useLensDispatch();
 
   useEffect(() => {
+    // React whenever the workspace reports chart data loading state
     const s = dataLoading$?.subscribe((isDataLoading) => {
-      // go thru only when the loading is complete
-      if (isDataLoading) {
+      // Only act when a load has fully finished (not undefined / not still loading).
+      if (isDataLoading !== false) {
         return;
       }
+      // After submit, runQuery already refreshed the grid; skip the duplicate refresh from the chart reload.
+      if (suppressNextChartLoadGridRefreshRef.current) {
+        suppressNextChartLoadGridRefreshRef.current = false;
+        return;
+      }
+
+      const q = submittedQueryRef.current;
+      // Refresh the ES|QL results table for the last submitted query (time/filters may have changed).
+      if (isOfAggregateQueryType(q)) {
+        void getSuggestions(
+          q,
+          data,
+          http,
+          uiSettings,
+          datasourceMap,
+          visualizationMap,
+          adHocDataViews,
+          undefined,
+          undefined,
+          setDataGridAttrs,
+          esqlVariables,
+          false,
+          currentAttributesRef.current
+        );
+      }
+
       const activeData = getActiveDataFromDatatable(
         layerId,
-        previousAdapters.current?.tables?.tables
+        lensAdaptersRef.current?.tables?.tables
       );
+
       const table = activeData?.[layerId];
 
       if (table) {
@@ -153,7 +188,18 @@ export function ESQLEditor({
       }
     });
     return () => s?.unsubscribe();
-  }, [dataLoading$, dispatch, layerId]);
+  }, [
+    adHocDataViews,
+    data,
+    dataLoading$,
+    datasourceMap,
+    dispatch,
+    esqlVariables,
+    http,
+    layerId,
+    uiSettings,
+    visualizationMap,
+  ]);
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
@@ -177,6 +223,7 @@ export function ESQLEditor({
         setErrors([]);
         updateSuggestion?.(attrs);
       }
+      suppressNextChartLoadGridRefreshRef.current = true;
       prevQuery.current = q;
       setSubmittedQuery(q);
       setIsVisualizationLoading(false);
