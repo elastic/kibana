@@ -96,7 +96,7 @@ export function registerCasesSteps(
   );
 
   workflowsExtensions.registerStepDefinition(() =>
-    import('./simple_steps').then((m) => m.setCategoryStepDefinition)
+    import('./set_category').then((m) => m.setCategoryStepDefinition)
   );
 
   workflowsExtensions.registerStepDefinition(() =>
