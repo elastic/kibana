@@ -31,17 +31,22 @@ describe('HeaderHelpMenu', () => {
         <HeaderHelpMenu />
       </TestChromeProviders>
     );
-    component.find('EuiButtonEmpty').simulate('click');
+    component.find('EuiHeaderSectionItemButton').find('button').simulate('click');
     return component;
   };
 
   test('it only renders the default content', () => {
     const component = renderAndOpenMenu();
 
-    const buttons = component.find('EuiButtonEmpty');
-    const buttonTexts = buttons.map((button) => button.text()).filter((text) => text.trim() !== '');
+    const items = component.find('EuiContextMenuItem');
+    const itemTexts = items.map((item) => item.text());
 
-    expect(buttonTexts).toEqual(['Kibana documentation', 'Ask Elastic', 'Open an issue in GitHub']);
+    // First item is the panel title "Help v ..."
+    expect(itemTexts.slice(1)).toEqual([
+      'Kibana documentation',
+      'Ask Elastic',
+      'Open an issue in GitHub',
+    ]);
   });
 
   test("it doesn't render the version details when serverless", () => {
@@ -72,11 +77,11 @@ describe('HeaderHelpMenu', () => {
 
     const component = renderAndOpenMenu({ chrome });
 
-    const customButton = component.findWhere(
-      (node) => node.type() === 'button' && node.text() === 'Keyboard shortcuts'
+    const customItem = component.findWhere(
+      (node) => node.is('EuiContextMenuItem') && node.text() === 'Keyboard shortcuts'
     );
-    expect(customButton.exists()).toBeTruthy();
-    customButton.simulate('click');
+    expect(customItem.exists()).toBeTruthy();
+    customItem.simulate('click');
     expect(onClick).toHaveBeenCalled();
   });
 
@@ -102,14 +107,43 @@ describe('HeaderHelpMenu', () => {
 
     const component = renderAndOpenMenu({ chrome });
 
-    // 2 custom global link + 3 default links + the toggle button
-    expect(component.find('EuiButtonEmpty').length).toBe(6);
+    // 1 panel title + 2 custom global links + 3 default links
+    expect(component.find('EuiContextMenuItem').length).toBe(6);
 
     expect(component.find('[data-test-subj="my-test-custom-link"]').exists()).toBeTruthy();
 
-    // The first global component is the second button (first is the toggle button)
-    expect(component.find('EuiButtonEmpty').at(1).prop('data-test-subj')).toBe(
+    // The first item after the panel title (highest priority) is the custom link
+    expect(component.find('EuiContextMenuItem').at(1).prop('data-test-subj')).toBe(
       'my-test-custom-link'
     );
+  });
+
+  test('it renders extension section with app name title', () => {
+    const chrome = chromeServiceMock.createStartContract();
+    chrome.getHelpExtension$.mockReturnValue(
+      new BehaviorSubject<ChromeHelpExtension | undefined>({
+        appName: 'Security',
+        links: [
+          {
+            linkType: 'documentation',
+            href: 'https://example.com/docs',
+          },
+        ],
+      })
+    );
+
+    const component = renderAndOpenMenu({ chrome });
+
+    // App name rendered as section title (EuiContextMenuItem)
+    const titleEl = component.findWhere(
+      (node) => node.is('EuiContextMenuItem') && node.text() === 'Security'
+    );
+    expect(titleEl.exists()).toBeTruthy();
+
+    // Documentation link rendered
+    const docItem = component.findWhere(
+      (node) => node.is('EuiContextMenuItem') && node.text() === 'Documentation'
+    );
+    expect(docItem.exists()).toBeTruthy();
   });
 });
