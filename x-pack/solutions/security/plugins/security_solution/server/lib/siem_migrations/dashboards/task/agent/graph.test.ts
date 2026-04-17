@@ -79,6 +79,12 @@ describe('getDashboardMigrationAgent', () => {
   });
 
   it('should run graph', async () => {
+    esClientMock.asInternalUser.indices.resolveIndex = jest.fn().mockResolvedValue({
+      indices: [],
+      aliases: [],
+      data_streams: [],
+    });
+
     const agent = setupAgent([{ nodeId: 'createDescriptions', response: '{}' }]);
     const result = await agent.invoke({
       id: 'testId',

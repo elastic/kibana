@@ -83,27 +83,14 @@ describe('getTranslateQueryNode', () => {
     );
   });
 
-  it('should replace TRANSLATION_INDEX_PATTERN with MISSING_INDEX_PATTERN_PLACEHOLDER in the final query', async () => {
+  it('should keep TRANSLATION_INDEX_PATTERN in the query when index pattern is missing (replacement deferred to translation_result)', async () => {
     const node = getTranslateQueryNode(mockParams);
     const state = { ...baseState, index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
 
     const result = await node(state, {});
 
-    expect(result.esql_query).toContain(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER}`);
-    expect(result.esql_query).not.toContain(TRANSLATION_INDEX_PATTERN);
-  });
-
-  it('should replace TRANSLATION_INDEX_PATTERN with MISSING_INDEX_PATTERN_PLACEHOLDER in comment messages', async () => {
-    const node = getTranslateQueryNode(mockParams);
-    const state = { ...baseState, index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER };
-
-    const result = await node(state, {});
-
-    expect(result.comments).toBeDefined();
-    for (const comment of result.comments!) {
-      expect(comment.message).toContain(MISSING_INDEX_PATTERN_PLACEHOLDER);
-      expect(comment.message).not.toContain(TRANSLATION_INDEX_PATTERN);
-    }
+    expect(result.esql_query).toContain(`FROM ${TRANSLATION_INDEX_PATTERN}`);
+    expect(result.esql_query).not.toContain(MISSING_INDEX_PATTERN_PLACEHOLDER);
   });
 
   it('should keep the actual index pattern in the query when a valid index is found', async () => {

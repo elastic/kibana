@@ -30,12 +30,15 @@ export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode 
 
     const { error: syntaxError } = await validateEsql({ query: state.esql_query });
 
-    if (syntaxError && state.esql_query.match(/\[(macro|lookup):.*?\]/)) {
+    if (state.esql_query.match(/\[(macro|lookup):.*?\]/)) {
       return {
-        validation_errors: { esql_errors: syntaxError, retries_left: 0 },
+        validation_errors: {
+          esql_errors: syntaxError,
+          retries_left: 0,
+        },
         comments: [
           generateAssistantComment(
-            '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping self-healing loop'
+            '## ESQL Validation Summary\n\nFound missing macro or lookup placeholders in query, can not generate a valid query unless they are provided.\nSkipping syntax and execution checks'
           ),
         ],
       };

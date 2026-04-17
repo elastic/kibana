@@ -10,6 +10,7 @@ import path from 'path';
 import type { Logger } from '@kbn/core/server';
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
+import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
@@ -34,8 +35,8 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
         translation_result: MigrationTranslationResult.FULL,
       };
     }
-    const query = state.esql_query;
-    if (!query) {
+    const rawQuery = state.esql_query;
+    if (!rawQuery) {
       const message = 'SPL query unsupported or missing, cannot translate panel';
       const panelJSON = createMarkdownPanel(message, state.parsed_panel);
       return {
@@ -43,6 +44,12 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
         translation_result: MigrationTranslationResult.UNTRANSLATABLE,
       };
     }
+
+    const isMissingIndex =
+      !state.index_pattern || state.index_pattern === MISSING_INDEX_PATTERN_PLACEHOLDER;
+    const query = isMissingIndex
+      ? rawQuery.replaceAll(TRANSLATION_INDEX_PATTERN, MISSING_INDEX_PATTERN_PLACEHOLDER)
+      : rawQuery;
 
     let translationResult;
     if (query.startsWith(`FROM ${MISSING_INDEX_PATTERN_PLACEHOLDER}`)) {

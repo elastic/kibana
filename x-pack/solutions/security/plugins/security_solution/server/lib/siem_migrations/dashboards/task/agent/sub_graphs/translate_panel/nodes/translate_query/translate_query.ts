@@ -47,19 +47,6 @@ Specific Panel description: "${state.description}"`;
       return { comments };
     }
 
-    const isMissingIndex =
-      !state.index_pattern || state.index_pattern === MISSING_INDEX_PATTERN_PLACEHOLDER;
-
-    if (!isMissingIndex) {
-      return { esql_query: esqlQuery, comments };
-    }
-
-    const replaceIndexPattern = (text: string) =>
-      text.replaceAll(TRANSLATION_INDEX_PATTERN, MISSING_INDEX_PATTERN_PLACEHOLDER);
-
-    return {
-      esql_query: replaceIndexPattern(esqlQuery),
-      comments,
-    };
+    return { esql_query: esqlQuery, comments };
   };
 };
