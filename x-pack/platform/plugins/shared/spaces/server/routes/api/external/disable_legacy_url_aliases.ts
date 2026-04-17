@@ -28,6 +28,8 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
       options: {
         access: isServerless ? 'internal' : 'public',
         summary: 'Disable legacy URL aliases',
+        description:
+          'Disable one or more legacy URL aliases so that they no longer resolve to their target saved objects.',
         tags: ['oas-tag:spaces'],
       },
       validate: {
