@@ -51,5 +51,5 @@ export const plugin: PluginInitializer<
 
 export { config } from './config';
 
-export { ExecutionStatus, isConversationExecution } from './services/execution';
-export type { ConversationExecutionParams } from './services/execution';
+export { ExecutionStatus } from './services/execution';
+export type { ConversationExecutionParams, ConversationAgentExecution } from './services/execution';

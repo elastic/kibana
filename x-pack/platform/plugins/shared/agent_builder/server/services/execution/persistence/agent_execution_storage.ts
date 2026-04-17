@@ -10,11 +10,7 @@ import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import type {
-  AgentExecutionParams,
-  ExecutionStatus,
-  SerializedExecutionError,
-} from '../types';
+import type { AgentExecutionParams, ExecutionStatus, SerializedExecutionError } from '../types';
 
 export const agentExecutionIndexName = chatSystemIndex('agent-executions');
 

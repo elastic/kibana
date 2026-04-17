@@ -15,7 +15,8 @@ import type {
   ConversationAction,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
-import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
+import type { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 export { ExecutionStatus };
@@ -39,6 +40,8 @@ export interface BaseExecutionParams {
   outputSchema?: Record<string, unknown>;
   /** Runtime configuration overrides for this execution only. */
   configurationOverrides?: AgentConfigurationOverrides;
+  /** Id of the parent execution that spawned this execution. */
+  parentExecutionId?: string;
 }
 
 /**
@@ -60,10 +63,7 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
 /**
  * Execution parameters for standalone mode — single execution, not tied to a conversation.
  */
-export interface StandaloneExecutionParams extends BaseExecutionParams {
-  /** Id of the parent execution that spawned this execution. */
-  parentExecutionId?: string;
-}
+export type StandaloneExecutionParams = BaseExecutionParams;
 
 /**
  * Union of all execution parameter types.
@@ -71,9 +71,9 @@ export interface StandaloneExecutionParams extends BaseExecutionParams {
 export type AgentExecutionParams = ConversationExecutionParams | StandaloneExecutionParams;
 
 /**
- * The agent execution document persisted in the agent-executions index.
+ * Common fields shared by all agent execution documents.
  */
-export interface AgentExecution {
+interface BaseAgentExecution {
   /** Unique id of the execution. */
   executionId: string;
   /** Timestamp of the execution creation. */
@@ -82,14 +82,8 @@ export interface AgentExecution {
   status: ExecutionStatus;
   /** Id of the agent being executed. */
   agentId: string;
-  /** The execution mode. Defaults to 'conversation' when not set. */
-  executionMode?: AgentExecutionMode;
-  /** For standalone executions, the ID of the parent execution. */
-  parentExecutionId?: string;
   /** Id of the space the execution was performed in. */
   spaceId: string;
-  /** Serialized execution parameters. */
-  agentParams: AgentExecutionParams;
   /** Error details, present when status is 'failed'. */
   error?: SerializedExecutionError;
   /** Number of events stored on the document (kept in sync with `events.length`). */
@@ -99,6 +93,30 @@ export interface AgentExecution {
   /** Caller-provided metadata. */
   metadata?: Record<string, string>;
 }
+
+/**
+ * An agent execution in conversation mode — tied to a conversation with persistence.
+ */
+export interface ConversationAgentExecution extends BaseAgentExecution {
+  executionMode: AgentExecutionMode.conversation;
+  agentParams: ConversationExecutionParams;
+}
+
+/**
+ * An agent execution in standalone mode — single execution, not tied to a conversation.
+ */
+export interface StandaloneAgentExecution extends BaseAgentExecution {
+  executionMode: AgentExecutionMode.standalone;
+  /** The ID of the parent execution that spawned this standalone execution. */
+  parentExecutionId?: string;
+  agentParams: StandaloneExecutionParams;
+}
+
+/**
+ * The agent execution document persisted in the agent-executions index.
+ * Discriminated union on `executionMode`.
+ */
+export type AgentExecution = ConversationAgentExecution | StandaloneAgentExecution;
 
 /**
  * Base parameters for {@link AgentExecutionService.executeAgent}.
@@ -182,24 +200,6 @@ export interface FindExecutionsOptions {
    * circular dependencies and to prevent exposing snake_case ES field names to consumers.
    */
   sort?: { field: '@timestamp' | 'status'; order: 'asc' | 'desc' };
-}
-
-/**
- * Type guard that narrows an {@link AgentExecution} to one with {@link ConversationExecutionParams}.
- */
-export function isConversationExecution(
-  execution: AgentExecution
-): execution is AgentExecution & { agentParams: ConversationExecutionParams } {
-  return execution.executionMode !== AgentExecutionMode.standalone;
-}
-
-/**
- * Type guard that narrows an {@link AgentExecution} to one with {@link StandaloneExecutionParams}.
- */
-export function isStandaloneExecution(
-  execution: AgentExecution
-): execution is AgentExecution & { agentParams: StandaloneExecutionParams } {
-  return execution.executionMode === AgentExecutionMode.standalone;
 }
 
 /**

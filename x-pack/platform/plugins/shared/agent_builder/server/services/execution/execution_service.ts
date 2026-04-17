@@ -14,11 +14,7 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import {
-  agentBuilderDefaultAgentId,
-  createBadRequestError,
-  AgentExecutionMode,
-} from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, createBadRequestError } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AttachmentServiceStart } from '../attachments';
@@ -29,8 +25,6 @@ import type {
   ExecuteAgentResult,
   FollowExecutionOptions,
   FindExecutionsOptions,
-  ConversationExecutionParams,
-  StandaloneExecutionParams,
 } from './types';
 import { ExecutionStatus } from './types';
 import { taskTypes } from './task';
@@ -68,26 +62,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     this.logger = deps.logger;
   }
 
-  private async validateAttachmentsIfProvided(
-    attachments: AttachmentInput[] | undefined,
-    request: KibanaRequest
-  ): Promise<Attachment[] | undefined> {
-    if (!attachments || attachments.length === 0) {
-      return undefined;
-    }
-
-    const validated: Attachment[] = [];
-    for (const attachment of attachments) {
-      const result = await this.deps.attachmentsService.validate(attachment, request);
-      if (!result.valid) {
-        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
-      }
-      validated.push(result.attachment as Attachment);
-    }
-
-    return validated;
-  }
-
   async executeAgent({
     request,
     mode,
@@ -110,33 +84,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    // Validate attachments for conversation mode
-    let validatedParams = params;
-    if (mode === AgentExecutionMode.conversation) {
-      const convParams = params as ConversationExecutionParams;
-      const validatedAttachments = await this.validateAttachmentsIfProvided(
-        convParams.nextInput.attachments,
-        request
-      );
-      if (validatedAttachments) {
-        validatedParams = {
-          ...convParams,
-          nextInput: { ...convParams.nextInput, attachments: validatedAttachments },
-        };
-      }
-    }
+    const validatedAttachments = await this.validateAttachmentsIfProvided(
+      params.nextInput.attachments,
+      request
+    );
+    const validatedParams = validatedAttachments
+      ? { ...params, nextInput: { ...params.nextInput, attachments: validatedAttachments } }
+      : params;
 
     const execution = await executionClient.create({
+      executionMode: mode,
       executionId,
       agentId,
       spaceId,
       agentParams: validatedParams,
-      executionMode:
-        mode === AgentExecutionMode.standalone ? AgentExecutionMode.standalone : undefined,
-      parentExecutionId:
-        mode === AgentExecutionMode.standalone
-          ? (params as StandaloneExecutionParams).parentExecutionId
-          : undefined,
+      parentExecutionId: params.parentExecutionId,
       metadata,
     });
 
@@ -152,9 +114,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       }
     }
 
-    const runOnTaskManager = await this.shouldUseTaskManager(request, useTaskManager);
-    if (runOnTaskManager) {
-      return this.executeRemote({ executionId, agentId, request });
+    const useScheduledTask = await this.shouldUseScheduledTask(request, useTaskManager);
+    if (useScheduledTask) {
+      return this.executeWithScheduledTask({ executionId, agentId, request });
     } else {
       return this.executeLocally({ execution, request });
     }
@@ -195,7 +157,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   /**
    * Execute on a TM node: schedule the task and return the followExecution polling observable.
    */
-  private async executeRemote({
+  private async executeWithScheduledTask({
     executionId,
     agentId,
     request,
@@ -337,7 +299,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
    * 2. If the request is a fakeRequest (already running on TM), run locally.
    * 3. Otherwise, run on task manager.
    */
-  private async shouldUseTaskManager(
+  private async shouldUseScheduledTask(
     request: KibanaRequest,
     useTaskManager?: boolean
   ): Promise<boolean> {
@@ -371,5 +333,25 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       logger: this.logger.get('execution-client'),
       esClient: this.deps.elasticsearch.client.asInternalUser,
     });
+  }
+
+  private async validateAttachmentsIfProvided(
+    attachments: AttachmentInput[] | undefined,
+    request: KibanaRequest
+  ): Promise<Attachment[] | undefined> {
+    if (!attachments || attachments.length === 0) {
+      return undefined;
+    }
+
+    const validated: Attachment[] = [];
+    for (const attachment of attachments) {
+      const result = await this.deps.attachmentsService.validate(attachment, request);
+      if (!result.valid) {
+        throw createBadRequestError(`Attachment validation failed: ${result.error}`);
+      }
+      validated.push(result.attachment as Attachment);
+    }
+
+    return validated;
   }
 }

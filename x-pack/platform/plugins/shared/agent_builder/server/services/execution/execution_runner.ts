@@ -41,12 +41,11 @@ import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
-import {
-  isStandaloneExecution,
-  type AgentExecution,
-  type ConversationExecutionParams,
-  type StandaloneExecutionParams,
-  type SerializedExecutionError,
+import type {
+  AgentExecution,
+  ConversationAgentExecution,
+  StandaloneAgentExecution,
+  SerializedExecutionError,
 } from './types';
 import type { AgentExecutionClient } from './persistence';
 
@@ -85,16 +84,10 @@ export const handleAgentExecution = async ({
   request: KibanaRequest;
   abortSignal: AbortSignal;
 }): Promise<Observable<ChatEvent>> => {
-  if (isStandaloneExecution(execution)) {
+  if (execution.executionMode === AgentExecutionMode.standalone) {
     return handleStandaloneExecution({ execution, deps, request, abortSignal });
   }
-  // All non-standalone executions are conversation mode (default when executionMode is undefined)
-  return handleConversationExecution({
-    execution: execution as AgentExecution & { agentParams: ConversationExecutionParams },
-    deps,
-    request,
-    abortSignal,
-  });
+  return handleConversationExecution({ execution, deps, request, abortSignal });
 };
 
 /**
@@ -107,7 +100,7 @@ const handleConversationExecution = async ({
   request,
   abortSignal,
 }: {
-  execution: AgentExecution & { agentParams: ConversationExecutionParams };
+  execution: ConversationAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
@@ -383,7 +376,7 @@ const handleStandaloneExecution = async ({
   request,
   abortSignal,
 }: {
-  execution: AgentExecution & { agentParams: StandaloneExecutionParams };
+  execution: StandaloneAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;

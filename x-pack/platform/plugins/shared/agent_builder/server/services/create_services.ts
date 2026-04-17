@@ -22,7 +22,11 @@ import { HooksService } from './hooks';
 import { type SkillService, createSkillService } from './skills';
 import { createSmlService, type SmlServiceInstance } from './sml';
 import { AuditLogService } from '../audit';
-import { createAgentExecutionService, createTaskHandler } from './execution';
+import {
+  type AgentExecutionService,
+  createAgentExecutionService,
+  createTaskHandler,
+} from './execution';
 import {
   createMeteringService,
   type MeteringService,
@@ -119,6 +123,15 @@ export class ServiceManager {
       return runner;
     };
 
+    // eslint-disable-next-line prefer-const
+    let executionService: AgentExecutionService | undefined;
+    const getExecutionService = () => {
+      if (!executionService) {
+        throw new Error('Execution service not yet initialized');
+      }
+      return executionService;
+    };
+
     const attachments = this.services.attachments.start({
       spaces,
       savedObjects,
@@ -164,16 +177,6 @@ export class ServiceManager {
       config: this.config,
       getToolRegistry: tools.getRegistry,
     });
-
-    // Use a lazy getter to break the circular dep: runner → executionService → runner.
-    // The execution service is created after the runner, but accessed lazily at call time.
-    let executionService: ReturnType<typeof createAgentExecutionService> | undefined;
-    const getExecutionService = () => {
-      if (!executionService) {
-        throw new Error('Execution service not yet initialized');
-      }
-      return executionService;
-    };
 
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),

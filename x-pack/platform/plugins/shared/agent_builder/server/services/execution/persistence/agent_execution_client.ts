@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ChatEvent } from '@kbn/agent-builder-common';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { AgentExecution, SerializedExecutionError, FindExecutionsOptions } from '../types';
 import { ExecutionStatus } from '../types';
 import type { AgentExecutionProperties, AgentExecutionStorage } from './agent_execution_storage';
@@ -15,8 +16,10 @@ import { agentExecutionIndexName, createStorage } from './agent_execution_storag
 
 type CreateExecutionParams = Pick<
   AgentExecution,
-  'executionId' | 'agentId' | 'spaceId' | 'agentParams' | 'metadata' | 'executionMode' | 'parentExecutionId'
->;
+  'executionId' | 'agentId' | 'spaceId' | 'agentParams' | 'metadata' | 'executionMode'
+> & {
+  parentExecutionId?: string;
+};
 
 /**
  * Lightweight snapshot returned by {@link AgentExecutionClient.peek}.
@@ -34,7 +37,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     '@timestamp': source['@timestamp'],
     status: source.status,
     agentId: source.agent_id,
-    ...(source.execution_mode ? { executionMode: source.execution_mode as AgentExecution['executionMode'] } : {}),
+    executionMode: (source.execution_mode as AgentExecutionMode) ?? AgentExecutionMode.conversation,
     ...(source.parent_execution_id ? { parentExecutionId: source.parent_execution_id } : {}),
     spaceId: source.space_id,
     agentParams: source.agent_params,
@@ -42,7 +45,7 @@ const fromEs = (source: AgentExecutionProperties): AgentExecution => {
     events: source.events ?? [],
     ...(source.error ? { error: source.error } : {}),
     ...(source.metadata ? { metadata: source.metadata } : {}),
-  };
+  } as AgentExecution;
 };
 
 /**
@@ -135,7 +138,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       '@timestamp': now,
       status: ExecutionStatus.scheduled,
       agent_id: agentId,
-      ...(executionMode ? { execution_mode: executionMode } : {}),
+      execution_mode: executionMode,
       ...(parentExecutionId ? { parent_execution_id: parentExecutionId } : {}),
       space_id: spaceId,
       agent_params: agentParams,
@@ -149,19 +152,7 @@ class AgentExecutionClientImpl implements AgentExecutionClient {
       document,
     });
 
-    return {
-      executionId,
-      '@timestamp': now,
-      status: ExecutionStatus.scheduled,
-      agentId,
-      ...(executionMode ? { executionMode } : {}),
-      ...(parentExecutionId ? { parentExecutionId } : {}),
-      spaceId,
-      agentParams,
-      eventCount: 0,
-      events: [],
-      ...(metadata ? { metadata } : {}),
-    };
+    return fromEs(document);
   }
 
   async get(executionId: string): Promise<AgentExecution | undefined> {

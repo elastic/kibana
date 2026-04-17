@@ -13,7 +13,11 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { isAgentBuilderError, createInternalError, AgentExecutionMode } from '@kbn/agent-builder-common';
+import {
+  isAgentBuilderError,
+  createInternalError,
+  AgentExecutionMode,
+} from '@kbn/agent-builder-common';
 import type { PromptStorageState } from '@kbn/agent-builder-common/agents/prompts';
 import type { Conversation, ConverseInput } from '@kbn/agent-builder-common';
 import type {

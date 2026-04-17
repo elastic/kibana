@@ -7,7 +7,8 @@
 
 import pMap from 'p-map';
 import type { IKibanaResponse, RequestHandler } from '@kbn/core/server';
-import { ExecutionStatus, isConversationExecution } from '@kbn/agent-builder-plugin/server';
+import { ExecutionStatus } from '@kbn/agent-builder-plugin/server';
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type { GetPendingInsightsRequestQueryParams } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
 import { GetPendingInsightsRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';
 import { errorHandler } from '../error_handler';
@@ -181,9 +182,10 @@ const getPendingRouteHandler = (
       const pending = allResults.map((execution) => ({
         executionId: execution.executionId,
         status: execution.status,
-        conversationId: isConversationExecution(execution)
-          ? execution.agentParams.conversationId
-          : undefined,
+        conversationId:
+          execution.executionMode === AgentExecutionMode.conversation
+            ? execution.agentParams.conversationId
+            : undefined,
         insightType: execution.metadata?.insightType,
         endpointId: execution.metadata?.endpointId,
         '@timestamp': execution['@timestamp'],

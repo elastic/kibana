@@ -773,16 +773,15 @@ describe('convertPreviousRounds', () => {
   });
 
   describe('background execution notices (from round steps)', () => {
-    const makeBgStep = (
-      overrides: Partial<BackgroundExecutionState> = {}
-    ): ConversationRoundStep => ({
-      type: ConversationRoundStepType.backgroundAgentExecutionComplete,
-      execution_id: 'bg-exec-1',
-      status: ExecutionStatus.completed,
-      response: { message: 'Background result' },
-      completed_at: { round_id: 'round-1' },
-      ...overrides,
-    } as ConversationRoundStep);
+    const makeBgStep = (overrides: Partial<BackgroundExecutionState> = {}): ConversationRoundStep =>
+      ({
+        type: ConversationRoundStepType.backgroundAgentExecutionComplete,
+        execution_id: 'bg-exec-1',
+        status: ExecutionStatus.completed,
+        response: { message: 'Background result' },
+        completed_at: { round_id: 'round-1' },
+        ...overrides,
+      } as ConversationRoundStep);
 
     it('injects system notice for background execution complete step', async () => {
       const round = createRound({
