@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'searchSessionsManagement',
   ]);
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const browser = getService('browser');
   const searchSessions = getService('searchSessions');
   const kibanaServer = getService('kibanaServer');
   const toasts = getService('toasts');
@@ -40,20 +39,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
           'A Pie in another space '
         );
-
-        // purge client side search cache
-        // https://github.com/elastic/kibana/issues/106074#issuecomment-920462094
-        await browser.refresh();
+        if (!savedSessionId)
+          throw new Error(`Can\'t find session with title = A Pie in another space`);
 
         await searchSessions.openFlyout();
-        const searchSessionList = await searchSessionsManagement.getList();
-        const searchSessionItem = searchSessionList.find(
-          (session) => session.id === savedSessionId
-        );
-
+        const searchSessionItem = await searchSessionsManagement.getById(savedSessionId);
         if (!searchSessionItem) throw new Error(`Can\'t find session with id = ${savedSessionId}`);
 
         // navigate to discover
+        await searchSessionItem.waitForCompleteStatus();
         await searchSessionItem.view();
 
         await header.waitUntilLoadingHasFinished();

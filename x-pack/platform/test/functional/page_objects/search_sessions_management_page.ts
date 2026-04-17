@@ -12,6 +12,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
   const log = getService('log');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
 
   return {
@@ -78,9 +79,22 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
               });
               await testSubjects.click('confirmEditName');
             },
+            waitForCompleteStatus: async () => {
+              await retry.waitFor('session should be in a completed status', async () => {
+                const status = $.findTestSubject('sessionManagementStatusLabel').attr(
+                  'data-test-status'
+                );
+                return status === 'complete';
+              });
+            },
           };
         })
       );
+    },
+
+    async getById(id: string) {
+      const list = await this.getList();
+      return list.find((session) => session.id === id);
     },
   };
 }
