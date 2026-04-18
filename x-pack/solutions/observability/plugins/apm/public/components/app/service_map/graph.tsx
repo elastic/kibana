@@ -86,8 +86,6 @@ interface GraphProps {
   fullMapHref?: string;
   /** When false, hides the minimap (e.g. in embeddable preview). Default true. */
   showMinimap?: boolean;
-  /** When false, disables the node/edge detail popover (e.g. in embeddable where router is unavailable). Default true. */
-  showPopover?: boolean;
   /** When false, hides the options panel with filters and layout controls. Default true. */
   showOptionsPanel?: boolean;
 }
@@ -105,7 +103,6 @@ function GraphInner({
   onToggleFullscreen,
   fullMapHref,
   showMinimap = true,
-  showPopover = true,
   showOptionsPanel = true,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -653,18 +650,16 @@ function GraphInner({
         </Panel>
         {showMinimap && <ServiceMapMinimap />}
       </ReactFlow>
-      {showPopover && (
-        <MapPopover
-          selectedNode={selectedNodeForPopover}
-          selectedEdge={selectedEdgeForPopover}
-          focusedServiceName={serviceName}
-          environment={environment}
-          kuery={kuery}
-          start={start}
-          end={end}
-          onClose={handlePopoverClose}
-        />
-      )}
+      <MapPopover
+        selectedNode={selectedNodeForPopover}
+        selectedEdge={selectedEdgeForPopover}
+        focusedServiceName={serviceName}
+        environment={environment}
+        kuery={kuery}
+        start={start}
+        end={end}
+        onClose={handlePopoverClose}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { ChartPointerEventContextProvider } from '../context/chart_pointer_event
 import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
+import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -41,9 +42,13 @@ export function ApmEmbeddableContext({
   const history = useMemo(
     () =>
       createMemoryHistory({
-        initialEntries: [`/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}`],
+        initialEntries: [
+          `/service-map?rangeFrom=${rangeFrom}&rangeTo=${rangeTo}&kuery=${encodeURIComponent(
+            kuery
+          )}&comparisonEnabled=false`,
+        ],
       }),
-    [rangeFrom, rangeTo]
+    [rangeFrom, rangeTo, kuery]
   );
 
   const services = {
@@ -73,7 +78,9 @@ export function ApmEmbeddableContext({
     <I18nContext>
       <ApmPluginContext.Provider value={services}>
         <KibanaThemeProvider theme={deps.coreStart.theme}>
-          <KibanaContextProvider services={deps.coreStart}>
+          <KibanaContextProvider
+            services={{ ...deps.coreStart, apmSourcesAccess: deps.pluginsStart.apmSourcesAccess }}
+          >
             <RouterProvider router={apmRouter as any} history={history}>
               <TimeRangeMetadataContextProvider
                 uiSettings={deps.coreStart.uiSettings}
@@ -83,7 +90,9 @@ export function ApmEmbeddableContext({
                 useSpanName={false}
               >
                 <LicenseProvider>
-                  <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                  <ApmIndexSettingsContextProvider>
+                    <ChartPointerEventContextProvider>{children}</ChartPointerEventContextProvider>
+                  </ApmIndexSettingsContextProvider>
                 </LicenseProvider>
               </TimeRangeMetadataContextProvider>
             </RouterProvider>

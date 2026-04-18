@@ -127,6 +127,20 @@ test.describe(
         expect(horizontalFill).toBeGreaterThan(0.95);
         expect(verticalFill).toBeGreaterThan(0.9);
       });
+
+      await test.step('click on a service node and verify popover appears', async () => {
+        const serviceNode = page.testSubj.locator(
+          `serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
+        );
+        await expect(serviceNode).toBeVisible({ timeout: 10000 });
+        await serviceNode.click();
+
+        const popover = page.testSubj.locator('serviceMapPopover');
+        await expect(popover).toBeVisible({ timeout: 5000 });
+
+        const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
+        await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
+      });
     });
   }
 );

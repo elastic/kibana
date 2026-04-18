@@ -31,6 +31,10 @@ jest.mock('../../context/time_range_metadata/time_range_metadata_context', () =>
   };
 });
 
+jest.mock('../../context/apm_index_settings/apm_index_settings_context', () => ({
+  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext
 >[0]['deps']['coreStart'];
