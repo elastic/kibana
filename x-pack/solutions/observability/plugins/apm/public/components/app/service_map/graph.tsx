@@ -615,15 +615,17 @@ function GraphInner({
             >
               <EuiIcon type="minus" aria-hidden={true} />
             </ControlButton>
-            <ControlButton
-              onClick={() => fitView(getFitViewOptions())}
-              title={fitViewLabel}
-              aria-label={fitViewLabel}
-              className="serviceMapRfControlButton"
-              data-test-subj="serviceMapFitViewButton"
-            >
-              <EuiIcon type="expand" aria-hidden={true} />
-            </ControlButton>
+            {!isEmbedded && (
+              <ControlButton
+                onClick={() => fitView(getFitViewOptions())}
+                title={fitViewLabel}
+                aria-label={fitViewLabel}
+                className="serviceMapRfControlButton"
+                data-test-subj="serviceMapFitViewButton"
+              >
+                <EuiIcon type="expand" aria-hidden={true} />
+              </ControlButton>
+            )}
             {fullMapHref && (
               <a
                 className="serviceMapRfControlLink"

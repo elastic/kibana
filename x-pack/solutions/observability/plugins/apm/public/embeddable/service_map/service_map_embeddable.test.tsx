@@ -250,6 +250,11 @@ describe('ServiceMapEmbeddable', () => {
       expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
     });
 
+    it('hides the fit view button when embedded', () => {
+      renderEmbeddable();
+      expect(screen.queryByTestId('serviceMapFitViewButton')).not.toBeInTheDocument();
+    });
+
     describe('when the panel is resized', () => {
       it.todo('adjusts graph height to match panel height');
     });
