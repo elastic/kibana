@@ -11,7 +11,7 @@ import type { MouseEvent } from 'react';
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor, IconType } from '@elastic/eui';
 import {
   EuiContextMenu,
   EuiContextMenuItem,
@@ -31,6 +31,67 @@ import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { css } from '@emotion/react';
 import { isModifiedOrPrevented } from './nav_link';
 import { useHelpMenu, useNavigateToUrl, useDocLinks } from './chrome_hooks';
+
+interface MenuItemOptions {
+  name: string;
+  key: string;
+  icon?: IconType;
+  href?: string;
+  target?: string;
+  rel?: string;
+  onClick?: () => void;
+  isExternal?: boolean;
+  dataTestSubj?: string;
+}
+
+type ItemClickHandler = (opts: {
+  onClick?: () => void;
+  href?: string;
+  isExternal?: boolean;
+}) => (e: MouseEvent) => void;
+
+const createItemClickHandler =
+  ({
+    closeMenu,
+    navigateToUrl,
+  }: {
+    closeMenu: () => void;
+    navigateToUrl: (url: string) => void;
+  }): ItemClickHandler =>
+  ({ onClick, href, isExternal }) =>
+  (e: MouseEvent) => {
+    if (onClick) {
+      e.preventDefault();
+      onClick();
+    } else if (
+      href &&
+      !isExternal &&
+      !isModifiedOrPrevented(e as MouseEvent<HTMLElement>) &&
+      e.button === 0
+    ) {
+      e.preventDefault();
+      navigateToUrl(href);
+    }
+    closeMenu();
+  };
+
+const createMenuItem = (
+  options: MenuItemOptions,
+  onItemClick: ItemClickHandler
+): EuiContextMenuPanelItemDescriptor => ({
+  name: options.name,
+  key: options.key,
+  icon: options.icon,
+  'data-test-subj': options.dataTestSubj,
+  ...(options.href ? { href: options.href } : {}),
+  target: options.target,
+  rel: options.rel,
+  onClick: onItemClick({
+    onClick: options.onClick,
+    href: options.href,
+    isExternal: options.isExternal,
+  }),
+});
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -97,32 +158,8 @@ export const HeaderHelpMenu = () => {
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
 
-  const handleItemClick = useCallback(
-    ({
-      onClick,
-      href,
-      isExternal,
-    }: {
-      onClick?: () => void;
-      href?: string;
-      isExternal?: boolean;
-    }): ((e: MouseEvent) => void) => {
-      return (e: MouseEvent) => {
-        if (onClick) {
-          e.preventDefault();
-          onClick();
-        } else if (
-          href &&
-          !isExternal &&
-          !isModifiedOrPrevented(e as MouseEvent<HTMLElement>) &&
-          e.button === 0
-        ) {
-          e.preventDefault();
-          navigateToUrl(href);
-        }
-        closeMenu();
-      };
-    },
+  const handleItemClick = useMemo(
+    () => createItemClickHandler({ closeMenu, navigateToUrl }),
     [closeMenu, navigateToUrl]
   );
 
@@ -133,16 +170,21 @@ export const HeaderHelpMenu = () => {
     globalHelpExtensionMenuLinks
       .sort((a, b) => b.priority - a.priority)
       .forEach((link) => {
-        menuItems.push({
-          name: link.content,
-          key: `global-${link.href}`,
-          href: link.href,
-          target: link.target,
-          rel: link.rel,
-          icon: link.iconType,
-          'data-test-subj': link['data-test-subj'],
-          onClick: handleItemClick({ href: link.href, isExternal: link.external }),
-        });
+        menuItems.push(
+          createMenuItem(
+            {
+              name: link.content,
+              key: `global-${link.href}`,
+              href: link.href,
+              target: link.target,
+              rel: link.rel,
+              icon: link.iconType,
+              isExternal: link.external,
+              dataTestSubj: link['data-test-subj'],
+            },
+            handleItemClick
+          )
+        );
       });
 
     // Default links (Kibana docs, Ask Elastic, GitHub)
@@ -153,18 +195,21 @@ export const HeaderHelpMenu = () => {
         );
       }
 
-      menuItems.push({
-        name: link.title,
-        key: `default-${idx}`,
-        icon: link.iconType,
-        'data-test-subj': link.dataTestSubj,
-        ...(link.href ? { href: link.href, target: '_blank' } : {}),
-        onClick: handleItemClick({
-          onClick: link.onClick,
-          href: link.href,
-          isExternal: !!link.href,
-        }),
-      });
+      menuItems.push(
+        createMenuItem(
+          {
+            name: link.title,
+            key: `default-${idx}`,
+            icon: link.iconType,
+            href: link.href,
+            target: link.href ? '_blank' : undefined,
+            onClick: link.onClick,
+            isExternal: !!link.href,
+            dataTestSubj: link.dataTestSubj,
+          },
+          handleItemClick
+        )
+      );
     });
 
     // App-specific extension links
@@ -179,38 +224,27 @@ export const HeaderHelpMenu = () => {
       });
 
       helpExtension.links?.forEach((link, idx) => {
-        switch (link.linkType) {
-          case 'documentation':
-            menuItems.push({
-              name: i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuDocumentation', {
-                defaultMessage: 'Documentation',
-              }),
+        const isDocumentation = link.linkType === 'documentation';
+        menuItems.push(
+          createMenuItem(
+            {
+              name: isDocumentation
+                ? i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuDocumentation', {
+                    defaultMessage: 'Documentation',
+                  })
+                : link.content,
               key: `extension-${idx}`,
+              icon: link.iconType,
               href: link.href,
-              target: '_blank',
-              rel: 'noopener',
-              icon: link.iconType,
-              'data-test-subj': link['data-test-subj'],
-              onClick: handleItemClick({ href: link.href, isExternal: true }),
-            });
-            break;
-          case 'custom':
-            menuItems.push({
-              name: link.content,
-              key: `extension-${idx}`,
-              icon: link.iconType,
-              'data-test-subj': link['data-test-subj'],
-              ...(link.href ? { href: link.href } : {}),
-              target: link.target,
-              rel: link.rel,
-              onClick: handleItemClick({
-                onClick: link.onClick,
-                href: link.href,
-                isExternal: link.external,
-              }),
-            });
-            break;
-        }
+              target: link.target ?? (isDocumentation ? '_blank' : undefined),
+              rel: link.rel ?? (isDocumentation ? 'noopener' : undefined),
+              onClick: !isDocumentation ? link.onClick : undefined,
+              isExternal: isDocumentation || link.external,
+              dataTestSubj: link['data-test-subj'],
+            },
+            handleItemClick
+          )
+        );
       });
     }
 
