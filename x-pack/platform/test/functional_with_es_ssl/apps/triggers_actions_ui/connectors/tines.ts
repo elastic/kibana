@@ -166,7 +166,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
-        await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+        await retry.try(async () => {
+          await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+          await testSubjects.existOrFail('executeActionButton');
+        });
 
         expect(await isEnabled('executeActionButton')).to.be(false);
       });
