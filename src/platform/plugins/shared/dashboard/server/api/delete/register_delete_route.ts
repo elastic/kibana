@@ -15,6 +15,8 @@ import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
 
+import { trackDeleteDashboardAction } from '../user_actions';
+
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
   usageCounter: UsageCounter | undefined
@@ -56,7 +58,8 @@ export function registerDeleteRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          await deleteDashboard(ctx, req.params.id);
+          const { title } = await deleteDashboard(ctx, req.params.id);
+          await trackDeleteDashboardAction({ id: req.params.id, data: { title } }, req);
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
             return res.notFound({

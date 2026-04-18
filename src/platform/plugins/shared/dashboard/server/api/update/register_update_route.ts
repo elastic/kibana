@@ -18,6 +18,7 @@ import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schem
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { writeErrorHandler } from '../write_error_handler';
+import { trackCreateDashboardAction, trackUpdateDashboardAction } from '../user_actions';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -78,9 +79,13 @@ export function registerUpdateRoute(
             req.body,
             isDashboardAppRequest
           );
-          return result.meta.updated_at === result.meta.created_at
-            ? res.created({ body: result })
-            : res.ok({ body: result });
+          if (result.meta.updated_at === result.meta.created_at) {
+            await trackCreateDashboardAction(result, req);
+            return res.created({ body: result });
+          } else {
+            await trackUpdateDashboardAction(result, req);
+            return res.ok({ body: result });
+          }
         } catch (e) {
           return writeErrorHandler(e, res);
         }

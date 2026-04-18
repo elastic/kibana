@@ -62,6 +62,7 @@ import type {
   SavedObjectsChangeAccessControlObject,
   SavedObjectsChangeAccessModeOptions,
   SavedObjectsChangeOwnershipOptions,
+  SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -307,7 +308,11 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
   /**
    * {@inheritDoc ISavedObjectsRepository.delete}
    */
-  async delete(type: string, id: string, options: SavedObjectsDeleteOptions = {}): Promise<{}> {
+  async delete(
+    type: string,
+    id: string,
+    options: SavedObjectsDeleteOptions = {}
+  ): ReturnType<SavedObjectsClientContract['delete']> {
     const timer = this.serverTiming?.start('so-delete', type);
     try {
       return await performDelete(

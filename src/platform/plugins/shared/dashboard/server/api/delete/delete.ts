@@ -13,7 +13,9 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 export async function deleteDashboard(
   requestCtx: RequestHandlerContext,
   id: string
-): Promise<void> {
+): Promise<{ title: string }> {
   const { core } = await requestCtx.resolve(['core']);
-  await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+  return await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id, {
+    returnTitle: true,
+  });
 }
