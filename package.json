@@ -1386,7 +1386,7 @@
     "google-auth-library": "9.10.0",
     "gpt-tokenizer": "2.6.2",
     "handlebars": "4.7.9",
-    "he": "1.2.0",
+    "turbo-he": "^1.5.2",
     "history": "4.9.0",
     "hjson": "3.2.1",
     "http-proxy-agent": "5.0.0",

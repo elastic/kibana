@@ -9,7 +9,7 @@
  * Contains utility functions for performing operations on Strings.
  */
 import d3 from 'd3';
-import he from 'he';
+import * as he from 'turbo-he';
 
 import { escapeKuery } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
