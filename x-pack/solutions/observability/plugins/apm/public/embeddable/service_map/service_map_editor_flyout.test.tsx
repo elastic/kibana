@@ -241,4 +241,109 @@ describe('<ServiceMapEditorFlyout/>', () => {
       );
     });
   });
+
+  describe('service name selection', () => {
+    it('clears service name when selection is removed', async () => {
+      const onSave = jest.fn();
+      mockHttpGet.mockResolvedValue({ terms: ['service-a', 'service-b'] });
+      await renderFlyout({ onSave });
+
+      const serviceNameComboBox = screen.getByTestId('apmServiceMapEditorServiceNameComboBox');
+      const input = serviceNameComboBox.querySelector('input')!;
+
+      // Select a service
+      fireEvent.change(input, { target: { value: 'service-a' } });
+      await act(async () => {
+        jest.advanceTimersByTime(300);
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'service-a' })).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('option', { name: 'service-a' }));
+
+      // Clear the selection using the clear button
+      const clearButton = serviceNameComboBox.querySelector(
+        '[data-test-subj="comboBoxClearButton"]'
+      );
+      if (clearButton) {
+        fireEvent.click(clearButton);
+      }
+
+      // Save to verify the service name was cleared
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            serviceName: undefined,
+          })
+        );
+      });
+    });
+  });
+
+  describe('environment selection', () => {
+    it('updates environment when a new option is selected', async () => {
+      const onSave = jest.fn();
+      mockHttpGet.mockResolvedValue({ terms: ['production', 'staging'] });
+      await renderFlyout({ onSave });
+
+      const environmentComboBox = screen.getByTestId('apmServiceMapEditorEnvironmentComboBox');
+      const input = environmentComboBox.querySelector('input')!;
+
+      fireEvent.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'production' })).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('option', { name: 'production' }));
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            environment: 'production',
+          })
+        );
+      });
+    });
+  });
+
+  describe('environment options filtering', () => {
+    it('includes ENVIRONMENT_NOT_DEFINED when present in terms', async () => {
+      mockHttpGet.mockResolvedValue({ terms: ['production', 'ENVIRONMENT_NOT_DEFINED'] });
+      await renderFlyout();
+
+      const environmentComboBox = screen.getByTestId('apmServiceMapEditorEnvironmentComboBox');
+      const input = environmentComboBox.querySelector('input')!;
+
+      fireEvent.click(input);
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: 'Not defined' })).toBeInTheDocument();
+        expect(screen.getByRole('option', { name: 'production' })).toBeInTheDocument();
+      });
+    });
+
+    it('excludes ENVIRONMENT_NOT_DEFINED from regular options list', async () => {
+      mockHttpGet.mockResolvedValue({ terms: ['production', 'ENVIRONMENT_NOT_DEFINED'] });
+      await renderFlyout();
+
+      const environmentComboBox = screen.getByTestId('apmServiceMapEditorEnvironmentComboBox');
+      const input = environmentComboBox.querySelector('input')!;
+
+      fireEvent.click(input);
+
+      await waitFor(() => {
+        const options = screen.getAllByRole('option');
+        const optionLabels = options.map((opt) => opt.textContent);
+        // Should have: All, Not defined, production (not ENVIRONMENT_NOT_DEFINED as a label)
+        expect(optionLabels).not.toContain('ENVIRONMENT_NOT_DEFINED');
+      });
+    });
+  });
 });

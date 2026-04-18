@@ -7,7 +7,7 @@
 
 import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID } from './constants';
+import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import { createAddServiceMapPanelAction } from './create_add_service_map_panel_action';
 import type { EmbeddableDeps } from '../types';
 
@@ -120,5 +120,69 @@ describe('createAddServiceMapPanelAction', () => {
 
     expect(mockApiPublishesTimeRange).toHaveBeenCalledWith(embeddable);
     expect(mockOpenLazyFlyout).toHaveBeenCalled();
+  });
+
+  describe('loadContent callback', () => {
+    it('returns ServiceMapEditorFlyout component', async () => {
+      const embeddable = { addNewPanel: jest.fn() };
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      mockApiPublishesTimeRange.mockReturnValue(false);
+      const action = createAddServiceMapPanelAction(mockDeps);
+
+      await action.execute({ embeddable } as never);
+
+      const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
+      const closeFlyout = jest.fn();
+      const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
+
+      expect(result).toBeDefined();
+      expect(result.props.ariaLabelledBy).toBe('test-aria-label');
+      expect(result.props.deps).toBe(mockDeps);
+      expect(result.props.onCancel).toBe(closeFlyout);
+    });
+
+    it('calls embeddable.addNewPanel and closeFlyout when onSave is invoked', async () => {
+      const addNewPanel = jest.fn();
+      const embeddable = { addNewPanel };
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      mockApiPublishesTimeRange.mockReturnValue(false);
+      const action = createAddServiceMapPanelAction(mockDeps);
+
+      await action.execute({ embeddable } as never);
+
+      const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
+      const closeFlyout = jest.fn();
+      const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
+
+      const state = { environment: 'production', kuery: '', serviceName: 'test-service' };
+      result.props.onSave(state);
+
+      expect(addNewPanel).toHaveBeenCalledWith(
+        {
+          panelType: APM_SERVICE_MAP_EMBEDDABLE,
+          serializedState: state,
+        },
+        { displaySuccessMessage: true }
+      );
+      expect(closeFlyout).toHaveBeenCalled();
+    });
+
+    it('passes time range to flyout when available', async () => {
+      const mockTimeRange = { from: 'now-1h', to: 'now' };
+      const embeddable = {
+        addNewPanel: jest.fn(),
+        timeRange$: { getValue: () => mockTimeRange },
+      };
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      mockApiPublishesTimeRange.mockReturnValue(true);
+      const action = createAddServiceMapPanelAction(mockDeps);
+
+      await action.execute({ embeddable } as never);
+
+      const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
+      const result = await loadContent({ closeFlyout: jest.fn(), ariaLabelledBy: 'test' });
+
+      expect(result.props.timeRange).toEqual(mockTimeRange);
+    });
   });
 });
