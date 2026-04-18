@@ -88,6 +88,7 @@ export function initializeEditApi({
     onEdit: async () => {
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
+      const locatorParams = getDiscoverLocatorParams({ ...partialApi, parentApi });
       const valueInput = isByReference
         ? undefined
         : fromSavedSearchToSavedObjectTab({
@@ -99,16 +100,18 @@ export function initializeEditApi({
                   defaultMessage: 'By-value Discover session',
                 }),
             },
-            savedSearch: partialApi.savedSearch$.getValue(),
+            savedSearch: {
+              ...partialApi.savedSearch$.getValue(),
+              controlGroupJson: JSON.stringify(locatorParams.esqlControls ?? {}),
+            },
             services: discoverServices,
           });
+
       let app: string;
       let path: string | undefined;
 
       if (isByReference) {
-        ({ app, path } = await discoverServices.locator.getLocation(
-          getDiscoverLocatorParams(partialApi)
-        ));
+        ({ app, path } = await discoverServices.locator.getLocation(locatorParams));
       } else {
         ({ app, path } = await discoverServices.locator.getLocation({}));
       }
