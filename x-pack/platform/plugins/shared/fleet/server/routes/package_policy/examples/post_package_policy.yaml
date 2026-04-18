@@ -1,0 +1,60 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postPackagePolicyRequestExample:
+          description: 'Create a new nginx package policy'
+          value:
+            name: 'nginx-1'
+            namespace: 'default'
+            policy_ids:
+              - 'agent-policy-id-1'
+            package:
+              name: 'nginx'
+              version: '1.20.0'
+            inputs: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postPackagePolicyExample:
+            description: 'The created package policy'
+            value:
+              item:
+                id: 'package-policy-id-2'
+                name: 'nginx-1'
+                namespace: 'default'
+                enabled: true
+                policy_ids:
+                  - 'agent-policy-id-1'
+                package:
+                  name: 'nginx'
+                  title: 'Nginx'
+                  version: '1.20.0'
+                inputs: []
+                created_at: '2024-01-15T10:00:00.000Z'
+                updated_at: '2024-01-15T10:00:00.000Z'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'
+  409:
+    description: 'Conflict'
+    content:
+      application/json:
+        examples:
+          conflictExample:
+            description: 'A package policy with the same name already exists'
+            value:
+              statusCode: 409
+              error: 'Conflict'
+              message: 'An error message describing what went wrong'
