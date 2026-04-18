@@ -20,6 +20,7 @@ import {
 import type { EmbeddableDeps } from '../types';
 
 const mockApiPublishesUnifiedSearch = jest.fn();
+const mockApiPublishesTimeRange = jest.fn();
 const mockInitializeTitleManager = jest.fn();
 const mockInitializeUnsavedChanges = jest.fn();
 const mockUseBatchedPublishingSubjects = jest.fn();
@@ -29,6 +30,7 @@ const mockApmEmbeddableContext = jest.fn();
 
 jest.mock('@kbn/presentation-publishing', () => ({
   apiPublishesUnifiedSearch: (...args: unknown[]) => mockApiPublishesUnifiedSearch(...args),
+  apiPublishesTimeRange: (...args: unknown[]) => mockApiPublishesTimeRange(...args),
   initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
   initializeUnsavedChanges: (...args: unknown[]) => mockInitializeUnsavedChanges(...args),
   titleComparators: { title: 'referenceEquality' },
@@ -68,6 +70,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     });
     mockInitializeUnsavedChanges.mockImplementation(() => ({ unsavedApi: true }));
     mockApiPublishesUnifiedSearch.mockReturnValue(true);
+    mockApiPublishesTimeRange.mockReturnValue(true);
     mockUseObservable.mockReturnValue({ query: 'transaction.type: request' });
     mockUseBatchedPublishingSubjects.mockReturnValue([
       undefined,
@@ -181,6 +184,7 @@ describe('getServiceMapEmbeddableFactory', () => {
 
   it('supports reset behavior and dashboard-query opt out', async () => {
     mockApiPublishesUnifiedSearch.mockReturnValue(false);
+    mockApiPublishesTimeRange.mockReturnValue(false);
     mockUseObservable.mockReturnValue(undefined);
     mockUseBatchedPublishingSubjects.mockReturnValue([
       undefined,
@@ -244,6 +248,7 @@ describe('getServiceMapEmbeddableFactory', () => {
       serviceGroupId: 'group-b',
     });
 
+    // Reset to undefined (new panel state) - should default to custom time range
     unsavedConfig.onReset(undefined);
     expect(embeddable.api.serializeState()).toEqual({
       title: 'Saved title',
@@ -265,6 +270,97 @@ describe('getServiceMapEmbeddableFactory', () => {
         serviceGroupId: undefined,
       })
     );
+  });
+
+  it('uses dashboard time range when panel time range is undefined', async () => {
+    const parentTimeRange = { from: 'now-7d', to: 'now' };
+    mockApiPublishesUnifiedSearch.mockReturnValue(false);
+    mockApiPublishesTimeRange.mockReturnValue(true);
+    // useObservable returns parent time range when custom time is off
+    mockUseObservable.mockImplementation((subject) => {
+      // Return parent time range for the time range observable
+      if (subject?.getValue && typeof subject.getValue === 'function') {
+        const val = subject.getValue();
+        if (val && typeof val === 'object' && 'from' in val) {
+          return val;
+        }
+      }
+      return parentTimeRange;
+    });
+    mockUseBatchedPublishingSubjects.mockReturnValue([
+      undefined, // rangeFrom - undefined means use dashboard time
+      undefined, // rangeTo - undefined means use dashboard time
+      ENVIRONMENT_ALL.value,
+      '',
+      undefined,
+      undefined,
+    ]);
+
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = {
+      query$: new BehaviorSubject({ query: '' }),
+      timeRange$: new BehaviorSubject(parentTimeRange),
+    };
+    const factory = getServiceMapEmbeddableFactory({ coreStart: {} } as unknown as EmbeddableDeps);
+    // Panel saved with undefined time range (use dashboard time)
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {
+        rangeFrom: undefined,
+        rangeTo: undefined,
+      },
+      finalizeApi,
+      uuid: 'panel-3',
+      parentApi,
+    } as never);
+
+    // Verify timeRange$ is undefined (indicating use dashboard time)
+    expect(embeddable.api.timeRange$.getValue()).toBeUndefined();
+
+    render(<embeddable.Component />);
+    // Should use parent's time range
+    expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rangeFrom: 'now-7d',
+        rangeTo: 'now',
+      })
+    );
+  });
+
+  it('exposes setTimeRange to toggle between custom and dashboard time', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = {
+      query$: new BehaviorSubject({ query: '' }),
+      timeRange$: new BehaviorSubject({ from: 'now-24h', to: 'now' }),
+    };
+    const factory = getServiceMapEmbeddableFactory({ coreStart: {} } as unknown as EmbeddableDeps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-4',
+      parentApi,
+    } as never);
+
+    // New panel defaults to custom time range
+    expect(embeddable.api.timeRange$.getValue()).toEqual({
+      from: 'now-15m',
+      to: 'now',
+    });
+
+    // Toggle to use dashboard time (set to undefined)
+    embeddable.api.setTimeRange(undefined);
+    expect(embeddable.api.timeRange$.getValue()).toBeUndefined();
+    expect(embeddable.api.serializeState().rangeFrom).toBeUndefined();
+    expect(embeddable.api.serializeState().rangeTo).toBeUndefined();
+
+    // Toggle back to custom time range
+    embeddable.api.setTimeRange({ from: 'now-1h', to: 'now' });
+    expect(embeddable.api.timeRange$.getValue()).toEqual({
+      from: 'now-1h',
+      to: 'now',
+    });
+    expect(embeddable.api.serializeState().rangeFrom).toBe('now-1h');
+    expect(embeddable.api.serializeState().rangeTo).toBe('now');
   });
 
   describe('filter notification api', () => {

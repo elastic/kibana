@@ -283,7 +283,17 @@ export function ServiceMapEditorFlyout({
               size="m"
               data-test-subj="apmServiceMapEditorSaveButton"
             >
-              <FormattedMessage id="xpack.apm.serviceMapEditor.saveButton" defaultMessage="Save" />
+              {isEditing ? (
+                <FormattedMessage
+                  id="xpack.apm.serviceMapEditor.saveButton"
+                  defaultMessage="Save"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.apm.serviceMapEditor.addPanelButton"
+                  defaultMessage="Add panel"
+                />
+              )}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

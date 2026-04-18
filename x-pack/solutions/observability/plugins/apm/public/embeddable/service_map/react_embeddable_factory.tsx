@@ -15,6 +15,7 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
+  apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   initializeTitleManager,
   titleComparators,
@@ -32,6 +33,7 @@ import {
 } from '../../../common/environment_filter_values';
 
 const NO_QUERY$ = new BehaviorSubject<Query | undefined>(undefined);
+const NO_TIME_RANGE$ = new BehaviorSubject<TimeRange | undefined>(undefined);
 import type { EmbeddableDeps } from '../types';
 import type { ServiceMapEmbeddableState } from './types';
 import { ApmEmbeddableContext } from '../embeddable_context';
@@ -46,6 +48,7 @@ export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableS
   HasEditCapabilities &
   PublishesFilters &
   PublishesTimeRange & {
+    setTimeRange: (timeRange: TimeRange | undefined) => void;
     query$: PublishingSubject<Query | undefined>;
     canEditUnifiedSearch: () => boolean;
   };
@@ -95,8 +98,16 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const { coreStart } = deps;
       const state = initialState;
       const titleManager = initializeTitleManager(state);
-      const rangeFrom$ = new BehaviorSubject(state.rangeFrom ?? DEFAULT_RANGE_FROM);
-      const rangeTo$ = new BehaviorSubject(state.rangeTo ?? DEFAULT_RANGE_TO);
+      // Detect if this is a brand new panel (keys not present) vs existing panel (keys present but may be undefined).
+      // New panels default to custom time range with now-15m.
+      // Existing panels with undefined time range use dashboard time.
+      const hasTimeRangeKeys = 'rangeFrom' in state || 'rangeTo' in state;
+      const rangeFrom$ = new BehaviorSubject<string | undefined>(
+        hasTimeRangeKeys ? state.rangeFrom : DEFAULT_RANGE_FROM
+      );
+      const rangeTo$ = new BehaviorSubject<string | undefined>(
+        hasTimeRangeKeys ? state.rangeTo : DEFAULT_RANGE_TO
+      );
       const environment$ = new BehaviorSubject(state.environment ?? ENVIRONMENT_ALL.value);
       const kuery$ = new BehaviorSubject(state.kuery ?? '');
       const serviceName$ = new BehaviorSubject(state.serviceName);
@@ -106,10 +117,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       const filters$ = new BehaviorSubject<Filter[] | undefined>(
         buildFiltersFromState(state.serviceName, state.environment)
       );
-      const timeRange$ = new BehaviorSubject<TimeRange | undefined>({
-        from: rangeFrom$.getValue(),
-        to: rangeTo$.getValue(),
-      });
+      // timeRange$ is undefined when using dashboard time, defined when using custom time
+      const timeRange$ = new BehaviorSubject<TimeRange | undefined>(
+        rangeFrom$.getValue() && rangeTo$.getValue()
+          ? { from: rangeFrom$.getValue()!, to: rangeTo$.getValue()! }
+          : undefined
+      );
 
       combineLatest([serviceName$, environment$]).subscribe(([sn, env]) => {
         filters$.next(buildFiltersFromState(sn, env));
@@ -118,7 +131,8 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         query$.next(buildQueryFromKuery(k));
       });
       combineLatest([rangeFrom$, rangeTo$]).subscribe(([from, to]) => {
-        timeRange$.next({ from, to });
+        // Only set timeRange$ when both from and to are defined (custom time range)
+        timeRange$.next(from && to ? { from, to } : undefined);
       });
 
       function serializeState(): ServiceMapEmbeddableState {
@@ -157,8 +171,11 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         }),
         onReset: (lastSaved) => {
           titleManager.reinitializeState(lastSaved);
-          rangeFrom$.next(lastSaved?.rangeFrom ?? DEFAULT_RANGE_FROM);
-          rangeTo$.next(lastSaved?.rangeTo ?? DEFAULT_RANGE_TO);
+          // For reset, check if lastSaved has time range keys to distinguish new panel vs saved with dashboard time
+          const savedHasTimeRangeKeys =
+            lastSaved && ('rangeFrom' in lastSaved || 'rangeTo' in lastSaved);
+          rangeFrom$.next(savedHasTimeRangeKeys ? lastSaved?.rangeFrom : DEFAULT_RANGE_FROM);
+          rangeTo$.next(savedHasTimeRangeKeys ? lastSaved?.rangeTo : DEFAULT_RANGE_TO);
           environment$.next(lastSaved?.environment ?? ENVIRONMENT_ALL.value);
           kuery$.next(lastSaved?.kuery ?? '');
           serviceName$.next(lastSaved?.serviceName);
@@ -173,7 +190,11 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         filters$,
         query$,
         timeRange$,
-        canEditUnifiedSearch: () => false,
+        setTimeRange: (timeRange: TimeRange | undefined) => {
+          rangeFrom$.next(timeRange?.from);
+          rangeTo$.next(timeRange?.to);
+        },
+        canEditUnifiedSearch: () => true,
         getTypeDisplayName: () =>
           i18n.translate('xpack.apm.embeddable.serviceMap.typeDisplayName', {
             defaultMessage: 'configuration',
@@ -229,6 +250,13 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
 
           const parentQuery$ = apiPublishesUnifiedSearch(parentApi) ? parentApi.query$ : NO_QUERY$;
           const dashboardQuery = useObservable(parentQuery$);
+
+          // Use parent's time range when panel doesn't have its own custom time range
+          const parentTimeRange$ = apiPublishesTimeRange(parentApi)
+            ? parentApi.timeRange$
+            : NO_TIME_RANGE$;
+          const parentTimeRange = useObservable(parentTimeRange$);
+
           const effectiveKuery = useMemo(() => {
             const dashboardQueryString =
               dashboardQuery && typeof dashboardQuery === 'object' && 'query' in dashboardQuery
@@ -243,17 +271,21 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             return panelKuery;
           }, [dashboardQuery, kuery]);
 
+          // Determine effective time range: custom panel time > parent time > defaults
+          const effectiveRangeFrom = rangeFrom ?? parentTimeRange?.from ?? DEFAULT_RANGE_FROM;
+          const effectiveRangeTo = rangeTo ?? parentTimeRange?.to ?? DEFAULT_RANGE_TO;
+
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
               <ApmEmbeddableContext
                 deps={deps}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
+                rangeFrom={effectiveRangeFrom}
+                rangeTo={effectiveRangeTo}
                 kuery={effectiveKuery}
               >
                 <ServiceMapEmbeddable
-                  rangeFrom={rangeFrom ?? DEFAULT_RANGE_FROM}
-                  rangeTo={rangeTo ?? DEFAULT_RANGE_TO}
+                  rangeFrom={effectiveRangeFrom}
+                  rangeTo={effectiveRangeTo}
                   environment={environment}
                   kuery={effectiveKuery}
                   serviceName={serviceName ?? undefined}
