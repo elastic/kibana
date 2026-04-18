@@ -47,12 +47,9 @@ export class DiscoverPageObject extends FtrService {
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
-    await this.retry.waitFor('discover app menu items to be present', async () => {
-      return (
-        (await this.appMenu.menuItemExists('discoverNewButton')) &&
-        (await this.appMenu.menuItemExists('discoverOpenButton'))
-      );
-    });
+    await this.retry.waitFor('discover app to be rendered', () =>
+      this.testSubjects.exists('discoverSavedSearchTitle', { allowHidden: true })
+    );
   }
 
   public async isOnDashboardsEditMode() {
@@ -220,6 +217,9 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
+    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
     await this.header.waitUntilLoadingHasFinished();
   }
 
