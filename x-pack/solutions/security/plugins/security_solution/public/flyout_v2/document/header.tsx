@@ -23,6 +23,7 @@ import { RiskScore } from './components/risk_score';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../shared/components/cell_actions';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 export interface HeaderProps {
   /**
@@ -50,6 +51,7 @@ export interface HeaderProps {
  */
 export const Header: FC<HeaderProps> = memo(
   ({ hit, renderCellActions = noopCellActionRenderer, onAlertUpdated, onShowNotes }) => {
+    const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
@@ -63,7 +65,7 @@ export const Header: FC<HeaderProps> = memo(
         <Timestamp hit={hit}>
           <EuiSpacer size="xs" />
         </Timestamp>
-        <Title hit={hit} />
+        <Title hit={hit} hideLink={!canReadRules} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />

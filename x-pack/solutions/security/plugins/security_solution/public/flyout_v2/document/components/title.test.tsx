@@ -145,4 +145,12 @@ describe('<Title />', () => {
     expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'false');
   });
+
+  it('should render as plain text when hideLink is true even with a rule id', () => {
+    const { queryByTestId, getByTestId } = renderTitle({ hit: alertHit, hideLink: true });
+
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'false');
+    expect(getByTestId(TITLE_TEST_ID)).toHaveTextContent('Test Rule Name');
+  });
 });
