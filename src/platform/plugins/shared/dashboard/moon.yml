@@ -126,6 +126,9 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-browser'
   - '@kbn/lens-common'
+  - '@kbn/dashboard-navigation-options-common'
+  - '@kbn/dashboard-navigation-options-components'
+  - '@kbn/dashboard-navigation-options-schema'
 tags:
   - plugin
   - prod
