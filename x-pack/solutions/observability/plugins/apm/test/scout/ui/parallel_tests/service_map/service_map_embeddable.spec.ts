@@ -29,7 +29,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth, uiSettings }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
       await uiSettings.set({ defaultIndex: dataViewId });
     });
 
@@ -76,7 +76,7 @@ test.describe(
         const environmentComboBox = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
         await environmentComboBox.click();
         await page
-          .locator(`[role="option"]:has-text("${SERVICE_MAP_TEST_ENVIRONMENT_STAGING}")`)
+          .getByRole('option', { name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING })
           .click({ timeout: 15000 });
 
         // Add KQL filter matching the staging transaction

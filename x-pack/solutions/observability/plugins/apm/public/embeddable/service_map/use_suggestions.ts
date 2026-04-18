@@ -59,13 +59,13 @@ export function useSuggestions({
         });
         setTerms(response.terms);
       } catch (error) {
-        if (error.name !== 'AbortError') {
-          console.error('Error fetching suggestions:', error);
-          setTerms([]);
+        if (error.name === 'AbortError') {
+          return;
         }
-      } finally {
-        setIsLoading(false);
+        console.error('Error fetching suggestions:', error);
+        setTerms([]);
       }
+      setIsLoading(false);
     },
     [core.http, fieldName, start, end, serviceName]
   );

@@ -123,6 +123,6 @@ export const useServiceMap = ({
       }
     }
 
-    return { data: INITIAL_STATE, status: FETCH_STATUS.LOADING };
+    return { data: INITIAL_STATE, status: FETCH_STATUS.SUCCESS };
   }, [data, status, error]);
 };
