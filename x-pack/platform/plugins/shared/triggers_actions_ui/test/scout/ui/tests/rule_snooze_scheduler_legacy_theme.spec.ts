@@ -45,7 +45,7 @@ test.describe(
     });
 
     test.beforeEach(async ({ browserAuth }) => {
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPrivilegedUser();
     });
 
     test.afterAll(async ({ apiServices }) => {
@@ -53,11 +53,7 @@ test.describe(
         return;
       }
 
-      try {
-        await apiServices.alerting.rules.delete(indexThresholdRuleId);
-      } catch {
-        // Continue cleanup even if rule deletion fails
-      }
+      await apiServices.alerting.rules.delete(indexThresholdRuleId);
     });
 
     test('keeps the scheduler stable without legacy theme CSS', async ({
