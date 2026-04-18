@@ -162,8 +162,6 @@ describe('MetricsExperienceGrid', () => {
 
     useMetricsGridFullScreenMock.mockReturnValue({
       metricsGridId: 'test-metrics-grid-id',
-      metricsGridWrapper: null,
-      setMetricsGridWrapper: jest.fn(),
       styles: {
         'metricsGrid--fullScreen': 'mock-fullscreen-class',
         'metricsGrid--restrictBody': 'mock-restrict-body-class',
