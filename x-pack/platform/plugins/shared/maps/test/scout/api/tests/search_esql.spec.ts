@@ -14,15 +14,9 @@ import { apiTest, testData } from '../fixtures';
 apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esArchiver }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
-  });
-
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
   });
 
   apiTest('should return getColumns response in expected shape', async ({ apiClient }) => {

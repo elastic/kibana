@@ -58,15 +58,9 @@ apiTest.describe('Maps - getGridTile', { tag: [...tags.stateful.classic] }, () =
     renderAs: 'point',
   };
 
-  apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth, esArchiver }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('viewer')).cookieHeader;
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
-  });
-
-  apiTest.afterAll(async ({ kbnClient }) => {
-    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
   });
 
   apiTest('should return vector tile with expected headers', async ({ apiClient }) => {

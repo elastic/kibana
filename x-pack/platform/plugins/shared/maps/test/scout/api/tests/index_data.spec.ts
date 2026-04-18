@@ -12,19 +12,15 @@ import { apiTest, testData } from '../fixtures';
 apiTest.describe('Maps - index feature data', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
   });
 
-  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+  apiTest.afterAll(async ({ esClient }) => {
     await esClient.indices.delete({
       index: ['new-point-feature-index', 'new-shape-feature-index', 'new-feature-index2'],
       ignore_unavailable: true,
     });
-    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
   });
 
   apiTest('should add point data to an existing index', async ({ apiClient }) => {

@@ -12,16 +12,12 @@ import { apiTest, testData } from '../fixtures';
 apiTest.describe('Maps - doc source creation', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {
+  apiTest.beforeAll(async ({ samlAuth }) => {
     cookieHeader = (await samlAuth.asInteractiveUser('admin')).cookieHeader;
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.logstashFunctional);
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.mapsData);
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.maps);
   });
 
-  apiTest.afterAll(async ({ esClient, kbnClient }) => {
+  apiTest.afterAll(async ({ esClient }) => {
     await esClient.indices.delete({ index: 'testing123', ignore_unavailable: true });
-    await kbnClient.importExport.unload(testData.KBN_ARCHIVES.maps);
   });
 
   apiTest(
