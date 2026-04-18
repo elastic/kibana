@@ -31,7 +31,6 @@ export function useGetAllIntegrations(): UseGetAllIntegrationsResult {
     queryFn: async ({ signal }) => {
       return getAllIntegrations({ http, abortSignal: signal });
     },
-    refetchInterval: 30 * 1000,
     refetchOnWindowFocus: true,
     retry: (failureCount, err) => {
       if (failureCount >= 3) {
