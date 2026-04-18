@@ -264,6 +264,8 @@ export function ServiceMapEditorFlyout({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCancel}
+              color="primary"
+              size="m"
               flush="left"
               data-test-subj="apmServiceMapEditorCancelButton"
             >
@@ -274,18 +276,14 @@ export function ServiceMapEditorFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSave} fill data-test-subj="apmServiceMapEditorSaveButton">
-              {isEditing ? (
-                <FormattedMessage
-                  id="xpack.apm.serviceMapEditor.saveButton"
-                  defaultMessage="Save"
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.apm.serviceMapEditor.addButton"
-                  defaultMessage="Add panel"
-                />
-              )}
+            <EuiButton
+              onClick={handleSave}
+              fill
+              color="primary"
+              size="m"
+              data-test-subj="apmServiceMapEditorSaveButton"
+            >
+              <FormattedMessage id="xpack.apm.serviceMapEditor.saveButton" defaultMessage="Save" />
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

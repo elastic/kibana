@@ -43,6 +43,10 @@ export function createAddServiceMapPanelAction(
       openLazyFlyout({
         core: deps.coreStart,
         parentApi: embeddable,
+        flyoutProps: {
+          type: 'overlay',
+          size: 'm',
+        },
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           return (
             <ServiceMapEditorFlyout
