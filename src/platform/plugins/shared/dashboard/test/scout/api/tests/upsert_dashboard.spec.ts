@@ -27,6 +27,9 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     editorCredentials = await requestAuth.getApiKeyForPrivilegedUser();
     viewerCredentials = await requestAuth.getApiKeyForViewer();
     await kbnClient.importExport.load(KBN_ARCHIVES.BASIC);
+    await kbnClient.importExport.load(
+      'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/dashboards_api.json'
+    );
     await kbnClient.importExport.load(KBN_ARCHIVES.TAGS);
   });
 
@@ -51,6 +54,24 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe('Refresh Requests (Updated)');
   });
 
+  apiTest('should update existing dashboard with invalid "as code" id', async ({ apiClient }) => {
+    const id = '(my)dashboard';
+    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+      headers: {
+        ...COMMON_HEADERS,
+        ...editorCredentials.apiKeyHeader,
+      },
+      body: {
+        title: 'Updated title',
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.id).toBe(id);
+    expect(response.body.data.title).toBe('Updated title');
+  });
+
   apiTest('should create new dashboard', async ({ apiClient }) => {
     const id = 'new-dashboard-id';
     const title = `I'm a new dashboard`;
@@ -60,7 +81,7 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
         ...editorCredentials.apiKeyHeader,
       },
       body: {
-        title: `I'm a new dashboard`,
+        title,
       },
       responseType: 'json',
     });
@@ -70,21 +91,46 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toBe(title);
   });
 
-  apiTest('validation - returns 400 when body is not empty', async ({ apiClient }) => {
-    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {},
-      responseType: 'json',
-    });
+  apiTest(
+    'validation - returns 400 when creating a new dashboard with an invalid id',
+    async ({ apiClient }) => {
+      const id = '(new)dashboard-id';
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: {
+          title: `I'm a new dashboard`,
+        },
+        responseType: 'json',
+      });
 
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      '[request body.title]: expected value of type [string] but got [undefined]'
-    );
-  });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
+      );
+    }
+  );
+
+  apiTest(
+    'validation - returns 400 when body is not valid dashboard shape',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...editorCredentials.apiKeyHeader,
+        },
+        body: {},
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toBe(
+        '[request body.title]: expected value of type [string] but got [undefined]'
+      );
+    }
+  );
 
   apiTest('validation - returns 400 when access_control is provided', async ({ apiClient }) => {
     const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
@@ -97,22 +143,6 @@ apiTest.describe('dashboards - upsert', { tag: tags.deploymentAgnostic }, () => 
         access_control: {
           access_mode: 'write_restricted',
         },
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation - returns 400 if panels is not an array', async ({ apiClient }) => {
-    const response = await apiClient.put(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title: 'foo',
-        panels: {},
       },
       responseType: 'json',
     });
