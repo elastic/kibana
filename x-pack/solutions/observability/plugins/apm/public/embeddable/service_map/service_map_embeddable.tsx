@@ -117,7 +117,7 @@ export function ServiceMapEmbeddable({
   const isEmpty = data.nodes.length === 0;
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
     return (
-      <EuiPanel hasBorder paddingSize="l">
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
         <EmptyPrompt />
       </EuiPanel>
     );
