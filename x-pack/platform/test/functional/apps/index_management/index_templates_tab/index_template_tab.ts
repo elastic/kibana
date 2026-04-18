@@ -93,6 +93,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // intercept the templateDetailsLink click in the beforeEach hook
       this.tags('skipFIPS');
       beforeEach(async () => {
+        if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+          await testSubjects.click('closeDetailsButton');
+        }
         await es.indices.putIndexTemplate({
           name: INDEX_TEMPLATE_NAME,
           index_patterns: ['logsdb-test-index-pattern'],
@@ -112,6 +115,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           if (btn) btn.click();
         });
         await retry.try(async () => {
+          if (await testSubjects.exists('closeDetailsButton', { timeout: 1000 })) {
+            await testSubjects.click('closeDetailsButton');
+          }
           await pageObjects.indexManagement.clickIndexTemplateNameLink(INDEX_TEMPLATE_NAME);
         });
         await testSubjects.click('manageTemplateButton');
