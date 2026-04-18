@@ -1,0 +1,103 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { debounce } from 'lodash';
+import type { CoreStart } from '@kbn/core/public';
+
+export interface UseSuggestionsResult {
+  terms: string[];
+  isLoading: boolean;
+  onSearchChange: (value: string) => void;
+  fetchAllTerms: () => void;
+}
+
+interface UseSuggestionsParams {
+  core: CoreStart;
+  fieldName: string;
+  start: string;
+  end: string;
+  serviceName?: string;
+  fetchOnMount?: boolean;
+}
+
+export function useSuggestions({
+  core,
+  fieldName,
+  start,
+  end,
+  serviceName,
+  fetchOnMount = false,
+}: UseSuggestionsParams): UseSuggestionsResult {
+  const [terms, setTerms] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const hasFetchedRef = useRef(false);
+
+  const fetchSuggestions = useCallback(
+    async (fieldValue: string) => {
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = new AbortController();
+
+      setIsLoading(true);
+      try {
+        const response = await core.http.get<{ terms: string[] }>('/internal/apm/suggestions', {
+          query: {
+            fieldName,
+            fieldValue,
+            start,
+            end,
+            ...(serviceName ? { serviceName } : {}),
+          },
+          signal: abortControllerRef.current.signal,
+          version: '2023-10-31',
+        });
+        setTerms(response.terms);
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching suggestions:', error);
+          setTerms([]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [core.http, fieldName, start, end, serviceName]
+  );
+
+  const fetchAllTerms = useCallback(() => {
+    fetchSuggestions('');
+  }, [fetchSuggestions]);
+
+  const debouncedFetch = useMemo(
+    () => debounce((value: string) => fetchSuggestions(value), 300),
+    [fetchSuggestions]
+  );
+
+  useEffect(() => {
+    if (fetchOnMount && !hasFetchedRef.current) {
+      hasFetchedRef.current = true;
+      fetchAllTerms();
+    }
+  }, [fetchOnMount, fetchAllTerms]);
+
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort();
+      debouncedFetch.cancel();
+    };
+  }, [debouncedFetch]);
+
+  const onSearchChange = useCallback(
+    (value: string) => {
+      debouncedFetch(value);
+    },
+    [debouncedFetch]
+  );
+
+  return { terms, isLoading, onSearchChange, fetchAllTerms };
+}

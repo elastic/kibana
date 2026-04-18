@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CoreStart } from '@kbn/core/public';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import { apiIsPresentationContainer, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
@@ -19,9 +18,10 @@ import {
 import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import type { ServiceMapEmbeddableState } from './types';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
+import type { EmbeddableDeps } from '../types';
 
 export function createAddServiceMapPanelAction(
-  coreStart: CoreStart
+  deps: EmbeddableDeps
 ): UiActionsActionDefinition<EmbeddableApiContext> {
   return {
     id: ADD_APM_SERVICE_MAP_PANEL_ACTION_ID,
@@ -36,13 +36,19 @@ export function createAddServiceMapPanelAction(
         throw new IncompatibleActionError();
       }
 
+      const timeRange = apiPublishesTimeRange(embeddable)
+        ? embeddable.timeRange$.getValue()
+        : undefined;
+
       openLazyFlyout({
-        core: coreStart,
+        core: deps.coreStart,
         parentApi: embeddable,
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           return (
             <ServiceMapEditorFlyout
               ariaLabelledBy={ariaLabelledBy}
+              deps={deps}
+              timeRange={timeRange}
               onCancel={closeFlyout}
               onSave={(state: ServiceMapEmbeddableState) => {
                 embeddable.addNewPanel(

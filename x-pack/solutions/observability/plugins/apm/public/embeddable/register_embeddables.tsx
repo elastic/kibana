@@ -70,7 +70,7 @@ export async function registerEmbeddables(
       const { createAddServiceMapPanelAction } = await import(
         './service_map/create_add_service_map_panel_action'
       );
-      return createAddServiceMapPanelAction(coreStart);
+      return createAddServiceMapPanelAction({ ...deps, coreStart, pluginsStart });
     }
   );
 }

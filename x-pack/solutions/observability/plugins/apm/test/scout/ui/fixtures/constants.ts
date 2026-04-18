@@ -25,6 +25,12 @@ export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
 export const PRODUCTION_ENVIRONMENT = 'production';
 
+// Service map multi-environment test data
+export const SERVICE_MAP_TEST_SERVICE = 'service-map-test';
+export const SERVICE_MAP_TEST_ENVIRONMENT_PRODUCTION = 'production';
+export const SERVICE_MAP_TEST_ENVIRONMENT_STAGING = 'staging';
+export const SERVICE_MAP_TEST_ENVIRONMENT_DEVELOPMENT = 'development';
+
 export const SERVICE_OTEL_SENDOTLP = 'sendotlp-otel-native-synth';
 export const OTEL_INSTANCE_ID = '89117ac1-0dbf-4488-9e17-4c2c3b76943a';
 export const OTEL_TRANSACTION_NAME = 'parent-synth';

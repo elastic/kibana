@@ -11,6 +11,8 @@ import { test, testData } from '../../fixtures';
 
 const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
 
+const { SERVICE_MAP_TEST_SERVICE, SERVICE_MAP_TEST_ENVIRONMENT_STAGING } = testData;
+
 test.describe(
   'Service map embeddable',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
@@ -29,7 +31,6 @@ test.describe(
     test.beforeEach(async ({ browserAuth, uiSettings }) => {
       await browserAuth.loginAsAdmin();
       await uiSettings.set({ defaultIndex: dataViewId });
-      await uiSettings.setDefaultTime({ from: testData.START_DATE, to: testData.END_DATE });
     });
 
     test.afterAll(async ({ apiServices, uiSettings }) => {
@@ -39,16 +40,19 @@ test.describe(
       }
     });
 
-    test('adds and renders Service map embeddable on a new dashboard', async ({
+    test('adds Service map panel with service name, environment and KQL filter', async ({
       page,
       pageObjects,
     }) => {
-      await test.step('open a new dashboard and add panel flyout', async () => {
+      await test.step('open a new dashboard', async () => {
         await pageObjects.dashboard.openNewDashboard();
+      });
+
+      await test.step('open add panel flyout', async () => {
         await pageObjects.dashboard.openAddPanelFlyout();
       });
 
-      await test.step('add Service map panel', async () => {
+      await test.step('add Service map panel with filters', async () => {
         await expect(page.getByRole('heading', { name: 'Add panel' })).toBeVisible();
         const serviceMapMenuItem = page.getByRole('menuitem', {
           name: 'Service map',
@@ -61,10 +65,28 @@ test.describe(
           page.getByRole('heading', { name: 'Add service map panel', level: 2 })
         ).toBeVisible();
 
+        // Select service name from dropdown (services load automatically)
+        const serviceNameComboBox = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
+        await serviceNameComboBox.click();
+        await page
+          .getByRole('option', { name: SERVICE_MAP_TEST_SERVICE })
+          .click({ timeout: 15000 });
+
+        // Select environment from dropdown (environments load automatically)
+        const environmentComboBox = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
+        await environmentComboBox.click();
+        await page
+          .locator(`[role="option"]:has-text("${SERVICE_MAP_TEST_ENVIRONMENT_STAGING}")`)
+          .click({ timeout: 15000 });
+
+        // Add KQL filter matching the staging transaction
+        const kueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
+        await kueryInput.fill('transaction.name: "GET /api/staging"');
+
         await page.testSubj.locator('apmServiceMapEditorSaveButton').click();
       });
 
-      await test.step('verify embeddable panel is rendered', async () => {
+      await test.step('verify embeddable panel renders service map with connected nodes', async () => {
         await pageObjects.dashboard.waitForPanelsToLoad(1);
         expect(await pageObjects.dashboard.getPanelCount()).toBe(1);
         await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
@@ -103,22 +125,7 @@ test.describe(
         const verticalFill = embeddableBox!.height / panelBox!.height;
 
         expect(horizontalFill).toBeGreaterThan(0.95);
-        // Panel header with time range badge takes ~8% vertical space
         expect(verticalFill).toBeGreaterThan(0.9);
-      });
-
-      await test.step('TODO: open a service node popover by clicking a map item', async () => {
-        test.info().annotations.push({
-          type: 'todo',
-          description: 'Skipping popover interaction in this scenario for now',
-        });
-      });
-
-      await test.step('TODO: follow navigation link from the popover', async () => {
-        test.info().annotations.push({
-          type: 'todo',
-          description: 'Skipping popover navigation assertion in this scenario for now',
-        });
       });
     });
   }

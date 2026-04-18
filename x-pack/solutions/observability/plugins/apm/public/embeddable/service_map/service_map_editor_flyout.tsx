@@ -8,6 +8,8 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -15,47 +17,67 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiSelect,
-  EuiFieldText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
+import type { TimeRange } from '@kbn/es-query';
+import datemath from '@kbn/datemath';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
+  getEnvironmentLabel,
 } from '../../../common/environment_filter_values';
 import type { Environment } from '../../../common/environment_rt';
 import type { ServiceMapEmbeddableState } from './types';
+import type { EmbeddableDeps } from '../types';
+import { useSuggestions } from './use_suggestions';
 
 export interface ServiceMapEditorFlyoutProps {
   onCancel: () => void;
   onSave: (state: ServiceMapEmbeddableState) => void;
   initialState?: ServiceMapEmbeddableState;
   ariaLabelledBy: string;
+  deps: EmbeddableDeps;
+  timeRange?: TimeRange;
 }
 
-const ENVIRONMENT_OPTIONS = [
-  {
-    value: ENVIRONMENT_ALL.value,
-    text: i18n.translate('xpack.apm.serviceMapEditor.allEnvironmentsOption', {
-      defaultMessage: 'All environments',
-    }),
-  },
-  {
-    value: ENVIRONMENT_NOT_DEFINED.value,
-    text: i18n.translate('xpack.apm.serviceMapEditor.notDefinedEnvironmentOption', {
-      defaultMessage: 'Not defined',
-    }),
-  },
-];
+function getEnvironmentOptions(environments: string[]) {
+  const environmentOptions = environments
+    .filter((env) => env !== ENVIRONMENT_NOT_DEFINED.value)
+    .map((environment) => ({
+      value: environment,
+      label: environment,
+    }));
+
+  return [
+    ENVIRONMENT_ALL,
+    ...(environments.includes(ENVIRONMENT_NOT_DEFINED.value) ? [ENVIRONMENT_NOT_DEFINED] : []),
+    ...environmentOptions,
+  ];
+}
+
+const DEFAULT_RANGE_FROM = 'now-15m';
+const DEFAULT_RANGE_TO = 'now';
+
+function getTimeRange(timeRange?: TimeRange) {
+  const rangeFrom = timeRange?.from ?? DEFAULT_RANGE_FROM;
+  const rangeTo = timeRange?.to ?? DEFAULT_RANGE_TO;
+  const start = datemath.parse(rangeFrom)?.toISOString() ?? rangeFrom;
+  const end = datemath.parse(rangeTo, { roundUp: true })?.toISOString() ?? rangeTo;
+  return { start, end };
+}
 
 export function ServiceMapEditorFlyout({
   onCancel,
   onSave,
   initialState,
   ariaLabelledBy,
+  deps,
+  timeRange,
 }: ServiceMapEditorFlyoutProps) {
   const isEditing = !!initialState;
 
@@ -64,6 +86,67 @@ export function ServiceMapEditorFlyout({
   );
   const [kuery, setKuery] = useState(initialState?.kuery ?? '');
   const [serviceName, setServiceName] = useState(initialState?.serviceName ?? '');
+
+  const [selectedServiceOption, setSelectedServiceOption] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >(serviceName ? [{ value: serviceName, label: serviceName }] : []);
+  const [selectedEnvironmentOption, setSelectedEnvironmentOption] = useState<
+    Array<EuiComboBoxOptionOption<string>>
+  >([{ value: environment, label: getEnvironmentLabel(environment) }]);
+
+  const { start, end } = getTimeRange(timeRange);
+
+  const {
+    terms: serviceNameTerms,
+    isLoading: isLoadingServiceNames,
+    onSearchChange: onServiceNameSearchChange,
+  } = useSuggestions({
+    core: deps.coreStart,
+    fieldName: SERVICE_NAME,
+    start,
+    end,
+    fetchOnMount: true,
+  });
+
+  const {
+    terms: environmentTerms,
+    isLoading: isLoadingEnvironments,
+    onSearchChange: onEnvironmentSearchChange,
+  } = useSuggestions({
+    core: deps.coreStart,
+    fieldName: SERVICE_ENVIRONMENT,
+    start,
+    end,
+    serviceName: serviceName || undefined,
+    fetchOnMount: true,
+  });
+
+  const serviceNameOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+    () => serviceNameTerms.map((term) => ({ value: term, label: term })),
+    [serviceNameTerms]
+  );
+
+  const environmentOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+    () => getEnvironmentOptions(environmentTerms),
+    [environmentTerms]
+  );
+
+  const onServiceNameSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    if (changedOptions.length === 0) {
+      setServiceName('');
+      setSelectedServiceOption([]);
+    } else if (changedOptions.length === 1 && changedOptions[0].value) {
+      setServiceName(changedOptions[0].value);
+      setSelectedServiceOption(changedOptions);
+    }
+  };
+
+  const onEnvironmentSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
+    if (changedOptions.length === 1 && changedOptions[0].value) {
+      setEnvironment(changedOptions[0].value as Environment);
+      setSelectedEnvironmentOption(changedOptions);
+    }
+  };
 
   const handleSave = useCallback(() => {
     const state: ServiceMapEmbeddableState = {
@@ -104,15 +187,25 @@ export function ServiceMapEditorFlyout({
             })}
             fullWidth
           >
-            <EuiFieldText
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.apm.serviceMapEditor.serviceNameComboBox.ariaLabel',
+                { defaultMessage: 'Select service name' }
+              )}
               compressed
               fullWidth
-              value={serviceName}
-              onChange={(e) => setServiceName(e.target.value)}
+              async
+              isClearable
               placeholder={i18n.translate('xpack.apm.serviceMapEditor.serviceNamePlaceholder', {
-                defaultMessage: 'e.g., my-service',
+                defaultMessage: 'Search for a service...',
               })}
-              data-test-subj="apmServiceMapEditorServiceNameInput"
+              singleSelection={{ asPlainText: true }}
+              options={serviceNameOptions}
+              selectedOptions={selectedServiceOption}
+              onChange={onServiceNameSelect}
+              onSearchChange={onServiceNameSearchChange}
+              isLoading={isLoadingServiceNames}
+              data-test-subj="apmServiceMapEditorServiceNameComboBox"
             />
           </EuiFormRow>
 
@@ -122,13 +215,25 @@ export function ServiceMapEditorFlyout({
             })}
             fullWidth
           >
-            <EuiSelect
+            <EuiComboBox
+              aria-label={i18n.translate(
+                'xpack.apm.serviceMapEditor.environmentComboBox.ariaLabel',
+                { defaultMessage: 'Select environment' }
+              )}
               compressed
               fullWidth
-              options={ENVIRONMENT_OPTIONS}
-              value={environment}
-              onChange={(e) => setEnvironment(e.target.value as Environment)}
-              data-test-subj="apmServiceMapEditorEnvironmentSelect"
+              async
+              isClearable={false}
+              placeholder={i18n.translate('xpack.apm.serviceMapEditor.environmentPlaceholder', {
+                defaultMessage: 'Select environment',
+              })}
+              singleSelection={{ asPlainText: true }}
+              options={environmentOptions}
+              selectedOptions={selectedEnvironmentOption}
+              onChange={onEnvironmentSelect}
+              onSearchChange={onEnvironmentSearchChange}
+              isLoading={isLoadingEnvironments}
+              data-test-subj="apmServiceMapEditorEnvironmentComboBox"
             />
           </EuiFormRow>
 
@@ -147,7 +252,7 @@ export function ServiceMapEditorFlyout({
               value={kuery}
               onChange={(e) => setKuery(e.target.value)}
               placeholder={i18n.translate('xpack.apm.serviceMapEditor.kueryPlaceholder', {
-                defaultMessage: 'e.g., service.environment: production',
+                defaultMessage: 'Filter service map using KQL syntax',
               })}
               data-test-subj="apmServiceMapEditorKueryInput"
             />
