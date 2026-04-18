@@ -13,45 +13,34 @@ import { apiTest, testData } from '../fixtures';
 apiTest.describe('GET /api/logstash/pipelines', { tag: tags.stateful.classic }, () => {
   let credentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, esClient }) => {
+  const EMPTY_PIPELINE_IDS = Array.from({ length: 21 }, (_, i) => `empty_pipeline_${i + 1}`);
+
+  apiTest.beforeAll(async ({ requestAuth, esClient, apiServices }) => {
     credentials = await requestAuth.getApiKeyForCustomRole(testData.LOGSTASH_MANAGER_ROLE);
 
+    // tweets_and_beats has specific field values asserted by the test, so it
+    // cannot use the generic createPipelines helper defaults.
     // ES accepts an empty settings object at runtime; the TS type is overly strict
     type PipelineSettings = import('@elastic/elasticsearch').estypes.LogstashPipelineSettings;
-    const PIPELINE_METADATA = { type: 'logstash_pipeline', version: '1' };
-    const PIPELINE_SETTINGS = {} as unknown as PipelineSettings;
-
     await esClient.logstash.putPipeline({
       id: testData.PIPELINE_IDS.TWEETS_AND_BEATS,
       pipeline: {
         description: testData.EXPECTED_TWEETS_AND_BEATS_PIPELINE.description,
         last_modified: '2017-08-02T18:59:07.724Z',
         pipeline: testData.EXPECTED_TWEETS_AND_BEATS_PIPELINE.pipeline,
-        pipeline_metadata: PIPELINE_METADATA,
-        pipeline_settings: PIPELINE_SETTINGS,
+        pipeline_metadata: { type: 'logstash_pipeline', version: '1' },
+        pipeline_settings: {} as unknown as PipelineSettings,
         username: testData.EXPECTED_TWEETS_AND_BEATS_PIPELINE.username,
       },
     });
 
-    for (let i = 1; i <= 21; i++) {
-      await esClient.logstash.putPipeline({
-        id: `empty_pipeline_${i}`,
-        pipeline: {
-          description: 'an empty pipeline',
-          last_modified: '2017-08-02T18:57:32.907Z',
-          pipeline: '# empty pipeline',
-          pipeline_metadata: PIPELINE_METADATA,
-          pipeline_settings: PIPELINE_SETTINGS,
-          username: 'elastic',
-        },
-      });
-    }
+    await apiServices.logstash.createPipelines(...EMPTY_PIPELINE_IDS);
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.logstash.deletePipelines(
       testData.PIPELINE_IDS.TWEETS_AND_BEATS,
-      ...Array.from({ length: 21 }, (_, i) => `empty_pipeline_${i + 1}`)
+      ...EMPTY_PIPELINE_IDS
     );
   });
 
