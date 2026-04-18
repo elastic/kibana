@@ -42,6 +42,7 @@ export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableS
   PublishesFilters &
   PublishesTimeRange & {
     query$: PublishingSubject<Query | undefined>;
+    canEditUnifiedSearch: () => boolean;
   };
 
 function buildFiltersFromState(
@@ -166,6 +167,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         filters$,
         query$,
         timeRange$,
+        canEditUnifiedSearch: () => false,
       });
 
       return {
