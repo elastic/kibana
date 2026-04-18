@@ -88,6 +88,8 @@ interface GraphProps {
   showMinimap?: boolean;
   /** When false, hides the options panel with filters and layout controls. Default true. */
   showOptionsPanel?: boolean;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
 }
 
 function GraphInner({
@@ -104,6 +106,7 @@ function GraphInner({
   fullMapHref,
   showMinimap = true,
   showOptionsPanel = true,
+  isEmbedded = false,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
@@ -659,6 +662,7 @@ function GraphInner({
         start={start}
         end={end}
         onClose={handlePopoverClose}
+        isEmbedded={isEmbedded}
       />
     </div>
   );

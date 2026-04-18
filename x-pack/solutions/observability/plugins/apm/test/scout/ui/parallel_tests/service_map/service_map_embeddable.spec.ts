@@ -106,6 +106,23 @@ test.describe(
         expect(horizontalFill).toBeGreaterThan(0.95);
       });
 
+      await test.step('click on a service node and verify popover appears', async () => {
+        const serviceNode = page.testSubj.locator(
+          `serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
+        );
+        await expect(serviceNode).toBeVisible({ timeout: 10000 });
+        await serviceNode.click();
+
+        const popover = page.testSubj.locator('serviceMapPopover');
+        await expect(popover).toBeVisible({ timeout: 5000 });
+
+        const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
+        await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
+
+        // Dismiss popover by clicking on the service node again (toggle behavior)
+        await serviceNode.click();
+      });
+
       await test.step('maximize the Service map panel', async () => {
         await pageObjects.dashboard.maximizePanel();
         await expect(page.testSubj.locator('apmServiceMapEmbeddable')).toBeVisible();
@@ -126,20 +143,6 @@ test.describe(
 
         expect(horizontalFill).toBeGreaterThan(0.95);
         expect(verticalFill).toBeGreaterThan(0.9);
-      });
-
-      await test.step('click on a service node and verify popover appears', async () => {
-        const serviceNode = page.testSubj.locator(
-          `serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
-        );
-        await expect(serviceNode).toBeVisible({ timeout: 10000 });
-        await serviceNode.click();
-
-        const popover = page.testSubj.locator('serviceMapPopover');
-        await expect(popover).toBeVisible({ timeout: 5000 });
-
-        const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
-        await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
       });
 
       await test.step('click View full service map button and verify navigation', async () => {

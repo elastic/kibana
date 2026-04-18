@@ -195,6 +195,7 @@ export function ServiceMapEmbeddable({
         fullMapHref={fullMapHref}
         showMinimap={false}
         showOptionsPanel={false}
+        isEmbedded={true}
       />
     </div>
   );
