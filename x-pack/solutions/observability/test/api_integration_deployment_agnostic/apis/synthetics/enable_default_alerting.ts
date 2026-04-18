@@ -47,7 +47,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       _httpMonitorJson = getFixtureJson('http_monitor');
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      await privateLocationTestService.installSyntheticsPackage();
+      privateLocation = await privateLocationTestService.getSharedPrivateLocation();
       await alerting.createIndexConnector({
         roleAuthc: editorUser,
         name: TEST_INDEX_CONNECTOR_NAME,
@@ -59,7 +59,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.savedObjects.clean({
         types: ['synthetics-monitor-multi-space'],
       });
-      privateLocation = await privateLocationTestService.addTestPrivateLocation();
       httpMonitorJson = {
         ..._httpMonitorJson,
         locations: [privateLocation],

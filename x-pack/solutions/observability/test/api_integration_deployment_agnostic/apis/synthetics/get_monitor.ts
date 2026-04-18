@@ -58,9 +58,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await retry.try(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
       });
-      await privateLocationTestService.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      privateLocation = await privateLocationTestService.addTestPrivateLocation();
+      privateLocation = await privateLocationTestService.getSharedPrivateLocation();
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set(editorUser.apiKeyHeader)

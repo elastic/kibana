@@ -8,12 +8,24 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import type { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
+import type {
+  PrivateLocation,
+  SyntheticsPrivateLocations,
+} from '@kbn/synthetics-plugin/common/runtime_types';
 import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
+
+// Module-level caches shared across test files in the same FTR run.
+// FTR spins up a single Kibana/ES stack per config, so these reflect the
+// live Kibana state for the whole test run. Callers that mutate the
+// synthetics package install or the shared private location MUST invalidate
+// the corresponding cache (see `resetInstalledVersionCache` /
+// `resetSharedPrivateLocation`) so later files don't pick up stale state.
+let cachedInstalledVersion: string | null = null;
+let cachedSharedPrivateLocation: PrivateLocation | null = null;
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
@@ -33,7 +45,21 @@ export class PrivateLocationTestService {
     return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   }
 
+  /**
+   * Installs (or reinstalls) the synthetics Fleet package.
+   *
+   * Idempotent across test files within a single FTR run: if the package is
+   * already installed at the resolved version, subsequent calls short-circuit.
+   * Tests that need to force a reinstall (e.g. to pin a specific prior
+   * version) should pass `{ version }`; the cache is updated to match.
+   */
   async installSyntheticsPackage({ version }: { version?: string } = {}) {
+    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
+
+    if (cachedInstalledVersion === resolvedVersion) {
+      return;
+    }
+
     await this.retry.try(async () => {
       await this.supertestWithAuth
         .post('/api/fleet/setup')
@@ -41,7 +67,7 @@ export class PrivateLocationTestService {
         .send()
         .expect(200);
     });
-    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
+
     await this.retry.try(async () => {
       await this.supertestWithAuth
         .delete(`/api/fleet/epm/packages/synthetics`)
@@ -60,6 +86,50 @@ export class PrivateLocationTestService {
         );
       }
     });
+
+    cachedInstalledVersion = resolvedVersion;
+  }
+
+  /**
+   * Force the next `installSyntheticsPackage()` call to reinstall regardless
+   * of what's cached. Use only when a test has modified the install out of
+   * band in a way the cache can't detect.
+   */
+  resetInstalledVersionCache() {
+    cachedInstalledVersion = null;
+  }
+
+  /**
+   * Returns a private location in the `default` space that is shared across
+   * test files. The first call creates the Fleet agent policy and the
+   * private-location saved object; subsequent calls in the same FTR run
+   * reuse them, saving the per-file `addFleetPolicy` + `setTestLocations`
+   * round-trips.
+   *
+   * Only use this helper in tests that treat the private location as
+   * read-only (attaching monitors to it). Tests that delete or mutate the
+   * location itself must call `addTestPrivateLocation()` to get an isolated
+   * one, or call `resetSharedPrivateLocation()` in their teardown.
+   */
+  async getSharedPrivateLocation(): Promise<PrivateLocation> {
+    if (cachedSharedPrivateLocation) {
+      return cachedSharedPrivateLocation;
+    }
+    await this.installSyntheticsPackage();
+    const apiResponse = await this.addFleetPolicy('synthetics-shared-private-location');
+    const testPolicyId = apiResponse.body.item.id;
+    const [location] = await this.setTestLocations([testPolicyId]);
+    cachedSharedPrivateLocation = location;
+    return location;
+  }
+
+  /**
+   * Invalidate the shared-private-location cache. Callers should invoke this
+   * when they knowingly delete or mutate the shared location so that later
+   * tests recreate it.
+   */
+  resetSharedPrivateLocation() {
+    cachedSharedPrivateLocation = null;
   }
 
   async addTestPrivateLocation(spaceId = 'default') {

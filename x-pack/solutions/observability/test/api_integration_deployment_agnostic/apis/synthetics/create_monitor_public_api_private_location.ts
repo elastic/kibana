@@ -31,7 +31,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
-      privateLocation = await privateLocationTestService.addTestPrivateLocation();
+      privateLocation = await privateLocationTestService.getSharedPrivateLocation();
     });
 
     after(async () => {

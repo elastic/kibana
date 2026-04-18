@@ -82,11 +82,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await testPrivateLocations.installSyntheticsPackage();
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      privateLocations = await testPrivateLocations.setTestLocations([testPolicyId]);
+      const sharedLocation = await testPrivateLocations.getSharedPrivateLocation();
+      testPolicyId = sharedLocation.id;
+      privateLocations = [sharedLocation];
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
       _httpMonitorJson = getFixtureJson('http_monitor');

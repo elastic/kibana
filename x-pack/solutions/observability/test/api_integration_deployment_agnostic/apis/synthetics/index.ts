@@ -6,9 +6,20 @@
  */
 
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
+export default function ({ getService, loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('SyntheticsAPITests', () => {
+    before(async () => {
+      // Install the synthetics Fleet package once for the whole suite.
+      // Individual files that still call `installSyntheticsPackage()` in
+      // their own `before` hooks are no-ops after this (the service caches
+      // the resolved version); we keep those calls for now so tests remain
+      // runnable in isolation via --grep.
+      const privateLocationService = new PrivateLocationTestService(getService);
+      await privateLocationService.installSyntheticsPackage();
+    });
+
     loadTestFile(require.resolve('./legacy_and_multispace_monitor_api'));
     loadTestFile(require.resolve('./create_monitor_private_location'));
     loadTestFile(require.resolve('./create_monitor_project_private_location'));
