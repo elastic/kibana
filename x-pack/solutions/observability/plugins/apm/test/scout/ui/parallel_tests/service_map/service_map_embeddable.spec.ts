@@ -141,6 +141,16 @@ test.describe(
         const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
         await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
       });
+
+      await test.step('click View full service map button and verify navigation', async () => {
+        const viewFullMapButton = page.testSubj.locator('serviceMapViewFullMapButton');
+        await expect(viewFullMapButton).toBeVisible();
+        await viewFullMapButton.click();
+
+        await expect(page).toHaveURL(
+          new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
+        );
+      });
     });
   }
 );
