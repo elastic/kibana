@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type {
+  HasEditCapabilities,
   PublishesFilters,
   PublishesTimeRange,
   PublishingSubject,
@@ -22,6 +23,8 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
 import {
   ENVIRONMENT_ALL,
@@ -33,12 +36,14 @@ import type { EmbeddableDeps } from '../types';
 import type { ServiceMapEmbeddableState } from './types';
 import { ApmEmbeddableContext } from '../embeddable_context';
 import { ServiceMapEmbeddable } from './service_map_embeddable';
+import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 
 const DEFAULT_RANGE_FROM = 'now-15m';
 const DEFAULT_RANGE_TO = 'now';
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
+  HasEditCapabilities &
   PublishesFilters &
   PublishesTimeRange & {
     query$: PublishingSubject<Query | undefined>;
@@ -87,6 +92,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: EmbeddableFactory<ServiceMapEmbeddableState, ServiceMapEmbeddableApi> = {
     type: APM_SERVICE_MAP_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const { coreStart } = deps;
       const state = initialState;
       const titleManager = initializeTitleManager(state);
       const rangeFrom$ = new BehaviorSubject(state.rangeFrom ?? DEFAULT_RANGE_FROM);
@@ -168,6 +174,44 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         query$,
         timeRange$,
         canEditUnifiedSearch: () => false,
+        getTypeDisplayName: () =>
+          i18n.translate('xpack.apm.embeddable.serviceMap.typeDisplayName', {
+            defaultMessage: 'configuration',
+          }),
+        isEditingEnabled: () => true,
+        onEdit: async () => {
+          openLazyFlyout({
+            core: coreStart,
+            parentApi,
+            flyoutProps: {
+              type: 'overlay',
+              size: 'm',
+              'data-test-subj': 'apmServiceMapEditorFlyout',
+              focusedPanelId: uuid,
+            },
+            loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
+              return (
+                <ServiceMapEditorFlyout
+                  ariaLabelledBy={ariaLabelledBy}
+                  deps={deps}
+                  timeRange={timeRange$.getValue()}
+                  initialState={serializeState()}
+                  onCancel={closeFlyout}
+                  onSave={(newState: ServiceMapEmbeddableState) => {
+                    if (newState.environment !== undefined) {
+                      environment$.next(newState.environment);
+                    }
+                    if (newState.kuery !== undefined) {
+                      kuery$.next(newState.kuery);
+                    }
+                    serviceName$.next(newState.serviceName);
+                    closeFlyout();
+                  }}
+                />
+              );
+            },
+          });
+        },
       });
 
       return {

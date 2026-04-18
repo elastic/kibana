@@ -99,6 +99,9 @@ describe('getServiceMapEmbeddableFactory', () => {
         titleApi: true,
         unsavedApi: true,
         serializeState: expect.any(Function),
+        isEditingEnabled: expect.any(Function),
+        onEdit: expect.any(Function),
+        getTypeDisplayName: expect.any(Function),
       })
     );
     expect(embeddable.api.serializeState()).toEqual({
@@ -110,6 +113,24 @@ describe('getServiceMapEmbeddableFactory', () => {
       serviceName: undefined,
       serviceGroupId: undefined,
     });
+  });
+
+  it('exposes edit capabilities', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-1',
+      parentApi,
+    } as never);
+
+    expect(embeddable.api.isEditingEnabled()).toBe(true);
+    expect(embeddable.api.getTypeDisplayName()).toBe('configuration');
+    expect(typeof embeddable.api.onEdit).toBe('function');
   });
 
   it('combines panel and dashboard kuery and passes state to rendered components', async () => {

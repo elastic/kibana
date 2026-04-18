@@ -32,9 +32,10 @@ const getBlankSectionFilterEntry = () =>
 interface PublishesESQLQuery {
   query$: PublishingSubject<AggregateQuery>;
 }
-const apiPublishesESQLQuery = (api: unknown): api is PublishesESQLQuery =>
-  Boolean((api as PublishesESQLQuery).query$) &&
-  'esql' in (api as PublishesESQLQuery).query$?.value;
+const apiPublishesESQLQuery = (api: unknown): api is PublishesESQLQuery => {
+  const query = (api as PublishesESQLQuery).query$?.value;
+  return Boolean(query) && typeof query === 'object' && 'esql' in query;
+};
 
 export const initializeRelatedPanelsManager = (
   trackPanel: ReturnType<typeof initializeTrackPanel>,

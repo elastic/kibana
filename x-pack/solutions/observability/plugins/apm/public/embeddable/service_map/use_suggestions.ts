@@ -37,6 +37,7 @@ export function useSuggestions({
   const [isLoading, setIsLoading] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const hasFetchedRef = useRef(false);
+  const debouncedFetchRef = useRef<ReturnType<typeof debounce> | null>(null);
 
   const fetchSuggestions = useCallback(
     async (fieldValue: string) => {
@@ -73,10 +74,12 @@ export function useSuggestions({
     fetchSuggestions('');
   }, [fetchSuggestions]);
 
-  const debouncedFetch = useMemo(
-    () => debounce((value: string) => fetchSuggestions(value), 300),
-    [fetchSuggestions]
-  );
+  const debouncedFetch = useMemo(() => {
+    debouncedFetchRef.current?.cancel();
+    const fn = debounce((value: string) => fetchSuggestions(value), 300);
+    debouncedFetchRef.current = fn;
+    return fn;
+  }, [fetchSuggestions]);
 
   useEffect(() => {
     if (fetchOnMount && !hasFetchedRef.current) {
@@ -88,9 +91,9 @@ export function useSuggestions({
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
-      debouncedFetch.cancel();
+      debouncedFetchRef.current?.cancel();
     };
-  }, [debouncedFetch]);
+  }, []);
 
   const onSearchChange = useCallback(
     (value: string) => {
