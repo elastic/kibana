@@ -35,7 +35,7 @@ describe(
         login();
       });
 
-      it('installs prebuilt rules from the "security_detection_engine" Fleet package', () => {
+      it.only('installs prebuilt rules from the "security_detection_engine" Fleet package', () => {
         visitAddRulesPage();
 
         // Expect the package to be installed

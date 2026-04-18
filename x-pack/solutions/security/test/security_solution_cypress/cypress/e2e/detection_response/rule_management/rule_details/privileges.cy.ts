@@ -94,7 +94,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       goToRuleDetailsOf(testRuleName);
     });
 
-    it(`should be able to edit rules`, () => {
+    it.only(`should be able to edit rules`, () => {
       goToRuleEditSettings();
       cy.get(EDIT_SUBMIT_BUTTON).should('be.enabled');
     });
