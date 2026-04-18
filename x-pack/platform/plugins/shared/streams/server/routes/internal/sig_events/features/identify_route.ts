@@ -64,6 +64,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxEntityFilters: z.number().optional(),
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
+        diverseOffset: z.number().min(0).optional(),
       })
       .nullable()
       .optional(),
@@ -99,6 +100,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
+      diverseOffset,
     } = params.body ?? {};
 
     const [connectorId, stream, featureClient] = await Promise.all([
@@ -139,6 +141,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
           max_excluded_features_in_prompt: maxExcludedFeaturesInPrompt,
           maxPreviouslyIdentifiedFeatures,
         },
+        diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
       });
     } catch (error) {

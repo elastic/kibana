@@ -135,7 +135,7 @@ async function runFeaturesIdentification(
     };
 
     const { max_iterations: maxIterations } = tuningConfig;
-    const tuning = {
+    let tuning = {
       sample_size: tuningConfig.sample_size,
       feature_ttl_days: tuningConfig.feature_ttl_days,
       entity_filtered_ratio: tuningConfig.entity_filtered_ratio,
@@ -154,6 +154,8 @@ async function runFeaturesIdentification(
       logger: taskLogger,
       featureTtlDays: tuningConfig.feature_ttl_days,
     });
+
+    let diverseOffset = 0;
 
     for (let i = 0; i < maxIterations; i++) {
       if (runContext.abortController.signal.aborted) {
@@ -181,6 +183,7 @@ async function runFeaturesIdentification(
         runId,
         state,
         tuning,
+        diverseOffset,
         trackFeaturesIdentified,
       });
 
@@ -188,6 +191,11 @@ async function runFeaturesIdentification(
         taskLogger.debug('Stopping: no documents available for sampling');
         break;
       }
+
+      if (result.nextDiverseOffset === diverseOffset) {
+        tuning = { ...tuning, diverse_ratio: 0 };
+      }
+      diverseOffset = result.nextDiverseOffset;
 
       state = result.state;
     }

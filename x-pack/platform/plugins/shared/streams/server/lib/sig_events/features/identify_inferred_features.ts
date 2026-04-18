@@ -188,10 +188,11 @@ interface RunInferredIterationOptions {
   logger: Logger;
   signal: AbortSignal;
   tuning: IterationTuningParams;
+  diverseOffset: number;
 }
 
 type InferredIterationResult =
-  | { hasDocuments: false }
+  | { hasDocuments: false; nextDiverseOffset: number }
   | {
       hasDocuments: true;
       docsCount: number;
@@ -199,6 +200,7 @@ type InferredIterationResult =
       totalFilters: number;
       filtersCapped: boolean;
       hasFilteredDocuments: boolean;
+      nextDiverseOffset: number;
       outcome:
         | { state: 'failure' }
         | {
@@ -224,6 +226,7 @@ async function runInferredIteration({
   logger,
   signal,
   tuning,
+  diverseOffset,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
     sample_size: sampleSize = DEFAULT_SIG_EVENTS_TUNING_CONFIG.sample_size,
@@ -248,10 +251,11 @@ async function runInferredIteration({
     entityFilteredRatio,
     diverseRatio,
     maxEntityFilters,
+    diverseOffset,
   });
 
   if (batchResult.documents.length === 0) {
-    return { hasDocuments: false };
+    return { hasDocuments: false, nextDiverseOffset: batchResult.nextOffset };
   }
 
   const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
@@ -298,6 +302,7 @@ async function runInferredIteration({
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
+      nextDiverseOffset: batchResult.nextOffset,
       outcome: { state: 'failure' },
     };
   }
@@ -321,6 +326,7 @@ async function runInferredIteration({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
+    nextDiverseOffset: batchResult.nextOffset,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -350,6 +356,7 @@ export interface IdentifyInferredFeaturesOptions {
   runId: string;
   state: AccumulatedIterationState;
   tuning?: IterationTuningParams;
+  diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
 }
 
@@ -358,6 +365,7 @@ export interface IdentifyInferredFeaturesResult {
   docsCount: number;
   docIds: string[];
   state: AccumulatedIterationState;
+  nextDiverseOffset: number;
 }
 
 export async function identifyInferredFeatures({
@@ -374,6 +382,7 @@ export async function identifyInferredFeatures({
   runId,
   state: prevState,
   tuning = {},
+  diverseOffset = 0,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
   const iteration = prevState.iterationResults.length + 1;
@@ -404,6 +413,7 @@ export async function identifyInferredFeatures({
     logger,
     signal,
     tuning,
+    diverseOffset,
   });
 
   if (!iterationResult.hasDocuments) {
@@ -412,6 +422,7 @@ export async function identifyInferredFeatures({
       docsCount: 0,
       docIds: [],
       state: prevState,
+      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -495,5 +506,6 @@ export async function identifyInferredFeatures({
       discoveredFeatures: nextDiscovered,
       iterationResults: [...prevState.iterationResults, iterationEntry],
     },
+    nextDiverseOffset: iterationResult.nextDiverseOffset,
   };
 }
