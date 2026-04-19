@@ -18,6 +18,7 @@ import {
 } from '../../fixtures/alerts_helpers';
 
 const SERVICE_NAME = 'opbeans-java';
+let ruleName: string | undefined;
 
 function createExploreInApmTest(alertIndex: string) {
   return async ({
@@ -70,8 +71,6 @@ function createExploreInApmTest(alertIndex: string) {
     });
   };
 }
-
-let ruleName: string | undefined;
 
 test.describe('Alert details - Explore in APM', () => {
   test.beforeEach(async ({ browserAuth }) => {
