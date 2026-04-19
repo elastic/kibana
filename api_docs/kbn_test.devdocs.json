@@ -3333,7 +3333,7 @@
           "<Options>"
         ],
         "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-        "lineNumber": 189,
+        "lineNumber": 203,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3349,7 +3349,7 @@
               "Options"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 191,
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3466,10 +3466,10 @@
         "tags": [],
         "label": "executeJestValidation",
         "description": [
-          "\nResolves scoped Jest targets from the validation contract and executes the\nrequired config runs, including downstream expansion when requested."
+          "\nResolves scoped Jest targets from the validation contract and executes the\nrequired config runs via Moon, including downstream expansion when requested."
         ],
         "signature": [
-          "({ baseContext, log, passthroughArgs, procRunner, onConfigResult, }: ",
+          "({ baseContext, log, passthroughArgs, procRunner, }: ",
           "ExecuteJestValidationOptions",
           ") => Promise<",
           {
@@ -3482,7 +3482,7 @@
           " | null>"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 449,
+        "lineNumber": 259,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3492,14 +3492,53 @@
             "id": "def-common.executeJestValidation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  baseContext,\n  log,\n  passthroughArgs = [],\n  procRunner,\n  onConfigResult,\n}",
+            "label": "{\n  baseContext,\n  log,\n  passthroughArgs = [],\n  procRunner,\n}",
             "description": [],
             "signature": [
               "ExecuteJestValidationOptions"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 449,
+            "lineNumber": 259,
             "columnNumber": 45,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.findJestConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "findJestConfig",
+        "description": [
+          "Walk up from a test file to find the nearest jest config."
+        ],
+        "signature": [
+          "(testFilePath: string) => string | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 73,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.findJestConfig.$1",
+            "type": "string",
+            "tags": [],
+            "label": "testFilePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 73,
+            "columnNumber": 32,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3664,7 +3703,7 @@
           "(hostPath: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-        "lineNumber": 765,
+        "lineNumber": 774,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3680,7 +3719,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-es/src/utils/docker.ts",
-            "lineNumber": 770,
+            "lineNumber": 779,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -4150,6 +4189,44 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-common.parseMoonJestOutput",
+        "type": "Function",
+        "tags": [],
+        "label": "parseMoonJestOutput",
+        "description": [],
+        "signature": [
+          "(output: string) => ",
+          "MoonJestParseResult"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 149,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.parseMoonJestOutput.$1",
+            "type": "string",
+            "tags": [],
+            "label": "output",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 149,
+            "columnNumber": 37,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-common.parseRawFlags",
         "type": "Function",
         "tags": [],
@@ -4210,7 +4287,7 @@
           "[]"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 313,
+        "lineNumber": 132,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4223,7 +4300,7 @@
             "label": "{\n  entries,\n  testMode,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 316,
+            "lineNumber": 135,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -4240,7 +4317,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-                "lineNumber": 317,
+                "lineNumber": 136,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4256,7 +4333,7 @@
                   "\"related\" | \"affected\""
                 ],
                 "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-                "lineNumber": 318,
+                "lineNumber": 137,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4654,11 +4731,142 @@
           "() => void"
         ],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 613,
+        "lineNumber": 367,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.runJestViaMoon",
+        "type": "Function",
+        "tags": [],
+        "label": "runJestViaMoon",
+        "description": [],
+        "signature": [
+          "({ changedFiles, verbose, downstream, onProgress, }: { changedFiles: string[]; verbose?: boolean | undefined; downstream?: string | undefined; onProgress?: ((progress: ",
+          "MoonJestProgress",
+          ") => void) | undefined; }) => Promise<",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.MoonJestResult",
+            "text": "MoonJestResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 301,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.runJestViaMoon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  changedFiles,\n  verbose = false,\n  downstream = 'none',\n  onProgress,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 306,
+            "columnNumber": 4,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.changedFiles",
+                "type": "Array",
+                "tags": [],
+                "label": "changedFiles",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 307,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.verbose",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "verbose",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 308,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.downstream",
+                "type": "string",
+                "tags": [],
+                "label": "downstream",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 309,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/test",
+                "id": "def-common.runJestViaMoon.$1.onProgress",
+                "type": "Function",
+                "tags": [],
+                "label": "onProgress",
+                "description": [],
+                "signature": [
+                  "((progress: ",
+                  "MoonJestProgress",
+                  ") => void) | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                "lineNumber": 310,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/test",
+                    "id": "def-common.runJestViaMoon.$1.onProgress.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "progress",
+                    "description": [],
+                    "signature": [
+                      "MoonJestProgress"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+                    "lineNumber": 310,
+                    "columnNumber": 17,
+                    "deprecated": false,
+                    "trackAdoption": false,
+                    "isRequired": true
+                  }
+                ],
+                "returnComment": []
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -5221,7 +5429,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\"> | undefined"
+              ", \"uiam\" | \"image\" | \"host\" | \"kibanaUrl\" | \"tag\" | \"dataPath\" | \"resources\" | \"projectType\" | \"uiamOAuth\"> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
             "lineNumber": 77,
@@ -5240,7 +5448,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 81,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5258,7 +5466,7 @@
               "\"info\" | \"error\" | \"all\" | \"warn\" | \"silent\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 82,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5283,7 +5491,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 88,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5305,7 +5513,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 95,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5321,7 +5529,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 96,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5339,7 +5547,7 @@
               "TestEsClusterNodesOptions[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 97,
+            "lineNumber": 105,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5357,7 +5565,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 119,
+            "lineNumber": 127,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5375,7 +5583,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 125,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5393,7 +5601,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 146,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5411,7 +5619,7 @@
               "string | number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 150,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5429,7 +5637,7 @@
               "((msg: string) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 155,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5445,7 +5653,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-                "lineNumber": 159,
+                "lineNumber": 167,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -5467,7 +5675,25 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 160,
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.CreateTestEsClusterOptions.clean",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "clean",
+            "description": [
+              "\nClean existing serverless object store data before startup.\n\nDefaults to `true` for backwards compatibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5485,7 +5711,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 164,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5503,7 +5729,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test-es-server/src/test_es_cluster.ts",
-            "lineNumber": 168,
+            "lineNumber": 182,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7123,7 +7349,7 @@
         "label": "JestConfigResult",
         "description": [],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 75,
+        "lineNumber": 56,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7136,7 +7362,7 @@
             "label": "index",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 76,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7149,7 +7375,7 @@
             "label": "total",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 77,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7162,7 +7388,7 @@
             "label": "config",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 78,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7175,7 +7401,7 @@
             "label": "passed",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 79,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7188,7 +7414,7 @@
             "label": "testCount",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 80,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7204,7 +7430,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 81,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7217,7 +7443,78 @@
             "label": "command",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 82,
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JestFailedTest",
+        "type": "Interface",
+        "tags": [],
+        "label": "JestFailedTest",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.file",
+            "type": "string",
+            "tags": [],
+            "label": "file",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.line",
+            "type": "number",
+            "tags": [],
+            "label": "line",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.JestFailedTest.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7233,7 +7530,7 @@
         "label": "JestValidationResult",
         "description": [],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 85,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7246,7 +7543,7 @@
             "label": "configCount",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 86,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7259,7 +7556,7 @@
             "label": "testCount",
             "description": [],
             "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-            "lineNumber": 87,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7366,6 +7663,252 @@
             ],
             "path": "src/platform/packages/shared/kbn-kbn-client/src/kbn_client/kbn_client.ts",
             "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.MoonJestResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "MoonJestResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.taskCount",
+            "type": "number",
+            "tags": [],
+            "label": "taskCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.cachedCount",
+            "type": "number",
+            "tags": [],
+            "label": "cachedCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.totalTests",
+            "type": "number",
+            "tags": [],
+            "label": "totalTests",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.failed",
+            "type": "Array",
+            "tags": [],
+            "label": "failed",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.MoonJestTaskResult",
+                "text": "MoonJestTaskResult"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.exitCode",
+            "type": "number",
+            "tags": [],
+            "label": "exitCode",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.verboseDetail",
+            "type": "string",
+            "tags": [],
+            "label": "verboseDetail",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.failureExcerpt",
+            "type": "Array",
+            "tags": [],
+            "label": "failureExcerpt",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 55,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestResult.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.MoonJestTaskResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "MoonJestTaskResult",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 39,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.project",
+            "type": "string",
+            "tags": [],
+            "label": "project",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.configPath",
+            "type": "string",
+            "tags": [],
+            "label": "configPath",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.cached",
+            "type": "boolean",
+            "tags": [],
+            "label": "cached",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.passed",
+            "type": "boolean",
+            "tags": [],
+            "label": "passed",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.testCount",
+            "type": "number",
+            "tags": [],
+            "label": "testCount",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/test",
+            "id": "def-common.MoonJestTaskResult.failures",
+            "type": "Array",
+            "tags": [],
+            "label": "failures",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.JestFailedTest",
+                "text": "JestFailedTest"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8397,7 +8940,7 @@
           "\"jest\""
         ],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 38,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8411,7 +8954,7 @@
         "label": "JEST_LOG_PREFIX",
         "description": [],
         "path": "src/platform/packages/shared/kbn-test/src/jest/run_contract.ts",
-        "lineNumber": 39,
+        "lineNumber": 33,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -8534,6 +9077,23 @@
         ],
         "path": "src/platform/packages/shared/kbn-test-es-server/src/es_test_config.ts",
         "lineNumber": 83,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
+        "id": "def-common.JEST_CONFIG_NAMES",
+        "type": "Object",
+        "tags": [],
+        "label": "JEST_CONFIG_NAMES",
+        "description": [],
+        "signature": [
+          "readonly [\"jest.config.dev.js\", \"jest.config.js\", \"jest.config.cjs\", \"jest.config.mjs\", \"jest.config.ts\", \"jest.config.json\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-test/src/jest/run_jest_via_moon.ts",
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

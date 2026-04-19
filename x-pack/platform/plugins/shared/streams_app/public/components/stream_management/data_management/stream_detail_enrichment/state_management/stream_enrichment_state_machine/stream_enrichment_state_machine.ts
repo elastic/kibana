@@ -11,6 +11,7 @@ import { assign, cancel, forwardTo, raise, sendTo, setup, stopChild } from 'xsta
 
 import {
   addDeterministicCustomIdentifiers,
+  addDeterministicCustomIdentifiersFromIngestProcessing,
   checkAdditiveChanges,
   validateStreamlang,
   validateStreamlangModeCompatibility,
@@ -85,8 +86,15 @@ export const streamEnrichmentMachine = setup({
     /* Validation actions */
     computeValidation: assign(({ context }) => {
       // First, check for schema errors (Zod parsing)
-      // Use pre-built strict schema to catch excess keys, matching server-side validation behavior
-      const parseResult = streamlangDSLSchemaStrict.safeParse(context.nextStreamlangDSL);
+      // Use pre-built strict schema to catch excess keys, matching server-side validation behavior.
+      // Only validate the Streamlang shape: context may briefly carry ingest.processing metadata
+      // like `updated_at`, which DeepStrict correctly rejects as excess root keys.
+      const dslForStrictValidation: StreamlangDSL = {
+        steps: Array.isArray(context.nextStreamlangDSL.steps)
+          ? context.nextStreamlangDSL.steps
+          : [],
+      };
+      const parseResult = streamlangDSLSchemaStrict.safeParse(dslForStrictValidation);
       if (!parseResult.success) {
         const schemaErrors = parseResult.error.issues.map((issue) => {
           const path = issue.path.length > 0 ? issue.path.join('.') : 'root';
@@ -134,7 +142,7 @@ export const streamEnrichmentMachine = setup({
     })),
     // When the definition is refreshed (outside of the machine), this resets state back to match it.
     resetStateFromDefinition: assign(({ context }) => {
-      const dslWithIdentifiers = addDeterministicCustomIdentifiers(
+      const dslWithIdentifiers = addDeterministicCustomIdentifiersFromIngestProcessing(
         context.definition.stream.ingest.processing
       );
       return {
@@ -325,10 +333,10 @@ export const streamEnrichmentMachine = setup({
     const streamType = getStreamTypeFromDefinition(input.definition.stream);
     return {
       definition: input.definition,
-      previousStreamlangDSL: addDeterministicCustomIdentifiers(
+      previousStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
         input.definition.stream.ingest.processing
       ),
-      nextStreamlangDSL: addDeterministicCustomIdentifiers(
+      nextStreamlangDSL: addDeterministicCustomIdentifiersFromIngestProcessing(
         input.definition.stream.ingest.processing
       ),
       hasChanges: false,

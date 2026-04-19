@@ -25,7 +25,10 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
     ...originalModule,
     useKibana: () => ({
       services: {
-        docLinks: { ELASTIC_WEBSITE_URL: 'url' },
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'url',
+          links: { alerting: { casesWebhookAction: 'url/cases-webhook' } },
+        },
         notifications: {
           toasts: {
             addError: jest.fn(),

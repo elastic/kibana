@@ -10,6 +10,8 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
+  EuiCodeBlock,
   EuiConfirmModal,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -34,17 +36,29 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import { QUERY_TYPE_MATCH, QUERY_TYPE_STATS, deriveQueryType } from '@kbn/streams-schema';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FlyoutMetadataCard } from '../../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../../flyout_components/flyout_toolbar_header';
 import type { SignificantEventItem } from '../../../../../hooks/sig_events/use_fetch_significant_events';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { StreamsESQLEditor } from '../../../../esql_query_editor';
 import { InfoPanel } from '../../../../info_panel';
 import { SparkPlot } from '../../../../spark_plot';
 import { SeveritySelector } from '../severity_selector';
 import { SeverityBadge } from '../severity_badge/severity_badge';
-import { OCCURRENCES_COLUMN, OCCURRENCES_TOOLTIP_NAME } from './translations';
+import {
+  OCCURRENCES_COLUMN,
+  THRESHOLD_BREACHES_TOOLTIP_NAME,
+  OPEN_IN_DISCOVER_ACTION_TITLE,
+} from './translations';
+import { AssetImage } from '../../../../asset_image';
+import { QueryTypeBadge } from '../query_type_badge/query_type_badge';
+import { buildDiscoverParams } from '../../utils/discover_helpers';
 
 interface QueryDetailsFlyoutProps {
   item: SignificantEventItem;
@@ -66,6 +80,13 @@ export function QueryDetailsFlyout({
   onDelete,
 }: QueryDetailsFlyoutProps) {
   const { euiTheme } = useEuiTheme();
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const { timeState } = useTimefilter();
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const flyoutTitleId = useGeneratedHtmlId({
     prefix: 'queryDetailsFlyoutTitle',
   });
@@ -110,16 +131,19 @@ export function QueryDetailsFlyout({
     setIsEditMode(false);
   };
 
-  const infoListItems = [
+  const queryType = useMemo(
+    () =>
+      isEditMode && query.trim()
+        ? deriveQueryType(query.trim())
+        : item.query.type ?? QUERY_TYPE_MATCH,
+    [isEditMode, query, item.query.type]
+  );
+  const hasDetectedOccurrences = item.occurrences?.some((point) => point.y > 0) ?? false;
+
+  const generalInfoItems = [
     {
       title: TYPE_LABEL,
-      description: <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>,
-    },
-    {
-      title: QUERY_LABEL,
-      description: (
-        <EuiText size="s">{getQueryInputValue(item) || DEFAULT_QUERY_PLACEHOLDER}</EuiText>
-      ),
+      description: <QueryTypeBadge type={queryType} />,
     },
     {
       title: DESCRIPTION_LABEL,
@@ -207,18 +231,18 @@ export function QueryDetailsFlyout({
         {/* Second header: title and metadata cards */}
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{item.query.title}</h2>
+            <h2 id={flyoutTitleId}>{isEditMode ? title : item.query.title}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
               <FlyoutMetadataCard title={SEVERITY_DETAILS_LABEL}>
-                <SeverityBadge score={item.query.severity_score} />
+                <SeverityBadge score={isEditMode ? severityScore : item.query.severity_score} />
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
               <FlyoutMetadataCard title={TYPE_LABEL}>
-                <EuiBadge color="hollow">{QUERY_TYPE_BADGE_LABEL}</EuiBadge>
+                <EuiBadge color="hollow">{queryType}</EuiBadge>
               </FlyoutMetadataCard>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -230,12 +254,26 @@ export function QueryDetailsFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          banner={
+            queryType === QUERY_TYPE_STATS && (
+              <EuiCallOut
+                announceOnMount
+                title={STATS_CALLOUT_TITLE}
+                color="primary"
+                iconType="info"
+                size="s"
+              >
+                <p>{STATS_CALLOUT_DESCRIPTION}</p>
+              </EuiCallOut>
+            )
+          }
+        >
           {!isEditMode && (
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
-                <InfoPanel title={QUERY_INFORMATION_TITLE}>
-                  {infoListItems.map((listItem, index) => (
+                <InfoPanel title={GENERAL_INFORMATION_TITLE}>
+                  {generalInfoItems.map((listItem, index) => (
                     <React.Fragment key={listItem.title}>
                       <EuiDescriptionList
                         type="column"
@@ -243,21 +281,71 @@ export function QueryDetailsFlyout({
                         compressed
                         listItems={[listItem]}
                       />
-                      {index < infoListItems.length - 1 && <EuiHorizontalRule margin="m" />}
+                      {index < generalInfoItems.length - 1 && <EuiHorizontalRule margin="m" />}
                     </React.Fragment>
                   ))}
                 </InfoPanel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <InfoPanel title={OCCURRENCES_COLUMN}>
-                  <SparkPlot
-                    id={`query-details-occurrences-${item.query.id}`}
-                    name={OCCURRENCES_TOOLTIP_NAME}
-                    type="bar"
-                    timeseries={item.occurrences}
-                    annotations={[]}
-                    height={160}
-                  />
+                <InfoPanel
+                  title={QUERY_PANEL_TITLE}
+                  headerRightContent={
+                    discoverLocator ? (
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="discoverApp"
+                        iconSide="left"
+                        onClick={() =>
+                          discoverLocator.navigate(buildDiscoverParams(item.query, timeState))
+                        }
+                      >
+                        {OPEN_IN_DISCOVER_ACTION_TITLE}
+                      </EuiButtonEmpty>
+                    ) : undefined
+                  }
+                >
+                  <EuiCodeBlock language="esql" isCopyable paddingSize="m">
+                    {getQueryInputValue(item) || DEFAULT_QUERY_PLACEHOLDER}
+                  </EuiCodeBlock>
+                </InfoPanel>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <InfoPanel
+                  title={
+                    queryType === QUERY_TYPE_STATS
+                      ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                      : OCCURRENCES_COLUMN
+                  }
+                >
+                  {hasDetectedOccurrences ? (
+                    <SparkPlot
+                      id={`query-details-occurrences-${item.query.id}`}
+                      name={
+                        queryType === QUERY_TYPE_STATS
+                          ? THRESHOLD_BREACHES_TOOLTIP_NAME
+                          : OCCURRENCES_COLUMN
+                      }
+                      type="bar"
+                      timeseries={item.occurrences}
+                      annotations={[]}
+                      height={160}
+                    />
+                  ) : (
+                    <EuiFlexGroup
+                      direction="column"
+                      gutterSize="s"
+                      alignItems="center"
+                      justifyContent="center"
+                      css={{ height: '100%', minHeight: '200px', padding: '30px' }}
+                    >
+                      <AssetImage type="barChart" size="xs" />
+                      <EuiText color="subdued" size="s" textAlign="center">
+                        {queryType === QUERY_TYPE_STATS
+                          ? NO_OCCURRENCES_STATS_DESCRIPTION
+                          : NO_OCCURRENCES_DESCRIPTION}
+                      </EuiText>
+                    </EuiFlexGroup>
+                  )}
                 </InfoPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -362,19 +450,14 @@ const STREAM_LABEL = i18n.translate(
   { defaultMessage: 'Stream' }
 );
 
-const QUERY_INFORMATION_TITLE = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryInformationTitle',
-  { defaultMessage: 'Query information' }
+const GENERAL_INFORMATION_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.generalInformationTitle',
+  { defaultMessage: 'General information' }
 );
 
 const TYPE_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.typeLabel',
   { defaultMessage: 'Type' }
-);
-
-const QUERY_TYPE_BADGE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryTypeBadgeLabel',
-  { defaultMessage: 'Query' }
 );
 
 const EDIT_QUERY_TITLE = i18n.translate(
@@ -387,7 +470,7 @@ const QUERY_NAME_LABEL = i18n.translate(
   { defaultMessage: 'Query name' }
 );
 
-const QUERY_LABEL = i18n.translate(
+const QUERY_PANEL_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.queryLabel',
   { defaultMessage: 'Query' }
 );
@@ -457,4 +540,33 @@ const DELETE_MODAL_BODY = i18n.translate(
 const DELETE_CONFIRM_BUTTON_LABEL = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.deleteConfirmButtonLabel',
   { defaultMessage: 'Delete query' }
+);
+
+const NO_OCCURRENCES_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesDescription',
+  {
+    defaultMessage:
+      'No events detected. Either leave the query as-is to display future events or modify the query to refine detection.',
+  }
+);
+
+const NO_OCCURRENCES_STATS_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.noOccurrencesStatsDescription',
+  {
+    defaultMessage:
+      'This STATS query is not monitored in the background. Use the Open in Discover action to preview its results.',
+  }
+);
+
+const STATS_CALLOUT_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.statsCalloutTitle',
+  { defaultMessage: 'STATS query' }
+);
+
+const STATS_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queryDetailsFlyout.statsCalloutDescription',
+  {
+    defaultMessage:
+      'STATS queries detect aggregate patterns like rising error rates or latency spikes. They cannot be promoted to background scanning rules yet.',
+  }
 );

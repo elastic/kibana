@@ -1,5 +1,5 @@
 {
-  "sha1": "05753d1f9789cecaf47eba9aebc765e3c6beb58e",
+  "sha1": "5047b9861a8abf19221dcf61b8deec3eeab7d82d",
   "tests": [
     {
       "id": "65fe2f541b6ad11-864f48536870f42",
@@ -470,7 +470,7 @@
       }
     },
     {
-      "id": "2e698b8125bdc32-18ea69a143e22e5",
+      "id": "b501cf6f250d502-18ea69a143e22e5",
       "title": "dashboards - upsert should update existing dashboard",
       "expectedStatus": "passed",
       "tags": [
@@ -490,13 +490,39 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 37,
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 40,
         "column": 10
       }
     },
     {
-      "id": "2e698b8125bdc32-7c00458123792e5",
+      "id": "b501cf6f250d502-2d1ed422e630ba3",
+      "title": "dashboards - upsert should update existing dashboard with invalid \"as code\" id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 57,
+        "column": 10
+      }
+    },
+    {
+      "id": "b501cf6f250d502-7c00458123792e5",
       "title": "dashboards - upsert should create new dashboard",
       "expectedStatus": "passed",
       "tags": [
@@ -516,14 +542,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 54,
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 75,
         "column": 10
       }
     },
     {
-      "id": "2e698b8125bdc32-0b4e483f285c872",
-      "title": "dashboards - upsert validation - returns 400 when body is not empty",
+      "id": "b501cf6f250d502-f0df1fbc7545c97",
+      "title": "dashboards - upsert validation - returns 400 when creating a new dashboard with an invalid id",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -542,13 +568,39 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 73,
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 94,
         "column": 10
       }
     },
     {
-      "id": "2e698b8125bdc32-3a01e7d01b4e606",
+      "id": "b501cf6f250d502-06538eb625744d5",
+      "title": "dashboards - upsert validation - returns 400 when body is not valid dashboard shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 116,
+        "column": 10
+      }
+    },
+    {
+      "id": "b501cf6f250d502-3a01e7d01b4e606",
       "title": "dashboards - upsert validation - returns 400 when access_control is provided",
       "expectedStatus": "passed",
       "tags": [
@@ -568,39 +620,13 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 89,
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 135,
         "column": 10
       }
     },
     {
-      "id": "2e698b8125bdc32-f107d039a7ee45f",
-      "title": "dashboards - upsert validation - returns 400 if panels is not an array",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 107,
-        "column": 10
-      }
-    },
-    {
-      "id": "2e698b8125bdc32-2d61d99873e8e38",
+      "id": "b501cf6f250d502-2d61d99873e8e38",
       "title": "dashboards - upsert validation - returns 403 if user does not have permission to update a dashboard",
       "expectedStatus": "passed",
       "tags": [
@@ -620,8 +646,8 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/update_dashboard.spec.ts",
-        "line": 123,
+        "file": "src/platform/plugins/shared/dashboard/test/scout/api/tests/upsert_dashboard.spec.ts",
+        "line": 153,
         "column": 10
       }
     }
