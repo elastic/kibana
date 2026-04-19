@@ -21,7 +21,7 @@ const DASHBOARD_PANEL_GROUP_ORDER = [
   'legacyGroup',
 ];
 
-const DASHBOARD_PANEL_TYPE_COUNT = 25;
+const DASHBOARD_PANEL_TYPE_COUNT = 26;
 
 spaceTest.describe(
   'Dashboard panel listing (includes observability group)',
