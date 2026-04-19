@@ -9,7 +9,7 @@
 
 import type { LineCounter } from 'yaml';
 import { getDeprecatedStepMessage } from '@kbn/workflows';
-import { getDeprecatedStepMetadataMap } from '../../../../common/schema';
+import { getDeprecatedStepMetadata } from '../../../../common/schema';
 import type { WorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { YamlValidationResult } from '../model/types';
 
@@ -18,10 +18,9 @@ export function validateDeprecatedStepTypes(
   lineCounter: LineCounter
 ): YamlValidationResult[] {
   const results: YamlValidationResult[] = [];
-  const deprecatedStepMetadata = getDeprecatedStepMetadataMap();
 
   for (const step of Object.values(workflowLookup.steps)) {
-    const deprecation = deprecatedStepMetadata[step.stepType];
+    const deprecation = getDeprecatedStepMetadata(step.stepType);
     const typeProp = step.propInfos.type;
 
     if (deprecation && typeProp?.valueNode.range) {

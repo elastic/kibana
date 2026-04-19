@@ -1,5 +1,5 @@
 {
-  "sha1": "7383ce8506a54f23241ac684993e67d9ba3d4e94",
+  "sha1": "68048fec4d0dacfc16e0c1e4ae18bbe469c2a1a7",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -643,6 +643,28 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/custom_columns.spec.ts",
         "line": 50,
+        "column": 14
+      }
+    },
+    {
+      "id": "343747d2436610a-9f0023dc4ce5b82",
+      "title": "Traces in Discover - Explore from Alerts Alert details - \"Traces in Discover\" opens traces experience",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/explore_from_alerts.spec.ts",
+        "line": 146,
         "column": 14
       }
     },
@@ -1438,7 +1460,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 14
       }
     },
@@ -1460,7 +1482,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
-        "line": 73,
+        "line": 75,
         "column": 14
       }
     },
@@ -1482,7 +1504,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/red_metrics_charts.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 14
       }
     },
