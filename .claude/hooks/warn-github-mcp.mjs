@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * PreToolUse hook (Claude Code): warn once per session when a GitHub MCP
+ * PreToolUse hook (Claude Code): warn once per install when a GitHub MCP
  * server is active, since the Kibana repo provides a gh-based skill that
  * covers the same functionality without the ~50k token overhead.
+ *
+ * The warning is gated by a marker file under `XDG_STATE_HOME` (or
+ * `~/.local/state`), so it is shown at most once per user on this machine.
+ * Remove the marker to re-arm the warning.
  */
 
 import { mkdirSync, existsSync, writeFileSync } from 'node:fs';
