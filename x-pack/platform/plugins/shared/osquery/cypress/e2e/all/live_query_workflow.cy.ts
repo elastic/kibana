@@ -48,10 +48,17 @@ describe('ALL - Live Query Workflow', { tags: ['@ess', '@serverless'] }, () => {
       selectAllAgents();
       inputQuery('select * from uptime;');
       getAdvancedButton().click();
-      fillInQueryTimeout('120');
 
+      fillInQueryTimeout('86401');
+      submitQuery();
+      cy.contains('Agents is a required field').should('not.exist');
+      cy.contains('Query is a required field').should('not.exist');
+      cy.contains('The timeout value must be 86400 seconds or lower.');
+
+      fillInQueryTimeout('120');
       cy.intercept('POST', '/api/osquery/live_queries').as('postQuery');
       submitQuery();
+      cy.contains('The timeout value must be 86400 seconds or lower.').should('not.exist');
       cy.wait('@postQuery').then((interception) => {
         expect(interception.request.body).to.have.property('query', 'select * from uptime;');
         expect(interception.request.body).to.have.property('timeout', 120);

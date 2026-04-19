@@ -152,7 +152,7 @@ export const loadRuleAlerts = (ruleName: string) => {
 };
 
 export const addToCase = (caseId: string) => {
-  cy.contains('Add to Case').click();
+  cy.get('[aria-label="Add to Case"]').first().click();
   cy.contains('Select case');
   cy.getBySelContains(`cases-table-row-select-${caseId}`).click();
 };
@@ -180,7 +180,7 @@ export const checkActionItemsInResults = ({
   timeline?: boolean;
 }) => {
   checkResults();
-  cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
+  cy.get('[aria-label="Add to Case"]').should(cases ? 'exist' : 'not.exist');
 };
 
 export const takeOsqueryActionWithParams = () => {

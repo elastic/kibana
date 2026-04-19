@@ -81,13 +81,24 @@ describe(
         cy.getBySel('securitySolutionFlyoutResponseButton').click();
         cy.getBySel('responseActionsViewWrapper').should('exist');
         cy.getBySel('osquery-results-comment').first().should('exist');
+        // Wait for osquery results to be indexed and rendered — the Discover URL
+        // is generated async after logsDataView resolves, and Discover needs at
+        // least one matching document to render `discoverDocTable` (otherwise it
+        // renders the empty state instead).
+        cy.getBySel('osquery-results-comment')
+          .first()
+          .within(() => {
+            cy.getBySel('dataGridRowCell', { timeout: 120000 }).should('have.length.at.least', 1);
+          });
         cy.get('[aria-label="View in Discover"]')
           .first()
-          .should('exist')
           .should('have.attr', 'href')
-          .then(($href) => {
-            // @ts-expect-error-next-line href string - check types
-            cy.visit($href);
+          .and('match', /\/app\/discover/);
+        cy.get('[aria-label="View in Discover"]')
+          .first()
+          .invoke('attr', 'href')
+          .then((href) => {
+            cy.visit(href as string);
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
               cy.contains(/action_data\.query\s*.+;/);
             });
@@ -258,7 +269,7 @@ describe(
         });
         submitQuery();
         cy.getBySel('flyout-body-osquery').within(() => {
-          cy.get('[data-grid-row-index]', { timeout: 6000000 }).should('have.length.at.least', 2);
+          cy.get('[data-grid-row-index]', { timeout: 120000 }).should('have.length.at.least', 2);
         });
       });
 
@@ -538,7 +549,9 @@ describe(
         });
 
         after(() => {
-          cleanupCase(caseId);
+          if (caseId) {
+            cleanupCase(caseId);
+          }
         });
 
         it('runs osquery against an alert and creates a new case', () => {
