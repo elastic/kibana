@@ -1,5 +1,5 @@
 {
-  "sha1": "343974e8132531b3c2d13821e401baaae29ebbb2",
+  "sha1": "f57a27ff0deaf5734c3d51a588c342e7db790b10",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1524,7 +1524,7 @@
     {
       "id": "9698b39c072261f-fb5d89006e5f2aa",
       "title": "Entity Store History Snapshot history snapshot: copies latest to history index and resets behaviors on latest",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1533,7 +1533,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 10
       }
     },
