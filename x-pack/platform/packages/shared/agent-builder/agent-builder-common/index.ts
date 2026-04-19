@@ -61,6 +61,7 @@ export {
   isAgentNotFoundError,
   isConversationNotFoundError,
   isPluginNotFoundError,
+  isSmlRuleNotFoundError,
   isBadRequestError,
   isRequestAbortedError,
   isWorkflowAbortedError,
@@ -74,6 +75,7 @@ export {
   createAgentNotFoundError,
   createConversationNotFoundError,
   createPluginNotFoundError,
+  createSmlRuleNotFoundError,
   createBadRequestError,
   createRequestAbortedError,
   createWorkflowAbortedError,
@@ -85,6 +87,7 @@ export {
   type AgentBuilderAgentNotFoundError,
   type AgentBuilderConversationNotFoundError,
   type AgentBuilderPluginNotFoundError,
+  type AgentBuilderSmlRuleNotFoundError,
   type AgentBuilderBadRequestError,
   type AgentBuilderRequestAbortedError,
   type AgentBuilderWorkflowAbortedError,
@@ -226,6 +229,14 @@ export {
   type VersionedAttachment,
   type UpdateOriginResponse,
 } from './attachments';
+export {
+  type SmlRuleType,
+  type IndexVariableInput,
+  type IndexVariable,
+  type EsqlVariable,
+  type SmlRuleVariable,
+  type SmlRule,
+} from './base/sml_rules';
 export {
   type PluginManifestAuthor,
   type PluginManifest,

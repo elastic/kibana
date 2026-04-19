@@ -1,0 +1,74 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        createOrUpdateSmlRuleRequestExample:
+          description: "Example request for creating or updating an SML rule"
+          value:
+            name: Summarize logs index
+            type: index
+            index_pattern: logs-*
+            inference_id: my-chat-completion-endpoint
+            prompt: "Summarize the following index metadata:\n${variables.mapping}"
+            variables:
+              mapping:
+                type: index
+                input: _mapping
+responses:
+  200:
+    description: "Indicates a successful response"
+    content:
+      application/json:
+        examples:
+          createOrUpdateSmlRuleResponseExample:
+            description: "Example response returning the created or updated SML rule"
+            value:
+              id: my-rule-id
+              name: Summarize logs index
+              type: index
+              index_pattern: logs-*
+              inference_id: my-chat-completion-endpoint
+              prompt: "Summarize the following index metadata:\n${variables.mapping}"
+              variables:
+                mapping:
+                  type: index
+                  input: _mapping
+              created_at: "2026-04-06T12:00:00.000Z"
+              updated_at: "2026-04-06T12:00:00.000Z"
+x-codeSamples:
+- lang: curl
+  source: |
+    curl \
+      -X POST "${KIBANA_URL}/api/agent_builder/sml/rule/{ruleId}" \
+      -H "Authorization: ApiKey ${API_KEY}" \
+      -H "kbn-xsrf: true" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "name": "Summarize logs index",
+        "type": "index",
+        "index_pattern": "logs-*",
+        "inference_id": "my-chat-completion-endpoint",
+        "prompt": "Summarize the following index metadata:\n${variables.mapping}",
+        "variables": {
+          "mapping": {
+            "type": "index",
+            "input": "_mapping"
+          }
+        }
+      }'
+- lang: Console
+  source: |
+    POST kbn:/api/agent_builder/sml/rule/{ruleId}
+    {
+      "name": "Summarize logs index",
+      "type": "index",
+      "index_pattern": "logs-*",
+      "inference_id": "my-chat-completion-endpoint",
+      "prompt": "Summarize the following index metadata:\n${variables.mapping}",
+      "variables": {
+        "mapping": {
+          "type": "index",
+          "input": "_mapping"
+        }
+      }
+    }
