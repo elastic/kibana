@@ -216,13 +216,14 @@ export function initializeLayoutManager(
   };
 
   // --------------------------------------------------------------------------------------
-  // Place the incoming embeddables if there is at least one
+  // Place incoming embeddables (used at init and for late arrivals on the same dashboard)
   // --------------------------------------------------------------------------------------
-  if (incomingEmbeddables?.length) {
-    const first = incomingEmbeddables[0];
+  const addIncomingEmbeddables = (embeddables?: EmbeddablePackageState[]) => {
+    if (!embeddables?.length) return;
+    const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
 
-    for (const incomingEmbeddable of incomingEmbeddables) {
+    for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
@@ -255,7 +256,10 @@ export function initializeLayoutManager(
     }
     trackPanel.setScrollToPanelId(first.embeddableId);
     trackPanel.setHighlightPanelId(first.embeddableId);
-  }
+  };
+
+  // On initialization, place incoming embeddables if there is at least one
+  addIncomingEmbeddables(incomingEmbeddables);
 
   // --------------------------------------------------------------------------------------
   // API definition
@@ -585,6 +589,7 @@ export function initializeLayoutManager(
       children$,
       getChildApi,
       addNewPanel,
+      addIncomingEmbeddables,
       removePanel,
       replacePanel,
       duplicatePanel,

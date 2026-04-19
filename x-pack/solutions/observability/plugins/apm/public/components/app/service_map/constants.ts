@@ -102,6 +102,7 @@ export const MOCK_EUI_THEME = {
 export const MOCK_EUI_THEME_FOR_USE_THEME = {
   colors: MOCK_EUI_THEME.colors,
   size: {
+    base: '16px',
     xxs: '2px',
     xs: '4px',
     s: '8px',
