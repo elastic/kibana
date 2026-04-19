@@ -1,0 +1,118 @@
+project: 'Kibana internal docs'
+products:
+  - id: kibana-team
+registry: internal
+toc:
+  - file: index.md
+  - file: getting_started/dev_welcome.md
+  - folder: getting_started
+    children:
+      - file: setting_up_a_development_env.md
+      - file: hello_world_plugin.md
+      - file: add_data.md
+      - file: troubleshooting.md
+  - folder: contributing
+    children:
+      - file: dev_principles.md
+      - file: code_walkthrough.md
+      - file: standards.md
+      - file: best_practices.md
+      - file: documentation.md
+      - file: kibana_http_api_design_guidelines.md
+      - file: kibana_http_api_tf_guidelines.md
+      - file: how_we_use_github.md
+      - file: third_party_dependencies.md
+  - folder: key_concepts
+    children:
+      - file: kibana_platform_plugin_intro.md
+      - file: anatomy_of_a_plugin.md
+      - folder: performance
+        children:
+          - file: index.md
+          - file: client_side.md
+          - file: server_side.md
+          - folder: case_studies
+            children:
+              - file: index.md
+              - file: case_study_async_too_early.md
+              - file: case_study_top_level_imports.md
+              - file: case_study_uncommon_code_in_common.md
+      - file: building_blocks.md
+      - file: api_authorization.md
+      - file: kibana_system_user.md
+      - file: feature_privileges.md
+      - file: saved_objects.md
+      - file: encrypted_saved_objects.md
+      - file: persistable_state.md
+      - file: data_views.md
+      - file: navigation.md
+      - file: embeddables.md
+      - file: audit_logging.md
+  - file: kibana_server_core_components.md
+  - folder: tutorials
+    children:
+      - file: advanced_settings.md
+      - file: development_windows.md
+      - file: testing_plugins.md
+      - file: saved_objects.md
+      - file: saved_objects_search.md
+      - file: saved_objects_esql.md
+      - file: elasticsearch.md
+      - file: versioning_http_apis.md
+      - file: versioning_interfaces.md
+      - file: generating_oas_for_http_apis.md
+      - file: submit_a_pull_request.md
+      - file: expressions.md
+      - folder: data
+        children:
+          - file: search.md
+      - folder: screenshotting
+        children:
+          - file: screenshotting.md
+          - file: screenshotting_updating_puppeteer_and_chromium.md
+      - file: data_views.md
+      - file: debugging.md
+      - file: debugging_fips_test_failures.md
+      - file: building_a_kibana_distributable.md
+      - file: ci.md
+      - file: endpoints.md
+      - file: configuring_cross_cluster_search.md
+      - folder: performance
+        children:
+          - file: adding_custom_performance_metrics.md
+          - file: adding_performance_journey.md
+          - file: adding_api_capacity_test.md
+          - file: running_performance_journey_in_cloud.md
+      - file: kibana_page_template.md
+  - folder: operations
+    children:
+      - file: operations_landing.md
+      - file: ci_stats.md
+      - file: flaky_tests.md
+      - file: flaky_test_runner.md
+      - file: writing_stable_functional_tests.md
+      - file: packages_idm.md
+  - folder: shared_ux
+    children:
+      - file: shared_ux_landing.md
+      - folder: chrome_recently_accessed
+        children:
+          - file: chrome_recently_accessed.md
+  - folder: lens
+    children:
+      - file: index.md
+      - file: config_api.md
+      - file: examples.md
+      - file: metric.md
+      - file: gauge.md
+      - file: pie.md
+      - file: mosaic.md
+      - file: treemap.md
+      - file: tagcloud.md
+      - file: regionmap.md
+      - file: table.md
+      - file: heatmap.md
+      - file: xy.md
+      - file: dataset.md
+      - file: breakdown.md
+  - file: api_welcome.md
