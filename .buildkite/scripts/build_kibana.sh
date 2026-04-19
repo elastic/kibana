@@ -6,8 +6,10 @@ source .buildkite/scripts/common/util.sh
 
 # Free disk space in the background — the build takes minutes, so cleanup
 # finishes well before archive/copy steps that might need the space.
-echo "--- Clean up cached images to free up space"
-clean_cached_images &
+# stdout/stderr is discarded to avoid interleaving `docker rmi` chatter with
+# the Kibana build output; clean_cached_images internally tolerates failures.
+echo "--- Clean up cached images to free up space (running in background)"
+clean_cached_images >/dev/null 2>&1 &
 cleanup_pid=$!
 
 export KBN_NP_PLUGINS_BUILT=true

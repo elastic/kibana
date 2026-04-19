@@ -12,17 +12,21 @@ export KBN_BOOTSTRAP_NO_PREBUILT=true
 
 # Bootstrap and artifact download are independent — run them in parallel.
 # Bootstrap installs node_modules; the download fetches the pre-built Kibana distributable.
-.buildkite/scripts/bootstrap.sh &
-bootstrap_pid=$!
-
-.buildkite/scripts/download_build_artifacts.sh &
+# To keep logs readable, the download runs in the background with its output captured
+# to a file; its log is emitted after bootstrap completes.
+download_log=$(mktemp)
+.buildkite/scripts/download_build_artifacts.sh >"$download_log" 2>&1 &
 download_pid=$!
 
 bootstrap_exit=0
-wait $bootstrap_pid || bootstrap_exit=$?
+.buildkite/scripts/bootstrap.sh || bootstrap_exit=$?
 
 download_exit=0
 wait $download_pid || download_exit=$?
+
+echo "--- Download build artifacts (log)"
+cat "$download_log"
+rm -f "$download_log"
 
 if [[ $bootstrap_exit -ne 0 ]]; then
   echo "Bootstrap failed with exit code $bootstrap_exit"
