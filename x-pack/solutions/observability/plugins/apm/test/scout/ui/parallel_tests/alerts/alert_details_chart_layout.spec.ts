@@ -19,6 +19,8 @@ import {
   cleanupApmAlerts,
 } from '../../fixtures/alerts_helpers';
 
+let ruleName: string | undefined;
+
 function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
   return async ({
     pageObjects: { alertDetailsPage },
@@ -54,8 +56,6 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
     });
   };
 }
-
-let ruleName: string | undefined;
 
 test.describe('Alert details - Chart layout', () => {
   test.beforeEach(async ({ browserAuth }) => {
