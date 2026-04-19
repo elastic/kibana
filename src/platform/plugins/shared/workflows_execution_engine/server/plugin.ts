@@ -931,6 +931,9 @@ export class WorkflowsExecutionEnginePlugin
 
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
+        ...(workflowExecution.status === ExecutionStatus.PENDING
+          ? { status: ExecutionStatus.CANCELLED }
+          : {}),
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
         cancelledAt,

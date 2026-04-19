@@ -35,6 +35,17 @@ describe('runWorkflow', () => {
   let mockGetWorkflowExecutionStatus: jest.Mock;
   let mockGetWorkflowExecution: jest.Mock;
   let mockEmitEvent: jest.Mock;
+  let mockRuntimeStart: jest.Mock;
+
+  const nonTerminalExecutionForFreshFetch = {
+    id: workflowRunId,
+    workflowId: 'wf-1',
+    spaceId,
+    status: ExecutionStatus.RUNNING,
+    isTestRun: false,
+    workflowDefinition: { name: 'Test Workflow', steps: [] },
+    triggeredBy: 'manual',
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -47,10 +58,11 @@ describe('runWorkflow', () => {
     mockGetLastFailedStepContext = jest.fn().mockReturnValue(undefined);
     mockGetWorkflowExecutionStatus = jest.fn();
     mockGetWorkflowExecution = jest.fn();
+    mockRuntimeStart = jest.fn().mockResolvedValue(undefined);
 
     mockSetupDependencies.mockResolvedValue({
       workflowRuntime: {
-        start: jest.fn().mockResolvedValue(undefined),
+        start: mockRuntimeStart,
         getWorkflowExecutionStatus: mockGetWorkflowExecutionStatus,
         getWorkflowExecution: mockGetWorkflowExecution,
       },
@@ -84,7 +96,9 @@ describe('runWorkflow', () => {
     };
     mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
     mockGetWorkflowExecution.mockReturnValue(failedExecution);
-    mockGetWorkflowExecutionById.mockResolvedValue(failedExecution);
+    mockGetWorkflowExecutionById
+      .mockResolvedValueOnce(nonTerminalExecutionForFreshFetch as any)
+      .mockResolvedValue(failedExecution);
     mockGetLastFailedStepContext.mockReturnValue({
       stepId: 'step_1',
       stepName: 'HTTP request',
@@ -148,7 +162,9 @@ describe('runWorkflow', () => {
     };
     mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
     mockGetWorkflowExecution.mockReturnValue(failedExecution);
-    mockGetWorkflowExecutionById.mockResolvedValue(failedExecution);
+    mockGetWorkflowExecutionById
+      .mockResolvedValueOnce(nonTerminalExecutionForFreshFetch as any)
+      .mockResolvedValue(failedExecution);
     // getLastFailedStepContext returns undefined: no step caused the failure
     mockGetLastFailedStepContext.mockReturnValue(undefined);
 
@@ -174,11 +190,13 @@ describe('runWorkflow', () => {
   it('does not emit when execution status is not FAILED', async () => {
     mockWorkflowExecutionLoop.mockRejectedValueOnce(new Error('Step failed'));
     mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
-    mockGetWorkflowExecutionById.mockResolvedValue({
-      id: workflowRunId,
-      status: ExecutionStatus.COMPLETED,
-      isTestRun: false,
-    });
+    mockGetWorkflowExecutionById
+      .mockResolvedValueOnce(nonTerminalExecutionForFreshFetch as any)
+      .mockResolvedValue({
+        id: workflowRunId,
+        status: ExecutionStatus.COMPLETED,
+        isTestRun: false,
+      });
     mockGetLastFailedStepContext.mockReturnValue(undefined);
 
     await expect(
@@ -212,6 +230,9 @@ describe('runWorkflow', () => {
     };
     mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.FAILED);
     mockGetWorkflowExecution.mockReturnValue(testRunExecution);
+    mockGetWorkflowExecutionById
+      .mockResolvedValueOnce(nonTerminalExecutionForFreshFetch as any)
+      .mockResolvedValue(testRunExecution);
 
     await expect(
       runWorkflow({
@@ -226,5 +247,48 @@ describe('runWorkflow', () => {
     ).rejects.toThrow('Step failed');
 
     expect(mockEmitEvent).not.toHaveBeenCalled();
+  });
+
+  it('returns without starting runtime when execution is already CANCELLED (e.g. cancel won race)', async () => {
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      id: workflowRunId,
+      workflowId: 'wf-1',
+      spaceId,
+      status: ExecutionStatus.CANCELLED,
+      isTestRun: false,
+      workflowDefinition: { name: 'Test Workflow', steps: [] },
+      triggeredBy: 'manual',
+    });
+
+    await runWorkflow({
+      workflowRunId,
+      spaceId,
+      taskAbortController: new AbortController(),
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+      fakeRequest,
+      dependencies,
+    });
+
+    expect(mockRuntimeStart).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+  });
+
+  it('throws when execution document is missing after setupDependencies', async () => {
+    mockGetWorkflowExecutionById.mockResolvedValue(null);
+
+    await expect(
+      runWorkflow({
+        workflowRunId,
+        spaceId,
+        taskAbortController: new AbortController(),
+        logger: logger as Logger,
+        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+        fakeRequest,
+        dependencies,
+      })
+    ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
+
+    expect(mockRuntimeStart).not.toHaveBeenCalled();
   });
 });
