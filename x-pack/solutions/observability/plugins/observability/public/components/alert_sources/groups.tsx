@@ -13,13 +13,12 @@ import { APM_APP_LOCATOR_ID } from './get_apm_app_url';
 import type { Group, TimeRange } from '../../../common/typings';
 import { generateSourceLink } from './get_alert_source_links';
 
-export const ALERT_SOURCE_TELEMETRY = {
-  ALERT_DETAILS: 'alertDetailsSource',
-  ALERT_FLYOUT: 'alertFlyoutSource',
+export const ALERT_SOURCE = {
+  ALERT_DETAILS: 'alertDetails',
+  ALERT_FLYOUT: 'alertFlyout',
 } as const;
 
-export type AlertSourceTelemetry =
-  (typeof ALERT_SOURCE_TELEMETRY)[keyof typeof ALERT_SOURCE_TELEMETRY];
+export type AlertSource = (typeof ALERT_SOURCE)[keyof typeof ALERT_SOURCE];
 
 export function Groups({
   groups,
@@ -30,7 +29,7 @@ export function Groups({
   groups: Group[];
   timeRange: TimeRange;
   alertRuleTypeId: string;
-  source: AlertSourceTelemetry;
+  source: AlertSource;
 }) {
   const {
     http: {
