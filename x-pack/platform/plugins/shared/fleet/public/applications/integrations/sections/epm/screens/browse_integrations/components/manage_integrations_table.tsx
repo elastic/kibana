@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -128,16 +128,13 @@ export const ManageIntegrationsTable: React.FC<{
     userProfile: userProfileService,
   } = useStartServices();
 
-  const hasReportedView = useRef(false);
   useEffect(() => {
-    if (!isLoading && !hasReportedView.current) {
-      (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
-        'automatic_import_manage_integrations_table_viewed',
-        {}
-      );
-      hasReportedView.current = true;
-    }
-  }, [isLoading, automaticImport]);
+    (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
+      'automatic_import_manage_integrations_table_viewed',
+      {}
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const integrationsWithActions = useMemo(() => {
     return integrations.map((item) => {
@@ -306,7 +303,7 @@ export const ManageIntegrationsTable: React.FC<{
         window.URL.revokeObjectURL(url);
         (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
           'automatic_import_integration_download_zip_clicked',
-          {}
+          { integrationId }
         );
       } catch (error) {
         notifications.toasts.addError(error as Error, {
@@ -362,7 +359,9 @@ export const ManageIntegrationsTable: React.FC<{
           `/api/automatic_import/integrations/${encodeURIComponent(integrationId)}/download`,
           {
             version: '1',
-            headers: { Accept: 'application/zip' },
+            headers: {
+              Accept: 'application/zip',
+            },
             query: { intent: 'install' },
           }
         );

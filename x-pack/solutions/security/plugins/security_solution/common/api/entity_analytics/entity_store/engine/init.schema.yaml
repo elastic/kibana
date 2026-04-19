@@ -10,6 +10,7 @@ paths:
       x-codegen-enabled: true
       operationId: InitEntityEngine
       summary: Initialize an Entity Engine
+      description: Initialize a single entity engine for the specified entity type.
       parameters:
         - name: entityType
           in: path
@@ -74,5 +75,19 @@ paths:
             application/json:
               schema:
                 $ref: '../common.schema.yaml#/components/schemas/EngineDescriptor'
+              examples:
+                initEntityEngineExample:
+                  summary: Host engine initialized
+                  description: A host engine was successfully initialized and is now in the installing state.
+                  value:
+                    type: host
+                    indexPattern: ''
+                    status: installing
+                    fieldHistoryLength: 10
+                    lookbackPeriod: '3h'
+                    timestampField: '@timestamp'
+                    timeout: '180s'
+                    frequency: '1m'
+                    delay: '1m'
         '400':
           description: Invalid request

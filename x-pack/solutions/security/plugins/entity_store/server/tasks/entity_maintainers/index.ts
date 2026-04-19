@@ -29,6 +29,8 @@ import { executeMaintainerRun } from './execution';
 
 /** Used when `RegisterEntityMaintainerConfig.minLicense` is omitted (minimum Kibana tier). */
 export const DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE: LicenseType = 'basic';
+/** Preserves current task manager default behavior when per-maintainer timeout is omitted. */
+export const DEFAULT_ENTITY_MAINTAINER_TIMEOUT = '5m';
 
 export function getTaskType(id: string): string {
   return `${TasksConfig[EntityStoreTaskType.enum.entityMaintainer].type}:${id}`;
@@ -84,8 +86,9 @@ export function registerEntityMaintainerTask({
 }): void {
   logger.debug(`Registering entity maintainer task: ${config.id}`);
   const { title } = TasksConfig[EntityStoreTaskType.enum.entityMaintainer];
-  const { run, interval, initialState, description, id, setup, minLicense } = config;
+  const { run, interval, timeout, initialState, description, id, setup, minLicense } = config;
   const effectiveMinLicense = minLicense ?? DEFAULT_ENTITY_MAINTAINER_MIN_LICENSE;
+  const effectiveTimeout = timeout ?? DEFAULT_ENTITY_MAINTAINER_TIMEOUT;
   const type = getTaskType(id);
 
   void core
@@ -106,6 +109,7 @@ export function registerEntityMaintainerTask({
           [type]: {
             title,
             description,
+            timeout: effectiveTimeout,
             createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
               run: async () => {
                 const status = taskInstance.state;
