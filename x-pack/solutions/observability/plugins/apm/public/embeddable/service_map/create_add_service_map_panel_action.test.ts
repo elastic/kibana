@@ -123,7 +123,11 @@ describe('createAddServiceMapPanelAction', () => {
   });
 
   describe('loadContent callback', () => {
-    it('returns ServiceMapEditorFlyout component', async () => {
+    function getFlyoutProps(result: React.ReactElement) {
+      return result.props.children.props;
+    }
+
+    it('returns ServiceMapEditorFlyout component wrapped in ApmEmbeddableContext', async () => {
       const embeddable = { addNewPanel: jest.fn() };
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockApiPublishesTimeRange.mockReturnValue(false);
@@ -136,9 +140,10 @@ describe('createAddServiceMapPanelAction', () => {
       const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
 
       expect(result).toBeDefined();
-      expect(result.props.ariaLabelledBy).toBe('test-aria-label');
-      expect(result.props.deps).toBe(mockDeps);
-      expect(result.props.onCancel).toBe(closeFlyout);
+      const flyoutProps = getFlyoutProps(result);
+      expect(flyoutProps.ariaLabelledBy).toBe('test-aria-label');
+      expect(flyoutProps.deps).toBe(mockDeps);
+      expect(flyoutProps.onCancel).toBe(closeFlyout);
     });
 
     it('calls embeddable.addNewPanel and closeFlyout when onSave is invoked', async () => {
@@ -155,7 +160,8 @@ describe('createAddServiceMapPanelAction', () => {
       const result = await loadContent({ closeFlyout, ariaLabelledBy: 'test-aria-label' });
 
       const state = { environment: 'production', kuery: '', serviceName: 'test-service' };
-      result.props.onSave(state);
+      const flyoutProps = getFlyoutProps(result);
+      flyoutProps.onSave(state);
 
       expect(addNewPanel).toHaveBeenCalledWith(
         {
@@ -182,7 +188,8 @@ describe('createAddServiceMapPanelAction', () => {
       const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
       const result = await loadContent({ closeFlyout: jest.fn(), ariaLabelledBy: 'test' });
 
-      expect(result.props.timeRange).toEqual(mockTimeRange);
+      const flyoutProps = getFlyoutProps(result);
+      expect(flyoutProps.timeRange).toEqual(mockTimeRange);
     });
   });
 });

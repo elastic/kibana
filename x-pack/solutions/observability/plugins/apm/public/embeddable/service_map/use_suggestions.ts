@@ -60,10 +60,13 @@ export function useSuggestions({
         setTerms(response.terms);
       } catch (error) {
         if (error.name === 'AbortError') {
+          setIsLoading(false);
           return;
         }
         console.error('Error fetching suggestions:', error);
         setTerms([]);
+        setIsLoading(false);
+        return;
       }
       setIsLoading(false);
     },
@@ -81,12 +84,17 @@ export function useSuggestions({
     return fn;
   }, [fetchSuggestions]);
 
+  const prevServiceNameRef = useRef(serviceName);
+
   useEffect(() => {
-    if (fetchOnMount && !hasFetchedRef.current) {
+    const serviceNameChanged = prevServiceNameRef.current !== serviceName;
+    prevServiceNameRef.current = serviceName;
+
+    if (fetchOnMount && (!hasFetchedRef.current || serviceNameChanged)) {
       hasFetchedRef.current = true;
       fetchAllTerms();
     }
-  }, [fetchOnMount, fetchAllTerms]);
+  }, [fetchOnMount, fetchAllTerms, serviceName]);
 
   useEffect(() => {
     return () => {

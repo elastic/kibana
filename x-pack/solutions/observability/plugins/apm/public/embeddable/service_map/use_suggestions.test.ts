@@ -260,7 +260,7 @@ describe('useSuggestions', () => {
     expect(mockHttpGet).not.toHaveBeenCalled();
   });
 
-  it('only fetches once on mount even if dependencies change', async () => {
+  it('re-fetches when serviceName changes with fetchOnMount enabled', async () => {
     mockHttpGet.mockResolvedValue({ terms: ['service-a'] });
 
     const { rerender } = renderHook(
@@ -272,9 +272,24 @@ describe('useSuggestions', () => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
     });
 
+    mockHttpGet.mockResolvedValue({ terms: ['env-a', 'env-b'] });
     rerender({ serviceName: 'new-service' });
 
-    expect(mockHttpGet).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(mockHttpGet).toHaveBeenCalledTimes(2);
+    });
+
+    expect(mockHttpGet).toHaveBeenLastCalledWith('/internal/apm/suggestions', {
+      query: {
+        fieldName: 'service.name',
+        fieldValue: '',
+        start: '2021-10-10T00:00:00.000Z',
+        end: '2021-10-10T00:15:00.000Z',
+        serviceName: 'new-service',
+      },
+      signal: expect.any(AbortSignal),
+      version: '2023-10-31',
+    });
   });
 
   it('fetchAllTerms manually triggers a fetch with empty fieldValue', async () => {

@@ -220,6 +220,10 @@ export function ServiceMapEditorFlyout({
       setServiceName(changedOptions[0].value);
       setSelectedServiceOption(changedOptions);
     }
+    setEnvironment(ENVIRONMENT_ALL.value);
+    setSelectedEnvironmentOption([
+      { value: ENVIRONMENT_ALL.value, label: getEnvironmentLabel(ENVIRONMENT_ALL.value) },
+    ]);
   };
 
   const onEnvironmentSelect = (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {

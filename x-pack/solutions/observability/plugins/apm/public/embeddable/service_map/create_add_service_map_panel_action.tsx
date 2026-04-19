@@ -19,6 +19,7 @@ import { ADD_APM_SERVICE_MAP_PANEL_ACTION_ID, APM_SERVICE_MAP_EMBEDDABLE } from 
 import type { ServiceMapEmbeddableState } from './types';
 import { ServiceMapEditorFlyout } from './service_map_editor_flyout';
 import type { EmbeddableDeps } from '../types';
+import { ApmEmbeddableContext } from '../embeddable_context';
 
 export function createAddServiceMapPanelAction(
   deps: EmbeddableDeps
@@ -49,22 +50,24 @@ export function createAddServiceMapPanelAction(
         },
         loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
           return (
-            <ServiceMapEditorFlyout
-              ariaLabelledBy={ariaLabelledBy}
-              deps={deps}
-              timeRange={timeRange}
-              onCancel={closeFlyout}
-              onSave={(state: ServiceMapEmbeddableState) => {
-                embeddable.addNewPanel(
-                  {
-                    panelType: APM_SERVICE_MAP_EMBEDDABLE,
-                    serializedState: state,
-                  },
-                  { displaySuccessMessage: true }
-                );
-                closeFlyout();
-              }}
-            />
+            <ApmEmbeddableContext deps={deps}>
+              <ServiceMapEditorFlyout
+                ariaLabelledBy={ariaLabelledBy}
+                deps={deps}
+                timeRange={timeRange}
+                onCancel={closeFlyout}
+                onSave={(state: ServiceMapEmbeddableState) => {
+                  embeddable.addNewPanel(
+                    {
+                      panelType: APM_SERVICE_MAP_EMBEDDABLE,
+                      serializedState: state,
+                    },
+                    { displaySuccessMessage: true }
+                  );
+                  closeFlyout();
+                }}
+              />
+            </ApmEmbeddableContext>
           );
         },
       });
