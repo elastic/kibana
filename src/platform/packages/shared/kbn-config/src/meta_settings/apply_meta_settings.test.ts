@@ -202,9 +202,7 @@ describe('applyMetaSettings', () => {
     });
   });
 
-  // This is is known feature gap in the meta settings logic.
-  // If we implement this in the future, we can update this test.
-  test('a super-meta setting does not disable another meta setting enabled by the user but with a lower priority', () => {
+  test('a super-meta setting disables another meta setting enabled by the user when the priority is higher', () => {
     const config = {
       myPlugin: { metaSetting: true },
       anotherMetaSetting: true,
@@ -233,8 +231,40 @@ describe('applyMetaSettings', () => {
     ]);
     const result = applyMetaSettings(config, metaSettings);
     expect(result).toEqual({
-      // myPlugin: { someValue: 'value' }, // This should be the ideal behavior, but it's not implemented yet since it's not really needed for now.
-      myPlugin: { someValue: 'new-value' },
+      myPlugin: {},
+    });
+  });
+
+  test('a super-meta setting disables another meta setting enabled by the user, even if the priority is lower', () => {
+    const config = {
+      myPlugin: { metaSetting: true },
+      anotherMetaSetting: true,
+    };
+    const metaSettings = new Map([
+      [
+        'myPlugin.metaSetting',
+        [
+          {
+            schema: schema.literal(true),
+            priority: 200,
+            config: { 'myPlugin.someValue': 'new-value' },
+          },
+        ],
+      ],
+      [
+        'anotherMetaSetting',
+        [
+          {
+            schema: schema.literal(true),
+            priority: 100,
+            config: { 'myPlugin.metaSetting': false },
+          },
+        ],
+      ],
+    ]);
+    const result = applyMetaSettings(config, metaSettings);
+    expect(result).toEqual({
+      myPlugin: {},
     });
   });
 
