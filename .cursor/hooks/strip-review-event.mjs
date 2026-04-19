@@ -50,17 +50,99 @@ const reviewCreation = /pulls\/\d+\/reviews(?!\/)/;
 /** Pipeline segment starts with an optional `gh pr review` invocation (allowing env prefixes). */
 const prReviewInvocation = /^\s*(?:\w+=\S*\s+)*gh\s+pr\s+review\b/;
 
-/** Publishing flags accepted by `gh pr review`; any of them publishes the review immediately. */
-const prReviewPublishFlag = /(?:^|\s)--(?:approve|request-changes|comment)\b/;
+/**
+ * Publishing flags accepted by `gh pr review`. Any of them publishes the
+ * review immediately. Covers long forms (`--approve`, `--request-changes`,
+ * `--comment`) and short forms (`-a`, `-r`, `-c`), including combined short
+ * forms like `-ar` or `-arc` that pflag also accepts.
+ */
+const prReviewPublishFlag =
+  /(?:^|\s)(?:--(?:approve|request-changes|comment)|-[a-zA-Z]*[arc][a-zA-Z]*)\b/;
 
 /** Heredoc opener: `<<EOF`, `<<-EOF`, `<<'EOF'`, `<<"EOF"`. */
 const heredoc = /<<-?\s*['"]?\w/;
+
+/**
+ * Shell-expansion characters that the hook cannot evaluate. A `--input` path
+ * containing any of `$`, backtick, or a leading `~` would be expanded by the
+ * shell at exec time but read literally by `readFileSync` here, leaving the
+ * actual payload file unchecked. Single-quoted captures are exempt because
+ * single quotes suppress shell expansion entirely.
+ */
+const shellExpansionInPath = /[$`]/;
 
 const isReviewCreationCall = (segment) =>
   apiInvocation.test(segment) && reviewCreation.test(segment);
 
 const isPrReviewPublish = (segment) =>
   prReviewInvocation.test(segment) && prReviewPublishFlag.test(segment);
+
+/**
+ * Returns `[start, end)` offsets for every quoted region in `src`. Both
+ * single- and double-quoted regions are reported (the closing quote is
+ * exclusive). Inside a double-quoted region a backslash escapes the next
+ * character so `"a\"b"` is treated as one region.
+ */
+const getQuotedRanges = (src) => {
+  const ranges = [];
+  let i = 0;
+  let quote = null;
+  let quoteStart = 0;
+  while (i < src.length) {
+    const c = src[i];
+    if (quote) {
+      if (c === '\\' && quote === '"' && i + 1 < src.length) {
+        i += 2;
+        continue;
+      }
+      if (c === quote) {
+        ranges.push([quoteStart, i + 1]);
+        quote = null;
+      }
+      i += 1;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      quote = c;
+      quoteStart = i;
+    }
+    i += 1;
+  }
+  return ranges;
+};
+
+const isInsideAnyRange = (idx, ranges) => {
+  for (const [start, end] of ranges) {
+    if (idx >= start && idx < end) return true;
+  }
+  return false;
+};
+
+/**
+ * Strips every `eventFlag` match in `segment` that lies outside any quoted
+ * region. Matches inside quoted regions are preserved so that a body argument
+ * like `-f body='example -f event=test'` is not corrupted by the rewrite.
+ */
+const stripEventFlagsOutsideQuotes = (segment) => {
+  const ranges = getQuotedRanges(segment);
+  const matches = [];
+  let m;
+  eventFlag.lastIndex = 0;
+  while ((m = eventFlag.exec(segment)) !== null) {
+    if (!isInsideAnyRange(m.index, ranges)) {
+      matches.push({ start: m.index, end: m.index + m[0].length });
+    }
+  }
+  if (matches.length === 0) return { result: segment, dirty: false };
+  let result = '';
+  let cursor = 0;
+  for (const { start, end } of matches) {
+    result += segment.slice(cursor, start);
+    cursor = end;
+  }
+  result += segment.slice(cursor);
+  return { result, dirty: true };
+};
 
 /**
  * Walks `src` tracking quote state and returns the first top-level pipeline
@@ -160,11 +242,29 @@ const filePath = fileMatch
     fileMatch.groups.singleQuoted ||
     fileMatch.groups.bare
   : null;
+const filePathSource = fileMatch
+  ? fileMatch.groups.doubleQuoted != null
+    ? 'doubleQuoted'
+    : fileMatch.groups.singleQuoted != null
+    ? 'singleQuoted'
+    : 'bare'
+  : null;
 
 if (filePath === '-') {
   deny(
     '`gh api .../reviews --input -` reads the request body from stdin, which the hook cannot inspect or rewrite. Write the body to a file and pass it as `--input <file>` so the `event` field can be stripped before submission.'
   );
+}
+
+if (filePath && filePathSource !== 'singleQuoted') {
+  const hasShellExpansion =
+    shellExpansionInPath.test(filePath) ||
+    (filePathSource === 'bare' && filePath.startsWith('~'));
+  if (hasShellExpansion) {
+    deny(
+      'The `--input` path contains shell expansion (`$VAR`, `$(...)`, backticks, or a leading `~`). The hook reads the literal path and cannot expand shell metacharacters, so the request body would slip through unchecked. Pass an absolute or already-expanded path so the file can be rewritten before submission.'
+    );
+  }
 }
 
 // Heredocs can embed text that looks like a `gh api` invocation. Without a
@@ -177,10 +277,9 @@ if (heredoc.test(raw)) process.exit(0);
 let mutated = segment;
 let dirty = false;
 
-if (eventFlag.test(mutated)) {
-  mutated = mutated.replace(eventFlag, '');
-  dirty = true;
-}
+const stripped = stripEventFlagsOutsideQuotes(mutated);
+mutated = stripped.result;
+if (stripped.dirty) dirty = true;
 
 if (filePath) {
   try {
