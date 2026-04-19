@@ -18,11 +18,11 @@ export const TASK_RECOVERY_ERROR_TYPE = 'TaskRecoveryError' as const;
 
 export const taskRecoveryMessages = {
   scheduledStale:
-    'Execution abandoned due to recovery mechanism. Execution was created for this scheduled run but the scheduled task was interrupted before completion.',
+    'Execution abandoned due to recovery mechanism. The scheduled task was interrupted before completion.',
   workflowRunInterrupted:
-    'Execution abandoned due to recovery mechanism. The workflow run task was interrupted before completion (e.g. Kibana restart); the prior run is not resumed.',
+    'Execution abandoned due to recovery mechanism. The workflow run task was interrupted before completion.',
   workflowResumeInterrupted:
-    'Execution abandoned due to recovery mechanism. The workflow resume task was interrupted before completion (e.g. Kibana restart); the prior resume is not applied.',
+    'Execution abandoned due to recovery mechanism. The workflow resume task was interrupted before completion.',
 } as const;
 
 export function buildTaskAttemptsExhaustedMessage(lastError: string): string {
@@ -163,8 +163,11 @@ export async function markExecutionFailedTaskRecovery(
 }
 
 /**
- * After `workflow:run` throws on the last Task Manager attempt, mark a still-non-terminal
- * execution FAILED so it does not remain stuck if the handler exits without updating state.
+ * After **`workflow:run`** or **`workflow:resume`** throws on the **last** Task Manager attempt
+ * (`taskAttempts >= maxAttempts` from the caller), best-effort mark a still-non-terminal execution
+ * **`FAILED`** with **`TaskAttemptsExhaustedError`** so it does not stay stuck if the handler exits
+ * without updating state. Same semantics for both task types; **`plugin.ts`** passes the task's
+ * **`maxAttempts`** (`WORKFLOW_RUN_TASK_MAX_ATTEMPTS` vs **`WORKFLOW_RESUME_TASK_MAX_ATTEMPTS`**).
  */
 export async function resolveExhaustedWorkflowRunTask({
   workflowExecutionRepository,
