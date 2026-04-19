@@ -21,6 +21,7 @@ export class SavedQueryManagementComponentService extends FtrService {
   private async clickMenuButtonByTestSubject(testSubj: string) {
     const cssSelector = this.testSubjects.getCssSelector(testSubj);
     await this.retry.try(async () => {
+      await this.closeSavedQueryManagementComponent();
       await this.openSavedQueryManagementComponent();
       const clicked = await this.browser.execute((sel: string) => {
         const el = document.querySelector(sel) as HTMLElement | null;
