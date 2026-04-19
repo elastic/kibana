@@ -171,11 +171,7 @@ export class PrivateLocationTestService {
   async installSyntheticsPackage({ force = false }: { force?: boolean } = {}) {
     if (!fleetSetupDone) {
       await this.retry.try(async () => {
-        await this.supertest
-          .post('/api/fleet/setup')
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
+        await this.supertest.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       });
       fleetSetupDone = true;
     }
