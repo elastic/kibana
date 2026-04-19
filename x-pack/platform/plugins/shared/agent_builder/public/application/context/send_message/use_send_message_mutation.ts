@@ -42,12 +42,13 @@ interface SendMessageParams {
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
 
-const buildScreenContextData = async ({
+export const buildScreenContextData = async ({
   services,
 }: {
   services: StartServices;
 }): Promise<ScreenContextAttachmentData | undefined> => {
-  const url = window.location.href;
+  const { pathname, search, hash } = window.location;
+  const url = pathname + search + hash;
   const app = await firstValueFrom(services.application.currentAppId$);
   const timefilter = services.plugins.data?.query.timefilter.timefilter;
   const time = timefilter?.getTime();
