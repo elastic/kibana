@@ -4,12 +4,6 @@ description: Local cross cluster search setup
 
 # Local cross cluster search setup
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/local-cross-cluster-search-setup](https://codex.elastic.dev/r/kibana-team/tutorials/local-cross-cluster-search-setup)
-:::
-
-
 ### Local CCS (cross cluster search) instructions
 * Spin up a "remote" instance of Elasticsearch (this needs to start before the "local" instance for some odd reason):
 ```

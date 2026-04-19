@@ -4,12 +4,6 @@ description: This tutorial demonstrates how to generate OpenAPI specification fo
 
 # Generating OAS for HTTP APIs
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/generating-oas-for-http-apis](https://codex.elastic.dev/r/kibana-team/tutorials/generating-oas-for-http-apis)
-:::
-
-
 <DocCallOut title="OAS is required for all public routes">
   If your route declares `access: 'public'` you **must** provide up-to-date OpenAPI specification for it. Docs for these routes get hosted on [on our docs site](https://www.elastic.co/docs/api/doc/serverless) and are used for client integrations. For example: our [Elastic stack terraform provider](https://github.com/elastic/terraform-provider-elasticstack).
 </DocCallOut>

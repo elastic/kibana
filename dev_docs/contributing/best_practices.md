@@ -4,12 +4,6 @@ description: Best practices to follow when building a Kibana plugin.
 
 # Best practices
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/best-practices](https://codex.elastic.dev/r/kibana-team/contributing/best-practices)
-:::
-
-
 ## General
 
 Be sure to follow our <DocLink id="kibDevPrinciples" text="development principles"/>

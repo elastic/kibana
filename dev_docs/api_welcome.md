@@ -4,12 +4,6 @@ description: How to use our automatically generated API documentation
 
 # Welcome
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/api-documentation/welcome](https://codex.elastic.dev/r/kibana-team/api-documentation/welcome)
-:::
-
-
 Welcome to our automatically generated typescript API 
 documentation for every plugin that exposes a <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>!
 

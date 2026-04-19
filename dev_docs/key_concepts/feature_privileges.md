@@ -4,12 +4,6 @@ description: Learn to control access to features of your plugin
 
 # Creating Feature Privileges
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/creating-feature-privileges](https://codex.elastic.dev/r/kibana-team/key-concepts/creating-feature-privileges)
-:::
-
-
 If you've added a new feature to Kibana and would like administrators to have granular control over who can access and perform actions within this feature, then creating Feature privileges is what you're after.
 
 Feature Privileges allow you to define precisely who can access your feature and what actions they can perform, all while seamlessly integrating with Kibana's role-based access control (RBAC) system.

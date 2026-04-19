@@ -4,12 +4,6 @@ description: Lens Config Builder API - Mosaic
 
 # Lens Config Builder API - Mosaic
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-mosaic](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-mosaic)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

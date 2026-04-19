@@ -4,12 +4,6 @@ description: Audit Logging
 
 # Audit Logging
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/audit-logging](https://codex.elastic.dev/r/kibana-team/key-concepts/audit-logging)
-:::
-
-
 ## Audit logging
 
 Audit logging is a subscription feature that users can enable to keep track of security-related events, such as authorization success and failures. Logging these events enables you to monitor Kibana for suspicious activity and provides evidence in the event of an attack.

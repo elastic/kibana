@@ -4,12 +4,6 @@ description: Describes the process to update the Puppeteer node module and build
 
 # Updating Puppeteer and Chromium
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/screenshotting/updating-puppeteer-and-chromium](https://codex.elastic.dev/r/kibana-team/tutorials/screenshotting/updating-puppeteer-and-chromium)
-:::
-
-
 # Updating Puppeteer and Chromium for Kibana
 
 This document builds off of [Keeping Chromium Up-To-Date](https://docs.google.com/presentation/d/19Z6ocVSoNnvY_wPjEG6Wstt-sOuIYkkNr4jqAqT6TGo/edit#slide=id.g6eae63e93f_4_112)

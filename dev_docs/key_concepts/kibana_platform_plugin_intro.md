@@ -4,12 +4,6 @@ description: An introduction to the Kibana platform and how to use it to build a
 
 # Plugins, packages, and the platform
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugins-packages-and-the-platform](https://codex.elastic.dev/r/kibana-team/key-concepts/plugins-packages-and-the-platform)
-:::
-
-
 From an end user perspective, Kibana is a tool for interacting with Elasticsearch, providing an easy way
 to visualize and analyze data.
 

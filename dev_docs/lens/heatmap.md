@@ -4,12 +4,6 @@ description: Lens Config Builder API - Heatmap
 
 # Lens Config Builder API - Heatmap
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-heatmap](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-heatmap)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

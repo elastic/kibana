@@ -4,12 +4,6 @@ description: Information about packages, where we are going, and how we are goin
 
 # Packages / Internal Dependency Management
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/packages-internal-dependency-management](https://codex.elastic.dev/r/kibana-team/orphaned/packages-internal-dependency-management)
-:::
-
-
 ## Summary
 
 The size of the Kibana repository has surpassed almost all other Typescript projects on Github, and the Javascript tooling ecosystem is inadequate. AppEx Operations team has done a lot of work over the years to close these gaps and keep up with our codebase's growth. Still, significant steps are necessary to provide a more efficient development experience. The AppEx Operations team is leading an effort to migrate to Bazel, which among other things, will provide remote caching and incremental builds. This initiative should drastically improve the productivity of Kibana contributors by minimizing what needs to be built, both locally and in CI, and providing faster and more thorough feedback.

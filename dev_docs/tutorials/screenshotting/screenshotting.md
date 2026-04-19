@@ -4,12 +4,6 @@ description: Kibana Screenshotting Service
 
 # Kibana Screenshotting Service
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/screenshotting/kibana-screenshotting-service](https://codex.elastic.dev/r/kibana-team/tutorials/screenshotting/kibana-screenshotting-service)
-:::
-
-
 ## Screenshotting Plugin
 
 This plugin provides functionality to take screenshots of the Kibana pages.

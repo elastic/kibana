@@ -4,12 +4,6 @@ description: Lens Config Builder API - Gauge
 
 # Lens Config Builder API - Gauge
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-gauge](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-gauge)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

@@ -4,12 +4,6 @@ description: Learn how to add data to Kibana
 
 # Add data
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/getting-started/add-data](https://codex.elastic.dev/r/kibana-team/getting-started/add-data)
-:::
-
-
 Building a feature and need an easy way to test it out with some data? Below are three options.
 
 ## Sample data

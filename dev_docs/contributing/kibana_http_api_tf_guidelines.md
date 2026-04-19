@@ -4,12 +4,6 @@ description: Guidelines for designing Terraform friendly HTTP APIs
 
 # Guidelines for Terraform friendly HTTP APIs
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/guidelines-for-terraform-friendly-http-apis](https://codex.elastic.dev/r/kibana-team/contributing/guidelines-for-terraform-friendly-http-apis)
-:::
-
-
 <DocCallOut title="Think Holistically">
 These guidelines are **recommended but not mandatory**. Deviating from them will increase the effort required on the Terraform provider side to consume your APIs effectively. Adhering to these guidelines ensures smoother integration and reduces the implementation burden for infrastructure-as-code consumers.
 </DocCallOut>

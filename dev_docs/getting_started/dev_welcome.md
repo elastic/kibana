@@ -4,12 +4,6 @@ description: Build custom solutions and applications on top of Kibana.
 
 # Welcome
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/getting-started/welcome](https://codex.elastic.dev/r/kibana-team/getting-started/welcome)
-:::
-
-
 [Kibana](https://www.elastic.co/what-is/kibana) is a pluggable platform that allows users to search, visualize and analyze data in Elasticsearch.
 
 Kibana ships with many out-of-the-box capabilities that can be extended and enhanced by custom javascript plugins. Developers can also write their own custom applications.

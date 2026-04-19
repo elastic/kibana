@@ -4,12 +4,6 @@ description: Lens Config Builder API - Pie
 
 # Lens Config Builder API - Pie
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-pie](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-pie)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

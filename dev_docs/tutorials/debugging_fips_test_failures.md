@@ -4,12 +4,6 @@ description: Learn how to debug test failures generated from the FIPS nightly pi
 
 # Debugging FIPS test failures
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/debugging-fips-test-failures](https://codex.elastic.dev/r/kibana-team/tutorials/debugging-fips-test-failures)
-:::
-
-
 ## What is FIPS?
 
 The Federal Information Processing Standard (FIPS) is a set of standards that describe document processing,

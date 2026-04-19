@@ -4,12 +4,6 @@ description: Learn how to setup a Windows development environment using WSL
 
 # WSL on Windows Development
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/wsl-on-windows-development](https://codex.elastic.dev/r/kibana-team/tutorials/wsl-on-windows-development)
-:::
-
-
 # Overview
 
 Development on Windows is only supported through WSL2.  WSL lets users run a Linux environment on Windows, providing a supported development environment for Kibana with a much better experience and 

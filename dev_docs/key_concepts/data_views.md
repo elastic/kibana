@@ -4,12 +4,6 @@ description: Data views are the central method of defining queryable data sets i
 
 # Data Views
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/data-views](https://codex.elastic.dev/r/kibana-team/key-concepts/data-views)
-:::
-
-
 _Note: Kibana index patterns are currently being renamed to data views. There will be some naming inconsistencies until the transition is complete._
 
 Data views (formerly Kibana index patterns or KIPs) are the central method of describing sets of indices for queries. Usage is strongly recommended

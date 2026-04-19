@@ -4,12 +4,6 @@ description: A tool which runs specific tests many times to spot flakiness
 
 # Flaky Test Runner
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/flaky-test-runner](https://codex.elastic.dev/r/kibana-team/orphaned/flaky-test-runner)
-:::
-
-
 The Flaky Test Runner is a tool that can be used to gauge the flakiness of a test. It is triggered using the form at https://ci-stats.kibana.dev/trigger_flaky_test_runner. Follow the instructions in the wizard to pick a PR, then a test which will run and the number of executions for that test, and finally start that job at Buildkite.
 
 After starting the job you will be sent to buildkite to view the progress of the job.

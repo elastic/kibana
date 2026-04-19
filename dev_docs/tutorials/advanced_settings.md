@@ -4,12 +4,6 @@ description: Learn how to add and use a new advanced setting
 
 # How to register a new advanced setting
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/shared-ux/how-to-register-a-new-advanced-setting](https://codex.elastic.dev/r/kibana-team/shared-ux/how-to-register-a-new-advanced-setting)
-:::
-
-
 _Note: Advanced settings, uiSettings, settings, and config are often used to describe the same concept. While we work toward unifying naming, there will be some inconsistencies until unification is complete._
 
 *Advanced Settings* control the behavior of Kibana. To configure the UI settings, open the main menu, then click *Stack Management > Advanced Settings*.  When settings are changed from their default, the new value is persisted as a key/value pair in the `config` saved object registered by `core`.

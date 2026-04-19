@@ -4,12 +4,6 @@ description: Some best-practices for writing stable functional tests
 
 # Writing Stable Functional Tests
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/writing-stable-functional-tests](https://codex.elastic.dev/r/kibana-team/orphaned/writing-stable-functional-tests)
-:::
-
-
 Consistently writing functional tests that aren't flaky is impossible. There are too many variables that can't be reproduced reliably, and those variables change over time, so instead we have to focus on how we can reduce the flakiness in our tests as much as possible, making them more resilient to changing conditions.
 
 When you watch tests execute locally it can be tempting to think "after I click this button I can click this other button" but this assumes that the first button click will always execute its click handler immediately, or that the render of the second button will be done immediately. The reality is that user interfaces are super complex and these types of assumptions are by far the most common cause of flakiness in tests.

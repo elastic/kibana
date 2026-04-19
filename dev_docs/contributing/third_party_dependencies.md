@@ -4,12 +4,6 @@ description: Expectations for working with third-party dependencies
 
 # Managing third-party dependencies
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/managing-third-party-dependencies](https://codex.elastic.dev/r/kibana-team/contributing/managing-third-party-dependencies)
-:::
-
-
 ## Third-party dependencies
 
 Third-party dependencies allow us to leverage the broader web development community to effeciently bring ideas to life, without having to re-invent the wheel.

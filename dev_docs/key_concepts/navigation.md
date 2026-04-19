@@ -4,12 +4,6 @@ description: Learn best practices about navigation inside Kibana
 
 # Routing, Navigation and URL
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/routing-navigation-and-url](https://codex.elastic.dev/r/kibana-team/key-concepts/routing-navigation-and-url)
-:::
-
-
 The Kibana platform provides a set of tools to help developers build consistent experience around routing and browser navigation.
 Some of that tooling is inside `core`, some is available as part of various plugins.
 

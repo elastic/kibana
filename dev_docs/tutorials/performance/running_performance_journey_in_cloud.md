@@ -4,12 +4,6 @@ summary: Learn how to run performance journey against Cloud cluster
 
 # Running Performance Journey In Cloud
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/running-performance-journey-in-cloud](https://codex.elastic.dev/r/kibana-team/orphaned/running-performance-journey-in-cloud)
-:::
-
-
 ## Overview
 As a way to better understand user experience with Kibana in cloud, we support running performance journeys against
 Cloud deployments.

@@ -4,12 +4,6 @@ description: High level walk-through of our repository structure.
 
 # Repository structure
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/repository-structure](https://codex.elastic.dev/r/kibana-team/contributing/repository-structure)
-:::
-
-
 A high-level walk through of the folder structure of our [repository](https://github.com/elastic/kibana).
 
 Tip: Look for a `README.md` in a folder to learn about its contents.

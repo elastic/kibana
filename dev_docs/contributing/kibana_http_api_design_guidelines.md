@@ -4,12 +4,6 @@ description: Best practices and guidelines for designing consistent, user-friend
 
 # Guidelines for HTTP API design in Kibana
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/guidelines-for-http-api-design-in-kibana](https://codex.elastic.dev/r/kibana-team/contributing/guidelines-for-http-api-design-in-kibana)
-:::
-
-
 <DocCallOut title="Work in progress" color="warning">
   This guidance is under active review. If you have a question or intend to apply it to your use-case please reach out to the Kibana Core team first.
 </DocCallOut>

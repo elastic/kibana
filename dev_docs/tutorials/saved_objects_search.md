@@ -4,12 +4,6 @@ description: Learn how to use the `search` method to search for Saved Objects.
 
 # Saved Object `search` method
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/saved-object-search-method](https://codex.elastic.dev/r/kibana-team/tutorials/saved-object-search-method)
-:::
-
-
 `SavedObjectsClientContract.search` is a powerful way to search for Saved Objects. It allows you to search Saved Objects using the [Elasticsearch query DSL](https://www.elastic.co/docs/explore-analyze/query-filter/languages/querydsl), [runtime fields](https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request) and more.
 
 It is an alternative to the safer but more limited `SavedObjectsClientContract.find` method. If you plan to use aggregations, be sure to review the [Aggregations to avoid](#aggregations-to-avoid) section.

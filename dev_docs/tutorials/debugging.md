@@ -4,12 +4,6 @@ description: Learn how to debug Kibana while running from source
 
 # Debugging in development
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/debugging-in-development](https://codex.elastic.dev/r/kibana-team/tutorials/debugging-in-development)
-:::
-
-
 There are multiple ways to go about debugging Kibana when running from source.
 
 ## Debugging using Chrome DevTools

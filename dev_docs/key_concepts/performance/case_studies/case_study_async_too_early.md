@@ -4,12 +4,6 @@ description: Learn how we were able to improve page load by identifying and fixi
 
 # Case Study - Async too early
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/case-study-async-too-early](https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/case-study-async-too-early)
-:::
-
-
 <DocCallOut>The following case study is derived from [kibana#179175](https://github.com/elastic/kibana/pull/179175).</DocCallOut>
 
 ## Summary

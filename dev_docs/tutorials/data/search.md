@@ -4,12 +4,6 @@ description: Kibana Search Services
 
 # Kibana data.search Services
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/kibana-data-search-services](https://codex.elastic.dev/r/kibana-team/tutorials/kibana-data-search-services)
-:::
-
-
 ## Search service
 
 ### Low level search

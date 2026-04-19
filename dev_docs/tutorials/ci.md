@@ -4,12 +4,6 @@ description: CI
 
 # CI
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/ci](https://codex.elastic.dev/r/kibana-team/tutorials/ci)
-:::
-
-
 ## CI
 
 Kibana uses BuildKite to run a series of checks against each pull requests and tracked branch.  Results are posted in pull requests as comments and from the BuildKite UI

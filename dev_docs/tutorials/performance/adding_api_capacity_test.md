@@ -4,12 +4,6 @@ summary: Learn how to add api capacity test
 
 # Adding Api Capacity Testing Journey
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/adding-api-capacity-testing-journey](https://codex.elastic.dev/r/kibana-team/orphaned/adding-api-capacity-testing-journey)
-:::
-
-
 ## Overview
 
 It is important to test individual API endpoint for the baseline performance, scalability, or breaking point. If an API doesn’t meet performance requirements, it is a bottleneck.

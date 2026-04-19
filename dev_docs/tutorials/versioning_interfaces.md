@@ -4,12 +4,6 @@ description: We need to keep old versions of interfaces available. This tutorial
 
 # Versioning interfaces
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/versioning-interfaces](https://codex.elastic.dev/r/kibana-team/tutorials/versioning-interfaces)
-:::
-
-
 To support versioned APIs we need to keep past versions of interfaces around. This tutorial presents one strategy to manage your interfaces.
 
 ## The strategy

@@ -4,12 +4,6 @@ description: This guide provides an overview of `kibana_system` user
 
 # Security Kibana System User
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/security-kibana-system-user](https://codex.elastic.dev/r/kibana-team/key-concepts/security-kibana-system-user)
-:::
-
-
 ## The `kibana_system` user
 
 The Kibana server authenticates to Elasticsearch using the `elastic/kibana` [service account](https://www.elastic.co/guide/en/elasticsearch/reference/current/service-accounts.html#service-accounts-explanation). This service account has privileges that are equivilent to the `kibana_system` reserved role, whose descriptor is managed in the Elasticsearch repository ([source link](https://github.com/elastic/elasticsearch/blob/430cde6909eae12e1a90ac2bff29b71cbf4af18b/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/security/authz/store/KibanaOwnedReservedRoleDescriptors.java#L58)).

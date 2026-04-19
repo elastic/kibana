@@ -4,12 +4,6 @@ description: Lens Config Builder API Examples
 
 # Lens Config Builder API Examples
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-examples](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-examples)
-:::
-
-
 Here are a few simple configurations for different types of visualizations using the Lens Config Builder API. 
 These examples demonstrate how to set up basic charts, including Metric, Pie, and XY (line chart) visualizations. 
 Each configuration showcases the flexibility and ease of defining visual attributes, queries, and other options 

@@ -4,12 +4,6 @@ description: Learn how to use the `esql` method to query Saved Objects using ES|
 
 # Saved Object `esql` method
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/saved-object-esql-method](https://codex.elastic.dev/r/kibana-team/orphaned/saved-object-esql-method)
-:::
-
-
 `SavedObjectsClientContract.esql` allows you to query Saved Objects using [ES|QL (Elasticsearch Query Language)](https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql). It returns tabular results (columns and values) directly from Elasticsearch, which can be useful for analytics, aggregations, and cross-type queries that don't fit the `find` or `search` methods.
 
 ## Relationship to `find` and `search`

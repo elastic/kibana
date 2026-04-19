@@ -4,12 +4,6 @@ description: Standards and guidelines we expect every Kibana developer to abide 
 
 # Standards and guidelines
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/standards-and-guidelines](https://codex.elastic.dev/r/kibana-team/contributing/standards-and-guidelines)
-:::
-
-
 ## Developer principles
 
 We expect all developers to read and abide by our overarching <DocLink id="kibDevPrinciples" />.

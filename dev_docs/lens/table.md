@@ -4,12 +4,6 @@ description: Lens Config Builder API - Table
 
 # Lens Config Builder API - Table
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-table](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-table)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

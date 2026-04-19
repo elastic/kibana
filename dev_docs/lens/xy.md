@@ -4,12 +4,6 @@ description: Lens Config Builder API - XY Chart
 
 # Lens Config Builder API - XY Chart
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-xy-chart](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-xy-chart)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

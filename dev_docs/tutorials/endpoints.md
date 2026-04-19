@@ -4,12 +4,6 @@ description: Learn how to register a new endpoint and access it
 
 # Registering and accessing an endpoint
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/registering-and-accessing-an-endpoint](https://codex.elastic.dev/r/kibana-team/tutorials/registering-and-accessing-an-endpoint)
-:::
-
-
 ## The HTTP service API
 
 ### The server-side HTTP service

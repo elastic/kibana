@@ -4,12 +4,6 @@ description: Configure your saved object types to secure sensitive data.
 
 # Encrypted Saved Objects
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/encrypted-saved-objects](https://codex.elastic.dev/r/kibana-team/key-concepts/encrypted-saved-objects)
-:::
-
-
 ## Overview
 
 "Encrypted Saved Objects" (ESO) are <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Object types"/> that have been registered with the Encrypted Saved Objects

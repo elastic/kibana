@@ -4,12 +4,6 @@ description: Anatomy of a Kibana plugin.
 
 # Anatomy of a plugin
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/anatomy-of-a-plugin](https://codex.elastic.dev/r/kibana-team/key-concepts/anatomy-of-a-plugin)
-:::
-
-
 Pre-reading material:
 
 - <DocLink id="kibPlatformIntro" />

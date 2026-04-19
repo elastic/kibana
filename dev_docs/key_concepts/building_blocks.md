@@ -4,12 +4,6 @@ description: Consider these building blocks when developing your plugin.
 
 # Building blocks
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/building-blocks](https://codex.elastic.dev/r/kibana-team/key-concepts/building-blocks)
-:::
-
-
 When building a plugin in Kibana, there are a handful of architectural "building blocks" you can use. Some of these building blocks are "higher-level",
 and some are "lower-level". High-level building blocks come
 with many built-in capabilities, require less maintenance, and evolve new feature sets over time with little to no

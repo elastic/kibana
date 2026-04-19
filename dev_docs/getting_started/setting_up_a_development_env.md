@@ -4,12 +4,6 @@ description: Learn how to setup a development environment for contributing to th
 
 # Set up a Development Environment
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/getting-started/set-up-a-development-environment](https://codex.elastic.dev/r/kibana-team/getting-started/set-up-a-development-environment)
-:::
-
-
 Setting up a development environment is pretty easy.
 
 <DocCallOut title="A note about Windows">

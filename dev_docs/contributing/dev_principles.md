@@ -4,12 +4,6 @@ description: Follow our development principles to help keep our code base stable
 
 # Developer principles
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/developer-principles](https://codex.elastic.dev/r/kibana-team/contributing/developer-principles)
-:::
-
-
 Over time, the Kibana project has been shaped by certain principles. Like Kibana itself, some of these principles were formed by intention while others were the result of evolution and circumstance, but today all are important for the continued success and maintainability of Kibana.
 
 This document is inspired by and at times reflects points already covered in the [Elasticsearch Development Constitution](https://github.com/elastic/engineering/blob/master/development_constitution.md). When this happens it is either to reframe a principle from the development constitution in terms that are more clearly relevant to Kibana or to emphasize principles that are underrepresented in the Kibana project today.

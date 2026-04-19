@@ -4,12 +4,6 @@ description: How to use chrome's recently accessed service to add your links to 
 
 # Chrome Recently Viewed
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/shared-ux/chrome-recently-viewed](https://codex.elastic.dev/r/kibana-team/shared-ux/chrome-recently-viewed)
-:::
-
-
 ## Introduction
 
 The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> service allows applications to register recently visited objects. These items are displayed in the "Recently Viewed" section of a side navigation menu, providing users with quick access to their previously visited resources. This service includes methods for adding, retrieving, and subscribing to the recently accessed history.

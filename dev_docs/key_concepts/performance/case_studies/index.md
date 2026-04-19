@@ -4,12 +4,6 @@ description: Examples of plugin performance optimization.
 
 # Performance Case Studies
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/performance-case-studies](https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/performance-case-studies)
-:::
-
-
 These are case studies of performance optimization in Kibana plugins, based on real-world examples.
 
 

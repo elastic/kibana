@@ -4,12 +4,6 @@ description: Learn how we were able to reduce the side of a plugin bundle by rem
 
 # Case Study - Uncommon code in common
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/case-study-uncommon-code-in-common](https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/case-study-uncommon-code-in-common)
-:::
-
-
 <DocCallOut>The following case study is derived from [kibana#178668](https://github.com/elastic/kibana/pull/178668).</DocCallOut>
 
 ## Summary

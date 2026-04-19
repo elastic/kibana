@@ -4,12 +4,6 @@ description: A collection of tips for working around strange issues.
 
 # Troubleshooting
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/getting-started/troubleshooting](https://codex.elastic.dev/r/kibana-team/getting-started/troubleshooting)
-:::
-
-
 ### Bootstrap failures
 
 If `yarn kbn bootstrap` fails, try the following in order:

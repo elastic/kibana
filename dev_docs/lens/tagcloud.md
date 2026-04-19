@@ -4,12 +4,6 @@ description: Lens Config Builder API - Tag Cloud
 
 # Lens Config Builder API - Tag Cloud
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-tag-cloud](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-tag-cloud)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

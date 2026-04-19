@@ -4,12 +4,6 @@ description: Build a very basic plugin that registers an application that says "
 
 # Hello World
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/getting-started/hello-world](https://codex.elastic.dev/r/kibana-team/getting-started/hello-world)
-:::
-
-
 This tutorial walks you through two ways to create a plugin that registers an application that says "Hello World!".
 
 You can view the tested example plugin at [examples/hello_world](https://github.com/elastic/kibana/tree/main/examples/hello_world).

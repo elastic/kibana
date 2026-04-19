@@ -4,12 +4,6 @@ description: Learn how to use the Elasticsearch client in your Kibana plugin.
 
 # Access the Elasticsearch Client in a Plugin
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/access-the-elasticsearch-client-in-a-plugin](https://codex.elastic.dev/r/kibana-team/tutorials/access-the-elasticsearch-client-in-a-plugin)
-:::
-
-
 This guide covers how to obtain the Elasticsearch client in both your plugin's start lifecycle and route handler context. It explains the difference between asCurrentUser and asInternalUser, and demonstrates best practices for robust concurrent index initialization.
 
 ## Getting the Elasticsearch Client

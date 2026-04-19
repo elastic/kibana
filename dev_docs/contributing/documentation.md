@@ -4,12 +4,6 @@ description: Writing documentation during development
 
 # Documentation
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/documentation](https://codex.elastic.dev/r/kibana-team/contributing/documentation)
-:::
-
-
 Docs should be written during development and accompany PRs when relevant. There are multiple types of documentation, and different places to add each.
 
 ## End-user documentation

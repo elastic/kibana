@@ -4,12 +4,6 @@ summary: Learn how to instrument your code and analyze performance
 
 # Adding Performance Metrics
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/adding-performance-metrics](https://codex.elastic.dev/r/kibana-team/tutorials/adding-performance-metrics)
-:::
-
-
 # Build and track custom performance metrics
 
 Having access to performance metrics allows us to better understand user experience across Kibana, identify issues and fix it.

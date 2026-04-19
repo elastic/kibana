@@ -4,12 +4,6 @@ description: A service that we run to track little bits of data about CI runs.
 
 # Kibana CI Stats
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/kibana-ci-stats](https://codex.elastic.dev/r/kibana-team/orphaned/kibana-ci-stats)
-:::
-
-
 Kibana CI Stats (sometimes written "ci-stats") is a service run at https://ci-stats.kibana.dev. This service runs a series of APIs in front of an Elasticsearch Cluster which allows us to record data about each run of CI. This data includes metrics, times, test results, and more. We are working on storing performance data in there too, and eventually will spend time to write good UIs on top of this data.
 
 The service implementation is available at https://github.com/elastic/kibana-ci-stats/ (private because there doesn't seem to be a good reason to make it public).

@@ -4,12 +4,6 @@ description: Lens Config Builder API - Metric
 
 # Lens Config Builder API - Metric
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-metric](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-metric)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

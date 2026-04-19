@@ -4,12 +4,6 @@ description: A description of how the operations team helps manage flaky tests i
 
 # Flaky Tests
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/flaky-tests](https://codex.elastic.dev/r/kibana-team/orphaned/flaky-tests)
-:::
-
-
 The Kibana repository contains hundreds of thousands of test cases, and on every PR and commit to the repository we run every one of those test cases. We need to do this because so many parts of Kibana are interconnected and we don't currently have the ability to only run the tests that are necessary based on the changes in a PR/commit. This has the side effect of running each test hundreds of times a day, which means that tests need to be very reliable.
 
 Because of the high reliability requirements for our tests it is common for tests to become "flaky", meaning that something changes which causes their reliability to drop and causes them to fail when they should be passing. When a test becomes flaky the Operations team will skip that test, meaning it will no longer run until the team owning that test investigates the flakiness, and unskips the test.

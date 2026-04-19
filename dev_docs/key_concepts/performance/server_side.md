@@ -4,12 +4,6 @@ description: Performance tips for plugin server code.
 
 # Server performance
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/server-performance](https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/server-performance)
-:::
-
-
 ## Don't block the event loop
 
 [Node.js is single threaded](https://nodejs.dev/learn/introduction-to-nodejs) which means a single CPU-intensive server-side, synchronous operation will block any other functionality waiting to execute on the Kibana server. The affects background tasks, like alerts, and search sessions, as well as search requests and page loads.

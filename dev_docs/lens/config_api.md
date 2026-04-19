@@ -4,12 +4,6 @@ description: Lens Config Builder API Documentation
 
 # Lens Config Builder API Documentation
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-documentation](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-documentation)
-:::
-
-
 ## Introduction
 
 The Lens Config Builder API provides a streamlined and flexible interface for developers to construct and integrate Lens configurations within their applications. Lens, as a powerful visualization tool in Kibana, enables users to create, visualize, and analyze data in diverse and complex ways. This API aims to simplify the process of generating these visualizations programmatically, allowing for dynamic and customizable integration points with Lens. By abstracting the complexities of Lens configuration details, developers can focus on delivering rich data visualization experiences tailored to their application's needs.

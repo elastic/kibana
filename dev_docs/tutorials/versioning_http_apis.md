@@ -4,12 +4,6 @@ description: This tutorial demonstrates how to create or migrate to versionable 
 
 # Versioning HTTP APIs
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/versioning-http-apis](https://codex.elastic.dev/r/kibana-team/tutorials/versioning-http-apis)
-:::
-
-
 All Kibana HTTP API developers and maintainers must ensure that past versions of HTTP APIs remain available.
 
 <DocCallOut title="A note on internal vs public HTTP APIs">

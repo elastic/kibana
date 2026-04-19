@@ -4,12 +4,6 @@ description: Persitable state is a key concept to understand when building a Kib
 
 # Persistable State
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/persistable-state](https://codex.elastic.dev/r/kibana-team/key-concepts/persistable-state)
-:::
-
-
 “Persistable state” is developer-defined state that supports being persisted by a plugin other than the one defining it. Persistable State needs to be serializable and the owner can/should provide utilities to migrate it, extract and inject any <DocLink id="kibDevDocsSavedObjectsIntro" section="references" text="references to Saved Objects"/> it may contain, as well as telemetry collection utilities.
 
 ## Exposing state that can be persisted

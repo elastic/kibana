@@ -4,12 +4,6 @@ description: Performance tips for plugin client code.
 
 # Client performance
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/client-performance](https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/client-performance)
-:::
-
-
 ## Lazy load code
 
 _tl;dr_: Load as much code lazily as possible. Everyone loves snappy

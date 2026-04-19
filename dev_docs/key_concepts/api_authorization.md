@@ -4,12 +4,6 @@ description: This guide provides an overview of API authorization in Kibana.
 
 # Kibana API authorization
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/kibana-api-authorization](https://codex.elastic.dev/r/kibana-team/key-concepts/kibana-api-authorization)
-:::
-
-
 Authorization is an important aspect of API design. It must be considered for all endpoints, even those marked as `internal`. This guide explains how and when to apply authorization to your endpoints
 
 Table of contents:

@@ -4,12 +4,6 @@ description: Lens Config Builder API - TreeMap
 
 # Lens Config Builder API - TreeMap
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-treemap](https://codex.elastic.dev/r/kibana-team/lens/lens-config-api/lens-config-builder-api-treemap)
-:::
-
-
 import Dataset from './dataset.mdx';
 import Breakdown from './breakdown.mdx';
 

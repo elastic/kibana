@@ -4,12 +4,6 @@ description: Forking, branching, committing and using labels in the Kibana GitHu
 
 # How we use Github
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/contributing/how-we-use-github](https://codex.elastic.dev/r/kibana-team/contributing/how-we-use-github)
-:::
-
-
 ## Forking
 
 We follow the [GitHub forking model](https://help.github.com/articles/fork-a-repo/) for collaborating on Kibana code. This model assumes that you have a remote called upstream which points to the official Kibana repo, which we’ll refer to in later code snippets.

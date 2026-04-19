@@ -4,12 +4,6 @@ description:  Learn how we were able to improve page load by removing top-level 
 
 # Case Study - Top level imports
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/case-study-top-level-imports](https://codex.elastic.dev/r/kibana-team/key-concepts/plugin-performance-and-optimization/case-studies/case-study-top-level-imports)
-:::
-
-
 <DocCallOut>The following case study is derived from [kibana#179311](https://github.com/elastic/kibana/pull/179311).</DocCallOut>
 
 ## Summary

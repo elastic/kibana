@@ -4,12 +4,6 @@ description: Learn how to create page layouts in Kibana
 
 # Kibana Page Template
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/shared-ux/kibana-page-template](https://codex.elastic.dev/r/kibana-team/shared-ux/kibana-page-template)
-:::
-
-
 :::{warning}
 Be sure to import the `KibanaPageTemplate` from `@kbn/shared-ux-page-kibana-template`.
 :::

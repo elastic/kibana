@@ -4,12 +4,6 @@ description: Links to all the documentation maintained by the Shared UX team.
 
 # Shared UX Team
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/shared-ux/shared-ux-team](https://codex.elastic.dev/r/kibana-team/shared-ux/shared-ux-team)
-:::
-
-
 <DocLandingHero
   title="Welcome to Shared UX team docs!"
   description="👋 Here you will find documentation about all the things the Shared UX team manages. Feel free to look around and ask questions!"

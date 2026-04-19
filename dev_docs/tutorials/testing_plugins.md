@@ -4,12 +4,6 @@ description: Learn how to test different aspects of Kibana plugins
 
 # Testing Kibana Plugins
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/testing-kibana-plugins](https://codex.elastic.dev/r/kibana-team/tutorials/testing-kibana-plugins)
-:::
-
-
 This document outlines best practices and patterns for testing Kibana Plugins.
 
 ## Strategy

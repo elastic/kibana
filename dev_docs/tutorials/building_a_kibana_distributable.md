@@ -4,12 +4,6 @@ description: Learn how to build a Kibana distributable
 
 # Building a Kibana distributable
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/building-a-kibana-distributable](https://codex.elastic.dev/r/kibana-team/tutorials/building-a-kibana-distributable)
-:::
-
-
 On the course of that tutorial it will be possible to learn more about how we can create a Kibana distributable 
 as well as handle its different main configurations.
 

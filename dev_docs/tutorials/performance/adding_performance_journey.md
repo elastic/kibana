@@ -4,12 +4,6 @@ summary: Learn how to add journey and track Kibana performance
 
 # Adding Single User Performance Journey
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/adding-single-user-performance-journey](https://codex.elastic.dev/r/kibana-team/orphaned/adding-single-user-performance-journey)
-:::
-
-
 ## Overview
 
 In order to achieve our goal of creating best user experience in Kibana, it is important to keep track on its features performance.

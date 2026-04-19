@@ -4,12 +4,6 @@ description: Data views API
 
 # Data views API
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/data-views-api](https://codex.elastic.dev/r/kibana-team/tutorials/data-views-api)
-:::
-
-
 *Note: Kibana index patterns are currently being renamed to data views. There will be some naming inconsistencies until the transition is complete.*
 
 ### Data views API

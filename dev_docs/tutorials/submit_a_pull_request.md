@@ -4,12 +4,6 @@ description: Learn how to submit a Kibana pull request
 
 # Submitting a Kibana pull request
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/submitting-a-kibana-pull-request](https://codex.elastic.dev/r/kibana-team/tutorials/submitting-a-kibana-pull-request)
-:::
-
-
 ## Create and clone a fork of Kibana
 
 Kibana has hundreds of developers, some of whom are outside of Elastic, so we use a fork-based approach for creating branches and pull requests.

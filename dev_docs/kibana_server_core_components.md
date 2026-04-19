@@ -4,12 +4,6 @@ description: An introduction to the Kibana server and core components.
 
 # Kibana Server and Core components
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/orphaned/kibana-server-and-core-components](https://codex.elastic.dev/r/kibana-team/orphaned/kibana-server-and-core-components)
-:::
-
-
 Core is a set of systems (frontend, backend etc.) that Kibana and its plugins are built on top of.
 
 ### Logging

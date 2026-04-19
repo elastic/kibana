@@ -4,12 +4,6 @@ description: Links to all the documentation maintained by the Kibana Operations 
 
 # Kibana Operations
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/operations/kibana-operations](https://codex.elastic.dev/r/kibana-team/operations/kibana-operations)
-:::
-
-
 <DocLandingHero
   title='Welcome to the ops docs!'
   description="👋 Here you will find documentation about all the things the Kibana Operations team manages. Feel free to look around and ask questions!"

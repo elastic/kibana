@@ -4,12 +4,6 @@ description: Kibana Expressions Service
 
 # Kibana Expressions Service
 
-
-:::{important}
-**!!! THIS PAGE HAS MOVED:** [https://codex.elastic.dev/r/kibana-team/tutorials/kibana-expressions-service](https://codex.elastic.dev/r/kibana-team/tutorials/kibana-expressions-service)
-:::
-
-
 ## Expressions service
 
 Expression service exposes a registry of reusable functions primary used for fetching and transposing data and a registry of renderer functions that can render data into a DOM element.
