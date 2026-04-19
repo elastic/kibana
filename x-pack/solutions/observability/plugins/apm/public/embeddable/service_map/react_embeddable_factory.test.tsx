@@ -15,9 +15,59 @@ import {
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import {
   getServiceMapEmbeddableFactory,
+  mergeKueryQueries,
   type ServiceMapEmbeddableApi,
 } from './react_embeddable_factory';
 import type { EmbeddableDeps } from '../types';
+
+describe('mergeKueryQueries', () => {
+  it('returns empty string when both inputs are empty', () => {
+    expect(mergeKueryQueries(undefined, undefined)).toBe('');
+    expect(mergeKueryQueries(undefined, '')).toBe('');
+    expect(mergeKueryQueries(undefined, '  ')).toBe('');
+  });
+
+  it('returns panel kuery when no dashboard query', () => {
+    expect(mergeKueryQueries(undefined, 'service.name: api')).toBe('service.name: api');
+    expect(mergeKueryQueries(undefined, '  service.name: api  ')).toBe('service.name: api');
+  });
+
+  it('returns dashboard query when no panel kuery', () => {
+    expect(mergeKueryQueries({ query: 'host.name: server1', language: 'kuery' }, '')).toBe(
+      'host.name: server1'
+    );
+    expect(
+      mergeKueryQueries({ query: '  host.name: server1  ', language: 'kuery' }, undefined)
+    ).toBe('host.name: server1');
+  });
+
+  it('combines panel and dashboard queries with "and"', () => {
+    expect(
+      mergeKueryQueries({ query: 'host.name: server1', language: 'kuery' }, 'service.name: api')
+    ).toBe('service.name: api and host.name: server1');
+  });
+
+  it('handles empty dashboard query object', () => {
+    expect(mergeKueryQueries({ query: '', language: 'kuery' }, 'service.name: api')).toBe(
+      'service.name: api'
+    );
+    expect(mergeKueryQueries({ query: '  ', language: 'kuery' }, 'service.name: api')).toBe(
+      'service.name: api'
+    );
+  });
+
+  it('handles malformed query objects gracefully', () => {
+    expect(mergeKueryQueries({} as any, 'service.name: api')).toBe('service.name: api');
+    expect(mergeKueryQueries({ query: null } as any, 'service.name: api')).toBe(
+      'service.name: api'
+    );
+  });
+
+  it('ignores AggregateQuery (ES|QL) and returns panel kuery only', () => {
+    expect(mergeKueryQueries({ esql: 'FROM logs' }, 'service.name: api')).toBe('service.name: api');
+    expect(mergeKueryQueries({ esql: 'FROM logs' }, '')).toBe('');
+  });
+});
 
 const mockApiPublishesUnifiedSearch = jest.fn();
 const mockInitializeTitleManager = jest.fn();

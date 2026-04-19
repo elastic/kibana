@@ -79,7 +79,11 @@ export function ApmEmbeddableContext({
       <ApmPluginContext.Provider value={services}>
         <KibanaThemeProvider theme={deps.coreStart.theme}>
           <KibanaContextProvider
-            services={{ ...deps.coreStart, apmSourcesAccess: deps.pluginsStart.apmSourcesAccess }}
+            services={{
+              ...deps.coreStart,
+              apmSourcesAccess: deps.pluginsStart.apmSourcesAccess,
+              dataViews: deps.pluginsStart.dataViews,
+            }}
           >
             <RouterProvider router={apmRouter as any} history={history}>
               <TimeRangeMetadataContextProvider

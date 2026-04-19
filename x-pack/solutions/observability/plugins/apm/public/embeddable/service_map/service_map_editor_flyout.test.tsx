@@ -16,16 +16,46 @@ import {
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { EmbeddableDeps } from '../types';
 
+jest.mock('../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+    apmIndices: undefined,
+  }),
+}));
+
+const mockQueryStringInput = jest.fn(({ query, onChange, onSubmit, dataTestSubj, placeholder }) => (
+  <input
+    data-test-subj={dataTestSubj}
+    value={query.query}
+    placeholder={placeholder}
+    onChange={(e) => {
+      onChange({ query: e.target.value, language: 'kuery' });
+      onSubmit({ query: e.target.value, language: 'kuery' });
+    }}
+  />
+));
+
 const mockHttpGet = jest.fn().mockResolvedValue({ terms: [] });
 const mockCoreStart = {
   http: {
     get: mockHttpGet,
   },
+  docLinks: {
+    links: {
+      query: {
+        kueryQuerySyntax: 'https://elastic.co/docs/kql',
+      },
+    },
+  },
 } as unknown as CoreStart;
 
 const mockDeps = {
   coreStart: mockCoreStart,
-  pluginsStart: {},
+  pluginsStart: {
+    kql: {
+      QueryStringInput: mockQueryStringInput,
+    },
+  },
   coreSetup: {} as CoreSetup,
   pluginsSetup: {},
   config: {},

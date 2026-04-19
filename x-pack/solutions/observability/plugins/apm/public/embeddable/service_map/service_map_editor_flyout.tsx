@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -17,6 +16,8 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
+  EuiLink,
+  EuiSkeletonText,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -24,7 +25,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '@kbn/apm-types';
-import type { TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import datemath from '@kbn/datemath';
 import {
   ENVIRONMENT_ALL,
@@ -35,6 +36,86 @@ import type { Environment } from '../../../common/environment_rt';
 import type { ServiceMapEmbeddableState } from './types';
 import type { EmbeddableDeps } from '../types';
 import { useSuggestions } from './use_suggestions';
+import { useAdHocApmDataView } from '../../hooks/use_adhoc_apm_data_view';
+
+interface KueryInputProps {
+  kuery: string;
+  onChange: (kuery: string) => void;
+  deps: EmbeddableDeps;
+}
+
+function KueryInput({ kuery, onChange, deps }: KueryInputProps) {
+  const { QueryStringInput } = deps.pluginsStart.kql;
+  const { dataView } = useAdHocApmDataView();
+  const isLoading = !dataView;
+
+  const query: Query = useMemo(() => ({ query: kuery, language: 'kuery' }), [kuery]);
+
+  const handleChange = useCallback(
+    (newQuery: Query) => {
+      onChange(String(newQuery.query));
+    },
+    [onChange]
+  );
+
+  const kqlDocsUrl = deps.coreStart.docLinks.links.query.kueryQuerySyntax;
+
+  const helpText = (
+    <>
+      {i18n.translate('xpack.apm.serviceMapEditor.kueryHelpText', {
+        defaultMessage: 'Additional filter using KQL syntax.',
+      })}{' '}
+      <EuiLink
+        data-test-subj="apmKueryInputLearnMoreLink"
+        href={kqlDocsUrl}
+        target="_blank"
+        external
+      >
+        {i18n.translate('xpack.apm.serviceMapEditor.kueryHelpLink', {
+          defaultMessage: 'Learn more',
+        })}
+      </EuiLink>
+    </>
+  );
+
+  if (isLoading) {
+    return (
+      <EuiFormRow
+        label={i18n.translate('xpack.apm.serviceMapEditor.kueryLabel', {
+          defaultMessage: 'KQL filter (optional)',
+        })}
+        helpText={helpText}
+        fullWidth
+      >
+        <EuiSkeletonText lines={1} />
+      </EuiFormRow>
+    );
+  }
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('xpack.apm.serviceMapEditor.kueryLabel', {
+        defaultMessage: 'KQL filter (optional)',
+      })}
+      helpText={helpText}
+      fullWidth
+    >
+      <QueryStringInput
+        appName="apm"
+        indexPatterns={dataView ? [dataView] : []}
+        query={query}
+        onChange={handleChange}
+        onSubmit={handleChange}
+        placeholder={i18n.translate('xpack.apm.serviceMapEditor.kueryPlaceholder', {
+          defaultMessage: 'Filter service map using KQL syntax',
+        })}
+        disableLanguageSwitcher
+        autoSubmit
+        dataTestSubj="apmServiceMapEditorKueryInput"
+      />
+    </EuiFormRow>
+  );
+}
 
 export interface ServiceMapEditorFlyoutProps {
   onCancel: () => void;
@@ -183,7 +264,8 @@ export function ServiceMapEditorFlyout({
               defaultMessage: 'Service name (optional)',
             })}
             helpText={i18n.translate('xpack.apm.serviceMapEditor.serviceNameHelpText', {
-              defaultMessage: 'Filter to show only a specific service and its connections',
+              defaultMessage:
+                'Filter to show only a specific service and its connections. Leave blank to show all services.',
             })}
             fullWidth
           >
@@ -237,26 +319,7 @@ export function ServiceMapEditorFlyout({
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.apm.serviceMapEditor.kueryLabel', {
-              defaultMessage: 'KQL filter (optional)',
-            })}
-            helpText={i18n.translate('xpack.apm.serviceMapEditor.kueryHelpText', {
-              defaultMessage: 'Additional filter using KQL syntax',
-            })}
-            fullWidth
-          >
-            <EuiFieldText
-              compressed
-              fullWidth
-              value={kuery}
-              onChange={(e) => setKuery(e.target.value)}
-              placeholder={i18n.translate('xpack.apm.serviceMapEditor.kueryPlaceholder', {
-                defaultMessage: 'Filter service map using KQL syntax',
-              })}
-              data-test-subj="apmServiceMapEditorKueryInput"
-            />
-          </EuiFormRow>
+          <KueryInput kuery={kuery} onChange={setKuery} deps={deps} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

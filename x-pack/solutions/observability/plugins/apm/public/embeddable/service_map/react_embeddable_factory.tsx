@@ -22,7 +22,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import useObservable from 'react-use/lib/useObservable';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
@@ -32,6 +32,25 @@ import {
 } from '../../../common/environment_filter_values';
 
 const NO_QUERY$ = new BehaviorSubject<Query | undefined>(undefined);
+
+export function mergeKueryQueries(
+  dashboardQuery: Query | AggregateQuery | undefined,
+  panelKuery: string | undefined
+): string {
+  const dashboardQueryString =
+    dashboardQuery && typeof dashboardQuery === 'object' && 'query' in dashboardQuery
+      ? String((dashboardQuery as { query?: string }).query ?? '').trim()
+      : '';
+  const panelQueryString = (panelKuery ?? '').trim();
+
+  if (dashboardQueryString) {
+    return panelQueryString
+      ? `${panelQueryString} and ${dashboardQueryString}`
+      : dashboardQueryString;
+  }
+  return panelQueryString;
+}
+
 import type { EmbeddableDeps } from '../types';
 import type { ServiceMapEmbeddableState } from './types';
 import { ApmEmbeddableContext } from '../embeddable_context';
@@ -196,23 +215,25 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             },
             loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
               return (
-                <ServiceMapEditorFlyout
-                  ariaLabelledBy={ariaLabelledBy}
-                  deps={deps}
-                  timeRange={timeRange$.getValue()}
-                  initialState={serializeState()}
-                  onCancel={closeFlyout}
-                  onSave={(newState: ServiceMapEmbeddableState) => {
-                    if (newState.environment !== undefined) {
-                      environment$.next(newState.environment);
-                    }
-                    if (newState.kuery !== undefined) {
-                      kuery$.next(newState.kuery);
-                    }
-                    serviceName$.next(newState.serviceName);
-                    closeFlyout();
-                  }}
-                />
+                <ApmEmbeddableContext deps={deps}>
+                  <ServiceMapEditorFlyout
+                    ariaLabelledBy={ariaLabelledBy}
+                    deps={deps}
+                    timeRange={timeRange$.getValue()}
+                    initialState={serializeState()}
+                    onCancel={closeFlyout}
+                    onSave={(newState: ServiceMapEmbeddableState) => {
+                      if (newState.environment !== undefined) {
+                        environment$.next(newState.environment);
+                      }
+                      if (newState.kuery !== undefined) {
+                        kuery$.next(newState.kuery);
+                      }
+                      serviceName$.next(newState.serviceName);
+                      closeFlyout();
+                    }}
+                  />
+                </ApmEmbeddableContext>
               );
             },
           });
@@ -235,19 +256,10 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
           const parentQuery$ = apiPublishesUnifiedSearch(parentApi) ? parentApi.query$ : NO_QUERY$;
           const dashboardQuery = useObservable(parentQuery$);
 
-          const effectiveKuery = useMemo(() => {
-            const dashboardQueryString =
-              dashboardQuery && typeof dashboardQuery === 'object' && 'query' in dashboardQuery
-                ? String((dashboardQuery as { query?: string }).query ?? '').trim()
-                : '';
-            const panelKuery = (kuery ?? '').trim();
-            if (dashboardQueryString) {
-              return panelKuery
-                ? `${panelKuery} and ${dashboardQueryString}`
-                : dashboardQueryString;
-            }
-            return panelKuery;
-          }, [dashboardQuery, kuery]);
+          const effectiveKuery = useMemo(
+            () => mergeKueryQueries(dashboardQuery, kuery),
+            [dashboardQuery, kuery]
+          );
 
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
