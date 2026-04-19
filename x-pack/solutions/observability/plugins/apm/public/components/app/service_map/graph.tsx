@@ -84,11 +84,7 @@ interface GraphProps {
   onToggleFullscreen?: () => void;
   /** When set, shows a "View full service map" button that links to the full map (focused map only) */
   fullMapHref?: string;
-  /** When false, hides the minimap (e.g. in embeddable preview). Default true. */
-  showMinimap?: boolean;
-  /** When false, hides the options panel with filters and layout controls. Default true. */
-  showOptionsPanel?: boolean;
-  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
 }
 
@@ -104,8 +100,6 @@ function GraphInner({
   isFullscreen = false,
   onToggleFullscreen,
   fullMapHref,
-  showMinimap = true,
-  showOptionsPanel = true,
   isEmbedded = false,
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
@@ -569,7 +563,7 @@ function GraphInner({
       >
         <Background gap={24} size={1} color={euiTheme.colors.lightShade} />
         <Panel position="top-left" css={topLeftToolbarStyles}>
-          {showOptionsPanel && (
+          {!isEmbedded && (
             <ServiceMapOptionsPanel
               nodes={nodesAfterFilters}
               filterOptionCounts={filterOptionCounts}
@@ -653,7 +647,7 @@ function GraphInner({
             )}
           </div>
         </Panel>
-        {showMinimap && <ServiceMapMinimap />}
+        {!isEmbedded && <ServiceMapMinimap />}
       </ReactFlow>
       <MapPopover
         selectedNode={selectedNodeForPopover}
