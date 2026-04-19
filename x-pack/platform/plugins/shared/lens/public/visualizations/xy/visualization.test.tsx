@@ -1217,6 +1217,7 @@ describe('xy_visualization', () => {
           annotations: [
             exampleAnnotation,
             {
+              color: 'auto',
               icon: 'triangle',
               type: 'manual',
               id: 'newCol',
