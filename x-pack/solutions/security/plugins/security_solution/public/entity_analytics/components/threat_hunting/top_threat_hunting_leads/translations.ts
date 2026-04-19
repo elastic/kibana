@@ -17,6 +17,11 @@ export const GENERATE_LEADS = i18n.translate(
   { defaultMessage: 'Generate' }
 );
 
+export const GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.threatHunting.leads.generateDisabledNoConnectorTooltip',
+  { defaultMessage: 'Ensure that you have a connector available and selected' }
+);
+
 export const REGENERATE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.threatHunting.leads.regenerate',
   { defaultMessage: 'Regenerate' }

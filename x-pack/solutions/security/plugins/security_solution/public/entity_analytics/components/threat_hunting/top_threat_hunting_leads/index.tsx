@@ -22,6 +22,7 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   EuiBetaBadge,
   useResizeObserver,
 } from '@elastic/eui';
@@ -172,16 +173,20 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
             )}
             {showHeaderGenerate && (
               <EuiFlexItem grow={false}>
-                <AiButton
-                  size="s"
-                  iconType="sparkles"
-                  isLoading={isGenerating}
-                  isDisabled={!connectorId}
-                  onClick={onGenerate}
-                  data-test-subj="headerGenerateLeadsButton"
+                <EuiToolTip
+                  content={!connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined}
                 >
-                  {i18n.GENERATE_LEADS}
-                </AiButton>
+                  <AiButton
+                    size="s"
+                    iconType="sparkles"
+                    isLoading={isGenerating}
+                    isDisabled={!connectorId}
+                    onClick={onGenerate}
+                    data-test-subj="headerGenerateLeadsButton"
+                  >
+                    {i18n.GENERATE_LEADS}
+                  </AiButton>
+                </EuiToolTip>
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
@@ -274,16 +279,22 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   title={<h3>{i18n.NO_DATA_TITLE}</h3>}
                   body={<p>{i18n.NO_DATA_DESCRIPTION}</p>}
                   actions={
-                    <AiButton
-                      size="s"
-                      iconType="sparkles"
-                      isLoading={isGenerating}
-                      isDisabled={!connectorId}
-                      onClick={onGenerate}
-                      data-test-subj="generateLeadsButton"
+                    <EuiToolTip
+                      content={
+                        !connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
+                      }
                     >
-                      {i18n.GENERATE_LEADS}
-                    </AiButton>
+                      <AiButton
+                        size="s"
+                        iconType="sparkles"
+                        isLoading={isGenerating}
+                        isDisabled={!connectorId}
+                        onClick={onGenerate}
+                        data-test-subj="generateLeadsButton"
+                      >
+                        {i18n.GENERATE_LEADS}
+                      </AiButton>
+                    </EuiToolTip>
                   }
                   data-test-subj="leadsEmptyPrompt"
                 />
@@ -293,16 +304,22 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                   color="transparent"
                   body={<p>{i18n.NO_LEADS_DESCRIPTION}</p>}
                   actions={
-                    <AiButton
-                      size="s"
-                      iconType="sparkles"
-                      isLoading={isGenerating}
-                      isDisabled={!connectorId}
-                      onClick={onGenerate}
-                      data-test-subj="generateLeadsButton"
+                    <EuiToolTip
+                      content={
+                        !connectorId ? i18n.GENERATE_DISABLED_NO_CONNECTOR_TOOLTIP : undefined
+                      }
                     >
-                      {i18n.GENERATE_LEADS}
-                    </AiButton>
+                      <AiButton
+                        size="s"
+                        iconType="sparkles"
+                        isLoading={isGenerating}
+                        isDisabled={!connectorId}
+                        onClick={onGenerate}
+                        data-test-subj="generateLeadsButton"
+                      >
+                        {i18n.GENERATE_LEADS}
+                      </AiButton>
+                    </EuiToolTip>
                   }
                   icon={<EuiImage size={128} alt="" url={illustrationGenAi} />}
                   data-test-subj="leadsEmptyPrompt"
@@ -315,7 +332,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                 {Array.from({ length: visibleCardCount }, (_, idx) => {
                   const lead = leads[idx];
                   return (
-                    <EuiFlexItem key={lead?.id ?? `empty-${idx}`}>
+                    <EuiFlexItem key={lead?.id ?? `empty-${idx}`} style={{ minWidth: 0 }}>
                       {lead ? <LeadCard lead={lead} onClick={onLeadClick} /> : <div />}
                     </EuiFlexItem>
                   );
