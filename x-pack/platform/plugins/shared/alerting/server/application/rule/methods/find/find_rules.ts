@@ -216,8 +216,8 @@ export async function findRules<Params extends RuleParams = never>(
       page,
       perPage,
       total,
-      searchAfter,
-      aggregations,
+      ...(searchAfter !== undefined ? { searchAfter } : {}),
+      ...(aggregations !== undefined ? { aggregations } : {}),
       // replace siem formatted rules
       data: authorizedData.map((rule) => formattedRulesMap[rule.id] ?? rule),
     };
@@ -227,8 +227,8 @@ export async function findRules<Params extends RuleParams = never>(
     page,
     perPage,
     total,
-    searchAfter,
-    aggregations,
+    ...(searchAfter !== undefined ? { searchAfter } : {}),
+    ...(aggregations !== undefined ? { aggregations } : {}),
     data: authorizedData as Array<SanitizedRule<Params>>,
   };
 }

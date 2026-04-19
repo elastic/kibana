@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const { body } = await searchRules({
-        filter: 'tags: match',
+        filter: 'alert.attributes.tags: match',
         search: { term: 'Simple', mode: 'legacy' },
       }).expect(200);
 
