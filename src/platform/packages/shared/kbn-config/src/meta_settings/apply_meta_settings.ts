@@ -23,6 +23,7 @@ export function applyMetaSettings(
 ) {
   // We don't want to mutate the original config object, so we clone it.
   const result = cloneDeep(config);
+  const userConfigWithoutMetaSettings = cloneDeep(config);
 
   const changes: { priority: number; changeFn: () => void }[] = [];
   // We need to run the meta settings until no changes are made (some meta settings may set other meta settings).
@@ -31,6 +32,7 @@ export function applyMetaSettings(
     metaSettings.forEach((_metaSettings, setting) => {
       const metaSettingValue = get(result, setting);
       unset(result, setting);
+      unset(userConfigWithoutMetaSettings, setting);
 
       _metaSettings.forEach((metaSetting) => {
         if (isValidMetaSetting(metaSetting, metaSettingValue)) {
@@ -48,7 +50,8 @@ export function applyMetaSettings(
     changes.sort((a, b) => a.priority - b.priority).forEach((change) => change.changeFn());
   } while (changes.length > 0);
 
-  return result;
+  // Merge incoming config last to preserve the user's config (without the meta settings).
+  return merge(result, userConfigWithoutMetaSettings);
 }
 
 function isValidMetaSetting(metaSetting: MetaSetting, value: unknown): boolean {

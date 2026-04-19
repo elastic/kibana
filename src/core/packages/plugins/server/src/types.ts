@@ -134,10 +134,6 @@ export interface PluginConfigDescriptor<T = any> {
    *
    * This is useful to group multiple configs under a single meta setting.
    *
-   * @remarks Meta settings are used to override the config object. This means that enabling a meta setting will override any custom config provided by the user for the related configs:
-   * If a meta setting configures `myPlugin.someValue` to `10`, and the user provides a custom config for `myPlugin.someValue` to `20`, the meta setting will override the user's config and set `myPlugin.someValue` to `10`.
-   * Consider using 2 meta settings with different priorities to workaround this limitation.
-   *
    * @example
    * ```typescript
    * export const config: PluginConfigDescriptor<MyConfigType> = {

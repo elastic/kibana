@@ -31,7 +31,7 @@ describe('applyMetaSettings', () => {
     expect(result).toEqual(config);
   });
 
-  test('should not apply the meta settings and remove it from the config object if the schema is invalid', () => {
+  test('should not apply the meta settings but still remove it from the config object if the schema is invalid', () => {
     const config = {
       myPlugin: { metaSetting: false, someValue: 'value' },
     };
@@ -55,7 +55,7 @@ describe('applyMetaSettings', () => {
 
   test('should apply the meta settings to the config if the schema is valid', () => {
     const config = {
-      myPlugin: { metaSetting: true, someValue: 'value' },
+      myPlugin: { metaSetting: true },
     };
     const metaSettings = new Map([
       [
@@ -75,9 +75,31 @@ describe('applyMetaSettings', () => {
     });
   });
 
+  test('should preserve the user config overrides over the meta settings', () => {
+    const config = {
+      myPlugin: { metaSetting: true, someValue: 'user-value' },
+    };
+    const metaSettings = new Map([
+      [
+        'myPlugin.metaSetting',
+        [
+          {
+            schema: schema.literal(true),
+            priority: 100,
+            config: { 'myPlugin.someValue': 'new-value' },
+          },
+        ],
+      ],
+    ]);
+    const result = applyMetaSettings(config, metaSettings);
+    expect(result).toEqual({
+      myPlugin: { someValue: 'user-value' },
+    });
+  });
+
   test('supports multiple priorities for the same meta setting', () => {
     const config = {
-      myPlugin: { metaSetting: true, someValue: 'value' },
+      myPlugin: { metaSetting: true },
     };
     const metaSettings = new Map([
       [
@@ -115,7 +137,7 @@ describe('applyMetaSettings', () => {
   test('supports multiple meta settings with different priorities', () => {
     const config = {
       anotherMetaSetting: true,
-      myPlugin: { metaSetting: true, someValue: 'value' },
+      myPlugin: { metaSetting: true },
     };
     const metaSettings = new Map([
       [
@@ -151,7 +173,6 @@ describe('applyMetaSettings', () => {
   test('supports meta settings that set other meta settings', () => {
     const config = {
       aSuperMetaSetting: true,
-      myPlugin: { someValue: 'value' },
     };
     const metaSettings = new Map([
       [
@@ -185,7 +206,7 @@ describe('applyMetaSettings', () => {
   // If we implement this in the future, we can update this test.
   test('a super-meta setting does not disable another meta setting enabled by the user but with a lower priority', () => {
     const config = {
-      myPlugin: { metaSetting: true, someValue: 'value' },
+      myPlugin: { metaSetting: true },
       anotherMetaSetting: true,
     };
     const metaSettings = new Map([
@@ -220,7 +241,7 @@ describe('applyMetaSettings', () => {
   test('supports flat and nested config objects', () => {
     const config = {
       anotherMetaSetting: true,
-      myPlugin: { metaSetting: true, someValue: 'value' },
+      myPlugin: { metaSetting: true },
     };
     const metaSettings = new Map([
       [
