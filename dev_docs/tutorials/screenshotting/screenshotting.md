@@ -80,5 +80,5 @@ export function plugin() {
 ```
 
 <DocCallOut>
-  Check the complete API reference <DocLink id="kibScreenshottingPluginApi" text="here" />.
+  Check the complete API reference [here](#kibScreenshottingPluginApi).
 </DocCallOut>

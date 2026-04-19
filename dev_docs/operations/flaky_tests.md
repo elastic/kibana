@@ -12,7 +12,7 @@ Because of the high reliability requirements for our tests it is common for test
 
 In many cases ownership is relatively obvious based on the location of the test. In cases where it's more ambiguous we will normally trace back to when the test was added, or look at the PRs which edit the functionality of the tests the most (ignoring repo-wide edits like ESLint upgrades, etc). The authors/teams that are labeled on these PRs or the teams of the authors of these PRs are treated as the "owner" of tests.
 
-In the <DocLink id="kibDevDocsOpsPackages" text="IDM project" /> we will be improving this by putting all code, including functional tests, into packages which have a specific and verified owner.
+In the [IDM project](packages_idm.md) we will be improving this by putting all code, including functional tests, into packages which have a specific and verified owner.
 
 ## When is a test flaky enough to skip?
 
@@ -42,9 +42,9 @@ Since PRs don't always contain complete code we don't immediately treat failures
 
 There are cases where tests will fail because of something that is outside of the test-authors' control.
 
-A recent example of this is issues caused by the way that the <DocLink id="kibDevDocsOpsEsArchiver" /> supported archiving Kibana saved object indices. This was a "best practice" that started failing as we worked to make the migration process more resilient, and caused flakiness that individual test owners couldn't really fix.
+A recent example of this is issues caused by the way that the [kibDevDocsOpsEsArchiver](#kibDevDocsOpsEsArchiver) supported archiving Kibana saved object indices. This was a "best practice" that started failing as we worked to make the migration process more resilient, and caused flakiness that individual test owners couldn't really fix.
 
-To fix this specific example the Operations, Core, and QA teams worked together to find a better solution, and the QA team has been assisting other teams by migrating their tests from the <DocLink id="kibDevDocsOpsEsArchiver" /> to the new `KbnArchiver`
+To fix this specific example the Operations, Core, and QA teams worked together to find a better solution, and the QA team has been assisting other teams by migrating their tests from the [kibDevDocsOpsEsArchiver](#kibDevDocsOpsEsArchiver) to the new `KbnArchiver`
 
 Now the majority of Kibana indexes stored in ES Archives have been migrated and this is no longer a major source of flakiness. When another case pops-up we usually just ping the QA team and ask them to migrate the specific usage rather than skip the test rather than skip the test.
 
@@ -56,8 +56,8 @@ When a test is determined to be flaky enough to be skipped the issue will get th
 
 ## How do I get my tests unskipped?
 
-Unskipping tests is the responsibility of the test owner. To unskip a test the flaky failures should be analyzed in order to determine the cause for the flakiness, or the problematic tests should be scanned for issues described in the section ("How do I write tests that aren't flaky?")[#how-do-i-write-tests-that-arent-flaky]. When the cause of the flakiness has been identified, open a PR with the changes necessary and validate that the flakiness is reduced using the <DocLink id="kibDevDocsOpsFlakyTestRunner" />. See the <DocLink id="kibDevDocsOpsFlakyTestRunner" /> docs for more information about how to use it.
+Unskipping tests is the responsibility of the test owner. To unskip a test the flaky failures should be analyzed in order to determine the cause for the flakiness, or the problematic tests should be scanned for issues described in the section ("How do I write tests that aren't flaky?")[#how-do-i-write-tests-that-arent-flaky]. When the cause of the flakiness has been identified, open a PR with the changes necessary and validate that the flakiness is reduced using the [kibDevDocsOpsFlakyTestRunner](flaky_test_runner.md). See the [kibDevDocsOpsFlakyTestRunner](flaky_test_runner.md) docs for more information about how to use it.
 
 ## How do I write functional tests that aren't flaky?
 
-Checkout <DocLink id="kibDevDocsOpsWritingStableFunctionalTests"/>
+Checkout [kibDevDocsOpsWritingStableFunctionalTests](writing_stable_functional_tests.md)

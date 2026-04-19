@@ -816,7 +816,7 @@ _todo: fully worked out example_
 
 ### Saved Objects model versions
 
-_Also see <DocLink id="kibDevTutorialSavedObject" section="model-versions" text="Defining model versions"/>._
+_Also see [Defining model versions](saved_objects.md#model-versions)._
 
 Model versions definitions are more structured than the legacy migration functions, which makes them harder
 to test without the proper tooling. This is why a set of testing tools and utilities are exposed

@@ -9,12 +9,12 @@ _Note: Advanced settings, uiSettings, settings, and config are often used to des
 *Advanced Settings* control the behavior of Kibana. To configure the UI settings, open the main menu, then click *Stack Management > Advanced Settings*.  When settings are changed from their default, the new value is persisted as a key/value pair in the `config` saved object registered by `core`.
 
 There are several ways to configure an advanced setting:
- - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-advanced-settings-ui" text="Through the Advanced Settings UI"/>
- - <DocLink id="kibDevTutorialAdvancedSettings" section="configuration-with-ui-settings-overrides" text="Locked via `kibana.yml`'s `uiSettings.overrides`"/>
- - <DocLink id="kibDevTutorialAdvancedSettings" section="client-side-usage" text="Through the client-side `uiSettings` service"/>
- - <DocLink id="kibDevTutorialAdvancedSettings" section="server-side-usage" text="Through the server-side `uiSettings` service"/>
+ - [Through the Advanced Settings UI](advanced_settings.md#configuration-with-advanced-settings-ui)
+ - [Locked via `kibana.yml`'s `uiSettings.overrides`](advanced_settings.md#configuration-with-ui-settings-overrides)
+ - [Through the client-side `uiSettings` service](advanced_settings.md#client-side-usage)
+ - [Through the server-side `uiSettings` service](advanced_settings.md#server-side-usage)
 
-`uiSettings` are registered synchronously during `core`'s setup lifecycle phase. This means that once you add a new advanced setting, you cannot change or remove it without <DocLink id="kibDevTutorialAdvancedSettings" section="registering-migrations" text="registering a migration in core"/>.
+`uiSettings` are registered synchronously during `core`'s setup lifecycle phase. This means that once you add a new advanced setting, you cannot change or remove it without [registering a migration in core](advanced_settings.md#registering-migrations).
 
 ### Configuration with Advanced Settings UI
 

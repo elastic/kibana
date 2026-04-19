@@ -6,13 +6,13 @@ description: How to use chrome's recently accessed service to add your links to 
 
 ## Introduction
 
-The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> service allows applications to register recently visited objects. These items are displayed in the "Recently Viewed" section of a side navigation menu, providing users with quick access to their previously visited resources. This service includes methods for adding, retrieving, and subscribing to the recently accessed history.
+The [ChromeRecentlyAccessed](#kibKbnCoreChromeBrowserPluginApi) service allows applications to register recently visited objects. These items are displayed in the "Recently Viewed" section of a side navigation menu, providing users with quick access to their previously visited resources. This service includes methods for adding, retrieving, and subscribing to the recently accessed history.
 
 ![Recently viewed section in the sidenav](./chrome_recently_accessed.png)
 
 ## Guidelines
 
-The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> service should be used thoughtfully to provide users with easy access to key resources they've interacted with. Unlike browser history, this feature is for important items that users may want to revisit.
+The [ChromeRecentlyAccessed](#kibKbnCoreChromeBrowserPluginApi) service should be used thoughtfully to provide users with easy access to key resources they've interacted with. Unlike browser history, this feature is for important items that users may want to revisit.
 
 ### DOs
 
@@ -56,8 +56,8 @@ coreStart.chrome.recentlyAccessed.add(
 
 ## Implementation details
 
-The <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> services is based on <DocLink id="kibKbnRecentlyAccessedPluginApi" text="@kbn/recently-accessed"/> package. This package provides a `RecentlyAccessedService` that uses browser local storage to manage records of recently accessed objects. Internally it implements the queue with a maximum length of 20 items. When the queue is full, the oldest item is removed.
+The [ChromeRecentlyAccessed](#kibKbnCoreChromeBrowserPluginApi) services is based on [@kbn/recently-accessed](#kibKbnRecentlyAccessedPluginApi) package. This package provides a `RecentlyAccessedService` that uses browser local storage to manage records of recently accessed objects. Internally it implements the queue with a maximum length of 20 items. When the queue is full, the oldest item is removed.
 Applications can create their own instance of `RecentlyAccessedService` to manage their own list of recently accessed items scoped to their application.
 
-- <DocLink id="kibKbnCoreChromeBrowserPluginApi" section="def-public.ChromeRecentlyAccessed" text="ChromeRecentlyAccessed" /> is a service available via `coreStart.chrome.recentlyAccessed` and should be used to add items to chrome's sidenav.
-- <DocLink id="kibKbnRecentlyAccessedPluginApi" text="@kbn/recently-accessed"/> is package that `ChromeRecentlyAccessed` is using internally and the package can be used to create your own instance and manage your own list of recently accessed items that is independent for chrome's sidenav.
+- [ChromeRecentlyAccessed](#kibKbnCoreChromeBrowserPluginApi) is a service available via `coreStart.chrome.recentlyAccessed` and should be used to add items to chrome's sidenav.
+- [@kbn/recently-accessed](#kibKbnRecentlyAccessedPluginApi) is package that `ChromeRecentlyAccessed` is using internally and the package can be used to create your own instance and manage your own list of recently accessed items that is independent for chrome's sidenav.

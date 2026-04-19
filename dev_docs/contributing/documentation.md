@@ -32,17 +32,14 @@ Internal plugin details can be kept alongside the code it describes. Information
 
 <DocCallOut title="Internal only">
 
-Only `mdx` files with the appropriate <DocLink id="docsSyntax" section="frontmatter" text="frontmatter"/> are rendered inside the Developer Guide. Read about the syntax <DocLink id="docsSyntax" text="here"/>. Edit [kibana/nav-kibana-dev.docnav.json](https://github.com/elastic/kibana/blob/main/dev_docs/nav-kibana-dev.docnav.json) to have a link to your document appear in the navigation menu. Read <DocLink id="kibDevDocsBestPractices" text="these instructions" /> for more details on how to add new content and test locally.
+Only `mdx` files with the appropriate [frontmatter](#docsSyntax) are rendered inside the Developer Guide. Read about the syntax [here](#docsSyntax). Edit [kibana/nav-kibana-dev.docnav.json](https://github.com/elastic/kibana/blob/main/dev_docs/nav-kibana-dev.docnav.json) to have a link to your document appear in the navigation menu. Read [these instructions](#kibDevDocsBestPractices) for more details on how to add new content and test locally.
 
 </DocCallOut>
 
 ### Structure
 
-The high-level developer documentation located in the [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. <DocLink id="kibDevDocsWelcome" text="Getting started" /> and <DocLink id="kibPlatformIntro" text="Key concepts" /> sections are _explanation_ oriented, while
-<DocLink id="kibDevTutorialDebugging" text="Tutorials" /> falls under both _tutorials_ and _how to_. The <DocLink
-  id="kibDevDocsApiWelcome"
-  text="API documentation"
-/> section is _reference_ material.
+The high-level developer documentation located in the [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder attempts to follow [divio documentation](https://documentation.divio.com/) guidance. [Getting started](../getting_started/dev_welcome.md) and [Key concepts](../key_concepts/kibana_platform_plugin_intro.md) sections are _explanation_ oriented, while
+[Tutorials](../tutorials/debugging.md) falls under both _tutorials_ and _how to_. The [API documentation](../api_welcome.md) section is _reference_ material.
 
 Developers may choose to keep information that is specific to a particular plugin along side the code.
 
@@ -67,7 +64,7 @@ It's easy to forget what it felt like to first write code in Kibana, but do your
 
 ## API documentation
 
-We automatically generate <DocLink id="kibDevDocsApiWelcome" text="API documentation"/>. The following guidelines will help ensure your <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public APIs" /> are useful.
+We automatically generate [API documentation](../api_welcome.md). The following guidelines will help ensure your [public APIs](../key_concepts/kibana_platform_plugin_intro.md#public-plugin-api) are useful.
 
 If you encounter an error of the form:
 
@@ -186,7 +183,7 @@ The code sandbox approach can be a lot faster to iterate compared to running it 
 
 ## Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or [building block](../key_concepts/building_blocks.md) to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
 You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.2/app/home). Note that because anonymous access is enabled, some
 of the demos are currently not working. 

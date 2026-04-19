@@ -26,7 +26,7 @@ performance than the native one.
   the browser GUI to visually run and/or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below.
   
   **Note:** For a normal development cycle we really advise to use the default experience setup within Windows 11. However if you have an explicit need for using a browser GUI 
-  while using Windows 10, please follow each step of the guide below applicable for the Basic Experience setup and then check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="short-term-workaround-for-windows-10-gui-support" text="short term workaround for Windows 10 GUI support" />.
+  while using Windows 10, please follow each step of the guide below applicable for the Basic Experience setup and then check our [short term workaround for Windows 10 GUI support](development_windows.md#short-term-workaround-for-windows-10-gui-support).
   
   ### Default Experience
   For a default experience and a completion of the entire guide which will make you able to run GUI apps you must be running **Windows 11 (Build 22000 and higher)**.
@@ -64,7 +64,7 @@ The latest setup instructions can be found at https://docs.microsoft.com/en-us/w
    wsl --set-default Ubuntu 
    ```  
 
-4. Install support for Google Chrome by running the following inside WSL shell **(IMPORTANT: <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="default-experience" text="Default Experience Only"/>)**
+4. Install support for Google Chrome by running the following inside WSL shell **(IMPORTANT: [Default Experience Only](development_windows.md#default-experience))**
 
    Start by updating your apt package sources list with
    ```
@@ -87,7 +87,7 @@ The latest setup instructions can be found at https://docs.microsoft.com/en-us/w
 
 ## Setup Kibana
 
-The next step is now <DocLink id="kibDevTutorialSetupDevEnv" section="get-the-code" text="setup your development environment" /> for Kibana inside WSL just like in any other case.
+The next step is now [setup your development environment](../getting_started/setting_up_a_development_env.md#get-the-code) for Kibana inside WSL just like in any other case.
 
 ## Install VSCode
 
@@ -112,9 +112,9 @@ As mentioned before is highly recommended you setup your environment for a defau
 at the same time you still have the need for a GUI browser on Windows 10. Next you can find our recommendations for a short term workaround to achieve that for Windows 10 before we could terminate the support 
 for this operating system.
 
-1. Fulfil the <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="basic-experience" text="prerequisites for basic experience"/> as well as installing the <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="default-experience" text="vGPU drivers from the default experience"/>. 
+1. Fulfil the [prerequisites for basic experience](development_windows.md#basic-experience) as well as installing the [vGPU drivers from the default experience](development_windows.md#default-experience). 
 
-2. Make sure you've followed <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="install-wsl" text="Install WSL"/> up to step 3, <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="setup-kibana" text="Setup Kibana"/> and <DocLink id="kibDevTutorialSetupWindowsDevWSL" section="install-vscode" text="Install VSCode"/>.
+2. Make sure you've followed [Install WSL](development_windows.md#install-wsl) up to step 3, [Setup Kibana](development_windows.md#setup-kibana) and [Install VSCode](development_windows.md#install-vscode).
 
 3. Install Google Chrome and it's dependencies by
    ```

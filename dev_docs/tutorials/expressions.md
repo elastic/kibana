@@ -54,7 +54,7 @@ const result = await executionContract.getData();
 ```
 
 <DocCallOut>
-  Check the full spec of execute function <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionsService.execute" text="here" />
+  Check the full spec of execute function [here](#kibExpressionsPluginApi)
 </DocCallOut>
 
 In addition, on the browser side, there are two additional ways to run expressions and render the results.
@@ -68,7 +68,7 @@ This is the easiest way to get expressions rendered inside your application.
 ```
 
 <DocCallOut>
-  Check the full spec of ReactExpressionRenderer component props <DocLink id="kibExpressionsPluginApi" section="def-public.ReactExpressionRendererProps" text="here" />
+  Check the full spec of ReactExpressionRenderer component props [here](#kibExpressionsPluginApi)
 </DocCallOut>
 
 #### Expression loader
@@ -80,7 +80,7 @@ const handler = loader(domElement, expression, params);
 ```
 
 <DocCallOut>
-  Check the full spec of expression loader params <DocLink id="kibExpressionsPluginApi" section="def-public.IExpressionLoaderParams" text="here" />
+  Check the full spec of expression loader params [here](#kibExpressionsPluginApi)
 </DocCallOut>
 
 ### Creating new expression functions
@@ -103,7 +103,7 @@ expressions.registerFunction(functionDefinition);
 ```
 
 <DocCallOut>
-  Check the full interface of ExpressionFuntionDefinition <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionFunctionDefinition" text="here" />
+  Check the full interface of ExpressionFuntionDefinition [here](#kibExpressionsPluginApi)
 </DocCallOut>
 
 ### Creating new expression renderers
@@ -125,5 +125,5 @@ expressions.registerRenderer(rendererDefinition);
 ```
 
 <DocCallOut>
-  Check the full interface of ExpressionRendererDefinition <DocLink id="kibExpressionsPluginApi" section="def-common.ExpressionRenderDefinition" text="here" />
+  Check the full interface of ExpressionRendererDefinition [here](#kibExpressionsPluginApi)
 </DocCallOut>

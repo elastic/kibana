@@ -5,7 +5,7 @@ description: How to use our automatically generated API documentation
 # Welcome
 
 Welcome to our automatically generated typescript API 
-documentation for every plugin that exposes a <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>!
+documentation for every plugin that exposes a [public API](key_concepts/kibana_platform_plugin_intro.md#public-plugin-api)!
 
 :::{warning}
 This documentation is being automatically generated using an
@@ -22,7 +22,7 @@ To learn more about how to write docs specifically for our [API references](http
 ## What is included
 
 Every plugin that 
-<DocLink id="kibPlatformIntro" section="public-plugin-api" text="exposes functionality for other plugins to use"/> will have
+[exposes functionality for other plugins to use](key_concepts/kibana_platform_plugin_intro.md#public-plugin-api) will have
 API documentation automatically generated (note this system 
 does *not* handle REST APIs).
 
@@ -43,7 +43,7 @@ notice, since there may be corner cases you aren't aware of, even if your PR pas
 ### Why do I not see my plugin's public API?
 
 There is one extra step required to have your API docs show up in the _navigation_ of the docs system. Follow
-the instructions <DocLink id="docsSetup" section="configure-the-nav-for-your-content" text="here" /> to learn how to 
+the instructions [here](#docsSetup) to learn how to 
 configure the navigation menu.  The nav file you need to
  edit is: [https://github.com/elastic/elastic-docs-prototype/blob/master/config/nav-kibana-dev.ts](https://github.com/elastic/elastic-docs-prototype/blob/master/config/nav-kibana-dev.ts)
 

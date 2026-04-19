@@ -8,7 +8,7 @@ Setting up a development environment is pretty easy.
 
 <DocCallOut title="A note about Windows">
   We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
-  Please check our <DocLink id="kibDevTutorialSetupWindowsDevWSL" text="tutorial"/> to know how to setup the environment and then follow the rest of this guide inside **WSL**.
+  Please check our [tutorial](../tutorials/development_windows.md) to know how to setup the environment and then follow the rest of this guide inside **WSL**.
 </DocCallOut>
 
 ## Get the code

@@ -6,7 +6,7 @@ description: Anatomy of a Kibana plugin.
 
 Pre-reading material:
 
-- <DocLink id="kibPlatformIntro" />
+- [kibPlatformIntro](kibana_platform_plugin_intro.md)
 
 ## The anatomy of a plugin
 
@@ -128,7 +128,7 @@ If you are developing in TypeScript (which we recommend), you will need to add a
 
 ### public/index.ts
 
-`public/index.ts` is the entry point into the client-side code of this plugin. Everything exported from this file will be a part of the plugins <DocLink id="kibPlatformIntro" section="public-plugin-api" text="public API"/>. If the plugin only exists to export static utilities, consider using a package. Otherwise, this file must export a function named plugin, which will receive a standard set of
+`public/index.ts` is the entry point into the client-side code of this plugin. Everything exported from this file will be a part of the plugins [public API](kibana_platform_plugin_intro.md#public-plugin-api). If the plugin only exists to export static utilities, consider using a package. Otherwise, this file must export a function named plugin, which will receive a standard set of
 core capabilities as an argument. It should return an instance of its plugin class for Kibana to load.
 
 ```ts

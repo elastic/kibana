@@ -9,7 +9,7 @@ description: This tutorial demonstrates how to generate OpenAPI specification fo
 </DocCallOut>
 
 <DocCallOut title="Designing good code-first APIs" color="warning">
-  Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see <DocLink id="kibHttpApiGuidelines" text="HTTP API Design" />.
+  Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see [HTTP API Design](../contributing/kibana_http_api_design_guidelines.md).
 
   Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
 
@@ -96,7 +96,7 @@ This example demonstrates how you can organize runtime schemas to prepare for:
 1. Being versioned
 2. Have TypeScript references available to client and server code in your plugin
 
-See <DocLink id="kibDevTutorialVersioningInterfaces" text="strategies for versioning your schemas" /> for more information on this organizational pattern.
+See [strategies for versioning your schemas](versioning_interfaces.md) for more information on this organizational pattern.
 
 #### 2. Route definitions
 

@@ -10,9 +10,9 @@ Kibana ships with many out-of-the-box capabilities that can be extended and enha
 
 Recommended next reading:
 
-1. <DocLink id="kibDevTutorialSetupDevEnv" text="Set up your development environment" />
-2. Create a <DocLink id="kibHelloWorldApp" text="Hello World plugin"/>.
-3. <DocLink id="kibDevAddData" text="Add data" />.
+1. [Set up your development environment](setting_up_a_development_env.md)
+2. Create a [Hello World plugin](hello_world_plugin.md).
+3. [Add data](add_data.md).
 
-Check out our <DocLink id="kibDevDocsApiWelcome" text="API documentation" /> to dig into the nitty gritty details of
+Check out our [API documentation](../api_welcome.md) to dig into the nitty gritty details of
 every public plugin API.

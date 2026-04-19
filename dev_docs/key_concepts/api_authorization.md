@@ -22,7 +22,7 @@ Table of contents:
 Kibana API routes do not have any authorization checks applied by default. This means that your APIs are accessible to anyone with valid credentials, regardless of their permissions. This includes users with no roles assigned.
 This on its own is insufficient, and care must be taken to ensure that only authorized users can invoke your endpoints.
 
-Kibana leverages <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are likely already met.
+Kibana leverages [Saved Objects](saved_objects.md) for a majority of its persistence. The Saved Objects Service performs its own authorization checks, so if your API route is primarily a CRUD interface to Saved Objects, then your authorization needs are likely already met.
 This is also true for derivatives of the Saved Objects Service, such as the Alerting and Cases services.
 
 If your endpoint is not a CRUD interface to Saved Objects, or if your endpoint bypasses our built-in Saved Objects authorization checks, then you must ensure that only authorized users can invoke your endpoint. 

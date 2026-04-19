@@ -6,15 +6,15 @@ description: Standards and guidelines we expect every Kibana developer to abide 
 
 ## Developer principles
 
-We expect all developers to read and abide by our overarching <DocLink id="kibDevPrinciples" />.
+We expect all developers to read and abide by our overarching [kibDevPrinciples](dev_principles.md).
 
 ## Style guide
 
-Please read and abide by our <DocLink id="kibStyleGuide" text="Style guide" />. The majority of these items are linted against but some are not.
+Please read and abide by our [Style guide](#kibStyleGuide). The majority of these items are linted against but some are not.
 
 ## Adding dependencies
 
-Please read and abide by our <DocLink id="kibThirdPartyDependencies" text="third-party dependencies guide" />.
+Please read and abide by our [third-party dependencies guide](third_party_dependencies.md).
 
 ## RESTful HTTP APIs
 
@@ -31,7 +31,7 @@ Anywhere we refer to “end user” in this section, we are referring to someone
 | Type     | Description                                                                                                                                          | Guarantees                                                                      |
 | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | Internal | An API with “internal” in the route. Specifically it should be `/internal/{pluginname}/{...}`. It should only be used by the plugin that created it. | None                                                                            |
-| Public   | Any API that is not internal based on above definition                                                                                               | Based on <DocLink id="kibStandards" section="release-tags" text="release tag"/> |
+| Public   | Any API that is not internal based on above definition                                                                                               | Based on [release tag](standards.md#release-tags) |
 
 ### Do not access directly from plugins
 

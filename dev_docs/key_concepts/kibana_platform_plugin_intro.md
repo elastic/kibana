@@ -35,16 +35,16 @@ When the [Bazel migration](https://github.com/elastic/kibana/blob/main/legacy_rf
 In the meantime, the following can be used to determine whether it makes sense to add code to a package inside the `packages` folder, or a plugin inside `src/plugins` or `x-pack/plugins`. 
 
 
-**If the code is stateful, it has to be exposed from a plugin's <DocLink id="kibPlatformIntro" section="lifecycle-methods" text="lifecycle methods"/>. Do not statically export stateful code.**
+**If the code is stateful, it has to be exposed from a plugin's [lifecycle methods](kibana_platform_plugin_intro.md#lifecycle-methods). Do not statically export stateful code.**
 
 Benefits to packages:
 
 1. <b>_Potentially_ reduced page load time</b>. All code that is statically exported from plugins will be downloaded on _every single page load_, even if that code isn't needed. With packages, only code that is imported is downloaded, which can be minimized by using async imports.
-2. <b>Puts the consumer is in charge of how and when to async import</b>. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our <DocLink id="kibDevPerformance" text="performance docs"/>.
+2. <b>Puts the consumer is in charge of how and when to async import</b>. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our [performance docs](performance/index.md).
 
 Downsides to packages:
 
-1. <b>It's not <DocLink id="kibDevPrinciples" text="organized by domain"/></b>. The packages folder is far away from the plugins folder. Having your stateless code in a plugin and the rest in a package may make it hard to find, leading to duplication. The Operations team hopes to fix this by supporting packages and plugins existing in the same folder. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
+1. <b>It's not [organized by domain](../contributing/dev_principles.md)</b>. The packages folder is far away from the plugins folder. Having your stateless code in a plugin and the rest in a package may make it hard to find, leading to duplication. The Operations team hopes to fix this by supporting packages and plugins existing in the same folder. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
 
 2. <b>Development overhead</b>. Developers have to run `yarn kbn watch` to have changes rebuilt automatically. [Phase II](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md#phase-ii---docs-developer-experience) of the Bazel migration work will bring the development experience on par with plugin development. This work can be tracked [here](https://github.com/elastic/kibana/issues/104519). 
 
@@ -94,7 +94,7 @@ We will continue to focus on adding clarity around these types of services and w
 
 Plugins are code that is written to extend and customize Kibana. Plugin's don't have to be part of the Kibana repo, though the Kibana
 repo does contain many plugins! Plugins add customizations by
-using <DocLink id="kibPlatformIntro" section="extension-points" text="extension points"/> provided by <DocLink id="kibPlatformIntro" section="platform-services" text="platform services"/>.
+using [extension points](kibana_platform_plugin_intro.md#extension-points) provided by [platform services](kibana_platform_plugin_intro.md#platform-services).
 Sometimes people confuse the term "plugin" and "application". While often there is a 1:1 relationship between a plugin and an application, it is not always the case.
 A plugin may register many applications, or none.
 
@@ -105,11 +105,11 @@ Applications are top level pages in the Kibana UI. Dashboard, Canvas, Maps, App 
 ![applications in kibana](../assets/applications.png)
 
 A plugin can register an application by
-adding it to core's application <DocLink id="kibPlatformIntro" section="registry" text="registry"/>.
+adding it to core's application [registry](kibana_platform_plugin_intro.md#registry).
 
 ### Public plugin API
 
-A plugin's public API consists of everything exported from a plugin's <DocLink id="kibPlatformIntro" section="plugin-lifecycle" text="start or setup lifecycle methods"/>,
+A plugin's public API consists of everything exported from a plugin's [start or setup lifecycle methods](kibana_platform_plugin_intro.md#plugin-lifecycle),
 as well as from the top level `index.ts` files that exist in the three "scope" folders:
 
 - common/index.ts
@@ -153,4 +153,4 @@ plugins to customize the Kibana experience. Examples of extension points are:
 
 ## Follow up material
 
-Learn how to build your own plugin by following <DocLink id="kibHelloWorldApp" />.
+Learn how to build your own plugin by following [kibHelloWorldApp](../getting_started/hello_world_plugin.md).

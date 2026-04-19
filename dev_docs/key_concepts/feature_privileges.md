@@ -193,7 +193,7 @@ public setup(core: CoreSetup, deps: FeatureControlExampleDeps) {
 }
 ```
 <DocCallOut>
-  For more information on the `security.authz` object and API authorization, please refer to our guide on <DocLink id="kibDevDocsSecurityAPIAuthorization" text="Configuring authorization on routes"/>
+  For more information on the `security.authz` object and API authorization, please refer to our guide on [Configuring authorization on routes](api_authorization.md)
 </DocCallOut>
 
 Notice, we've added a `security.authz.requiredPrivileges` property for the API route that returns sensitive information. This added configuration is then used in the privileges object as follow

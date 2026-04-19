@@ -68,14 +68,14 @@ GET /api/my_domain/my_resource_bs?page=1
 </DocCallOut>
 
 <DocCallOut title="Unit, Integration and E2E tests">
-  All HTTP APIs must have <DocLink id="kibDevTutorialTestingPlugins" section="integration-tests" text="E2E or integration test coverage" /> giving confidence the basic functionality works as intended.
+  All HTTP APIs must have [E2E or integration test coverage](../tutorials/testing_plugins.md#integration-tests) giving confidence the basic functionality works as intended.
 </DocCallOut>
 
 ### Commitment
 
 Exposing a public HTTP API is a long-term commitment to users and is not easily reversible. We must carefully design and plan APIs before they are made public, and then maintain them and ensure they work as expected.
 
-First release new HTTP APIs internally or as `Technical Preview` behind a <DocLink id="kibFeatureFlagsService" text="feature flag" /> to ensure we aren't breaking our stability promises to users if the API needs to change while in development.
+First release new HTTP APIs internally or as `Technical Preview` behind a [feature flag](../tutorials/advanced_settings.md) to ensure we aren't breaking our stability promises to users if the API needs to change while in development.
 
 #### Breaking changes to HTTP APIs include
 
@@ -122,7 +122,7 @@ See the principle regarding [commitment](#commitment) before making APIs public!
 
 All public APIs should endeavour to be compatible with Infrastructure-as-Code (IaC) tools like Terraform. There may be merit in further optimizations for IaC use cases depending on your API.
 
-For additional guidance, refer to the <DocLink id="kibHttpApiTfGuidelines" text="Guidelines for Terraform friendly HTTP APIs" /> if you would like to support an Infrastructure-as-Code (IaC) use case.
+For additional guidance, refer to the [Guidelines for Terraform friendly HTTP APIs](kibana_http_api_tf_guidelines.md) if you would like to support an Infrastructure-as-Code (IaC) use case.
 
 ## Structure and conventions
 
@@ -396,7 +396,7 @@ Changing the value of a default may, in some cases, have a devastating result si
 **Should be returned in the response (most of the time)**
 
 Public API configurable defaults should be returned in the response. Internal defaults do not need to be returned.
-Refer to <DocLink id="kibHttpApiTfGuidelines" section="return-as-much-as-you-can-and-handle-defaults-carefully" text="Terraform's guidelines on defaults" /> to learn more.
+Refer to [Terraform's guidelines on defaults](kibana_http_api_tf_guidelines.md#return-as-much-as-you-can-and-handle-defaults-carefully) to learn more.
 
 ### Validation
 
@@ -565,7 +565,7 @@ And either returns a task ID for tracking long running executions or a response 
   Bulk operations add complexity, ensure that your use case merits the added complexity. Reach out to the Kibana Core team for more guidance.
 </DocCallOut>
 
-If you are considering offering this API consider impacts on <DocLink id="kibHttpApiTfGuidelines" text="IaC use cases" />.
+If you are considering offering this API consider impacts on [IaC use cases](kibana_http_api_tf_guidelines.md).
 
 ### Observability
 
@@ -585,10 +585,10 @@ For questions about APM and telemetry please reach out to the Core team.
 
 ### Security
 
-User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see <DocLink id="kibDevDocsSecurityAPIAuthorization" text="API authorization docs" />). This depends on the actions your API performs.
+User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../key_concepts/api_authorization.md)). This depends on the actions your API performs.
 
 <DocCallOut title="Do not expose sensitive information" color="warning">
-  Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate <DocLink id="kibAuditLogging" text="audit logger" /> that you can use to log sensitive information about user actions.
+  Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../key_concepts/audit_logging.md) that you can use to log sensitive information about user actions.
 </DocCallOut>
 
 
@@ -622,7 +622,7 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 
 See our current reference documentation [here](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
 
-See <DocLink id="kibDevTutorialGeneratingOASForHTTPAPIs" text="this tutorial" /> about the code-first approach to generating OpenAPI spec available in Kibana.
+See [this tutorial](../tutorials/generating_oas_for_http_apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
 
 ## Versioning
 
@@ -644,7 +644,7 @@ Kibana's public HTTP APIs in our Serverless offering are versioned with the enti
 
 Kibana's internal HTTP APIs can be versioned too, but for a very different purpose! With serverless, we continually roll out code changes _without_ asking browsers to refresh. That means, for a time, browser clients might expect old internal API behavior. It is up to route authors and UI developers to consider how to handle breaking changes of internal routes. Note: you are free to version internal APIs at will to mitigate any unfortunate browser client breakages!
 
-Please see the tutorial on <DocLink id="kibDevTutorialVersioningHTTPAPIs" text="versioning HTTP APIs" /> for more details.
+Please see the tutorial on [versioning HTTP APIs](../tutorials/versioning_http_apis.md) for more details.
 
 ## Advanced concepts
 

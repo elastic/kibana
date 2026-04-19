@@ -6,7 +6,7 @@ description: Configure your saved object types to secure sensitive data.
 
 ## Overview
 
-"Encrypted Saved Objects" (ESO) are <DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Object types"/> that have been registered with the Encrypted Saved Objects
+"Encrypted Saved Objects" (ESO) are [Saved Object types](saved_objects.md) that have been registered with the Encrypted Saved Objects
 Service (ESO Service) to specify which attributes should be protected (encrypted attributes) and which attributes, if any, should be present and unchanged
 in order to decrypt the protected attributes ("Additional Authenticated Data", or AAD).
 
@@ -34,7 +34,7 @@ When in doubt, consult with the Kibana Security team (Application Experience/Pla
 ### Registration
 
 To register a Saved Object type, the type must first be registered with the Saved Objects Repository. This can be achieved by calling the Saved Object Service's
-`registerType` function. More information can be found in the <DocLink id="kibDevTutorialSavedObject" text="Register a new saved object type"/> tutorial. Once the
+`registerType` function. More information can be found in the [Register a new saved object type](../tutorials/saved_objects.md) tutorial. Once the
 Saved Object type is registered, use the ESO Plugin's `registerType` function, and provide an `EncryptedSavedObjectTypeRegistration` object that defines how the
 object should be encrypted.
 
@@ -81,7 +81,7 @@ the Saved Object Descriptor for a Saved Object never changes.
 
 Any time an ESO's AAD changes (when any attribute that is included in AAD changes), all encrypted attributes of that ESO must be re-encrypted to account for the new AAD.
 This is one reason why it is important to carefully consider whether an attribute should be included in AAD. More on this below in
-<DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="what-attributes-should-be-included-in-aad" text="What attributes should be included in AAD"/>
+[What attributes should be included in AAD](encrypted_saved_objects.md#what-attributes-should-be-included-in-aad)
 
 #### Nested attributes
 
@@ -105,7 +105,7 @@ Good candidates for attributes to EXCLUDE from AAD are attributes that...
 - contain a large amount of data that can significantly slow down encryption and decryption, especially during bulk operations (e.g. large geo shape, arbitrary HTML document or image data)
 
 There are additional considerations to make due to how version upgrades work in Serverless. These are covered in more detail in the
-<DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="serverless-considerations" text="Serverless Considerations"/> section, but the basics are:
+[Serverless Considerations](encrypted_saved_objects.md#serverless-considerations) section, but the basics are:
 
 - An attribute cannot be removed from AAD once it is included, unless it can be altogether removed from the object type, or refactored with a new name.
 - An existing attribute cannot be added to AAD if it was not included in AAD when it was first defined and has already been populated.
@@ -151,7 +151,7 @@ The optional `shouldTransformIfDecryptionFails` parameter defines whether an ESO
 Some examples of `createModelVersion` can be found in the ESO Model Version example plugin (
 [examples/eso_model_version_example/server/plugin.ts](https://github.com/elastic/kibana/blob/06fc22a0f15e692857ba689a7b0ddec91ed2dac2/examples/eso_model_version_example/server/plugin.ts))
 
-For more information see our developer documentation for <DocLink id="kibDevTutorialSavedObject" section="defining-model-versions" text="Model Versions"/>.
+For more information see our developer documentation for [Model Versions](../tutorials/saved_objects.md#defining-model-versions).
 
 #### Serverless Considerations
 
@@ -308,7 +308,7 @@ And here is what the Model Version and schemas look like:
 
 There is only one encrypted attribute, `apiKeyToUse`, which contains the API key that needs to be protected. The attributes to include in AAD consist of the `spaceId`,
 and the `rule` definition. Since the object's namespace type is `'multiple-isolated'`, the space ID (or namespace) will not automatically be part of AAD by way of the
-Saved Object Descriptor (see <DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="aad" text="AAD"/>). In theory, the space id will never change for a
+Saved Object Descriptor (see [AAD](encrypted_saved_objects.md#aad)). In theory, the space id will never change for a
 `'multiple-isolated'`, which makes it a reasonable candidate for an AAD field.
 
 The `rule` attribute contains values related to the encrypted attribute `apiKeyToUse`, or that will never change:
@@ -335,7 +335,7 @@ encrypted attribute `apiKeyToUse`:
 
 This is not a problem, but it is important to consider that a change to any of these attributes will require re-encryption of an object. It is worth considering the nature
 of AAD hierarchical inclusion when structuring attributes for your saved objects. You can also utilize more granular keys when specifying which attributes to include in AAD,
-e.g. `rule.apiKeyOwner`. For more information, see the <DocLink id="kibDevDocsEncryptedSavedObjectsIntro" section="nested-attributes" text="Nested attributes"/> section of
+e.g. `rule.apiKeyOwner`. For more information, see the [Nested attributes](encrypted_saved_objects.md#nested-attributes) section of
 this document.
 
 Additionally, the owning team implemented a type to help manage partial updates. This is a great addition to ensure changes to the ESOs do not render them undecryptable.

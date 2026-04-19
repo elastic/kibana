@@ -10,7 +10,7 @@ After starting the job you will be sent to buildkite to view the progress of the
 
 ## How many successful runs do I need to know if my test is flaky?
 
-Most of the time flakiness should be resolved by starting with the error that's occurring in CI, then applying the suggestions in <DocLink id="kibDevDocsOpsFlakyTests" section="how-do-i-write-tests-that-arent-flaky" text="Flaky tests: How do I write functional tests that aren't flaky?"/> to find places where flakiness is likely being introduced. When working this way the flaky test runner can be used to debug a failure by running it many times to trigger the flakiness, or used to verify at the end that flakiness isn't increased by the changes.
+Most of the time flakiness should be resolved by starting with the error that's occurring in CI, then applying the suggestions in [Flaky tests: How do I write functional tests that aren't flaky?](flaky_tests.md#how-do-i-write-tests-that-arent-flaky) to find places where flakiness is likely being introduced. When working this way the flaky test runner can be used to debug a failure by running it many times to trigger the flakiness, or used to verify at the end that flakiness isn't increased by the changes.
 
 If you did want to prove that your test wasn't flaky anymore, the number of runs that you would need is based on the flakiness of the test you are dealing with. We execute tests about 300 times a day, on average, so if your test is only failing a few times a week then you might need over 1000 successful test runs to prove that it's no longer flaky. If a test is failing several times a day, then you would need way fewer.
 

@@ -14,12 +14,8 @@ Low-level building blocks
 provide greater flexibility, but require more code to stitch them together into a meaningful UX. This results in higher maintenance cost for consumers and greater UI/UX variability
 across Kibana.
 
-For example, if an application is using <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns"/> and <DocLink id="kibBuildingBlocks" section="search-source" text="Search Source" />, their application would
-automatically support runtime fields. If the app is instead using the lower-level <DocLink
-  id="kibBuildingBlocks"
-  section="search-strategy"
-  text="Search Strategy"
-/>, additional work would be required.
+For example, if an application is using [Index Patterns](building_blocks.md#index-patterns) and [Search Source](building_blocks.md#search-source), their application would
+automatically support runtime fields. If the app is instead using the lower-level [Search Strategy](building_blocks.md#search-strategy), additional work would be required.
 
 Armed with this knowledge, you can choose what works best for your use case!
 
@@ -31,15 +27,15 @@ The following high-level building blocks can be rendered directly into your appl
 
 ### Query Bar
 
-The <DocLink id="kibDataPlugin" text="Data plugin"/> provides a high-level Query Bar component that comes with support for Lucene, KQL, Saved Queries,
-and <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns"/>. If you would like to expose the ability to search and filter on Elasticsearch data, the Query Bar provided by the <DocLink id="kibDataPlugin" text="Data plugin" /> is your go-to building block.
+The [Data plugin](data_views.md) provides a high-level Query Bar component that comes with support for Lucene, KQL, Saved Queries,
+and [Index Patterns](building_blocks.md#index-patterns). If you would like to expose the ability to search and filter on Elasticsearch data, the Query Bar provided by the [Data plugin](data_views.md) is your go-to building block.
 
 **Github labels**: `Team:AppServices`, `Feature:QueryBar`
 
 ### Dashboard Embeddable
 
 Add a Dashboard Embeddable directly inside your application to provide users with a set of visualizations and graphs that work seamlessly
-with the <DocLink id="kibBuildingBlocks" section="query-bar" text="Query Bar"/>. Every feature that is added to a registered <DocLink id="kibBuildingBlocks" section="embeddables" text="Embeddable" /> (Lens, Maps, Discover sessions and more) will be available automatically, as well as any <DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" /> that are added to the Embeddable context menu panel (for example, drilldowns, custom panel time ranges, and "share to" features).
+with the [Query Bar](building_blocks.md#query-bar). Every feature that is added to a registered [Embeddable](building_blocks.md#embeddables) (Lens, Maps, Discover sessions and more) will be available automatically, as well as any [UI Actions](building_blocks.md#ui-actions--triggers) that are added to the Embeddable context menu panel (for example, drilldowns, custom panel time ranges, and "share to" features).
 
 The Dashboard Embeddable is one of the highest-level UI components you can add to your application.
 
@@ -47,7 +43,7 @@ The Dashboard Embeddable is one of the highest-level UI components you can add t
 
 ### Lens Embeddable
 
-Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the <DocLink id="kibBuildingBlocks" section="expressions" text="Expression language" />, and integrates with <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Patterns" /> and <DocLink id="kibBuildingBlocks" section="ui-actions--triggers" text="UI Actions" />. Using the same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to drill deeper and explore their data.
+Check out the Lens Embeddable if you wish to show users visualizations based on Elasticsearch data without worrying about query building and chart rendering. It's built on top of the [Expression language](building_blocks.md#expressions), and integrates with [Index Patterns](building_blocks.md#index-patterns) and [UI Actions](building_blocks.md#ui-actions--triggers). Using the same configuration, it's also possible to link to a prefilled Lens editor, allowing the user to drill deeper and explore their data.
 
 **Github labels**: `Team:Visualizations`, `Feature:Lens`
 
@@ -61,7 +57,7 @@ Check out the Map Embeddable if you wish to embed a map in your application.
 
 All Kibana pages should use KibanaPageTemplate to setup their pages. It's a thin wrapper around [EuiPageTemplate](https://elastic.github.io/eui/#/layout/page) that makes setting up common types of Kibana pages quicker and easier while also adhering to any Kibana-specific requirements.
 
-Check out <DocLink id="kibDevDocsKPTTutorial" text="the KibanaPageTemplate tutorial" /> for more implementation guidance.
+Check out [the KibanaPageTemplate tutorial](../tutorials/kibana_page_template.md) for more implementation guidance.
 
 **Github labels**: `EUI`
 
@@ -69,7 +65,7 @@ Check out <DocLink id="kibDevDocsKPTTutorial" text="the KibanaPageTemplate tutor
 
 ### Index Patterns
 
-<DocLink id="kibDataPlugin" section="data-views-api" text="Index Patterns" /> are a high-level, space-aware
+[Index Patterns](data_views.md#data-views-api) are a high-level, space-aware
 abstraction layer that sits above Data Streams and Elasticsearch indices. Index Patterns provide users
 the ability to define and customize the data they wish to search and filter on, on a per-space basis.
 For example, users can specify a set of indices, and they can customize the field list with runtime fields,
@@ -81,14 +77,10 @@ Index Patterns are used in many other high-level building blocks so we highly re
 
 ### Search Source
 
-<DocLink id="kibDataPlugin" section="searchsource" text="Search Source" /> is a high-level search service
-offered by the <DocLink id="kibDataPlugin" section="searchsource" text="Data plugin" />. It requires
-an <DocLink id="kibBuildingBlocks" section="index-patterns" text="Index Pattern" />, and abstracts away
-the raw ES DSL and search endpoint. Internally it uses the ES <DocLink
-  id="kibBuildingBlocks"
-  section="search-strategies"
-  text="Search Strategy"
-/>
+[Search Source](data_views.md#searchsource) is a high-level search service
+offered by the [Data plugin](data_views.md#searchsource). It requires
+an [Index Pattern](building_blocks.md#index-patterns), and abstracts away
+the raw ES DSL and search endpoint. Internally it uses the ES [Search Strategy](building_blocks.md#search-strategies)
 . Use Search Source if you need to query data from Elasticsearch, and you aren't already using one of
 the high-level UI Components that handles this internally.
 
@@ -105,14 +97,14 @@ languages, like EQL and SQL. These are very low-level building blocks so expect 
 ### Expressions
 
 Expressions are a low-level building block that can be used if you have advanced search needs that requiring piping results into additional functionality, like
-joining and manipulating data. Lens and Canvas are built on top of Expressions. Most developers should be able to use <DocLink id="kibBuildingBlocks" section="lens-embeddable" text="Lens" /> or <DocLink id="kibBuildingBlocks" section="search-source" text="Search Source" />, rather than need to
+joining and manipulating data. Lens and Canvas are built on top of Expressions. Most developers should be able to use [Lens](building_blocks.md#lens-embeddable) or [Search Source](building_blocks.md#search-source), rather than need to
 access the Expression language directly.{' '}
 
 **Github labels**: `Team:AppServices`, `Feature:ExpressionLanguage`
 
 ## Saved Objects
 
-<DocLink id="kibDevDocsSavedObjectsIntro" text="Saved Objects" /> should be used if you need to persist
+[Saved Objects](saved_objects.md) should be used if you need to persist
 application-level information. If you were building a TODO application, each TODO item would be a `Saved
 Object`. Saved objects come pre-wired with support for bulk export/import, security features like space
 sharing and space isolation, and tags.
@@ -121,7 +113,7 @@ sharing and space isolation, and tags.
 
 ## Advanced Settings
 
-<DocLink id="kibDevTutorialAdvancedSettings" text="Advanced Settings and the uiSettings service" /> should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
+[Advanced Settings and the uiSettings service](../tutorials/advanced_settings.md) should be used if you need to add application-level configuration options. If you wanted to add a setting for listing a number of items per page in your TODO application, then `pageListing` would be a configuration option.
 
 **Github labels**: `Team:Core`, `Feature:uiSettings`, `Feature:Advanced Settings`
 
@@ -139,7 +131,7 @@ application could register a UI Action called "View in Maps" to appear any time 
 
 ## Embeddables
 
-<DocLink id="kibDevDocsEmbeddables" text="Embeddables" /> help you integrate your application with the Dashboard application. Register your custom UI Widget as an Embeddable and users will
+[Embeddables](embeddables.md) help you integrate your application with the Dashboard application. Register your custom UI Widget as an Embeddable and users will
 be able to add it as a panel on a Dashboard. With a little extra work, it can also be exposed in Canvas workpads.
 
 **Github labels**: `Team:AppServices`, `Feature:Embeddables`
