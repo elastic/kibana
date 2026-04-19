@@ -29,8 +29,11 @@ describe('reviewer sync', () => {
 
   it('sameStringSet compares sets order-insensitively', () => {
     expect(sameStringSet(['b', 'a'], ['a', 'b'])).toEqual(true);
+    expect(sameStringSet(['a', 'b'], ['b', 'a'])).toEqual(true);
+    expect(sameStringSet(['a', 'a', 'b'], ['b', 'a'])).toEqual(true);
     expect(sameStringSet(['a'], ['a', 'b'])).toEqual(false);
     expect(sameStringSet(undefined, [])).toEqual(true);
+    expect(sameStringSet(undefined, ['a'])).toEqual(false);
   });
 
   it('getRulePackages collects matchDepNames + matchPackageNames and filters to known packages', () => {
@@ -163,6 +166,7 @@ describe('reviewer sync', () => {
     });
 
     expect(report.updatedRules).toEqual(1);
+    expect(report.rulesSyncManaged).toEqual(1);
     expect(report.managedSyncNeeded).toEqual(1);
     expect(report.ruleDrift).toHaveLength(0);
     expect(report.managedRuleDrift).toHaveLength(1);
@@ -177,6 +181,43 @@ describe('reviewer sync', () => {
       'team:kibana-core',
       'team:kibana-presentation',
     ]);
+  });
+
+  it('syncReviewersInConfig counts all in-scope mode=sync rules in rulesSyncManaged, even when already in sync', () => {
+    const renovateConfig: RenovateConfig = {
+      packageRules: [
+        {
+          // sync rule already in sync - should count toward rulesSyncManaged but not managedSyncNeeded
+          matchDepNames: ['lodash'],
+          reviewers: ['team:kibana-core'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+        {
+          // sync rule with drift - should count toward both rulesSyncManaged and managedSyncNeeded
+          matchDepNames: ['react'],
+          reviewers: ['team:old'],
+          x_kbn_reviewer_sync: { mode: 'sync' },
+        },
+      ],
+    };
+
+    const report = syncReviewersInConfig({
+      renovateConfig,
+      knownPackages: new Set(['lodash', 'react']),
+      packageToTeams: new Map([
+        ['lodash', ['@elastic/kibana-core']],
+        ['react', ['@elastic/kibana-presentation']],
+      ]),
+      applyChanges: true,
+    });
+
+    expect(report.rulesSyncManaged).toEqual(2);
+    expect(report.managedSyncNeeded).toEqual(1);
+    expect(report.managedRuleDrift).toHaveLength(1);
+    expect(report.updatedRules).toEqual(1);
+    expect(report.managedRuleDrift[0].packages).toEqual(['react']);
+    expect(renovateConfig.packageRules?.[0].reviewers).toEqual(['team:kibana-core']);
+    expect(renovateConfig.packageRules?.[1].reviewers).toEqual(['team:kibana-presentation']);
   });
 
   it('syncReviewersInConfig reports missing coverage for packages used in code but not referenced by any rule', () => {

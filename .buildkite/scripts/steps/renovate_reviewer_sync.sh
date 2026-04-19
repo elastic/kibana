@@ -357,12 +357,11 @@ main () {
 
   report_main_step "Changes committed. Pushing branch."
 
+  # Fetch the remote ref (if any) so `--force-with-lease` has a lease baseline.
+  # Works for both fresh branch creation (no remote ref yet, lease is a no-op) and
+  # stale-branch overwrite (e.g. a previously closed PR left the remote branch behind).
   git fetch origin "$BRANCH_NAME" >/dev/null 2>&1 || true
-  if [ -n "${existing_pr_number:-}" ] && [ "${existing_pr_number:-}" != "null" ]; then
-    git push origin "$BRANCH_NAME" --force-with-lease
-  else
-    git push origin "$BRANCH_NAME"
-  fi
+  git push origin "$BRANCH_NAME" --force-with-lease
 
   if [ -n "${existing_pr_number:-}" ] && [ "${existing_pr_number:-}" != "null" ]; then
     report_main_step "Updating pull request body"

@@ -121,10 +121,10 @@ export function computeReviewersForPackages(
 }
 
 export function sameStringSet(a: string[] | undefined, b: string[]): boolean {
-  if (!a) return b.length === 0;
-  const normA = normalizeSortedUnique(a);
-  if (normA.length !== b.length) return false;
-  return normA.every((v, i) => v === b[i]);
+  const normA = normalizeSortedUnique(a ?? []);
+  const normB = normalizeSortedUnique(b);
+  if (normA.length !== normB.length) return false;
+  return normA.every((v, i) => v === normB[i]);
 }
 
 export interface ReviewerSyncReport {
@@ -247,11 +247,18 @@ export function syncReviewersInConfig(params: {
       continue;
     }
 
+    // Counted parallel to `rulesFixedByOverride` above: in-scope rules that this
+    // tool actively manages (mappable packages + computable reviewers + mode=sync),
+    // regardless of whether they currently have drift. Drift is tracked separately
+    // via `managedSyncNeeded`/`managedRuleDrift`.
+    if (ruleMode === 'sync') {
+      rulesSyncManaged++;
+    }
+
     if (
       !sameStringSet(isStringArray(rule.reviewers) ? rule.reviewers : undefined, computedReviewers)
     ) {
       if (ruleMode === 'sync') {
-        rulesSyncManaged++;
         managedSyncNeeded++;
 
         managedRuleDrift.push({
