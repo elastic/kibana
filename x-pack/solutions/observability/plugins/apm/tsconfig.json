@@ -158,6 +158,7 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
+    "@kbn/presentation-util",
   ],
   "exclude": ["target/**/*"]
 }
