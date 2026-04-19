@@ -152,6 +152,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         isEditingEnabled: expect.any(Function),
         onEdit: expect.any(Function),
         getTypeDisplayName: expect.any(Function),
+        blockingError$: expect.any(Object),
       })
     );
     expect(embeddable.api.serializeState()).toEqual({
@@ -163,6 +164,23 @@ describe('getServiceMapEmbeddableFactory', () => {
       serviceName: undefined,
       serviceGroupId: undefined,
     });
+  });
+
+  it('exposes blockingError$ initialized to undefined', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: { application: {} } } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+
+    const embeddable = await factory.buildEmbeddable({
+      initialState: {},
+      finalizeApi,
+      uuid: 'panel-1',
+      parentApi,
+    } as never);
+
+    expect(embeddable.api.blockingError$).toBeDefined();
+    expect(embeddable.api.blockingError$.getValue()).toBeUndefined();
   });
 
   it('exposes edit capabilities', async () => {

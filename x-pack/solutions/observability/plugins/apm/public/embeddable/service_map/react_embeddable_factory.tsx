@@ -10,6 +10,7 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
+  PublishesBlockingError,
   PublishesFilters,
   PublishesTimeRange,
   PublishingSubject,
@@ -63,6 +64,7 @@ const DEFAULT_RANGE_TO = 'now';
 
 export type ServiceMapEmbeddableApi = DefaultEmbeddableApi<ServiceMapEmbeddableState> &
   HasEditCapabilities &
+  PublishesBlockingError &
   PublishesFilters &
   PublishesTimeRange & {
     setTimeRange: (timeRange: TimeRange | undefined) => void;
@@ -130,6 +132,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         from: rangeFrom$.getValue(),
         to: rangeTo$.getValue(),
       });
+      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
       combineLatest([serviceName$, environment$]).subscribe(([sn, env]) => {
         filters$.next(buildFiltersFromState(sn, env));
@@ -190,6 +193,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         ...titleManager.api,
         ...unsavedChangesApi,
         serializeState,
+        blockingError$,
         filters$,
         query$,
         timeRange$,
@@ -210,6 +214,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             flyoutProps: {
               type: 'overlay',
               size: 'm',
+              container: null,
               'data-test-subj': 'apmServiceMapEditorFlyout',
               focusedPanelId: uuid,
             },
@@ -277,6 +282,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
                   serviceName={serviceName ?? undefined}
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}
+                  onBlockingError={(error) => blockingError$.next(error)}
                 />
               </ApmEmbeddableContext>
             </div>

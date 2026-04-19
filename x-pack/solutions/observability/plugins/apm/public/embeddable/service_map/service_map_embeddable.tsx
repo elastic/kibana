@@ -6,7 +6,7 @@
  */
 
 import { EuiCallOut, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -36,6 +36,7 @@ export interface ServiceMapEmbeddableProps {
   serviceName?: string;
   serviceGroupId?: string;
   core: CoreStart;
+  onBlockingError?: (error: Error | undefined) => void;
 }
 
 function LoadingSpinner() {
@@ -55,9 +56,29 @@ export function ServiceMapEmbeddable({
   serviceName,
   serviceGroupId,
   core,
+  onBlockingError,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
+
+  const hasValidLicense = license && isActivePlatinumLicense(license);
+  const isServiceMapEnabled = config.serviceMapEnabled;
+
+  useEffect(() => {
+    if (license && !hasValidLicense) {
+      onBlockingError?.(new Error(invalidLicenseMessage));
+    } else if (!isServiceMapEnabled) {
+      onBlockingError?.(
+        new Error(
+          i18n.translate('xpack.apm.serviceMapEmbeddable.disabledError', {
+            defaultMessage: 'Service map is disabled in APM configuration',
+          })
+        )
+      );
+    } else {
+      onBlockingError?.(undefined);
+    }
+  }, [license, hasValidLicense, isServiceMapEnabled, onBlockingError]);
 
   const { start: resolvedStart, end: resolvedEnd } = useMemo(
     () => getDateRange({ rangeFrom, rangeTo }),

@@ -116,6 +116,16 @@ describe('ServiceMapEmbeddable', () => {
     expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
 
+  it('clears blocking error when license and config are valid', () => {
+    const onBlockingError = jest.fn();
+    mockUseServiceMap.mockReturnValue({
+      data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+      status: FETCH_STATUS.LOADING,
+    });
+    renderEmbeddable({ onBlockingError });
+    expect(onBlockingError).toHaveBeenCalledWith(undefined);
+  });
+
   describe('when license is missing', () => {
     it('renders the loading state', () => {
       renderEmbeddable({}, { license: undefined });
@@ -160,6 +170,33 @@ describe('ServiceMapEmbeddable', () => {
       );
       expect(screen.getByText(/Platinum/)).toBeInTheDocument();
     });
+
+    it('calls onBlockingError with license error', () => {
+      const goldLicense = new License({
+        signature: 'test',
+        license: {
+          expiryDateInMillis: 0,
+          mode: 'gold',
+          status: 'active',
+          type: 'gold',
+          uid: '1',
+        },
+      });
+      const onBlockingError = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      render(
+        <ApmEmbeddableContext deps={mockDeps} rangeFrom="now-15m" rangeTo="now">
+          <LicenseContext.Provider value={goldLicense}>
+            <ServiceMapEmbeddable {...defaultProps} onBlockingError={onBlockingError} />
+          </LicenseContext.Provider>
+        </ApmEmbeddableContext>
+      );
+      expect(onBlockingError).toHaveBeenCalledWith(expect.any(Error));
+      expect(onBlockingError.mock.calls[0][0].message).toMatch(/Platinum/);
+    });
   });
 
   describe('when service map is not enabled', () => {
@@ -185,6 +222,30 @@ describe('ServiceMapEmbeddable', () => {
           /The service map has been disabled\. It can be enabled via `xpack\.apm\.serviceMapEnabled`/
         )
       ).toBeInTheDocument();
+    });
+
+    it('calls onBlockingError with disabled error', () => {
+      const onBlockingError = jest.fn();
+      mockUseServiceMap.mockReturnValue({
+        data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
+        status: FETCH_STATUS.SUCCESS,
+      });
+      render(
+        <ApmEmbeddableContext
+          deps={{
+            ...mockDeps,
+            config: { ...mockDeps.config, serviceMapEnabled: false },
+          }}
+          rangeFrom="now-15m"
+          rangeTo="now"
+        >
+          <LicenseContext.Provider value={platinumLicense}>
+            <ServiceMapEmbeddable {...defaultProps} onBlockingError={onBlockingError} />
+          </LicenseContext.Provider>
+        </ApmEmbeddableContext>
+      );
+      expect(onBlockingError).toHaveBeenCalledWith(expect.any(Error));
+      expect(onBlockingError.mock.calls[0][0].message).toMatch(/disabled/i);
     });
   });
 
@@ -253,10 +314,6 @@ describe('ServiceMapEmbeddable', () => {
     it('hides the fit view button when embedded', () => {
       renderEmbeddable();
       expect(screen.queryByTestId('serviceMapFitViewButton')).not.toBeInTheDocument();
-    });
-
-    describe('when the panel is resized', () => {
-      it.todo('adjusts graph height to match panel height');
     });
 
     it('falls back to raw range values when date range is unresolved', () => {
