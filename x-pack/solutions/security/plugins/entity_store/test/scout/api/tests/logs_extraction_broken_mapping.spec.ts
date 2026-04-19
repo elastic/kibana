@@ -397,6 +397,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         }
       );
       expect(firstExtraction.statusCode).toBe(200);
+      expect(firstExtraction.body).toMatchObject({ success: true, count: 1 });
 
       await esClient.indices.refresh({ index: LATEST_ALIAS });
       expect(
@@ -436,6 +437,7 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
         }
       );
       expect(secondExtraction.statusCode).toBe(200);
+      expect(secondExtraction.body).toMatchObject({ success: true, count: 1 });
 
       await esClient.indices.refresh({ index: LATEST_ALIAS });
       const afterSecond = await esClient.search({
@@ -446,8 +448,8 @@ apiTest.describe('Entity Store logs extraction broken mapping', { tag: ENTITY_ST
 
       // user.full_name uses `collect` (VALUES) — both values must be present if the update landed.
       const source = afterSecond.hits.hits[0]._source as { user: { full_name: unknown } };
-      expect(source.user.full_name).toContain('First Full Name');
-      expect(source.user.full_name).toContain('Second Full Name');
+      expect.soft(source.user.full_name).toContain('First Full Name');
+      expect.soft(source.user.full_name).toContain('Second Full Name');
     }
   );
 
