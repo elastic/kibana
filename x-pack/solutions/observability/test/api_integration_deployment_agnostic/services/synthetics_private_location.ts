@@ -11,15 +11,71 @@ import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/sa
 import type { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
 import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { KbnClient } from '@kbn/kbn-client';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
+/**
+ * Saved-object types that synthetics tests actually create and therefore need
+ * cleaning between suites. This is an explicit allow-list, *not* a subset of
+ * the shared `STANDARD_LIST_TYPES`, because the shared list wipes several
+ * types whose presence is required for the synthetics Fleet package to stay
+ * functional across suites:
+ *
+ *   - `epm-packages` / `epm-packages-assets`: Fleet's record of the installed
+ *     synthetics package. Wiping these forces `installSyntheticsPackage()` to
+ *     do a full DELETE+POST reinstall on every suite (the primary source of
+ *     502 / "backend closed connection" Fleet flakes in CI).
+ *   - Kibana asset types (`dashboard`, `index-pattern`, `visualization`,
+ *     `search`, `lens`, `map`, etc.): these are installed *by* the synthetics
+ *     Fleet package, referenced from `epm-packages.installed_kibana`.
+ *     Wiping them while preserving `epm-packages` leaves dangling references
+ *     that break subsequent tests which resolve package assets in new spaces.
+ *
+ * Keep this list narrow: only SO types the tests themselves create.
+ */
+const SYNTHETICS_TEST_SO_TYPES = [
+  // Synthetics test artifacts
+  'synthetics-monitor',
+  'synthetics-monitor-multi-space',
+  'synthetics-privates-locations',
+  'synthetics-private-location',
+  'synthetics-param',
+  'uptime-dynamic-settings',
+  // Fleet agent / package policies created to back private locations
+  'ingest-agent-policies',
+  'fleet-agent-policies',
+  'ingest-package-policies',
+  'fleet-package-policies',
+  // Alerting artifacts created by enable_default_alerting & related suites
+  'alert',
+  'action',
+];
+
+/**
+ * Drop-in replacement for `kibanaServer.savedObjects.cleanStandardList()` for
+ * synthetics suites. Wipes only the SO types the tests themselves create,
+ * leaving the synthetics Fleet package installation (and the Kibana/ES
+ * assets it owns) intact so `installSyntheticsPackage()` can short-circuit
+ * across suites.
+ */
+export async function cleanSyntheticsTestData(
+  kibanaServer: KbnClient,
+  options?: { space?: string }
+) {
+  await kibanaServer.savedObjects.clean({
+    types: SYNTHETICS_TEST_SO_TYPES,
+    space: options?.space,
+  });
+}
+
 // Module-level caches shared across every PrivateLocationTestService instance
-// in a single FTR run. These exist so that the ~25 suite-level `before` hooks
-// that call `installSyntheticsPackage()` don't each trigger a full Fleet setup
-// + package delete + reinstall cycle against the same Kibana — that churn was
-// the primary source of 502 / "backend closed connection" flakes.
+// in a single FTR run. Combined with `cleanSyntheticsTestData` (which leaves
+// the `epm-packages` SO intact), these let the ~25 suite-level `before` hooks
+// that call `installSyntheticsPackage()` short-circuit after the first real
+// install, avoiding the Fleet churn that produced 502 flakes in downstream
+// tests.
 let fleetSetupDone = false;
 let installedVersionCache: string | null = null;
 
