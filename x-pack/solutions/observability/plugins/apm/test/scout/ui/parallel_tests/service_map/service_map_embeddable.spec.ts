@@ -75,9 +75,7 @@ test.describe(
         // Select environment from dropdown (environments load automatically)
         const environmentComboBox = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
         await environmentComboBox.click();
-        await page
-          .getByRole('option', { name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING })
-          .click({ timeout: 15000 });
+        await page.getByRole('option', { name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING }).click();
 
         // Add KQL filter matching the staging transaction
         const kueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');

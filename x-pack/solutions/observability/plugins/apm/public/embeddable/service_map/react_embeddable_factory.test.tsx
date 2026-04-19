@@ -15,79 +15,21 @@ import {
 import { APM_SERVICE_MAP_EMBEDDABLE } from './constants';
 import {
   getServiceMapEmbeddableFactory,
-  mergeKueryQueries,
   type ServiceMapEmbeddableApi,
 } from './react_embeddable_factory';
 import type { EmbeddableDeps } from '../types';
 
-describe('mergeKueryQueries', () => {
-  it('returns empty string when both inputs are empty', () => {
-    expect(mergeKueryQueries(undefined, undefined)).toBe('');
-    expect(mergeKueryQueries(undefined, '')).toBe('');
-    expect(mergeKueryQueries(undefined, '  ')).toBe('');
-  });
-
-  it('returns panel kuery when no dashboard query', () => {
-    expect(mergeKueryQueries(undefined, 'service.name: api')).toBe('service.name: api');
-    expect(mergeKueryQueries(undefined, '  service.name: api  ')).toBe('service.name: api');
-  });
-
-  it('returns dashboard query when no panel kuery', () => {
-    expect(mergeKueryQueries({ query: 'host.name: server1', language: 'kuery' }, '')).toBe(
-      'host.name: server1'
-    );
-    expect(
-      mergeKueryQueries({ query: '  host.name: server1  ', language: 'kuery' }, undefined)
-    ).toBe('host.name: server1');
-  });
-
-  it('combines panel and dashboard queries with "and"', () => {
-    expect(
-      mergeKueryQueries({ query: 'host.name: server1', language: 'kuery' }, 'service.name: api')
-    ).toBe('service.name: api and host.name: server1');
-  });
-
-  it('handles empty dashboard query object', () => {
-    expect(mergeKueryQueries({ query: '', language: 'kuery' }, 'service.name: api')).toBe(
-      'service.name: api'
-    );
-    expect(mergeKueryQueries({ query: '  ', language: 'kuery' }, 'service.name: api')).toBe(
-      'service.name: api'
-    );
-  });
-
-  it('handles malformed query objects gracefully', () => {
-    expect(mergeKueryQueries({} as any, 'service.name: api')).toBe('service.name: api');
-    expect(mergeKueryQueries({ query: null } as any, 'service.name: api')).toBe(
-      'service.name: api'
-    );
-  });
-
-  it('ignores AggregateQuery (ES|QL) and returns panel kuery only', () => {
-    expect(mergeKueryQueries({ esql: 'FROM logs' }, 'service.name: api')).toBe('service.name: api');
-    expect(mergeKueryQueries({ esql: 'FROM logs' }, '')).toBe('');
-  });
-});
-
-const mockApiPublishesUnifiedSearch = jest.fn();
 const mockInitializeTitleManager = jest.fn();
 const mockInitializeUnsavedChanges = jest.fn();
 const mockUseBatchedPublishingSubjects = jest.fn();
-const mockUseObservable = jest.fn();
 const mockServiceMapEmbeddable = jest.fn();
 const mockApmEmbeddableContext = jest.fn();
 
 jest.mock('@kbn/presentation-publishing', () => ({
-  apiPublishesUnifiedSearch: (...args: unknown[]) => mockApiPublishesUnifiedSearch(...args),
   initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
   initializeUnsavedChanges: (...args: unknown[]) => mockInitializeUnsavedChanges(...args),
   titleComparators: { title: 'referenceEquality' },
   useBatchedPublishingSubjects: (...args: unknown[]) => mockUseBatchedPublishingSubjects(...args),
-}));
-
-jest.mock('react-use/lib/useObservable', () => ({
-  __esModule: true,
-  default: (...args: unknown[]) => mockUseObservable(...args),
 }));
 
 jest.mock('../embeddable_context', () => ({
@@ -117,8 +59,6 @@ describe('getServiceMapEmbeddableFactory', () => {
       reinitializeState: jest.fn(),
     });
     mockInitializeUnsavedChanges.mockImplementation(() => ({ unsavedApi: true }));
-    mockApiPublishesUnifiedSearch.mockReturnValue(true);
-    mockUseObservable.mockReturnValue({ query: 'transaction.type: request' });
     mockUseBatchedPublishingSubjects.mockReturnValue([
       undefined,
       undefined,
@@ -201,7 +141,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     expect(typeof embeddable.api.onEdit).toBe('function');
   });
 
-  it('combines panel and dashboard kuery and passes state to rendered components', async () => {
+  it('passes panel kuery to rendered components (ignores dashboard query)', async () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
       'now-1h',
       'now',
@@ -231,7 +171,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         deps,
         rangeFrom: 'now-1h',
         rangeTo: 'now',
-        kuery: 'service.name: api and transaction.type: request',
+        kuery: 'service.name: api',
       })
     );
     expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
@@ -239,7 +179,7 @@ describe('getServiceMapEmbeddableFactory', () => {
         rangeFrom: 'now-1h',
         rangeTo: 'now',
         environment: 'production',
-        kuery: 'service.name: api and transaction.type: request',
+        kuery: 'service.name: api',
         serviceName: 'checkout',
         serviceGroupId: 'group-1',
         core: deps.coreStart,
@@ -247,9 +187,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     );
   });
 
-  it('supports reset behavior and dashboard-query opt out', async () => {
-    mockApiPublishesUnifiedSearch.mockReturnValue(false);
-    mockUseObservable.mockReturnValue(undefined);
+  it('supports reset behavior', async () => {
     mockUseBatchedPublishingSubjects.mockReturnValue([
       'now-15m',
       'now',
@@ -327,7 +265,7 @@ describe('getServiceMapEmbeddableFactory', () => {
     render(<embeddable.Component />);
     expect(mockServiceMapEmbeddable).toHaveBeenCalledWith(
       expect.objectContaining({
-        kuery: 'host.name: app-1',
+        kuery: '  host.name: app-1  ',
         rangeFrom: 'now-15m',
         rangeTo: 'now',
         serviceName: undefined,
@@ -337,7 +275,6 @@ describe('getServiceMapEmbeddableFactory', () => {
   });
 
   it('defaults to now-15m when initialState has undefined time range', async () => {
-    mockApiPublishesUnifiedSearch.mockReturnValue(false);
     mockUseBatchedPublishingSubjects.mockReturnValue([
       'now-15m',
       'now',

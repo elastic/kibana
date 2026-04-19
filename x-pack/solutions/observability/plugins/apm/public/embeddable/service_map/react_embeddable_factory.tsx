@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type {
@@ -16,14 +16,12 @@ import type {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import {
-  apiPublishesUnifiedSearch,
   initializeTitleManager,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import useObservable from 'react-use/lib/useObservable';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
@@ -32,26 +30,6 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../common/environment_filter_values';
-
-const NO_QUERY$ = new BehaviorSubject<Query | undefined>(undefined);
-
-export function mergeKueryQueries(
-  dashboardQuery: Query | AggregateQuery | undefined,
-  panelKuery: string | undefined
-): string {
-  const dashboardQueryString =
-    dashboardQuery && typeof dashboardQuery === 'object' && 'query' in dashboardQuery
-      ? String((dashboardQuery as { query?: string }).query ?? '').trim()
-      : '';
-  const panelQueryString = (panelKuery ?? '').trim();
-
-  if (dashboardQueryString) {
-    return panelQueryString
-      ? `${panelQueryString} and ${dashboardQueryString}`
-      : dashboardQueryString;
-  }
-  return panelQueryString;
-}
 
 import type { EmbeddableDeps } from '../types';
 import type { ServiceMapEmbeddableState } from './types';
@@ -259,27 +237,19 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
               serviceGroupId$
             );
 
-          const parentQuery$ = apiPublishesUnifiedSearch(parentApi) ? parentApi.query$ : NO_QUERY$;
-          const dashboardQuery = useObservable(parentQuery$);
-
-          const effectiveKuery = useMemo(
-            () => mergeKueryQueries(dashboardQuery, kuery),
-            [dashboardQuery, kuery]
-          );
-
           return (
             <div style={{ width: '100%', height: '100%', position: 'relative' }}>
               <ApmEmbeddableContext
                 deps={deps}
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
-                kuery={effectiveKuery}
+                kuery={kuery}
               >
                 <ServiceMapEmbeddable
                   rangeFrom={rangeFrom}
                   rangeTo={rangeTo}
                   environment={environment}
-                  kuery={effectiveKuery}
+                  kuery={kuery}
                   serviceName={serviceName ?? undefined}
                   serviceGroupId={serviceGroupId ?? undefined}
                   core={deps.coreStart}

@@ -94,7 +94,7 @@ export const useServiceMap = ({
   const { data, status, error } = fetcherResult;
 
   return useMemo((): UseServiceMapResult => {
-    if (status === FETCH_STATUS.LOADING) {
+    if (status === FETCH_STATUS.NOT_INITIATED || status === FETCH_STATUS.LOADING) {
       return { data: INITIAL_STATE, status: FETCH_STATUS.LOADING };
     }
 
