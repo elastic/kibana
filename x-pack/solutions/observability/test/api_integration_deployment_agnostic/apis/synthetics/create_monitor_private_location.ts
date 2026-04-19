@@ -498,7 +498,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         this.skip();
       }
 
-      await testPrivateLocations.installSyntheticsPackage({ version: lowerVersion });
+      await testPrivateLocations.installSyntheticsPackage({
+        version: lowerVersion,
+        force: true,
+      });
       let monitorId = '';
       const privateLocation = await testPrivateLocations.addTestPrivateLocation();
 
@@ -530,7 +533,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(packagePolicy.package.version).eql(lowerVersion);
 
-        await testPrivateLocations.installSyntheticsPackage();
+        await testPrivateLocations.installSyntheticsPackage({ force: true });
 
         await retry.tryForTime(120 * 1000, async () => {
           const policyResponseAfterUpgrade = await supertestWithAuth.get(
@@ -552,7 +555,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         }
         // Restore the package to the latest version — this MUST succeed
         // or subsequent tests will run against the wrong version
-        await testPrivateLocations.installSyntheticsPackage();
+        await testPrivateLocations.installSyntheticsPackage({ force: true });
       }
     });
 

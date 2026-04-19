@@ -15,6 +15,21 @@ import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_conte
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
+// Module-level caches shared across every PrivateLocationTestService instance
+// in a single FTR run. These exist so that the ~25 suite-level `before` hooks
+// that call `installSyntheticsPackage()` don't each trigger a full Fleet setup
+// + package delete + reinstall cycle against the same Kibana — that churn was
+// the primary source of 502 / "backend closed connection" flakes.
+let fleetSetupDone = false;
+let installedVersionCache: string | null = null;
+
+/** Reset the module-level cache. Exposed for tests that intentionally mutate
+ *  deployment state (e.g. the synthetics auto-upgrade test). */
+export function resetInstallSyntheticsPackageCache() {
+  fleetSetupDone = false;
+  installedVersionCache = null;
+}
+
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
   private readonly retry: RetryService;
@@ -33,15 +48,62 @@ export class PrivateLocationTestService {
     return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   }
 
-  async installSyntheticsPackage({ version }: { version?: string } = {}) {
-    await this.retry.try(async () => {
-      await this.supertestWithAuth
-        .post('/api/fleet/setup')
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
-    });
-    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
+  /** Returns the Fleet-reported { version, status } for the synthetics
+   *  package, or `null` if Fleet hasn't observed it at all. */
+  async getInstalledSyntheticsPackage(): Promise<{ version: string; status: string } | null> {
+    const res = await this.supertestWithAuth
+      .get('/api/fleet/epm/packages/synthetics')
+      .set('kbn-xsrf', 'true');
+    const item = res.body?.item;
+    if (!item?.version) {
+      return null;
+    }
+    return { version: item.version, status: item.status ?? 'unknown' };
+  }
+
+  /**
+   * Ensures the synthetics Fleet package is installed at the requested version.
+   *
+   * This method is idempotent across all FTR suites in a single run:
+   * - `POST /api/fleet/setup` only runs the first time any suite calls it.
+   * - If the package is already installed at the requested version, it
+   *   returns without issuing `DELETE` + `POST`.
+   *
+   * Historically every one of the ~25 Synthetics `describe` `before` hooks
+   * performed a full uninstall + reinstall cycle, which saturated Fleet and
+   * produced 502 / "backend closed connection" flakes in downstream tests.
+   * Callers that genuinely need a clean reinstall (the auto-upgrade test)
+   * should pass `{ force: true }`.
+   */
+  async installSyntheticsPackage({
+    version,
+    force = false,
+  }: { version?: string; force?: boolean } = {}) {
+    if (!fleetSetupDone) {
+      await this.retry.try(async () => {
+        await this.supertestWithAuth
+          .post('/api/fleet/setup')
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+      });
+      fleetSetupDone = true;
+    }
+
+    const installed = await this.getInstalledSyntheticsPackage();
+    const resolvedVersion =
+      version ?? installed?.version ?? installedVersionCache ?? DEFAULT_SYNTHETICS_VERSION;
+
+    const alreadyInstalled =
+      !force &&
+      installed?.status === 'installed' &&
+      installed?.version === resolvedVersion &&
+      installedVersionCache === resolvedVersion;
+
+    if (alreadyInstalled) {
+      return;
+    }
+
     await this.retry.try(async () => {
       await this.supertestWithAuth
         .delete(`/api/fleet/epm/packages/synthetics`)
@@ -53,12 +115,13 @@ export class PrivateLocationTestService {
         .expect(200);
       // Verify the version actually took effect — background Fleet tasks
       // (e.g. deferred upgradePackageInstallVersion) can race and overwrite it
-      const installedVersion = await this.fetchSyntheticsPackageVersion();
-      if (installedVersion !== resolvedVersion) {
+      const after = await this.getInstalledSyntheticsPackage();
+      if (after?.version !== resolvedVersion) {
         throw new Error(
-          `Package version mismatch after install: expected ${resolvedVersion} but got ${installedVersion}`
+          `Package version mismatch after install: expected ${resolvedVersion} but got ${after?.version}`
         );
       }
+      installedVersionCache = resolvedVersion;
     });
   }
 
