@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { suggestDescriptionRoute } from './suggest_description_route';
 import { suggestPartitionsRoute } from './suggest_partitions_route';
 import { suggestProcessingPipelineRoute } from './suggest_processing_pipeline_route';
 import { unmanagedAssetsRoute } from './unmanaged_assets_route';
@@ -12,6 +13,7 @@ import { restoreDataStreamRoute } from './restore_data_stream_route';
 
 export const internalManagementRoutes = {
   ...unmanagedAssetsRoute,
+  ...suggestDescriptionRoute,
   ...suggestPartitionsRoute,
   ...suggestProcessingPipelineRoute,
   ...restoreDataStreamRoute,
