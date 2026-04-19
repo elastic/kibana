@@ -30,7 +30,7 @@ export function createAddServiceMapPanelAction(
     order: 25,
     getIconType: () => 'apps',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return deps.config.serviceMapEnabled && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) {

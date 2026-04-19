@@ -33,7 +33,7 @@ const mockDeps = {
   pluginsStart: {},
   coreSetup: {} as CoreSetup,
   pluginsSetup: {},
-  config: {},
+  config: { serviceMapEnabled: true },
   kibanaEnvironment: {},
   observabilityRuleTypeRegistry: {},
 } as unknown as EmbeddableDeps;
@@ -65,6 +65,17 @@ describe('createAddServiceMapPanelAction', () => {
   it('is not compatible when embeddable is not a presentation container', async () => {
     mockApiIsPresentationContainer.mockReturnValue(false);
     const action = createAddServiceMapPanelAction(mockDeps);
+
+    await expect(action.isCompatible!({ embeddable: {} })).resolves.toBe(false);
+  });
+
+  it('is not compatible when serviceMapEnabled is false', async () => {
+    mockApiIsPresentationContainer.mockReturnValue(true);
+    const disabledDeps = {
+      ...mockDeps,
+      config: { serviceMapEnabled: false },
+    } as unknown as EmbeddableDeps;
+    const action = createAddServiceMapPanelAction(disabledDeps);
 
     await expect(action.isCompatible!({ embeddable: {} })).resolves.toBe(false);
   });
