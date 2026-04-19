@@ -27,6 +27,7 @@ import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject, combineLatest, map, merge } from 'rxjs';
+import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -80,21 +81,21 @@ function buildFiltersFromState(
 
   if (serviceName) {
     filters.push({
-      meta: { key: 'service.name', type: 'phrase', params: { query: serviceName } },
-      query: { match_phrase: { 'service.name': serviceName } },
+      meta: { key: SERVICE_NAME, type: 'phrase', params: { query: serviceName } },
+      query: { match_phrase: { [SERVICE_NAME]: serviceName } },
     });
   }
 
   if (environment && environment !== ENVIRONMENT_ALL.value) {
     if (environment === ENVIRONMENT_NOT_DEFINED.value) {
       filters.push({
-        meta: { key: 'service.environment', type: 'exists', negate: true },
-        query: { exists: { field: 'service.environment' } },
+        meta: { key: SERVICE_ENVIRONMENT, type: 'exists', negate: true },
+        query: { exists: { field: SERVICE_ENVIRONMENT } },
       });
     } else {
       filters.push({
-        meta: { key: 'service.environment', type: 'phrase', params: { query: environment } },
-        query: { match_phrase: { 'service.environment': environment } },
+        meta: { key: SERVICE_ENVIRONMENT, type: 'phrase', params: { query: environment } },
+        query: { match_phrase: { [SERVICE_ENVIRONMENT]: environment } },
       });
     }
   }

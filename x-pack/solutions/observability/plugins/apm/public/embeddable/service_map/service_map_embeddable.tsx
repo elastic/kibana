@@ -96,26 +96,21 @@ export function ServiceMapEmbeddable({
     serviceName,
   });
 
-  // When license is not yet available (e.g. first render or after remount), show loading
-  // instead of null to avoid a blank panel while the license observable emits.
   if (!license) {
     return (
-      <EuiPanel hasBorder paddingSize="none">
-        <div
-          data-test-subj="apmServiceMapEmbeddable"
-          style={{
-            width: '100%',
-            minWidth: EMBEDDABLE_MIN_WIDTH,
-            maxWidth: '100%',
-            height: EMBEDDABLE_MIN_HEIGHT,
-            minHeight: EMBEDDABLE_MIN_HEIGHT,
-            position: 'relative',
-            boxSizing: 'border-box',
-          }}
-        >
-          <LoadingSpinner />
-        </div>
-      </EuiPanel>
+      <div
+        data-test-subj="apmServiceMapEmbeddable"
+        style={{
+          width: '100%',
+          height: '100%',
+          minWidth: EMBEDDABLE_MIN_WIDTH,
+          minHeight: EMBEDDABLE_MIN_HEIGHT,
+          position: 'relative',
+          boxSizing: 'border-box',
+        }}
+      >
+        <LoadingSpinner />
+      </div>
     );
   }
 
