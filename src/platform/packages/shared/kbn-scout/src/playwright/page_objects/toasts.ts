@@ -31,7 +31,11 @@ export class Toasts {
   }
 
   async closeAll() {
-    await this.waitFor();
+    // Tolerate the case where no toast is currently visible: `waitFor` would otherwise
+    // throw after 10s if callers invoke `closeAll` opportunistically as a cleanup step.
+    if ((await this.page.locator('.euiToast').count()) === 0) {
+      return;
+    }
     await this.toast.closeAllToasts();
   }
 }

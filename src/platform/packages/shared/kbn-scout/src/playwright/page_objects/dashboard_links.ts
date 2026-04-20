@@ -205,16 +205,18 @@ export class DashboardLinks {
       await this.linkEditorLabelInput.fill(linkLabel);
     }
 
+    // The Links panel renders `DashboardDrilldownOptionsComponent`, whose data-test-subjs use
+    // the `dashboardDrillDownOptions--{field}--checkbox` pattern and the field names below.
     await this.setEuiSwitch(
-      this.page.testSubj.locator('dashboardNavigationOptions--useFilters--checkbox'),
+      this.page.testSubj.locator('dashboardDrillDownOptions--useCurrentFilters--checkbox'),
       useFilters
     );
     await this.setEuiSwitch(
-      this.page.testSubj.locator('dashboardNavigationOptions--useTimeRange--checkbox'),
+      this.page.testSubj.locator('dashboardDrillDownOptions--useCurrentDateRange--checkbox'),
       useTimeRange
     );
     await this.setEuiSwitch(
-      this.page.testSubj.locator('dashboardNavigationOptions--openInNewTab--checkbox'),
+      this.page.testSubj.locator('dashboardDrillDownOptions--openInNewTab--checkbox'),
       openInNewTab
     );
 
