@@ -88,9 +88,10 @@ export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs.forEach((input) => {
     const streamsIdsMap = new Map();
 
+    const inputEffectiveName = getInputEffectiveName(input);
     const inputId = input.policy_template
-      ? `${input.policy_template}-${input.type}`
-      : `${input.type}`;
+      ? `${input.policy_template}-${inputEffectiveName}`
+      : inputEffectiveName;
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: inputId,
@@ -166,9 +167,10 @@ export async function getTemplateInputs(
   if (format === 'yml') {
     // Add a placeholder <VAR_NAME> to all variables without default value
     for (const inputWithStreamIds of inputsWithStreamIds) {
+      const inputEffectiveName = getInputEffectiveName(inputWithStreamIds);
       const inputId = inputWithStreamIds.policy_template
-        ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
-        : inputWithStreamIds.type;
+        ? `${inputWithStreamIds.policy_template}-${inputEffectiveName}`
+        : inputEffectiveName;
 
       const packageInput = indexedInputsAndStreams[inputId];
       if (!packageInput) {
