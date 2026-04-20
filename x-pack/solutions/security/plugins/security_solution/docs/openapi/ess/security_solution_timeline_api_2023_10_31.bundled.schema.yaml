@@ -43,13 +43,13 @@ paths:
         required: true
       responses:
         '200':
-          description: Indicates the note was successfully deleted.
+          description: Indicates a successful call.
       summary: Delete a note
       tags:
         - Security Timeline API
         - access:securitySolution
     get:
-      description: Get all notes for a given document.
+      descripdescription: Get all notes for a given document.
       operationId: GetNotes
       parameters:
         - in: query
@@ -103,9 +103,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                notes:
+                  - eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                    note: Escalated to tier-2 analyst
+                    noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzQ2LDFd
+                totalCount: 1
               schema:
                 $ref: '#/components/schemas/GetNotesResult'
-          description: Indicates the requested notes were returned.
+          description: Indicates a successful call.
       summary: Get notes
       tags:
         - Security Timeline API
@@ -140,9 +148,16 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                note:
+                  eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                  note: Escalated to tier-2 analyst
+                  noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  version: WzQ2LDFd
               schema:
                 $ref: '#/components/schemas/ResponseNote'
-          description: Indicates the note was successfully created.
+          description: Indicates a successful call.
       summary: Add or update a note
       tags:
         - Security Timeline API
@@ -181,11 +196,14 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                pinnedEventId: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
+                timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                version: WzQ2LDFe
               schema:
                 $ref: '#/components/schemas/PersistPinnedEventResponse'
-          description: >-
-            Indicates the event was successfully pinned to or unpinned from the
-            Timeline.
+          description: Indicates a successful call.
       summary: Pin/unpin an event
       tags:
         - Security Timeline API
@@ -227,7 +245,7 @@ paths:
         required: true
       responses:
         '200':
-          description: Indicates the Timeline was successfully deleted.
+          description: Indicates a successful call.
       summary: Delete Timelines or Timeline templates
       tags:
         - Security Timeline API
@@ -250,9 +268,18 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                description: User-reported suspicious email
+                noteIds: []
+                pinnedEventIds: []
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                status: active
+                timelineType: default
+                title: Phishing investigation
+                version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/TimelineResponse'
-          description: Indicates that the (template) Timeline was found and returned.
+          description: Indicates a successful call.
       summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
@@ -298,9 +325,15 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                status: active
+                timelineType: default
+                title: Escalated case review
+                version: WzE1LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: Indicates that the Timeline was successfully updated.
+          description: Indicates a successful call.
         '405':
           content:
             application/json:
@@ -366,9 +399,15 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                status: active
+                timelineType: default
+                title: Malware containment
+                version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: Indicates the Timeline was successfully created.
+          description: Indicates a successful call.
         '405':
           content:
             application/json:
@@ -410,9 +449,15 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                savedObjectId: 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                status: active
+                timelineType: default
+                title: Copy of phishing investigation
+                version: WzE1LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: Indicates that the timeline has been successfully copied.
+          description: Indicates a successful call.
       summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
@@ -434,9 +479,15 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                status: draft
+                timelineType: default
+                title: ''
+                version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: Indicates that the draft Timeline was successfully retrieved.
+          description: Indicates a successful call.
         '403':
           content:
             application/json:
@@ -496,12 +547,17 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                status: draft
+                templateTimelineId: null
+                templateTimelineVersion: null
+                timelineType: default
+                title: ''
+                version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: >-
-            Indicates that the draft Timeline was successfully created. In the
-            event the user already has a draft Timeline, the existing draft
-            Timeline is cleared and returned.
+          description: Indicates a successful call.
         '403':
           content:
             application/json:
@@ -562,10 +618,15 @@ paths:
         '200':
           content:
             application/ndjson:
+              example:
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                timelineType: default
+                title: Investigation
+                version: WzE0LDFd
               schema:
                 description: NDJSON of the exported Timelines
                 type: string
-          description: Indicates the Timelines were successfully exported.
+          description: Indicates a successful call.
         '400':
           content:
             application/ndjson:
@@ -576,7 +637,7 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates that the export size limit was exceeded.
+          description: Bad Request response.
       summary: Export Timelines
       tags:
         - Security Timeline API
@@ -614,9 +675,16 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                favorite:
+                  - favoriteDate: 1741337636741
+                    userName: elastic
+                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                timelineType: default
+                version: WzE2LDFd
               schema:
                 $ref: '#/components/schemas/FavoriteTimelineResponse'
-          description: Indicates the favorite status was successfully updated.
+          description: Indicates a successful call.
         '403':
           content:
             application/json:
@@ -659,9 +727,15 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                errors: []
+                success: true
+                success_count: 5
+                timelines_installed: 3
+                timelines_updated: 2
               schema:
                 $ref: '#/components/schemas/ImportTimelineResult'
-          description: Indicates the import of Timelines was successful.
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
@@ -675,9 +749,7 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: >-
-            Indicates the import of Timelines was unsuccessful because of an
-            invalid file extension.
+          description: Bad Request response.
         '404':
           content:
             application/json:
@@ -747,9 +819,15 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                errors: []
+                success: true
+                success_count: 10
+                timelines_installed: 8
+                timelines_updated: 2
               schema:
                 $ref: '#/components/schemas/ImportTimelineResult'
-          description: Indicates the installation of prepackaged Timelines was successful.
+          description: Indicates a successful call.
         '500':
           content:
             application/json:
@@ -769,6 +847,12 @@ paths:
         - access:securitySolution
   /api/timeline/resolve:
     get:
+      description: >-
+        Resolve a timeline or template through the saved-object resolve API,
+        surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict`
+        when object ids have been remapped during upgrades or imports. Provide
+        **either** `id` for default timelines or `template_timeline_id` for
+        templates—mirrors `GET /api/timeline` parameter semantics.
       operationId: ResolveTimeline
       parameters:
         - description: The ID of the template timeline to resolve
@@ -785,11 +869,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                exactMatch:
+                  description: Timeline resolved without alias or conflict
+                  value:
+                    outcome: exactMatch
+                    timeline:
+                      savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      timelineType: default
+                      title: Investigation
               schema:
                 $ref: '#/components/schemas/ResolvedTimeline'
-          description: The (template) Timeline has been found
+          description: Indicates a successful call.
         '400':
-          description: The request is missing parameters
+          description: Bad Request response.
         '404':
           description: The (template) Timeline was not found
       summary: Get an existing saved Timeline or Timeline template
@@ -856,6 +949,20 @@ paths:
         '200':
           content:
             application/json:
+              example:
+                customTemplateTimelineCount: 0
+                defaultTimelineCount: 1
+                elasticTemplateTimelineCount: 0
+                favoriteCount: 0
+                templateTimelineCount: 0
+                timeline:
+                  - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Phishing investigation
+                    updated: 1741344876825
+                    version: WzE0LDFd
+                totalCount: 1
               schema:
                 type: object
                 properties:
@@ -890,7 +997,7 @@ paths:
                 required:
                   - timeline
                   - totalCount
-          description: Indicates that the (template) Timelines were found and returned.
+          description: Indicates a successful call.
         '400':
           content:
             application/json:
@@ -904,7 +1011,7 @@ paths:
                   statusCode:
                     example: 405
                     type: number
-          description: Bad request. The user supplied invalid data.
+          description: Bad Request response.
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API

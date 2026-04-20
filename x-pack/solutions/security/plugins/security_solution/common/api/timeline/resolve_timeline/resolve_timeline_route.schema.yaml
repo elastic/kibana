@@ -9,6 +9,8 @@ paths:
       x-codegen-enabled: true
       operationId: ResolveTimeline
       summary: Get an existing saved Timeline or Timeline template
+      description:
+        Resolve a timeline or template through the saved-object resolve API, surfacing outcomes such as `exactMatch`, `aliasMatch`, or `conflict` when object ids have been remapped during upgrades or imports. Provide **either** `id` for default timelines or `template_timeline_id` for templates—mirrors `GET /api/timeline` parameter semantics.
       tags:
         - access:securitySolution
       parameters:
@@ -24,13 +26,22 @@ paths:
           description: The ID of the timeline to resolve
       responses:
         '200':
-          description: The (template) Timeline has been found
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
+              examples:
+                exactMatch:
+                  description: Timeline resolved without alias or conflict
+                  value:
+                    outcome: exactMatch
+                    timeline:
+                      savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      title: Investigation
+                      timelineType: default
 
         '400':
-          description: The request is missing parameters
+          description: Bad Request response.
         '404':
           description: The (template) Timeline was not found

@@ -38,11 +38,17 @@ paths:
                     nullable: true
       responses:
         '200':
-          description: Indicates the installation of prepackaged Timelines was successful.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+              example:
+                success: true
+                success_count: 10
+                timelines_installed: 8
+                timelines_updated: 2
+                errors: []
         '500':
           description: Indicates the installation of prepackaged Timelines was unsuccessful.
           content:

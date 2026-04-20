@@ -43,4 +43,4 @@ paths:
                     - 6ce1b592-84e3-4b4a-9552-f189d4b82075
       responses:
         '200':
-          description: Indicates the Timeline was successfully deleted.
+          description: Indicates a successful call.

@@ -27,8 +27,14 @@ paths:
                   type: string
       responses:
         '200':
-          description: Indicates that the timeline has been successfully copied.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
+              example:
+                savedObjectId: 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                version: WzE1LDFd
+                title: Copy of phishing investigation
+                timelineType: default
+                status: active

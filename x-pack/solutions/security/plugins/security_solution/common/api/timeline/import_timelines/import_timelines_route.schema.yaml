@@ -33,14 +33,20 @@ paths:
                 file: {}
       responses:
         '200':
-          description: Indicates the import of Timelines was successful.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
+              example:
+                success: true
+                success_count: 5
+                timelines_installed: 3
+                timelines_updated: 2
+                errors: []
 
         '400':
-          description: Indicates the import of Timelines was unsuccessful because of an invalid file extension.
+          description: Bad Request response.
           content:
             application/json:
               schema:

@@ -67,7 +67,7 @@ paths:
             nullable: true
       responses:
         '200':
-          description: Indicates that the (template) Timelines were found and returned.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -102,8 +102,22 @@ paths:
                     type: number
                     description: The amount of custom Timeline templates in the results
                     example: 2
+              example:
+                timeline:
+                  - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE0LDFd
+                    title: Phishing investigation
+                    timelineType: default
+                    status: active
+                    updated: 1741344876825
+                totalCount: 1
+                defaultTimelineCount: 1
+                templateTimelineCount: 0
+                favoriteCount: 0
+                elasticTemplateTimelineCount: 0
+                customTemplateTimelineCount: 0
         '400':
-          description: Bad request. The user supplied invalid data.
+          description: Bad Request response.
           content:
             application/json:
               schema:

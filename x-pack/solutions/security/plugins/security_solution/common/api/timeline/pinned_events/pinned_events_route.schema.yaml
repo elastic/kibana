@@ -39,11 +39,16 @@ paths:
                   example: '10r1929b-0af7-42bd-85a8-56e234f98h2f3'
       responses:
         '200':
-          description: Indicates the event was successfully pinned to or unpinned from the Timeline.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistPinnedEventResponse'
+              examples:
+                pinnedEventId: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
+                version: WzQ2LDFe
+                eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
 
 components:
   schemas:

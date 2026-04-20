@@ -36,4 +36,4 @@ paths:
                         type: string
       responses:
         '200':
-          description: Indicates the note was successfully deleted.
+          description: Indicates a successful call.
