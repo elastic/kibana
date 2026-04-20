@@ -146,7 +146,7 @@ function setKibanaCapabilities(workflowsManagement: {
         isReady: () => true,
       },
     },
-  } as ReturnType<typeof useKibana>);
+  } as unknown as ReturnType<typeof useKibana>);
 }
 
 function WorkflowListHarness({ item = defaultWorkflow }: { item?: typeof defaultWorkflow } = {}) {
