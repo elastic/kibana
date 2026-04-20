@@ -162,6 +162,10 @@ export default ({ getService }: FtrProviderContext): void => {
         params: Omit<Parameters<typeof waitForScore>[0], 'scoreType'>
       ) => waitForScore({ ...params, scoreType: 'base' });
 
+      const hasPositiveCalculatedScore = (
+        score: ReturnType<typeof normalizeScores>[number]
+      ): boolean => (score.calculated_score_norm ?? 0) > 0;
+
       before(async () => {
         await setupMaintainerLogsDataStream({
           es,
@@ -234,7 +238,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const relatedEntityIds =
               score.related_entities?.map((entity) => entity.entity_id) ?? [];
             return (
-              score.calculated_score_norm > 0 && relatedEntityIds.includes(aliasUser.expectedEuid)
+              hasPositiveCalculatedScore(score) && relatedEntityIds.includes(aliasUser.expectedEuid)
             );
           },
         });
@@ -244,7 +248,7 @@ export default ({ getService }: FtrProviderContext): void => {
           waitLabel: `base score for ${targetUser.expectedEuid}`,
           predicate: (score) =>
             score.calculation_run_id === resolutionScore.calculation_run_id &&
-            score.calculated_score_norm > 0,
+            hasPositiveCalculatedScore(score),
         });
 
         expect(resolutionScore.score_type).to.eql('resolution');
@@ -285,7 +289,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const baseScore = await waitForBaseScore({
           entityId: user.expectedEuid,
           waitLabel: `base score for ${user.expectedEuid}`,
-          predicate: (score) => score.calculated_score_norm > 0,
+          predicate: hasPositiveCalculatedScore,
         });
         expect(baseScore.score_type).to.eql('base');
 
@@ -329,7 +333,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const resolutionScore = await waitForResolutionScore({
           entityId: targetUser.expectedEuid,
           waitLabel: `resolved score for canonical target ${targetUser.expectedEuid}`,
-          predicate: (score) => score.calculated_score_norm > 0,
+          predicate: hasPositiveCalculatedScore,
         });
         expect(resolutionScore.score_type).to.eql('resolution');
         expect(resolutionScore.id_value).to.eql(targetUser.expectedEuid);
