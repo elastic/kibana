@@ -43,12 +43,16 @@ export type ApplyEnrichmentsToEvents = <T extends DetectionAlertLatest>(params: 
   logger: IRuleExecutionLogForExecutors;
 }) => Array<EventsForEnrichment<T>>;
 
-interface BasedEnrichParameters<T extends DetectionAlertLatest> {
+export interface BasedEnrichParameters<T extends DetectionAlertLatest> {
   services: SecurityRuleServices;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
   entityStoreCrudClient?: EntityStoreCRUDClient | null;
 }
+
+export type EnrichmentOptions<T extends DetectionAlertLatest> = BasedEnrichParameters<T> & {
+  spaceId: string;
+};
 
 export type GetEventValue = <T extends DetectionAlertLatest>(
   events: EventsForEnrichment<T>,
