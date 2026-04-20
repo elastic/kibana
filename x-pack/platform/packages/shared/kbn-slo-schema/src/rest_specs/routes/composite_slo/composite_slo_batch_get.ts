@@ -4,32 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import {
+  compositeSloIdSchema,
   compositeSloBaseDefinitionSchema,
   compositeSloMemberSummarySchema,
   compositeSloSummarySchema,
 } from '../../../schema/composite_slo';
-import { sloIdSchema } from '../../../schema/slo';
 
-const batchGetCompositeSLOParamsSchema = t.type({
-  body: t.type({
-    ids: t.array(sloIdSchema),
+const batchGetCompositeSLOParamsSchema = z.object({
+  body: z.object({
+    ids: z.array(compositeSloIdSchema).min(1).max(100),
   }),
 });
 
-const batchGetCompositeSLOResponseSchema = t.array(
-  t.intersection([
-    compositeSloBaseDefinitionSchema,
-    t.type({
-      summary: compositeSloSummarySchema,
-      members: t.array(compositeSloMemberSummarySchema),
-    }),
-  ])
+const batchGetCompositeSLOResponseSchema = z.array(
+  compositeSloBaseDefinitionSchema.extend({
+    summary: compositeSloSummarySchema,
+    members: z.array(compositeSloMemberSummarySchema),
+  })
 );
 
-type BatchGetCompositeSLOParams = t.TypeOf<typeof batchGetCompositeSLOParamsSchema.props.body>;
-type BatchGetCompositeSLOResponse = t.OutputOf<typeof batchGetCompositeSLOResponseSchema>;
+type BatchGetCompositeSLOParams = z.infer<typeof batchGetCompositeSLOParamsSchema.shape.body>;
+type BatchGetCompositeSLOResponse = z.infer<typeof batchGetCompositeSLOResponseSchema>;
 
 export { batchGetCompositeSLOParamsSchema, batchGetCompositeSLOResponseSchema };
 export type { BatchGetCompositeSLOParams, BatchGetCompositeSLOResponse };
