@@ -6,9 +6,7 @@
  */
 
 import type { BatchGetCompositeSLOResponse, GetCompositeSLOResponse } from '@kbn/slo-schema';
-import {
-  ALL_VALUE,
-} from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { toRichRollingTimeWindow } from '../domain/models';
 import type { CompositeSLORepository } from './composite_slo_repository';
 import type { SLODefinitionRepository } from './slo_definition_repository';
@@ -20,7 +18,7 @@ export class GetCompositeSLO {
     private compositeSloRepository: CompositeSLORepository,
     private sloDefinitionRepository: SLODefinitionRepository,
     private summaryClient: SummaryClient
-  ) { }
+  ) {}
 
   public async executeBatch(ids: string[]): Promise<BatchGetCompositeSLOResponse> {
     return await Promise.all(ids.map((id) => this.executeOne(id)));
