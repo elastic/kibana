@@ -12,10 +12,11 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type {
   Attachment,
   AttachmentVersionRef,
@@ -26,6 +27,7 @@ import { ROUNDED_BORDER_RADIUS_LARGE } from '../../../../common.styles';
 import { RoundResponseActions } from './round_response/round_response_actions';
 import { RoundAttachmentReferences } from './round_attachment_references';
 import { CommandBadgeText } from './command_badge_text';
+import { parseSurfaceActionLabel } from '../../attachments/a2ui_surface/surface_action_marker';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.round.userInput', {
@@ -49,6 +51,8 @@ export const RoundInput = ({
   const { euiTheme } = useEuiTheme();
   const [isHovering, setIsHovering] = useState(false);
 
+  const surfaceActionLabel = useMemo(() => parseSurfaceActionLabel(input), [input]);
+
   const inputContainerStyles = css`
     align-self: end;
     max-inline-size: 90%;
@@ -57,6 +61,23 @@ export const RoundInput = ({
     white-space: pre-wrap;
     border-radius: ${`${ROUNDED_BORDER_RADIUS_LARGE} ${ROUNDED_BORDER_RADIUS_LARGE} 0 ${ROUNDED_BORDER_RADIUS_LARGE}`};
   `;
+
+  if (surfaceActionLabel) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        alignItems="flexEnd"
+        css={css`
+          margin-block: ${euiTheme.size.xs};
+        `}
+      >
+        <EuiBadge color="hollow" iconType="check" iconSide="left">
+          {surfaceActionLabel}
+        </EuiBadge>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiFlexGroup

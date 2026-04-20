@@ -13,6 +13,7 @@ export type {
   EsqlAttachment,
   VisualizationAttachment,
   ConnectorAttachment,
+  A2UISurfaceAttachment,
 } from './attachments';
 
 export type {
@@ -37,7 +38,21 @@ export {
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
   type ConnectorAttachmentData,
+  type A2UISurfaceAttachmentData,
 } from './attachment_types';
+
+export {
+  A2UIComponentType,
+  KIBANA_EUI_CATALOG_ID,
+  a2uiComponentSchema,
+  a2uiSurfaceAttachmentDataSchema,
+  type A2UIComponent,
+  type A2UIChildList,
+  type A2UIAction,
+  type A2UITableColumn,
+  type A2UIDescriptionListItem,
+  type DynamicValue,
+} from './a2ui_surface';
 
 export type {
   VersionedAttachment,

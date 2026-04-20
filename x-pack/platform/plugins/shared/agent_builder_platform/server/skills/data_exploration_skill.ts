@@ -43,6 +43,10 @@ Follow the steps below to provide structured, accurate answers.
 - Highlight key patterns, outliers, or notable values.
 - Suggest follow-up queries or visualizations if relevant.
 
+### 5. Choose the Right Presentation
+- For plain-text answers or quick lookups, respond directly in markdown.
+- **When the user asks for a summary, overview, or dashboard-like display with multiple metrics, also load the \`a2ui-surface-creation\` skill.** It provides stat cards, tables, badges, embedded visualizations, and other structured layout components that are more informative than plain markdown for multi-metric responses.
+
 ## Best Practices
 - Always confirm the index and time range before running queries.
 - Start with broad queries and narrow down based on user feedback.

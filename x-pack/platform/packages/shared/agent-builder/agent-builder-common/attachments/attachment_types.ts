@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { A2UISurfaceAttachmentData } from './a2ui_surface';
 
 /**
  * List of internal / built-in attachment types.
@@ -18,6 +19,7 @@ export enum AttachmentType {
   esql = 'esql',
   visualization = 'visualization',
   connector = 'connector',
+  a2uiSurface = 'a2ui_surface',
 }
 
 interface AttachmentDataMap {
@@ -26,6 +28,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.a2uiSurface]: A2UISurfaceAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -154,5 +157,7 @@ export interface ConnectorAttachmentData {
   /** Action type ID (e.g., ".slack2", ".mcp") */
   connector_type: string;
 }
+
+export type { A2UISurfaceAttachmentData } from './a2ui_surface';
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

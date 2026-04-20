@@ -196,6 +196,7 @@ export function ChatMessageText({
         conversationId,
         isSidebar,
         attachmentsService,
+        currentRoundSteps: stepsFromCurrentRound,
       }),
     };
 

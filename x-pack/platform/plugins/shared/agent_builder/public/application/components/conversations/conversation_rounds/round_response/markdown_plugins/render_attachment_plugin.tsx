@@ -6,12 +6,16 @@
  */
 
 import React from 'react';
+import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
 import type {
   VersionedAttachment,
   AttachmentVersionRef,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import { isToolCallStep, platformCoreTools } from '@kbn/agent-builder-common';
+import { isOtherResult } from '@kbn/agent-builder-common/tools';
 import {
   renderAttachmentElement,
   type RenderAttachmentElementAttributes,
@@ -31,7 +35,7 @@ interface ResolveAttachmentVersionParams {
  * Resolves the version to use for an attachment.
  * Priority:
  * 1. Explicit version from tag attributes
- * 2. Version from cumulative attachment refs (highest version seen up to this round)
+ * 2. Version from cumulative attachment refs for this round
  * 3. Latest available version as fallback
  */
 export const resolveAttachmentVersion = ({
@@ -94,12 +98,51 @@ const getScreenContext = (
   return latest?.data as ScreenContextAttachmentData | undefined;
 };
 
+/**
+ * Extracts the highest attachment version produced by create_a2ui_surface tool
+ * calls in the current round's steps. Returns undefined if no matching tool
+ * result exists for this attachment.
+ *
+ * Used to detect when the server has created a newer version that may not yet
+ * be reflected in cumulative attachment refs (which only update after a full
+ * conversation refetch).
+ */
+export const getToolResultAttachmentVersion = (
+  attachmentId: string,
+  steps: ConversationRoundStep[] | undefined
+): number | undefined => {
+  if (!steps) return undefined;
+
+  let maxVersion: number | undefined;
+
+  for (const step of steps) {
+    if (!isToolCallStep(step) || step.tool_id !== platformCoreTools.createA2UISurface) {
+      continue;
+    }
+    for (const result of step.results) {
+      if (!isOtherResult(result)) continue;
+      const { data } = result;
+      if (
+        'attachment_id' in data &&
+        'version' in data &&
+        data.attachment_id === attachmentId &&
+        typeof data.version === 'number'
+      ) {
+        maxVersion = maxVersion === undefined ? data.version : Math.max(maxVersion, data.version);
+      }
+    }
+  }
+
+  return maxVersion;
+};
+
 interface RenderAttachmentRendererProps {
   attachmentsService: AttachmentsService;
   conversationAttachments?: VersionedAttachment[];
   attachmentRefs?: AttachmentVersionRef[];
   conversationId?: string;
   isSidebar: boolean;
+  currentRoundSteps?: ConversationRoundStep[];
 }
 /**
  * Creates a renderer for <render_attachment> tags.
@@ -110,6 +153,7 @@ export const createRenderAttachmentRenderer = ({
   attachmentRefs,
   conversationId,
   isSidebar,
+  currentRoundSteps,
 }: RenderAttachmentRendererProps) => {
   const screenContext = getScreenContext(conversationAttachments);
 
@@ -123,15 +167,23 @@ export const createRenderAttachmentRenderer = ({
     const attachment = conversationAttachments?.find((att) => att.id === attachmentId);
 
     if (!attachment) {
-      return null;
+      return (
+        <EuiPanel color="subdued" paddingSize="l" hasBorder={false} hasShadow={false}>
+          <EuiSkeletonText lines={3} />
+        </EuiPanel>
+      );
     }
 
-    const versionToUse = resolveAttachmentVersion({
-      explicitVersion,
-      attachmentId,
-      attachmentRefs,
-      attachment,
-    });
+    const toolResultVersion = getToolResultAttachmentVersion(attachmentId, currentRoundSteps);
+
+    const versionToUse =
+      toolResultVersion ??
+      resolveAttachmentVersion({
+        explicitVersion,
+        attachmentId,
+        attachmentRefs,
+        attachment,
+      });
 
     if (versionToUse === undefined) {
       return null;
@@ -140,7 +192,11 @@ export const createRenderAttachmentRenderer = ({
     const versionData = attachment.versions.find((v) => v.version === versionToUse);
 
     if (!versionData) {
-      return null;
+      return (
+        <EuiPanel color="subdued" paddingSize="l" hasBorder={false} hasShadow={false}>
+          <EuiSkeletonText lines={3} />
+        </EuiPanel>
+      );
     }
 
     return (

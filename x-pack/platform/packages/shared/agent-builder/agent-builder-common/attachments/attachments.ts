@@ -42,3 +42,4 @@ export type ScreenContextAttachment = Attachment<AttachmentType.screenContext>;
 export type EsqlAttachment = Attachment<AttachmentType.esql>;
 export type VisualizationAttachment = Attachment<AttachmentType.visualization>;
 export type ConnectorAttachment = Attachment<AttachmentType.connector>;
+export type A2UISurfaceAttachment = Attachment<AttachmentType.a2uiSurface>;

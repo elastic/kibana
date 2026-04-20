@@ -29,6 +29,7 @@ Do **not** use this skill when:
 - The user only needs raw documents or table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
+- The primary goal is a composite layout that combines multiple KPIs, tables, and charts into a unified display. Use the a2ui-surface-creation skill to compose these, then embed visualizations inside via VisualizationRef.
 - The primary goal is to compose or update a dashboard. Use the dashboard-management skill for dashboard panel creation and layout.
 
 ## Available Tools

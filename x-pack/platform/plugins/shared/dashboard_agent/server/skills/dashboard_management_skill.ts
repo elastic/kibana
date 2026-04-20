@@ -6,6 +6,7 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import { platformCoreTools } from '@kbn/agent-builder-common';
 import { manageDashboardTool } from '../tools';
 import { dashboardTools } from '../../common';
 import { gridLayoutPrompt } from './grid_layout_prompt';
@@ -24,10 +25,25 @@ Use this skill when:
 - A user asks to create a dashboard from one or more visualizations.
 - A user asks to update an in-memory dashboard created earlier in the conversation.
 - A request involves dashboard metadata, markdown, panel, or section changes.
+- The user clicks a suggested action to "Create new dashboard" or "Add to existing dashboard" after an A2UI surface.
 
 Do **not** use this skill when:
 - The user asks for a standalone visualization rather than a dashboard.
 - The user needs help exploring data, fields, or query logic.
+
+## Creating a Dashboard from a Prior A2UI Summary
+
+When the user asks to create a dashboard from an A2UI summary rendered earlier in the conversation, the dashboard should **mirror the summary's structure and data** rather than re-interpreting the data from scratch. Follow these rules:
+
+1. **Match the summary 1:1.** Every A2UI component that displays data should have a corresponding dashboard panel:
+   - Each **Stat** component becomes a \`metric\` chart type panel in \`create_visualization_panels\`.
+   - Each **Table** component becomes a \`datatable\` chart type panel in \`create_visualization_panels\`.
+   - Each **VisualizationRef** component is added via \`add_panels_from_attachments\` using its \`attachment_id\`.
+2. **Do not add panels** that were not present in the summary unless the user explicitly requests a richer dashboard.
+3. **Do not omit panels** that appeared in the summary.
+4. **Reuse ES|QL queries.** If the A2UI surface \`data_model\` contains a \`_queries\` metadata key, or if prior \`${platformCoreTools.executeEsql}\` / \`${platformCoreTools.generateEsql}\` tool results are in context, pass those queries via the \`esql\` parameter on each panel in \`create_visualization_panels\`. Also pass the \`index\` from the same source. This prevents independent query regeneration and keeps the dashboard data consistent with the summary.
+5. **Preserve panel ordering.** Follow the visual hierarchy from the summary: headline KPIs first, then trend charts, then breakdowns and detail tables.
+6. **Use the summary's sections** as dashboard sections when the summary groups components into distinct Card containers or labeled groups.
 
 ## Core Instructions
 
@@ -84,6 +100,7 @@ After a successful call:
 - Use returned \`id\` values for future panel removals.
 - Use returned \`sectionId\` values for future section-targeted changes.
 - If \`data.failures\` is present, explain which attachments failed and why.
+- Call \`${platformCoreTools.suggestFollowUps}\` with relevant next steps. When the dashboard was loaded from a saved object (has a known saved object ID from \`sml_search\` or \`sml_attach\`), include a navigation link: \`{"label": "Open dashboard", "prompt": "Open the dashboard", "url": "/app/dashboards#/view/<savedObjectId>", "icon": "dashboardApp"}\`. For newly created in-memory dashboards, suggest prompt actions instead (e.g. "Add more panels", "Customize layout").
 
 ## Attachments
 
@@ -109,5 +126,6 @@ ${gridLayoutPrompt}
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before calling \`remove_panels\`, \`create_visualization_panels\`, or any other replacement operations.
 - If the tool returns partial failures, explain which attachments failed and include the reported error for each one.
 `,
+  getRegistryTools: () => [platformCoreTools.suggestFollowUps],
   getInlineTools: () => [manageDashboardTool()],
 });

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { a2uiSurfaceCreationSkill } from './a2ui_surface_creation_skill';
 export { dataExplorationSkill } from './data_exploration_skill';
 export { graphCreationSkill } from './graph_creation_skill';
 export { visualizationCreationSkill } from './visualization_creation_skill';

@@ -26,6 +26,7 @@ import type {
 export type SkillsDirectoryStructure = Directory<{
   skills: Directory<{
     platform: FileDirectory<{
+      a2ui: FileDirectory;
       dashboard: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;

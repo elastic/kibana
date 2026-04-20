@@ -12,6 +12,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type {
   ConversationRound,
   ReasoningStep,
+  SuggestedAction,
   ToolCallProgress,
   ToolCallStep,
   Conversation,
@@ -25,7 +26,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { AttachmentInput, VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { ConversationsService } from '../../../services/conversations';
 import { queryKeys } from '../../query_keys';
 import { storageKeys } from '../../storage_keys';
@@ -85,6 +86,8 @@ export interface ConversationActions {
     tokenCountAfter: number;
     summarizedRoundCount: number;
   }) => void;
+  setSuggestedActions: (actions: SuggestedAction[] | undefined) => void;
+  mergeAttachments: (attachments: VersionedAttachment[] | undefined) => void;
   deleteConversation: (id: string) => Promise<void>;
   renameConversation: (id: string, title: string) => Promise<void>;
 }
@@ -316,6 +319,23 @@ const createConversationActions = ({
       if (onConversationCreated) {
         onConversationCreated({ conversationId: id, title });
       }
+    },
+    setSuggestedActions: (actions: SuggestedAction[] | undefined) => {
+      setCurrentRound((round) => {
+        round.response.suggested_actions = actions;
+      });
+    },
+    mergeAttachments: (updatedAttachments: VersionedAttachment[] | undefined) => {
+      if (!updatedAttachments?.length) {
+        return;
+      }
+      setConversation(
+        produce((draft) => {
+          if (draft) {
+            draft.attachments = updatedAttachments;
+          }
+        })
+      );
     },
     deleteConversation: async (id: string) => {
       await conversationsService.delete({ conversationId: id });

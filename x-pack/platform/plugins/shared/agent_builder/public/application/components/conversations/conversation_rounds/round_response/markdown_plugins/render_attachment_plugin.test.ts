@@ -9,7 +9,17 @@ import type {
   AttachmentVersionRef,
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { renderAttachmentTagParser, resolveAttachmentVersion } from './render_attachment_plugin';
+import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  platformCoreTools,
+  ToolResultType,
+} from '@kbn/agent-builder-common';
+import {
+  renderAttachmentTagParser,
+  resolveAttachmentVersion,
+  getToolResultAttachmentVersion,
+} from './render_attachment_plugin';
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 
 const createMockAttachment = (
@@ -156,6 +166,66 @@ describe('resolveAttachmentVersion', () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe('getToolResultAttachmentVersion', () => {
+  const attachmentId = 'attachment-1';
+
+  const createA2UISurfaceStep = (
+    resultAttachmentId: string,
+    version: number
+  ): ConversationRoundStep => ({
+    type: ConversationRoundStepType.toolCall,
+    tool_call_id: 'call-1',
+    tool_id: platformCoreTools.createA2UISurface,
+    params: {},
+    results: [
+      {
+        tool_result_id: 'result-1',
+        type: ToolResultType.other,
+        data: {
+          surface_id: 'surface-1',
+          title: 'Test Surface',
+          component_count: 2,
+          attachment_id: resultAttachmentId,
+          version,
+          is_update: true,
+        },
+      },
+    ],
+  });
+
+  it('returns the version from a matching tool result', () => {
+    const step = createA2UISurfaceStep(attachmentId, 3);
+    expect(getToolResultAttachmentVersion(attachmentId, [step])).toBe(3);
+  });
+
+  it('returns the highest version when multiple tool results exist', () => {
+    const step1 = createA2UISurfaceStep(attachmentId, 2);
+    const step2 = createA2UISurfaceStep(attachmentId, 4);
+    expect(getToolResultAttachmentVersion(attachmentId, [step1, step2])).toBe(4);
+  });
+
+  it('returns undefined when the tool result is for a different attachment', () => {
+    const step = createA2UISurfaceStep('other-attachment', 3);
+    expect(getToolResultAttachmentVersion(attachmentId, [step])).toBeUndefined();
+  });
+
+  it('returns undefined when steps are undefined', () => {
+    expect(getToolResultAttachmentVersion(attachmentId, undefined)).toBeUndefined();
+  });
+
+  it('returns undefined when steps contain no create_a2ui_surface calls', () => {
+    const step: ConversationRoundStep = {
+      type: ConversationRoundStepType.toolCall,
+      tool_call_id: 'call-1',
+      tool_id: 'platform.core.search',
+      params: {},
+      results: [{ tool_result_id: 'result-1', type: ToolResultType.other, data: {} }],
+    };
+
+    expect(getToolResultAttachmentVersion(attachmentId, [step])).toBeUndefined();
   });
 });
 

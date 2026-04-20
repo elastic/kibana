@@ -26,6 +26,8 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
+  createA2UISurface: platformCoreTool('create_a2ui_surface'),
+  suggestFollowUps: platformCoreTool('suggest_follow_ups'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   productDocumentation: platformCoreTool('product_documentation'),
@@ -36,6 +38,9 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  listConnectorSpecs: platformCoreTool('list_connector_specs'),
+  getConnectorSchema: platformCoreTool('get_connector_schema'),
+  createConnector: platformCoreTool('create_connector'),
 } as const;
 
 export const platformStreamsSigEventsTools = {
@@ -90,6 +95,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.suggestFollowUps,
 ];
 
 /**

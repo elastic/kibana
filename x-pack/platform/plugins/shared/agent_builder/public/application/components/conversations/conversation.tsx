@@ -110,6 +110,19 @@ export const Conversation: React.FC<{}> = () => {
     }
   }, [stickToBottom, isFetched, conversationId, shouldStickToBottom]);
 
+  const wasResponseLoadingRef = useRef(false);
+
+  useEffect(() => {
+    if (isResponseLoading && !wasResponseLoadingRef.current) {
+      const timeoutId = setTimeout(() => {
+        scrollToMostRecentRoundTop();
+      }, 50);
+      wasResponseLoadingRef.current = isResponseLoading;
+      return () => clearTimeout(timeoutId);
+    }
+    wasResponseLoadingRef.current = isResponseLoading;
+  }, [isResponseLoading, scrollToMostRecentRoundTop]);
+
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
   `;
@@ -191,10 +204,7 @@ export const Conversation: React.FC<{}> = () => {
               onDismiss={() => setDismissStaleAttachments(true)}
             />
           )}
-          <ConversationInput
-            onSubmit={scrollToMostRecentRoundTop}
-            onEditorFocus={scheduleStaleCheck}
-          />
+          <ConversationInput onEditorFocus={scheduleStaleCheck} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <CanvasFlyout attachmentsService={attachmentsService} />
