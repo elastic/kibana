@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { IlmPolicyHotPhase, IlmPolicyPhases } from '@kbn/streams-schema';
+import type { IlmPolicyHotPhase, IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
 import type { PreservedTimeUnit, TimeUnit } from '../../shared';
 
 export type { PreservedTimeUnit, TimeUnit };
 
-export const DOWNSAMPLE_PHASES = ['hot', 'warm', 'cold'] as const;
+export const DOWNSAMPLE_PHASES = ['hot', 'warm', 'cold'] as const satisfies PhaseName[];
 export type DownsamplePhase = (typeof DOWNSAMPLE_PHASES)[number];
+
+export const READONLY_ALLOWED_PHASES = ['hot', 'warm', 'cold'] as const satisfies PhaseName[];
+export type ReadonlyAllowedPhase = (typeof READONLY_ALLOWED_PHASES)[number];
 
 export interface MinAgeMetaFields {
   minAgeValue: string;
@@ -20,11 +23,6 @@ export interface MinAgeMetaFields {
    * `micros`, `nanos`). We preserve and round-trip the unit as-is.
    */
   minAgeUnit: PreservedTimeUnit;
-  /**
-   * Derived field used for cross-phase min_age validation.
-   * -1 means "unset / invalid / not computed".
-   */
-  minAgeToMilliSeconds: number;
 }
 
 export interface DownsampleMetaFields {
@@ -73,7 +71,7 @@ export interface DeletePhaseMetaFields extends MinAgeMetaFields {
 
 /**
  * All UI controls write to dedicated form paths under `_meta.*`.
- * Output `IlmPolicyPhases` is constructed solely by the serializer.
+ * Output `IlmPolicyPhases` is constructed solely by the mapper.
  */
 export interface IlmPhasesFlyoutFormInternal {
   _meta: {
@@ -89,7 +87,7 @@ export interface IlmPhasesFlyoutFormInternal {
 }
 
 /**
- * Output/serialized shape for consumers.
+ * Output shape for consumers.
  * This matches the existing component contract: `onChange(next: IlmPolicyPhases)`.
  */
 export type IlmPhasesFlyoutFormOutput = IlmPolicyPhases;
