@@ -14,7 +14,6 @@ const HYSTERESIS_FACTOR = 0.9;
 interface DynamicCapacityState {
   capacity: number;
   cooldownUntilMs: number;
-  consecutiveUnhealthyReadings: number;
 }
 
 interface ProcessHealthSignals {
@@ -42,6 +41,16 @@ interface ProportionalScaleDownResult {
   nextCapacity: number;
   stepUsed: number;
   worstOvershootRatio?: number;
+}
+
+interface ProjectionResult {
+  projectedAtFullCapacity: ProjectedAtFullCapacityMetrics;
+  projectionFactor: number;
+}
+
+interface EsCapacityAdjustmentResult {
+  nextCapacity: number;
+  reason: CapacityReason;
 }
 
 export interface DynamicCapacityControllerOpts {
@@ -86,7 +95,6 @@ export class DynamicCapacityController {
     this.state = {
       capacity: startingCapacity,
       cooldownUntilMs: 0,
-      consecutiveUnhealthyReadings: 0,
     };
   }
 
@@ -129,47 +137,28 @@ export class DynamicCapacityController {
 
     const previousCapacity = this.state.capacity;
     let nextCapacity = previousCapacity;
-    let nextConsecutiveUnhealthyReadings = this.state.consecutiveUnhealthyReadings;
     let nextCooldownUntilMs = this.state.cooldownUntilMs;
     let reason: CapacityReason = '';
     let scaleDownStepUsed: number | undefined;
     let worstOvershootRatio: number | undefined;
-    const utilizationRatio = Math.max(
-      this.projectionUtilizationPct / 100,
-      this.minUtilizationForProjection
-    );
-    const projectionFactor = 1 / utilizationRatio;
-    const projectedAtFullCapacity = {
-      eventLoopUtilization: processHealthForEvaluation.eventLoopUtilization * projectionFactor,
-      processCpuUtilization: processHealthForEvaluation.processCpuUtilization * projectionFactor,
-      eventLoopDelayMs: processHealthForEvaluation.eventLoopDelayMs * projectionFactor,
-    };
+    const { projectedAtFullCapacity, projectionFactor } = projectAtFullCapacity({
+      projectionUtilizationPct: this.projectionUtilizationPct,
+      minUtilizationForProjection: this.minUtilizationForProjection,
+      processHealth: processHealthForEvaluation,
+    });
     const projectedHealthyForScaleUp = isHealthyForScaleUp(projectedAtFullCapacity, this.config);
 
-    const esCapacityIsDegraded = this.esManagedCapacity < this.startingCapacity;
-
-    // ES-side reductions are always applied quickly when ES has degraded capacity below
-    // the baseline. ES-side recovery increases are skipped while process signals are
-    // unhealthy to avoid oscillation.
-    if (esCapacityIsDegraded && this.esManagedCapacity < nextCapacity) {
-      nextCapacity = this.esManagedCapacity;
-      reason = 'elasticsearch_errors';
-    } else if (
-      esCapacityIsDegraded &&
-      this.esManagedCapacity > nextCapacity &&
-      !processHealthForEvaluation.isUnhealthy
-    ) {
-      nextCapacity = this.esManagedCapacity;
-      reason = 'elasticsearch_recovery';
-    }
+    const esAdjustment = applyEsManagedCapacityAdjustment({
+      currentCapacity: nextCapacity,
+      esManagedCapacity: this.esManagedCapacity,
+      startingCapacity: this.startingCapacity,
+      processIsUnhealthy: processHealthForEvaluation.isUnhealthy,
+    });
+    nextCapacity = esAdjustment.nextCapacity;
+    reason = esAdjustment.reason;
 
     if (processHealthForEvaluation.isUnhealthy) {
-      nextConsecutiveUnhealthyReadings += 1;
-      if (
-        nextConsecutiveUnhealthyReadings >=
-          this.config.dynamic_capacity.scale_down_consecutive_unhealthy_readings &&
-        nextCapacity > this.floorCapacity
-      ) {
+      if (nextCapacity > this.floorCapacity) {
         const scaleDownResult = applyProportionalScaleDown({
           currentCapacity: nextCapacity,
           floorCapacity: this.floorCapacity,
@@ -180,7 +169,6 @@ export class DynamicCapacityController {
         scaleDownStepUsed = scaleDownResult.stepUsed;
         worstOvershootRatio = scaleDownResult.worstOvershootRatio;
         nextCooldownUntilMs = nowMs + this.config.dynamic_capacity.scale_down_cooldown_ms;
-        nextConsecutiveUnhealthyReadings = 0;
         reason = 'unhealthy_process_signals';
       }
     } else if (
@@ -192,10 +180,7 @@ export class DynamicCapacityController {
         nextCapacity + this.config.dynamic_capacity.scale_up_step,
         this.upperBoundCapacity
       );
-      nextConsecutiveUnhealthyReadings = 0;
       reason = 'high_post_claim_utilization';
-    } else {
-      nextConsecutiveUnhealthyReadings = 0;
     }
 
     nextCapacity = Math.min(nextCapacity, this.upperBoundCapacity);
@@ -232,7 +217,7 @@ export class DynamicCapacityController {
       worstOvershootRatio,
     });
 
-    this.logger.debug(`${humanSummary} technical=${evaluationReason}`);
+    this.logger.info(`${humanSummary} technical=${evaluationReason}`);
 
     const changed = nextCapacity !== this.state.capacity;
     if (changed) {
@@ -240,7 +225,6 @@ export class DynamicCapacityController {
     }
 
     this.state.cooldownUntilMs = nextCooldownUntilMs;
-    this.state.consecutiveUnhealthyReadings = nextConsecutiveUnhealthyReadings;
 
     return { changed, capacity: this.state.capacity };
   }
@@ -360,18 +344,18 @@ function getMetricDetails(
   scaleDownStepUsed?: number,
   worstOvershootRatio?: number
 ) {
-  const eluStatus =
-    processHealth.eventLoopUtilization > config.dynamic_capacity.max_event_loop_utilization
-      ? 'unhealthy'
-      : 'healthy';
-  const heapStatus =
-    processHealth.heapUsedFraction > config.dynamic_capacity.max_heap_used_fraction
-      ? 'unhealthy'
-      : 'healthy';
-  const cpuStatus =
-    processHealth.processCpuUtilization > config.dynamic_capacity.max_process_cpu_utilization
-      ? 'unhealthy'
-      : 'healthy';
+  const eluStatus = getStatusForThreshold(
+    processHealth.eventLoopUtilization,
+    config.dynamic_capacity.max_event_loop_utilization
+  );
+  const heapStatus = getStatusForThreshold(
+    processHealth.heapUsedFraction,
+    config.dynamic_capacity.max_heap_used_fraction
+  );
+  const cpuStatus = getStatusForThreshold(
+    processHealth.processCpuUtilization,
+    config.dynamic_capacity.max_process_cpu_utilization
+  );
   const delayStatus =
     config.dynamic_capacity.max_event_loop_delay_ms > 0 &&
     processHealth.eventLoopDelayMs > config.dynamic_capacity.max_event_loop_delay_ms
@@ -379,6 +363,7 @@ function getMetricDetails(
       : config.dynamic_capacity.max_event_loop_delay_ms === 0
       ? 'disabled'
       : 'healthy';
+  const scaleUpGateDetails = getScaleUpGateDetails(projectedAtFullCapacity, config);
 
   return `elu=${processHealth.eventLoopUtilization.toFixed(
     3
@@ -404,7 +389,13 @@ function getMetricDetails(
     3
   )}, eventLoopDelayMs=${projectedAtFullCapacity.eventLoopDelayMs.toFixed(1)}, scaleDownStep=${
     scaleDownStepUsed ?? 0
-  }, worstOvershootRatio=${(worstOvershootRatio ?? 0).toFixed(3)}`;
+  }, worstOvershootRatio=${(worstOvershootRatio ?? 0).toFixed(
+    3
+  )}, scaleUpGate=${scaleUpGateDetails}`;
+}
+
+function getStatusForThreshold(value: number, threshold: number): 'healthy' | 'unhealthy' {
+  return value > threshold ? 'unhealthy' : 'healthy';
 }
 
 function getProcessCpuUtilization(
@@ -477,7 +468,6 @@ function applyProportionalScaleDown({
   config: TaskManagerConfig;
 }): ProportionalScaleDownResult {
   const worstOvershootRatio = computeWorstOvershootRatio(processHealth, config);
-  const minStep = config.dynamic_capacity.scale_down_step;
   const maxStep = Math.max(
     1,
     Math.ceil(currentCapacity * config.dynamic_capacity.scale_down_max_step_fraction)
@@ -485,8 +475,8 @@ function applyProportionalScaleDown({
   const rawStep =
     worstOvershootRatio && worstOvershootRatio > 1
       ? currentCapacity - Math.floor(currentCapacity / worstOvershootRatio)
-      : minStep;
-  const proposedStep = Math.min(Math.max(rawStep, minStep), maxStep);
+      : 1;
+  const proposedStep = Math.min(rawStep, maxStep);
   const stepUsed = Math.max(1, Math.min(proposedStep, currentCapacity - floorCapacity));
 
   return {
@@ -494,6 +484,90 @@ function applyProportionalScaleDown({
     stepUsed,
     worstOvershootRatio,
   };
+}
+
+function projectAtFullCapacity({
+  projectionUtilizationPct,
+  minUtilizationForProjection,
+  processHealth,
+}: {
+  projectionUtilizationPct: number;
+  minUtilizationForProjection: number;
+  processHealth: ProcessHealthSignals;
+}): ProjectionResult {
+  const utilizationRatio = Math.max(projectionUtilizationPct / 100, minUtilizationForProjection);
+  const projectionFactor = 1 / utilizationRatio;
+
+  return {
+    projectionFactor,
+    projectedAtFullCapacity: {
+      eventLoopUtilization: processHealth.eventLoopUtilization * projectionFactor,
+      processCpuUtilization: processHealth.processCpuUtilization * projectionFactor,
+      eventLoopDelayMs: processHealth.eventLoopDelayMs * projectionFactor,
+    },
+  };
+}
+
+function applyEsManagedCapacityAdjustment({
+  currentCapacity,
+  esManagedCapacity,
+  startingCapacity,
+  processIsUnhealthy,
+}: {
+  currentCapacity: number;
+  esManagedCapacity: number;
+  startingCapacity: number;
+  processIsUnhealthy: boolean;
+}): EsCapacityAdjustmentResult {
+  const esCapacityIsDegraded = esManagedCapacity < startingCapacity;
+  if (!esCapacityIsDegraded) {
+    return { nextCapacity: currentCapacity, reason: '' };
+  }
+
+  // ES-side reductions are always applied quickly when ES has degraded capacity below
+  // the baseline. ES-side recovery increases are skipped while process signals are
+  // unhealthy to avoid oscillation.
+  if (esManagedCapacity < currentCapacity) {
+    return { nextCapacity: esManagedCapacity, reason: 'elasticsearch_errors' };
+  }
+
+  if (esManagedCapacity > currentCapacity && !processIsUnhealthy) {
+    return { nextCapacity: esManagedCapacity, reason: 'elasticsearch_recovery' };
+  }
+
+  return { nextCapacity: currentCapacity, reason: '' };
+}
+
+function getScaleUpGateDetails(
+  projectedAtFullCapacity: ProjectedAtFullCapacityMetrics,
+  config: TaskManagerConfig
+): string {
+  const eluGate = config.dynamic_capacity.max_event_loop_utilization * HYSTERESIS_FACTOR;
+  const cpuGate = config.dynamic_capacity.max_process_cpu_utilization * HYSTERESIS_FACTOR;
+  const delayGate =
+    config.dynamic_capacity.max_event_loop_delay_ms === 0
+      ? 0
+      : config.dynamic_capacity.max_event_loop_delay_ms * HYSTERESIS_FACTOR;
+  const eluGateStatus = projectedAtFullCapacity.eventLoopUtilization < eluGate ? 'pass' : 'fail';
+  const cpuGateStatus = projectedAtFullCapacity.processCpuUtilization < cpuGate ? 'pass' : 'fail';
+  const delayGateStatus =
+    config.dynamic_capacity.max_event_loop_delay_ms === 0
+      ? 'disabled'
+      : projectedAtFullCapacity.eventLoopDelayMs < delayGate
+      ? 'pass'
+      : 'fail';
+
+  return `hysteresisFactor=${HYSTERESIS_FACTOR.toFixed(
+    2
+  )}; elu=${projectedAtFullCapacity.eventLoopUtilization.toFixed(3)}/${eluGate.toFixed(
+    3
+  )}(${eluGateStatus}), cpu=${projectedAtFullCapacity.processCpuUtilization.toFixed(
+    3
+  )}/${cpuGate.toFixed(
+    3
+  )}(${cpuGateStatus}), eventLoopDelayMs=${projectedAtFullCapacity.eventLoopDelayMs.toFixed(
+    1
+  )}/${delayGate.toFixed(1)}(${delayGateStatus})`;
 }
 
 function buildHumanDynamicCapacitySummary({
@@ -545,14 +619,13 @@ function buildHumanDynamicCapacitySummary({
 
   if (decision === 'down') {
     if (reason === 'unhealthy_process_signals') {
-      const n = config.dynamic_capacity.scale_down_consecutive_unhealthy_readings;
-      const step = scaleDownStepUsed ?? config.dynamic_capacity.scale_down_step;
+      const step = scaleDownStepUsed ?? 1;
       const overshootSummary = worstOvershootRatio
         ? ` The worst observed signal was ${worstOvershootRatio.toFixed(2)}x over its threshold.`
         : '';
       return (
         `Task Manager lowered claim concurrency from ${previousCapacity} to ${nextCapacity}: ` +
-        `Node process health (event loop utilization, heap, event loop delay, and process CPU against configured ceilings) was unhealthy for ${n} consecutive checks, so concurrency was reduced by ${step}.${signalDetail}` +
+        `Node process health (event loop utilization, heap, event loop delay, and process CPU against configured ceilings) exceeded configured limits, so concurrency was reduced immediately by ${step}.${signalDetail}` +
         overshootSummary +
         utilizationSuffix
       );
@@ -599,10 +672,9 @@ function buildHumanDynamicCapacitySummary({
         utilizationSuffix
       );
     }
-    const n = config.dynamic_capacity.scale_down_consecutive_unhealthy_readings;
     return (
       `Task Manager left claim concurrency at ${nextCapacity}: ` +
-      `process health is over limits, but scale-down only runs after ${n} consecutive unhealthy samples (or other safeguards), so capacity is unchanged for now.${signalDetail}` +
+      `process health is over limits, but no additional reduction was applied this cycle.${signalDetail}` +
       utilizationSuffix
     );
   }
@@ -610,7 +682,7 @@ function buildHumanDynamicCapacitySummary({
   if (!projectedHealthyForScaleUp) {
     return (
       `Task Manager left claim concurrency at ${nextCapacity}: ` +
-      `if concurrency were increased, projected event loop, CPU, or event loop delay would likely exceed limits, so scaling up is paused.` +
+      `if concurrency were increased, projected event loop, CPU, or event loop delay would likely exceed hysteresis-adjusted scale-up safety limits, so scaling up is paused.` +
       utilizationSuffix
     );
   }

@@ -52,13 +52,12 @@ describe('DynamicCapacityController', () => {
     expect(controller.getCapacity()).toBe(12);
   });
 
-  test('scales down after consecutive unhealthy readings and respects cooldown', () => {
+  test('scales down immediately when unhealthy and respects cooldown', () => {
     const controller = new DynamicCapacityController({
       config: createConfig({
         capacity: 'auto',
         dynamic_capacity: {
           upper_bound: 12,
-          scale_down_consecutive_unhealthy_readings: 2,
           scale_down_cooldown_ms: 30000,
           max_process_cpu_utilization: 100,
         },
@@ -79,10 +78,6 @@ describe('DynamicCapacityController', () => {
     controller.setOpsMetrics(createOpsMetrics({ elu: 0.95 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(12);
-
-    jest.advanceTimersByTime(1000);
-    controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(10);
 
     controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
@@ -93,6 +88,39 @@ describe('DynamicCapacityController', () => {
     jest.advanceTimersByTime(30000);
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(11);
+  });
+
+  test('continues scaling down when unhealthy during cooldown', () => {
+    const controller = new DynamicCapacityController({
+      config: createConfig({
+        capacity: 'auto',
+        dynamic_capacity: {
+          upper_bound: 20,
+          scale_up_step: 10,
+          scale_down_max_step_fraction: 0.5,
+          scale_down_cooldown_ms: 30000,
+          max_process_cpu_utilization: 100,
+        },
+      }),
+      logger,
+      startingCapacity: 10,
+    });
+    controller.setPostClaimUtilizationPct(100);
+    controller.setProjectionUtilizationPct(100);
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(20);
+
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.95 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(17);
+
+    // Cooldown is active, but unhealthy signals should still trigger another scale-down.
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(15);
   });
 
   test('uses projection utilization for projected full-capacity health', () => {
@@ -120,16 +148,14 @@ describe('DynamicCapacityController', () => {
     expect(controller.getCapacity()).toBe(10);
   });
 
-  test('uses minimum scale-down step when overshoot is small', () => {
+  test('uses proportional scale-down step when overshoot is small', () => {
     const controller = new DynamicCapacityController({
       config: createConfig({
         capacity: 'auto',
         dynamic_capacity: {
           upper_bound: 20,
           scale_up_step: 10,
-          scale_down_step: 2,
           scale_down_max_step_fraction: 0.5,
-          scale_down_consecutive_unhealthy_readings: 1,
           max_process_cpu_utilization: 100,
         },
       }),
@@ -143,11 +169,11 @@ describe('DynamicCapacityController', () => {
     controller.evaluate(Date.now());
     expect(controller.getCapacity()).toBe(20);
 
-    // ELU is only slightly above its threshold (0.85), so raw proportional step would be 1.
+    // ELU is only slightly above its threshold (0.85), so proportional step is 1.
     controller.setOpsMetrics(createOpsMetrics({ elu: 0.86 }));
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(18);
+    expect(controller.getCapacity()).toBe(19);
   });
 
   test('scales down proportionally for moderate overshoot', () => {
@@ -157,9 +183,7 @@ describe('DynamicCapacityController', () => {
         dynamic_capacity: {
           upper_bound: 20,
           scale_up_step: 10,
-          scale_down_step: 1,
           scale_down_max_step_fraction: 0.5,
-          scale_down_consecutive_unhealthy_readings: 1,
           max_process_cpu_utilization: 100,
         },
       }),
@@ -187,9 +211,7 @@ describe('DynamicCapacityController', () => {
         dynamic_capacity: {
           upper_bound: 20,
           scale_up_step: 15,
-          scale_down_step: 1,
           scale_down_max_step_fraction: 0.5,
-          scale_down_consecutive_unhealthy_readings: 1,
           max_process_cpu_utilization: 100,
         },
       }),
@@ -217,9 +239,7 @@ describe('DynamicCapacityController', () => {
         dynamic_capacity: {
           upper_bound: 12,
           scale_up_step: 4,
-          scale_down_step: 1,
           scale_down_max_step_fraction: 1,
-          scale_down_consecutive_unhealthy_readings: 1,
           max_process_cpu_utilization: 100,
         },
       }),
@@ -246,6 +266,7 @@ function createConfig(
   }
 ): TaskManagerConfig {
   const baseConfig = {
+    capacity: 'auto',
     allow_reading_invalid_state: true,
     api_key_type: 'es',
     adjust_capacity_for_elasticsearch_errors: true,
@@ -259,15 +280,12 @@ function createConfig(
       upper_bound: 100,
       scale_interval_ms: 1000,
       scale_up_step: 1,
-      scale_down_step: 1,
-      scale_up_min_post_claim_utilization_pct: 90,
       max_event_loop_utilization: 0.85,
       max_heap_used_fraction: 0.85,
       max_process_cpu_utilization: 0.85,
       min_utilization_for_projection: 30,
-      max_event_loop_delay_ms: 10000,
+      max_event_loop_delay_ms: 500,
       scale_down_cooldown_ms: 30000,
-      scale_down_consecutive_unhealthy_readings: 3,
       scale_down_max_step_fraction: 0.5,
       ...(overrides.dynamic_capacity ?? {}),
     },

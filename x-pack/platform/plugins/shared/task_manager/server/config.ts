@@ -20,14 +20,11 @@ export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
 export const MAX_DYNAMIC_CAPACITY = MAX_WORKERS_LIMIT;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_INTERVAL_MS = 10 * 1000;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_STEP = 1;
-export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_STEP = 1;
-export const DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_MIN_POST_CLAIM_UTILIZATION_PCT = 90;
 export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_UTILIZATION = 0.85;
 export const DEFAULT_DYNAMIC_CAPACITY_MAX_HEAP_USED_FRACTION = 0.85;
 export const DEFAULT_DYNAMIC_CAPACITY_MAX_PROCESS_CPU_UTILIZATION = 0.85;
-export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_DELAY_MS = 10 * 1000;
+export const DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_DELAY_MS = 500;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_COOLDOWN_MS = 30 * 1000;
-export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_CONSECUTIVE_UNHEALTHY_READINGS = 3;
 export const DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_MAX_STEP_FRACTION = 0.5;
 export const DEFAULT_DYNAMIC_CAPACITY_MIN_UTILIZATION_FOR_PROJECTION = 30;
 
@@ -249,15 +246,6 @@ export const configSchema = schema.object(
         defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_STEP,
         min: 1,
       }),
-      scale_down_step: schema.number({
-        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_STEP,
-        min: 1,
-      }),
-      scale_up_min_post_claim_utilization_pct: schema.number({
-        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_UP_MIN_POST_CLAIM_UTILIZATION_PCT,
-        min: 0,
-        max: 100,
-      }),
       max_event_loop_utilization: schema.number({
         defaultValue: DEFAULT_DYNAMIC_CAPACITY_MAX_EVENT_LOOP_UTILIZATION,
         min: 0,
@@ -284,10 +272,6 @@ export const configSchema = schema.object(
       scale_down_cooldown_ms: schema.number({
         defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_COOLDOWN_MS,
         min: 0,
-      }),
-      scale_down_consecutive_unhealthy_readings: schema.number({
-        defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_CONSECUTIVE_UNHEALTHY_READINGS,
-        min: 1,
       }),
       scale_down_max_step_fraction: schema.number({
         defaultValue: DEFAULT_DYNAMIC_CAPACITY_SCALE_DOWN_MAX_STEP_FRACTION,

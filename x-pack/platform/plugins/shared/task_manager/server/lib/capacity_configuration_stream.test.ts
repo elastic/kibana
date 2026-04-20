@@ -78,7 +78,7 @@ describe('createCapacityConfigurationStream', () => {
     subscription.unsubscribe();
   });
 
-  test('scales down only after consecutive unhealthy readings and respects cooldown', () => {
+  test('scales down immediately when unhealthy and respects cooldown', () => {
     const errorCheck$ = new Subject<ErrorScanResult>();
     const postClaimUtilization$ = new BehaviorSubject<number>(100);
     const opsMetrics$ = new BehaviorSubject<OpsMetrics>(createOpsMetrics({}));
@@ -91,7 +91,6 @@ describe('createCapacityConfigurationStream', () => {
           upper_bound: 12,
           scale_interval_ms: 1000,
           scale_down_cooldown_ms: 30000,
-          scale_down_consecutive_unhealthy_readings: 2,
         },
       }),
       logger,
@@ -106,9 +105,6 @@ describe('createCapacityConfigurationStream', () => {
     expect(updates[updates.length - 1]).toBe(12);
 
     opsMetrics$.next(createOpsMetrics({ elu: 0.95 }));
-    jest.advanceTimersByTime(1000);
-    expect(updates[updates.length - 1]).toBe(12);
-
     jest.advanceTimersByTime(1000);
     expect(updates[updates.length - 1]).toBe(10);
 
@@ -133,7 +129,6 @@ describe('createCapacityConfigurationStream', () => {
         dynamic_capacity: {
           scale_interval_ms: 1000,
           upper_bound: 12,
-          scale_down_consecutive_unhealthy_readings: 10,
         },
       }),
       logger,
@@ -245,6 +240,7 @@ function createConfig(
   }
 ): TaskManagerConfig {
   const baseConfig = {
+    capacity: 'auto',
     allow_reading_invalid_state: true,
     api_key_type: 'es',
     adjust_capacity_for_elasticsearch_errors: true,
@@ -258,15 +254,12 @@ function createConfig(
       upper_bound: 100,
       scale_interval_ms: 1000,
       scale_up_step: 1,
-      scale_down_step: 1,
-      scale_up_min_post_claim_utilization_pct: 90,
       max_event_loop_utilization: 0.85,
       max_heap_used_fraction: 0.85,
       max_process_cpu_utilization: 0.85,
       min_utilization_for_projection: 30,
-      max_event_loop_delay_ms: 10000,
+      max_event_loop_delay_ms: 500,
       scale_down_cooldown_ms: 30000,
-      scale_down_consecutive_unhealthy_readings: 3,
       scale_down_max_step_fraction: 0.5,
       ...(overrides.dynamic_capacity ?? {}),
     },

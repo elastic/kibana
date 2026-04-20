@@ -172,6 +172,18 @@ export class TaskManagerPlugin
     return backgroundTasks && !migrator && !ui;
   }
 
+  private assertAutoCapacityIsAllowed() {
+    if (this.config.capacity !== 'auto') {
+      return;
+    }
+
+    if (!this.isNodeBackgroundTasksOnly()) {
+      throw new Error(
+        'TaskManager xpack.task_manager.capacity: auto is only supported on background-task-only nodes (node.roles.background_tasks=true, node.roles.ui=false, node.roles.migrator=false).'
+      );
+    }
+  }
+
   private invalidateApiKey(params: InvalidateAPIKeysParams) {
     if (this.invalidateApiKeyFn) {
       return this.invalidateApiKeyFn(params);
@@ -182,6 +194,8 @@ export class TaskManagerPlugin
     core: CoreSetup<TaskManagerPluginsStart, TaskManagerStartContract>,
     plugins: TaskManagerPluginsSetup
   ): TaskManagerSetupContract {
+    // this.assertAutoCapacityIsAllowed();
+
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
     const clusterClientPromise = core
       .getStartServices()
