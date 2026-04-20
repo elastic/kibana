@@ -33,9 +33,9 @@ const projectRouting = {
   type: ['keyword'],
   serverlessOnly: true,
   preview: true,
-  snapshotOnly: true,
+  snapshotOnly: false,
   description:
-    'A project routing expression, used to define which projects to route the query to. Only supported if Cross-Project Search is enabled.',
+    'Limits the scope of a [cross-project search (CPS)](https://www.elastic.co/docs/reference/query-languages/esql/esql-cross-serverless-projects) to specific projects before query execution, based on a [Lucene query expression](docs-content://explore-analyze/cross-project-search/cross-project-search-project-routing.md) evaluated against project tags. Excluded projects are not queried, which can reduce cost and latency. ',
   ignoreAsSuggestion: true,
 };
 
@@ -57,7 +57,7 @@ const unmappedFields = {
   preview: true,
   snapshotOnly: false,
   description:
-    'Defines how unmapped fields are treated. Possible values are:\n\n- `DEFAULT` (default) - standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL) may treat them differently;\n- `NULLIFY` - treats unmapped fields as null values.\n- `LOAD` - attempts to load the fields from the source. \n',
+    'Determines how unmapped fields are treated. Possible values are:\n\n- `DEFAULT` : Standard ESQL queries fail when referencing unmapped fields, while other query types (e.g. PromQL)\nmay treat them differently.\n- `NULLIFY` : Treats unmapped fields as null values.\n- `LOAD` : Loads unmapped fields from the stored [`_source`](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/mapping-source-field)\nwith type `keyword`. Or nullifies them if absent from `_source`. \n\nAn `unmapped field` is a field referenced in a query that does not exist in the mapping of the index being queried. When querying\nmultiple indices, a field is considered `partially unmapped` if it exists in the mapping of some indices but not others.\n\nSpecial notes about the `LOAD` option:\n- `PromQL`, `FORK`, `LOOKUP JOIN`, subqueries, views, and full-text search functions are not yet supported anywhere in the query.\n- Referencing subfields of `flattened` parents is not supported.\n- Referencing partially unmapped non-keyword fields must be inside a cast or a conversion function (e.g. `::TYPE` or `TO_TYPE`),\nunless referenced in a `KEEP` or `DROP`.\n',
   ignoreAsSuggestion: false,
 };
 

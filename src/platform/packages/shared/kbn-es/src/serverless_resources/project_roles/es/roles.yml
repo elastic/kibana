@@ -2,7 +2,7 @@
 # Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
-  cluster: ['manage_own_api_key', 'read_pipeline']
+  cluster: ['manage_own_api_key', 'read_pipeline', 'read_project_routing']
   indices:
     - names:
         - '*'

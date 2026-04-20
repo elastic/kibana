@@ -7,25 +7,19 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PhaseName } from '@kbn/streams-schema';
-import {
-  getFieldValidityAndErrorMessage,
-  type FieldHook,
-  UseField,
-  useFormContext,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { useController, useFormContext, useWatch, type FieldPath } from 'react-hook-form';
 
 import type { DownsamplePhase, PreservedTimeUnit, TimeUnit } from '../types';
 import { DOWNSAMPLE_PHASES } from '../types';
 import { getBoundsHelpTextValues, getUnitSelectOptions } from '../../../shared';
 import { getRelativeBoundsInMs } from '../utils';
-import { useOnFieldErrorsChange } from '../error_tracking';
 import { getPhaseDurationMs } from '../get_phase_duration_ms';
+import type { IlmPhasesFlyoutFormInternal } from '../types';
+import { getDownsampleFieldsToValidateOnChange } from '../schema';
 
 export interface DownsampleIntervalFieldProps {
-  phaseName: PhaseName;
+  phaseName: DownsamplePhase;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
   isEnabled: boolean;
@@ -36,19 +30,30 @@ const DownsampleIntervalFieldControl = ({
   dataTestSubj,
   timeUnitOptions,
   isEnabled,
-  valueField,
-  unitField,
 }: {
-  phaseName: PhaseName;
+  phaseName: DownsamplePhase;
   dataTestSubj: string;
   timeUnitOptions: ReadonlyArray<{ value: TimeUnit; text: string }>;
   isEnabled: boolean;
-  valueField: FieldHook<string>;
-  unitField: FieldHook<PreservedTimeUnit>;
 }) => {
-  const form = useFormContext();
+  const { control, getValues, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
 
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(valueField);
+  const valuePath =
+    `_meta.${phaseName}.downsample.fixedIntervalValue` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+  const unitPath =
+    `_meta.${phaseName}.downsample.fixedIntervalUnit` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+
+  const { field: valueField, fieldState: valueFieldState } = useController({
+    control,
+    name: valuePath,
+  });
+  const { field: unitField } = useController({
+    control,
+    name: unitPath,
+  });
+
+  const isInvalid = Boolean(valueFieldState.error);
+  const errorMessage = valueFieldState.error?.message;
   const committedValue = String(valueField.value ?? '');
   const currentUnit = String(unitField.value ?? 'd') as PreservedTimeUnit;
 
@@ -66,7 +71,7 @@ const DownsampleIntervalFieldControl = ({
   const showError = isEnabled ? errorMessage : null;
 
   const getPhaseDownsampleIntervalMs = (phase: DownsamplePhase): number | null =>
-    getPhaseDurationMs(form, phase, {
+    getPhaseDurationMs(getValues, phase, {
       valuePathSuffix: 'downsample.fixedIntervalValue',
       unitPathSuffix: 'downsample.fixedIntervalUnit',
       extraEnabledPathSuffix: 'downsampleEnabled',
@@ -143,6 +148,7 @@ const DownsampleIntervalFieldControl = ({
             disabled={!isEnabled}
             isInvalid={showInvalid}
             data-test-subj={`${dataTestSubj}DownsamplingIntervalValue`}
+            inputRef={valueField.ref}
             onChange={(e) => {
               isEditingRef.current = true;
               const nextValue = e.target.value;
@@ -150,6 +156,7 @@ const DownsampleIntervalFieldControl = ({
             }}
             onBlur={() => {
               isEditingRef.current = false;
+              valueField.onBlur();
               const nextValue = draftValue.trim();
               if (nextValue === '') {
                 setDraftValue(committedValue);
@@ -158,8 +165,10 @@ const DownsampleIntervalFieldControl = ({
 
               // Commit only on blur.
               if (nextValue !== committedValue.trim()) {
-                valueField.setValue(nextValue);
+                valueField.onChange(nextValue);
               }
+
+              void trigger(getDownsampleFieldsToValidateOnChange(phaseName));
             }}
           />
         </EuiFlexItem>
@@ -176,7 +185,9 @@ const DownsampleIntervalFieldControl = ({
             data-test-subj={`${dataTestSubj}DownsamplingIntervalUnit`}
             onChange={(e) => {
               const nextUnit = e.target.value as PreservedTimeUnit;
-              unitField.setValue(nextUnit);
+              unitField.onChange(nextUnit);
+
+              void trigger(getDownsampleFieldsToValidateOnChange(phaseName));
             }}
           />
         </EuiFlexItem>
@@ -191,14 +202,11 @@ export const DownsampleIntervalField = ({
   timeUnitOptions,
   isEnabled,
 }: DownsampleIntervalFieldProps) => {
-  const form = useFormContext();
-  const valuePath = `_meta.${phaseName}.downsample.fixedIntervalValue`;
-  const unitPath = `_meta.${phaseName}.downsample.fixedIntervalUnit`;
-  const onFieldErrorsChange = useOnFieldErrorsChange();
+  const { control } = useFormContext<IlmPhasesFlyoutFormInternal>();
 
-  useFormData({
-    form,
-    watch: [
+  useWatch({
+    control,
+    name: [
       '_meta.hot.enabled',
       '_meta.hot.downsampleEnabled',
       '_meta.hot.downsample.fixedIntervalValue',
@@ -215,21 +223,11 @@ export const DownsampleIntervalField = ({
   });
 
   return (
-    <UseField path={valuePath} onError={(errors) => onFieldErrorsChange?.(valuePath, errors)}>
-      {(valueField) => (
-        <UseField path={unitPath}>
-          {(unitField) => (
-            <DownsampleIntervalFieldControl
-              phaseName={phaseName}
-              dataTestSubj={dataTestSubj}
-              timeUnitOptions={timeUnitOptions}
-              isEnabled={isEnabled}
-              valueField={valueField as FieldHook<string>}
-              unitField={unitField as FieldHook<PreservedTimeUnit>}
-            />
-          )}
-        </UseField>
-      )}
-    </UseField>
+    <DownsampleIntervalFieldControl
+      phaseName={phaseName}
+      dataTestSubj={dataTestSubj}
+      timeUnitOptions={timeUnitOptions}
+      isEnabled={isEnabled}
+    />
   );
 };
