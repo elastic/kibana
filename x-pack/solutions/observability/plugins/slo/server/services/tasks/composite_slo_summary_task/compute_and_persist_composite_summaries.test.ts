@@ -152,7 +152,9 @@ describe('computeAndPersistCompositeSummaries', () => {
     jest.useFakeTimers().setSystemTime(TEST_DATE);
     jest.clearAllMocks();
 
-    mockComputeSummaries = jest.fn().mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
+    mockComputeSummaries = jest
+      .fn()
+      .mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
     MockDefaultSummaryClient.mockImplementation(
       () =>
         ({
