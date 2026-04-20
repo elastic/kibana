@@ -699,10 +699,11 @@ const InternalUnifiedDataTable = React.forwardRef<
           columnId,
           fieldFormats,
           columnsMeta,
+          isPlainRecord,
           options,
         });
       },
-      [displayedRows, dataView, fieldFormats, columnsMeta]
+      [displayedRows, dataView, fieldFormats, columnsMeta, isPlainRecord]
     );
 
     /**

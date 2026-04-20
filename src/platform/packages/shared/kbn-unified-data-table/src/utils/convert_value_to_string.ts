@@ -29,6 +29,7 @@ export const convertValueToString = ({
   dataView,
   fieldFormats,
   columnsMeta,
+  isPlainRecord,
   options,
 }: {
   rowIndex: number;
@@ -37,6 +38,7 @@ export const convertValueToString = ({
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
   columnsMeta: DataTableColumnsMeta | undefined;
+  isPlainRecord?: boolean;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
   };
@@ -56,7 +58,7 @@ export const convertValueToString = ({
     columnMeta: columnsMeta?.[columnId],
   });
 
-  const sourceValue = getSourceValue({ row: rows[rowIndex], columnId, isPlainRecord: !field });
+  const sourceValue = getSourceValue({ row: rows[rowIndex], columnId, isPlainRecord });
 
   if (sourceValue) {
     return {
