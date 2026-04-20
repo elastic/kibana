@@ -101,20 +101,33 @@ async function createDashboardWithLensPanel(
   return response.data.id;
 }
 
-function assertTemporalXAxis(debug: DebugState) {
-  const xAxis = debug.axes?.x?.[0];
-  expect(xAxis, 'Expected chart debug state to include an x-axis').toBeDefined();
+async function getChartDebugState(
+  esqlCase: EsqlTimeseriesCase,
+  kbnClient: import('@kbn/scout').KbnClient,
+  spaceId: string,
+  page: import('@kbn/scout').ScoutPage,
+  pageObjects: import('@kbn/scout').PageObjects
+): Promise<DebugState> {
+  const title = `Scout ES|QL timeseries API ${esqlCase.description} ${Date.now()}`;
+  const dashboardId = await createDashboardWithLensPanel(kbnClient, spaceId, title, esqlCase);
 
-  const tickValues = xAxis!.values ?? [];
-  expect(tickValues.length, 'Expected at least one x-axis tick value').toBeGreaterThan(0);
+  const { dashboard } = pageObjects;
+  await dashboard.openDashboardWithId(dashboardId);
+  await dashboard.waitForPanelsToLoad(1);
 
-  const eachTickIsEpochMs = tickValues.every((v) => typeof v === 'number' && v > 1_000_000_000_000);
-  expect(
-    eachTickIsEpochMs,
-    `Expected x-axis tick values to be epoch milliseconds (time scale); got ${JSON.stringify(
-      tickValues.slice(0, 5)
-    )}`
-  ).toBe(true);
+  const chart = page.testSubj.locator('xyVisChart');
+  await chart.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
+    state: 'attached',
+    timeout: 30_000,
+  });
+
+  const chartStatus = chart.locator('.echChartStatus');
+  const debugJson = await chartStatus.getAttribute('data-ech-debug-state');
+  return JSON.parse(debugJson ?? '{}') as DebugState;
+}
+
+function areAllEpochMilliseconds(values: unknown[]): boolean {
+  return values.every((v) => typeof v === 'number' && v > 1_000_000_000_000);
 }
 
 spaceTest.describe(
@@ -129,7 +142,8 @@ spaceTest.describe(
       });
     });
 
-    spaceTest.beforeEach(async ({ context }) => {
+    spaceTest.beforeEach(async ({ browserAuth, context }) => {
+      await browserAuth.loginAsPrivilegedUser();
       await context.addInitScript(() => {
         (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
       });
@@ -140,45 +154,67 @@ spaceTest.describe(
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    for (const esqlCase of TIMESERIES_CASES) {
-      spaceTest(
-        `renders a time-scaled x-axis for ${esqlCase.description}`,
-        async ({ browserAuth, kbnClient, scoutSpace, page, pageObjects }) => {
-          const title = `Scout ES|QL timeseries API ${esqlCase.description} ${Date.now()}`;
-          const dashboardId = await createDashboardWithLensPanel(
-            kbnClient,
-            scoutSpace.id,
-            title,
-            esqlCase
-          );
+    spaceTest(
+      'renders a time-scaled x-axis for TBUCKET',
+      async ({ kbnClient, scoutSpace, page, pageObjects }) => {
+        const debug = await getChartDebugState(
+          TIMESERIES_CASES[0],
+          kbnClient,
+          scoutSpace.id,
+          page,
+          pageObjects
+        );
+        const xAxis = debug.axes?.x?.[0];
+        expect(xAxis, 'Expected chart debug state to include an x-axis').toBeDefined();
+        const tickValues = xAxis!.values ?? [];
+        expect(tickValues.length, 'Expected at least one x-axis tick value').toBeGreaterThan(0);
+        expect(
+          areAllEpochMilliseconds(tickValues),
+          `Expected epoch-ms x-axis ticks; got ${JSON.stringify(tickValues.slice(0, 5))}`
+        ).toBe(true);
+      }
+    );
 
-          await browserAuth.loginAsPrivilegedUser();
+    spaceTest(
+      'renders a time-scaled x-axis for BUCKET on timestamp',
+      async ({ kbnClient, scoutSpace, page, pageObjects }) => {
+        const debug = await getChartDebugState(
+          TIMESERIES_CASES[1],
+          kbnClient,
+          scoutSpace.id,
+          page,
+          pageObjects
+        );
+        const xAxis = debug.axes?.x?.[0];
+        expect(xAxis, 'Expected chart debug state to include an x-axis').toBeDefined();
+        const tickValues = xAxis!.values ?? [];
+        expect(tickValues.length, 'Expected at least one x-axis tick value').toBeGreaterThan(0);
+        expect(
+          areAllEpochMilliseconds(tickValues),
+          `Expected epoch-ms x-axis ticks; got ${JSON.stringify(tickValues.slice(0, 5))}`
+        ).toBe(true);
+      }
+    );
 
-          const { dashboard } = pageObjects;
-
-          await dashboard.openDashboardWithId(dashboardId);
-          await dashboard.waitForPanelsToLoad(1);
-
-          await expect(page.testSubj.locator('embeddable-lens-failure')).toBeHidden();
-          await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
-
-          const chart = page.testSubj.locator('xyVisChart');
-          await expect(
-            chart.locator('.echChartStatus[data-ech-render-complete="true"]')
-          ).toBeAttached({
-            timeout: 30_000,
-          });
-
-          const chartStatus = chart.locator('.echChartStatus');
-          const debugJson = await chartStatus.getAttribute('data-ech-debug-state');
-          await expect(chartStatus, 'Elastic Charts debug state attribute missing').toHaveAttribute(
-            'data-ech-debug-state'
-          );
-          const debug = JSON.parse(debugJson ?? '{}') as DebugState;
-
-          assertTemporalXAxis(debug);
-        }
-      );
-    }
+    spaceTest(
+      'renders a time-scaled x-axis for DATE_TRUNC on timestamp',
+      async ({ kbnClient, scoutSpace, page, pageObjects }) => {
+        const debug = await getChartDebugState(
+          TIMESERIES_CASES[2],
+          kbnClient,
+          scoutSpace.id,
+          page,
+          pageObjects
+        );
+        const xAxis = debug.axes?.x?.[0];
+        expect(xAxis, 'Expected chart debug state to include an x-axis').toBeDefined();
+        const tickValues = xAxis!.values ?? [];
+        expect(tickValues.length, 'Expected at least one x-axis tick value').toBeGreaterThan(0);
+        expect(
+          areAllEpochMilliseconds(tickValues),
+          `Expected epoch-ms x-axis ticks; got ${JSON.stringify(tickValues.slice(0, 5))}`
+        ).toBe(true);
+      }
+    );
   }
 );
