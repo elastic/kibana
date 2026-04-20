@@ -536,10 +536,8 @@ paths:
         - access:securitySolution
   /api/timeline/_copy:
     post:
-      description: >
-        Create a new saved timeline (or template) by copying an existing one.
-        Pass the source timeline `savedObjectId` in `timelineIdToCopy` and
-        overrides in `timeline`.
+      description: |
+        Copies and returns a timeline or timeline template.
       operationId: CopyTimeline
       requestBody:
         content:
@@ -585,7 +583,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates a successful call.
-      summary: Copy a timeline or timeline template
+      summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
         - access:securitySolution
