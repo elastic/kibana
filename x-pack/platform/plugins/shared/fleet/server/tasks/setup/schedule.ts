@@ -12,6 +12,7 @@ import { TASK_TYPE, type SetupTaskParams } from './utils';
 const DEFAULT_SETUP_TASKS: SetupTaskParams[] = [
   { type: 'backportPackagePolicyInputId' },
   { type: 'migrateComponentTemplateILMs' },
+  { type: 'backfillInstalledPackageInfo' },
 ];
 
 /**
