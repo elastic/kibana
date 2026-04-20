@@ -51,6 +51,10 @@ import type {
   SiemMigrationsTelemetryEventsMap,
 } from './events/siem_migrations/types';
 import type {
+  RuleDeprecationEventTypes,
+  RuleDeprecationTelemetryEventsMap,
+} from './events/rule_deprecation/types';
+import type {
   RuleUpgradeEventTypes,
   RuleUpgradeTelemetryEventsMap,
 } from './events/rule_upgrade/types';
@@ -76,6 +80,7 @@ export * from './events/manual_rule_run/types';
 export * from './events/event_log/types';
 export * from './events/preview_rule/types';
 export * from './events/notes/types';
+export * from './events/rule_deprecation/types';
 export * from '@kbn/agent-builder-common/telemetry';
 
 export interface TelemetryServiceSetupParams {
@@ -109,6 +114,8 @@ export type TelemetryEventTypeData<T extends TelemetryEventTypes> = T extends Al
   ? SiemMigrationsTelemetryEventsMap[T]
   : T extends SiemMigrationsDashboardEventTypes
   ? SiemMigrationsTelemetryEventsMap[T]
+  : T extends RuleDeprecationEventTypes
+  ? RuleDeprecationTelemetryEventsMap[T]
   : T extends RuleUpgradeEventTypes
   ? RuleUpgradeTelemetryEventsMap[T]
   : T extends AIValueReportEventTypes
@@ -135,6 +142,7 @@ export type TelemetryEventTypes =
   | AppEventTypes
   | SiemMigrationsRuleEventTypes
   | SiemMigrationsDashboardEventTypes
+  | RuleDeprecationEventTypes
   | RuleUpgradeEventTypes
   | AIValueReportEventTypes
   | TrialCompanionEventTypes

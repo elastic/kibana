@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useTimedDismissal } from '../../../../common/hooks/use_timed_dismissal';
+import { useKibana } from '../../../../common/lib/kibana';
+import { RuleDeprecationEventTypes } from '../../../../common/lib/telemetry/events/rule_deprecation/types';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useExecuteBulkAction } from '../../logic/bulk_actions/use_execute_bulk_action';
 import { usePrebuiltRulesDeprecationReview } from '../../logic/prebuilt_rules/use_prebuilt_rules_deprecation_review';
@@ -27,21 +29,51 @@ export const useDeprecatedRulesTableCallout = () => {
   const [isConfirmVisible, showConfirm, hideConfirm] = useBoolState();
   const [isDismissed, dismiss] = useTimedDismissal(DISMISSAL_STORAGE_KEY);
   const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
+  const { telemetry } = useKibana().services;
   const { data, isLoading } = usePrebuiltRulesDeprecationReview(null, {
     enabled: isFeatureEnabled,
   });
   const { executeBulkAction } = useExecuteBulkAction();
 
+  const hasReportedShown = useRef(false);
+  const rulesCount = data?.rules.length ?? 0;
+
+  useEffect(() => {
+    if (rulesCount > 0 && !hasReportedShown.current) {
+      hasReportedShown.current = true;
+      telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesCalloutShown, {
+        count: rulesCount,
+      });
+    }
+  }, [rulesCount, telemetry]);
+
+  const handleDismiss = useCallback(() => {
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesCalloutDismissed, {
+      count: rulesCount,
+    });
+    dismiss();
+  }, [dismiss, rulesCount, telemetry]);
+
+  const handleShowModal = useCallback(() => {
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesModalOpened, {
+      count: rulesCount,
+    });
+    showModal();
+  }, [rulesCount, showModal, telemetry]);
+
   const handleDeleteAll = useCallback(async () => {
     if (!data?.rules.length) {
       return;
     }
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesDeleteAllClicked, {
+      count: data.rules.length,
+    });
     hideConfirm();
     await executeBulkAction({
       type: BulkActionTypeEnum.delete,
       ids: data.rules.map((rule) => rule.id),
     });
-  }, [data?.rules, executeBulkAction, hideConfirm]);
+  }, [data?.rules, executeBulkAction, hideConfirm, telemetry]);
 
   if (!isFeatureEnabled || isDismissed || isLoading || !data || data.rules.length === 0) {
     return null;
@@ -55,7 +87,7 @@ export const useDeprecatedRulesTableCallout = () => {
         buttons={[
           <EuiButton
             color="warning"
-            onClick={showModal}
+            onClick={handleShowModal}
             data-test-subj="deprecated-rules-table-view-button"
             fill
           >
@@ -70,7 +102,7 @@ export const useDeprecatedRulesTableCallout = () => {
             {i18n.DELETE_DEPRECATED_RULES}
           </EuiButton>,
         ]}
-        onDismiss={dismiss}
+        onDismiss={handleDismiss}
         dataTestSubj="deprecated-rules-table-callout"
       />
       {isModalVisible && (

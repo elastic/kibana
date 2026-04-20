@@ -17,6 +17,7 @@ import { notesTelemetryEvents } from './notes';
 import { onboardingHubTelemetryEvents } from './onboarding';
 import { previewRuleTelemetryEvents } from './preview_rule';
 import { siemMigrationsTelemetryEvents } from './siem_migrations';
+import { ruleDeprecationTelemetryEvents } from './rule_deprecation';
 import { ruleUpgradeTelemetryEvents } from './rule_upgrade';
 import { aiValueReportTelemetryEvents } from './ai_value_report';
 import { attacksTelemetryEvents } from './attacks';
@@ -30,6 +31,7 @@ export const telemetryEvents = [
   ...documentTelemetryEvents,
   ...onboardingHubTelemetryEvents,
   ...manualRuleRunTelemetryEvents,
+  ...ruleDeprecationTelemetryEvents,
   ...ruleUpgradeTelemetryEvents,
   ...bulkFillRuleGapsTelemetryEvents,
   ...eventLogTelemetryEvents,

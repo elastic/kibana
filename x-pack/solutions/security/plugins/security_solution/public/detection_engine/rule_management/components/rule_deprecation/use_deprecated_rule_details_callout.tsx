@@ -9,6 +9,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
+import { RuleDeprecationEventTypes } from '../../../../common/lib/telemetry/events/rule_deprecation/types';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
@@ -35,6 +36,7 @@ export const useDeprecatedRuleDetailsCallout = ({
 }: UseDeprecatedRuleDetailsCalloutProps) => {
   const {
     application: { navigateToApp },
+    telemetry,
   } = useKibana().services;
   const {
     rules: { edit: canEditRules },
@@ -83,12 +85,13 @@ export const useDeprecatedRuleDetailsCallout = ({
     if ((await confirmDeletion()) === false) {
       return;
     }
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDeleteClicked, {});
     await executeBulkAction({
       type: BulkActionTypeEnum.delete,
       ids: [rule.id],
     });
     navigateToRulesPage();
-  }, [confirmDeletion, executeBulkAction, navigateToRulesPage, rule]);
+  }, [confirmDeletion, executeBulkAction, navigateToRulesPage, rule, telemetry]);
 
   const handleDuplicateAndDelete = useCallback(async () => {
     if (!rule) {
@@ -101,6 +104,8 @@ export const useDeprecatedRuleDetailsCallout = ({
     if (duplicateOption === null) {
       return;
     }
+
+    telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRuleDuplicateAndDeleteClicked, {});
 
     const duplicateResult = await executeBulkAction({
       type: BulkActionTypeEnum.duplicate,
@@ -131,7 +136,14 @@ export const useDeprecatedRuleDetailsCallout = ({
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(newRuleId),
     });
-  }, [rule, canEditExceptions, showDuplicateConfirmation, executeBulkAction, navigateToApp]);
+  }, [
+    rule,
+    canEditExceptions,
+    showDuplicateConfirmation,
+    executeBulkAction,
+    navigateToApp,
+    telemetry,
+  ]);
 
   const deprecatedRule = data?.rules?.[0];
 

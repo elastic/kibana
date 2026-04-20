@@ -16,6 +16,7 @@ import type {
   FeatureTypeUsage,
   ResponseActionsUsage,
   UpgradeableRulesSummary,
+  DeprecatedRulesSummary,
   ThreatMatchFeatureTypeUsage,
   RuleCustomizationCounts,
 } from './types';
@@ -173,6 +174,10 @@ export const getInitialRuleUpgradeStatus = (): UpgradeableRulesSummary => ({
   customized: 0,
   enabled: 0,
   disabled: 0,
+});
+
+export const getInitialRuleDeprecatedStatus = (): DeprecatedRulesSummary => ({
+  total: 0,
 });
 
 export const getInitialRuleCustomizationStatus = (): RuleCustomizationCounts => ({
