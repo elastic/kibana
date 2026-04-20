@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { compositeSloDefinitionSchema, storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
 import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../domain/models';
 import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
@@ -46,11 +45,8 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
       throw new SLOIdConflict(`Composite SLO [${compositeSlo.id}] already exists`);
     }
 
-    const storedAttributes = storedCompositeSloDefinitionSchema.encode(compositeSlo);
-    await this.soClient.create<StoredCompositeSLODefinition>(
-      SO_SLO_COMPOSITE_TYPE,
-      storedAttributes
-    );
+    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore);
 
     return compositeSlo;
   }
@@ -67,12 +63,11 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     }
 
     const existingSavedObjectId = findResponse.saved_objects[0].id;
-    const storedAttributes = storedCompositeSloDefinitionSchema.encode(compositeSlo);
-    await this.soClient.create<StoredCompositeSLODefinition>(
-      SO_SLO_COMPOSITE_TYPE,
-      storedAttributes,
-      { id: existingSavedObjectId, overwrite: true }
-    );
+    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore, {
+      id: existingSavedObjectId,
+      overwrite: true,
+    });
 
     return compositeSlo;
   }
@@ -169,14 +164,14 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
   }
 
   private toCompositeSLO(stored: StoredCompositeSLODefinition): CompositeSLODefinition | undefined {
-    const result = compositeSloDefinitionSchema.decode(stored);
+    const result = compositeSloDefinitionSchema.safeParse(stored);
 
-    if (isLeft(result)) {
+    if (!result.success) {
       this.logger.debug(`Invalid stored composite SLO with id [${stored.id}]`);
       return undefined;
     }
 
-    return result.right;
+    return result.data;
   }
 
   private isCompositeSLO(slo: CompositeSLODefinition | undefined): slo is CompositeSLODefinition {
