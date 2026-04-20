@@ -68,14 +68,18 @@ test.describe(
         // Select service name from dropdown (services load automatically)
         const serviceNameComboBox = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
         await serviceNameComboBox.click();
-        await page
-          .getByRole('option', { name: SERVICE_MAP_TEST_SERVICE })
-          .click({ timeout: 15000 });
+        const serviceOption = page.getByRole('option', { name: SERVICE_MAP_TEST_SERVICE });
+        await serviceOption.waitFor({ state: 'visible', timeout: 15000 });
+        await serviceOption.click();
 
         // Select environment from dropdown (environments load automatically)
         const environmentComboBox = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
         await environmentComboBox.click();
-        await page.getByRole('option', { name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING }).click();
+        const environmentOption = page.getByRole('option', {
+          name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING,
+        });
+        await environmentOption.waitFor({ state: 'visible' });
+        await environmentOption.click();
 
         // Add KQL filter matching the staging transaction
         const kueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
