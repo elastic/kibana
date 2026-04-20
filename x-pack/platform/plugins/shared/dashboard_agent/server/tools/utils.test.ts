@@ -76,9 +76,7 @@ describe('resolvePanelsFromAttachments', () => {
       type: LENS_EMBEDDABLE_TYPE,
       config: {
         title: 'Request count',
-        attributes: expect.objectContaining({
-          type: 'metric',
-        }),
+        type: 'metric',
       },
     });
   });

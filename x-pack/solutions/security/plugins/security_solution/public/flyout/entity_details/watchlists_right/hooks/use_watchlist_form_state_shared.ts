@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/entity_analytics/watchlists/management/create.gen';
 import { WatchlistsFlyoutKey } from '../../shared/constants';
+import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from '../constants';
 
 export const getDefaultWatchlist = (): CreateWatchlistRequestBodyInput => ({
   name: '',
@@ -17,19 +18,10 @@ export const getDefaultWatchlist = (): CreateWatchlistRequestBodyInput => ({
   managed: false,
 });
 
-export const getWatchlistNameValidation = (name: string, shouldValidate: boolean) => {
-  const trimmedName = name.trim();
-  const isNameValid =
-    trimmedName.length > 0 &&
-    /^[a-z0-9][a-z0-9._-]*$/.test(trimmedName) &&
-    trimmedName !== '.' &&
-    trimmedName !== '..';
-
-  return {
-    trimmedName,
-    isNameInvalid: shouldValidate && !isNameValid,
-  };
-};
+export const getWatchlistFieldLengthValidation = (watchlist: CreateWatchlistRequestBodyInput) => ({
+  isNameTooLong: watchlist.name.length > MAX_WATCHLIST_NAME_LENGTH,
+  isDescriptionTooLong: (watchlist.description ?? '').length > MAX_WATCHLIST_DESCRIPTION_LENGTH,
+});
 
 export const useResetEditsOnFlyoutOpen = (setHasUserEdits: (value: boolean) => void) => {
   const { right } = useExpandableFlyoutState();

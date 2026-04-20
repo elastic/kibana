@@ -42,6 +42,8 @@ export {
 } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream, getSourcesForStream } from './src/helpers/hierarchy_helpers';
 export { getDiscoverEsqlQuery } from './src/helpers/get_discover_esql_query';
+export { definitionToESQLQuery } from './src/helpers/definition_to_esql_query';
+export type { DefinitionToESQLQueryOptions } from './src/helpers/definition_to_esql_query';
 export {
   convertUpsertRequestIntoDefinition,
   convertGetResponseIntoUpsertRequest,
@@ -72,6 +74,8 @@ export {
   hasStatsCommand,
   MS_PER_UNIT,
   normalizeEsqlQuery,
+  normalizeEsqlSafe,
+  hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';
