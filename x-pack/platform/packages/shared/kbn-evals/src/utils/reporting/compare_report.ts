@@ -7,7 +7,7 @@
 
 import chalk from 'chalk';
 import { table } from 'table';
-import type { PairedTTestResult } from '../statistical_analysis';
+import type { PairedTTestResult } from '@kbn/evals-common';
 
 const DEFAULT_SIGNIFICANCE_THRESHOLD = 0.05;
 

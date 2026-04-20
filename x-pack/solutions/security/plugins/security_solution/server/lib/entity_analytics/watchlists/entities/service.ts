@@ -16,6 +16,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 
 import type { IntegrationType } from '../entity_sources/infra';
 import type { CorrelationMap } from './types';
+import { getEntityType } from './utils';
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
@@ -150,16 +151,6 @@ const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => 
 const integrationToStoreNamespaceMap: Record<IntegrationType, string> = {
   entityanalytics_okta: 'okta',
   entityanalytics_ad: 'active_directory',
-};
-
-const getEntityType = (record: EntityStoreEntity): EntityType => {
-  const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
-
-  if (!entityType || !Object.values(EntityType).includes(entityType as EntityType)) {
-    throw new Error(`Unexpected entity store record: ${JSON.stringify(record)}`);
-  }
-
-  return EntityType[entityType as keyof typeof EntityType];
 };
 
 const dedup = (entityIdsByType: EntityStoreEntityIdsByType): EntityStoreEntityIdsByType =>
