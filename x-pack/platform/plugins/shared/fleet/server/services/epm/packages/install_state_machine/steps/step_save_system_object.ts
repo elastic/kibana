@@ -42,6 +42,11 @@ export async function stepSaveSystemObject(context: InstallContext) {
     name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
+  const policyTemplatesDeploymentInfo = packageInfo.policy_templates?.map((t) => ({
+    name: t.name,
+    deployment_modes: t.deployment_modes,
+  }));
+
   await withPackageSpan('Update install status', () =>
     savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       version: pkgVersion,
@@ -56,6 +61,7 @@ export async function stepSaveSystemObject(context: InstallContext) {
       rolled_back:
         !!installedPkg?.attributes.version &&
         semverLt(pkgVersion, installedPkg?.attributes.version),
+      policy_templates_deployment_info: policyTemplatesDeploymentInfo,
     })
   );
 

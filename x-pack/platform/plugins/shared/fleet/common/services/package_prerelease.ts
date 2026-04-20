@@ -6,12 +6,13 @@
  */
 
 import { AgentlessDeploymentReleaseStatus } from '../types';
-import type { IntegrationCardReleaseLabel, PackageInfo, RegistryRelease } from '../types';
+import type { IntegrationCardReleaseLabel, RegistryRelease } from '../types';
 
 import {
   getAgentlessRelease,
   isDefaultAgentlessIntegration,
   isOnlyAgentlessIntegration,
+  type PackageWithDeploymentInfo,
 } from './agentless_policy_helper';
 
 export function isPackagePrerelease(version: string): boolean {
@@ -43,7 +44,7 @@ export function mapPackageReleaseToIntegrationCardRelease(
  * and an explicit agentless filter view (`options.isAgentlessContext`).
  */
 export function getAgentlessReleaseOverride(
-  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  packageInfo?: PackageWithDeploymentInfo,
   integrationToEnable?: string,
   options?: { isAgentlessContext?: boolean }
 ): Exclude<AgentlessDeploymentReleaseStatus, AgentlessDeploymentReleaseStatus.GA> | undefined {
@@ -72,7 +73,7 @@ export function getAgentlessReleaseOverride(
  * installed version. The list endpoint does not include policy_templates for the installed version.
  */
 export function resolveEffectiveRelease(
-  packageInfo?: Pick<PackageInfo, 'policy_templates' | 'version'>,
+  packageInfo?: PackageWithDeploymentInfo & { version?: string },
   integrationToEnable?: string,
   options?: { isAgentlessContext?: boolean; version?: string }
 ): IntegrationCardReleaseLabel {

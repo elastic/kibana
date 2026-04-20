@@ -13,7 +13,16 @@ import {
 } from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 import { AgentlessDeploymentReleaseStatus } from '../types';
-import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
+import type { DeploymentsModes, NewPackagePolicyInput, PackageInfo } from '../types';
+
+export interface PolicyTemplateDeploymentRef {
+  name: string;
+  deployment_modes?: DeploymentsModes;
+}
+
+export interface PackageWithDeploymentInfo {
+  policy_templates?: PolicyTemplateDeploymentRef[];
+}
 
 export interface RegistryInputForDeploymentMode {
   type: string;
@@ -72,7 +81,7 @@ export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyNa
 };
 
 export const isOnlyAgentlessIntegration = (
-  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  packageInfo?: PackageWithDeploymentInfo,
   integrationToEnable?: string
 ) => {
   if (
@@ -90,7 +99,7 @@ export const isOnlyAgentlessIntegration = (
   return false;
 };
 
-export const isOnlyAgentlessPolicyTemplate = (policyTemplate: RegistryPolicyTemplate) => {
+export const isOnlyAgentlessPolicyTemplate = (policyTemplate: PolicyTemplateDeploymentRef) => {
   return Boolean(
     policyTemplate.deployment_modes &&
       policyTemplate.deployment_modes.agentless?.enabled === true &&
@@ -191,7 +200,7 @@ export function validateDeploymentModesForInputs(
  * When no specific integration is provided, returns the least mature release across all agentless-enabled templates.
  */
 export const getAgentlessRelease = (
-  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  packageInfo?: PackageWithDeploymentInfo,
   integrationToEnable?: string
 ): AgentlessDeploymentReleaseStatus | undefined => {
   const templates = packageInfo?.policy_templates ?? [];
@@ -222,7 +231,7 @@ export const getAgentlessRelease = (
 };
 
 export const isDefaultAgentlessIntegration = (
-  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  packageInfo?: PackageWithDeploymentInfo,
   integrationToEnable?: string
 ): boolean => {
   if (integrationToEnable) {
