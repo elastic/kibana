@@ -28,8 +28,7 @@
           "\nAn error thrown when a HTTP request results in an error response."
         ],
         "signature": [
-          "AJAXError",
-          " extends Error"
+          "maplibregl.AJAXError extends Error"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 76,
@@ -214,11 +213,7 @@
           "\nA source containing GeoJSON.\n(See the [Style Specification](https://maplibre.org/maplibre-style-spec/#sources-geojson) for detailed documentation of options.)\n"
         ],
         "signature": [
-          "GeoJSONSource",
-          " extends ",
-          "Evented",
-          " implements ",
-          "Source"
+          "maplibregl.GeoJSONSource extends maplibregl.Evented implements maplibregl.Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 13727,
@@ -407,7 +402,7 @@
             "label": "map",
             "description": [],
             "signature": [
-              "Map"
+              "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13794,
@@ -496,9 +491,7 @@
             "label": "onAdd",
             "description": [],
             "signature": [
-              "(map: ",
-              "Map",
-              ") => void"
+              "(map: maplibregl.Map) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13803,
@@ -514,7 +507,7 @@
                 "label": "map",
                 "description": [],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13803,
@@ -576,9 +569,7 @@
               "\nUpdates the source's GeoJSON, and re-renders the map.\n\nFor sources with lots of features, this method can be used to make updates more quickly.\n\nThis approach requires unique IDs for every feature in the source. The IDs can either be specified on the feature,\nor by using the promoteId option to specify which property should be used as the ID.\n\nIt is an error to call updateData on a source that did not have unique IDs for each of its features already.\n\nUpdates are applied on a best-effort basis, updating an ID that does not exist will not result in an error.\n"
             ],
             "signature": [
-              "(diff: ",
-              "GeoJSONSourceDiff",
-              ") => this"
+              "(diff: maplibregl.GeoJSONSourceDiff) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13810,
@@ -596,7 +587,7 @@
                   "- The changes that need to be applied."
                 ],
                 "signature": [
-                  "GeoJSONSourceDiff"
+                  "maplibregl.GeoJSONSourceDiff"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13824,
@@ -640,9 +631,7 @@
               "\nAllows getting the source's boundaries.\nIf there's a problem with the source's data, it will return an empty {@link LngLatBounds}."
             ],
             "signature": [
-              "() => Promise<",
-              "LngLatBounds",
-              ">"
+              "() => Promise<maplibregl.LngLatBounds>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13832,
@@ -664,9 +653,7 @@
               "\nTo disable/enable clustering on the source options"
             ],
             "signature": [
-              "(options: ",
-              "SetClusterOptions",
-              ") => this"
+              "(options: maplibregl.SetClusterOptions) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13838,
@@ -684,7 +671,7 @@
                   "- The options to set"
                 ],
                 "signature": [
-                  "SetClusterOptions"
+                  "maplibregl.SetClusterOptions"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13847,
@@ -870,9 +857,7 @@
               "\nResponsible for invoking WorkerSource's geojson.loadData target, which\nhandles loading the geojson data and preparing to serve it up as tiles,\nusing geojson-vt or supercluster as appropriate."
             ],
             "signature": [
-              "(diff?: ",
-              "GeoJSONSourceDiff",
-              " | undefined) => Promise<void>"
+              "(diff?: maplibregl.GeoJSONSourceDiff | undefined) => Promise<void>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13888,
@@ -890,8 +875,7 @@
                   "- the diff object"
                 ],
                 "signature": [
-                  "GeoJSONSourceDiff",
-                  " | undefined"
+                  "maplibregl.GeoJSONSourceDiff | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13894,
@@ -1055,8 +1039,7 @@
             "label": "serialize",
             "description": [],
             "signature": [
-              "() => ",
-              "GeoJSONSourceSpecification"
+              "() => maplibregl.GeoJSONSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13900,
@@ -1102,7 +1085,7 @@
           "\nA `LngLat` object represents a given longitude and latitude coordinate, measured in degrees.\nThese coordinates are based on the [WGS84 (EPSG:4326) standard](https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84).\n\nMapLibre GL JS uses longitude, latitude coordinate order (as opposed to latitude, longitude) to match the\n[GeoJSON specification](https://tools.ietf.org/html/rfc7946).\n\nNote that any MapLibre GL JS method that accepts a `LngLat` object as an argument or option\ncan also accept an `Array` of two numbers and will perform an implicit conversion.\nThis flexible type is documented as {@link LngLatLike}.\n"
         ],
         "signature": [
-          "LngLat"
+          "maplibregl.LngLat"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 543,
@@ -1207,8 +1190,7 @@
               "\nReturns a new `LngLat` object whose longitude is wrapped to the range (-180, 180).\n"
             ],
             "signature": [
-              "() => ",
-              "LngLat"
+              "() => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 579,
@@ -1274,9 +1256,7 @@
               "\nReturns the approximate distance between a pair of coordinates in meters\nUses the Haversine Formula (from R.W. Sinnott, \"Virtues of the Haversine\", Sky and Telescope, vol. 68, no. 2, 1984, p. 159)\n"
             ],
             "signature": [
-              "(lngLat: ",
-              "LngLat",
-              ") => number"
+              "(lngLat: maplibregl.LngLat) => number"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 616,
@@ -1294,7 +1274,7 @@
                   "- coordinates to compute the distance to"
                 ],
                 "signature": [
-                  "LngLat"
+                  "maplibregl.LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 629,
@@ -1318,10 +1298,7 @@
               "\nConverts an array of two numbers or an object with `lng` and `lat` or `lon` and `lat` properties\nto a `LngLat` object.\n\nIf a `LngLat` object is passed in, the function returns it unchanged.\n"
             ],
             "signature": [
-              "(input: ",
-              "LngLatLike",
-              ") => ",
-              "LngLat"
+              "(input: maplibregl.LngLatLike) => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 630,
@@ -1339,7 +1316,7 @@
                   "- An array of two numbers or object to convert, or a `LngLat` object to return."
                 ],
                 "signature": [
-                  "LngLatLike"
+                  "maplibregl.LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 645,
@@ -1368,7 +1345,7 @@
           "\nA `LngLatBounds` object represents a geographical bounding box,\ndefined by its southwest and northeast points in longitude and latitude.\n\nIf no arguments are provided to the constructor, a `null` bounding box is created.\n\nNote that any Mapbox GL method that accepts a `LngLatBounds` object as an argument or option\ncan also accept an `Array` of two {@link LngLatLike} constructs and will perform an implicit conversion.\nThis flexible type is documented as {@link LngLatBoundsLike}.\n"
         ],
         "signature": [
-          "LngLatBounds"
+          "maplibregl.LngLatBounds"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 1741,
@@ -1384,7 +1361,7 @@
             "label": "_ne",
             "description": [],
             "signature": [
-              "LngLat"
+              "maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1761,
@@ -1400,7 +1377,7 @@
             "label": "_sw",
             "description": [],
             "signature": [
-              "LngLat"
+              "maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1762,
@@ -1434,13 +1411,7 @@
                   "- The southwest corner of the bounding box."
                 ],
                 "signature": [
-                  "[number, number, number, number] | ",
-                  "LngLatLike",
-                  " | [",
-                  "LngLatLike",
-                  ", ",
-                  "LngLatLike",
-                  "] | undefined"
+                  "[number, number, number, number] | maplibregl.LngLatLike | [maplibregl.LngLatLike, maplibregl.LngLatLike] | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1783,
@@ -1459,8 +1430,7 @@
                   "- The northeast corner of the bounding box."
                 ],
                 "signature": [
-                  "LngLatLike",
-                  " | undefined"
+                  "maplibregl.LngLatLike | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1791,
@@ -1482,9 +1452,7 @@
               "\nSet the northeast corner of the bounding box\n"
             ],
             "signature": [
-              "(ne: ",
-              "LngLatLike",
-              ") => this"
+              "(ne: maplibregl.LngLatLike) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1792,
@@ -1502,7 +1470,7 @@
                   "- a {@link LngLatLike} object describing the northeast corner of the bounding box."
                 ],
                 "signature": [
-                  "LngLatLike"
+                  "maplibregl.LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1797,
@@ -1524,9 +1492,7 @@
               "\nSet the southwest corner of the bounding box\n"
             ],
             "signature": [
-              "(sw: ",
-              "LngLatLike",
-              ") => this"
+              "(sw: maplibregl.LngLatLike) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1798,
@@ -1544,7 +1510,7 @@
                   "- a {@link LngLatLike} object describing the southwest corner of the bounding box."
                 ],
                 "signature": [
-                  "LngLatLike"
+                  "maplibregl.LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1803,
@@ -1566,11 +1532,7 @@
               "\nExtend the bounds to include a given LngLatLike or LngLatBoundsLike.\n"
             ],
             "signature": [
-              "(obj: ",
-              "LngLatBoundsLike",
-              " | ",
-              "LngLatLike",
-              ") => this"
+              "(obj: maplibregl.LngLatBoundsLike | maplibregl.LngLatLike) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1804,
@@ -1588,9 +1550,7 @@
                   "- object to extend to"
                 ],
                 "signature": [
-                  "LngLatBoundsLike",
-                  " | ",
-                  "LngLatLike"
+                  "maplibregl.LngLatBoundsLike | maplibregl.LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1809,
@@ -1612,8 +1572,7 @@
               "\nReturns the geographical coordinate equidistant from the bounding box's corners.\n"
             ],
             "signature": [
-              "() => ",
-              "LngLat"
+              "() => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1810,
@@ -1635,8 +1594,7 @@
               "\nReturns the southwest corner of the bounding box.\n"
             ],
             "signature": [
-              "() => ",
-              "LngLat"
+              "() => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1821,
@@ -1658,8 +1616,7 @@
               "\nReturns the northeast corner of the bounding box.\n"
             ],
             "signature": [
-              "() => ",
-              "LngLat"
+              "() => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1827,
@@ -1681,8 +1638,7 @@
               "\nReturns the northwest corner of the bounding box.\n"
             ],
             "signature": [
-              "() => ",
-              "LngLat"
+              "() => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1833,
@@ -1704,8 +1660,7 @@
               "\nReturns the southeast corner of the bounding box.\n"
             ],
             "signature": [
-              "() => ",
-              "LngLat"
+              "() => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1839,
@@ -1881,9 +1836,7 @@
               "\nCheck if the point is within the bounding box.\n"
             ],
             "signature": [
-              "(lnglat: ",
-              "LngLatLike",
-              ") => boolean"
+              "(lnglat: maplibregl.LngLatLike) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1902,
@@ -1901,7 +1854,7 @@
                   "- geographic point to check against."
                 ],
                 "signature": [
-                  "LngLatLike"
+                  "maplibregl.LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1919,
@@ -1925,10 +1878,7 @@
               "\nConverts an array to a `LngLatBounds` object.\n\nIf a `LngLatBounds` object is passed in, the function returns it unchanged.\n\nInternally, the function calls `LngLat#convert` to convert arrays to `LngLat` values.\n"
             ],
             "signature": [
-              "(input: ",
-              "LngLatBoundsLike",
-              " | null) => ",
-              "LngLatBounds"
+              "(input: maplibregl.LngLatBoundsLike | null) => maplibregl.LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1920,
@@ -1946,8 +1896,7 @@
                   "- An array of two coordinates to convert, or a `LngLatBounds` object to return."
                 ],
                 "signature": [
-                  "LngLatBoundsLike",
-                  " | null"
+                  "maplibregl.LngLatBoundsLike | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1935,
@@ -1971,10 +1920,7 @@
               "\nReturns a `LngLatBounds` from the coordinates extended by a given `radius`. The returned `LngLatBounds` completely contains the `radius`.\n"
             ],
             "signature": [
-              "(center: ",
-              "LngLat",
-              ", radius?: number | undefined) => ",
-              "LngLatBounds"
+              "(center: maplibregl.LngLat, radius?: number | undefined) => maplibregl.LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1936,
@@ -1992,7 +1938,7 @@
                   "- center coordinates of the new bounds."
                 ],
                 "signature": [
-                  "LngLat"
+                  "maplibregl.LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 1948,
@@ -2035,8 +1981,7 @@
               "\nAdjusts the given bounds to handle the case where the bounds cross the 180th meridian (antimeridian).\n"
             ],
             "signature": [
-              "() => ",
-              "LngLatBounds"
+              "() => maplibregl.LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 1949,
@@ -2064,8 +2009,7 @@
           "\nThe `Map` object represents the map on your page. It exposes methods\nand properties that enable you to programmatically change the map,\nand fires events as users interact with it.\n\nYou create a `Map` by specifying a `container` and other options, see {@link MapOptions} for the full list.\nThen MapLibre GL JS initializes the map on the page and returns your `Map` object.\n"
         ],
         "signature": [
-          "Map",
-          " extends Camera"
+          "maplibregl.Map extends Camera"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 10629,
@@ -2081,7 +2025,7 @@
             "label": "style",
             "description": [],
             "signature": [
-              "Style"
+              "maplibregl.Style"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10661,
@@ -2452,9 +2396,7 @@
             "label": "_canvasContextAttributes",
             "description": [],
             "signature": [
-              "WebGLContextAttributes & { contextType?: ",
-              "WebGLSupportedVersions",
-              "; }"
+              "WebGLContextAttributes & { contextType?: maplibregl.WebGLSupportedVersions; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10687,
@@ -2483,7 +2425,7 @@
             "label": "_hash",
             "description": [],
             "signature": [
-              "Hash"
+              "maplibregl.Hash"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10689,
@@ -2499,9 +2441,7 @@
             "label": "_delegatedListeners",
             "description": [],
             "signature": [
-              "{ [x: string]: ",
-              "DelegatedListener",
-              "[]; }"
+              "{ [x: string]: maplibregl.DelegatedListener[]; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10690,
@@ -2585,8 +2525,7 @@
             "label": "_controls",
             "description": [],
             "signature": [
-              "IControl",
-              "[]"
+              "maplibregl.IControl[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10696,
@@ -2734,11 +2673,7 @@
             "label": "_terrainDataCallback",
             "description": [],
             "signature": [
-              "(e: ",
-              "MapStyleDataEvent",
-              " | ",
-              "MapSourceDataEvent",
-              ") => void"
+              "(e: maplibregl.MapStyleDataEvent | maplibregl.MapSourceDataEvent) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10709,
@@ -2755,9 +2690,7 @@
                 "label": "e",
                 "description": [],
                 "signature": [
-                  "MapStyleDataEvent",
-                  " | ",
-                  "MapSourceDataEvent"
+                  "maplibregl.MapStyleDataEvent | maplibregl.MapSourceDataEvent"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10709,
@@ -2777,7 +2710,7 @@
               "\nThe map's {@link ScrollZoomHandler}, which implements zooming in and out with a scroll wheel or trackpad.\nFind more details and examples using `scrollZoom` in the {@link ScrollZoomHandler} section."
             ],
             "signature": [
-              "ScrollZoomHandler"
+              "maplibregl.ScrollZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10715,
@@ -2795,7 +2728,7 @@
               "\nThe map's {@link BoxZoomHandler}, which implements zooming using a drag gesture with the Shift key pressed.\nFind more details and examples using `boxZoom` in the {@link BoxZoomHandler} section."
             ],
             "signature": [
-              "BoxZoomHandler"
+              "maplibregl.BoxZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10720,
@@ -2813,7 +2746,7 @@
               "\nThe map's {@link DragRotateHandler}, which implements rotating the map while dragging with the right\nmouse button or with the Control key pressed. Find more details and examples using `dragRotate`\nin the {@link DragRotateHandler} section."
             ],
             "signature": [
-              "DragRotateHandler"
+              "maplibregl.DragRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10725,
@@ -2831,7 +2764,7 @@
               "\nThe map's {@link DragPanHandler}, which implements dragging the map with a mouse or touch gesture.\nFind more details and examples using `dragPan` in the {@link DragPanHandler} section."
             ],
             "signature": [
-              "DragPanHandler"
+              "maplibregl.DragPanHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10731,
@@ -2849,7 +2782,7 @@
               "\nThe map's {@link KeyboardHandler}, which allows the user to zoom, rotate, and pan the map using keyboard\nshortcuts. Find more details and examples using `keyboard` in the {@link KeyboardHandler} section."
             ],
             "signature": [
-              "KeyboardHandler"
+              "maplibregl.KeyboardHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10736,
@@ -2867,7 +2800,7 @@
               "\nThe map's {@link DoubleClickZoomHandler}, which allows the user to zoom by double clicking.\nFind more details and examples using `doubleClickZoom` in the {@link DoubleClickZoomHandler} section."
             ],
             "signature": [
-              "DoubleClickZoomHandler"
+              "maplibregl.DoubleClickZoomHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10741,
@@ -2885,7 +2818,7 @@
               "\nThe map's {@link TwoFingersTouchZoomRotateHandler}, which allows the user to zoom or rotate the map with touch gestures.\nFind more details and examples using `touchZoomRotate` in the {@link TwoFingersTouchZoomRotateHandler} section."
             ],
             "signature": [
-              "TwoFingersTouchZoomRotateHandler"
+              "maplibregl.TwoFingersTouchZoomRotateHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10746,
@@ -2903,7 +2836,7 @@
               "\nThe map's {@link TwoFingersTouchPitchHandler}, which allows the user to pitch the map with touch gestures.\nFind more details and examples using `touchPitch` in the {@link TwoFingersTouchPitchHandler} section."
             ],
             "signature": [
-              "TwoFingersTouchPitchHandler"
+              "maplibregl.TwoFingersTouchPitchHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10751,
@@ -2921,7 +2854,7 @@
               "\nThe map's {@link CooperativeGesturesHandler}, which allows the user to see cooperative gesture info when user tries to zoom in/out.\nFind more details and examples using `cooperativeGestures` in the {@link CooperativeGesturesHandler} section."
             ],
             "signature": [
-              "CooperativeGesturesHandler"
+              "maplibregl.CooperativeGesturesHandler"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10756,
@@ -2970,7 +2903,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "MapOptions"
+                  "maplibregl.MapOptions"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10768,
@@ -2994,12 +2927,7 @@
               "\nAdds an {@link IControl} to the map, calling `control.onAdd(this)`.\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
-              "(control: ",
-              "IControl",
-              ", position?: ",
-              "ControlPosition",
-              " | undefined) => ",
-              "Map"
+              "(control: maplibregl.IControl, position?: maplibregl.ControlPosition | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10776,
@@ -3017,7 +2945,7 @@
                   "- The {@link IControl} to add."
                 ],
                 "signature": [
-                  "IControl"
+                  "maplibregl.IControl"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10791,
@@ -3036,8 +2964,7 @@
                   "- position on the map to which the control will be added."
                 ],
                 "signature": [
-                  "ControlPosition",
-                  " | undefined"
+                  "maplibregl.ControlPosition | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10791,
@@ -3059,10 +2986,7 @@
               "\nRemoves the control from the map.\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
-              "(control: ",
-              "IControl",
-              ") => ",
-              "Map"
+              "(control: maplibregl.IControl) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10792,
@@ -3080,7 +3004,7 @@
                   "- The {@link IControl} to remove."
                 ],
                 "signature": [
-                  "IControl"
+                  "maplibregl.IControl"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10808,
@@ -3102,9 +3026,7 @@
               "\nChecks if a control exists on the map.\n"
             ],
             "signature": [
-              "(control: ",
-              "IControl",
-              ") => boolean"
+              "(control: maplibregl.IControl) => boolean"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10809,
@@ -3122,7 +3044,7 @@
                   "- The {@link IControl} to check."
                 ],
                 "signature": [
-                  "IControl"
+                  "maplibregl.IControl"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10824,
@@ -3144,12 +3066,7 @@
             "label": "calculateCameraOptionsFromTo",
             "description": [],
             "signature": [
-              "(from: ",
-              "LngLat",
-              ", altitudeFrom: number, to: ",
-              "LngLat",
-              ", altitudeTo?: number | undefined) => ",
-              "CameraOptions"
+              "(from: maplibregl.LngLat, altitudeFrom: number, to: maplibregl.LngLat, altitudeTo?: number | undefined) => maplibregl.CameraOptions"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10825,
@@ -3165,7 +3082,7 @@
                 "label": "from",
                 "description": [],
                 "signature": [
-                  "LngLat"
+                  "maplibregl.LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10825,
@@ -3199,7 +3116,7 @@
                 "label": "to",
                 "description": [],
                 "signature": [
-                  "LngLat"
+                  "maplibregl.LngLat"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10825,
@@ -3238,8 +3155,7 @@
               "\nResizes the map according to the dimensions of its\n`container` element.\n\nChecks if the map container size changed and updates the map if it has changed.\nThis method must be called after the map's `container` is resized programmatically\nor when the map is shown after being initially hidden with CSS.\n\nTriggers the following events: `movestart`, `move`, `moveend`, and `resize`.\n"
             ],
             "signature": [
-              "(eventData?: any, constrainTransform?: boolean | undefined) => ",
-              "Map"
+              "(eventData?: any, constrainTransform?: boolean | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10826,
@@ -3394,8 +3310,7 @@
               "\nReturns the map's geographical bounds. When the bearing or pitch is non-zero, the visible region is not\nan axis-aligned rectangle, and the result is the smallest bounds that encompasses the visible region."
             ],
             "signature": [
-              "() => ",
-              "LngLatBounds"
+              "() => maplibregl.LngLatBounds"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10869,
@@ -3417,9 +3332,7 @@
               "\nReturns the maximum geographical bounds the map is constrained to, or `null` if none set."
             ],
             "signature": [
-              "() => ",
-              "LngLatBounds",
-              " | null"
+              "() => maplibregl.LngLatBounds | null"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10879,
@@ -3441,10 +3354,7 @@
               "\nSets or clears the map's geographical bounds.\n\nPan and zoom operations are constrained within these bounds.\nIf a pan or zoom is performed that would\ndisplay regions outside these bounds, the map will\ninstead display a position and zoom level\nas close as possible to the operation's request while still\nremaining within the bounds.\n"
             ],
             "signature": [
-              "(bounds?: ",
-              "LngLatBoundsLike",
-              " | null | undefined) => ",
-              "Map"
+              "(bounds?: maplibregl.LngLatBoundsLike | null | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10888,
@@ -3462,8 +3372,7 @@
                   "- The maximum bounds to set. If `null` or `undefined` is provided, the function removes the map's maximum bounds."
                 ],
                 "signature": [
-                  "LngLatBoundsLike",
-                  " | null | undefined"
+                  "maplibregl.LngLatBoundsLike | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 10909,
@@ -3485,8 +3394,7 @@
               "\nSets or clears the map's minimum zoom level.\nIf the map's current zoom level is lower than the new minimum,\nthe map will zoom to the new minimum.\n\nIt is not always possible to zoom out and reach the set `minZoom`.\nOther factors such as map height may restrict zooming. For example,\nif the map is 512px tall it will not be possible to zoom below zoom 0\nno matter what the `minZoom` is set to.\n\nA {@link ErrorEvent} event will be fired if minZoom is out of bounds.\n"
             ],
             "signature": [
-              "(minZoom?: number | null | undefined) => ",
-              "Map"
+              "(minZoom?: number | null | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10910,
@@ -3548,8 +3456,7 @@
               "\nSets or clears the map's maximum zoom level.\nIf the map's current zoom level is higher than the new maximum,\nthe map will zoom to the new maximum.\n\nA {@link ErrorEvent} event will be fired if minZoom is out of bounds.\n"
             ],
             "signature": [
-              "(maxZoom?: number | null | undefined) => ",
-              "Map"
+              "(maxZoom?: number | null | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10940,
@@ -3611,8 +3518,7 @@
               "\nSets or clears the map's minimum pitch.\nIf the map's current pitch is lower than the new minimum,\nthe map will pitch to the new minimum.\n\nA {@link ErrorEvent} event will be fired if minPitch is out of bounds.\n"
             ],
             "signature": [
-              "(minPitch?: number | null | undefined) => ",
-              "Map"
+              "(minPitch?: number | null | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10965,
@@ -3674,8 +3580,7 @@
               "\nSets or clears the map's maximum pitch.\nIf the map's current pitch is higher than the new maximum,\nthe map will pitch to the new maximum.\n\nA {@link ErrorEvent} event will be fired if maxPitch is out of bounds.\n"
             ],
             "signature": [
-              "(maxPitch?: number | null | undefined) => ",
-              "Map"
+              "(maxPitch?: number | null | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 10982,
@@ -3763,8 +3668,7 @@
               "\nSets the state of `renderWorldCopies`.\n"
             ],
             "signature": [
-              "(renderWorldCopies?: boolean | null | undefined) => ",
-              "Map"
+              "(renderWorldCopies?: boolean | null | undefined) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11014,
@@ -3804,10 +3708,7 @@
               "\nReturns a [Point](https://github.com/mapbox/point-geometry) representing pixel coordinates, relative to the map's `container`,\nthat correspond to the specified geographical location.\n"
             ],
             "signature": [
-              "(lnglat: ",
-              "LngLatLike",
-              ") => ",
-              "node_modules/maplibre-gl/node_modules/@types/mapbox__point-geometry/index"
+              "(lnglat: maplibregl.LngLatLike) => maplibregl.Point"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11032,
@@ -3825,7 +3726,7 @@
                   "- The geographical location to project."
                 ],
                 "signature": [
-                  "LngLatLike"
+                  "maplibregl.LngLatLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11044,
@@ -3849,10 +3750,7 @@
               "\nReturns a {@link LngLat} representing geographical coordinates that correspond\nto the specified pixel coordinates.\n"
             ],
             "signature": [
-              "(point: ",
-              "PointLike",
-              ") => ",
-              "LngLat"
+              "(point: maplibregl.PointLike) => maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11045,
@@ -3870,7 +3768,7 @@
                   "- The pixel coordinates to unproject."
                 ],
                 "signature": [
-                  "PointLike"
+                  "maplibregl.PointLike"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11059,
@@ -3958,10 +3856,7 @@
             "label": "_createDelegatedListener",
             "description": [],
             "signature": [
-              "(type: string, layerIds: string[], listener: ",
-              "Listener",
-              ") => ",
-              "DelegatedListener"
+              "(type: string, layerIds: string[], listener: maplibregl.Listener) => maplibregl.DelegatedListener"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11087,
@@ -4011,7 +3906,7 @@
                 "label": "listener",
                 "description": [],
                 "signature": [
-                  "Listener"
+                  "maplibregl.Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11087,
@@ -4031,9 +3926,7 @@
             "label": "_saveDelegatedListener",
             "description": [],
             "signature": [
-              "(type: string, delegatedListener: ",
-              "DelegatedListener",
-              ") => void"
+              "(type: string, delegatedListener: maplibregl.DelegatedListener) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11088,
@@ -4066,7 +3959,7 @@
                 "label": "delegatedListener",
                 "description": [],
                 "signature": [
-                  "DelegatedListener"
+                  "maplibregl.DelegatedListener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11088,
@@ -4086,9 +3979,7 @@
             "label": "_removeDelegatedListener",
             "description": [],
             "signature": [
-              "(type: string, layerIds: string[], listener: ",
-              "Listener",
-              ") => void"
+              "(type: string, layerIds: string[], listener: maplibregl.Listener) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11089,
@@ -4138,7 +4029,7 @@
                 "label": "listener",
                 "description": [],
                 "signature": [
-                  "Listener"
+                  "maplibregl.Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11089,
@@ -4164,29 +4055,7 @@
             "label": "on",
             "description": [],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; (type: string, listener: ",
-              "Listener",
-              "): ",
-              "Subscription",
-              "; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): maplibregl.Subscription; (type: string, listener: maplibregl.Listener): maplibregl.Subscription; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11090,
@@ -4242,9 +4111,7 @@
                   "- The function to be called when the event is fired."
                 ],
                 "signature": [
-                  "(ev: ",
-                  "MapLayerEventType",
-                  "[T] & Object) => void"
+                  "(ev: maplibregl.MapLayerEventType[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11195,
@@ -4268,29 +4135,7 @@
               "\nOverload of the `on` method that allows to listen to events specifying multiple layers."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; (type: string, listener: ",
-              "Listener",
-              "): ",
-              "Subscription",
-              "; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): maplibregl.Subscription; (type: string, listener: maplibregl.Listener): maplibregl.Subscription; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11196,
@@ -4346,9 +4191,7 @@
                   "- The listener callback."
                 ],
                 "signature": [
-                  "(ev: ",
-                  "MapLayerEventType",
-                  "[T] & Object) => void"
+                  "(ev: maplibregl.MapLayerEventType[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11203,
@@ -4372,29 +4215,7 @@
               "\nOverload of the `on` method that allows to listen to events without specifying a layer."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; (type: string, listener: ",
-              "Listener",
-              "): ",
-              "Subscription",
-              "; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): maplibregl.Subscription; (type: string, listener: maplibregl.Listener): maplibregl.Subscription; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11204,
@@ -4431,9 +4252,7 @@
                   "- The listener callback."
                 ],
                 "signature": [
-                  "(ev: ",
-                  "MapEventType",
-                  "[T] & Object) => void"
+                  "(ev: maplibregl.MapEventType[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11210,
@@ -4457,29 +4276,7 @@
               "\nOverload of the `on` method that allows to listen to events without specifying a layer."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): ",
-              "Subscription",
-              "; (type: string, listener: ",
-              "Listener",
-              "): ",
-              "Subscription",
-              "; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): maplibregl.Subscription; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): maplibregl.Subscription; (type: string, listener: maplibregl.Listener): maplibregl.Subscription; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11211,
@@ -4516,7 +4313,7 @@
                   "- The listener callback."
                 ],
                 "signature": [
-                  "Listener"
+                  "maplibregl.Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11217,
@@ -4540,23 +4337,7 @@
               "\nAdds a listener that will be called only once to a specified event type, optionally limited to features in a specified style layer.\n"
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): this | Promise<",
-              "MapLayerEventType",
-              "[T] & Object>; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener?: ((ev: ",
-              "MapEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: ",
-              "Listener",
-              " | undefined): Promise<any> | this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11218,
@@ -4612,9 +4393,7 @@
                   "- The function to be called when the event is fired."
                 ],
                 "signature": [
-                  "((ev: ",
-                  "MapLayerEventType",
-                  "[T] & Object) => void) | undefined"
+                  "((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11234,
@@ -4640,23 +4419,7 @@
               "\nOverload of the `once` method that allows to listen to events specifying multiple layers."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): this | Promise<",
-              "MapLayerEventType",
-              "[T] & Object>; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener?: ((ev: ",
-              "MapEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: ",
-              "Listener",
-              " | undefined): Promise<any> | this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11235,
@@ -4712,9 +4475,7 @@
                   "- The listener callback."
                 ],
                 "signature": [
-                  "((ev: ",
-                  "MapLayerEventType",
-                  "[T] & Object) => void) | undefined"
+                  "((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11242,
@@ -4738,23 +4499,7 @@
               "\nOverload of the `once` method that allows to listen to events without specifying a layer."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): this | Promise<",
-              "MapLayerEventType",
-              "[T] & Object>; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener?: ((ev: ",
-              "MapEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: ",
-              "Listener",
-              " | undefined): Promise<any> | this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11243,
@@ -4791,9 +4536,7 @@
                   "- The listener callback."
                 ],
                 "signature": [
-                  "((ev: ",
-                  "MapEventType",
-                  "[T] & Object) => void) | undefined"
+                  "((ev: maplibregl.MapEventType[T] & Object) => void) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11249,
@@ -4817,23 +4560,7 @@
               "\nOverload of the `once` method that allows to listen to events without specifying a layer."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): this | Promise<",
-              "MapLayerEventType",
-              "[T] & Object>; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layerIds: string[], listener?: ((ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener?: ((ev: ",
-              "MapEventType",
-              "[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: ",
-              "Listener",
-              " | undefined): Promise<any> | this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): this | Promise<maplibregl.MapLayerEventType[T] & Object>; <T extends keyof maplibregl.MapLayerEventType>(type: T, layerIds: string[], listener?: ((ev: maplibregl.MapLayerEventType[T] & Object) => void) | undefined): Promise<any> | this; <T extends keyof maplibregl.MapEventType>(type: T, listener?: ((ev: maplibregl.MapEventType[T] & Object) => void) | undefined): Promise<any> | this; (type: string, listener?: maplibregl.Listener | undefined): Promise<any> | this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11250,
@@ -4870,8 +4597,7 @@
                   "- The listener callback."
                 ],
                 "signature": [
-                  "Listener",
-                  " | undefined"
+                  "maplibregl.Listener | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11256,
@@ -4895,21 +4621,7 @@
               "\nRemoves an event listener for events previously added with `Map#on`.\n"
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layers: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): this; (type: string, listener: ",
-              "Listener",
-              "): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapLayerEventType>(type: T, layers: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11257,
@@ -4965,9 +4677,7 @@
                   "- The function previously installed as a listener."
                 ],
                 "signature": [
-                  "(ev: ",
-                  "MapLayerEventType",
-                  "[T] & Object) => void"
+                  "(ev: maplibregl.MapLayerEventType[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11265,
@@ -4991,21 +4701,7 @@
               "\nOverload of the `off` method that allows to remove an event created with multiple layers.\nProvide the same layer IDs as to `on` or `once`, when the listener was registered."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layers: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): this; (type: string, listener: ",
-              "Listener",
-              "): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapLayerEventType>(type: T, layers: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11266,
@@ -5061,9 +4757,7 @@
                   "- The function previously installed as a listener."
                 ],
                 "signature": [
-                  "(ev: ",
-                  "MapLayerEventType",
-                  "[T] & Object) => void"
+                  "(ev: maplibregl.MapLayerEventType[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11274,
@@ -5087,21 +4781,7 @@
               "\nOverload of the `off` method that allows to remove an event created without specifying a layer."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layers: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): this; (type: string, listener: ",
-              "Listener",
-              "): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapLayerEventType>(type: T, layers: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11275,
@@ -5138,9 +4818,7 @@
                   "- The function previously installed as a listener."
                 ],
                 "signature": [
-                  "(ev: ",
-                  "MapEventType",
-                  "[T] & Object) => void"
+                  "(ev: maplibregl.MapEventType[T] & Object) => void"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11281,
@@ -5164,21 +4842,7 @@
               "\nOverload of the `off` method that allows to remove an event created without specifying a layer."
             ],
             "signature": [
-              "{ <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layer: string, listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapLayerEventType",
-              ">(type: T, layers: string[], listener: (ev: ",
-              "MapLayerEventType",
-              "[T] & Object) => void): this; <T extends keyof ",
-              "MapEventType",
-              ">(type: T, listener: (ev: ",
-              "MapEventType",
-              "[T] & Object) => void): this; (type: string, listener: ",
-              "Listener",
-              "): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapLayerEventType>(type: T, layers: string[], listener: (ev: maplibregl.MapLayerEventType[T] & Object) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & Object) => void): this; (type: string, listener: maplibregl.Listener): this; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11282,
@@ -5215,7 +4879,7 @@
                   "- The function previously installed as a listener."
                 ],
                 "signature": [
-                  "Listener"
+                  "maplibregl.Listener"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11288,
@@ -5239,19 +4903,7 @@
               "\nReturns an array of MapGeoJSONFeature objects\nrepresenting visible features that satisfy the query parameters.\n"
             ],
             "signature": [
-              "(geometryOrOptions?: ",
-              "PointLike",
-              " | [",
-              "PointLike",
-              ", ",
-              "PointLike",
-              "] | ",
-              "QueryRenderedFeaturesOptions",
-              " | undefined, options?: ",
-              "QueryRenderedFeaturesOptions",
-              " | undefined) => ",
-              "MapGeoJSONFeature",
-              "[]"
+              "(geometryOrOptions?: maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | maplibregl.QueryRenderedFeaturesOptions | undefined, options?: maplibregl.QueryRenderedFeaturesOptions | undefined) => maplibregl.MapGeoJSONFeature[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11289,
@@ -5269,14 +4921,7 @@
                   "- (optional) The geometry of the query region:"
                 ],
                 "signature": [
-                  "PointLike",
-                  " | [",
-                  "PointLike",
-                  ", ",
-                  "PointLike",
-                  "] | ",
-                  "QueryRenderedFeaturesOptions",
-                  " | undefined"
+                  "maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | maplibregl.QueryRenderedFeaturesOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11368,
@@ -5295,8 +4940,7 @@
                   "- (optional) Options object."
                 ],
                 "signature": [
-                  "QueryRenderedFeaturesOptions",
-                  " | undefined"
+                  "maplibregl.QueryRenderedFeaturesOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11371,
@@ -5320,11 +4964,7 @@
               "\nReturns an array of MapGeoJSONFeature objects\nrepresenting features within the specified vector tile or GeoJSON source that satisfy the query parameters.\n"
             ],
             "signature": [
-              "(sourceId: string, parameters?: ",
-              "QuerySourceFeatureOptions",
-              " | null | undefined) => ",
-              "GeoJSONFeature",
-              "[]"
+              "(sourceId: string, parameters?: maplibregl.QuerySourceFeatureOptions | null | undefined) => maplibregl.GeoJSONFeature[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11372,
@@ -5361,8 +5001,7 @@
                   "- The options object."
                 ],
                 "signature": [
-                  "QuerySourceFeatureOptions",
-                  " | null | undefined"
+                  "maplibregl.QuerySourceFeatureOptions | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11402,
@@ -5386,13 +5025,7 @@
               "\nUpdates the map's MapLibre style object with a new value.\n\nIf a style is already set when this is used and options.diff is set to true, the map renderer will attempt to compare the given style\nagainst the map's current state and perform only the changes necessary to make the map style match the desired state. Changes in sprites\n(images used for icons and patterns) and glyphs (fonts for label text) **cannot** be diffed. If the sprites or fonts used in the current\nstyle and the given style are different in any way, the map renderer will force a full update, removing the current style and building\nthe given one from scratch.\n\n"
             ],
             "signature": [
-              "(style: string | ",
-              "StyleSpecification",
-              " | null, options?: (",
-              "StyleSwapOptions",
-              " & ",
-              "StyleOptions",
-              ") | undefined) => this"
+              "(style: string | maplibregl.StyleSpecification | null, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11403,
@@ -5410,9 +5043,7 @@
                   "- A JSON object conforming to the schema described in the"
                 ],
                 "signature": [
-                  "string | ",
-                  "StyleSpecification",
-                  " | null"
+                  "string | maplibregl.StyleSpecification | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11450,
@@ -5431,11 +5062,7 @@
                   "- The options object."
                 ],
                 "signature": [
-                  "(",
-                  "StyleSwapOptions",
-                  " & ",
-                  "StyleOptions",
-                  ") | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11450,
@@ -5457,9 +5084,7 @@
               "\n Updates the requestManager's transform request with a new function\n"
             ],
             "signature": [
-              "(transformRequest: ",
-              "RequestTransformFunction",
-              ") => this"
+              "(transformRequest: maplibregl.RequestTransformFunction) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11451,
@@ -5477,7 +5102,7 @@
                   "- A callback run before the Map makes a request for an external URL. The callback can be used to modify the url, set headers, or set the credentials property for cross-origin requests."
                 ],
                 "signature": [
-                  "RequestTransformFunction"
+                  "maplibregl.RequestTransformFunction"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11462,
@@ -5533,13 +5158,7 @@
             "label": "_updateStyle",
             "description": [],
             "signature": [
-              "(style: string | ",
-              "StyleSpecification",
-              " | null, options?: (",
-              "StyleSwapOptions",
-              " & ",
-              "StyleOptions",
-              ") | undefined) => this"
+              "(style: string | maplibregl.StyleSpecification | null, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11464,
@@ -5555,9 +5174,7 @@
                 "label": "style",
                 "description": [],
                 "signature": [
-                  "string | ",
-                  "StyleSpecification",
-                  " | null"
+                  "string | maplibregl.StyleSpecification | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11464,
@@ -5574,11 +5191,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "(",
-                  "StyleSwapOptions",
-                  " & ",
-                  "StyleOptions",
-                  ") | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11464,
@@ -5616,13 +5229,7 @@
             "label": "_diffStyle",
             "description": [],
             "signature": [
-              "(style: string | ",
-              "StyleSpecification",
-              ", options?: (",
-              "StyleSwapOptions",
-              " & ",
-              "StyleOptions",
-              ") | undefined) => void"
+              "(style: string | maplibregl.StyleSpecification, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11466,
@@ -5638,8 +5245,7 @@
                 "label": "style",
                 "description": [],
                 "signature": [
-                  "string | ",
-                  "StyleSpecification"
+                  "string | maplibregl.StyleSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11466,
@@ -5656,11 +5262,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "(",
-                  "StyleSwapOptions",
-                  " & ",
-                  "StyleOptions",
-                  ") | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11466,
@@ -5680,13 +5282,7 @@
             "label": "_updateDiff",
             "description": [],
             "signature": [
-              "(style: ",
-              "StyleSpecification",
-              ", options?: (",
-              "StyleSwapOptions",
-              " & ",
-              "StyleOptions",
-              ") | undefined) => void"
+              "(style: maplibregl.StyleSpecification, options?: (maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11467,
@@ -5702,7 +5298,7 @@
                 "label": "style",
                 "description": [],
                 "signature": [
-                  "StyleSpecification"
+                  "maplibregl.StyleSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11467,
@@ -5719,11 +5315,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "(",
-                  "StyleSwapOptions",
-                  " & ",
-                  "StyleOptions",
-                  ") | undefined"
+                  "(maplibregl.StyleSwapOptions & maplibregl.StyleOptions) | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11467,
@@ -5745,8 +5337,7 @@
               "\nReturns the map's MapLibre style object, a JSON object which can be used to recreate the map's style.\n"
             ],
             "signature": [
-              "() => ",
-              "StyleSpecification"
+              "() => maplibregl.StyleSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11468,
@@ -5792,11 +5383,7 @@
               "\nAdds a source to the map's style.\n\nEvents triggered:\n\nTriggers the `source.add` event.\n"
             ],
             "signature": [
-              "(id: string, source: ",
-              "SourceSpecification",
-              " | ",
-              "CanvasSourceSpecification",
-              ") => this"
+              "(id: string, source: maplibregl.SourceSpecification | maplibregl.CanvasSourceSpecification) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11491,
@@ -5833,9 +5420,7 @@
                   "- The source object, conforming to the"
                 ],
                 "signature": [
-                  "SourceSpecification",
-                  " | ",
-                  "CanvasSourceSpecification"
+                  "maplibregl.SourceSpecification | maplibregl.CanvasSourceSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11528,
@@ -5899,9 +5484,7 @@
               "\nLoads a 3D terrain mesh, based on a \"raster-dem\" source.\n\nTriggers the `terrain` event.\n"
             ],
             "signature": [
-              "(options: ",
-              "TerrainSpecification",
-              " | null) => this"
+              "(options: maplibregl.TerrainSpecification | null) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11543,
@@ -5919,8 +5502,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "TerrainSpecification",
-                  " | null"
+                  "maplibregl.TerrainSpecification | null"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11554,
@@ -5942,9 +5524,7 @@
               "\nGet the terrain-options if terrain is loaded"
             ],
             "signature": [
-              "() => ",
-              "TerrainSpecification",
-              " | null"
+              "() => maplibregl.TerrainSpecification | null"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11555,
@@ -5988,8 +5568,7 @@
               "\nRemoves a source from the map's style.\n"
             ],
             "signature": [
-              "(id: string) => ",
-              "Map"
+              "(id: string) => maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11575,
@@ -6033,9 +5612,7 @@
               "\nReturns the source with the specified ID in the map's style.\n\nThis method is often used to update a source using the instance members for the relevant\nsource type as defined in classes that derive from {@link Source}.\nFor example, setting the `data` for a GeoJSON source or updating the `url` and `coordinates`\nof an image source.\n"
             ],
             "signature": [
-              "<TSource extends ",
-              "Source",
-              ">(id: string) => TSource | undefined"
+              "<TSource extends maplibregl.Source>(id: string) => TSource | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11585,
@@ -6080,11 +5657,7 @@
               "\nAdd an image to the style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/layers/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-line-line-pattern).\n\nA {@link ErrorEvent} event will be fired if the image parameter is invalid or there is not enough space in the sprite to add this image.\n"
             ],
             "signature": [
-              "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; } | ",
-              "StyleImageInterface",
-              ", options?: Partial<",
-              "StyleImageMetadata",
-              "> | undefined) => this"
+              "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; } | maplibregl.StyleImageInterface, options?: Partial<maplibregl.StyleImageMetadata> | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11608,
@@ -6121,8 +5694,7 @@
                   "- The image as an `HTMLImageElement`, `ImageData`, `ImageBitmap` or object with `width`, `height`, and `data`"
                 ],
                 "signature": [
-                  "HTMLImageElement | ImageBitmap | ImageData | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; } | ",
-                  "StyleImageInterface"
+                  "HTMLImageElement | ImageBitmap | ImageData | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; } | maplibregl.StyleImageInterface"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11642,
@@ -6141,9 +5713,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "Partial<",
-                  "StyleImageMetadata",
-                  "> | undefined"
+                  "Partial<maplibregl.StyleImageMetadata> | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11646,
@@ -6165,9 +5735,7 @@
               "\nUpdate an existing image in a style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/layers/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-line-line-pattern).\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
-              "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | ",
-              "StyleImageInterface",
-              " | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }) => this"
+              "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | maplibregl.StyleImageInterface | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11647,
@@ -6204,9 +5772,7 @@
                   "- The image as an `HTMLImageElement`, `ImageData`, `ImageBitmap` or object with `width`, `height`, and `data`"
                 ],
                 "signature": [
-                  "HTMLImageElement | ImageBitmap | ImageData | ",
-                  "StyleImageInterface",
-                  " | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }"
+                  "HTMLImageElement | ImageBitmap | ImageData | maplibregl.StyleImageInterface | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11667,
@@ -6228,8 +5794,7 @@
               "\nReturns an image, specified by ID, currently available in the map.\nThis includes both images from the style's original sprite\nand any images that have been added at runtime using {@link Map#addImage}.\n"
             ],
             "signature": [
-              "(id: string) => ",
-              "StyleImage"
+              "(id: string) => maplibregl.StyleImage"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11672,
@@ -6355,9 +5920,7 @@
               "\nLoad an image from an external URL to be used with {@link Map#addImage}. External\ndomains must support [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS).\n"
             ],
             "signature": [
-              "(url: string) => Promise<",
-              "GetResourceResponse",
-              "<HTMLImageElement | ImageBitmap>>"
+              "(url: string) => Promise<maplibregl.GetResourceResponse<HTMLImageElement | ImageBitmap>>"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11718,
@@ -6425,9 +5988,7 @@
               "\nAdds a [MapLibre style layer](https://maplibre.org/maplibre-style-spec/layers)\nto the map's style.\n\nA layer defines how data from a specified source will be styled. Read more about layer types\nand available paint and layout properties in the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/layers).\n"
             ],
             "signature": [
-              "(layer: ",
-              "AddLayerObject",
-              ", beforeId?: string | undefined) => this"
+              "(layer: maplibregl.AddLayerObject, beforeId?: string | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11748,
@@ -6445,7 +6006,7 @@
                   "- The layer to add,"
                 ],
                 "signature": [
-                  "AddLayerObject"
+                  "maplibregl.AddLayerObject"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11827,
@@ -6732,11 +6293,7 @@
               "\nSets the filter for the specified style layer.\n\nFilters control which features a style layer renders from its source.\nAny feature for which the filter expression evaluates to `true` will be\nrendered on the map. Those that are false will be hidden.\n\nUse `setFilter` to show a subset of your source data.\n\nTo clear the filter, pass `null` or `undefined` as the second parameter.\n"
             ],
             "signature": [
-              "(layerId: string, filter?: ",
-              "FilterSpecification",
-              " | null | undefined, options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(layerId: string, filter?: maplibregl.FilterSpecification | null | undefined, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11902,
@@ -6773,8 +6330,7 @@
                   "- The filter, conforming to the MapLibre Style Specification's"
                 ],
                 "signature": [
-                  "FilterSpecification",
-                  " | null | undefined"
+                  "maplibregl.FilterSpecification | null | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11935,
@@ -6793,8 +6349,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11935,
@@ -6816,8 +6371,7 @@
               "\nReturns the filter applied to the specified style layer.\n"
             ],
             "signature": [
-              "(layerId: string) => void | ",
-              "FilterSpecification"
+              "(layerId: string) => void | maplibregl.FilterSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11936,
@@ -6862,9 +6416,7 @@
               "\nSets the value of a paint property in the specified style layer.\n"
             ],
             "signature": [
-              "(layerId: string, name: string, value: any, options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(layerId: string, name: string, value: any, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11943,
@@ -6939,8 +6491,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11959,
@@ -7023,9 +6574,7 @@
               "\nSets the value of a layout property in the specified style layer.\n"
             ],
             "signature": [
-              "(layerId: string, name: string, value: any, options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(layerId: string, name: string, value: any, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11968,
@@ -7100,8 +6649,7 @@
                   "- The options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11980,
@@ -7184,9 +6732,7 @@
               "\nSets the value of the style's glyphs property.\n"
             ],
             "signature": [
-              "(glyphsUrl: string | null, options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(glyphsUrl: string | null, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 11989,
@@ -7223,8 +6769,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 11999,
@@ -7268,9 +6813,7 @@
               "\nAdds a sprite to the map's style. Fires the `style` event.\n"
             ],
             "signature": [
-              "(id: string, url: string, options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(id: string, url: string, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12006,
@@ -7326,8 +6869,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12017,
@@ -7411,9 +6953,7 @@
               "\nSets the value of the style's sprite property.\n"
             ],
             "signature": [
-              "(spriteUrl: string | null, options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(spriteUrl: string | null, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12038,
@@ -7450,8 +6990,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12048,
@@ -7473,11 +7012,7 @@
               "\nSets the any combination of light values.\n"
             ],
             "signature": [
-              "(light: ",
-              "LightSpecification",
-              ", options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(light: maplibregl.LightSpecification, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12049,
@@ -7495,7 +7030,7 @@
                   "- Light properties to set. Must conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/light)."
                 ],
                 "signature": [
-                  "LightSpecification"
+                  "maplibregl.LightSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12060,
@@ -7514,8 +7049,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12060,
@@ -7537,8 +7071,7 @@
               "\nReturns the value of the light object.\n"
             ],
             "signature": [
-              "() => ",
-              "LightSpecification"
+              "() => maplibregl.LightSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12061,
@@ -7560,11 +7093,7 @@
               "\nSets the value of style's sky properties.\n"
             ],
             "signature": [
-              "(sky: ",
-              "SkySpecification",
-              ", options?: ",
-              "StyleSetterOptions",
-              " | undefined) => this"
+              "(sky: maplibregl.SkySpecification, options?: maplibregl.StyleSetterOptions | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12067,
@@ -7582,7 +7111,7 @@
                   "- Sky properties to set. Must conform to the [MapLibre Style Specification](https://maplibre.org/maplibre-style-spec/sky/)."
                 ],
                 "signature": [
-                  "SkySpecification"
+                  "maplibregl.SkySpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12078,
@@ -7601,8 +7130,7 @@
                   "- Options object."
                 ],
                 "signature": [
-                  "StyleSetterOptions",
-                  " | undefined"
+                  "maplibregl.StyleSetterOptions | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12078,
@@ -7624,8 +7152,7 @@
               "\nReturns the value of the style's sky.\n"
             ],
             "signature": [
-              "() => ",
-              "SkySpecification"
+              "() => maplibregl.SkySpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12079,
@@ -7649,9 +7176,7 @@
               "\nSets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nWhen using this method, the `state` object is merged with any existing key-value pairs in the feature's state.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\nThis method can only be used with sources that have a `feature.id` attribute. The `feature.id` attribute can be defined in three ways:\n\n- For vector or GeoJSON sources, including an `id` attribute in the original data file.\n- For vector or GeoJSON sources, using the [`promoteId`](https://maplibre.org/maplibre-style-spec/sources/#promoteid) option at the time the source is defined.\n- For GeoJSON sources, using the [`generateId`](https://maplibre.org/maplibre-style-spec/sources/#generateid) option to auto-assign an `id` based on the feature's index in the source data. If you change feature data using `map.getSource('some id').setData(..)`, you may need to re-apply state taking into account updated `id` values.\n\n_Note: You can use the [`feature-state` expression](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) to access the values in a feature's state object for the purposes of styling._\n"
             ],
             "signature": [
-              "(feature: ",
-              "FeatureIdentifier",
-              ", state: any) => this"
+              "(feature: maplibregl.FeatureIdentifier, state: any) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12089,
@@ -7669,7 +7194,7 @@
                   "- Feature identifier. Feature objects returned from"
                 ],
                 "signature": [
-                  "FeatureIdentifier"
+                  "maplibregl.FeatureIdentifier"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12125,
@@ -7710,9 +7235,7 @@
               "\nRemoves the `state` of a feature, setting it back to the default behavior.\nIf only a `target.source` is specified, it will remove the state for all features from that source.\nIf `target.id` is also specified, it will remove all keys for that feature's state.\nIf `key` is also specified, it removes only that key from that feature's state.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n"
             ],
             "signature": [
-              "(target: ",
-              "FeatureIdentifier",
-              ", key?: string | undefined) => this"
+              "(target: maplibregl.FeatureIdentifier, key?: string | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12126,
@@ -7730,7 +7253,7 @@
                   "- Identifier of where to remove state. It can be a source, a feature, or a specific key of feature."
                 ],
                 "signature": [
-                  "FeatureIdentifier"
+                  "maplibregl.FeatureIdentifier"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12172,
@@ -7771,9 +7294,7 @@
               "\nGets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\n_Note: To access the values in a feature's state object for the purposes of styling the feature, use the [`feature-state` expression](https://maplibre.org/maplibre-style-spec/expressions/#feature-state)._\n"
             ],
             "signature": [
-              "(feature: ",
-              "FeatureIdentifier",
-              ") => any"
+              "(feature: maplibregl.FeatureIdentifier) => any"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12173,
@@ -7791,7 +7312,7 @@
                   "- Feature identifier. Feature objects returned from"
                 ],
                 "signature": [
-                  "FeatureIdentifier"
+                  "maplibregl.FeatureIdentifier"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12199,
@@ -8009,11 +7530,7 @@
             "label": "migrateProjection",
             "description": [],
             "signature": [
-              "(newTransform: ",
-              "ITransform",
-              ", newCameraHelper: ",
-              "ICameraHelper",
-              ") => void"
+              "(newTransform: maplibregl.ITransform, newCameraHelper: maplibregl.ICameraHelper) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12232,
@@ -8029,7 +7546,7 @@
                 "label": "newTransform",
                 "description": [],
                 "signature": [
-                  "ITransform"
+                  "maplibregl.ITransform"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12232,
@@ -8046,7 +7563,7 @@
                 "label": "newCameraHelper",
                 "description": [],
                 "signature": [
-                  "ICameraHelper"
+                  "maplibregl.ICameraHelper"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12232,
@@ -8515,8 +8032,7 @@
               "\nGets the {@link ProjectionSpecification}."
             ],
             "signature": [
-              "() => ",
-              "ProjectionSpecification"
+              "() => maplibregl.ProjectionSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12364,
@@ -8538,9 +8054,7 @@
               "\nSets the {@link ProjectionSpecification}."
             ],
             "signature": [
-              "(projection: ",
-              "ProjectionSpecification",
-              ") => this"
+              "(projection: maplibregl.ProjectionSpecification) => this"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 12373,
@@ -8558,7 +8072,7 @@
                   "- the projection specification to set"
                 ],
                 "signature": [
-                  "ProjectionSpecification"
+                  "maplibregl.ProjectionSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 12378,
@@ -8585,12 +8099,7 @@
           "\n`MapMouseEvent` is the event type for mouse-related map events.\n"
         ],
         "signature": [
-          "MapMouseEvent",
-          " extends ",
-          "Event",
-          " implements ",
-          "MapLibreEvent",
-          "<MouseEvent>"
+          "maplibregl.MapMouseEvent extends maplibregl.Event implements maplibregl.MapLibreEvent<MouseEvent>"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 9322,
@@ -8626,7 +8135,7 @@
               "\nThe `Map` object that fired the event."
             ],
             "signature": [
-              "Map"
+              "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 9343,
@@ -8662,7 +8171,7 @@
               "\nThe pixel coordinates of the mouse cursor, relative to the map and measured from the top left corner."
             ],
             "signature": [
-              "node_modules/maplibre-gl/node_modules/@types/mapbox__point-geometry/index"
+              "maplibregl.Point"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 9351,
@@ -8680,7 +8189,7 @@
               "\nThe geographic location on the map of the mouse cursor."
             ],
             "signature": [
-              "LngLat"
+              "maplibregl.LngLat"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 9355,
@@ -8777,7 +8286,7 @@
                 "label": "map",
                 "description": [],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 9376,
@@ -8841,11 +8350,7 @@
           "\nA source containing raster tiles (See the [Style Specification](https://maplibre.org/maplibre-style-spec/) for detailed documentation of options.)\n"
         ],
         "signature": [
-          "RasterTileSource",
-          " extends ",
-          "Evented",
-          " implements ",
-          "Source"
+          "maplibregl.RasterTileSource extends maplibregl.Evented implements maplibregl.Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 13921,
@@ -9016,7 +8521,7 @@
             "label": "map",
             "description": [],
             "signature": [
-              "Map"
+              "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13967,
@@ -9061,9 +8566,7 @@
             "label": "_options",
             "description": [],
             "signature": [
-              "RasterSourceSpecification",
-              " | ",
-              "RasterDEMSourceSpecification"
+              "maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13970,
@@ -9128,9 +8631,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "RasterSourceSpecification",
-                  " | ",
-                  "RasterDEMSourceSpecification"
+                  "maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13972,
@@ -9164,7 +8665,7 @@
                 "label": "eventedParent",
                 "description": [],
                 "signature": [
-                  "Evented"
+                  "maplibregl.Evented"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13972,
@@ -9238,9 +8739,7 @@
             "label": "onAdd",
             "description": [],
             "signature": [
-              "(map: ",
-              "Map",
-              ") => void"
+              "(map: maplibregl.Map) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13975,
@@ -9256,7 +8755,7 @@
                 "label": "map",
                 "description": [],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 13975,
@@ -9410,10 +8909,7 @@
             "label": "serialize",
             "description": [],
             "signature": [
-              "() => ",
-              "RasterSourceSpecification",
-              " | ",
-              "RasterDEMSourceSpecification"
+              "() => maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 13990,
@@ -9601,11 +9097,7 @@
           "\nA source containing vector tiles in [Mapbox Vector Tile format](https://docs.mapbox.com/vector-tiles/reference/).\n(See the [Style Specification](https://maplibre.org/maplibre-style-spec/) for detailed documentation of options.)\n"
         ],
         "signature": [
-          "VectorTileSource",
-          " extends ",
-          "Evented",
-          " implements ",
-          "Source"
+          "maplibregl.VectorTileSource extends maplibregl.Evented implements maplibregl.Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 14029,
@@ -9731,9 +9223,7 @@
             "label": "_options",
             "description": [],
             "signature": [
-              "{ type: \"vector\"; url?: string | undefined; tiles?: string[] | undefined; bounds?: [number, number, number, number] | undefined; scheme?: \"tms\" | \"xyz\" | undefined; minzoom?: number | undefined; maxzoom?: number | undefined; attribution?: string | undefined; promoteId?: ",
-              "PromoteIdSpecification",
-              " | undefined; volatile?: boolean | undefined; }"
+              "{ type: \"vector\"; url?: string | undefined; tiles?: string[] | undefined; bounds?: [number, number, number, number] | undefined; scheme?: \"tms\" | \"xyz\" | undefined; minzoom?: number | undefined; maxzoom?: number | undefined; attribution?: string | undefined; promoteId?: maplibregl.PromoteIdSpecification | undefined; volatile?: boolean | undefined; }"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 14073,
@@ -9778,7 +9268,7 @@
             "label": "map",
             "description": [],
             "signature": [
-              "Map"
+              "maplibregl.Map"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 14076,
@@ -9930,7 +9420,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "VectorTileSourceOptions"
+                  "maplibregl.VectorTileSourceOptions"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 14089,
@@ -9964,7 +9454,7 @@
                 "label": "eventedParent",
                 "description": [],
                 "signature": [
-                  "Evented"
+                  "maplibregl.Evented"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 14089,
@@ -10056,9 +9546,7 @@
             "label": "onAdd",
             "description": [],
             "signature": [
-              "(map: ",
-              "Map",
-              ") => void"
+              "(map: maplibregl.Map) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 14093,
@@ -10074,7 +9562,7 @@
                 "label": "map",
                 "description": [],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 14093,
@@ -10228,8 +9716,7 @@
             "label": "serialize",
             "description": [],
             "signature": [
-              "() => ",
-              "VectorSourceSpecification"
+              "() => maplibregl.VectorSourceSpecification"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 14108,
@@ -10381,7 +9868,7 @@
           "\nInterface for custom style layers. This is a specification for\nimplementers to model: it is not an exported method or class.\n\nCustom layers allow a user to render directly into the map's GL context using the map's camera.\nThese layers can be added between any regular layers using {@link Map#addLayer}.\n\nCustom layers must have a unique `id` and must have the `type` of `\"custom\"`.\nThey must implement `render` and may implement `prerender`, `onAdd` and `onRemove`.\nThey can trigger rendering using {@link Map#triggerRepaint}\nand they should appropriately handle {@link MapContextEvent} with `webglcontextlost` and `webglcontextrestored`.\n\nThe `renderingMode` property controls whether the layer is treated as a `\"2d\"` or `\"3d\"` map layer. Use:\n\n- `\"renderingMode\": \"3d\"` to use the depth buffer and share it with other layers\n- `\"renderingMode\": \"2d\"` to add a layer with no depth. If you need to use the depth buffer for a `\"2d\"` layer you must use an offscreen\n  framebuffer and {@link CustomLayerInterface#prerender}\n"
         ],
         "signature": [
-          "CustomLayerInterface"
+          "maplibregl.CustomLayerInterface"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 6272,
@@ -10450,9 +9937,7 @@
               "\nCalled during a render frame allowing the layer to draw into the GL context.\n\nThe layer can assume blending and depth state is set to allow the layer to properly\nblend and clip other layers. The layer cannot make any other assumptions about the\ncurrent GL state.\n\nIf the layer needs to render to a texture, it should implement the `prerender` method\nto do this and only use the `render` method for drawing directly into the main framebuffer.\n\nThe blend function is set to `gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)`. This expects\ncolors to be provided in premultiplied alpha form where the `r`, `g` and `b` values are already\nmultiplied by the `a` value. If you are unable to provide colors in premultiplied form you\nmay want to change the blend function to\n`gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)`."
             ],
             "signature": [
-              "(gl: WebGLRenderingContext | WebGL2RenderingContext, options: ",
-              "CustomRenderMethodInput",
-              ") => void"
+              "(gl: WebGLRenderingContext | WebGL2RenderingContext, options: maplibregl.CustomRenderMethodInput) => void"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 6351,
@@ -10489,9 +9974,7 @@
                   "mat4",
                   "; projectionMatrix: ",
                   "mat4",
-                  "; shaderData: { variantName: string; vertexShaderPrelude: string; define: string; }; defaultProjectionData: ",
-                  "ProjectionData",
-                  "; }"
+                  "; shaderData: { variantName: string; vertexShaderPrelude: string; define: string; }; defaultProjectionData: maplibregl.ProjectionData; }"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 6271,
@@ -10511,8 +9994,7 @@
               "\nOptional method called during a render frame to allow a layer to prepare resources or render into a texture.\n\nThe layer cannot make any assumptions about the current GL state and must bind a framebuffer before rendering."
             ],
             "signature": [
-              "CustomRenderMethod",
-              " | undefined"
+              "maplibregl.CustomRenderMethod | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 6368,
@@ -10530,9 +10012,7 @@
               "\nOptional method called when the layer has been added to the Map with {@link Map#addLayer}. This\ngives the layer a chance to initialize gl resources and register event listeners.\n"
             ],
             "signature": [
-              "((map: ",
-              "Map",
-              ", gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
+              "((map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 6374,
@@ -10550,7 +10030,7 @@
                   "- The Map this custom layer was just added to."
                 ],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 6381,
@@ -10591,9 +10071,7 @@
               "\nOptional method called when the layer has been removed from the Map with {@link Map#removeLayer}. This\ngives the layer a chance to clean up gl resources and event listeners.\n"
             ],
             "signature": [
-              "((map: ",
-              "Map",
-              ", gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
+              "((map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 6382,
@@ -10611,7 +10089,7 @@
                   "- The Map this custom layer was just added to."
                 ],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 6389,
@@ -10657,7 +10135,7 @@
           "\nThe `Source` interface must be implemented by each source type, including \"core\" types (`vector`, `raster`,\n`video`, etc.) and all custom, third-party types.\n\n**Event** `data` - Fired with `{dataType: 'source', sourceDataType: 'metadata'}` to indicate that any necessary metadata\nhas been loaded so that it's okay to call `loadTile`; and with `{dataType: 'source', sourceDataType: 'content'}`\nto indicate that the source data has changed, so that any current caches should be flushed.\n"
         ],
         "signature": [
-          "Source"
+          "maplibregl.Source"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 2494,
@@ -10892,9 +10370,7 @@
               "\nAn ability to fire an event to all the listeners, see {@link Evented}"
             ],
             "signature": [
-              "(event: ",
-              "Event",
-              ") => unknown"
+              "(event: maplibregl.Event) => unknown"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 2548,
@@ -10912,7 +10388,7 @@
                   "- The event to fire"
                 ],
                 "signature": [
-                  "Event"
+                  "maplibregl.Event"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 2552,
@@ -10934,9 +10410,7 @@
               "\nThis method is called when the source is added to the map."
             ],
             "signature": [
-              "((map: ",
-              "Map",
-              ") => void) | undefined"
+              "((map: maplibregl.Map) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 2553,
@@ -10954,7 +10428,7 @@
                   "- The map instance"
                 ],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 2557,
@@ -10976,9 +10450,7 @@
               "\nThis method is called when the source is removed from the map."
             ],
             "signature": [
-              "((map: ",
-              "Map",
-              ") => void) | undefined"
+              "((map: maplibregl.Map) => void) | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 2558,
@@ -10996,7 +10468,7 @@
                   "- The map instance"
                 ],
                 "signature": [
-                  "Map"
+                  "maplibregl.Map"
                 ],
                 "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
                 "lineNumber": 2562,
@@ -11218,8 +10690,7 @@
               "\nOptional function to redefine how tiles are loaded at high pitch angles."
             ],
             "signature": [
-              "CalculateTileZoomFunction",
-              " | undefined"
+              "maplibregl.CalculateTileZoomFunction | undefined"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "lineNumber": 2594,
@@ -11279,9 +10750,7 @@
         "label": "FilterSpecification",
         "description": [],
         "signature": [
-          "ExpressionFilterSpecification",
-          " | ",
-          "LegacyFilterSpecification"
+          "maplibregl.ExpressionFilterSpecification | maplibregl.LegacyFilterSpecification"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "lineNumber": 424,
@@ -11298,23 +10767,7 @@
         "label": "LayerSpecification",
         "description": [],
         "signature": [
-          "FillLayerSpecification",
-          " | ",
-          "LineLayerSpecification",
-          " | ",
-          "SymbolLayerSpecification",
-          " | ",
-          "CircleLayerSpecification",
-          " | ",
-          "HeatmapLayerSpecification",
-          " | ",
-          "FillExtrusionLayerSpecification",
-          " | ",
-          "RasterLayerSpecification",
-          " | ",
-          "HillshadeLayerSpecification",
-          " | ",
-          "BackgroundLayerSpecification"
+          "maplibregl.FillLayerSpecification | maplibregl.LineLayerSpecification | maplibregl.SymbolLayerSpecification | maplibregl.CircleLayerSpecification | maplibregl.HeatmapLayerSpecification | maplibregl.FillExtrusionLayerSpecification | maplibregl.RasterLayerSpecification | maplibregl.HillshadeLayerSpecification | maplibregl.BackgroundLayerSpecification"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "lineNumber": 957,
@@ -11333,26 +10786,7 @@
           "\nAn extended geojson feature used by the events to return data to the listener"
         ],
         "signature": [
-          "GeoJSONFeature",
-          " & { layer: (Omit<",
-          "FillLayerSpecification",
-          ", \"source\"> | Omit<",
-          "LineLayerSpecification",
-          ", \"source\"> | Omit<",
-          "SymbolLayerSpecification",
-          ", \"source\"> | Omit<",
-          "CircleLayerSpecification",
-          ", \"source\"> | Omit<",
-          "HeatmapLayerSpecification",
-          ", \"source\"> | Omit<",
-          "FillExtrusionLayerSpecification",
-          ", \"source\"> | Omit<",
-          "RasterLayerSpecification",
-          ", \"source\"> | Omit<",
-          "HillshadeLayerSpecification",
-          ", \"source\"> | Omit<",
-          "BackgroundLayerSpecification",
-          ", \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
+          "maplibregl.GeoJSONFeature & { layer: (Omit<maplibregl.FillLayerSpecification, \"source\"> | Omit<maplibregl.LineLayerSpecification, \"source\"> | Omit<maplibregl.SymbolLayerSpecification, \"source\"> | Omit<maplibregl.CircleLayerSpecification, \"source\"> | Omit<maplibregl.HeatmapLayerSpecification, \"source\"> | Omit<maplibregl.FillExtrusionLayerSpecification, \"source\"> | Omit<maplibregl.RasterLayerSpecification, \"source\"> | Omit<maplibregl.HillshadeLayerSpecification, \"source\"> | Omit<maplibregl.BackgroundLayerSpecification, \"source\">) & { source: string; }; source: string; sourceLayer?: string | undefined; state: { [key: string]: any; }; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 1687,
@@ -11371,35 +10805,7 @@
           "\nThe {@link Map} options object."
         ],
         "signature": [
-          "{ hash?: string | boolean | undefined; interactive?: boolean | undefined; container: string | HTMLElement; bearingSnap?: number | undefined; attributionControl?: false | ",
-          "AttributionControlOptions",
-          " | undefined; maplibreLogo?: boolean | undefined; logoPosition?: ",
-          "ControlPosition",
-          " | undefined; canvasContextAttributes?: ",
-          "WebGLContextAttributesWithType",
-          " | undefined; refreshExpiredTiles?: boolean | undefined; maxBounds?: ",
-          "LngLatBoundsLike",
-          " | undefined; scrollZoom?: boolean | ",
-          "AroundCenterOptions",
-          " | undefined; minZoom?: number | null | undefined; maxZoom?: number | null | undefined; minPitch?: number | null | undefined; maxPitch?: number | null | undefined; boxZoom?: boolean | undefined; dragRotate?: boolean | undefined; dragPan?: boolean | ",
-          "DragPanOptions",
-          " | undefined; keyboard?: boolean | undefined; doubleClickZoom?: boolean | undefined; touchZoomRotate?: boolean | ",
-          "AroundCenterOptions",
-          " | undefined; touchPitch?: boolean | ",
-          "AroundCenterOptions",
-          " | undefined; cooperativeGestures?: boolean | undefined; trackResize?: boolean | undefined; center?: ",
-          "LngLatLike",
-          " | undefined; elevation?: number | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; roll?: number | undefined; renderWorldCopies?: boolean | undefined; maxTileCacheSize?: number | null | undefined; maxTileCacheZoomLevels?: number | undefined; transformRequest?: ",
-          "RequestTransformFunction",
-          " | null | undefined; transformCameraUpdate?: ",
-          "CameraUpdateTransformFunction",
-          " | null | undefined; locale?: any; fadeDuration?: number | undefined; crossSourceCollisions?: boolean | undefined; collectResourceTiming?: boolean | undefined; clickTolerance?: number | undefined; bounds?: ",
-          "LngLatBoundsLike",
-          " | undefined; fitBoundsOptions?: ",
-          "FitBoundsOptions",
-          " | undefined; localIdeographFontFamily?: string | false | undefined; style?: string | ",
-          "StyleSpecification",
-          " | undefined; pitchWithRotate?: boolean | undefined; rollEnabled?: boolean | undefined; pixelRatio?: number | undefined; validateStyle?: boolean | undefined; maxCanvasSize?: [number, number] | undefined; cancelPendingTileRequestsWhileZooming?: boolean | undefined; centerClampedToGround?: boolean | undefined; }"
+          "{ hash?: string | boolean | undefined; interactive?: boolean | undefined; container: string | HTMLElement; bearingSnap?: number | undefined; attributionControl?: false | maplibregl.AttributionControlOptions | undefined; maplibreLogo?: boolean | undefined; logoPosition?: maplibregl.ControlPosition | undefined; canvasContextAttributes?: maplibregl.WebGLContextAttributesWithType | undefined; refreshExpiredTiles?: boolean | undefined; maxBounds?: maplibregl.LngLatBoundsLike | undefined; scrollZoom?: boolean | maplibregl.AroundCenterOptions | undefined; minZoom?: number | null | undefined; maxZoom?: number | null | undefined; minPitch?: number | null | undefined; maxPitch?: number | null | undefined; boxZoom?: boolean | undefined; dragRotate?: boolean | undefined; dragPan?: boolean | maplibregl.DragPanOptions | undefined; keyboard?: boolean | undefined; doubleClickZoom?: boolean | undefined; touchZoomRotate?: boolean | maplibregl.AroundCenterOptions | undefined; touchPitch?: boolean | maplibregl.AroundCenterOptions | undefined; cooperativeGestures?: boolean | undefined; trackResize?: boolean | undefined; center?: maplibregl.LngLatLike | undefined; elevation?: number | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; roll?: number | undefined; renderWorldCopies?: boolean | undefined; maxTileCacheSize?: number | null | undefined; maxTileCacheZoomLevels?: number | undefined; transformRequest?: maplibregl.RequestTransformFunction | null | undefined; transformCameraUpdate?: maplibregl.CameraUpdateTransformFunction | null | undefined; locale?: any; fadeDuration?: number | undefined; crossSourceCollisions?: boolean | undefined; collectResourceTiming?: boolean | undefined; clickTolerance?: number | undefined; bounds?: maplibregl.LngLatBoundsLike | undefined; fitBoundsOptions?: maplibregl.FitBoundsOptions | undefined; localIdeographFontFamily?: string | false | undefined; style?: string | maplibregl.StyleSpecification | undefined; pitchWithRotate?: boolean | undefined; rollEnabled?: boolean | undefined; pixelRatio?: number | undefined; validateStyle?: boolean | undefined; maxCanvasSize?: [number, number] | undefined; cancelPendingTileRequestsWhileZooming?: boolean | undefined; centerClampedToGround?: boolean | undefined; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 10334,
@@ -11420,12 +10826,7 @@
           "\nThe source data event interface\n"
         ],
         "signature": [
-          "MapLibreEvent",
-          "<unknown> & { dataType: \"source\"; isSourceLoaded: boolean; source: ",
-          "SourceSpecification",
-          "; sourceId: string; sourceDataType: ",
-          "MapSourceDataType",
-          "; sourceDataChanged?: boolean | undefined; tile: any; }"
+          "maplibregl.MapLibreEvent<unknown> & { dataType: \"source\"; isSourceLoaded: boolean; source: maplibregl.SourceSpecification; sourceId: string; sourceDataType: maplibregl.MapSourceDataType; sourceDataChanged?: boolean | undefined; tile: any; }"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 9298,
@@ -11463,8 +10864,7 @@
           "\nA [Point](https://github.com/mapbox/point-geometry) or an array of two numbers representing `x` and `y` screen coordinates in pixels.\n"
         ],
         "signature": [
-          "[number, number] | ",
-          "node_modules/maplibre-gl/node_modules/@types/mapbox__point-geometry/index"
+          "maplibregl.Point | [number, number]"
         ],
         "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
         "lineNumber": 7755,
@@ -11481,17 +10881,7 @@
         "label": "SourceSpecification",
         "description": [],
         "signature": [
-          "VectorSourceSpecification",
-          " | ",
-          "RasterSourceSpecification",
-          " | ",
-          "RasterDEMSourceSpecification",
-          " | ",
-          "GeoJSONSourceSpecification",
-          " | ",
-          "VideoSourceSpecification",
-          " | ",
-          "ImageSourceSpecification"
+          "maplibregl.VectorSourceSpecification | maplibregl.RasterSourceSpecification | maplibregl.RasterDEMSourceSpecification | maplibregl.GeoJSONSourceSpecification | maplibregl.VideoSourceSpecification | maplibregl.ImageSourceSpecification"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "lineNumber": 671,
@@ -11508,23 +10898,7 @@
         "label": "StyleSpecification",
         "description": [],
         "signature": [
-          "{ version: 8; name?: string | undefined; metadata?: unknown; center?: number[] | undefined; centerAltitude?: number | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; roll?: number | undefined; light?: ",
-          "LightSpecification",
-          " | undefined; sky?: ",
-          "SkySpecification",
-          " | undefined; projection?: ",
-          "ProjectionSpecification",
-          " | undefined; terrain?: ",
-          "TerrainSpecification",
-          " | undefined; sources: { [_: string]: ",
-          "SourceSpecification",
-          "; }; sprite?: ",
-          "SpriteSpecification",
-          " | undefined; glyphs?: string | undefined; transition?: ",
-          "TransitionSpecification",
-          " | undefined; layers: ",
-          "LayerSpecification",
-          "[]; }"
+          "{ version: 8; name?: string | undefined; metadata?: unknown; center?: number[] | undefined; centerAltitude?: number | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; roll?: number | undefined; light?: maplibregl.LightSpecification | undefined; sky?: maplibregl.SkySpecification | undefined; projection?: maplibregl.ProjectionSpecification | undefined; terrain?: maplibregl.TerrainSpecification | undefined; sources: { [_: string]: maplibregl.SourceSpecification; }; sprite?: maplibregl.SpriteSpecification | undefined; glyphs?: string | undefined; transition?: maplibregl.TransitionSpecification | undefined; layers: maplibregl.LayerSpecification[]; }"
         ],
         "path": "node_modules/@maplibre/maplibre-gl-style-spec/dist/index.d.ts",
         "lineNumber": 507,
@@ -11543,8 +10917,7 @@
         "label": "maplibregl",
         "description": [],
         "signature": [
-          "typeof ",
-          "node_modules/maplibre-gl/dist/maplibre-gl"
+          "typeof maplibregl"
         ],
         "path": "src/platform/packages/private/kbn-mapbox-gl/index.ts",
         "lineNumber": 41,
