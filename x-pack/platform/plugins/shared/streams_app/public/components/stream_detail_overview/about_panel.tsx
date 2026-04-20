@@ -118,6 +118,7 @@ export function AboutPanel() {
 
   useEffect(() => {
     const handleKeyup = (e: KeyboardEvent) => {
+      if (!isEditing) return;
       if (e.key === 'Enter' && !e.shiftKey) {
         saveDescription(descriptionValue.trim());
       }
@@ -127,7 +128,7 @@ export function AboutPanel() {
     };
     window.addEventListener('keyup', handleKeyup);
     return () => window.removeEventListener('keyup', handleKeyup);
-  }, [saveDescription, descriptionValue]);
+  }, [isEditing, saveDescription, descriptionValue]);
 
   return (
     <EuiFocusTrap onClickOutside={() => setIsEditing(false)}>

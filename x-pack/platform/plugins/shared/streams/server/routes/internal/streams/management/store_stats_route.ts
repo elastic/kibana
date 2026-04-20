@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { z } from '@kbn/zod/v4';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
@@ -36,8 +37,13 @@ export const storeStatsRoute = createServerRoute({
         metric: ['store'],
       });
       return { store_size_bytes: stats._all?.primaries?.store?.size_in_bytes ?? 0 };
-    } catch {
-      return { store_size_bytes: 0 };
+    } catch (error) {
+      // Return 0 only when the index doesn't exist yet; re-throw everything else
+      // (e.g. 403 authorization errors) so the caller gets a proper HTTP response.
+      if (error instanceof esErrors.ResponseError && error.statusCode === 404) {
+        return { store_size_bytes: 0 };
+      }
+      throw error;
     }
   },
 });

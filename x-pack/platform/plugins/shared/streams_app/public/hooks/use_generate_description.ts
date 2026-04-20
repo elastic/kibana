@@ -35,10 +35,12 @@ export function useGenerateDescription(streamName: string): UseGenerateDescripti
     if (!connectorId) return null;
 
     setIsLoading(true);
+    const abortController = new AbortController();
     try {
       const result = await streamsRepositoryClient.fetch(
         'POST /internal/streams/{name}/_suggest_description',
         {
+          signal: abortController.signal,
           params: {
             path: { name: streamName },
             body: { connector_id: connectorId, start: startMs, end: endMs },
