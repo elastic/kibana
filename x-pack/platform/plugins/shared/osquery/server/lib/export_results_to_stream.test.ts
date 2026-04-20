@@ -98,10 +98,13 @@ describe('exportResultsToStream', () => {
         logger,
       });
 
-      expect(esClient.openPointInTime).toHaveBeenCalledWith({
-        index: 'logs-osquery_manager.result-default',
-        keep_alive: '5m',
-      });
+      expect(esClient.openPointInTime).toHaveBeenCalledWith(
+        {
+          index: 'logs-osquery_manager.result-default',
+          keep_alive: '5m',
+        },
+        { signal: expect.any(AbortSignal) }
+      );
     });
 
     it('should close PIT after stream completes', async () => {
@@ -204,7 +207,7 @@ describe('exportResultsToStream', () => {
 
       await collectStream(result as NodeJS.ReadableStream);
 
-      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Failed to close PIT'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to close PIT'));
     });
   });
 

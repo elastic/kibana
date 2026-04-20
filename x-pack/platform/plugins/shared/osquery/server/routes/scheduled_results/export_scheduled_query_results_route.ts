@@ -9,10 +9,13 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { escapeKuery } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../common';
+import { packSavedObjectType } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import type { PackSavedObject } from '../../common/types';
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 import { exportRequestBodySchema } from '../export/export_request_body_schema';
 
@@ -54,6 +57,31 @@ export const exportScheduledQueryResultsRoute = (
       async (context, request, response) => {
         try {
           const { scheduleId, executionCount } = request.params;
+          const logger = osqueryContext.logFactory.get('export_scheduled_query_results');
+
+          // Resolve the pack query for metadata + ECS mapping. A deleted pack
+          // is a soft-failure — the export still runs without ecs_mapping,
+          // matching get_scheduled_action_results_route behaviour.
+          let queryText: string | undefined;
+          let ecsMapping: ECSMapping | undefined;
+          try {
+            const coreContext = await context.core;
+            const soClient = coreContext.savedObjects.client;
+            const packSavedObjects = await soClient.find<PackSavedObject>({
+              type: packSavedObjectType,
+              perPage: 1,
+              search: scheduleId,
+              searchFields: ['queries.schedule_id'],
+            });
+            const packSO = packSavedObjects.saved_objects[0];
+            const matchingQuery = packSO?.attributes?.queries?.find(
+              (q) => q.schedule_id === scheduleId
+            );
+            queryText = matchingQuery?.query;
+            ecsMapping = matchingQuery?.ecs_mapping as ECSMapping | undefined;
+          } catch (e) {
+            logger.debug(`Could not resolve pack query for schedule ${scheduleId}: ${e.message}`);
+          }
 
           return await handleExport(context, request, response, {
             baseFilter: `schedule_id: ${escapeKuery(
@@ -61,10 +89,11 @@ export const exportScheduledQueryResultsRoute = (
             )} AND osquery_meta.schedule_execution_count: ${executionCount}`,
             metadata: {
               action_id: scheduleId,
-              query: `Scheduled query: ${scheduleId}`,
+              query: queryText ?? `Scheduled query: ${scheduleId}`,
               execution_count: executionCount,
             },
             fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
+            ecsMapping,
           });
         } catch (e) {
           return response.customError({

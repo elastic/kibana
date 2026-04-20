@@ -24,6 +24,14 @@ export interface ResultFormatter {
   closing: () => string | null;
   contentType: string;
   fileExtension: string;
+  /**
+   * Optional pre-scan hook. Called once with all first-page records before any
+   * bytes are written so the formatter can compute stable state (e.g. the CSV
+   * column union) from more than just row 1. Heterogeneous osquery tables
+   * across agents frequently have columns that only appear in later rows, so
+   * a single-row capture would silently drop fields.
+   */
+  finalizeColumns?: (firstPageRecords: Array<Record<string, unknown>>) => void;
 }
 
 // --- NDJSON ---
@@ -87,17 +95,35 @@ export function createCsvFormatter(): ResultFormatter {
   return {
     contentType: 'text/csv',
     fileExtension: 'csv',
+    finalizeColumns(firstPageRecords) {
+      const seen = new Set<string>();
+      const union: string[] = [];
+      // Preserve insertion order — first occurrence wins — so the column
+      // ordering matches the first row's shape with extras appended.
+      for (const record of firstPageRecords) {
+        for (const key of Object.keys(record)) {
+          if (!seen.has(key)) {
+            seen.add(key);
+            union.push(key);
+          }
+        }
+      }
+
+      columns = union;
+    },
     opening() {
       return null;
     },
     row(record, isFirst) {
-      if (isFirst || !columns) {
-        columns = Object.keys(record);
+      if (isFirst) {
+        if (!columns) columns = Object.keys(record);
         const header = columns.map(escapeCsvField).join(',') + '\n';
         const row = columns.map((col) => escapeCsvField(record[col])).join(',') + '\n';
 
         return header + row;
       }
+
+      if (!columns) columns = Object.keys(record);
 
       return columns.map((col) => escapeCsvField(record[col])).join(',') + '\n';
     },

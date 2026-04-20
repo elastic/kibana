@@ -14,12 +14,20 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFormRow,
   EuiSuperSelect,
   EuiCheckbox,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+/**
+ * Threshold above which we surface a size warning in the modal. The server
+ * hard-caps exports at 500k rows; warning at 100k keeps low-spec clients from
+ * being surprised by a multi-hundred-MB download.
+ */
+const LARGE_EXPORT_THRESHOLD = 100_000;
 
 import type { ExportFormat } from './use_export_results';
 
@@ -113,6 +121,27 @@ const ExportResultsModalComponent: React.FC<ExportResultsModalProps> = ({
               onChange={handleFilteredToggle}
               data-test-subj="osqueryExportFilteredCheckbox"
             />
+          </>
+        )}
+
+        {filteredTotal != null && filteredTotal >= LARGE_EXPORT_THRESHOLD && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              size="s"
+              color="warning"
+              iconType="warning"
+              data-test-subj="osqueryExportLargeWarning"
+              title={i18n.translate('xpack.osquery.exportModal.largeExportTitle', {
+                defaultMessage: 'Large export ({count} rows)',
+                values: { count: filteredTotal },
+              })}
+            >
+              {i18n.translate('xpack.osquery.exportModal.largeExportText', {
+                defaultMessage:
+                  'This may take several minutes and produce a large file. Narrow the query with filters if possible. Exports above 500,000 rows are rejected — add filters to reduce the result set.',
+              })}
+            </EuiCallOut>
           </>
         )}
       </EuiModalBody>

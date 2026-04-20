@@ -19,37 +19,36 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Export results', () => {
     describe('space-aware index resolution', () => {
-      const SPACE_ID = 'osquery-export-space';
+      // SPACE_ID + ACTION_ID + SPACE_RESULTS_INDEX are all unique per run so
+      // test retries and concurrent runs never trip over leaked state (a
+      // prior 'before' failing before 'after' runs would otherwise block
+      // subsequent runs with "space already exists").
+      const RUN_SUFFIX = `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+      const SPACE_ID = `osquery-export-space-${RUN_SUFFIX}`;
       const SPACE_RESULTS_INDEX = `logs-osquery_manager.result-${SPACE_ID}`;
-      const ACTION_ID = `space-action-${Date.now()}`;
+      const ACTION_ID = `space-action-${RUN_SUFFIX}`;
 
       before(async () => {
-        await spacesService.create({
-          id: SPACE_ID,
-          name: 'Osquery Export Test Space',
-          disabledFeatures: [],
-        });
+        try {
+          await spacesService.create({
+            id: SPACE_ID,
+            name: 'Osquery Export Test Space',
+            disabledFeatures: [],
+          });
+        } catch (e) {
+          // Idempotent: a leaked space from a prior run should not block
+          // this run. If the space already exists, continue.
+          if (!/already exists|409/i.test(String(e?.message ?? e))) {
+            throw e;
+          }
+        }
 
-        // Seed a result doc in the space-scoped index. Uses a regular index
-        // (not a Fleet-managed datastream) — this still exercises the
-        // non-default-space routing and end-to-end query flow.
-        await es.indices.create({
-          index: SPACE_RESULTS_INDEX,
-          mappings: {
-            properties: {
-              action_id: { type: 'keyword' },
-              '@timestamp': { type: 'date' },
-              agent: { properties: { id: { type: 'keyword' }, name: { type: 'keyword' } } },
-              osquery: {
-                properties: {
-                  pid: { type: 'long' },
-                  name: { type: 'keyword' },
-                },
-              },
-            },
-          },
-        });
-
+        // Seed a result doc in the space-scoped index. Fleet's osquery_manager
+        // integration (if installed in the test env) ships a composable index
+        // template that claims `logs-osquery_manager.result*` for a datastream.
+        // Explicit `indices.create` with inline mappings conflicts with that
+        // template, so we skip create+mapping and let `es.index` auto-create
+        // the index from the template or via dynamic mapping.
         await es.index({
           index: SPACE_RESULTS_INDEX,
           refresh: 'wait_for',
@@ -64,7 +63,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       after(async () => {
         await es.indices.delete({ index: SPACE_RESULTS_INDEX, ignore_unavailable: true });
-        await spacesService.delete(SPACE_ID);
+        try {
+          await spacesService.delete(SPACE_ID);
+        } catch {
+          // Swallow — the space may have already been deleted or never created.
+        }
       });
 
       it('exports results from a non-default space', async () => {

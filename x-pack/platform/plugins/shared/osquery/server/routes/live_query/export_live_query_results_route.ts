@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { escapeKuery } from '@kbn/es-query';
 import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS, OSQUERY_ACTIONS_INDEX } from '../../../common/constants';
@@ -55,8 +56,11 @@ export const exportLiveQueryResultsRoute = (
           const { actionId } = request.params;
           const logger = osqueryContext.logFactory.get('export_live_query_results');
 
-          // Fetch the SQL query string from the action document
+          // Fetch the SQL query string and ECS mapping from the action document.
+          // The ECS mapping lets the export enrich rows with the same user-defined
+          // ECS columns visible in the UI table.
           let queryString: string | undefined;
+          let ecsMapping: ECSMapping | undefined;
           try {
             const coreContext = await context.core;
             const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -67,10 +71,17 @@ export const exportLiveQueryResultsRoute = (
               _source: ['queries'],
             });
             const actionSource = actionDoc.hits.hits[0]?._source as
-              | { queries?: Array<{ action_id: string; query: string }> }
+              | {
+                  queries?: Array<{
+                    action_id: string;
+                    query: string;
+                    ecs_mapping?: ECSMapping;
+                  }>;
+                }
               | undefined;
             const matchingQuery = actionSource?.queries?.find((q) => q.action_id === actionId);
             queryString = matchingQuery?.query;
+            ecsMapping = matchingQuery?.ecs_mapping;
           } catch (e) {
             logger.debug(`Could not fetch query string for action ${actionId}: ${e.message}`);
           }
@@ -82,6 +93,7 @@ export const exportLiveQueryResultsRoute = (
               query: queryString,
             },
             fileNamePrefix: `osquery-results-${actionId}`,
+            ecsMapping,
           });
         } catch (e) {
           return response.customError({

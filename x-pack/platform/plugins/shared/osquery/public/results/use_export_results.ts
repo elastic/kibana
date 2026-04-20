@@ -71,14 +71,36 @@ export const useExportResults = ({
         });
 
         const rawResp = response.response as Response;
-        const blob = await rawResp.blob();
 
         // Extract filename from Content-Disposition or generate one
         const contentDisposition = rawResp.headers?.get('content-disposition') ?? '';
         const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
         const fileName = fileNameMatch?.[1] ?? `osquery-results-${actionId}.${format}`;
 
-        // Trigger browser download
+        // Read the streamed response body incrementally via the body reader
+        // rather than `rawResp.blob()`. This avoids the internal buffer clone
+        // performed by `blob()` on some browser implementations and keeps a
+        // single-copy path through to the anchor download. True
+        // streaming-to-disk (File System Access API) is intentionally not
+        // used here because user activation from the button click expires
+        // before the server response arrives, and the picker call then
+        // throws SecurityError.
+        const reader = rawResp.body?.getReader();
+        const parts: Uint8Array[] = [];
+        if (reader) {
+          let done = false;
+          while (!done) {
+            const next = await reader.read();
+            done = next.done;
+            if (next.value) parts.push(next.value);
+          }
+        } else {
+          parts.push(new Uint8Array(await rawResp.arrayBuffer()));
+        }
+
+        const blob = new Blob(parts as BlobPart[], {
+          type: rawResp.headers.get('content-type') ?? 'application/octet-stream',
+        });
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;

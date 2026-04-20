@@ -11,6 +11,7 @@ import { once } from 'events';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Observable } from 'rxjs';
+import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 
 import { flattenOsqueryHit } from '../../common/utils/flatten_osquery_hit';
 import type { ResultFormatter, ExportMetadata } from './format_results';
@@ -74,6 +75,12 @@ export interface ExportResultsToStreamOptions {
   metadata: ExportMetadata;
   aborted$: Observable<void>;
   logger: Logger;
+  /**
+   * ECS field mapping from the saved query / action. When provided, rows are
+   * enriched with ECS-mapped columns pulled from `_source` so that the export
+   * matches the UI's column set.
+   */
+  ecsMapping?: ECSMapping;
 }
 
 export interface ExportResultsError {
@@ -89,6 +96,7 @@ export async function exportResultsToStream({
   metadata,
   aborted$,
   logger,
+  ecsMapping,
 }: ExportResultsToStreamOptions): Promise<PassThrough | ExportResultsError> {
   const stream = new PassThrough();
   const abortController = new AbortController();
@@ -106,7 +114,9 @@ export async function exportResultsToStream({
       try {
         await esClient.closePointInTime({ id: pitId });
       } catch (e) {
-        logger.debug(`Failed to close PIT: ${e.message}`);
+        // Leaked PITs consume cluster memory until keep_alive expires (5m).
+        // Surface at warn so cluster-memory pressure is visible in ops dashboards.
+        logger.warn(`Failed to close PIT ${pitId}: ${e.message}`);
       }
 
       pitId = undefined;
@@ -114,22 +124,28 @@ export async function exportResultsToStream({
   };
 
   try {
-    const pitResponse = await esClient.openPointInTime({
-      index,
-      keep_alive: '5m',
-    });
+    const pitResponse = await esClient.openPointInTime(
+      {
+        index,
+        keep_alive: '5m',
+      },
+      { signal: abortController.signal }
+    );
     pitId = pitResponse.id;
 
     // First page — check total count
-    const firstPage = await esClient.search({
-      pit: { id: pitId, keep_alive: '5m' },
-      query,
-      size: EXPORT_PAGE_SIZE,
-      track_total_hits: true,
-      fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
-      sort: [{ '@timestamp': { order: 'desc' as const } }, '_doc'],
-      _source: ['agent'],
-    });
+    const firstPage = await esClient.search(
+      {
+        pit: { id: pitId, keep_alive: '5m' },
+        query,
+        size: EXPORT_PAGE_SIZE,
+        track_total_hits: true,
+        fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
+        sort: [{ '@timestamp': { order: 'desc' as const } }, '_doc'],
+        _source: ecsMapping ? true : ['agent'],
+      },
+      { signal: abortController.signal }
+    );
 
     const total =
       typeof firstPage.hits.total === 'number'
@@ -148,8 +164,24 @@ export async function exportResultsToStream({
     // Update metadata with total and start streaming asynchronously
     const enrichedMetadata = { ...metadata, total_results: total };
 
-    // Use setTimeout to start streaming on the next tick (proven pattern from lists plugin)
-    setTimeout(async () => {
+    // Pre-flatten first-page rows so formatters can pre-scan column shape
+    // before any bytes are written to the stream. This fixes the CSV header
+    // being locked to only row 1's keys — the CSV formatter now sees the
+    // column union of the first page.
+    const firstPageRecords = firstPage.hits.hits.map((hit) =>
+      deduplicateFields(flattenOsqueryHit(hit, ecsMapping))
+    );
+    if (formatter.finalizeColumns) {
+      formatter.finalizeColumns(firstPageRecords);
+    }
+
+    // Defer streaming to the next macrotask tick so the route handler can
+    // attach the returned PassThrough to the HTTP response before any writes
+    // occur. A macrotask (setImmediate) rather than a microtask is required
+    // because consumers (and tests) install listeners/spies on the returned
+    // stream synchronously after the await returns — a microtask would fire
+    // before those listeners are in place.
+    setImmediate(async () => {
       const signal = abortController.signal;
 
       try {
@@ -162,10 +194,9 @@ export async function exportResultsToStream({
         }
 
         // Process first page
-        for (const hit of firstPage.hits.hits) {
+        for (const record of firstPageRecords) {
           if (signal.aborted) break;
-          const flattened = deduplicateFields(flattenOsqueryHit(hit));
-          await writeWithBackpressure(stream, formatter.row(flattened, isFirstRow), signal);
+          await writeWithBackpressure(stream, formatter.row(record, isFirstRow), signal);
           isFirstRow = false;
         }
 
@@ -185,7 +216,7 @@ export async function exportResultsToStream({
               fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
               sort: [{ '@timestamp': { order: 'desc' as const } }, '_doc'],
               search_after: searchAfter,
-              _source: ['agent'],
+              _source: ecsMapping ? true : ['agent'],
             },
             { signal }
           );
@@ -194,7 +225,7 @@ export async function exportResultsToStream({
 
           for (const hit of page.hits.hits) {
             if (signal.aborted) break;
-            const flattened = deduplicateFields(flattenOsqueryHit(hit));
+            const flattened = deduplicateFields(flattenOsqueryHit(hit, ecsMapping));
             await writeWithBackpressure(stream, formatter.row(flattened, isFirstRow), signal);
             isFirstRow = false;
           }

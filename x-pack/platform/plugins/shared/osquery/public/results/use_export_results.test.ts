@@ -16,10 +16,42 @@ const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const createMockBlob = () => new Blob(['mock-content'], { type: 'application/ndjson' });
 
-const createMockRawResponse = (contentDisposition: string | null = null) => ({
+/**
+ * Minimal ReadableStream-shaped body that emits one chunk then closes.
+ * Sufficient for the streaming-download fallback path in use_export_results.
+ */
+const createMockBody = () => {
+  let emitted = false;
+
+  return {
+    getReader: jest.fn().mockReturnValue({
+      read: jest.fn().mockImplementation(() => {
+        if (emitted) {
+          return Promise.resolve({ done: true, value: undefined });
+        }
+
+        emitted = true;
+
+        return Promise.resolve({ done: false, value: new Uint8Array([1, 2, 3, 4]) });
+      }),
+    }),
+  };
+};
+
+const createMockRawResponse = (
+  contentDisposition: string | null = null,
+  contentType: string | null = 'application/ndjson'
+) => ({
   blob: jest.fn().mockResolvedValue(createMockBlob()),
+  arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(4)),
+  body: createMockBody(),
   headers: {
-    get: jest.fn().mockReturnValue(contentDisposition),
+    get: jest.fn().mockImplementation((name: string) => {
+      if (name.toLowerCase() === 'content-disposition') return contentDisposition;
+      if (name.toLowerCase() === 'content-type') return contentType;
+
+      return null;
+    }),
   },
 });
 
