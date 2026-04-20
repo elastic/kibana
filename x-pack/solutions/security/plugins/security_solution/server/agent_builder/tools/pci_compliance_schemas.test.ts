@@ -60,9 +60,7 @@ describe('pciTimeRangeSchema', () => {
   });
 
   it('rejects a non-ISO string', () => {
-    expect(
-      pciTimeRangeSchema.safeParse({ from: 'yesterday', to: 'now' }).success
-    ).toBe(false);
+    expect(pciTimeRangeSchema.safeParse({ from: 'yesterday', to: 'now' }).success).toBe(false);
   });
 
   it('rejects when `from` is after `to`', () => {

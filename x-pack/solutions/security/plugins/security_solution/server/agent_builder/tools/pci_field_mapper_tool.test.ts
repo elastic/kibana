@@ -93,9 +93,7 @@ describe('pciFieldMapperTool', () => {
         }>;
       };
 
-      const userNameMapping = payload.suggestedMappings.find(
-        (m) => m.sourceField === 'username'
-      );
+      const userNameMapping = payload.suggestedMappings.find((m) => m.sourceField === 'username');
       expect(userNameMapping?.suggestedEcsField).toBe('user.name');
       expect(userNameMapping?.confidence).toBeGreaterThanOrEqual(0.5);
     });

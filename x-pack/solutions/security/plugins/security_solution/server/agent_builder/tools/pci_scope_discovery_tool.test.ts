@@ -8,10 +8,7 @@
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test_helpers';
-import {
-  pciScopeDiscoveryTool,
-  PCI_SCOPE_DISCOVERY_TOOL_ID,
-} from './pci_scope_discovery_tool';
+import { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_discovery_tool';
 
 describe('pciScopeDiscoveryTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -40,15 +37,13 @@ describe('pciScopeDiscoveryTool', () => {
       expect(result.success).toBe(false);
     });
 
-    it.each([
-      'custom-index"; DROP',
-      'bad\u0000index',
-      'line\nbreak',
-      '../escape',
-    ])('rejects malicious custom index %j', (bad) => {
-      const result = tool.schema.safeParse({ customIndices: [bad] });
-      expect(result.success).toBe(false);
-    });
+    it.each(['custom-index"; DROP', 'bad\u0000index', 'line\nbreak', '../escape'])(
+      'rejects malicious custom index %j',
+      (bad) => {
+        const result = tool.schema.safeParse({ customIndices: [bad] });
+        expect(result.success).toBe(false);
+      }
+    );
   });
 
   describe('properties', () => {
@@ -82,8 +77,7 @@ describe('pciScopeDiscoveryTool', () => {
       )) as ToolHandlerStandardReturn;
 
       expect(mockEsClient.asCurrentUser.fieldCaps).toHaveBeenCalledTimes(1);
-      const call = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock
-        .calls[0][0];
+      const call = (mockEsClient.asCurrentUser.fieldCaps as unknown as jest.Mock).mock.calls[0][0];
       expect(call.index).toEqual(['packetbeat-network-1', 'auth-logs-1']);
 
       expect(result.results).toHaveLength(1);

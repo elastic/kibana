@@ -217,10 +217,7 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Correlate intrusion alerts with control test outcomes for validation.',
     ],
     buildCoverageEsql: (i) =>
-      coverageQuery(
-        i,
-        'event.category == "intrusion_detection" OR vulnerability.id IS NOT NULL'
-      ),
+      coverageQuery(i, 'event.category == "intrusion_detection" OR vulnerability.id IS NOT NULL'),
   },
   '12': {
     id: '12',
@@ -546,13 +543,7 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
     description:
       'Verify that audit log entries contain required detail: user ID, event type, date/time, success or failure indication, origination, and identity or name of affected data/resource. Check field fill rates for completeness.',
     pciReference: 'PCI DSS v4.0.1 Section 10.3',
-    requiredFields: [
-      'user.name',
-      'event.category',
-      'event.action',
-      'event.outcome',
-      '@timestamp',
-    ],
+    requiredFields: ['user.name', 'event.category', 'event.action', 'event.outcome', '@timestamp'],
     verdict: 'rows_mean_evidence',
     defaultLookbackDays: 7,
     recommendations: [

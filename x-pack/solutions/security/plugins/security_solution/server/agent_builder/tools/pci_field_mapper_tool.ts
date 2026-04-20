@@ -31,9 +31,7 @@ const pciFieldMapperSchema = z.object({
     .min(1)
     .max(50)
     .optional()
-    .describe(
-      'Optional list of ECS fields to map to. Defaults to common PCI-relevant ECS fields.'
-    ),
+    .describe('Optional list of ECS fields to map to. Defaults to common PCI-relevant ECS fields.'),
   timeRange: pciTimeRangeSchema
     .optional()
     .describe(
@@ -244,9 +242,7 @@ export const pciFieldMapperTool = (
         });
         if (sampleResponse.hits?.hits?.length) {
           sampleFields = [
-            ...new Set(
-              sampleResponse.hits.hits.flatMap((hit) => Object.keys(hit._source ?? {}))
-            ),
+            ...new Set(sampleResponse.hits.hits.flatMap((hit) => Object.keys(hit._source ?? {}))),
           ];
         }
       } catch {
@@ -270,9 +266,7 @@ export const pciFieldMapperTool = (
               totalFields: allFields.length,
               ecsFieldsPresent,
               ecsMissing,
-              ecsCoveragePercent: Math.round(
-                (ecsFieldsPresent.length / ecsTargets.length) * 100
-              ),
+              ecsCoveragePercent: Math.round((ecsFieldsPresent.length / ecsTargets.length) * 100),
               suggestedMappings: mappings.slice(0, 20),
               sampleFieldNames: sampleFields.slice(0, 30),
               guidance:

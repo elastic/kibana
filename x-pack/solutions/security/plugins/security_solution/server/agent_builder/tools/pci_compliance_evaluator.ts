@@ -79,10 +79,7 @@ async function runPreflight(
     );
 
     const requiredWithoutTimestamp = definition.requiredFields.filter((f) => f !== '@timestamp');
-    if (
-      requiredWithoutTimestamp.length > 0 &&
-      missing.length === requiredWithoutTimestamp.length
-    ) {
+    if (requiredWithoutTimestamp.length > 0 && missing.length === requiredWithoutTimestamp.length) {
       return { confidence: 'NOT_ASSESSABLE', missingFields: missing };
     }
     if (missing.length > 0) {
@@ -95,16 +92,9 @@ async function runPreflight(
 }
 
 function statusToScore(status: ComplianceStatus, confidence: ComplianceConfidence): number {
-  const baseScore =
-    status === 'GREEN' ? 100 : status === 'AMBER' ? 50 : status === 'RED' ? 0 : 25;
+  const baseScore = status === 'GREEN' ? 100 : status === 'AMBER' ? 50 : status === 'RED' ? 0 : 25;
   const confidenceWeight =
-    confidence === 'HIGH'
-      ? 1.0
-      : confidence === 'MEDIUM'
-      ? 0.8
-      : confidence === 'LOW'
-      ? 0.5
-      : 0.3;
+    confidence === 'HIGH' ? 1.0 : confidence === 'MEDIUM' ? 0.8 : confidence === 'LOW' ? 0.5 : 0.3;
   return Math.round(baseScore * confidenceWeight);
 }
 
