@@ -45,6 +45,16 @@ Example: `x-pack/platform/plugins/shared/streams_app/test/scout/ui/playwright.co
 
 If multiple changed files resolve to the same config, include it only once.
 
+### Shared fixtures
+
+A **shared fixture** is a non-test file (XML, JSON archive, ES/Kibana snapshot, role definition, etc.) that is not referenced by `testFiles` / `loadTestFile`, is pulled in only by `*.base.ts` configs (typically via `require.resolve` or `import`), and is consumed identically by every leaf config that extends the base (e.g. loaded once at server startup).
+
+When the changed file is a shared fixture:
+
+1. Pick **one** canonical leaf config that extends the base — prefer the plainest "vanilla" config for the affected area (no feature flags, no extra server args). For example, for a change to `@kbn/security-api-integration-helpers/saml/idp_metadata_mock_idp.xml`, prefer `x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts` over siblings that layer on feature flags or solution-specific services.
+2. In the comment body, list 2–3 other leaf configs that inherit the same fixture and tell the author they can run those manually via the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) for broader coverage.
+3. Do **not** add a second leaf just to "cover both base configs" when the bases exercise the same runtime path through the fixture. One run of the canonical leaf validates the shared code path; a second leaf doubles CI cost without adding signal.
+
 ## Output
 
 Post one comment on the PR with a single `/flaky` command. Include tokens only for runner types that qualify. All configs — any number, any mix of Scout and FTR — go space-separated on the same line. Format:
