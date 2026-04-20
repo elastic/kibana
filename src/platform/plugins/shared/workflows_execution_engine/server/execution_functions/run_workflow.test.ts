@@ -250,7 +250,7 @@ describe('runWorkflow', () => {
   });
 
   it('returns without starting runtime when execution is already CANCELLED (e.g. cancel won race)', async () => {
-    mockGetWorkflowExecutionById.mockResolvedValue({
+    const cancelledExecution = {
       id: workflowRunId,
       workflowId: 'wf-1',
       spaceId,
@@ -258,7 +258,32 @@ describe('runWorkflow', () => {
       isTestRun: false,
       workflowDefinition: { name: 'Test Workflow', steps: [] },
       triggeredBy: 'manual',
+    };
+    mockGetWorkflowExecutionById.mockResolvedValue(cancelledExecution as any);
+    const reportWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+
+    await runWorkflow({
+      workflowRunId,
+      spaceId,
+      taskAbortController: new AbortController(),
+      logger: logger as Logger,
+      config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
+      fakeRequest,
+      dependencies,
+      meteringService: { reportWorkflowExecution } as any,
     });
+
+    expect(mockRuntimeStart).not.toHaveBeenCalled();
+    expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+    expect(reportWorkflowExecution).toHaveBeenCalledTimes(1);
+    expect(reportWorkflowExecution).toHaveBeenCalledWith(
+      cancelledExecution,
+      dependencies.cloudSetup
+    );
+  });
+
+  it('returns without starting runtime when execution document is missing after setupDependencies', async () => {
+    mockGetWorkflowExecutionById.mockResolvedValue(null);
 
     await runWorkflow({
       workflowRunId,
@@ -272,23 +297,5 @@ describe('runWorkflow', () => {
 
     expect(mockRuntimeStart).not.toHaveBeenCalled();
     expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
-  });
-
-  it('throws when execution document is missing after setupDependencies', async () => {
-    mockGetWorkflowExecutionById.mockResolvedValue(null);
-
-    await expect(
-      runWorkflow({
-        workflowRunId,
-        spaceId,
-        taskAbortController: new AbortController(),
-        logger: logger as Logger,
-        config: { logging: { console: false }, http: { allowedHosts: ['*'] } } as any,
-        fakeRequest,
-        dependencies,
-      })
-    ).rejects.toThrow(`Workflow execution with ID ${workflowRunId} not found`);
-
-    expect(mockRuntimeStart).not.toHaveBeenCalled();
   });
 });

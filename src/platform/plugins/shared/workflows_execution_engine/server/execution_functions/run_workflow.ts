@@ -74,12 +74,16 @@ export async function runWorkflow({
     spaceId
   );
   if (!execution) {
-    throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
+    logger.warn(`Skipping workflow run ${workflowRunId}: execution not found`);
+    return;
   }
   if (isTerminalStatus(execution.status)) {
     logger.debug(
-      `Skipping workflow run ${workflowRunId}: execution already terminal (${execution.status})`
+      `Skipping workflow run ${workflowRunId}: execution already terminal [${execution.status}]`
     );
+    if (meteringService) {
+      void meteringService.reportWorkflowExecution(execution, dependencies.cloudSetup);
+    }
     return;
   }
 
