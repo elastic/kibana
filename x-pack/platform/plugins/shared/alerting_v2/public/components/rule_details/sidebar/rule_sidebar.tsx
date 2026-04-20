@@ -14,7 +14,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSidebarConditionsTab } from './rule_sidebar_conditions_tab';
 import { RuleSidebarRunbookTab } from './rule_sidebar_runbook_tab';
 
@@ -35,11 +34,7 @@ const SIDEBAR_TAB_OPTIONS = [
   },
 ];
 
-export interface RuleSidebarProps {
-  rule: RuleApiResponse;
-}
-
-export const RuleSidebar: React.FC<RuleSidebarProps> = ({ rule }) => {
+export const RuleSidebar: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState('conditions');
 
   return (
@@ -70,11 +65,7 @@ export const RuleSidebar: React.FC<RuleSidebarProps> = ({ rule }) => {
 
       <EuiHorizontalRule margin="m" />
 
-      {selectedTab === 'conditions' ? (
-        <RuleSidebarConditionsTab rule={rule} />
-      ) : (
-        <RuleSidebarRunbookTab rule={rule} />
-      )}
+      {selectedTab === 'conditions' ? <RuleSidebarConditionsTab /> : <RuleSidebarRunbookTab />}
     </div>
   );
 };
