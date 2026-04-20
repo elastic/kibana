@@ -5,26 +5,50 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { FLEET_LOG_INDICES } from '@kbn/fleet-plugin/common';
-import { OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE } from '../../../common';
+import {
+  OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE,
+  OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
+  OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT,
+} from '../../../common';
+import { OVERVIEW_PATH } from '../../../common/locators/paths';
 import { useHasData } from '../../hooks/use_has_data';
 import { useKibana } from '../../utils/kibana_react';
 import { APM_APP_LOCATOR_ID } from '../../components/alert_sources/get_apm_app_url';
 
 export function LandingPage() {
-  const { pricing } = useKibana().services;
+  const { pricing, featureFlags } = useKibana().services;
   const hasCompleteLandingPage = pricing.isFeatureAvailable(
     OBSERVABILITY_COMPLETE_LANDING_PAGE_FEATURE.id
   );
+  const isSigeventsOverviewEnabled = featureFlags.getBooleanValue(
+    OBSERVABILITY_SIGEVENTS_OVERVIEW_FEATURE_FLAG,
+    OBSERVABILITY_SIGEVENTS_OVERVIEW_DEFAULT
+  );
+
+  if (isSigeventsOverviewEnabled) {
+    return <SigeventsLandingPage />;
+  }
 
   return hasCompleteLandingPage ? (
     <ObservabilityCompleteLandingPage />
   ) : (
     <ObservabilityLogsEssentialsLandingPage />
   );
+}
+
+function SigeventsLandingPage() {
+  const history = useHistory();
+
+  useEffect(() => {
+    history.replace(OVERVIEW_PATH);
+  }, [history]);
+
+  return <></>;
 }
 
 function ObservabilityCompleteLandingPage() {
