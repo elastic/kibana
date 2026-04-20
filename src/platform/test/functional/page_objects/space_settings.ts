@@ -12,7 +12,6 @@ import { FtrService } from '../ftr_provider_context';
 export class SpaceSettingsPageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly header = this.ctx.getPageObject('header');
 
   public async navigateTo(spaceName: string = 'default') {
     await this.common.navigateToUrl('management', `kibana/spaces/edit/${spaceName}`, {
@@ -40,21 +39,10 @@ export class SpaceSettingsPageObject extends FtrService {
     };
 
     await this.navigateTo(spaceName);
-<<<<<<< HEAD
-=======
-    // ensure the edit form is fully rendered before interacting  with it
->>>>>>> 7a4a3d4a761e (wait for reload in switchSpaceSolutionType to prevent renderer timeout)
-    await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.existOrFail('spaces-view-page');
 
     await this.testSubjects.click('solutionViewSelect');
     await this.testSubjects.click(solutionSpecificTestSubjectMap[solution]);
     await this.testSubjects.click('save-space-button');
-    await this.common.clickConfirmOnModal();
-    await this.header.waitUntilLoadingHasFinished();
-<<<<<<< HEAD
-    await this.testSubjects.existOrFail('spaces-grid-page');
-=======
->>>>>>> 7a4a3d4a761e (wait for reload in switchSpaceSolutionType to prevent renderer timeout)
+    await this.testSubjects.click('confirmModalConfirmButton');
   }
 }
