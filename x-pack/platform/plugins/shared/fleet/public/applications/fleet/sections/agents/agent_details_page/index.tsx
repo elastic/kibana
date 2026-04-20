@@ -31,7 +31,7 @@ import {
   useGetInfoOutputsForPolicy,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
-
+import { ExperimentalFeaturesService } from '../../../services';
 import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
@@ -40,6 +40,7 @@ import {
   AgentDetailsActionMenu,
   AgentDetailsContent,
   AgentDiagnosticsTab,
+  AgentCollectorConfig,
 } from './components';
 import { AgentSettings } from './components/agent_settings';
 
@@ -192,6 +193,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [agentPolicyData, agentData, getHref, isAgentPolicyLoading]
   );
 
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+
   const headerTabs = useMemo(() => {
     const tabs = [
       {
@@ -226,9 +229,24 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         href: getHref('agent_details_settings', { agentId, tabId: 'settings' }),
         isSelected: tabId === 'settings',
       },
+      ...(enableOtelUI && agent?.type === 'OPAMP'
+        ? [
+            {
+              id: 'collector-config',
+              name: i18n.translate('xpack.fleet.agentDetails.subTabs.collectorConfigTab', {
+                defaultMessage: 'Collector Config',
+              }),
+              href: getHref('agent_details_collector_config', {
+                agentId,
+                tabId: 'collector-config',
+              }),
+              isSelected: tabId === 'collector-config',
+            },
+          ]
+        : []),
     ];
     return tabs;
-  }, [getHref, agentId, tabId]);
+  }, [getHref, agentId, tabId, enableOtelUI, agent]);
 
   return (
     <AgentRefreshContext.Provider
@@ -332,6 +350,12 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={FLEET_ROUTING_PATHS.agent_details_settings}
         render={() => {
           return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
+        }}
+      />
+      <Route
+        path={FLEET_ROUTING_PATHS.agent_details_collector_config}
+        render={() => {
+          return <AgentCollectorConfig agent={agent} />;
         }}
       />
       <Route
