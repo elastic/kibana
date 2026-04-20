@@ -81,7 +81,7 @@ function normalizeSingleQuotedScalars(fileContent: string): string {
 
     // Detect a block scalar header: a line whose YAML value is | or > with
     // optional chomping/indent modifiers and an optional trailing comment.
-    if (/(?::\s*|-\s+)[|>][+\-]?\d?\s*(?:#[^\r\n]*)?\s*$/.test(line)) {
+    if (/(?::\s*|-\s+)[|>](?:[+\-]?\d?|\d?[+\-]?)\s*(?:#[^\r\n]*)?\s*$/.test(line)) {
       maskedLines.push(line);
       i++;
 

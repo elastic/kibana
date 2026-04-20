@@ -8,7 +8,7 @@
  */
 
 import fs from 'fs/promises';
-import { Document, isScalar } from 'yaml';
+import { Document, isScalar, visit } from 'yaml';
 import type { Pair } from 'yaml';
 import { dirname } from 'path';
 
@@ -23,6 +23,30 @@ export async function writeYamlDocument(filePath: string, document: unknown): Pr
   }
 }
 
+/**
+ * Walk the document tree and set explicit scalar types to match js-yaml's
+ * block-scalar heuristics:
+ *   - Strings containing '\n' → BLOCK_LITERAL (|)
+ *   - Strings longer than 80 chars without '\n' → BLOCK_FOLDED (>)
+ *
+ * Map keys are skipped (they must stay inline). Flow-context scalars fall back
+ * to quoted strings automatically in the serialiser, so it is safe to set block
+ * types unconditionally on value/sequence-item scalars.
+ */
+const applyBlockScalarTypes = (doc: Document): void => {
+  visit(doc, {
+    Scalar(key, node) {
+      if (key !== 'key' && typeof node.value === 'string') {
+        if (node.value.includes('\n')) {
+          node.type = 'BLOCK_LITERAL';
+        } else if (node.value.length > 80) {
+          node.type = 'BLOCK_FOLDED';
+        }
+      }
+    },
+  });
+};
+
 function stringifyToYaml(document: unknown): string {
   try {
     // Disable YAML Anchors https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases
@@ -36,6 +60,7 @@ function stringifyToYaml(document: unknown): string {
       schema: 'yaml-1.1',
       strict: false,
     });
+    applyBlockScalarTypes(doc);
     // Prefer single quotes over double quotes when a string requires quoting,
     // matching js-yaml's default style. The serialiser falls back to double
     // quotes automatically when the value contains a single quote but no
@@ -49,6 +74,7 @@ function stringifyToYaml(document: unknown): string {
       schema: 'yaml-1.1',
       strict: false,
     });
+    applyBlockScalarTypes(doc);
     return doc.toString({ singleQuote: true });
   }
 }
