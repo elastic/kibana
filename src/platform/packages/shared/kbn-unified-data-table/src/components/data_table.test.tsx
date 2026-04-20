@@ -43,7 +43,7 @@ import {
 } from '../../__mocks__/external_control_columns';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
 import { useColumns } from '../hooks/use_data_grid_columns';
@@ -519,9 +519,8 @@ describe('UnifiedDataTable', () => {
       });
       await userEvent.click(screen.getByTestId('unifiedDataTableSelectionBtn'));
       await userEvent.click(screen.getByTestId('unifiedDataTableCopyRowsAsText'), {
-        pointerEventsCheck: 0,
+        pointerEventsCheck: PointerEventsCheckLevel.Never,
       });
-      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
       return (navigator.clipboard.writeText as jest.Mock).mock.calls.at(-1)![0] as string;
     };
 
