@@ -141,8 +141,8 @@ export const Default: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -192,8 +192,8 @@ export const PreserveMsUnits: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -244,8 +244,8 @@ export const WarmAndDeletePhases: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -289,8 +289,8 @@ export const OnlyDeletePhase: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -340,8 +340,8 @@ export const NoMetricsStream: Story = {
               onClose={() => {
                 action('onClose')();
               }}
-              onChange={(next, _meta) => {
-                action('onChange')(next);
+              onChange={(next, changeMeta) => {
+                action('onChange')({ next, meta: changeMeta });
               }}
               onSave={(next) => {
                 action('onSave')(next);
@@ -440,8 +440,8 @@ export const PhaseSyncing: Story = {
                   action('onClose')();
                   setIsOpen(false);
                 }}
-                onChange={(next, _meta) => {
-                  action('onChange')(next);
+                onChange={(next, changeMeta) => {
+                  action('onChange')({ next, meta: changeMeta });
                   setPhases(next);
                 }}
                 onSave={(next) => {
