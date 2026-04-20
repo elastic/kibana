@@ -87,6 +87,8 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/scout'
   - '@kbn/core-http-browser'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/core-http-request-handler-context-server'
 tags:
   - plugin
   - prod
