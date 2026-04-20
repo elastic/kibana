@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { calculatePercentage, DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -59,9 +59,11 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   } = useKibana();
 
   const canReadFailureStore = definition.privileges.read_failure_store;
+  const failureStoreEnabled = isEnabledFailureStore(definition.effective_failure_store);
+  const canQueryFailureStore = canReadFailureStore && failureStoreEnabled;
   const streamName = definition.stream.name;
 
-  const dataSourceForTimeRange = canReadFailureStore
+  const dataSourceForTimeRange = canQueryFailureStore
     ? `${streamName},${streamName}::failures`
     : streamName;
 
@@ -108,7 +110,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   // Only fetched when the user has read_failure_store privilege.
   const failedDocsResult = useStreamsAppFetch(
     async ({ signal, timeState: ts }) => {
-      if (!canReadFailureStore) return 0;
+      if (!canQueryFailureStore) return 0;
       if (!ts) return 0;
       const result = await streamsRepositoryClient.fetch(
         'GET /internal/streams/doc_counts/failed',
@@ -119,7 +121,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
       );
       return result.find((d) => d.stream === streamName)?.count ?? 0;
     },
-    [streamName, streamsRepositoryClient, canReadFailureStore],
+    [streamName, streamsRepositoryClient, canQueryFailureStore],
     { withTimeRange: true, withRefresh: true }
   );
 
@@ -266,7 +268,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TopFailureReasons streamName={streamName} canReadFailureStore={canReadFailureStore} />
+          <TopFailureReasons streamName={streamName} canReadFailureStore={canQueryFailureStore} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

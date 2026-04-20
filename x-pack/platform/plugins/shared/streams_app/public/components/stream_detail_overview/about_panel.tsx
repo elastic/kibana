@@ -148,7 +148,6 @@ export function AboutPanel() {
             opacity: 1;
           }
         `}
-        onClick={handleClick}
       >
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow>
@@ -172,11 +171,11 @@ export function AboutPanel() {
             >
               <EuiButtonIcon
                 iconType="pencil"
-                onClick={() => setIsEditing(true)}
                 aria-label={i18n.translate(
                   'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
                   { defaultMessage: 'Edit description' }
                 )}
+                onClick={handleClick}
               />
             </EuiFlexItem>
           )}

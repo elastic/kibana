@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
@@ -54,15 +55,24 @@ export function StreamOverview() {
     <EuiFlexGroup
       alignItems="flexStart"
       gutterSize="m"
-      direction={isStackedOverviewLayout ? 'columnReverse' : 'row'}
+      direction={isStackedOverviewLayout ? 'column' : 'row'}
       responsive={false}
     >
       <EuiFlexItem grow={false} style={sidebarColumnStyle}>
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup direction={isStackedOverviewLayout ? 'row' : 'column'} gutterSize="m">
           {sidebarSections
             .filter((s) => s.show)
             .map((s) => (
-              <EuiFlexItem key={s.id} grow={false}>
+              <EuiFlexItem
+                key={s.id}
+                grow={isStackedOverviewLayout}
+                css={
+                  isStackedOverviewLayout &&
+                  css`
+                    max-width: 50%;
+                  `
+                }
+              >
                 {s.node}
               </EuiFlexItem>
             ))}

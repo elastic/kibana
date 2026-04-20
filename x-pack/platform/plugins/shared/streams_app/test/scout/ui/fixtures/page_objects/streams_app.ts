@@ -1340,6 +1340,16 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamModalDeleteButton() {
+    // Toast notifications rendered in the globalToastList can overlap the confirm
+    // button and intercept pointer events. Wait until the list is empty before clicking.
+    await this.page.waitForFunction(
+      () => {
+        const list = document.querySelector('[data-test-subj="globalToastList"]');
+        return !list || list.childElementCount === 0;
+      },
+      null,
+      { timeout: 15_000 }
+    );
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
   }
 
