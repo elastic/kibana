@@ -125,8 +125,11 @@ These are capabilities that interact with or are prerequisites for managed workf
 
 ### Registration
 
-1. **Registration mechanism: `workflows_extensions` vs `workflows_management`?**
-   The existing `workflows_extensions` registers step *types*. Managed workflow registration covers full workflow *lifecycle* (definition, provisioning, updates, removal). These likely coexist as distinct APIs rather than being alternatives. Needs engineering alignment.
+1. **Where does the registration API live?**
+   The existing `workflows_extensions` registers step *types*. Managed workflow registration covers full workflow *lifecycle* (definition, provisioning, updates, removal). These are distinct concerns that coexist rather than being alternatives. The question is which plugin (or package) exposes the registration API:
+   - **`workflows_management`** — Natural home since it owns CRUD and storage. But this adds a setup dependency on `workflows_management` for every plugin that registers a managed workflow, which may be problematic for plugins that currently only depend on `workflows_extensions`.
+   - **`workflows_extensions`** — Already depended on by consuming plugins. Lighter dependency. But it has no access to Elasticsearch, no CRUD capabilities, and no space awareness — adding lifecycle management would bloat its responsibility.
+   - **Dedicated package** — A new lightweight package (e.g., `@kbn/workflows-registration`) that holds only the registration contract and in-memory registry. Plugins depend on the package (no plugin dependency at all). `workflows_management` consumes the registry at `start()` for provisioning. Cleanest dependency graph, but adds a new package.
 
 2. <a id="post-start-lifecycle"></a>**Should post-start registration be supported?**
    Registering workflows dynamically in response to user actions (e.g., a button click that installs a workflow, or a form that customizes it). Creation and deletion are straightforward — the plugin calls the API at runtime, and cleanup on uninstall uses `managedBy`. The hard part is **updates**: how does the startup reconciliation (create-if-absent, update-if-changed) apply to a workflow that didn't exist at startup?
