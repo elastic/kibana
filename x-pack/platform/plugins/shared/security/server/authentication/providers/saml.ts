@@ -767,6 +767,11 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
       );
 
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
+      // Only override cookie options when serving over HTTPS: Safari (unlike Chrome) refuses
+      // to set or send `Secure` cookies over plain HTTP — even on localhost — which caused
+      // the session cookie to be lost between the SAML handshake and the ACS callback,
+      // resulting in an empty `ids` array sent to Elasticsearch. Falling back to the default
+      // cookie options over HTTP keeps the handshake working in dev/Safari setups.
       return AuthenticationResult.redirectTo(redirect, {
         state: {
           requestIdMap: this.updateRequestIdMap(
@@ -776,11 +781,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider<Provi
           ),
           realm,
         },
-        // `isSecure` mirrors the server protocol: Safari (unlike Chrome) refuses to set or
-        // send `Secure` cookies over plain HTTP — even on localhost — which caused the
-        // session cookie to be lost between the SAML handshake and the ACS callback,
-        // resulting in an empty `ids` array sent to Elasticsearch.
-        stateCookieOptions: { sameSite: 'None', isSecure: this.isHttps() },
+        ...(this.isHttps() ? { stateCookieOptions: { sameSite: 'None', isSecure: true } } : {}),
       });
     } catch (err) {
       this.logger.debug(() => `Failed to initiate SAML handshake: ${getDetailedErrorMessage(err)}`);
