@@ -107,6 +107,10 @@ const entitySourceSchemaV1 = {
   managedVersion: schema.maybe(schema.number()),
   filter: schema.maybe(schema.any()),
   integrations: schema.maybe(integrationsSchema),
+} satisfies Omit<WatchlistEntitySourceSchemaProps, 'range'>;
+
+const entitySourceSchemaV2 = {
+  ...entitySourceSchemaV1,
   range: schema.maybe(
     schema.object(
       {
@@ -147,8 +151,8 @@ export const watchlistEntitySourceType: SavedObjectsType = {
         },
       ],
       schemas: {
-        forwardCompatibility: schema.object(entitySourceSchemaV1, { unknowns: 'ignore' }),
-        create: schema.object(entitySourceSchemaV1, { unknowns: 'ignore' }),
+        forwardCompatibility: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
+        create: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
       },
     },
   },

@@ -200,7 +200,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "user_connector_token": "524b43a59d7bbc5b0430b19332f8f0f69e323dec2e391a87c568bb4fb4b3690c",
         "visualization": "b7c299233eb6fc88faccdf5924d4cff9fc2f4c3fe8acf5376d7232c05c9a3cfd",
         "watchlist-config": "447ff0c6227fa2ca64fe05afb5b3bc4808063926c1da3edacb9c28d52c1fb86a",
-        "watchlist-entity-source": "690d69141c6ef5ef8fa069abb96393adb7b36510e182e5160eee1707e911f39e",
+        "watchlist-entity-source": "c51b3021ff12acaa47d35e3ead5236e9956e211cd928becb1d7636854595c1a2",
         "workplace_search_telemetry": "b17dd0963b685cea46246d00b7da598822668434659b7e698313da6c2212febb",
       }
     `);
@@ -1394,7 +1394,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "watchlist-entity-source|mappings: 9ffd89787c09633c55456fc1d46ebd2cfd4db1cc",
         "watchlist-entity-source|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "watchlist-entity-source|10.2.0: 6014db43a6561ba3b1995e33475b129082222bbe08d6a784b680ed5a806e17a6",
-        "watchlist-entity-source|10.1.0: 91ace052018b895f1f2df1afce6b99cf0173b6f4117274e5649b777e44344c28",
+        "watchlist-entity-source|10.1.0: 7a6b96c670be283b52b768a0d3ec4f80ad7523beefc39fb63dc361611db476b7",
         "================================================================================================",
         "workplace_search_telemetry|global: 1788a0f48253a7ac02a9d00de8047bc5128cd4be",
         "workplace_search_telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
