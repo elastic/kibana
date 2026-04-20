@@ -43,7 +43,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 |---|-------------|---------|
 | **R1** | **Distinguish managed from user-defined** | The platform must be able to distinguish managed workflows from user-defined ones. The designation is not user-settable. How this is achieved (a flag on the same index, a separate index, or other mechanism) is discussed in the [Storage](#1-storage) section of the technical design. |
 | **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject changes to managed workflows. This includes the `enabled` toggle (enable/disable is an update). UI-only restrictions are insufficient — API callers can still mutate. Note: this conflicts with the force override (S5) — see the [Force Override](#21-force-override) section for the interaction model and options. |
-| **R3** | **Active by default** | Registered managed workflows are immediately active and ready to execute. No separate activation step required. |
+| **R3** | **Active by default** | Registered managed workflows are immediately active and ready to execute. No separate activation step required. Note: Detection Engine needs workflows that are disabled by default and user-enabled — see [Open Questions > Mutability #5](#initial-enabled-state). |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
 | **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
 | **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
@@ -170,7 +170,15 @@ These are capabilities that interact with or are prerequisites for managed workf
 
    This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the reconciliation safety net restores the original on upgrade.
 
-5. **Should a `--force` flag allow overriding read-only?**
+5. <a id="initial-enabled-state"></a>**Should managed workflows support being registered as disabled by default?**
+   Detection Engine (nkhristinin, [#16662 comment](https://github.com/elastic/security-team/issues/16662#issuecomment-4280143015)) needs managed workflows that are disabled by default and explicitly enabled by the user (via the Detection Engine UI, which calls the workflow API). This means:
+   - The `ManagedWorkflowRegistration` contract needs an `enabled` option (default `true` to preserve R3 behavior, but settable to `false`).
+   - The enable/disable toggle must be a user-permitted mutation on managed workflows — not gated behind `--force` — since the product UX depends on it.
+   - The reconciliation logic must decide: when a new version of the workflow ships, should the platform reset `enabled` to the registered default, or preserve the user's current state? Preserving user state is likely correct (the user explicitly opted in/out), but the registering plugin should be able to force a reset if needed (e.g., a critical fix that must be active).
+
+   This overlaps with the partial editability discussion (#4 above) but is narrower — only `enabled` state, not arbitrary fields. It may be reasonable to support this in the first delivery as a special case, since `enabled` is already a first-class field on `WorkflowProperties` and the enforcement is straightforward.
+
+6. **Should a `--force` flag allow overriding read-only?**
    ruflin proposed this for testing, recovery, and urgent fixes. If supported, it should be API-only (not UI), logged, and clearly documented as "you own the consequences."
 
 ### Lifecycle
