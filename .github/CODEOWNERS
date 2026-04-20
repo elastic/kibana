@@ -774,7 +774,6 @@ src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
-src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/inspect_component @elastic/appex-sharedux
@@ -1340,6 +1339,8 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 # used for the 'team' designator within Kibana Stats
 
 packages/kbn-generate/src/commands/user_activity_actions_docs_command.ts @elastic/kibana-core
+
+src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
 
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
