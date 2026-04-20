@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { ObservedDataSection } from './components/observed_data_section';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useHasEntityResolutionLicense } from '../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../cloud_security_posture/components/entity_insight';
@@ -58,9 +57,6 @@ export const HostPanelContent = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
 }: HostPanelContentProps) => {
-  const isEntityDetailsHighlightsAIEnabled = useIsExperimentalFeatureEnabled(
-    'entityDetailsHighlightsEnabled'
-  );
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
   // Extract hostName from identityFields for components that need a string
@@ -70,8 +66,11 @@ export const HostPanelContent = ({
 
   return (
     <>
-      {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
-        <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
+      {!skipRiskAndCriticality && (
+        <EntityHighlightsAccordion
+          entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
+          entityType={EntityType.host}
+        />
       )}
       {!skipRiskAndCriticality &&
         riskScoreState.hasEngineBeenInstalled &&
