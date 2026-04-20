@@ -428,8 +428,10 @@ describe('GenAiSettingsApp', () => {
 
       renderComponent();
 
-      // Documentation section should not be visible in Classic mode
-      expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      // Settings fields load asynchronously; until then `currentChatExperience` falls back to Agent.
+      await waitFor(() => {
+        expect(screen.queryByTestId('documentationSection')).not.toBeInTheDocument();
+      });
     });
 
     it('shows Documentation section when chat experience is Agent', async () => {

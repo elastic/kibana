@@ -39,8 +39,7 @@ export async function getESQLTimeFieldFromQuery({
     return undefined;
   }
   const pendingRequest = http
-    // eslint-disable-next-line @kbn/eslint/no_unsafe_dynamic_http_path -- buildPath can't be used in common package
-    .get(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)
+    .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
     .then((response) => (response as { timeField?: string } | undefined)?.timeField)
     .catch((error) => {
       // eslint-disable-next-line no-console
