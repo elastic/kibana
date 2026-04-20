@@ -47,6 +47,7 @@ interface ResolutionPageResult {
  * which cap resolution search responses at 10k and treat larger groups as truncated.
  */
 const MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT = 10_000;
+const RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE = 1_000;
 
 export const calculateResolutionEntityScores = async function* ({
   esClient,
@@ -104,6 +105,8 @@ export const calculateResolutionEntityScores = async function* ({
       const resolutionTargetIds = [
         ...new Set(parsedScores.map((score) => score.resolution_target_id)),
       ];
+      // ES|QL only surfaces members attached to contributing alerts. Pull the
+      // full group from entity store before fetching modifier entities.
       const fullGroupMemberIds = await fetchResolutionGroupMemberIds({
         crudClient,
         resolutionTargetIds,
@@ -219,6 +222,9 @@ const collectMemberEntityIds = (parsedScores: ParsedResolutionScore[]): Set<stri
   return allMemberIds;
 };
 
+// ES|QL only tells us which members contributed alerts to a resolved score.
+// This helper expands that to the full resolution group from entity store so
+// silent aliases can still contribute modifiers like watchlists and criticality.
 export const fetchResolutionGroupMemberIds = async ({
   crudClient,
   resolutionTargetIds,
@@ -228,19 +234,14 @@ export const fetchResolutionGroupMemberIds = async ({
   resolutionTargetIds: string[];
   logger: ScopedLogger;
 }): Promise<Set<string>> => {
-  // ES|QL only tells us which members contributed alerts to a resolved score.
-  // This helper expands that to the full resolution group from entity store so
-  // silent aliases can still contribute modifiers like watchlists and criticality.
   const memberIds = new Set<string>();
   if (resolutionTargetIds.length === 0) {
     return memberIds;
   }
 
   try {
-    const fetchPageSize = resolutionTargetIds.length * 10;
-    const maxIterations = Math.max(
-      1,
-      Math.ceil(MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT / Math.max(fetchPageSize, 1))
+    const maxIterations = Math.ceil(
+      MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT / RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE
     );
     let searchAfter: Array<string | number> | undefined;
     let iterations = 0;
@@ -258,7 +259,7 @@ export const fetchResolutionGroupMemberIds = async ({
         filter: {
           terms: { 'entity.relationships.resolution.resolved_to': resolutionTargetIds },
         },
-        size: fetchPageSize,
+        size: RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE,
         searchAfter,
         source: ['entity.id'],
       });

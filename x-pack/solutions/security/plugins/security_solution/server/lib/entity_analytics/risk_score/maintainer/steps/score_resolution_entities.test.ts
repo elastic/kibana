@@ -47,4 +47,31 @@ describe('score_resolution_entities', () => {
     expect(result).toEqual(new Set());
     expect(logger.warn).toHaveBeenCalledTimes(1);
   });
+
+  it('uses a fixed entity-store page size when fetching resolution group members', async () => {
+    const crudClient = {
+      listEntities: jest.fn().mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      }),
+    } as unknown as EntityUpdateClient;
+    const logger = buildLogger();
+
+    await fetchResolutionGroupMemberIds({
+      crudClient,
+      resolutionTargetIds: ['user:target-1', 'user:target-2'],
+      logger,
+    });
+
+    expect(crudClient.listEntities).toHaveBeenCalledWith({
+      filter: {
+        terms: {
+          'entity.relationships.resolution.resolved_to': ['user:target-1', 'user:target-2'],
+        },
+      },
+      size: 1000,
+      searchAfter: undefined,
+      source: ['entity.id'],
+    });
+  });
 });

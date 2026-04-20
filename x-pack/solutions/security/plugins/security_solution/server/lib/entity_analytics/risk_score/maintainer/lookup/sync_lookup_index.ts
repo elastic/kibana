@@ -61,6 +61,8 @@ export const buildLookupSyncOperationsForPage = ({
   }
 
   for (const targetId of resolutionTargetIds) {
+    // Some pages only confirm that a target exists; they may not contain an
+    // alias row that would otherwise create the target's self mapping.
     if (!upsertMap.has(targetId)) {
       upsertMap.set(targetId, {
         entity_id: targetId,
