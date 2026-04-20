@@ -739,7 +739,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/cases/public/client/attachment_framework/types.ts",
-        "lineNumber": 123,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3588,6 +3588,57 @@
     "misc": [
       {
         "parentPluginId": "cases",
+        "id": "def-common.AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiops.change_point_chart\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiops.log_rate_analysis\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 19,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"aiops.pattern_analysis\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.APP_ID",
         "type": "string",
         "tags": [],
@@ -5363,6 +5414,57 @@
         ],
         "path": "x-pack/platform/plugins/shared/cases/common/constants/index.ts",
         "lineNumber": 228,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ML_ANOMALY_CHARTS_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_CHARTS_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml.anomaly_charts\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml.anomaly_swimlane\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
+        "id": "def-common.ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE",
+        "description": [],
+        "signature": [
+          "\"ml.single_metric_viewer\""
+        ],
+        "path": "x-pack/platform/plugins/shared/cases/common/constants/attachments.ts",
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
