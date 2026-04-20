@@ -591,8 +591,7 @@ describe('ApplyThrottlingStep', () => {
 
     await step.execute(buildState({ groups: [group], policies, startedAt }));
 
-    const expectedLookbackMs =
-      7 * 24 * 60 * 60 * 1000 * LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR;
+    const expectedLookbackMs = 7 * 24 * 60 * 60 * 1000 * LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR;
     const expectedSince = new Date(startedAt.getTime() - expectedLookbackMs).toISOString();
 
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
