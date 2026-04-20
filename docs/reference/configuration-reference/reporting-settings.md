@@ -19,10 +19,6 @@ You can configure `xpack.reporting` settings to:
 * [Control how screenshots are captured for PNG/PDF reports](#reporting-capture-settings)
 * [Control the limits and capabilities of CSV reports](#reporting-csv-settings)
 
-:::{note}
-If a setting is applicable to {{ech}} environments, its name is followed by this icon: ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on Elastic Cloud Hosted")
-:::
-
 ## Enable reporting [general-reporting-settings]
 
 :::{settings} /reference/configuration-reference/reporting-settings-enable.yml
