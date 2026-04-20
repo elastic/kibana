@@ -120,7 +120,7 @@ describe('useKubernetesCharts', () => {
 
 describe('useHostKpiCharts', () => {
   it('should return an array of charts with correct order', async () => {
-    const { result } = renderHook(() => useHostKpiCharts({ indexPattern }));
+    const { result } = renderHook(() => useHostKpiCharts({ indexPattern, schema: 'ecs' }));
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     const expectedOrder = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'];
