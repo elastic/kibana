@@ -264,8 +264,7 @@ function configureDatasourceProperties(
 ): void {
   const indexPattern = getIndexPatternFromESQLQuery(query);
 
-  const textBased =
-    panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased;
+  const textBased = panelJSON.embeddableConfig?.attributes?.state?.datasourceStates?.textBased;
   if (textBased?.layers) {
     const layerId = '3a5310ab-2832-41db-bdbe-1b6939dd5651';
     if (textBased.layers[layerId]) {
