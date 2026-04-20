@@ -1735,6 +1735,7 @@
     "@kbn/generate": "link:packages/kbn-generate",
     "@kbn/generate-console-definitions": "link:packages/kbn-generate-console-definitions",
     "@kbn/get-repo-files": "link:src/platform/packages/private/kbn-get-repo-files",
+    "@kbn/heap-snapshot-analyzer-cli": "link:packages/kbn-heap-snapshot-analyzer-cli",
     "@kbn/import-locator": "link:packages/kbn-import-locator",
     "@kbn/import-resolver": "link:src/platform/packages/private/kbn-import-resolver",
     "@kbn/inference-cli": "link:x-pack/platform/packages/shared/kbn-inference-cli",

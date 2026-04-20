@@ -75,8 +75,6 @@ export const useSearchAlertsQuery = ({
     placeholderData: {
       total: -1,
       alerts: [],
-      oldAlertsData: [],
-      ecsAlertsData: [],
     },
   });
 };
