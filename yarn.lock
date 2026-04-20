@@ -7235,6 +7235,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/heap-snapshot-analyzer-cli@link:packages/kbn-heap-snapshot-analyzer-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/hello-world-plugin@link:examples/hello_world":
   version "0.0.0"
   uid ""
