@@ -132,7 +132,8 @@ export const createUpdateDetectionService = ({
         afterKey,
         pageSize,
         syncMarker,
-        allowedEntityIds
+        allowedEntityIds,
+        source.queryRule
       );
       const response = await esClient.search<never, EntitiesAggregation>({
         index: source.indexPattern,

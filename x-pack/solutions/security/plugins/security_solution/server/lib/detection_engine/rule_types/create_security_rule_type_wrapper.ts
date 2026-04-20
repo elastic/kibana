@@ -336,7 +336,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 logger.info(`Failed to send gap detected telemetry event: ${error}`);
               }
             }
-            ruleExecutionLogger.error(gapErrorMessage);
+            ruleExecutionLogger.error(gapErrorMessage, { userError: true });
           }
 
           try {
