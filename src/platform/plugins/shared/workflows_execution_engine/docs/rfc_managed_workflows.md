@@ -501,24 +501,37 @@ Plugin setup()                    workflows_management setup()
                               workflows_management start()
                                       │
                                       ├─ For each registered managed workflow:
-                                      │    ├─ For each space:
-                                      │    │    ├─ Load existing workflow by ID + spaceId
-                                      │    │    ├─ If not found → create (create-if-absent)
-                                      │    │    ├─ If found, hash differs → update (update-if-changed)
-                                      │    │    └─ If found, hash matches → skip
-                                      │    └─ (end spaces loop)
-                                      └─ Register space-creation listener for future spaces
+                                      │    ├─ Load existing workflow by ID (spaceId = '_global')
+                                      │    ├─ If not found → create with spaceId = '_global'
+                                      │    ├─ If found, hash differs → update
+                                      │    └─ If found, hash matches → skip
+                                      │
+                                      └─ Orphan cleanup (see Lifecycle section)
 ```
 
-**Space-creation listener:**
+**Space-agnostic workflows:**
 
-When a new space is created, the provisioning logic runs for all registered managed workflows in that space. This requires hooking into the Spaces plugin's lifecycle. Options:
+Two fundamental approaches exist for managed workflows that should be available across all spaces:
 
-- **Option A: Listen for space creation events** — If the Spaces plugin emits events on create, subscribe to them. This does not currently exist as a public API.
-- **Option B: Lazy provisioning on first access** — When any workflow API is called in a space, check if managed workflows are provisioned. Cache the result per space. This is the pattern Security Insights uses today and avoids the need for a space-creation hook, but has the "missing until first use" problem.
-- **Option C: Periodic reconciliation** — A Task Manager task that periodically scans all spaces and provisions missing workflows. More robust but adds background load.
+**Approach 1: Sentinel space ID (e.g., `_global`)**
 
-**Recommendation:** Option A is the only approach that fully satisfies R11 ("auto-provisioned into newly created spaces"). If a space-creation hook can be added (or already exists internally), it should be the v1 approach. Option B (lazy provisioning) does not meet R11 — workflows would be missing until first API access in the space. If Option A is not feasible for v1, R11 should be downgraded to a "should have" for the first delivery, with Option C (periodic reconciliation) as a follow-up for robustness.
+Store the workflow once with a special `spaceId` (e.g., `_global`) instead of provisioning per space. All query paths change from `spaceId = currentSpace` to `spaceId = currentSpace OR spaceId = '_global'`. No per-space provisioning needed — the workflow exists once and is visible everywhere.
+
+This avoids the new-space problem entirely (no provisioning needed), but raises a hard question: **execution context**. When a `_global` workflow runs, which space's resources does it use? Two sub-options:
+- **Caller provides space at execution time** — The trigger or schedule specifies a space. The workflow definition is global, but each execution is space-scoped. This works for scheduled workflows (the schedule includes a target space) and API-triggered runs (the request carries a space).
+- **Truly spaceless execution** — The workflow only uses space-agnostic resources (cluster-level APIs, external HTTP calls). This limits which steps can be used and is only viable for a narrow set of use cases.
+
+**Approach 2: Provision into every space (current model)**
+
+Each space gets its own copy of the workflow document. Execution context is unambiguous — the workflow runs in the space it belongs to, with access to that space's resources. The startup reconciliation loop handles existing spaces. The challenge is **newly created spaces**.
+
+Today, the Spaces plugin has no public `onSpaceCreated` hook or event system. Space creation goes through `SpacesClient.create()` → saved object write → return. The only post-create logic is hard-coded in the route handler (not an extension point). Options for provisioning into new spaces:
+
+- **Option A: `onSpaceCreated` hook on the Spaces plugin** — Propose a callback registry on `SpacesPluginSetup` (e.g., `spaces.onSpaceCreated(callback)`). The workflows plugin registers a listener at setup; when a space is created, it provisions all managed workflows. This is the only approach that fully satisfies R11 and requires cross-team collaboration with the Spaces team.
+- **Option B: Lazy provisioning on first access** — When any workflow API is called in a space, check if managed workflows are provisioned. Cache the result per space. No dependency on the Spaces plugin, but workflows are missing until first use (does not fully meet R11).
+- **Option C: Periodic reconciliation** — A Task Manager task that periodically scans all spaces and provisions missing workflows. Robust, no Spaces plugin dependency, but adds delay (up to one reconciliation interval) and background load.
+
+**Recommendation:** Approach 1 (sentinel space ID). A single `_global` document eliminates the new-space provisioning problem entirely — no hooks, no lazy checks, no periodic tasks. The execution context question is addressed by the "caller provides space at execution time" sub-option: the workflow definition is stored once, but every execution is space-scoped (the trigger, schedule, or API request carries the target space). This keeps space-scoped resource access (connectors, rules, alerts) well-defined without duplicating the definition across spaces. Approach 2 remains a viable fallback if the sentinel pattern proves problematic with existing query paths.
 
 **What about integrations?**
 
