@@ -152,7 +152,6 @@ const deleteSavedObjectSafe = async (
 
 const adoptLegacyConfigurationSavedObject = async ({
   savedObjectsClient,
-  logger,
   namespace,
   chosenConfiguration,
   allLegacyConfigurations,
@@ -170,10 +169,6 @@ const adoptLegacyConfigurationSavedObject = async ({
   for (const legacy of allLegacyConfigurations) {
     await deleteSavedObjectSafe(savedObjectsClient, legacy.id);
   }
-
-  logger?.info(
-    `Adopted legacy config "${chosenConfiguration.id}" -> deterministic id for namespace "${namespace}"`
-  );
 
   return adoptedConfiguration;
 };
@@ -200,7 +195,6 @@ const getConfigurationSavedObject = async ({
 
   return adoptLegacyConfigurationSavedObject({
     savedObjectsClient,
-    logger,
     namespace,
     chosenConfiguration: chooseLegacyConfigurationSavedObject({
       legacyConfigurations,
