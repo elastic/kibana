@@ -102,6 +102,10 @@ export const OfExpression = ({
   return (
     <EuiPopover
       id="aggFieldPopover"
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.of.popoverAriaLabel',
+        { defaultMessage: 'Of' }
+      )}
       button={
         <EuiExpression
           description={i18n.translate(

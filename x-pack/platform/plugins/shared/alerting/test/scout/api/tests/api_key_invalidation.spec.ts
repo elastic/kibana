@@ -41,11 +41,13 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ apiClient, kbnClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
-      for (const ruleId of ruleIds) {
-        await apiClient.delete(`api/alerting/rule/${ruleId}`, {
-          headers: { ...COMMON_HEADERS, ...cookieHeader },
-        });
-      }
+      await Promise.allSettled(
+        ruleIds.map((ruleId) =>
+          apiClient.delete(`api/alerting/rule/${ruleId}`, {
+            headers: { ...COMMON_HEADERS, ...cookieHeader },
+          })
+        )
+      );
       await kbnClient.savedObjects.clean({ types: ['api_key_pending_invalidation'] });
     });
 
