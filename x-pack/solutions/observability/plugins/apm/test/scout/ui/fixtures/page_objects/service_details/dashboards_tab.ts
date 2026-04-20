@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper, type KibanaUrl, type ScoutPage, type Locator } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -15,35 +15,25 @@ export class DashboardsTab extends ServiceDetailsTab {
   public readonly tab: Locator;
 
   public readonly addServiceDashboardButton: Locator;
+  private readonly dashboardComboBox: EuiComboBoxWrapper;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
     this.tab = this.page.getByTestId(`${this.tabName}Tab`);
     this.addServiceDashboardButton = this.page.getByTestId('apmAddServiceDashboard');
+    this.dashboardComboBox = new EuiComboBoxWrapper(this.page, 'apmSelectServiceDashboard');
   }
 
   protected async waitForTabLoad(): Promise<void> {
-    await this.page.getByTestId('apmUnifiedSearchBar').waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page
+      .getByTestId('apmUnifiedSearchBar')
+      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
   public async linkDashboardByTitle(dashboardTitle: string) {
-    await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
-
-    const modal = this.page.getByTestId('apmSelectServiceDashboard');
-    await modal.waitFor({ timeout: EXTENDED_TIMEOUT });
-
-    const comboBoxInput = modal.getByTestId('comboBoxSearchInput');
-    await comboBoxInput.waitFor();
-    await comboBoxInput.fill(dashboardTitle);
-    await this.page
-      .getByRole('option', { name: dashboardTitle })
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
-    await this.page.getByRole('option', { name: dashboardTitle }).click();
-
-    const selectDashboardButton = this.page.getByTestId('apmSelectDashboardButton');
-    await selectDashboardButton.waitFor();
-    await selectDashboardButton.click();
+    await this.dashboardComboBox.selectSingleOption(dashboardTitle);
+    await this.page.getByTestId('apmSelectDashboardButton').click();
   }
 
   public async unlinkDashboard() {
