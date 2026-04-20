@@ -15,8 +15,11 @@ Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
 
 **Important:**
 
-- Never post the flaky test runner comment more than once on the same PR.
 - Do not run this check on backport PRs.
+- The check may run multiple times as the PR author pushes new commits. What must never happen is a **duplicate** comment — same runner types and same config list as one already posted. Before posting, read the existing flaky-nudge comments on the PR:
+  - If the new changes resolve to a set of `(runner type, config path)` tokens that is a **subset of, or equal to**, what any prior comment already covers → post nothing.
+  - If the new changes add **new tokens** not previously covered (a new config, or a runner type — Scout or FTR — that wasn't covered before), post a new comment that lists **only the newly-added tokens**, and briefly note it's a follow-up covering additions since the previous comment.
+  - Never re-list tokens that a prior comment already covered.
 
 ## Step 1: Are any in-scope files changed?
 
@@ -25,11 +28,37 @@ Decide whether this PR needs a Flaky Test Runner nudge. If not, post nothing.
 
 If nothing matches, stop.
 
-## Step 2: Do the changes affect stability?
+## Step 2: Does the change introduce non-determinism?
 
-**Nudge if:** test logic, assertions, selectors, fixtures, page objects, test config files, hooks, timeouts, waits, API calls, new/updated/unskipped tests.
+The required CI pass already catches deterministic failures. The flaky test runner only adds signal when the *same* change could fail *non-deterministically* — i.e., when a single pass isn't a reliable signal. Ask one question:
 
-**Skip if:** comments only, pure formatting, import reorder, trivial copy changes.
+> *Does this change introduce a new source of non-determinism that one CI pass wouldn't reliably catch?*
+
+If no, skip — regardless of how many test files are touched.
+
+**Nudge (new non-determinism introduced):**
+
+- **New tests** (`test(...)`, `it(...)`, new `describe` blocks) — unknown stability.
+- **Unskipped tests** (`test.skip` → `test`, `.only` removed on a previously-skipped suite) — often skipped originally because they were flaky.
+- **New or changed waits/timing:** `waitFor`, `expect.toPass`, `retry`, polling intervals, `setTimeout`, increased/decreased timeouts, new `await` on async operations whose ordering matters.
+- **New fixtures/hooks with timing components:** index creation, data ingestion waits, server startup, role/space provisioning, `beforeEach`/`afterEach` that mutate shared state.
+- **New async interactions:** new API calls, new ES queries, new network requests, new WebSocket/SSE subscriptions in tests.
+- **Parallelism or ordering changes:** `test.describe.parallel`, worker count, `fullyParallel`, changes to test sharding/grouping in configs.
+- **New selectors tied to dynamic content:** text matchers on i18n strings, selectors depending on animations, virtualized lists, or async-rendered content.
+
+**Skip (deterministic — one pass is sufficient):**
+
+- Renames (identifiers, tool IDs, symbols) applied uniformly across the diff.
+- File moves / directory reorganizations (e.g., for CODEOWNERS), even with mechanical import path updates.
+- Pure assertion *value* changes where the value is deterministic (`expect(x).toBe(1)` → `expect(x).toBe(2)` to match a code change).
+- Snapshot updates.
+- Type-only changes, comments, formatting, import reorders.
+- Mechanical refactors preserving semantics (extracting a helper, splitting a file).
+- Config field renames / ownership tags / metadata that don't affect runtime behavior (tags, descriptions, CODEOWNERS annotations).
+
+### Sanity check before nudging
+
+If you can describe the change as "rename X to Y", "move A to B", or "update expected value from X to Y", and nothing else is going on, **skip**. A 30-run matrix cannot reveal anything a single run wouldn't.
 
 Evaluate Scout and FTR independently. Only nudge the side(s) that qualify.
 
