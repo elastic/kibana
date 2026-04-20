@@ -18,6 +18,7 @@ import {
   EuiPanel,
   EuiButtonEmpty,
   EuiFlyoutFooter,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -123,6 +124,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     setNActions(defaultNActions);
   };
 
+  const flyoutTitleId = useGeneratedHtmlId();
+
   return (
     <>
       <EuiFlyout
@@ -134,13 +137,14 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         }}
         paddingSize="none"
         maxWidth={MAX_FLYOUT_WIDTH}
+        aria-labelledby={flyoutTitleId}
       >
-        <EuiFlyoutHeader aria-labelledby="FleetAgentActivityFlyoutTitle">
+        <EuiFlyoutHeader>
           <EuiPanel borderRadius="none" hasShadow={false} hasBorder={true}>
             <EuiFlexGroup direction="column" gutterSize="m">
               <EuiFlexItem>
                 <EuiTitle size="l">
-                  <h1>
+                  <h1 id={flyoutTitleId}>
                     <FormattedMessage
                       id="xpack.fleet.agentActivityFlyout.title"
                       defaultMessage="Agent activity"
