@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/human-readable-id",
     "@kbn/alerting-plugin",
     "@kbn/features-plugin",
     "@kbn/rule-registry-plugin",

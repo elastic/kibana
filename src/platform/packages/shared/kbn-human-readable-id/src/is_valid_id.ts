@@ -8,7 +8,11 @@
  */
 
 import { isUnsafeId } from './is_unsafe_id';
-import { humanReadableIdSchema } from './human_readable_id_schema';
+import {
+  HUMAN_READABLE_ID_PATTERN,
+  HUMAN_READABLE_ID_MAX_LENGTH,
+  HUMAN_READABLE_ID_MIN_LENGTH,
+} from './constants';
 
 /**
  * Validates that an ID is safe and matches the human-readable slug format.
@@ -16,6 +20,13 @@ import { humanReadableIdSchema } from './human_readable_id_schema';
  *
  * Does NOT check domain-specific reserved prefixes — consumers should compose
  * this with their own reserved-prefix check when needed.
+ *
+ * @param maxLength — Upper bound for the ID length. Defaults to {@link HUMAN_READABLE_ID_MAX_LENGTH} (255).
+ * @param minLength — Lower bound for the ID length. Defaults to {@link HUMAN_READABLE_ID_MIN_LENGTH} (3).
  */
-export const isValidId = (id: string): boolean =>
-  !isUnsafeId(id) && humanReadableIdSchema.safeParse(id).success;
+export const isValidId = (
+  id: string,
+  maxLength = HUMAN_READABLE_ID_MAX_LENGTH,
+  minLength = HUMAN_READABLE_ID_MIN_LENGTH
+): boolean =>
+  !isUnsafeId(id, maxLength) && id.length >= minLength && HUMAN_READABLE_ID_PATTERN.test(id);

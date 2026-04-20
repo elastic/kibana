@@ -14,7 +14,6 @@ export {
   MAX_COLLISION_RETRIES,
 } from './src/constants';
 
-export { humanReadableIdSchema } from './src/human_readable_id_schema';
 export { isUnsafeId } from './src/is_unsafe_id';
 export { isValidId } from './src/is_valid_id';
 export { generateHumanReadableId } from './src/generate_human_readable_id';

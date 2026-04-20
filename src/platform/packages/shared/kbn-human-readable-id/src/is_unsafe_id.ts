@@ -9,10 +9,15 @@
 
 import { UNSAFE_IDS, HUMAN_READABLE_ID_MAX_LENGTH } from './constants';
 
-/** Returns true if the ID is a known prototype-pollution key, empty, too long, or contains path traversal sequences. */
-export const isUnsafeId = (id: string): boolean =>
+/**
+ * Returns true if the ID is a known prototype-pollution key, empty, too long,
+ * or contains path traversal sequences.
+ *
+ * @param maxLength — Upper bound for the ID length. Defaults to {@link HUMAN_READABLE_ID_MAX_LENGTH} (255).
+ */
+export const isUnsafeId = (id: string, maxLength = HUMAN_READABLE_ID_MAX_LENGTH): boolean =>
   UNSAFE_IDS.has(id) ||
   id.length === 0 ||
-  id.length > HUMAN_READABLE_ID_MAX_LENGTH ||
+  id.length > maxLength ||
   id.includes('..') ||
   id.includes('/');

@@ -71,4 +71,14 @@ describe('isValidId', () => {
     expect(isValidId('system-foo')).toBe(true);
     expect(isValidId('internal-bar')).toBe(true);
   });
+
+  it('should respect a custom maxLength', () => {
+    expect(isValidId('a'.repeat(37), 36)).toBe(false);
+    expect(isValidId('a'.repeat(36), 36)).toBe(true);
+  });
+
+  it('should respect a custom minLength', () => {
+    expect(isValidId('ab', 255, 3)).toBe(false);
+    expect(isValidId('ab', 255, 1)).toBe(true);
+  });
 });
