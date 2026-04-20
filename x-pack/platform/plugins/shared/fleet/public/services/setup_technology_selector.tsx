@@ -48,7 +48,7 @@ export const SetupTechnologySelector = ({
   setupTechnology,
   onSetupTechnologyChange,
   isAgentlessDefault = false,
-  showBetaBadge = true,
+  showBetaBadge,
   useDescribedFormGroup = true,
   useCheckableCards = false,
   hideTitle = false,
