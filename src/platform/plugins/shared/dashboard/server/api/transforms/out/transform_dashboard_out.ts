@@ -55,7 +55,11 @@ export function transformDashboardOut(
     isDashboardAppRequest
   );
 
-  const pinnedPanels = transformPinnedPanelsOut(legacyControls, pinned_panels, references ?? []);
+  const { panels: pinnedPanels, warnings: pinnedPanelWarnings } = transformPinnedPanelsOut(
+    legacyControls,
+    pinned_panels,
+    references ?? []
+  );
 
   const timeRange =
     timeRestore && timeFrom && timeTo
@@ -86,6 +90,6 @@ export function transformDashboardOut(
       ...(timeRange && { time_range: timeRange }),
       title: title ?? '',
     },
-    warnings,
+    warnings: [...warnings, ...pinnedPanelWarnings],
   };
 }
