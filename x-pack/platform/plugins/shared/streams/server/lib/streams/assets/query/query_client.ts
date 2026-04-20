@@ -29,7 +29,6 @@ import {
   type QueryLinkRequest,
   type QueryUnlinkRequest,
   type SearchMode,
-  resolveSearchMode,
 } from '../../../../../common/queries';
 import type { EsqlRuleParams } from '../../../sig_events/rules/esql/types';
 
@@ -53,8 +52,8 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { parseError } from '../../errors/parse_error';
 import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
+import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import { computeRuleId } from './helpers/query';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -546,23 +545,11 @@ export class QueryClient {
     filters?: QueryLinkFilters,
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
-    const effectiveMode = resolveSearchMode(searchMode);
-
-    try {
-      return await this.executeFindQueries(effectiveMode, streamNames, query, filters);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !searchMode) {
-        const { message } = parseError(error);
-        this.dependencies.logger.warn(
-          `Query search mode "${effectiveMode}" failed for streams [${streamNames.join(', ')}], falling back to keyword: ${message}`
-        );
-        return await this.executeFindQueries('keyword', streamNames, query, filters);
-      }
-      throw error;
-    }
+    return searchWithKeywordFallback(
+      this.dependencies.logger,
+      { searchMode, label: 'Query', streamNames },
+      (mode) => this.executeFindQueries(mode, streamNames, query, filters)
+    );
   }
 
   private async executeFindQueries(

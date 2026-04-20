@@ -30,9 +30,11 @@ import {
  *
  * `semantic_text` without an explicit `inference_id` uses the cluster's default
  * inference endpoint at write time. Existing indices that already have a mapping
- * with an explicit `inference_id` keep it — ES merges additively on putMapping.
- * The bulk write path retries without the embedding field when inference-related
- * errors are detected (see `bulkWithInferenceFallback`).
+ * with an explicit `inference_id` keep it -- ES merges additively on putMapping,
+ * so the existing inference_id is preserved (verified against ES 8.x behaviour;
+ * confirm on major ES upgrades). The bulk write path retries without the
+ * embedding field when inference-related errors are detected
+ * (see `bulkWithInferenceFallback`).
  */
 export const queryStorageSettings = {
   name: '.kibana_streams_assets',

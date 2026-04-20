@@ -101,6 +101,28 @@ describe('isInferenceRelatedBulkError', () => {
     expect(isInferenceRelatedBulkError(error)).toBe(true);
   });
 
+  it('returns true when inference is mentioned only in the error type', () => {
+    const response: BulkResponse = {
+      errors: true,
+      took: 0,
+      items: [
+        {
+          index: {
+            _index: '.kibana_streams_assets',
+            _id: 'doc-1',
+            status: 500,
+            error: {
+              type: 'inference_exception',
+              reason: 'Unable to find model deployment task [elser-endpoint]',
+            },
+          },
+        },
+      ],
+    };
+    const error = new BulkOperationError('bulk failed', response);
+    expect(isInferenceRelatedBulkError(error)).toBe(true);
+  });
+
   it('returns true when inference is mentioned only in caused_by.reason', () => {
     const response: BulkResponse = {
       errors: true,
@@ -117,6 +139,32 @@ describe('isInferenceRelatedBulkError', () => {
               caused_by: {
                 type: 'exception',
                 reason: 'Error loading inference for inference id [elser-endpoint] on field [x]',
+              },
+            },
+          },
+        },
+      ],
+    };
+    const error = new BulkOperationError('bulk failed', response);
+    expect(isInferenceRelatedBulkError(error)).toBe(true);
+  });
+
+  it('returns true when inference is mentioned only in a nested caused_by.type', () => {
+    const response: BulkResponse = {
+      errors: true,
+      took: 0,
+      items: [
+        {
+          index: {
+            _index: '.kibana_streams_assets',
+            _id: 'doc-1',
+            status: 500,
+            error: {
+              type: 'status_exception',
+              reason: 'Unable to find model deployment task [elser-endpoint]',
+              caused_by: {
+                type: 'inference_exception',
+                reason: 'Endpoint not available',
               },
             },
           },
@@ -251,6 +299,7 @@ describe('bulkWithInferenceFallback', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Bulk write failed due to inference error (1/1 items)')
     );
+    expect(logger.debug).toHaveBeenCalledWith('Bulk write retry without embedding succeeded');
   });
 
   it('propagates the retry error when the second attempt also fails', async () => {
@@ -289,9 +338,13 @@ describe('bulkWithInferenceFallback', () => {
 
   it('does not retry when BulkOperationError has mixed inference and non-inference item failures', async () => {
     const error = new BulkOperationError('mixed errors', mixedErrorResponse());
+    const logger = createLogger();
     const attempt = jest.fn().mockRejectedValueOnce(error);
 
-    await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(error);
+    await expect(bulkWithInferenceFallback(logger, attempt)).rejects.toBe(error);
     expect(attempt).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('mixed errors (1 inference + 1 other out of 2 items)')
+    );
   });
 });

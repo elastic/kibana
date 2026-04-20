@@ -37,9 +37,9 @@ import {
 import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
-import { parseError } from '../errors/parse_error';
 import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
-import { resolveSearchMode, type SearchMode } from '../../../../common/queries';
+import { searchWithKeywordFallback } from '../errors/search_with_keyword_fallback';
+import type { SearchMode } from '../../../../common/queries';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
@@ -329,24 +329,13 @@ export class FeatureClient {
       limit?: number;
     }
   ): Promise<{ hits: Feature[]; total: number }> {
-    const effectiveMode = resolveSearchMode(options?.searchMode);
+    const streamNames = Array.isArray(streams) ? streams : [streams];
 
-    try {
-      return await this.executeFindFeatures(effectiveMode, streams, query, options);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !options?.searchMode) {
-        const streamNames = Array.isArray(streams) ? streams : [streams];
-        const { message } = parseError(error);
-        this.clients.logger.warn(
-          `Feature search mode "${effectiveMode}" failed for streams [${streamNames.join(', ')}], falling back to keyword: ${message}`
-        );
-        return await this.executeFindFeatures('keyword', streams, query, options);
-      }
-      throw error;
-    }
+    return searchWithKeywordFallback(
+      this.clients.logger,
+      { searchMode: options?.searchMode, label: 'Feature', streamNames },
+      (mode) => this.executeFindFeatures(mode, streams, query, options)
+    );
   }
 
   private async executeFindFeatures(
