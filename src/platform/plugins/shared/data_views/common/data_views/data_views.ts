@@ -1158,10 +1158,9 @@ export class DataViewsService {
         } catch {
           // Cache may hold a failed `get()` (saved object load). `create(spec)` must still be able
           // to build an ad hoc data view from `spec` for the same id.
-          this.dataViewCache.delete(specId);
-          const created = await this.createFromSpec(spec, skipFetchFields, displayErrors);
-          this.dataViewCache.set(specId, Promise.resolve(created));
-          return created;
+          const created = this.createFromSpec(spec, skipFetchFields, displayErrors);
+          this.dataViewCache.set(specId, created);
+          return await created;
         }
 
         // refresh fields if they are not fetched yet
