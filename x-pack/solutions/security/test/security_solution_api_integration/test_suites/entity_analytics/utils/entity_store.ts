@@ -290,6 +290,7 @@ export const EntityStoreUtils = (
       dataViewPattern = 'logs-*',
       waitForEntities = true,
       entityTypes = ['user', 'host'],
+      maintainerAutoStart = false,
       ...installBody
     } = body;
     const installRequestBody = { ...installBody, entityTypes };
@@ -349,7 +350,7 @@ export const EntityStoreUtils = (
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
       .set('elastic-api-version', '2')
-      .send({});
+      .send({ autoStart: maintainerAutoStart });
 
     expect([200, 201]).to.contain(maintainersRes.status);
     return res;

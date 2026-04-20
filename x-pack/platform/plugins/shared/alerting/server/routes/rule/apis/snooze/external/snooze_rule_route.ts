@@ -15,6 +15,7 @@ import {
   snoozeBodySchemaV1,
   snoozeParamsSchemaV1,
   snoozeResponseSchemaV1,
+  snoozeRuleParamsExamplesV1,
 } from '../../../../../../common/routes/rule/apis/snooze';
 import type { ILicenseState } from '../../../../../lib';
 import { RuleMutedError } from '../../../../../lib';
@@ -41,6 +42,7 @@ export const snoozeRuleRoute = (
         description:
           'When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.',
         tags: ['oas-tag:alerting'],
+        oasOperationObject: snoozeRuleParamsExamplesV1,
         availability: {
           since: '8.19.0',
           stability: 'stable',

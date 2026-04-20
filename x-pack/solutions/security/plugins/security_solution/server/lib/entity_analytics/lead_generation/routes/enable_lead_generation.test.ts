@@ -46,7 +46,7 @@ describe('enableLeadGenerationRoute', () => {
     const request = requestMock.create({
       method: 'post',
       path: ENABLE_LEAD_GENERATION_URL,
-      body: {},
+      body: { connectorId: 'test-connector-id' },
     });
 
     const response = await server.inject(request, context);
@@ -70,7 +70,7 @@ describe('enableLeadGenerationRoute', () => {
     const request = requestMock.create({
       method: 'post',
       path: ENABLE_LEAD_GENERATION_URL,
-      body: {},
+      body: { connectorId: 'test-connector-id' },
     });
 
     const response = await server.inject(request, context);
