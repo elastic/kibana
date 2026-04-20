@@ -34,6 +34,96 @@ Review the deprecated functionality for Kibana. While deprecations have no immed
 % 4. You can then call the link from any Kibana code. For example: `href: docLinks.links.upgradeAssistant.id`
 % Check https://docs.elastic.dev/docs/kibana-doc-links (internal) for more details about the Doc links service.
 
+## 9.4.0 [kibana-9.4.0-deprecations]
+
+$$$kibana-263996$$$
+::::{dropdown} Threat Hunting Agent removed from Agent Builder
+**Details**<br> The Threat Hunting Agent has been removed from the Security Solution plugin. Security AI capabilities are now delivered through the Agent Builder's Skills system, making this pre-built agent redundant. The Elastic AI Agent with skills is now the default experience for security workflows.
+
+**Impact**<br> Conversations previously stored with the Threat Hunting Agent (`agent_id: security.agent`) will no longer appear in the conversation list and cannot be continued from the UI.
+
+**Action**<br> No migration is required. Security AI workflows now use the Elastic AI Agent with skills. If you need to access historical conversations, contact support for assistance with a targeted Elasticsearch `update_by_query` to reassign affected conversations to the default agent.
+
+View [#263996]({{kib-pull}}263996).
+::::
+
+$$$kibana-263694$$$
+::::{dropdown} Direct AI connector step types deprecated in favor of `ai.prompt`
+**Details**<br> All direct AI connector workflow step types (`inference.*`, `bedrock.*`, `gen-ai.*`, `gemini.*`) are now deprecated. These steps are hidden from autocomplete suggestions and the **Add Action** menu in the workflow editor. Existing workflows using these step types continue to work but display a deprecation warning.
+
+**Impact**<br> New workflows cannot easily discover or add direct AI connector steps. Existing workflows remain functional but show deprecation warnings in the editor.
+
+**Action**<br> Migrate workflows to use the purpose-built `ai.prompt` step instead of direct AI connector steps. The `ai.prompt` step provides a consistent interface for AI operations regardless of the underlying connector type.
+
+View [#263694]({{kib-pull}}263694).
+::::
+
+$$$kibana-262937$$$
+::::{dropdown} Observability Agent removed in favor of Elastic Agent with skills
+**Details**<br> The Observability Agent has been removed from Kibana. Observability AI capabilities are now delivered through the Elastic Agent with the skills system, providing a unified AI experience across solutions.
+
+**Impact**<br> The Observability Agent is no longer available. All observability AI workflows now use the {{agent}} with skills.
+
+**Action**<br> No action required. The migration to {{agent}} with skills is automatic.
+
+View [#262937]({{kib-pull}}262937).
+::::
+
+$$$kibana-261785$$$
+::::{dropdown} Metrics Explorer deprecated in favor of Discover
+**Details**<br> Metrics Explorer is deprecated in 9.4.0 and will be removed in a future version. This tool for ad-hoc metrics exploration is being replaced by the enhanced metrics experience in Discover, where you can explore and analyze your metrics directly alongside other signals.
+
+**Impact**<br> Metrics Explorer remains functional and accessible in the UI for now. However, it will no longer receive new features or updates, and it will be completely removed in a future release.
+
+**Action**<br> Transition your metrics exploration workflows to Discover. Use the query `TS metrics-*` in Discover to get started and see a catalog of your metrics that you can explore and analyze. For more information, refer to [Explore metrics data with Discover](https://www.elastic.co/docs/solutions/observability/infra-and-hosts/discover-metrics).
+
+View [#261785]({{kib-pull}}261785).
+::::
+
+$$$kibana-252183$$$
+::::{dropdown} Deprecated `securitySolution:enableCcsWarning` advanced setting
+**Details**<br> The `securitySolution:enableCcsWarning` advanced setting (labeled **Enable CCS Warning Privileges** in the UI) is deprecated. The rule execution privilege check has been reworked to use the Field Caps API, which can properly verify cross-cluster search privileges. The previous approach incorrectly used an internal user for index pattern queries, leading to confusing warnings for users without access to certain index patterns.
+
+**Impact**<br> The setting no longer affects rule execution behavior. The new approach automatically handles cross-cluster search privilege verification without requiring manual configuration.
+
+**Action**<br> No action required. You can remove any explicit configuration of `securitySolution:enableCcsWarning` from your advanced settings.
+
+View [#252183]({{kib-pull}}252183).
+::::
+
+$$$kibana-249305$$$
+::::{dropdown} Deprecated `--stats` flag on `build_api_docs` CLI
+**Details**<br> The `--stats` flag on the `build_api_docs` CLI is deprecated. A new dedicated `check_package_docs` CLI has been introduced for validating plugin and package API documentation without generating output files.
+
+**Impact**<br> Scripts using `node scripts/build_api_docs --stats` will continue to work but display a deprecation warning. The command automatically routes to the new `check_package_docs` CLI.
+
+**Action**<br> Update your scripts to use the new CLI: `node scripts/check_package_docs --plugin <pluginId>` or `node scripts/check_package_docs --package <packageId>`. The new CLI supports `--check <any|comments|exports|all>` flags for specifying validation checks.
+
+View [#249305]({{kib-pull}}249305).
+::::
+
+$$$kibana-244798$$$
+::::{dropdown} Kibana user removed from root group in serverless images
+**Details**<br> The Kibana user has been removed from the root group (GID 0) in serverless Docker images. The Kibana user (UID 1000) remains in its primary group (GID 1000).
+
+**Impact**<br> Bind-mounted directories that previously relied on root group membership may need updated permissions. OpenShift deployments continue to work correctly because the Docker image sets up files and directories with GID 0 ownership and group write permissions.
+
+**Action**<br> For bind-mounted directories, use GID 1000 instead of GID 0. Verify that any custom volume mounts have appropriate permissions for the Kibana user (UID 1000) or its primary group (GID 1000).
+
+View [#244798]({{kib-pull}}244798).
+::::
+
+$$$kibana-242972$$$
+::::{dropdown} Deprecated `state:storeInSessionStorage` advanced setting
+**Details**<br> The artificial URL length limit has been removed from Kibana, and the `state:storeInSessionStorage` advanced setting is now deprecated. This setting was originally provided as a workaround for URL length limits in older browsers. Modern browsers no longer have these limits, and using this setting can prevent copying and pasting URLs directly between tabs.
+
+**Impact**<br> The `state:storeInSessionStorage` setting will be removed in a future version. Enabling this setting may cause issues with URL sharing in Discover and Dashboards.
+
+**Action**<br> Disable the `state:storeInSessionStorage` setting if it is currently enabled. Go to **Stack Management** > **Advanced Settings** and set `state:storeInSessionStorage` to `false`.
+
+View [#242972]({{kib-pull}}242972).
+::::
+
 ## 9.3.0 [kibana-9.3.0-deprecations]
 
 There are no deprecations in this version.
