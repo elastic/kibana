@@ -79,7 +79,7 @@ Often yes, especially with [parallel test execution](./scout/parallelism.md) and
 
 #### Q: What is selective testing? [scout-faq-selective-testing]
 
-In PR builds, Scout automatically detects which modules changed and runs only the relevant tests, reducing CI time.
+In PR builds, Scout automatically detects which modules changed and runs only the relevant tests, reducing CI time. You can confirm your tests ran by looking for the `affected Scout:` prefix on Buildkite steps. See PR [#261510](https://github.com/elastic/kibana/pull/261510) for details.
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
