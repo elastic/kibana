@@ -3264,9 +3264,9 @@ describe('TaskStore', () => {
     });
 
     test('marks API keys for invalidation when task has uiamApiKey but no apiKey', async () => {
-      const getApiKeyIdsForInvalidation = jest.fn().mockReturnValue([
-        { apiKeyId: 'uiamApiKeyId', uiamApiKey: 'essu_uiam-api-key' },
-      ]);
+      const getApiKeyIdsForInvalidation = jest
+        .fn()
+        .mockReturnValue([{ apiKeyId: 'uiamApiKeyId', uiamApiKey: 'essu_uiam-api-key' }]);
       const markForInvalidation = jest.fn().mockResolvedValue(undefined);
       const spyStrategy = {
         shouldGrantUiam: true,
