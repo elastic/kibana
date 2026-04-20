@@ -162,11 +162,11 @@ export function AnalyticsIdSelector({
       const response = await trainedModelsApiService.getTrainedModels();
       setTrainedModels(response);
     } catch (e) {
-      console.error('Error fetching trained models', e); // eslint-disable-line no-console
+      console.error('Error fetching local models', e); // eslint-disable-line no-console
       displayErrorToast(
         e,
         i18n.translate('xpack.ml.analyticsSelector.trainedModelsFetchErrorMessage', {
-          defaultMessage: 'An error occurred fetching trained models. Refresh and try again.',
+          defaultMessage: 'An error occurred fetching local models. Refresh and try again.',
         })
       );
     }
@@ -267,7 +267,7 @@ export function AnalyticsIdSelector({
           sorting={true}
           selection={selectionValue}
           tableCaption={i18n.translate('xpack.ml.analyticsSelector.modelsTableCaption', {
-            defaultMessage: 'Trained models available for selection',
+            defaultMessage: 'Local models available for selection',
           })}
         />
       ),

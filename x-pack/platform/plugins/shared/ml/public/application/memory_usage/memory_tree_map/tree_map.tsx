@@ -40,7 +40,7 @@ const TYPE_LABELS: Record<string, MlSavedObjectType> = {
     defaultMessage: 'Data frame analytics jobs',
   })]: 'data-frame-analytics',
   [i18n.translate('xpack.ml.memoryUsage.treeMap.modelsLabel', {
-    defaultMessage: 'Trained models',
+    defaultMessage: 'Local models',
   })]: 'trained-model',
 } as const;
 
@@ -192,7 +192,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
               <h2>
                 <FormattedMessage
                   id="xpack.ml.memoryUsage.treeMap.emptyPrompt"
-                  defaultMessage="No open jobs or trained models match the current selection. "
+                  defaultMessage="No open jobs or local models match the current selection. "
                 />
               </h2>
             }

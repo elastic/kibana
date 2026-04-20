@@ -101,7 +101,7 @@ export const SavedObjectsWarning: FC<Props> = ({
         title={
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.title"
-            defaultMessage="ML job and trained model synchronization required"
+            defaultMessage="ML job and local model synchronization required"
           />
         }
         color="warning"
@@ -111,7 +111,7 @@ export const SavedObjectsWarning: FC<Props> = ({
         <>
           <FormattedMessage
             id="xpack.ml.jobsList.missingSavedObjectWarning.description"
-            defaultMessage="Some jobs or trained models are missing or have incomplete saved objects. "
+            defaultMessage="Some jobs or local models are missing or have incomplete saved objects. "
           />
           {canSync ? (
             <FormattedMessage
@@ -122,7 +122,7 @@ export const SavedObjectsWarning: FC<Props> = ({
                   <EuiLink onClick={setShowSyncFlyout.bind(null, true)}>
                     <FormattedMessage
                       id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
-                      defaultMessage="Synchronize your jobs and trained models."
+                      defaultMessage="Synchronize your jobs and local models."
                     />
                   </EuiLink>
                 ),
@@ -131,7 +131,7 @@ export const SavedObjectsWarning: FC<Props> = ({
           ) : (
             <FormattedMessage
               id="xpack.ml.jobsList.missingSavedObjectWarning.noPermission"
-              defaultMessage="An Administrator can synchronize the jobs and trained models in Stack Management."
+              defaultMessage="An Administrator can synchronize the jobs and local models in Stack Management."
             />
           )}
           {showSyncFlyout && <JobSpacesSyncFlyout onClose={onClose} />}

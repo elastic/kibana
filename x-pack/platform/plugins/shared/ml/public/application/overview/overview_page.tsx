@@ -59,7 +59,7 @@ const MEMORY_STATS_LABELS = {
     }
   ),
   'trained-model': i18n.translate('xpack.ml.overview.memoryUsagePanel.trainedModelsLabel', {
-    defaultMessage: 'Trained models',
+    defaultMessage: 'Local models',
   }),
 };
 

@@ -86,7 +86,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
       const { successCount, errorCount } = getResponseCounts(resp);
       if (errorCount > 0) {
         const title = i18n.translate('xpack.ml.management.syncSavedObjectsFlyout.sync.error', {
-          defaultMessage: 'Some jobs or trained models cannot be synchronized.',
+          defaultMessage: 'Some jobs or local models cannot be synchronized.',
         });
         displayErrorToast(resp as any, title);
         return;
@@ -127,7 +127,7 @@ export const JobSpacesSyncFlyout: FC<Props> = ({ onClose }) => {
             <EuiText size="s">
               <FormattedMessage
                 id="xpack.ml.management.syncSavedObjectsFlyout.description"
-                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs or trained models in Elasticsearch."
+                defaultMessage="Synchronize the saved objects if they are out of sync with the machine learning jobs or local models in Elasticsearch."
               />
             </EuiText>
           </EuiCallOut>

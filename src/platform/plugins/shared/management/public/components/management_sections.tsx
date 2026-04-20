@@ -39,7 +39,7 @@ const machineLearningTitle = i18n.translate('management.sections.machineLearning
 });
 
 const machineLearningTip = i18n.translate('management.sections.machineLearningTip', {
-  defaultMessage: 'Manage your Machine Learning jobs and trained models',
+  defaultMessage: 'Manage your Machine Learning jobs and local models',
 });
 
 const sectionTitle = i18n.translate('management.sections.section.title', {

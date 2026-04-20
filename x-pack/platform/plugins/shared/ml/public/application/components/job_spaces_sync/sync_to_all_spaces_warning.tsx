@@ -33,7 +33,7 @@ export const SyncToAllSpacesWarning: FC = () => {
       <EuiText size="s">
         <FormattedMessage
           id="xpack.ml.management.syncSavedObjectsFlyout.allSpacesWarning.description"
-          defaultMessage="Without {readAndWritePrivilegesLink} for all spaces you can only add jobs and trained models to the current space when syncing."
+          defaultMessage="Without {readAndWritePrivilegesLink} for all spaces you can only add jobs and local models to the current space when syncing."
           values={{
             readAndWritePrivilegesLink: (
               <EuiLink href={docLink} target="_blank">

@@ -415,7 +415,7 @@ export class TrainedModelsService {
                 this.displayErrorToast?.(
                   error,
                   i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-                    defaultMessage: 'Error loading trained models',
+                    defaultMessage: 'Error loading local models',
                   })
                 );
                 return of([] as TrainedModelUIItem[]);

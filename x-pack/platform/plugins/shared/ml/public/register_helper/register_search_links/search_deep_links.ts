@@ -110,6 +110,20 @@ function createDeepLinks(
       return null;
     },
 
+    getTrainedModelsDeepLink: (): AppDeepLink<LinkId> | null => {
+      if (!mlCapabilities.isDFAEnabled && !mlCapabilities.isNLPEnabled) return null;
+
+      return {
+        id: 'nodesOverview',
+        title: i18n.translate('xpack.ml.deepLink.trainedModels', {
+          defaultMessage: 'Local Models',
+        }),
+        keywords: ['trained models'],
+        // TODO: Change redirect to management page once #213152 is resolved
+        path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
+      };
+    },
+
     getMemoryUsageDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!isFullLicense) return null;
 

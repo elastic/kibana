@@ -22,7 +22,7 @@ export const MANAGE_INFERENCE_ENDPOINTS_LABEL = i18n.translate(
 export const VIEW_YOUR_MODELS_LINK = i18n.translate(
   'xpack.searchInferenceEndpoints.viewYourModels',
   {
-    defaultMessage: 'ML Trained Models',
+    defaultMessage: 'Local Models',
   }
 );
 

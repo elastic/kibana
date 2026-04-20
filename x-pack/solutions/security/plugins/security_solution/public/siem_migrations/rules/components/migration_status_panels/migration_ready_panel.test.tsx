@@ -27,7 +27,7 @@ const mockMigrationStateWithError: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
   last_execution: {
     error:
-      'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]',
+      'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Local Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]',
   },
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
@@ -145,7 +145,7 @@ describe('MigrationReadyPanel', () => {
         'Migration of 6 rules failed. Please correct the below error and try again.'
       );
       expect(screen.getByTestId('ruleMigrationLastError')).toHaveTextContent(
-        'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]'
+        'Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Local Models. Error: Exception when running inference id [.elser-2-elasticsearch] on field [elser_embedding]'
       );
     });
 

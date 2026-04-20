@@ -147,7 +147,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                   target="_blank"
                 >
                   {i18n.translate('xpack.aiAssistant.welcomeMessage.trainedModelsLinkLabel', {
-                    defaultMessage: 'Trained Models',
+                    defaultMessage: 'Local Models',
                   })}
                 </EuiLink>
               ),

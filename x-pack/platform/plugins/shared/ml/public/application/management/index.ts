@@ -99,7 +99,7 @@ export const MANAGEMENT_SECTIONS: Record<ManagementSectionId, string> = {
   [MANAGEMENT_SECTION_IDS.TRAINED_MODELS]: i18n.translate(
     'xpack.ml.management.trainedModelsTitle',
     {
-      defaultMessage: 'Trained Models',
+      defaultMessage: 'Local Models',
     }
   ),
   [MANAGEMENT_SECTION_IDS.AD_SETTINGS]: i18n.translate('xpack.ml.management.settingsTitle', {

@@ -21,7 +21,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     { label: 'Machine Learning / Data Frame Analytics', expected: false },
     { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: false },
     { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: false },
-    { label: 'Machine Learning / Trained Models', expected: true },
+    { label: 'Machine Learning / Local Models', expected: true },
     { label: 'Machine Learning / Model Management / Nodes', expected: false },
     { label: 'Machine Learning / Settings', expected: false },
     { label: 'Machine Learning / Settings / Calendars', expected: false },

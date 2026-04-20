@@ -48,7 +48,7 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
       },
       trained_models: {
         name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsMemoryUsage', {
-          defaultMessage: 'Trained models',
+          defaultMessage: 'Local models',
         }),
         color: getMemoryItemColor('trained-model'),
       },

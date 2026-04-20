@@ -80,7 +80,7 @@ export function TrainedModelsProvider({ getService }: FtrProviderContext, mlComm
     async assertStats(expectedTotalCount: number) {
       await retry.tryForTime(5 * 1000, async () => {
         const actualStats = await testSubjects.getVisibleText('mlInferenceModelsStatsBar');
-        expect(actualStats).to.eql(`Total trained models: ${expectedTotalCount}`);
+        expect(actualStats).to.eql(`Total local models: ${expectedTotalCount}`);
       });
     },
 

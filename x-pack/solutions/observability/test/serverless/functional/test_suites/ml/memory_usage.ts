@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const availableMLObjectTypes = [
     'Anomaly detection jobs',
     'Data frame analytics jobs',
-    'Trained models',
+    'Local models',
   ];
 
   describe('Memory usage page', function () {

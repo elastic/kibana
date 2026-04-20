@@ -367,17 +367,17 @@ export const OverviewPage: FC = () => {
             <EuiFlexItem>
               <OverviewFooterItem
                 title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
-                  defaultMessage: 'Trained models',
+                  defaultMessage: 'Local models',
                 })}
                 description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
                   defaultMessage:
-                    'Add or manage trained models. See deployment stats or add a new deployment.',
+                    'Add or manage local models. See deployment stats or add a new deployment.',
                 })}
                 docLink={trainedModelsDocLink}
                 callToAction={
                   <EuiLink onClick={navigateToTrainedModels}>
                     {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
-                      defaultMessage: 'Manage trained models',
+                      defaultMessage: 'Manage local models',
                     })}
                   </EuiLink>
                 }

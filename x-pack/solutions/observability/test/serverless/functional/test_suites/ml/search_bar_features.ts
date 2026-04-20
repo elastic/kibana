@@ -19,7 +19,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       { label: 'Machine Learning / Data Frame Analytics Jobs', expected: true },
       { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: true },
       { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: true },
-      { label: 'Machine Learning / Trained Models', expected: true },
+      { label: 'Machine Learning / Local Models', expected: true },
       { label: 'Machine Learning / Memory Usage', expected: true },
       { label: 'Machine Learning / Anomaly Detection Settings', expected: true },
       { label: 'Machine Learning / AIOps', expected: true },

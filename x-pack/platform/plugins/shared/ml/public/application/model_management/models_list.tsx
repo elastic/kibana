@@ -226,7 +226,7 @@ export const ModelsList: FC<Props> = ({
         show: true,
         value: existingModels.length,
         label: i18n.translate('xpack.ml.trainedModels.modelsList.totalAmountLabel', {
-          defaultMessage: 'Total trained models',
+          defaultMessage: 'Total local models',
         }),
       },
     };
@@ -624,7 +624,7 @@ export const ModelsList: FC<Props> = ({
             >
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
-                defaultMessage="Add trained model"
+                defaultMessage="Add local model"
               />
             </EuiButton>
           </EuiFlexItem>
@@ -656,7 +656,7 @@ export const ModelsList: FC<Props> = ({
             sorting={sorting}
             data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
             tableCaption={i18n.translate('xpack.ml.trainedModels.modelsList.modelsTableCaption', {
-              defaultMessage: 'Trained models',
+              defaultMessage: 'Local models',
             })}
             childrenBetween={
               isElserCalloutVisible ? (

@@ -90,7 +90,7 @@ export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline)
                   {i18n.translate(
                     'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDeployed.fixLink',
                     {
-                      defaultMessage: 'Fix issue in Trained Models',
+                      defaultMessage: 'Fix issue in Local Models',
                     }
                   )}
                 </EuiButtonEmpty>

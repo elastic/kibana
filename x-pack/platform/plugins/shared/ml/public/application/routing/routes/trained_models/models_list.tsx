@@ -27,14 +27,14 @@ export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute =>
   id: 'trained_models',
   path: '/',
   title: i18n.translate('xpack.ml.modelManagement.trainedModels.docTitle', {
-    defaultMessage: 'Trained Models',
+    defaultMessage: 'Local Models',
   }),
   render: () => <PageWrapper />,
   breadcrumbs: [
     getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.trainedModelsLabel', {
-        defaultMessage: 'Trained Models',
+        defaultMessage: 'Local Models',
       }),
     },
   ],
@@ -54,7 +54,7 @@ const PageWrapper: FC = () => {
           title={
             <FormattedMessage
               id="xpack.ml.modelManagement.trainedModelsHeader"
-              defaultMessage="Trained Models"
+              defaultMessage="Local Models"
             />
           }
         />

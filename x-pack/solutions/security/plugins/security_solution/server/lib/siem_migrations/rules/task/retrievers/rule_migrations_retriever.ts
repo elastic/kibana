@@ -56,7 +56,7 @@ export class RuleMigrationsRetriever {
       ]);
     } catch (err) {
       throw new Error(
-        `Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Trained Models. ${err}`
+        `Failed to populate ELSER indices. Make sure the ELSER model is deployed and running at Machine Learning > Local Models. ${err}`
       );
     }
   }

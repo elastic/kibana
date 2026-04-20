@@ -118,7 +118,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
         if (models.length > 0) {
           newOptions.push({
             label: i18n.translate('xpack.ml.mlEntitySelector.trainedModelsLabel', {
-              defaultMessage: 'Trained models',
+              defaultMessage: 'Local models',
             }),
             isGroupLabelOption: true,
             options: models.map(({ model_id: modelId }) => ({
