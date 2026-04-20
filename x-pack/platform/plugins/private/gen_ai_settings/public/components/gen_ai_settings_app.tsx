@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import {
   EuiPageSection,
   EuiSpacer,
   EuiSplitPanel,
   EuiDescribedFormGroup,
   EuiFormRow,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiTitle,
   EuiLink,
+  EuiFlexItem,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { AiIcon } from '@kbn/shared-ux-ai-components';
 import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { isEmpty } from 'lodash';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
@@ -30,9 +28,7 @@ import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
-import { useGenAiConnectors } from '../hooks/use_genai_connectors';
 import { useSettingsContext } from '../contexts/settings_context';
-import { DefaultAIConnector } from './default_ai_connector/default_ai_connector';
 import { BottomBarActions } from './bottom_bar_actions/bottom_bar_actions';
 import { AIAssistantVisibility } from './ai_assistant_visibility/ai_assistant_visibility';
 import { ChatExperience } from './chat_experience/chat_experience';
@@ -51,11 +47,9 @@ const isAIChatExperience = (value: unknown): value is AIChatExperience =>
   typeof value === 'string' &&
   (value === AIChatExperience.Classic || value === AIChatExperience.Agent);
 
-const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
-
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  const { application, http, docLinks, productDocBase, analytics } = services;
+  const { application, http, productDocBase, analytics } = services;
   const {
     showSpacesIntegration,
     isPermissionsBased,
@@ -67,11 +61,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const { euiTheme } = useEuiTheme();
   const { fields, unsavedChanges, isSaving, cleanUnsavedChanges, saveAll } = useSettingsContext();
 
-  const isModelSettingsPageEnabled = services.settings?.client?.get<boolean>(
-    MODEL_SETTINGS_FEATURE_FLAG_ID,
-    true
-  );
-
   // Determine current chat experience (including unsaved changes)
   const chatExperienceField = fields[AI_CHAT_EXPERIENCE_TYPE];
   const currentChatExperience =
@@ -82,16 +71,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
   const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
-  const hasConnectorsAllPrivilege =
-    application.capabilities.actions?.show === true &&
-    application.capabilities.actions?.execute === true &&
-    application.capabilities.actions?.delete === true &&
-    application.capabilities.actions?.save === true;
   const canManageSpaces = application.capabilities.management.kibana.spaces;
-  const connectors = useGenAiConnectors();
-  const hasElasticManagedLlm = (connectors.connectors || []).some(
-    (connector) => connector.isPreconfigured
-  );
 
   useEffect(() => {
     const breadcrumbs = [
@@ -124,113 +104,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       openInNewTab: true,
     });
   }, [application, http.basePath, isPermissionsBased]);
-
-  const connectorDescription = useMemo(() => {
-    if (!hasElasticManagedLlm) {
-      return (
-        <p>
-          <FormattedMessage
-            id="genAiSettings.aiConnectorDescription"
-            defaultMessage={`AI-powered features require a large language model (LLM) connection. You can use Elastic Inference Service models ({atAdditionalCost}) or configure a third-party model.
-              When you set a default AI model, it is pre-selected for all of these features in this space.
-              If you haven't set a default, the most recently used model is selected automatically. {manageConnectors}`}
-            values={{
-              manageConnectors: (
-                <EuiLink
-                  href={application.getUrlForApp('management', {
-                    path: 'modelManagement/model_settings',
-                  })}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="genAiSettings.manage.connectors"
-                    defaultMessage={'Manage models'}
-                  />
-                </EuiLink>
-              ),
-              atAdditionalCost: (
-                <EuiLink
-                  href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                  target="_blank"
-                >
-                  <FormattedMessage
-                    id="genAiSettings.additionalCostLink"
-                    defaultMessage="at additional cost"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      );
-    }
-
-    const showSpacesNote = showSpacesIntegration && canManageSpaces && hasConnectorsAllPrivilege;
-
-    return (
-      <p>
-        <FormattedMessage
-          id="genAiSettings.aiConnectorDescriptionWithLink"
-          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {preconfiguredConnectors} ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-            showSpacesNote
-              ? ' Set up your own models or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
-              : ''
-          } {manageConnectors}`}
-          values={{
-            link: (
-              <EuiLink
-                href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="genAiSettings.additionalCostsLink"
-                  defaultMessage="additional costs incur"
-                />
-              </EuiLink>
-            ),
-            manageConnectors: (
-              <EuiLink
-                href={application.getUrlForApp('management', {
-                  path: 'modelManagement/model_settings',
-                })}
-                target="_blank"
-              >
-                <FormattedMessage
-                  id="genAiSettings.manage.connectors"
-                  defaultMessage="Manage models"
-                />
-              </EuiLink>
-            ),
-            preconfiguredConnectors: (
-              <strong>
-                <FormattedMessage
-                  id="genAiSettings.preconfiguredConnectors"
-                  defaultMessage="pre-configured AI connectors"
-                />
-              </strong>
-            ),
-            ...(showSpacesNote && {
-              aiFeatureVisibility: (
-                <strong>
-                  <FormattedMessage
-                    id="genAiSettings.aiFeatureVisibilityText"
-                    defaultMessage="AI feature visibility"
-                  />
-                </strong>
-              ),
-            }),
-          }}
-        />
-      </p>
-    );
-  }, [
-    hasElasticManagedLlm,
-    hasConnectorsAllPrivilege,
-    showSpacesIntegration,
-    canManageSpaces,
-    docLinks,
-    application,
-  ]);
 
   async function handleSave() {
     const savedChatExperience = isAIChatExperience(chatExperienceField?.savedValue)
@@ -316,42 +189,6 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
               </EuiTitle>
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner>
-              {!isModelSettingsPageEnabled && (
-                <>
-                  <EuiDescribedFormGroup
-                    data-test-subj="connectorsSection"
-                    fullWidth
-                    title={
-                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiTitle size="xs">
-                            <h3 data-test-subj="connectorsTitle">
-                              <FormattedMessage
-                                id="genAiSettings.aiConnectorLabel"
-                                defaultMessage="Default AI Connector"
-                              />
-                            </h3>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <AiIcon iconType="sparkles" size="m" aria-hidden={true} />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    }
-                    description={connectorDescription}
-                  >
-                    <EuiFormRow fullWidth>
-                      <EuiFlexGroup gutterSize="m" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <DefaultAIConnector connectors={connectors} />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFormRow>
-                  </EuiDescribedFormGroup>
-                  {showSpacesIntegration && canManageSpaces && <EuiSpacer size="l" />}
-                </>
-              )}
-
               {showSpacesIntegration && canManageSpaces && (
                 <EuiDescribedFormGroup
                   fullWidth
