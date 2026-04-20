@@ -43,6 +43,7 @@ const hostActionsInvalidAgentIdError = async () => {
 
 const hostActionsHandler: ExternalEdrServerEmulatorRouteHandlerMethod<
   {},
+  {},
   CrowdstrikeHostActionsParams
 > = async () => {
   return {
