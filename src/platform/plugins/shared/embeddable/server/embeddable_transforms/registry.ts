@@ -28,11 +28,14 @@ export function getEmbeddableServerRegistry(
       registry[type] = definition;
     },
     getAllEmbeddableSchemas: () => {
-      const schemas: { [key: string]: ObjectType } = {};
+      const schemas: { [key: string]: { schema: ObjectType; title: string } } = {};
       Object.entries(registry).forEach(([type, definition]) => {
         const schema = definition?.getSchema?.(drilldownRegistry.getSchema);
         if (schema) {
-          schemas[type] = schema as ObjectType;
+          schemas[type] = {
+            schema: schema as ObjectType,
+            title: definition.title,
+          };
         }
       });
       return schemas;

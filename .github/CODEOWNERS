@@ -71,6 +71,7 @@ packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
+packages/kbn-heap-snapshot-analyzer-cli @elastic/kibana-core
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
@@ -1729,8 +1730,9 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-presentation-team @elastic/obs-exploration-team
 /x-pack/platform/test/common/utils/server_route_repository @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 
-## Streams parts owned by Logs UX
+## Streams parts owned by Obs Onboarding
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams @elastic/obs-onboarding-team
 
 # Streams parts owned by Kibana Management
 x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
@@ -1741,6 +1743,7 @@ x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-
 x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -1934,7 +1937,6 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
-/x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
