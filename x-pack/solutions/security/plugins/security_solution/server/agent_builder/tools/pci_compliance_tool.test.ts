@@ -100,6 +100,8 @@ describe('pciComplianceTool (consolidated)', () => {
           indices: ['logs-*'],
           timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
           includeEvidence: false,
+          format: 'summary',
+          includeRecommendations: true,
         },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
@@ -123,6 +125,8 @@ describe('pciComplianceTool (consolidated)', () => {
           indices: ['cluster-a:logs-pci-*'],
           timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
           includeEvidence: false,
+          format: 'summary',
+          includeRecommendations: true,
         },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
@@ -141,6 +145,8 @@ describe('pciComplianceTool (consolidated)', () => {
           indices: ['logs-custom-a*'],
           timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
           includeEvidence: false,
+          format: 'summary',
+          includeRecommendations: true,
         },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
@@ -174,6 +180,7 @@ describe('pciComplianceTool (consolidated)', () => {
           timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
           format: 'summary',
           includeRecommendations: true,
+          includeEvidence: false,
         },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
@@ -199,6 +206,7 @@ describe('pciComplianceTool (consolidated)', () => {
           timeRange: { from: '2024-01-01T00:00:00Z', to: '2024-01-08T00:00:00Z' },
           format: 'summary',
           includeRecommendations: true,
+          includeEvidence: false,
         },
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
