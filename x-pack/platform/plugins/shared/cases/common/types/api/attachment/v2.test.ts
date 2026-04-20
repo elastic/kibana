@@ -245,6 +245,24 @@ describe('Unified Attachments', () => {
       });
     });
 
+    it('accepts security.event reference payloads with attachmentId and metadata', () => {
+      const securityEventRequests = [
+        {
+          type: 'security.event',
+          attachmentId: 'doc-id',
+          owner: 'securitySolution',
+          metadata: { index: '.siem-signals-index' },
+        },
+      ];
+
+      const query = BulkCreateAttachmentsRequestRtV2.decode(securityEventRequests);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: securityEventRequests,
+      });
+    });
+
     it('accepts mixed array of v1 and v2 attachment requests', () => {
       const mixedRequests = [
         {

@@ -6,6 +6,7 @@
  */
 
 import {
+  notificationPolicyResponseSchema,
   snoozeNotificationPolicyBodySchema,
   type SnoozeNotificationPolicyBody,
 } from '@kbn/alerting-v2-schemas';
@@ -21,7 +22,7 @@ import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const snoozeNotificationPolicyParamsSchema = z.object({
-  id: z.string(),
+  id: z.string().describe('The notification policy identifier.'),
 });
 
 @injectable()
@@ -42,7 +43,19 @@ export class SnoozeNotificationPolicyRoute extends BaseAlertingRoute {
       params: buildRouteValidationWithZod(snoozeNotificationPolicyParamsSchema),
       body: buildRouteValidationWithZod(snoozeNotificationPolicyBodySchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => notificationPolicyResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates invalid request parameters or body.',
+      },
+      404: {
+        description: 'Indicates a notification policy with the given ID does not exist.',
+      },
+    },
+  };
 
   protected readonly routeName = 'snooze notification policy';
 

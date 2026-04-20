@@ -6,18 +6,19 @@
  */
 
 import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
+import { stripZeroWidthSpaces } from './utils';
 
 /**
  * Walks child nodes of the editor element and serializes to text.
  * Badge spans are converted to `[/label](scheme://metadataValue)`.
- * Text nodes are appended as-is.
+ * Text nodes are appended as-is, with caret-target ZWS characters stripped.
  */
 export const serializeEditorContent = (editorElement: HTMLElement): string => {
   let result = '';
 
   for (const node of Array.from(editorElement.childNodes)) {
     if (node.nodeType === Node.TEXT_NODE) {
-      result += node.textContent ?? '';
+      result += stripZeroWidthSpaces(node.textContent ?? '');
       continue;
     }
     if (node.nodeType !== Node.ELEMENT_NODE) {

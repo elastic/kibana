@@ -104,8 +104,13 @@ Object {
           "$ref": "#/definitions/Condition",
         },
         Object {
-          "additionalProperties": false,
           "properties": Object {
+            "else": Object {
+              "items": Object {
+                "$ref": "#/definitions/StreamlangStep",
+              },
+              "type": "array",
+            },
             "steps": Object {
               "items": Object {
                 "$ref": "#/definitions/StreamlangStep",
@@ -338,11 +343,434 @@ Object {
           "description": "Execute steps if any condition is true",
           "label": "Condition block (OR)",
         },
+        Object {
+          "body": Object {
+            "condition": Object {
+              "else": Array [
+                "\${4}",
+              ],
+              "eq": "\${2:value}",
+              "field": "\${1:field.name}",
+              "steps": Array [
+                "\${3}",
+              ],
+            },
+          },
+          "description": "Conditional step execution with if and else branches",
+          "label": "Condition block with else",
+        },
       ],
       "id": "StreamlangConditionBlock",
       "properties": Object {
         "condition": Object {
-          "$ref": "#/definitions/ConditionWithSteps",
+          "additionalProperties": false,
+          "defaultSnippets": Array [
+            Object {
+              "body": Object {
+                "eq": "\${2:value}",
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field equals a value",
+              "label": "Field equals",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "neq": "\${2:value}",
+              },
+              "description": "Check if field does not equal a value",
+              "label": "Field not equals",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "lt": "\${2:value}",
+              },
+              "description": "Check if field is less than a value",
+              "label": "Field less than",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "lte": "\${2:value}",
+              },
+              "description": "Check if field is less than or equal to a value",
+              "label": "Field less than or equal",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "gt": "\${2:value}",
+              },
+              "description": "Check if field is greater than a value",
+              "label": "Field greater than",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "gte": "\${2:value}",
+              },
+              "description": "Check if field is greater than or equal to a value",
+              "label": "Field greater than or equal",
+            },
+            Object {
+              "body": Object {
+                "contains": "\${2:value}",
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field contains a value",
+              "label": "Field contains",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "startsWith": "\${2:value}",
+              },
+              "description": "Check if field starts with a value",
+              "label": "Field starts with",
+            },
+            Object {
+              "body": Object {
+                "endsWith": "\${2:value}",
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field ends with a value",
+              "label": "Field ends with",
+            },
+            Object {
+              "body": Object {
+                "exists": true,
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field exists",
+              "label": "Field exists",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "range": Object {
+                  "gte": "\${2:minValue}",
+                  "lte": "\${3:maxValue}",
+                },
+              },
+              "description": "Check if field is within a range",
+              "label": "Field range",
+            },
+            Object {
+              "body": Object {
+                "eq": "\${2:value}",
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field equals a value",
+              "label": "Field equals",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "neq": "\${2:value}",
+              },
+              "description": "Check if field does not equal a value",
+              "label": "Field not equals",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "lt": "\${2:value}",
+              },
+              "description": "Check if field is less than a value",
+              "label": "Field less than",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "lte": "\${2:value}",
+              },
+              "description": "Check if field is less than or equal to a value",
+              "label": "Field less than or equal",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "gt": "\${2:value}",
+              },
+              "description": "Check if field is greater than a value",
+              "label": "Field greater than",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "gte": "\${2:value}",
+              },
+              "description": "Check if field is greater than or equal to a value",
+              "label": "Field greater than or equal",
+            },
+            Object {
+              "body": Object {
+                "contains": "\${2:value}",
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field contains a value",
+              "label": "Field contains",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "startsWith": "\${2:value}",
+              },
+              "description": "Check if field starts with a value",
+              "label": "Field starts with",
+            },
+            Object {
+              "body": Object {
+                "endsWith": "\${2:value}",
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field ends with a value",
+              "label": "Field ends with",
+            },
+            Object {
+              "body": Object {
+                "exists": true,
+                "field": "\${1:field.name}",
+              },
+              "description": "Check if field exists",
+              "label": "Field exists",
+            },
+            Object {
+              "body": Object {
+                "field": "\${1:field.name}",
+                "range": Object {
+                  "gte": "\${2:minValue}",
+                  "lte": "\${3:maxValue}",
+                },
+              },
+              "description": "Check if field is within a range",
+              "label": "Field range",
+            },
+            Object {
+              "body": Object {
+                "and": Array [
+                  Object {
+                    "eq": "\${2:value1}",
+                    "field": "\${1:field1.name}",
+                  },
+                  Object {
+                    "eq": "\${4:value2}",
+                    "field": "\${3:field2.name}",
+                  },
+                ],
+              },
+              "description": "Combine conditions with AND logic",
+              "label": "AND condition",
+            },
+            Object {
+              "body": Object {
+                "or": Array [
+                  Object {
+                    "eq": "\${2:value1}",
+                    "field": "\${1:field1.name}",
+                  },
+                  Object {
+                    "eq": "\${4:value2}",
+                    "field": "\${3:field2.name}",
+                  },
+                ],
+              },
+              "description": "Combine conditions with OR logic",
+              "label": "OR condition",
+            },
+            Object {
+              "body": Object {
+                "not": Object {
+                  "eq": "\${2:value}",
+                  "field": "\${1:field.name}",
+                },
+              },
+              "description": "Negate a condition",
+              "label": "NOT condition",
+            },
+          ],
+          "id": "ConditionWithSteps",
+          "properties": Object {
+            "always": Object {
+              "additionalProperties": false,
+              "description": "An empty object. This condition always matches.",
+              "properties": Object {},
+              "type": "object",
+            },
+            "and": Object {
+              "description": "An array of conditions. All sub-conditions must be true for this condition to be true.",
+              "items": Object {
+                "$ref": "#/definitions/Condition",
+              },
+              "type": "array",
+            },
+            "contains": Object {
+              "description": "Contains comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "else": Object {
+              "items": Object {
+                "$ref": "#/definitions/StreamlangStep",
+              },
+              "type": "array",
+            },
+            "endsWith": Object {
+              "description": "Ends-with comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "eq": Object {
+              "description": "Equality comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "exists": Object {
+              "description": "Indicates whether the field exists or not.",
+              "type": "boolean",
+            },
+            "field": Object {
+              "description": "The document field to filter on.",
+              "minLength": 1,
+              "type": "string",
+            },
+            "gt": Object {
+              "description": "Greater-than comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "gte": Object {
+              "description": "Greater-than-or-equal comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "includes": Object {
+              "description": "Checks if multivalue field includes the value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "lt": Object {
+              "description": "Less-than comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "lte": Object {
+              "description": "Less-than-or-equal comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "neq": Object {
+              "description": "Inequality comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "never": Object {
+              "additionalProperties": false,
+              "description": "An empty object. This condition never matches.",
+              "properties": Object {},
+              "type": "object",
+            },
+            "not": Object {
+              "allOf": Array [
+                Object {
+                  "$ref": "#/definitions/Condition",
+                },
+              ],
+              "description": "A condition that negates another condition.",
+            },
+            "or": Object {
+              "description": "An array of conditions. At least one sub-condition must be true for this condition to be true.",
+              "items": Object {
+                "$ref": "#/definitions/Condition",
+              },
+              "type": "array",
+            },
+            "range": Object {
+              "additionalProperties": false,
+              "description": "Range comparison values.",
+              "properties": Object {
+                "gt": Object {
+                  "description": "A value that can be a string, number, or boolean.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
+                },
+                "gte": Object {
+                  "description": "A value that can be a string, number, or boolean.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
+                },
+                "lt": Object {
+                  "description": "A value that can be a string, number, or boolean.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
+                },
+                "lte": Object {
+                  "description": "A value that can be a string, number, or boolean.",
+                  "type": Array [
+                    "string",
+                    "number",
+                    "boolean",
+                  ],
+                },
+              },
+              "type": "object",
+            },
+            "startsWith": Object {
+              "description": "Starts-with comparison value.",
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
+              ],
+            },
+            "steps": Object {
+              "items": Object {
+                "$ref": "#/definitions/StreamlangStep",
+              },
+              "type": "array",
+            },
+          },
+          "required": Array [
+            "steps",
+          ],
+          "type": "object",
         },
         "customIdentifier": Object {
           "type": "string",
@@ -1489,7 +1917,6 @@ Object {
             Object {
               "allOf": Array [
                 Object {
-                  "additionalProperties": false,
                   "properties": Object {
                     "action": Object {
                       "const": "network_direction",
@@ -1542,7 +1969,6 @@ Object {
                 Object {
                   "anyOf": Array [
                     Object {
-                      "additionalProperties": false,
                       "properties": Object {
                         "internal_networks": Object {
                           "items": Object {
@@ -1557,7 +1983,6 @@ Object {
                       "type": "object",
                     },
                     Object {
-                      "additionalProperties": false,
                       "properties": Object {
                         "internal_networks_field": Object {
                           "minLength": 1,
@@ -1572,6 +1997,8 @@ Object {
                   ],
                 },
               ],
+              "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
+              "title": "Network Direction",
             },
             Object {
               "additionalProperties": false,
@@ -1793,6 +2220,7 @@ Object {
                 "sort",
                 "convert",
                 "concat",
+                "network_direction",
                 "json_extract",
                 "enrich",
                 "manual_ingest_pipeline",
@@ -2950,7 +3378,6 @@ Object {
               Object {
                 "allOf": Array [
                   Object {
-                    "additionalProperties": false,
                     "properties": Object {
                       "action": Object {
                         "const": "network_direction",
@@ -3003,7 +3430,6 @@ Object {
                   Object {
                     "anyOf": Array [
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "internal_networks": Object {
                             "items": Object {
@@ -3018,7 +3444,6 @@ Object {
                         "type": "object",
                       },
                       Object {
-                        "additionalProperties": false,
                         "properties": Object {
                           "internal_networks_field": Object {
                             "minLength": 1,
@@ -3033,6 +3458,8 @@ Object {
                     ],
                   },
                 ],
+                "description": "Calculates the network direction given a source IP address, destination IP address, and a list of internal networks.",
+                "title": "Network Direction",
               },
               Object {
                 "additionalProperties": false,
@@ -3254,6 +3681,7 @@ Object {
                   "sort",
                   "convert",
                   "concat",
+                  "network_direction",
                   "json_extract",
                   "enrich",
                   "manual_ingest_pipeline",

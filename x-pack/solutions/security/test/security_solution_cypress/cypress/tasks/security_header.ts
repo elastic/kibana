@@ -27,6 +27,11 @@ export const navigateFromHeaderTo = (page: string, isServerless: boolean = false
   cy.get(page).click();
 };
 
+export const verifyNavigatesFromDashboardLandingTo = (dashboardId: string, URL: string) => {
+  cy.get(`[data-test-subj="LandingImageCard-item-${dashboardId}"]`).click();
+  cy.url().should('include', URL);
+};
+
 export const refreshPage = () => {
   cy.get(REFRESH_BUTTON).click({ force: true });
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');

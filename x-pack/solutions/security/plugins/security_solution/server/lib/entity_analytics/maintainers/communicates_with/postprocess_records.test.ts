@@ -37,7 +37,7 @@ describe('communicates_with postProcessEsqlResults', () => {
     expect(result[0]).toEqual({
       entityId: 'user:alice@acme',
       entityType: 'user',
-      communicates_with: ['service:s3.amazonaws.com'],
+      communicates_with: { ids: ['service:s3.amazonaws.com'] },
     });
   });
 
@@ -54,32 +54,32 @@ describe('communicates_with postProcessEsqlResults', () => {
   it('handles null communicates_with as empty array', () => {
     const values = [['user:bob@acme', null]];
     const result = postProcessEsqlResults(baseColumns, values, 'user');
-    expect(result[0].communicates_with).toEqual([]);
+    expect(result[0].communicates_with).toEqual({ ids: [] });
   });
 
   it('handles scalar string communicates_with as single-element array', () => {
     const values = [['user:alice@acme', 'service:s3.amazonaws.com']];
     const result = postProcessEsqlResults(baseColumns, values, 'user');
-    expect(result[0].communicates_with).toEqual(['service:s3.amazonaws.com']);
+    expect(result[0].communicates_with).toEqual({ ids: ['service:s3.amazonaws.com'] });
   });
 
   it('handles multi-value array in communicates_with', () => {
     const targets = ['service:s3.amazonaws.com', 'service:ec2.amazonaws.com'];
     const values = [['user:alice@acme', targets]];
     const result = postProcessEsqlResults(baseColumns, values, 'user');
-    expect(result[0].communicates_with).toEqual(targets);
+    expect(result[0].communicates_with).toEqual({ ids: targets });
   });
 
   it('filters non-string values out of communicates_with array', () => {
     const values = [['user:alice@acme', ['service:s3', 42, null, 'service:ec2']]];
     const result = postProcessEsqlResults(baseColumns, values, 'user');
-    expect(result[0].communicates_with).toEqual(['service:s3', 'service:ec2']);
+    expect(result[0].communicates_with).toEqual({ ids: ['service:s3', 'service:ec2'] });
   });
 
   it('drops non-string scalar communicates_with value', () => {
     const values = [['user:alice@acme', 99]];
     const result = postProcessEsqlResults(baseColumns, values, 'user');
-    expect(result[0].communicates_with).toEqual([]);
+    expect(result[0].communicates_with).toEqual({ ids: [] });
   });
 
   it('processes multiple rows independently', () => {
@@ -92,6 +92,6 @@ describe('communicates_with postProcessEsqlResults', () => {
     expect(result).toHaveLength(2);
     expect(result[0].entityId).toBe('user:alice@acme');
     expect(result[1].entityId).toBe('user:bob@acme');
-    expect(result[1].communicates_with).toEqual(['service:Microsoft Teams']);
+    expect(result[1].communicates_with).toEqual({ ids: ['service:Microsoft Teams'] });
   });
 });

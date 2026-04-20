@@ -14,13 +14,12 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -125,14 +124,15 @@ export const QueryResultsGrid = ({
           display: (
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiToolTip
+                <EuiIconTip
                   content={i18n.translate(
                     'xpack.alertingV2.ruleForm.queryResultsGrid.groupKeyTooltip',
                     { defaultMessage: 'Group key field' }
                   )}
-                >
-                  <EuiIcon type="key" size="s" color="primary" aria-hidden={true} />
-                </EuiToolTip>
+                  type="key"
+                  size="s"
+                  color="primary"
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{col.displayAsText}</EuiFlexItem>
             </EuiFlexGroup>

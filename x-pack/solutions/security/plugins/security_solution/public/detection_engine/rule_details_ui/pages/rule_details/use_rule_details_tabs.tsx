@@ -14,7 +14,6 @@ import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/us
 import * as i18n from './translations';
 import type { Rule } from '../../../rule_management/logic';
 import type { NavTab } from '../../../../common/components/navigation/types';
-import { useRuleExecutionSettings } from '../../../rule_monitoring';
 
 export enum RuleDetailTabs {
   overview = 'overview',
@@ -22,7 +21,6 @@ export enum RuleDetailTabs {
   exceptions = 'rule_exceptions',
   endpointExceptions = 'endpoint_exceptions',
   executionResults = 'execution_results',
-  executionEvents = 'execution_events',
 }
 
 export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
@@ -31,7 +29,6 @@ export const RULE_DETAILS_TAB_NAME: Record<string, string> = {
   [RuleDetailTabs.exceptions]: i18n.EXCEPTIONS_TAB,
   [RuleDetailTabs.endpointExceptions]: i18n.ENDPOINT_EXCEPTIONS_TAB,
   [RuleDetailTabs.executionResults]: i18n.EXECUTION_RESULTS_TAB,
-  [RuleDetailTabs.executionEvents]: i18n.EXECUTION_EVENTS_TAB,
 };
 
 export interface UseRuleDetailsTabsProps {
@@ -83,18 +80,11 @@ export const useRuleDetailsTabs = ({
         disabled: !isExistingRule,
         href: `/rules/id/${ruleId}/${RuleDetailTabs.executionResults}`,
       },
-      [RuleDetailTabs.executionEvents]: {
-        id: RuleDetailTabs.executionEvents,
-        name: RULE_DETAILS_TAB_NAME[RuleDetailTabs.executionEvents],
-        disabled: !isExistingRule,
-        href: `/rules/id/${ruleId}/${RuleDetailTabs.executionEvents}`,
-      },
     }),
     [isExistingRule, rule, ruleId]
   );
 
   const [pageTabs, setTabs] = useState<Partial<Record<RuleDetailTabs, NavTab>>>(ruleDetailTabs);
-  const ruleExecutionSettings = useRuleExecutionSettings();
 
   const canReadEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
   const canReadExceptions = useUserPrivileges().rulesPrivileges.exceptions.read;
@@ -104,9 +94,6 @@ export const useRuleDetailsTabs = ({
 
     if (!canReadAlerts) {
       hiddenTabs.push(RuleDetailTabs.alerts);
-    }
-    if (!ruleExecutionSettings.extendedLogging.isEnabled) {
-      hiddenTabs.push(RuleDetailTabs.executionEvents);
     }
     if (isEndpointExceptionsMovedFFEnabled || !canReadEndpointExceptions) {
       hiddenTabs.push(RuleDetailTabs.endpointExceptions);
@@ -133,7 +120,6 @@ export const useRuleDetailsTabs = ({
     isEndpointExceptionsMovedFFEnabled,
     rule,
     ruleDetailTabs,
-    ruleExecutionSettings,
   ]);
 
   return pageTabs;

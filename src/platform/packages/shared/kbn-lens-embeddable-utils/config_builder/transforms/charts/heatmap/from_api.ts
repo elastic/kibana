@@ -24,7 +24,7 @@ import { DEFAULT_LAYER_ID } from '../../../constants';
 import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
 import type { HeatmapState } from '../../../schema';
-import { fromColorByValueAPIToLensState } from '../../coloring';
+import { fromColorByValueAPIToLensState, isAutoColor } from '../../coloring';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -48,8 +48,11 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
 function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
-  const basePalette = layer.metric.color && fromColorByValueAPIToLensState(layer.metric.color);
-  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axes?.x?.labels?.orientation);
+  const basePalette =
+    layer.metric.color && !isAutoColor(layer.metric.color)
+      ? fromColorByValueAPIToLensState(layer.metric.color)
+      : undefined;
+  const xAxisLabelRotation = axisLabelOrientationCompat.toState(layer.axis?.x?.labels?.orientation);
 
   return {
     layerId: DEFAULT_LAYER_ID,
@@ -60,17 +63,17 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     ...(layer.y ? { yAccessor: getAccessorName('y') } : {}),
     gridConfig: {
       type: HEATMAP_GRID_NAME,
-      isCellLabelVisible: layer.cells?.labels?.visible ?? false,
-      isXAxisLabelVisible: layer.axes?.x?.labels?.visible ?? true,
-      isXAxisTitleVisible: layer.axes?.x?.title?.visible ?? false,
-      isYAxisLabelVisible: layer.axes?.y?.labels?.visible ?? true,
-      isYAxisTitleVisible: layer.axes?.y?.title?.visible ?? false,
+      isCellLabelVisible: layer.styling?.cells?.labels?.visible ?? false,
+      isXAxisLabelVisible: layer.axis?.x?.labels?.visible ?? true,
+      isXAxisTitleVisible: layer.axis?.x?.title?.visible ?? false,
+      isYAxisLabelVisible: layer.axis?.y?.labels?.visible ?? true,
+      isYAxisTitleVisible: layer.axis?.y?.title?.visible ?? false,
       ...stripUndefined<HeatmapGridConfigResult>({
-        xTitle: layer.axes?.x?.title?.text,
-        yTitle: layer.axes?.y?.title?.text,
+        xTitle: layer.axis?.x?.title?.text,
+        yTitle: layer.axis?.y?.title?.text,
         xAxisLabelRotation,
-        xSortPredicate: layer.axes?.x?.sort,
-        ySortPredicate: layer.axes?.y?.sort,
+        xSortPredicate: layer.axis?.x?.sort,
+        ySortPredicate: layer.axis?.y?.sort,
       }),
     },
     legend: {

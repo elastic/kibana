@@ -30,23 +30,36 @@ import {
 import { RuleBasedSourceInput } from './rule_based_source_input';
 import { WatchlistCsvUpload } from './csv_upload';
 import { ManagedWatchlistSourceInput } from './managed_watchlist_source_input';
+import { MAX_WATCHLIST_DESCRIPTION_LENGTH, MAX_WATCHLIST_NAME_LENGTH } from './constants';
 
 export interface WatchlistFormProps {
   watchlist: CreateWatchlistRequestBodyInput;
   watchlistId?: string;
   isEditMode: boolean;
-  isNameInvalid: boolean;
+  isNameTooLong: boolean;
+  isDescriptionTooLong: boolean;
   onFieldChange: <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
 }
 
+const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
+  isTooLong
+    ? [
+        i18n.translate(fieldId, {
+          defaultMessage: 'Must be {maxLength} characters or fewer',
+          values: { maxLength },
+        }),
+      ]
+    : undefined;
+
 export const WatchlistForm = ({
   watchlist,
   watchlistId,
   isEditMode,
-  isNameInvalid,
+  isNameTooLong,
+  isDescriptionTooLong,
   onFieldChange,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
@@ -57,31 +70,29 @@ export const WatchlistForm = ({
     <EuiForm component="form" fullWidth>
       <EuiFormRow
         label={WATCHLIST_NAME_LABEL}
-        isInvalid={isNameInvalid}
-        error={
-          isNameInvalid
-            ? [
-                i18n.translate(
-                  'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid',
-                  {
-                    defaultMessage:
-                      'Use lowercase letters, numbers, ".", "_" or "-" and start with a letter or number.',
-                  }
-                ),
-              ]
-            : undefined
-        }
+        isInvalid={isNameTooLong}
+        error={getTooLongError(
+          isNameTooLong,
+          MAX_WATCHLIST_NAME_LENGTH,
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.nameInvalid'
+        )}
       >
         <EuiFieldText
+          isInvalid={isNameTooLong}
           name="WatchlistName"
           value={watchlist.name}
           onChange={(e) => onFieldChange('name', e.target.value)}
-          isInvalid={isNameInvalid}
           disabled={isNameDisabled}
         />
       </EuiFormRow>
       <EuiFormRow
         label={WATCHLIST_DESCRIPTION_LABEL}
+        isInvalid={isDescriptionTooLong}
+        error={getTooLongError(
+          isDescriptionTooLong,
+          MAX_WATCHLIST_DESCRIPTION_LENGTH,
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.descriptionInvalid'
+        )}
         labelAppend={
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -92,6 +103,7 @@ export const WatchlistForm = ({
         }
       >
         <EuiFieldText
+          isInvalid={isDescriptionTooLong}
           name="WatchlistDescription"
           value={watchlist.description}
           onChange={(e) => onFieldChange('description', e.target.value)}

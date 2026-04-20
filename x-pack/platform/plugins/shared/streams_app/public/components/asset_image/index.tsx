@@ -113,6 +113,13 @@ const imageSets = {
       defaultMessage: 'Empty state illustration for the Knowledge Indicators view',
     }),
   },
+  queryStreamsEmptyState: {
+    light: () => import('./query_streams_empty_state_light.svg'),
+    dark: () => import('./query_streams_empty_state_dark.svg'),
+    alt: i18n.translate('xpack.streams.queryStreams.emptyStateImage', {
+      defaultMessage: 'Empty state illustration for query streams',
+    }),
+  },
   significantEventsDiscovery: {
     light: () => import('./significant_events_discovery_light.svg'),
     dark: () => import('./significant_events_discovery_dark.svg'),

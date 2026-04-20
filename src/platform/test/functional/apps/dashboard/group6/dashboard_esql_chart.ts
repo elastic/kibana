@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const log = getService('log');
 
-  // Failing: See https://github.com/elastic/kibana/issues/258164
-  describe.skip('dashboard add ES|QL chart', function () {
+  describe('dashboard add ES|QL chart', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -35,7 +34,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await dashboard.navigateToApp();
-      await testSubjects.click('discard-unsaved-New-Dashboard');
+      if (await testSubjects.exists('discard-unsaved-New-Dashboard')) {
+        await testSubjects.click('discard-unsaved-New-Dashboard');
+      }
     });
 
     it('should add an ES|QL datatable chart when the ES|QL panel action is clicked', async () => {
@@ -43,6 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await dashboard.switchToEditMode();
+      await header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.openAddPanelFlyout();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
@@ -104,10 +106,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('cancelFlyoutButton');
       const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      const panelsAfterDelete = await dashboard.getDashboardPanels();
+      expect(panelsAfterDelete.length).to.eql(0);
     });
 
     it('should be able to edit the query and render another chart', async () => {
       await dashboardAddPanel.openAddPanelFlyout();
+      log.debug('After openAddPanelFlyout');
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboardAddPanel.expectAddPanelFlyoutClosed();
       await dashboard.waitForRenderComplete();

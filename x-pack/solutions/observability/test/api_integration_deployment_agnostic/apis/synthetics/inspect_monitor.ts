@@ -13,7 +13,10 @@ import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('inspectSyntheticsMonitor', function () {
@@ -35,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await kibanaServer.savedObjects.clean({ types: ['synthetics-param'] });
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       adminUser = await samlAuth.createM2mApiKeyWithRoleScope('admin');
@@ -115,6 +118,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       ipv6: true,
                       fields: {
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 300,
                       },
                       fields_under_root: true,
                       spaces: ['default'],
@@ -184,6 +188,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                       original_space: 'default',
                       fields: {
                         meta: { space_id: ['default'] },
+                        'monitor.interval': 600,
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                         'monitor.project.id': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                       },
@@ -276,6 +281,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               fields: {
                 meta: { space_id: 'default' },
                 'monitor.fleet_managed': true,
+                'monitor.interval': 300,
               },
             },
           },

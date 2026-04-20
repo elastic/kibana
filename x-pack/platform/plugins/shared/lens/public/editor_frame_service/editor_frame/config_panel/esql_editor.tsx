@@ -22,6 +22,7 @@ import React from 'react';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
+import { useESQLEditorContext } from './esql_editor_context';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 import {
   onActiveDataChange,
@@ -302,6 +303,7 @@ function InnerESQLEditor({
   queryStats,
 }: InnerEditorProps) {
   const { euiTheme } = useEuiTheme();
+  const esqlEditorContext = useESQLEditorContext();
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
@@ -346,6 +348,16 @@ function InnerESQLEditor({
           }}
           esqlVariables={esqlVariables}
           queryStats={queryStats}
+          initialState={
+            esqlEditorContext?.editorHeightRef.current !== undefined
+              ? { editorHeight: esqlEditorContext.editorHeightRef.current }
+              : undefined
+          }
+          onInitialStateChange={(state) => {
+            if (state.editorHeight !== undefined && esqlEditorContext) {
+              esqlEditorContext.editorHeightRef.current = state.editorHeight;
+            }
+          }}
         />
       </div>
     </EuiFlexItem>

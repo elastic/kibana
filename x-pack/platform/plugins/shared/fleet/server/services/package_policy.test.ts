@@ -161,6 +161,19 @@ hosts:
 timeout: 30s
 `),
   ],
+  // Integration stream template using data_stream.dataset (package-spec dataset var parity)
+  [
+    '/dsvarpkg-1.0.0/data_stream/customds/agent/stream/stream_ds.yml',
+    Buffer.from(`
+type: log
+data_stream:
+  dataset: {{data_stream.dataset}}
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+`),
+  ],
 ]) as PackagePolicyAssetsMap;
 
 async function mockedGetInstallation(params: any) {
@@ -1981,6 +1994,42 @@ describe('Package policy service', () => {
   });
 
   describe('list', () => {
+    it('should use NOT latest_revision:false filter to include 8.x policies without the field', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        page: 1,
+        per_page: 20,
+        saved_objects: [],
+      });
+
+      await packagePolicyService.list(soClient, {});
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
+        })
+      );
+    });
+
+    it('should combine user kuery with NOT latest_revision:false filter', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        page: 1,
+        per_page: 20,
+        saved_objects: [],
+      });
+
+      await packagePolicyService.list(soClient, { kuery: 'ingest-package-policies.name: nginx' });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (ingest-package-policies.attributes.name: nginx)`,
+        })
+      );
+    });
+
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       soClient.find.mockResolvedValueOnce({
@@ -2092,6 +2141,114 @@ describe('Package policy service', () => {
           ],
         },
       ]);
+    });
+
+    it('should compile integration stream data_stream.dataset from package stream var default value', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-ds-default',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': {
+                    value: 'dsvarpkg.customds',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'dsvarpkg.customds' },
+        paths: ['/var/log/app.log'],
+      });
+    });
+
+    it('should compile integration stream with overridden data_stream.dataset stream var', async () => {
+      const pkgInfo = {
+        name: 'dsvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'dsvarpkg.customds',
+            path: 'customds',
+            streams: [
+              {
+                input: 'log',
+                template_path: 'stream_ds.yml',
+              },
+            ],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const inputs = await _compilePackagePolicyInputs(
+        pkgInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'stream-ds-override',
+                data_stream: { dataset: 'dsvarpkg.customds', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: { value: ['/var/log/app.log'], type: 'text' },
+                  'data_stream.dataset': {
+                    value: 'other.integration_dataset',
+                    type: 'text',
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        type: 'log',
+        data_stream: { dataset: 'other.integration_dataset' },
+        paths: ['/var/log/app.log'],
+      });
     });
 
     it('should work with a two level dataset name', async () => {
@@ -9875,6 +10032,280 @@ describe('Package policy service', () => {
       });
     });
 
+    describe('when inputs have name for disambiguation', () => {
+      it('matches the correct original input by name during upgrade when multiple inputs share the same type', () => {
+        const basePolicy: NewPackagePolicy = {
+          name: 'nginx-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              name: 'filelog_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {
+                log_path: { type: 'text', value: '/var/log/nginx/access.log' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'nginx.access', type: 'logs' },
+                },
+              ],
+            },
+            {
+              type: 'otelcol',
+              name: 'nginx_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {
+                endpoint: { type: 'text', value: 'http://localhost:8080/stub_status' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'nginx.stubstatus', type: 'metrics' },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfoV2: PackageInfo = {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          description: 'Nginx integration',
+          type: 'integration',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx',
+              description: 'Nginx',
+              data_streams: ['access', 'stubstatus'],
+              inputs: [
+                {
+                  name: 'filelog_otel',
+                  type: 'otelcol',
+                  title: 'Logs via filelog',
+                  description: 'Logs',
+                  vars: [{ name: 'log_path', type: 'text' }],
+                },
+                {
+                  name: 'nginx_otel',
+                  type: 'otelcol',
+                  title: 'Metrics',
+                  description: 'Metrics',
+                  vars: [
+                    { name: 'endpoint', type: 'text' },
+                    { name: 'timeout', type: 'text' },
+                  ],
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'nginx.access',
+              title: 'Access logs',
+              path: 'access',
+              release: 'ga',
+              package: 'nginx',
+              streams: [{ input: 'filelog_otel', title: 'Access logs', vars: [] }],
+            },
+            {
+              type: 'metrics',
+              dataset: 'nginx.stubstatus',
+              title: 'Stub status',
+              path: 'stubstatus',
+              release: 'ga',
+              package: 'nginx',
+              streams: [{ input: 'nginx_otel', title: 'Stub status', vars: [] }],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = packageToPackagePolicyInputs(
+          packageInfoV2
+        ) as InputsOverride[];
+
+        const result = updatePackageInputs(basePolicy, packageInfoV2, inputsOverride, false);
+
+        const filelogInput = result.inputs.find((i) => i.name === 'filelog_otel');
+        const nginxInput = result.inputs.find((i) => i.name === 'nginx_otel');
+
+        expect(filelogInput).toBeDefined();
+        expect(nginxInput).toBeDefined();
+
+        // User-configured var should be preserved on the correct input
+        expect(filelogInput?.vars?.log_path?.value).toBe('/var/log/nginx/access.log');
+        expect(nginxInput?.vars?.endpoint?.value).toBe('http://localhost:8080/stub_status');
+
+        // New var added in v2 should get default value
+        expect(nginxInput?.vars?.timeout).toBeDefined();
+      });
+
+      it('uses name to determine which inputs still exist in the new package version', () => {
+        const basePolicy: NewPackagePolicy = {
+          name: 'nginx-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              name: 'filelog_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {},
+              streams: [],
+            },
+            {
+              type: 'otelcol',
+              name: 'nginx_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {},
+              streams: [],
+            },
+          ],
+        };
+
+        // New package version removes the nginx_otel input
+        const packageInfoV2: PackageInfo = {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          description: 'Nginx integration',
+          type: 'integration',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx',
+              description: 'Nginx',
+              inputs: [
+                {
+                  name: 'filelog_otel',
+                  type: 'otelcol',
+                  title: 'Logs',
+                  description: 'Logs',
+                },
+              ],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = packageToPackagePolicyInputs(
+          packageInfoV2
+        ) as InputsOverride[];
+
+        const result = updatePackageInputs(basePolicy, packageInfoV2, inputsOverride, false);
+
+        // Only the filelog_otel input should remain
+        const otelInputs = result.inputs.filter((i) => i.type === 'otelcol');
+        expect(otelInputs).toHaveLength(1);
+        expect(otelInputs[0].name).toBe('filelog_otel');
+      });
+
+      it('supports migrate_from referencing an name', () => {
+        const basePolicy: NewPackagePolicy = {
+          name: 'nginx-policy',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          policy_ids: ['xxxx'],
+          package: { name: 'nginx', title: 'Nginx', version: '1.0.0' },
+          inputs: [
+            {
+              type: 'otelcol',
+              name: 'filelog_otel',
+              policy_template: 'nginx',
+              enabled: true,
+              vars: {
+                log_path: { type: 'text', value: '/var/log/nginx/access.log' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'nginx.access', type: 'logs' },
+                },
+              ],
+            },
+          ],
+        };
+
+        // New package replaces filelog_otel with filelog_otel_v2
+        const packageInfoV2: PackageInfo = {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '2.0.0',
+          latestVersion: '2.0.0',
+          description: 'Nginx integration',
+          type: 'integration',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx',
+              description: 'Nginx',
+              data_streams: ['access'],
+              inputs: [
+                {
+                  name: 'filelog_otel_v2',
+                  type: 'otelcol',
+                  title: 'Logs v2',
+                  description: 'Logs v2',
+                  migrate_from: 'filelog_otel',
+                  vars: [{ name: 'log_path', type: 'text' }],
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'nginx.access',
+              title: 'Access logs',
+              path: 'access',
+              release: 'ga',
+              package: 'nginx',
+              streams: [{ input: 'filelog_otel_v2', title: 'Access logs', vars: [] }],
+            },
+          ],
+        } as unknown as PackageInfo;
+
+        const inputsOverride: InputsOverride[] = packageToPackagePolicyInputs(
+          packageInfoV2
+        ) as InputsOverride[];
+
+        const result = updatePackageInputs(basePolicy, packageInfoV2, inputsOverride, false);
+
+        const v2Input = result.inputs.find((i) => i.name === 'filelog_otel_v2');
+        expect(v2Input).toBeDefined();
+        // Var should be migrated from the old filelog_otel input
+        expect(v2Input?.vars?.log_path?.value).toBe('/var/log/nginx/access.log');
+        // Old input should be removed
+        expect(result.inputs.find((i) => i.name === 'filelog_otel')).toBeUndefined();
+      });
+    });
+
     describe('when re-upgrading to a package version that removes deprecated/migrate_from', () => {
       it('clears deprecated and migrate_from on an existing input when new package no longer declares them', () => {
         const basePackagePolicy: NewPackagePolicy = {
@@ -10307,7 +10738,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -10327,7 +10758,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (one=two)`,
         })
       );
     });
@@ -10381,7 +10812,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -10399,7 +10830,7 @@ describe('Package policy service', () => {
           sortField: 'created_at',
           sortOrder: 'asc',
           fields: [],
-          filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`,
+          filter: `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false`,
         })
       );
     });
@@ -10420,7 +10851,7 @@ describe('Package policy service', () => {
           perPage: 12,
           sortField: 'updated_by',
           sortOrder: 'desc',
-          filter: `${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true AND (one=two)`,
+          filter: `NOT ${LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:false AND (one=two)`,
         })
       );
     });
@@ -11780,6 +12211,29 @@ describe('getCompiledVersionsForAgentPolicy()', () => {
 
     expect(result).toEqual([]);
     expect(soClient.find).not.toHaveBeenCalled();
+  });
+
+  it('uses NOT latest_revision:false filter so 8.x policies are included', async () => {
+    const soClient = savedObjectsClientMock.create();
+    soClient.find.mockResolvedValue({
+      saved_objects: [],
+      total: 0,
+      per_page: 10000,
+      page: 1,
+    });
+
+    await getCompiledVersionsForAgentPolicy(soClient, 'agent-policy-1');
+
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.stringContaining('NOT'),
+      })
+    );
+    expect(soClient.find).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filter: expect.not.stringContaining('latest_revision:true'),
+      })
+    );
   });
 
   it('returns empty array when no package policies have inputs_for_versions', async () => {

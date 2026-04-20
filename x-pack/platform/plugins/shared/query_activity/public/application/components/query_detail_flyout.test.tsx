@@ -48,6 +48,7 @@ describe('QueryDetailFlyout', () => {
 
     mockUseQueryActivityAppContext.mockReturnValue({
       chrome: {} as any,
+      dataViews: { get: jest.fn().mockResolvedValue({}) } as any,
       http: { basePath: { prepend: jest.fn((path: string) => path) } } as any,
       notifications: {} as any,
       apiService: {} as any,

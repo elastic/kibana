@@ -63,6 +63,7 @@ export const inferenceEndpointAdapter = {
       logger,
       abortSignal,
       timeout,
+      metadata,
     } = options;
 
     const useSimulatedFunctionCalling = functionCalling === 'simulated';
@@ -81,6 +82,7 @@ export const inferenceEndpointAdapter = {
       executor.invoke({
         body: request as unknown as Record<string, unknown>,
         signal: abortSignal,
+        metadata,
         timeout,
       })
     ).pipe(

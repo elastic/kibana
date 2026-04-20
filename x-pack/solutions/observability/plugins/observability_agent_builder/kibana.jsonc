@@ -19,9 +19,10 @@
       "metricsDataAccess",
       "inference",
       "discoverShared",
-      "licensing"
+      "licensing",
+      "searchInferenceEndpoints"
     ],
-    "optionalPlugins": ["ml", "spaces", "searchInferenceEndpoints"],
+    "optionalPlugins": ["ml", "spaces"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }

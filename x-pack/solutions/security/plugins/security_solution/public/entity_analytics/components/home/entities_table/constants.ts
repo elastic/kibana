@@ -17,7 +17,6 @@ export {
 
 export const MAX_ENTITIES_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
-export const DEFAULT_TABLE_SECTION_HEIGHT = 512;
 
 export const QUERY_KEY_GRID_DATA = 'entity_analytics_grid_data';
 export const QUERY_KEY_GROUPING_DATA = 'entity-analytics-grouping-data';

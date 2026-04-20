@@ -88,9 +88,11 @@ describe('Gauge Schema', () => {
             value: 80,
           },
         },
-        shape: {
-          type: 'bullet',
-          orientation: 'vertical',
+        styling: {
+          shape: {
+            type: 'bullet',
+            orientation: 'vertical',
+          },
         },
       } satisfies GaugeInput;
 
@@ -107,8 +109,10 @@ describe('Gauge Schema', () => {
         field: 'cpu_usage',
         ticks: { mode: 'auto' as const },
       },
-      shape: {
-        type: 'circle',
+      styling: {
+        shape: {
+          type: 'circle',
+        },
       },
     } satisfies GaugeInput;
 
@@ -124,14 +128,16 @@ describe('Gauge Schema', () => {
         field: 'test_field',
         empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
       },
-      shape: {
-        type: 'bullet',
-        orientation: 'horizontal',
+      styling: {
+        shape: {
+          type: 'bullet',
+          orientation: 'horizontal',
+        },
       },
     } satisfies GaugeInput;
 
     const validated = gaugeStateSchema.validate(input);
-    expect(validated.shape).toEqual({
+    expect(validated.styling?.shape).toEqual({
       type: 'bullet',
       orientation: 'horizontal',
     });
@@ -186,9 +192,11 @@ describe('Gauge Schema', () => {
           column: 'goal',
         },
       },
-      shape: {
-        type: 'bullet',
-        orientation: 'vertical',
+      styling: {
+        shape: {
+          type: 'bullet',
+          orientation: 'vertical',
+        },
       },
     } satisfies GaugeInput;
 
@@ -212,9 +220,11 @@ describe('Gauge Schema', () => {
           value: 5,
         },
       },
-      shape: {
-        type: 'bullet',
-        orientation: 'vertical',
+      styling: {
+        shape: {
+          type: 'bullet',
+          orientation: 'vertical',
+        },
       },
     } satisfies GaugeInput;
 
@@ -239,9 +249,11 @@ describe('Gauge Schema', () => {
         operation: 'count',
         field: 'test_field',
       },
-      shape: {
-        // @ts-expect-error
-        type: 'invalid',
+      styling: {
+        shape: {
+          // @ts-expect-error
+          type: 'invalid',
+        },
       },
     } satisfies GaugeInput;
 

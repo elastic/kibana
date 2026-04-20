@@ -38,7 +38,7 @@ export type {
   LensXYConfigBase,
   LensBreakdownConfig,
 } from './config_builder';
-export { isLensESQLConfig } from './config_builder/utils';
+export { isLensESQLConfig, isLensDSLConfig } from './config_builder/utils';
 
-export { lensApiStateSchema } from './config_builder';
+export { lensApiStateSchema, lensApiStateSchemaNoESQL } from './config_builder';
 export type { LensApiSchemaType } from './config_builder';

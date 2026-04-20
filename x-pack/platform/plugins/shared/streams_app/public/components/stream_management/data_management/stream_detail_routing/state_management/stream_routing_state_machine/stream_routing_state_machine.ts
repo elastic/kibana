@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { MachineImplementationsFrom, ActorRefFrom } from 'xstate';
-import { assign, and, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
+import { assign, and, not, enqueueActions, setup, sendTo, assertEvent } from 'xstate';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import type { Streams } from '@kbn/streams-schema';
-import { isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
+import { Streams, isChildOf, isSchema, routingDefinitionListSchema } from '@kbn/streams-schema';
 import { ALWAYS_CONDITION, conditionSchema } from '@kbn/streamlang';
 import type { RoutingDefinition } from '@kbn/streams-schema';
 import type {
@@ -20,8 +19,8 @@ import type {
 } from './types';
 import {
   createUpsertStreamActor,
-  createStreamFailureNofitier,
-  createStreamSuccessNofitier,
+  createStreamFailureNotifier,
+  createStreamSuccessNotifier,
   createForkStreamActor,
   createDeleteStreamActor,
   createQueryStreamActor,
@@ -53,8 +52,8 @@ export const streamRoutingMachine = setup({
     createQueryStream: getPlaceholderFor(createQueryStreamActor),
   },
   actions: {
-    notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNofitier),
-    notifyStreamFailure: getPlaceholderFor(createStreamFailureNofitier),
+    notifyStreamSuccess: getPlaceholderFor(createStreamSuccessNotifier),
+    notifyStreamFailure: getPlaceholderFor(createStreamFailureNotifier),
     refreshDefinition: () => {},
     addNewRoutingRule: assign(({ context }) => {
       const newRule = routingConverter.toUIDefinition({
@@ -89,10 +88,10 @@ export const streamRoutingMachine = setup({
       routing: context.initialRouting,
       isConditionEditorValid: true,
     })),
-    setupRouting: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => {
-      const routing = params.definition.stream.ingest.wired.routing.map(
-        routingConverter.toUIDefinition
-      );
+    setupRouting: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => {
+      const routing = Streams.WiredStream.Definition.is(params.definition.stream)
+        ? params.definition.stream.ingest.wired.routing.map(routingConverter.toUIDefinition)
+        : [];
 
       return {
         currentRuleId: null,
@@ -104,7 +103,7 @@ export const streamRoutingMachine = setup({
     storeCurrentRuleId: assign((_, params: { id: StreamRoutingContext['currentRuleId'] }) => ({
       currentRuleId: params.id,
     })),
-    storeDefinition: assign((_, params: { definition: Streams.WiredStream.GetResponse }) => ({
+    storeDefinition: assign((_, params: { definition: Streams.ingest.all.GetResponse }) => ({
       definition: params.definition,
     })),
     storeSuggestedRuleId: assign((_, params: { id: StreamRoutingContext['suggestedRuleId'] }) => ({
@@ -202,6 +201,8 @@ export const streamRoutingMachine = setup({
 
       return isChildOf(currentStream.name, currentRule.destination);
     },
+    isClassicStream: ({ context }) =>
+      Streams.ClassicStream.Definition.is(context.definition.stream),
     allBulkForksProcessed: ({ context }) => {
       const { bulkFork } = context;
       return bulkFork !== null && bulkFork.results.length >= bulkFork.items.length;
@@ -226,7 +227,14 @@ export const streamRoutingMachine = setup({
   initial: 'initializing',
   states: {
     initializing: {
-      always: 'ready',
+      always: [
+        {
+          // Classic streams only support query mode — skip ingestMode entirely
+          target: '#queryMode',
+          guard: 'isClassicStream',
+        },
+        { target: 'ready' },
+      ],
     },
     ready: {
       id: 'ready',
@@ -238,14 +246,24 @@ export const streamRoutingMachine = setup({
         'routingRule.setConditionEditorValidity': {
           actions: [{ type: 'setConditionEditorValidity', params: ({ event }) => event }],
         },
-        'stream.received': {
-          target: '#ready',
-          actions: [
-            { type: 'storeDefinition', params: ({ event }) => event },
-            { type: 'clearRefreshing' },
-          ],
-          reenter: true,
-        },
+        'stream.received': [
+          {
+            guard: 'isClassicStream',
+            actions: [
+              { type: 'storeDefinition', params: ({ event }) => event },
+              { type: 'setupRouting', params: ({ event }) => ({ definition: event.definition }) },
+              { type: 'clearRefreshing' },
+            ],
+          },
+          {
+            target: '#ready',
+            actions: [
+              { type: 'storeDefinition', params: ({ event }) => event },
+              { type: 'clearRefreshing' },
+            ],
+            reenter: true,
+          },
+        ],
         'routingSamples.setDocumentMatchFilter': {
           actions: sendTo('routingSamplesMachine', ({ event }) => ({
             type: 'routingSamples.setDocumentMatchFilter',
@@ -304,6 +322,15 @@ export const streamRoutingMachine = setup({
           on: {
             'childStreams.mode.changeToQueryMode': {
               target: '#queryMode',
+            },
+            'stream.received': {
+              target: '#ingestMode',
+              actions: [
+                { type: 'storeDefinition', params: ({ event }) => event },
+                { type: 'setupRouting', params: ({ event }) => ({ definition: event.definition }) },
+                { type: 'clearRefreshing' },
+              ],
+              reenter: true,
             },
             'routingSamples.setDocumentMatchFilter': {
               actions: sendTo('routingSamplesMachine', ({ event }) => ({
@@ -445,7 +472,7 @@ export const streamRoutingMachine = setup({
                       const currentRoutingRule = selectCurrentRule(context);
 
                       return {
-                        definition: context.definition,
+                        definition: context.definition as Streams.WiredStream.GetResponse,
                         where: currentRoutingRule.where,
                         destination: currentRoutingRule.destination,
                         status: currentRoutingRule.status,
@@ -538,7 +565,7 @@ export const streamRoutingMachine = setup({
                     id: 'upsertStreamActor',
                     src: 'upsertStream',
                     input: ({ context }) => ({
-                      definition: context.definition,
+                      definition: context.definition as Streams.WiredStream.GetResponse,
                       routing: context.routing.map(routingConverter.toAPIDefinition),
                     }),
                     onDone: {
@@ -587,7 +614,7 @@ export const streamRoutingMachine = setup({
                     id: 'upsertStreamActor',
                     src: 'upsertStream',
                     input: ({ context }) => ({
-                      definition: context.definition,
+                      definition: context.definition as Streams.WiredStream.GetResponse,
                       routing: context.routing.map(routingConverter.toAPIDefinition),
                     }),
                     onDone: {
@@ -635,7 +662,7 @@ export const streamRoutingMachine = setup({
                       }
 
                       return {
-                        definition: context.definition,
+                        definition: context.definition as Streams.WiredStream.GetResponse,
                         destination: routingRule.destination,
                         where: routingRule.where,
                         status: 'enabled',
@@ -679,7 +706,7 @@ export const streamRoutingMachine = setup({
                       const item = bulkFork!.items[nextIdx];
 
                       return {
-                        definition: context.definition,
+                        definition: context.definition as Streams.WiredStream.GetResponse,
                         destination: item.name,
                         where: item.condition,
                         status: 'enabled',
@@ -797,8 +824,17 @@ export const streamRoutingMachine = setup({
           initial: 'idle',
           on: {
             'childStreams.mode.changeToIngestMode': {
+              guard: not('isClassicStream'),
               target: '#ingestMode',
               actions: assign({ editingQueryStreamName: null }),
+            },
+            'stream.received': {
+              target: '#queryMode',
+              actions: [
+                { type: 'storeDefinition', params: ({ event }) => event },
+                { type: 'clearRefreshing' },
+              ],
+              reenter: true,
             },
           },
           states: {
@@ -938,14 +974,14 @@ export const createStreamRoutingMachineImplementations = ({
   core,
   data,
   timeState$,
-  forkSuccessNofitier,
+  forkSuccessNotifier,
   telemetryClient,
 }: StreamRoutingServiceDependencies): MachineImplementationsFrom<typeof streamRoutingMachine> => ({
   actors: {
     deleteStream: createDeleteStreamActor({ streamsRepositoryClient }),
     forkStream: createForkStreamActor({
       streamsRepositoryClient,
-      forkSuccessNofitier,
+      forkSuccessNotifier,
       telemetryClient,
     }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
@@ -960,10 +996,10 @@ export const createStreamRoutingMachineImplementations = ({
   },
   actions: {
     refreshDefinition,
-    notifyStreamSuccess: createStreamSuccessNofitier({
+    notifyStreamSuccess: createStreamSuccessNotifier({
       toasts: core.notifications.toasts,
     }),
-    notifyStreamFailure: createStreamFailureNofitier({
+    notifyStreamFailure: createStreamFailureNotifier({
       toasts: core.notifications.toasts,
     }),
     notifyQueryStreamSuccess: createQueryStreamSuccessNotifier({

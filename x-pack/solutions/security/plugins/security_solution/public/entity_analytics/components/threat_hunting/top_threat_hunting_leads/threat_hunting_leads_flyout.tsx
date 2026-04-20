@@ -8,17 +8,14 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiFlyoutResizable,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiTablePagination,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,35 +24,30 @@ import { useEntityAnalyticsRoutes } from '../../../api/api';
 import type { HuntingLead } from './types';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
-import { getEntityIcon } from './utils';
-
-const PAGE_SIZE_OPTIONS = [10, 20, 50];
+import { MAX_VISIBLE_TAGS } from './utils';
+import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
 
 interface ThreatHuntingLeadsFlyoutProps {
   onClose: () => void;
   onSelectLead: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
 export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> = ({
   onClose,
   onSelectLead,
-  onInfoClick,
 }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(20);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { fetchLeads } = useEntityAnalyticsRoutes();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['hunting-leads-flyout', pageIndex, pageSize],
+    queryKey: ['hunting-leads-flyout'],
     queryFn: ({ signal }) =>
       fetchLeads({
         signal,
         params: {
-          page: pageIndex + 1,
-          perPage: pageSize,
+          page: 1,
+          perPage: 10,
           sortField: 'priority',
           sortOrder: 'desc',
         },
@@ -63,7 +55,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
   });
 
   const leads: HuntingLead[] = useMemo(() => data?.leads?.map(fromApiLead) ?? [], [data?.leads]);
-  const totalCount = data?.total ?? 0;
 
   const filteredLeads = useMemo(() => {
     if (!searchQuery) return leads;
@@ -75,12 +66,6 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         lead.entities.some((e) => e.name.toLowerCase().includes(query))
     );
   }, [leads, searchQuery]);
-
-  const handlePageChange = useCallback((page: number) => setPageIndex(page), []);
-  const handlePageSizeChange = useCallback((size: number) => {
-    setPageSize(size);
-    setPageIndex(0);
-  }, []);
 
   return (
     <EuiFlyoutResizable
@@ -94,16 +79,17 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
         <EuiTitle size="m">
           <h2>{i18n.ALL_HUNTING_LEADS_TITLE}</h2>
         </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          {i18n.ALL_HUNTING_LEADS_DESCRIPTION}
+        </EuiText>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
         <EuiFieldSearch
           placeholder={i18n.SEARCH_LEADS_PLACEHOLDER}
           value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setPageIndex(0);
-          }}
+          onChange={(e) => setSearchQuery(e.target.value)}
           fullWidth
           data-test-subj="leadSearchField"
         />
@@ -118,21 +104,10 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
             <EuiFlexGroup direction="column" gutterSize="s">
               {filteredLeads.map((lead) => (
                 <EuiFlexItem key={lead.id}>
-                  <LeadListItem lead={lead} onClick={onSelectLead} onInfoClick={onInfoClick} />
+                  <LeadListItem lead={lead} onClick={onSelectLead} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
-
-            <EuiSpacer size="m" />
-            <EuiTablePagination
-              pageCount={Math.ceil((searchQuery ? filteredLeads.length : totalCount) / pageSize)}
-              activePage={pageIndex}
-              onChangePage={handlePageChange}
-              itemsPerPage={pageSize}
-              onChangeItemsPerPage={handlePageSizeChange}
-              itemsPerPageOptions={PAGE_SIZE_OPTIONS}
-              data-test-subj="leadsPagination"
-            />
           </>
         )}
       </EuiFlyoutBody>
@@ -143,28 +118,14 @@ export const ThreatHuntingLeadsFlyout: React.FC<ThreatHuntingLeadsFlyoutProps> =
 interface LeadListItemProps {
   lead: HuntingLead;
   onClick: (lead: HuntingLead) => void;
-  onInfoClick?: (lead: HuntingLead) => void;
 }
 
-const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick }) => {
+const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-  const handleInfoClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onInfoClick?.(lead);
-    },
-    [onInfoClick, lead]
+  const renderedByline = useMemo(
+    () => renderTextWithEntities(lead.byline, lead.entities),
+    [lead.byline, lead.entities]
   );
-
-  const relativeTime = useMemo(() => {
-    const diff = Date.now() - new Date(lead.timestamp).getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    if (hours < 1) return i18n.RELATIVE_TIME_JUST_NOW;
-    if (hours < 24) return i18n.getRelativeTimeHours(hours);
-    const days = Math.floor(hours / 24);
-    return i18n.getRelativeTimeDays(days);
-  }, [lead.timestamp]);
-
   return (
     <EuiPanel
       hasBorder
@@ -172,40 +133,37 @@ const LeadListItem: React.FC<LeadListItemProps> = ({ lead, onClick, onInfoClick 
       onClick={handleClick}
       data-test-subj={`leadListItem-${lead.id}`}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{lead.title}</strong>
-          </EuiText>
-          <EuiText size="xs" color="subdued">
-            {lead.byline}
-          </EuiText>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            {lead.entities.slice(0, 2).map((entity) => (
-              <EuiFlexItem grow={false} key={`${entity.type}-${entity.name}`}>
-                <EuiBadge color="hollow">
-                  <EuiIcon type={getEntityIcon(entity.type)} size="s" aria-hidden={true} />{' '}
-                  {entity.name}
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{lead.title}</strong>
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {relativeTime}
+            {renderedByline}
           </EuiText>
         </EuiFlexItem>
-        {onInfoClick && (
+
+        {lead.tags.length > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="iInCircle"
-              aria-label={i18n.VIEW_LEAD_DETAILS}
-              onClick={handleInfoClick}
-              data-test-subj={`leadListInfoButton-${lead.id}`}
-            />
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
+              {lead.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
+                <EuiFlexItem grow={false} key={tag}>
+                  <EuiBadge color="hollow">{tag}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+              {lead.tags.length > MAX_VISIBLE_TAGS && (
+                <EuiFlexItem grow={false}>
+                  <TagsPopover tags={lead.tags} />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

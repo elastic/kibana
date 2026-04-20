@@ -10,3 +10,8 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 });
 
 import './commands';
+import { suppressGlobalAnnouncements } from './suppress_global_announcements';
+
+before(() => {
+  suppressGlobalAnnouncements();
+});

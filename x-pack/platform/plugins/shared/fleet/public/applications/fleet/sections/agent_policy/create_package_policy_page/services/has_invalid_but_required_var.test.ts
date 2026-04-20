@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
+
 import { hasInvalidButRequiredVar } from './has_invalid_but_required_var';
 
 describe('Fleet - hasInvalidButRequiredVar', () => {
   it('returns true for invalid & required vars', () => {
     expect(
       hasInvalidButRequiredVar(
+        parse,
         [
           {
             name: 'mock_var',
@@ -24,6 +27,7 @@ describe('Fleet - hasInvalidButRequiredVar', () => {
 
     expect(
       hasInvalidButRequiredVar(
+        parse,
         [
           {
             name: 'mock_var',
@@ -43,6 +47,7 @@ describe('Fleet - hasInvalidButRequiredVar', () => {
   it('returns false for valid & required vars', () => {
     expect(
       hasInvalidButRequiredVar(
+        parse,
         [
           {
             name: 'mock_var',
@@ -62,6 +67,7 @@ describe('Fleet - hasInvalidButRequiredVar', () => {
   it('returns false for optional vars', () => {
     expect(
       hasInvalidButRequiredVar(
+        parse,
         [
           {
             name: 'mock_var',
@@ -78,6 +84,7 @@ describe('Fleet - hasInvalidButRequiredVar', () => {
 
     expect(
       hasInvalidButRequiredVar(
+        parse,
         [
           {
             name: 'mock_var',

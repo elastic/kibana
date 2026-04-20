@@ -21,7 +21,10 @@ import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_mana
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { omitMonitorKeys } from './create_monitor';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -56,7 +59,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await retry.try(async () => {
-        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanSyntheticsTestData(kibanaServer);
       });
       await privateLocationTestService.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');

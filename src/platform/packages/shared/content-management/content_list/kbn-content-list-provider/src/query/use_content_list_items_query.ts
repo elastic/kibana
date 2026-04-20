@@ -7,62 +7,68 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useQuery } from '@kbn/react-query';
 import type { ContentListClientState, ContentListQueryData } from '../state/types';
+import { USER_UID_FIELDS } from '../item';
 import { useContentListConfig } from '../context';
+import { useProfileCache } from '../services';
+import { useQueryModel, toFindItemsFilters } from '../query_model';
+import { DEFAULT_DEBOUNCE_MS } from '../datasource/types';
 import { contentListKeys } from './keys';
 
-/**
- * Default page configuration.
- */
 const DEFAULT_PAGE = { index: 0, size: 20 };
 
 /**
  * React Query hook for fetching content list items.
  *
- * This hook:
- * - Fetches items using the configured `findItems` function.
- * - Returns query data directly (items, loading, error) without dispatching.
+ * Derives {@link ActiveFilters} from `queryText` via {@link useQueryModel}.
  *
- * Note: Items are expected to already be in `ContentListItem` format.
- * Transformation should happen in the `findItems` implementation.
- *
- * @param clientState - Client-controlled state (search, filters, sort).
- * @returns Query data and refetch function.
+ * When the data source provides an `invalidate` callback, the returned
+ * `refetch` function calls it before re-executing the query so that any
+ * internal cache (e.g. in a client-side strategy) is cleared first.
  */
 export const useContentListItemsQuery = (
   clientState: ContentListClientState
-): ContentListQueryData & { refetch: () => void } => {
+): ContentListQueryData & { refetch: () => Promise<void>; requery: () => Promise<void> } => {
   const { dataSource, queryKeyScope, supports } = useContentListConfig();
+  const profileCache = useProfileCache();
 
-  // Build query parameters from client state.
-  // Only include sort if sorting is supported; otherwise, let the data source use its natural order.
-  // Only include page if pagination is supported; otherwise, use a sensible default.
+  const model = useQueryModel(clientState.queryText);
+  const activeFilters = useMemo(() => toFindItemsFilters(model), [model]);
+
+  // Only free-text search is debounced to avoid a request on every keystroke.
+  // Explicit user actions (starred toggle, tag selection, sort, pagination) are immediate.
+  const debounceMs = dataSource.debounceMs ?? DEFAULT_DEBOUNCE_MS;
+  const [debouncedSearchText, setDebouncedSearchText] = useState(activeFilters.search ?? '');
+  useDebounce(() => setDebouncedSearchText(activeFilters.search ?? ''), debounceMs, [
+    activeFilters.search,
+  ]);
+
   const queryParams = useMemo(
     () => ({
-      searchQuery: clientState.filters.search ?? '',
-      filters: clientState.filters,
+      searchQuery: debouncedSearchText,
+      filters: { ...activeFilters, search: debouncedSearchText },
       sort: supports.sorting ? clientState.sort : undefined,
       page: supports.pagination ? clientState.page : DEFAULT_PAGE,
     }),
-    [clientState.filters, clientState.sort, clientState.page, supports.sorting, supports.pagination]
+    [
+      debouncedSearchText,
+      activeFilters,
+      clientState.sort,
+      clientState.page,
+      supports.sorting,
+      supports.pagination,
+    ]
   );
 
-  // React Query for data fetching.
-  // `keepPreviousData` retains the previous results while a new query loads,
-  // preventing the table from flashing empty when page, filters, or search text change.
   const query = useQuery({
     queryKey: contentListKeys.items(queryKeyScope, queryParams),
     keepPreviousData: true,
     queryFn: async ({ signal }) => {
       const result = await dataSource.findItems({ ...queryParams, signal });
 
-      // Invoke success callback if provided.
-      // Note: Errors from `onFetchSuccess` are caught and logged to prevent them from
-      // breaking the query. In production, errors are logged but not surfaced to the UI.
-      // If you need to handle callback failures, consider adding error handling within
-      // your `onFetchSuccess` implementation.
       if (dataSource.onFetchSuccess) {
         try {
           dataSource.onFetchSuccess(result);
@@ -76,7 +82,45 @@ export const useContentListItemsQuery = (
     },
   });
 
-  // Derive error (normalize to Error type).
+  // Prime the profile cache with UIDs from fetched items so that
+  // `resolveDisplayToId` can resolve display values (email, full name)
+  // typed into the search bar for direct `ContentListProvider` consumers.
+  // Cell rendering does not depend on this — `useProfile` self-loads.
+  const items = query.data?.items;
+  const prevDataUpdatedAtRef = useRef(query.dataUpdatedAt);
+  useEffect(() => {
+    if (!profileCache || !items || prevDataUpdatedAtRef.current === query.dataUpdatedAt) {
+      return;
+    }
+    prevDataUpdatedAtRef.current = query.dataUpdatedAt;
+
+    const uids = new Set<string>();
+    for (const item of items) {
+      for (const field of USER_UID_FIELDS) {
+        const uid = item[field];
+        if (typeof uid === 'string') {
+          uids.add(uid);
+        }
+      }
+    }
+    if (uids.size > 0) {
+      profileCache.ensureLoaded(Array.from(uids)).catch(() => {});
+    }
+  }, [items, query.dataUpdatedAt, profileCache]);
+
+  // Clear any data-source-level cache before re-executing the query.
+  const refetch = useCallback(async () => {
+    dataSource.onInvalidate?.();
+    await query.refetch();
+  }, [dataSource, query]);
+
+  // Re-run the query function without invalidating the data-source cache.
+  // Used by `refresh()` after external decoration data changes (e.g. favorites)
+  // so `findItems` reads freshly decorated items without a server round-trip.
+  const requery = useCallback(async () => {
+    await query.refetch();
+  }, [query]);
+
   const error = useMemo(() => {
     if (!query.error) {
       return undefined;
@@ -87,10 +131,10 @@ export const useContentListItemsQuery = (
   return {
     items: query.data?.items ?? [],
     totalItems: query.data?.total ?? 0,
-    counts: query.data?.counts,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error,
-    refetch: query.refetch,
+    refetch,
+    requery,
   };
 };

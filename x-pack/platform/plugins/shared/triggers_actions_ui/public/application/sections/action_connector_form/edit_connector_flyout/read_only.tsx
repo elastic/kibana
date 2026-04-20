@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +34,9 @@ export const ReadOnlyConnectorMessage: React.FC<{
       {ExtraComponent && (
         <>
           <EuiSpacer size="m" />
-          <ExtraComponent connectorId={connectorId} connectorName={connectorName} />
+          <Suspense fallback={null}>
+            <ExtraComponent connectorId={connectorId} connectorName={connectorName} />
+          </Suspense>
         </>
       )}
     </>

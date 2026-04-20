@@ -158,12 +158,8 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
           <div css={contentPadding}>
             <IdentificationSection />
 
-            {isExperimentalFeaturesEnabled && (
-              <>
-                <EuiHorizontalRule margin="l" />
-                <AccessSection canChangeVisibility={canChangeVisibility} />
-              </>
-            )}
+            <EuiHorizontalRule margin="l" />
+            <AccessSection canChangeVisibility={canChangeVisibility} />
 
             <EuiHorizontalRule margin="l" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />

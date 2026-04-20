@@ -2012,6 +2012,7 @@ class TimeseriesChartIntl extends Component {
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={this.props.telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout

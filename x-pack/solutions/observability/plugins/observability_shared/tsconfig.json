@@ -28,7 +28,6 @@
     "@kbn/es-types",
     "@kbn/spaces-plugin",
     "@kbn/core-application-browser",
-    "@kbn/core-application-common",
     "@kbn/datemath",
     "@kbn/rison",
     "@kbn/kibana-utils-plugin",

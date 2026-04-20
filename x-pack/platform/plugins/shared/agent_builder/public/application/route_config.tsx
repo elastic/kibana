@@ -212,6 +212,12 @@ export const getSidebarViewForRoute = (pathname: string): SidebarView => {
   return 'conversation';
 };
 
+export const getViewIdForPathname = (
+  pathname: string,
+  enabledRoutes: RouteDefinition[]
+): string | undefined =>
+  enabledRoutes.find((route) => matchPath(pathname, { path: route.path, exact: true }))?.viewId;
+
 export const getAgentIdFromPath = (pathname: string): string | undefined => {
   const match = pathname.match(/^\/agents\/([^/]+)/);
   return match ? match[1] : undefined;

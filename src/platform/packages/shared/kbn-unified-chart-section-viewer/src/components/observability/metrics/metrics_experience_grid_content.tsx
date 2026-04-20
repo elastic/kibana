@@ -18,7 +18,7 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
-import type { ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
+import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
 import { PAGE_SIZE } from '../../../common/constants';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
@@ -38,11 +38,13 @@ export interface MetricsExperienceGridContentProps
   > {
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   metricItems: ParsedMetricItem[];
+  activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
   metricItems,
+  activeDimensions,
   services,
   discoverFetch$,
   fetchParams,
@@ -60,7 +62,7 @@ export const MetricsExperienceGridContent = ({
 
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
-  const { searchTerm, currentPage, selectedDimensions, onPageChange } = useMetricsExperienceState();
+  const { searchTerm, currentPage, onPageChange } = useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -117,7 +119,7 @@ export const MetricsExperienceGridContent = ({
         {isDiscoverLoading && <MetricsGridLoadingProgress />}
         <MetricsGrid
           columns={columns}
-          dimensions={selectedDimensions}
+          dimensions={activeDimensions}
           services={services}
           metricItems={currentPageFields}
           onBrushEnd={onBrushEnd}

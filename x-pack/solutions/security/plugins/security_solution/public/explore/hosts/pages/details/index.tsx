@@ -14,12 +14,7 @@ import {
   EuiText,
   EuiWindowEvent,
 } from '@elastic/eui';
-import {
-  bulkUpdateEntities,
-  FF_ENABLE_ENTITY_STORE_V2,
-  useEntityStoreEuidApi,
-} from '@kbn/entity-store/public';
-import { useQueryClient } from '@kbn/react-query';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,6 +22,7 @@ import { useLocation } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
@@ -89,7 +85,6 @@ import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 import {
-  applyEntityStoreSearchCachePatch,
   useEntityFromStore,
   type EntityStoreRecord,
 } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -183,9 +178,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
 
   const capabilities = useMlCapabilities();
   const {
-    services: { http, uiSettings },
+    services: { uiSettings },
   } = useKibana();
-  const queryClient = useQueryClient();
 
   const resolvedIdentityFields = useMemo(
     () => identityFields ?? { [ES_HOST_FIELD]: detailName },
@@ -424,18 +418,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     onSuccess: refetchRiskScore,
   });
 
-  const handleSaveAssetCriticalityViaEntityStore = useCallback(
-    async (updatedRecord: Entity) => {
-      await bulkUpdateEntities(http, {
-        entityType: 'host',
-        body: updatedRecord as Record<string, unknown>,
-        force: true,
-      });
-      applyEntityStoreSearchCachePatch(queryClient, 'host', updatedRecord as EntityStoreRecord);
-      calculateEntityRiskScore();
-    },
-    [http, queryClient, calculateEntityRiskScore]
-  );
+  const { updateAssetCriticalityRecord } = useUpdateAssetCriticality('host', {
+    onSuccess: calculateEntityRiskScore,
+  });
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
 
@@ -514,7 +499,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                 noEntityInStore={noEntityInStore}
                 observedHostEntityRecord={observedHost.entityRecord}
                 storeRecord={entityFromStoreResult.entityRecord}
-                onSaveViaEntityStore={handleSaveAssetCriticalityViaEntityStore}
+                onSaveViaEntityStore={updateAssetCriticalityRecord}
                 onCriticalityChange={calculateEntityRiskScore}
               />
               {!noEntityInStore && (

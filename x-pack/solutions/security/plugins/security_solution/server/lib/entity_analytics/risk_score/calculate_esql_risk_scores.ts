@@ -534,13 +534,13 @@ export const getBaseScoreESQL = (
   const query = /* esql */ `
   FROM ${index} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${fieldEvalsClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    ${fieldEvalsClause}
     | EVAL entity_id = ${euidEval},
            rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
@@ -603,13 +603,13 @@ export const getResolutionScoreESQL = (
   const query = /* esql */ `
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
+    ${fieldEvalsClause}
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    ${fieldEvalsClause}
     | EVAL entity_id = ${euidEval},
            rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)

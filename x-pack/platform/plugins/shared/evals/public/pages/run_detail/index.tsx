@@ -9,9 +9,12 @@ import React, { useCallback, useMemo, type MouseEvent } from 'react';
 import {
   EuiAccordion,
   EuiBasicTable,
+  EuiButton,
   EuiLink,
   EuiBadge,
+  EuiEmptyPrompt,
   EuiFlexGroup,
+  EuiLoadingSpinner,
   EuiFlexItem,
   EuiPageSection,
   EuiStat,
@@ -27,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useParams, useHistory, useLocation } from 'react-router-dom';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import type { EvaluatorStats } from '@kbn/evals-common';
 import { useEvaluationRun, useRunDatasetExamples } from '../../hooks/use_evals_api';
 import { ExampleScoresTable } from '../../components/example_scores_table';
@@ -118,6 +122,8 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
           <EuiText color="danger" size="s">
             <p>{i18n.getExamplesLoadError(String(examplesError))}</p>
           </EuiText>
+        ) : examplesLoading ? (
+          <EuiLoadingSpinner size="m" />
         ) : (
           <ExampleScoresTable
             examples={datasetExamples?.examples ?? []}
@@ -132,6 +138,7 @@ const DatasetStatsAccordion: React.FC<DatasetStatsAccordionProps> = ({
         </EuiText>
         <EuiSpacer size="s" />
         <EuiBasicTable<EvaluatorStats>
+          tableCaption={i18n.SECTION_EVALUATOR_STATS}
           items={group.stats}
           columns={statsColumns}
           loading={runLoading || (isOpen && examplesLoading)}
@@ -282,6 +289,35 @@ export const RunDetailPage: React.FC = () => {
     []
   );
 
+  if (runLoading) {
+    return (
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiPageSection>
+    );
+  }
+
+  if (runError) {
+    const isNotFound = isHttpFetchError(runError) && runError.response?.status === 404;
+    return (
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiEmptyPrompt
+          color={isNotFound ? 'subdued' : 'danger'}
+          iconType={isNotFound ? 'search' : 'warning'}
+          title={<h2>{isNotFound ? i18n.RUN_NOT_FOUND_TITLE : i18n.RUN_LOAD_ERROR_TITLE}</h2>}
+          body={
+            <p>
+              {isNotFound
+                ? i18n.getRunNotFoundBody(runId)
+                : i18n.getRunLoadErrorBody(String(runError))}
+            </p>
+          }
+          actions={[<EuiButton onClick={() => history.push('/')}>{i18n.BACK_TO_RUNS}</EuiButton>]}
+        />
+      </EuiPageSection>
+    );
+  }
+
   return (
     <>
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
@@ -289,15 +325,6 @@ export const RunDetailPage: React.FC = () => {
           <h2>{i18n.getPageTitle(runId)}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
-
-        {runError ? (
-          <>
-            <EuiText color="danger" size="s">
-              <p>{String(runError)}</p>
-            </EuiText>
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
 
         {runDetail && (
           <>

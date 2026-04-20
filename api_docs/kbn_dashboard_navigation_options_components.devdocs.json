@@ -1,0 +1,148 @@
+{
+  "id": "@kbn/dashboard-navigation-options-components",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/dashboard-navigation-options-components",
+        "id": "def-public.DashboardNavigationOptionsEditor",
+        "type": "Function",
+        "tags": [],
+        "label": "DashboardNavigationOptionsEditor",
+        "description": [],
+        "signature": [
+          "({ options, onOptionChange }: ",
+          {
+            "pluginId": "@kbn/dashboard-navigation-options-components",
+            "scope": "public",
+            "docId": "kibKbnDashboardNavigationOptionsComponentsPluginApi",
+            "section": "def-public.Props",
+            "text": "Props"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-components/index.tsx",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-navigation-options-components",
+            "id": "def-public.DashboardNavigationOptionsEditor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ options, onOptionChange }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dashboard-navigation-options-components",
+                "scope": "public",
+                "docId": "kibKbnDashboardNavigationOptionsComponentsPluginApi",
+                "section": "def-public.Props",
+                "text": "Props"
+              }
+            ],
+            "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-components/index.tsx",
+            "lineNumber": 20,
+            "columnNumber": 50,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/dashboard-navigation-options-components",
+        "id": "def-public.Props",
+        "type": "Interface",
+        "tags": [],
+        "label": "Props",
+        "description": [],
+        "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-components/index.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dashboard-navigation-options-components",
+            "id": "def-public.Props.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ readonly use_filters: boolean; readonly use_time_range: boolean; readonly open_in_new_tab: boolean; }"
+            ],
+            "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-components/index.tsx",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dashboard-navigation-options-components",
+            "id": "def-public.Props.onOptionChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onOptionChange",
+            "description": [],
+            "signature": [
+              "(newOptions: Partial<Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>>) => void"
+            ],
+            "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-components/index.tsx",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/dashboard-navigation-options-components",
+                "id": "def-public.Props.onOptionChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newOptions",
+                "description": [],
+                "signature": [
+                  "Partial<Readonly<{} & { use_filters: boolean; use_time_range: boolean; open_in_new_tab: boolean; }>>"
+                ],
+                "path": "src/platform/packages/private/dashboard/dashboard-navigation-options-components/index.tsx",
+                "lineNumber": 17,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

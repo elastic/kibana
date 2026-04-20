@@ -22,6 +22,9 @@ import { Entity } from './common.gen';
 
 export type UpsertEntityRequestQuery = z.infer<typeof UpsertEntityRequestQuery>;
 export const UpsertEntityRequestQuery = z.object({
+  /**
+   * When true, allows updating protected fields.
+   */
   force: BooleanFromString.optional().default(false),
 });
 export type UpsertEntityRequestQueryInput = z.input<typeof UpsertEntityRequestQuery>;

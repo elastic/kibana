@@ -92,19 +92,21 @@ describe('Treemap Schema', () => {
           visibility: 'auto',
           size: 'l',
         },
-        labels: { visible: true },
-        values: {
-          visible: true,
-          mode: 'absolute',
+        styling: {
+          labels: { visible: true },
+          values: {
+            visible: true,
+            mode: 'absolute',
+          },
         },
       };
 
       const validated = treemapStateSchema.validate(input);
       expect(validated.title).toBe('Sales Treemap');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.labels?.visible).toBe(true);
-      expect(validated.values?.visible).toBe(true);
-      expect(validated.values?.mode).toBe('absolute');
+      expect(validated.styling?.labels?.visible).toBe(true);
+      expect(validated.styling?.values?.visible).toBe(true);
+      expect(validated.styling?.values?.mode).toBe('absolute');
     });
 
     it('validates configuration with two group_by dimensions', () => {
@@ -638,12 +640,14 @@ describe('Treemap Schema', () => {
           nested: false,
           visibility: 'visible',
         },
-        labels: { visible: true },
+        styling: {
+          labels: { visible: true },
+        },
       };
 
       const validated = treemapStateSchema.validate(input);
       expect(validated.title).toBe('Sales Treemap');
-      expect(validated.labels?.visible).toBe(true);
+      expect(validated.styling?.labels?.visible).toBe(true);
     });
   });
 });

@@ -18,6 +18,8 @@ import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/e
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
 import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
+import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -29,7 +31,7 @@ export interface EpisodesFilterBarProps {
   ruleOptions: Array<{ label: string; value: string }>;
   onRefresh?: () => void;
   isLoading?: boolean;
-  services: { http: HttpStart };
+  services: { http: HttpStart; expressions: ExpressionsStart };
 }
 
 export const EpisodesFilterBar = ({
@@ -69,6 +71,13 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
+  const onTagsChange = useCallback(
+    (tags: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, tags }));
+    },
+    [onFilterChange]
+  );
+
   const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setQueryStringInput(e.target.value);
   }, []);
@@ -102,6 +111,14 @@ export const EpisodesFilterBar = ({
             ruleOptions={ruleOptions}
             data-test-subj="episodesFilterBar-rule"
             services={services}
+          />
+
+          <AlertEpisodesTagFilter
+            selectedTags={filterState.tags}
+            onTagsChange={onTagsChange}
+            services={services}
+            timeRange={timeRange}
+            data-test-subj="episodesFilterBar-tags"
           />
         </EuiFilterGroup>
       </EuiFlexItem>

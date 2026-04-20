@@ -1,0 +1,42 @@
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          allPrivilegesGrantedExample:
+            summary: "All privileges granted"
+            description: "The current user has all required Elasticsearch privileges to use the Entity Store."
+            value:
+              privileges:
+                elasticsearch:
+                  index:
+                    "entities-latest-default":
+                      read: true
+                      write: true
+                kibana: {}
+              has_all_required: true
+              has_read_permissions: true
+              has_write_permissions: true
+          missingPrivilegesExample:
+            summary: "Missing privileges"
+            description: "The current user is missing write privileges on the entity index."
+            value:
+              privileges:
+                elasticsearch:
+                  index:
+                    "entities-latest-default":
+                      read: true
+                      write: false
+                kibana: {}
+              has_all_required: false
+              has_read_permissions: true
+              has_write_permissions: false
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/check_privileges"
+  - lang: Console
+    source: |
+      GET kbn://api/security/entity_store/check_privileges

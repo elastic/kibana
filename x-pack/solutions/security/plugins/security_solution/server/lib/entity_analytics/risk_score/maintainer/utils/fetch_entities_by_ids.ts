@@ -22,7 +22,7 @@ interface NormalizedModifierEntitySource {
     attributes?: { watchlists?: unknown };
     relationships?: { resolution?: { resolved_to?: unknown } };
   };
-  asset?: RiskScoreModifierEntity['asset'];
+  asset?: RiskScoreModifierEntity['asset'] | null;
 }
 
 const normalizeWatchlists = (value: unknown): string[] => {

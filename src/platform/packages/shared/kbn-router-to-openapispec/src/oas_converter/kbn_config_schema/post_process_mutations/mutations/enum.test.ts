@@ -178,6 +178,29 @@ describe('processEnum', () => {
       },
     },
     {
+      name: 'correctly transforms schema.nullable with $ref target using allOf wrapper',
+      input: {
+        anyOf: [
+          {
+            $ref: '#/components/schemas/MySchema',
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        allOf: [
+          {
+            $ref: '#/components/schemas/MySchema',
+          },
+        ],
+        nullable: true,
+      },
+    },
+    {
       name: 'replaces the internal nullable placeholder in larger unions',
       input: {
         anyOf: [
@@ -206,12 +229,10 @@ describe('processEnum', () => {
             type: 'number',
           },
           {
-            enum: [null],
-          },
-          {
             type: 'boolean',
           },
         ],
+        nullable: true,
       },
     },
   ])('$name', ({ input, expected }) => {

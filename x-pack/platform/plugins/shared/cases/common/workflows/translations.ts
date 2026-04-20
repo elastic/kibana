@@ -448,7 +448,8 @@ export const ADD_CATEGORY_STEP_DESCRIPTION = i18n.translate(
 export const ADD_CATEGORY_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.addCategory.documentation.details',
   {
-    defaultMessage: 'This step sets the category on an existing case.',
+    defaultMessage:
+      'This step sets the category on an existing case. Provide an `owner` property to get auto-completed categories.',
   }
 );
 
@@ -575,6 +576,18 @@ export const DELETE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
       'This step deletes the specified observable from the case. The step echoes back the case_id and observable_id that were removed.',
   }
 );
+
+export const CATEGORY_CAN_BE_USED_MESSAGE = (category: string) =>
+  i18n.translate('xpack.cases.workflowSteps.shared.categoryCanBeUsedMessage', {
+    defaultMessage: 'Category "{category}" can be set on the case.',
+    values: { category },
+  });
+
+export const CATEGORY_NOT_FOUND_MESSAGE = (category: string) =>
+  i18n.translate('xpack.cases.workflowSteps.shared.categoryNotFoundMessage', {
+    defaultMessage: 'Category "{category}" was not found.',
+    values: { category },
+  });
 
 export const GET_CASES_STEP_LABEL = i18n.translate('xpack.cases.workflowSteps.getCases.label', {
   defaultMessage: 'Cases - Get cases',

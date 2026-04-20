@@ -7,7 +7,7 @@
 
 import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers/v4';
 
-import { NonEmptyString, SafeIdentifier, UUID } from './primitive.gen';
+import { NonEmptyString, SafeIdentifier, SemVer, UUID } from './primitive.gen';
 
 describe('primitive schemas', () => {
   describe('NonEmptyString', () => {
@@ -119,6 +119,44 @@ describe('primitive schemas', () => {
     it('accepts strings at the 255 character limit', () => {
       const result = SafeIdentifier.safeParse('a'.repeat(255));
       expectParseSuccess(result);
+    });
+  });
+
+  describe('SemVer', () => {
+    it('accepts valid semantic versions', () => {
+      const valid = ['1.0.0', '0.1.0', '0.0.1', '10.20.30', '99.99.99'];
+      valid.forEach((str) => {
+        const result = SemVer.safeParse(str);
+        expectParseSuccess(result);
+        expect(result.data).toBe(str);
+      });
+    });
+
+    it('accepts pre-release versions', () => {
+      const valid = ['1.0.0-beta', '1.0.0-alpha', '2.1.0-rc1', '1.0.0-beta.1', '1.0.0-alpha.2.3'];
+      valid.forEach((str) => {
+        const result = SemVer.safeParse(str);
+        expectParseSuccess(result);
+        expect(result.data).toBe(str);
+      });
+    });
+
+    it('rejects strings without three numeric segments', () => {
+      const invalid = ['1.0', '1', '1.0.0.0', 'v1.0.0', 'abc'];
+      invalid.forEach((str) => {
+        const result = SemVer.safeParse(str);
+        expectParseError(result);
+      });
+    });
+
+    it('rejects strings shorter than 5 characters', () => {
+      const result = SemVer.safeParse('1.0');
+      expectParseError(result);
+    });
+
+    it('rejects strings exceeding 20 characters', () => {
+      const result = SemVer.safeParse(`1.0.0-${'a'.repeat(20)}`);
+      expectParseError(result);
     });
   });
 

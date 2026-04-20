@@ -137,9 +137,11 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           <h2 id={flyoutTitleId}>{displayName}</h2>
         </EuiTitle>
         <EuiSpacer size="xs" />
-        {uniqueTaskTypes.map((taskType) => (
-          <EuiBadge key={taskType}>{taskType}</EuiBadge>
-        ))}
+        <span data-test-subj="flyoutTaskBadges">
+          {uniqueTaskTypes.map((taskType) => (
+            <EuiBadge key={taskType}>{taskType}</EuiBadge>
+          ))}
+        </span>
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
@@ -148,6 +150,7 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
           compressed
           columnGutterSize="m"
           listItems={descriptionListItems}
+          data-test-subj="flyoutModelDetails"
         />
 
         <EuiHorizontalRule margin="xxl" />

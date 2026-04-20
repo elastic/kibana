@@ -40,6 +40,7 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       config,
       log,
       esFrom: options.esFrom,
+      preserveEsData: options.preserveEsData,
       logsDir: options.logsDir,
     });
 

@@ -109,6 +109,8 @@ interface InferenceFlyoutWrapperProps {
   focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
   /** When set, only these task types will be available for selection in the form. */
   allowedTaskTypes?: InferenceTaskType[];
+  /** When set, providers matching these service keys will be hidden from the selectable list. */
+  excludeProviders?: string[];
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -122,6 +124,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   enableEisPromoTour,
   focusTrapProps,
   allowedTaskTypes,
+  excludeProviders,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -190,6 +193,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
               reenterSecretsOnEdit: false,
               enableEisPromoTour,
               allowedTaskTypes,
+              excludeProviders,
             }}
           />
           <EuiSpacer size="m" />

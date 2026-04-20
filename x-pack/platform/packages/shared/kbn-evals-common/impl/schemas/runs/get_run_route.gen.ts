@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { Model, EvaluatorStats, BuildkiteMetadata } from '../common_attributes.gen';
+import { Model, BuildkiteMetadata, EvaluatorStats } from '../common_attributes.gen';
 
 export type GetEvaluationRunRequestQuery = z.infer<typeof GetEvaluationRunRequestQuery>;
 export const GetEvaluationRunRequestQuery = z.object({

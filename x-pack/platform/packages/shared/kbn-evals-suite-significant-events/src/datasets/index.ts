@@ -90,11 +90,16 @@ export const snapshotSourceKey = ({
   return `${gcs.bucket}/${gcs.basePathPrefix}::${snapshotName}`;
 };
 
+export const getAllDatasetIds = (): string[] => Object.keys(DATASETS);
+
+export const getDatasetById = (id: string): DatasetConfig | undefined => DATASETS[id];
+
 export type {
   DatasetConfig,
   KIQueryGenerationScenario,
   KIFeatureExtractionScenario,
   KIFeatureExclusionScenario,
   KIFeatureDuplicationScenario,
+  SamplingCriterion,
   SnapshotSourceOverride,
 } from './types';

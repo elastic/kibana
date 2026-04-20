@@ -13,21 +13,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AccessDenied } from './access_denied';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: {
-      http: {
-        basePath: {
-          prepend: (path: string) => `/mock-base-path${path}`,
-        },
-      },
-    },
-  }),
-}));
-
-jest.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => ({
-  useWorkflowsBreadcrumbs: jest.fn(),
-}));
+jest.mock('../../assets/lock_light.svg', () => 'lock_light.svg');
 
 const renderWithProviders = (component: React.ReactElement) =>
   render(
@@ -37,33 +23,51 @@ const renderWithProviders = (component: React.ReactElement) =>
   );
 
 describe('AccessDenied', () => {
-  it('renders no-read empty state copy and data-test-subj', () => {
-    renderWithProviders(<AccessDenied />);
+  it('renders the title, description, and data-test-subj', () => {
+    renderWithProviders(
+      <AccessDenied title="Access restricted" description="You need more privileges." />
+    );
 
-    expect(screen.getByTestId('workflowsNoReadAccessEmptyState')).toBeInTheDocument();
-    expect(screen.getByText('Contact your administrator for access')).toBeInTheDocument();
-    expect(
-      screen.getByText('To view workflows in this space, you need additional privileges.')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('workflowsAccessDeniedEmptyState')).toBeInTheDocument();
+    expect(screen.getByText('Access restricted')).toBeInTheDocument();
+    expect(screen.getByText('You need more privileges.')).toBeInTheDocument();
   });
 
-  it('lists required privileges in the empty prompt footer when requirements are provided', () => {
-    renderWithProviders(<AccessDenied requirements={['Workflows: Read']} />);
+  it('renders a footer when provided', () => {
+    renderWithProviders(
+      <AccessDenied
+        title="Access restricted"
+        description="You need more privileges."
+        footer={<div data-test-subj="customFooter">{'Footer content'}</div>}
+      />
+    );
 
-    expect(
-      screen.getByTestId('workflowsNoReadAccessRequiredPrivilegesSection')
-    ).toBeInTheDocument();
-    expect(screen.getByText('Minimum privileges required in this space:')).toBeInTheDocument();
-    expect(screen.getByText('Workflows: Read')).toBeInTheDocument();
+    expect(screen.getByTestId('customFooter')).toBeInTheDocument();
+    expect(screen.getByText('Footer content')).toBeInTheDocument();
+  });
+
+  it('renders actions when provided', () => {
+    renderWithProviders(
+      <AccessDenied
+        title="Upgrade required"
+        description="You need a higher license."
+        actions={[
+          <button key="upgrade" type="button">
+            {'Upgrade'}
+          </button>,
+        ]}
+      />
+    );
+
+    expect(screen.getByText('Upgrade')).toBeInTheDocument();
   });
 
   it('uses the light lock illustration in light mode', () => {
-    renderWithProviders(<AccessDenied />);
+    renderWithProviders(
+      <AccessDenied title="Access restricted" description="You need more privileges." />
+    );
 
     const image = screen.getByRole('img', { name: 'Restricted access' });
-    expect(image).toHaveAttribute(
-      'src',
-      '/mock-base-path/plugins/workflowsManagement/assets/lock_light.svg'
-    );
+    expect(image).toHaveAttribute('src', 'lock_light.svg');
   });
 });

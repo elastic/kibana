@@ -27,6 +27,9 @@ export class ServiceMapPage {
   public serviceMapFocusMapButton: Locator;
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
+  public serviceMapOptionsPanel: Locator;
+  public serviceMapFindInPageInput: Locator;
+  public serviceMapFindMatchSummary: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.serviceMap = page.testSubj.locator('serviceMap');
@@ -52,6 +55,9 @@ export class ServiceMapPage {
     this.serviceMapEdgeExploreTracesButton = page.testSubj.locator(
       'apmEdgeContentsOpenInDiscoverButton'
     );
+    this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
+    this.serviceMapFindInPageInput = page.testSubj.locator('serviceMapControlsSearch');
+    this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
   }
 
   async gotoWithDateSelected(start: string, end: string, options?: { kuery?: string }) {
@@ -95,6 +101,23 @@ export class ServiceMapPage {
     await this.serviceMapGraph.waitFor({ state: 'visible' });
   }
 
+  /**
+   * Blur focused controls and move focus to `document.body` so the service map Ctrl/Cmd+K handler
+   * treats the shortcut as in scope (see graph.tsx).
+   */
+  async focusBodyForMapShortcuts() {
+    await this.page.evaluate(() => {
+      (document.activeElement as HTMLElement | null)?.blur?.();
+      document.body.focus();
+    });
+  }
+
+  /** Triggers find-in-page focus via the same shortcut as the in-app hint (Control+K / Meta+K). */
+  async openFindInPageWithKeyboardShortcut() {
+    await this.focusBodyForMapShortcuts();
+    await this.page.keyboard.press('Control+KeyK');
+  }
+
   async clickZoom(direction: 'in' | 'out') {
     const button = direction === 'in' ? this.zoomInBtn : this.zoomOutBtn;
     await button.waitFor({ state: 'visible' });
@@ -121,20 +144,79 @@ export class ServiceMapPage {
     await this.zoomOutBtnControl.click();
   }
 
+  /**
+   * After fit view, the map animates; merging alert/SLO badges can also re-run layout + fitView (see graph.tsx).
+   * Wait briefly so clicks target the final node positions.
+   */
+  async settleServiceMapLayout() {
+    await this.serviceMapGraph.waitFor({ state: 'visible' });
+    await new Promise<void>((resolve) => setTimeout(resolve, 800));
+  }
+
   async clickFitView() {
     await this.fitViewBtn.click();
+    await this.settleServiceMapLayout();
+  }
+
+  /**
+   * Click handlers can no-op while nodes remount or the viewport is still animating after fit view / badge merge.
+   * Retries: dismiss, settle, click, until popover content is visible.
+   */
+  private async clickUntilPopoverVisible(clickFn: () => Promise<void>) {
+    const maxAttempts = 4;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      await this.dismissPopoverIfOpen();
+      await this.settleServiceMapLayout();
+      try {
+        await clickFn();
+        await this.serviceMapPopoverContent.waitFor({ state: 'visible', timeout: 15000 });
+        return;
+      } catch (err) {
+        if (attempt === maxAttempts - 1) {
+          throw err;
+        }
+      }
+    }
+  }
+
+  async openServiceNodePopover(serviceName: string) {
+    await this.clickUntilPopoverVisible(async () => {
+      await this.clickServiceNode(serviceName);
+    });
+  }
+
+  async openNodePopover(nodeId: string) {
+    await this.clickUntilPopoverVisible(async () => {
+      await this.clickNode(nodeId);
+    });
+  }
+
+  async openEdgePopover(edgeId: string) {
+    await this.clickUntilPopoverVisible(async () => {
+      await this.clickEdge(edgeId);
+    });
   }
 
   getNodeById(nodeId: string) {
     return this.serviceMapGraph.locator(`[data-id="${nodeId}"]`);
   }
 
+  /** Wrapper for a service node (icon, badges row, label). `data.id` on the map matches the service name in tests. */
+  getServiceNodeRoot(serviceName: string) {
+    return this.serviceMapGraph.getByTestId(`serviceMapNode-service-${serviceName}`);
+  }
+
   /**
-   * Service nodes are rendered as role="button" with aria-label like "Service: {serviceName}. Agent: {agentName}".
-   * data.label (service name) has no regex-special chars in our test data; use string for substring match.
+   * The clickable/focusable service circle only. Prefer this over role+name: when shown, violated/degrading SLO
+   * badges can also be buttons whose accessible name includes the service name, so `getByRole('button', { name })`
+   * is ambiguous.
    */
   getServiceNode(serviceName: string) {
-    return this.serviceMapGraph.getByRole('button', { name: serviceName });
+    return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeServiceCircle');
+  }
+
+  getServiceNodeAlertsBadge(serviceName: string) {
+    return this.getServiceNodeRoot(serviceName).getByTestId('serviceMapNodeAlertsBadge');
   }
 
   async waitForNodeToLoad(nodeId: string) {
@@ -142,42 +224,93 @@ export class ServiceMapPage {
   }
 
   async waitForServiceNodeToLoad(serviceName: string) {
-    await this.getServiceNode(serviceName).waitFor({
-      state: 'visible',
-      timeout: EXTENDED_TIMEOUT,
-    });
+    const circle = this.getServiceNode(serviceName);
+    await circle.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+    await circle.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Stable handle on the edge stroke path (see `ServiceMapEdge` + `BaseEdge`); avoids the React Flow
+   * wrapper `[data-id]` which can detach briefly while the graph re-renders after fit view / badge merge.
+   */
   getEdgeById(edgeId: string) {
-    return this.serviceMapGraph.locator(`[data-id="${edgeId}"]`);
+    return this.serviceMapGraph.getByTestId(`serviceMapEdge-${edgeId}`);
   }
 
   async waitForEdgeToLoad(edgeId: string) {
-    await this.getEdgeById(edgeId).waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    const edge = this.getEdgeById(edgeId);
+    await edge.waitFor({ state: 'attached', timeout: EXTENDED_TIMEOUT });
+    await edge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
 
+  /**
+   * Nodes and edges can unmount/remount while the map settles (fit view animation, badge API merge).
+   * Re-resolve locators each attempt to avoid "not attached to the DOM" flakes.
+   */
+  private async runWithDomRetry<T>(
+    description: string,
+    run: () => Promise<T>,
+    timeoutMs: number = EXTENDED_TIMEOUT
+  ): Promise<T> {
+    const start = Date.now();
+    let lastError: Error | undefined;
+    while (Date.now() - start < timeoutMs) {
+      try {
+        return await run();
+      } catch (e) {
+        lastError = e instanceof Error ? e : new Error(String(e));
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+    }
+    throw lastError ?? new Error(`runWithDomRetry failed: ${description}`);
+  }
+
+  /**
+   * Clicks the node's real hit target (service circle or dependency diamond), not the React Flow
+   * wrapper. The wrapper's center often lands on `NodeLabel` (`pointer-events: none`), so the click
+   * passes through to the pane and never opens the popover.
+   */
   async clickNode(nodeId: string) {
-    const node = this.getNodeById(nodeId);
-    await node.scrollIntoViewIfNeeded();
-    await node.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await node.focus();
-    await node.click({ force: true });
+    await this.runWithDomRetry(`clickNode ${nodeId}`, async () => {
+      const node = this.getNodeById(nodeId);
+      await node.waitFor({ state: 'attached', timeout: 10000 });
+      await node.waitFor({ state: 'visible', timeout: 10000 });
+      const circle = node.getByTestId('serviceMapNodeServiceCircle');
+      const diamond = node.getByTestId('serviceMapNodeDiamondHit');
+      if ((await circle.count()) > 0) {
+        const hit = circle;
+        await hit.scrollIntoViewIfNeeded();
+        await hit.click({ force: true, timeout: 15000 });
+      } else if ((await diamond.count()) > 0) {
+        const hit = diamond;
+        await hit.scrollIntoViewIfNeeded();
+        await hit.click({ force: true, timeout: 15000 });
+      } else {
+        await node.scrollIntoViewIfNeeded();
+        await node.click({ force: true, timeout: 15000 });
+      }
+    });
   }
 
   /** Click a service node by its service name (uses role + aria-label). */
   async clickServiceNode(serviceName: string) {
-    const button = this.getServiceNode(serviceName);
-    await button.scrollIntoViewIfNeeded();
-    await button.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await button.click({ force: true });
+    await this.runWithDomRetry(`clickServiceNode ${serviceName}`, async () => {
+      const button = this.getServiceNode(serviceName);
+      await button.waitFor({ state: 'attached', timeout: 10000 });
+      await button.waitFor({ state: 'visible', timeout: 10000 });
+      await button.scrollIntoViewIfNeeded();
+      await button.click({ force: true, timeout: 15000 });
+    });
   }
 
   async clickEdge(edgeId: string) {
-    const edge = this.getEdgeById(edgeId);
-    await edge.scrollIntoViewIfNeeded();
-    await edge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await edge.focus();
-    await edge.click({ force: true });
+    await this.runWithDomRetry(`clickEdge ${edgeId}`, async () => {
+      const edge = this.getEdgeById(edgeId);
+      await edge.waitFor({ state: 'attached', timeout: 10000 });
+      await edge.waitFor({ state: 'visible', timeout: 10000 });
+      await edge.scrollIntoViewIfNeeded();
+      await edge.click({ force: true, timeout: 15000 });
+    });
   }
 
   async waitForPopoverToBeVisible() {
@@ -205,12 +338,21 @@ export class ServiceMapPage {
   async focusNodeAndWaitForFocus(nodeId: string) {
     await this.waitForNodeToLoad(nodeId);
     const node = this.getNodeById(nodeId);
-    const button = node.locator('[role="button"]');
-    await button.focus();
+    const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    const diamond = node.getByTestId('serviceMapNodeDiamondHit');
+    if ((await circle.count()) > 0) {
+      await circle.focus();
+    } else if ((await diamond.count()) > 0) {
+      await diamond.focus();
+    } else {
+      await node.getByRole('button').focus();
+    }
     await this.page.waitForFunction(
       (id) => {
         const nodeEl = document.querySelector(`[data-id="${id}"]`);
-        const buttonEl = nodeEl?.querySelector('[role="button"]');
+        const circleEl = nodeEl?.querySelector('[data-test-subj="serviceMapNodeServiceCircle"]');
+        const diamondEl = nodeEl?.querySelector('[data-test-subj="serviceMapNodeDiamondHit"]');
+        const buttonEl = circleEl ?? diamondEl ?? nodeEl?.querySelector('[role="button"]');
         return (
           buttonEl === document.activeElement ||
           nodeEl === document.activeElement ||
@@ -256,8 +398,15 @@ export class ServiceMapPage {
   async openPopoverWithKeyboard(nodeId: string, key: 'Enter' | ' ') {
     await this.focusNodeAndWaitForFocus(nodeId);
     const node = this.getNodeById(nodeId);
-    const button = node.locator('[role="button"]');
-    await button.press(key === ' ' ? 'Space' : key);
+    const circle = node.getByTestId('serviceMapNodeServiceCircle');
+    const diamond = node.getByTestId('serviceMapNodeDiamondHit');
+    if ((await circle.count()) > 0) {
+      await circle.press(key === ' ' ? 'Space' : key);
+    } else if ((await diamond.count()) > 0) {
+      await diamond.press(key === ' ' ? 'Space' : key);
+    } else {
+      await node.getByRole('button').press(key === ' ' ? 'Space' : key);
+    }
     await this.waitForPopoverToBeVisible();
   }
 

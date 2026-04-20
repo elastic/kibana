@@ -10,14 +10,17 @@
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import { Subject } from 'rxjs';
 
 import type { DashboardRendererProps } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
 import { buildMockDashboardApi } from '../mocks';
-import { dataService } from '../services/kibana_services';
+import { dataService, embeddableService } from '../services/kibana_services';
 import { DashboardApp } from './dashboard_app';
+import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
 
 jest.mock('../dashboard_renderer/dashboard_renderer');
 jest.mock('../dashboard_top_nav');
@@ -109,6 +112,219 @@ describe('Dashboard App', () => {
       expect(dashboardApi.expandedPanelId$.getValue()).toBe(undefined);
       expect(historySpy).toHaveBeenCalledTimes(1);
       expect(mockHistory.location.pathname).toBe('/create');
+    });
+  });
+
+  describe('same-dashboard incoming embeddables', () => {
+    const addIncomingEmbeddablesSpy = jest.spyOn(dashboardApi, 'addIncomingEmbeddables');
+    const setViewModeSpy = jest.spyOn(dashboardApi, 'setViewMode');
+    const stateTransferMock = embeddableService.getStateTransfer();
+    const transferSubject$ = new Subject<unknown>();
+
+    beforeAll(() => {
+      (stateTransferMock.onTransferEmbeddablePackage$ as jest.Mock).mockReturnValue(
+        transferSubject$
+      );
+      (embeddableService.getStateTransfer as jest.Mock).mockReturnValue(stateTransferMock);
+    });
+
+    beforeEach(() => {
+      addIncomingEmbeddablesSpy.mockClear();
+      setViewModeSpy.mockClear();
+      if (dashboardApi.expandedPanelId$.value) {
+        dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+      }
+    });
+
+    it('adds incoming embeddables when received via the state transfer observable', async () => {
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId="test-dashboard-123"
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      const incomingEmbeddables = [
+        {
+          type: 'lens',
+          serializedState: { title: 'Chart from the AI sidebar' },
+        },
+      ];
+      transferSubject$.next(incomingEmbeddables);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(incomingEmbeddables);
+        expect(setViewModeSpy).toHaveBeenCalledWith('edit');
+      });
+    });
+
+    it('minimizes expanded panel when receiving incoming embeddables', async () => {
+      dashboardApi.expandPanel('maximized-panel-id');
+      expandPanelSpy.mockClear();
+
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId="test-dashboard-123"
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      const incomingEmbeddables = [
+        {
+          type: 'lens',
+          serializedState: { title: 'Chart from the AI sidebar' },
+        },
+      ];
+      transferSubject$.next(incomingEmbeddables);
+
+      await waitFor(() => {
+        expect(expandPanelSpy).toHaveBeenCalledWith('maximized-panel-id');
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledTimes(1);
+        expect(addIncomingEmbeddablesSpy).toHaveBeenCalledWith(incomingEmbeddables);
+        expect(setViewModeSpy).toHaveBeenCalledWith('edit');
+      });
+    });
+
+    it('does nothing when the state transfer observable emits undefined', async () => {
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId="test-dashboard-456"
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      transferSubject$.next(undefined);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+        expect(setViewModeSpy).not.toHaveBeenCalled();
+      });
+    });
+
+    it('does nothing when the state transfer observable emits an empty array', async () => {
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={mockHistory}
+          savedDashboardId="test-dashboard-789"
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+      });
+
+      transferSubject$.next([]);
+
+      await waitFor(() => {
+        expect(addIncomingEmbeddablesSpy).not.toHaveBeenCalled();
+        expect(setViewModeSpy).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('showNoDataPage', () => {
+    const mockIsDashboardAppInNoDataState = jest.fn();
+
+    beforeAll(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./no_data/dashboard_app_no_data').isDashboardAppInNoDataState =
+        mockIsDashboardAppInNoDataState;
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('./no_data/dashboard_app_no_data').DashboardAppNoDataPage = () => (
+        <div>Mock no data page</div>
+      );
+
+      /**
+       * Mock the DashboardTopNav + LazyDashboardRenderer component to avoid rendering the actual dashboard
+       * and hitting errors that aren't relevant
+       */
+      (DashboardTopNav as jest.Mock).mockImplementation(() => <>Top nav</>);
+      (DashboardRenderer as jest.Mock).mockImplementation(() => <>mock DashboardRenderer</>);
+    });
+
+    beforeEach(() => {
+      mockIsDashboardAppInNoDataState.mockReset();
+    });
+
+    test('should render dashboard when savedDashboardId is provided', async () => {
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={createMemoryHistory()}
+          savedDashboardId={'1'}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByText('mock DashboardRenderer')).toBeInTheDocument();
+        expect(mockIsDashboardAppInNoDataState).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    test('should render dashboard when incoming embeddables are provided', async () => {
+      const stateTransferSpy = jest.spyOn(embeddableService, 'getStateTransfer');
+      stateTransferSpy.mockImplementationOnce(
+        () =>
+          ({
+            ...createEmbeddableStateTransferMock(),
+            getIncomingEmbeddablePackage: () => [
+              {
+                type: 'testEmbeddable',
+                serializedState: {},
+              },
+            ],
+          } as unknown as EmbeddableStateTransfer)
+      );
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={createMemoryHistory()}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByText('mock DashboardRenderer')).toBeInTheDocument();
+        expect(mockIsDashboardAppInNoDataState).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    test('should render no data page when isDashboardAppInNoDataState returns true', async () => {
+      mockIsDashboardAppInNoDataState.mockResolvedValueOnce(true);
+      render(
+        <DashboardApp
+          redirectTo={jest.fn()}
+          history={createMemoryHistory()}
+          setDashboardAppApi={jest.fn()}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.queryByText('Mock no data page')).toBeInTheDocument();
+        expect(mockIsDashboardAppInNoDataState).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

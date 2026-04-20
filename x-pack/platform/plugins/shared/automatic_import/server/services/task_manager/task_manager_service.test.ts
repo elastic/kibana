@@ -180,6 +180,10 @@ describe('runTask abort handling', () => {
       expect.objectContaining({ status: TASK_STATUSES.completed }),
       abortController.signal
     );
+    expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ success: true })
+    );
   });
 
   it('passes agent field_mappings to generateFieldMappings', async () => {

@@ -145,7 +145,7 @@
               "(name: string, signal?: NodeJS.Signals) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 157,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -161,7 +161,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 160,
+                "lineNumber": 147,
                 "columnNumber": 14,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -178,7 +178,7 @@
                   "NodeJS.Signals"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 160,
+                "lineNumber": 147,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -202,7 +202,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 169,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -224,7 +224,7 @@
               "(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-            "lineNumber": 177,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -240,7 +240,7 @@
                   "\"exit\" | NodeJS.Signals"
                 ],
                 "path": "src/platform/packages/shared/kbn-dev-proc-runner/src/proc_runner.ts",
-                "lineNumber": 184,
+                "lineNumber": 171,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,

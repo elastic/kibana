@@ -30,6 +30,7 @@
     "@kbn/discover-utils",
     "@kbn/i18n-react",
     "@kbn/es-query",
+    "@kbn/esql-utils",
     "@kbn/react-hooks",
     "@kbn/alerting-v2-constants",
     "@kbn/es-types",

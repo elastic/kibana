@@ -615,6 +615,7 @@ describe('generateOtelcolConfig', () => {
               context: 'span',
               statements: [
                 'set(attributes["data_stream.type"], "traces")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
                 'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
@@ -622,6 +623,7 @@ describe('generateOtelcolConfig', () => {
               context: 'spanevent',
               statements: [
                 'set(attributes["data_stream.type"], "logs")',
+                'set(attributes["data_stream.dataset"], "zipkinreceiver")',
                 'set(attributes["data_stream.namespace"], "apmtest")',
               ],
             },
@@ -669,6 +671,39 @@ describe('generateOtelcolConfig', () => {
         },
       },
     });
+  });
+
+  it('should include dataset in span routing transform for traces input without use_apm', () => {
+    const otelTracesInputNoAPM: FullAgentPolicyInput = {
+      ...otelTracesInputWithAPM,
+      streams: otelTracesInputWithAPM.streams?.map((stream) => {
+        const { use_apm: _useApm, ...rest } = stream as any;
+        return rest;
+      }),
+    };
+    const inputs: FullAgentPolicyInput[] = [otelTracesInputNoAPM];
+    const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput });
+
+    expect(
+      result.processors?.['transform/test-traces-stream-id-1-routing']?.trace_statements
+    ).toEqual([
+      {
+        context: 'span',
+        statements: [
+          'set(attributes["data_stream.type"], "traces")',
+          'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+          'set(attributes["data_stream.namespace"], "apmtest")',
+        ],
+      },
+      {
+        context: 'spanevent',
+        statements: [
+          'set(attributes["data_stream.type"], "logs")',
+          'set(attributes["data_stream.dataset"], "zipkinreceiver")',
+          'set(attributes["data_stream.namespace"], "apmtest")',
+        ],
+      },
+    ]);
   });
 
   it('should produce separate aggregated-apm-metrics pipelines for two APM package policies with different namespaces', () => {
@@ -967,13 +1002,13 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // dynamic_signal_types: data_stream.dataset is NOT set — deferred to ES exporter routing
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
           {
             context: 'log',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -983,6 +1018,7 @@ describe('generateOtelcolConfig', () => {
             context: 'datapoint',
             statements: [
               'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -992,6 +1028,7 @@ describe('generateOtelcolConfig', () => {
             context: 'span',
             statements: [
               'set(attributes["data_stream.type"], "traces")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -999,6 +1036,7 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1008,6 +1046,7 @@ describe('generateOtelcolConfig', () => {
             context: 'profile',
             statements: [
               'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1019,13 +1058,13 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithMultipleSignalTypes2];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // dynamic_signal_types: data_stream.dataset is NOT set — deferred to ES exporter routing
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
           {
             context: 'log',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1035,6 +1074,7 @@ describe('generateOtelcolConfig', () => {
             context: 'datapoint',
             statements: [
               'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1044,6 +1084,7 @@ describe('generateOtelcolConfig', () => {
             context: 'span',
             statements: [
               'set(attributes["data_stream.type"], "traces")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1051,6 +1092,7 @@ describe('generateOtelcolConfig', () => {
             context: 'spanevent',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1060,6 +1102,7 @@ describe('generateOtelcolConfig', () => {
             context: 'profile',
             statements: [
               'set(attributes["data_stream.type"], "profiles")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1095,13 +1138,13 @@ describe('generateOtelcolConfig', () => {
       const inputs: FullAgentPolicyInput[] = [otelInputWithSubsetSignalTypes];
       const result = generateOtelcolConfig({ inputs, dataOutput: defaultOutput, packageInfoCache });
 
-      // dynamic_signal_types: data_stream.dataset is NOT set — deferred to ES exporter routing
       expect(result.processors?.['transform/test-multi-signal-stream-id-1-routing']).toEqual({
         log_statements: [
           {
             context: 'log',
             statements: [
               'set(attributes["data_stream.type"], "logs")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1111,6 +1154,7 @@ describe('generateOtelcolConfig', () => {
             context: 'datapoint',
             statements: [
               'set(attributes["data_stream.type"], "metrics")',
+              'set(attributes["data_stream.dataset"], "multidataset")',
               'set(attributes["data_stream.namespace"], "default")',
             ],
           },
@@ -1986,6 +2030,27 @@ describe('generateOtelcolConfig', () => {
         secrets: { ssl: { key: { id: 'my-secret-id' } } },
       });
     });
+
+    it('should suppress ssl.key from config_yaml when secrets.ssl.key is set', () => {
+      // config_yaml has a plain ssl.key — it must be stripped when a secret key is configured,
+      // otherwise both would appear in beatsauth (plain key in ssl.key, secret in secrets.ssl.key).
+      const outputWithYamlKeyAndSecret: Output = {
+        ...defaultOutput,
+        config_yaml: 'ssl:\n  key: plain-key-from-yaml\n  verification_mode: none',
+        secrets: {
+          ssl: { key: { id: 'secret-id-takes-precedence' } },
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithYamlKeyAndSecret });
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: { verification_mode: 'none' }, // key stripped from ssl
+        secrets: { ssl: { key: { id: 'secret-id-takes-precedence' } } },
+      });
+      // Ensure no plain key leaks through
+      expect((result.extensions?.['beatsauth/default'] as any)?.ssl?.key).toBeUndefined();
+    });
   });
 
   describe('otel_exporter_config_yaml merging', () => {
@@ -2078,6 +2143,178 @@ describe('generateOtelcolConfig', () => {
       expect(result.exporters?.['elasticsearch/default']).toEqual({
         endpoints: defaultOutput.hosts,
       });
+    });
+  });
+
+  describe('config_yaml Advanced YAML parameters in beatsauth', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+
+    it('should include ssl parameters from config_yaml in beatsauth', () => {
+      const outputWithConfigYaml: Output = {
+        ...defaultOutput,
+        config_yaml:
+          'ssl:\n  certificate_authorities:\n    - /path/to/ca.crt\n  verification_mode: none',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithConfigYaml });
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: {
+          certificate_authorities: ['/path/to/ca.crt'],
+          verification_mode: 'none',
+        },
+      });
+    });
+
+    it('should include timeout and idle_connection_timeout from config_yaml in beatsauth', () => {
+      const outputWithConfigYaml: Output = {
+        ...defaultOutput,
+        config_yaml: 'timeout: 30s\nidle_connection_timeout: 5s',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithConfigYaml });
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        timeout: '30s',
+        idle_connection_timeout: '5s',
+      });
+    });
+
+    it('should include proxy fields from config_yaml in beatsauth when no structured proxy is set', () => {
+      const outputWithConfigYaml: Output = {
+        ...defaultOutput,
+        config_yaml:
+          'proxy_url: socks5://internal-proxy:1080\nproxy_headers:\n  X-Proxy-Auth: token',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithConfigYaml });
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        proxy_url: 'socks5://internal-proxy:1080',
+        proxy_headers: { 'X-Proxy-Auth': 'token' },
+      });
+    });
+
+    it('structured ssl fields should take precedence over config_yaml ssl values', () => {
+      const outputWithBoth: Output = {
+        ...defaultOutput,
+        // config_yaml sets verification_mode to none and a CA path
+        config_yaml:
+          'ssl:\n  verification_mode: none\n  certificate_authorities:\n    - /yaml/ca.crt',
+        // structured field overrides verification_mode to full and provides its own CA
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nSTRUCTURED_CA'],
+          verification_mode: 'full',
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithBoth });
+
+      expect(result.extensions?.['beatsauth/default']).toEqual({
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nSTRUCTURED_CA'],
+          verification_mode: 'full',
+        },
+      });
+    });
+
+    it('should not crash when config_yaml is null', () => {
+      const outputWithNull: Output = {
+        ...defaultOutput,
+        config_yaml: null,
+      };
+
+      expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithNull })).not.toThrow();
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithNull });
+      expect(result.extensions?.['beatsauth/default']).toBeUndefined();
+    });
+
+    it('should throw when config_yaml contains malformed YAML', () => {
+      const outputWithBadYaml: Output = {
+        ...defaultOutput,
+        config_yaml: ': invalid yaml',
+      };
+
+      expect(() => generateOtelcolConfig({ inputs, dataOutput: outputWithBadYaml })).toThrow();
+    });
+  });
+
+  describe('otel_disable_beatsauth toggle', () => {
+    const inputs: FullAgentPolicyInput[] = [otelInput1];
+
+    it('should omit beatsauth extension and auth when otel_disable_beatsauth is true', () => {
+      const outputWithDisabledBeatsauth: Output = {
+        ...defaultOutput,
+        otel_disable_beatsauth: true,
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nMIIC...'],
+          verification_mode: 'full',
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithDisabledBeatsauth });
+
+      expect(result.extensions?.['beatsauth/default']).toBeUndefined();
+      expect(result.exporters?.['elasticsearch/default']).not.toHaveProperty('auth');
+      expect(result.service?.extensions ?? []).not.toContain('beatsauth/default');
+    });
+
+    it('should still include endpoints in exporter when otel_disable_beatsauth is true', () => {
+      const outputWithDisabledBeatsauth: Output = {
+        ...defaultOutput,
+        otel_disable_beatsauth: true,
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithDisabledBeatsauth });
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        endpoints: defaultOutput.hosts,
+      });
+    });
+
+    it('should still merge otel_exporter_config_yaml into exporter when otel_disable_beatsauth is true', () => {
+      const outputWithDisabledBeatsauth: Output = {
+        ...defaultOutput,
+        otel_disable_beatsauth: true,
+        otel_exporter_config_yaml: 'flush_interval: 5s',
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithDisabledBeatsauth });
+
+      expect(result.exporters?.['elasticsearch/default']).toEqual({
+        flush_interval: '5s',
+        endpoints: defaultOutput.hosts,
+      });
+      expect(result.extensions?.['beatsauth/default']).toBeUndefined();
+    });
+
+    it('should use beatsauth normally when otel_disable_beatsauth is false', () => {
+      const outputWithEnabledBeatsauth: Output = {
+        ...defaultOutput,
+        otel_disable_beatsauth: false,
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nMIIC...'],
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithEnabledBeatsauth });
+
+      expect(result.extensions?.['beatsauth/default']).toBeDefined();
+      expect(result.exporters?.['elasticsearch/default']).toHaveProperty('auth');
+    });
+
+    it('should use beatsauth normally when otel_disable_beatsauth is undefined', () => {
+      const outputWithSSL: Output = {
+        ...defaultOutput,
+        ssl: {
+          certificate_authorities: ['-----BEGIN CERTIFICATE-----\nMIIC...'],
+        },
+      };
+
+      const result = generateOtelcolConfig({ inputs, dataOutput: outputWithSSL });
+
+      expect(result.extensions?.['beatsauth/default']).toBeDefined();
+      expect(result.exporters?.['elasticsearch/default']).toHaveProperty('auth');
     });
   });
 });

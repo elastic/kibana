@@ -33,7 +33,7 @@ const supportedLocations: ScoutTargetLocation[] = ScoutTargetLocationSchema.opti
 
 export const SERVER_FLAG_OPTIONS: FlagOptions = {
   string: ['location', 'arch', 'domain', 'serverConfigSet', 'esFrom', 'kibanaInstallDir'],
-  boolean: ['logToFile'],
+  boolean: ['logToFile', 'preserveEsData'],
   default: { location: 'local', serverConfigSet: 'default' },
   help: `
     --location          Where is the test target located (one of: ${supportedLocations.join(
@@ -45,6 +45,7 @@ export const SERVER_FLAG_OPTIONS: FlagOptions = {
     --esFrom            Build Elasticsearch from source or run snapshot or serverless. [default: $TEST_ES_FROM or "snapshot"]
     --kibanaInstallDir  Run Kibana from existing install directory instead of from source
     --logToFile         Write the log output from Kibana/ES to files instead of to stdout
+    --preserveEsData    Reuse existing serverless ES object store data instead of cleaning it on startup
   `,
 };
 
@@ -71,6 +72,7 @@ export function parseServerFlags(flags: FlagsReader) {
   const serverConfigSet = flags.requiredString('serverConfigSet');
   const esFrom = flags.enum('esFrom', ['source', 'snapshot', 'serverless']);
   const installDir = flags.string('kibanaInstallDir');
+  const preserveEsData = flags.boolean('preserveEsData');
   const logsDir = flags.boolean('logToFile')
     ? resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
     : undefined;
@@ -79,6 +81,7 @@ export function parseServerFlags(flags: FlagsReader) {
     testTarget,
     serverConfigSet,
     esFrom,
+    preserveEsData,
     installDir,
     logsDir,
   };

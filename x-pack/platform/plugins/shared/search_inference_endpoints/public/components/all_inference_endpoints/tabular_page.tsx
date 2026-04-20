@@ -44,7 +44,6 @@ import { DeleteAction } from './render_table_columns/render_actions/actions/dele
 
 import { EndpointsTable } from './endpoints_table';
 import { GroupedEndpointsTables } from './grouped_endpoints/grouped_endpoints_tables';
-import { EisCallouts } from './eis_callouts';
 
 const searchContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   width: ${euiTheme.base * 25}px;
@@ -71,13 +70,9 @@ const initializeGroupBy = (): GroupByOptions => {
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
-  isEisEnabled?: boolean;
 }
 
-export const TabularPage: React.FC<TabularPageProps> = ({
-  inferenceEndpoints,
-  isEisEnabled = false,
-}) => {
+export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
@@ -197,7 +192,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({
   return (
     <>
       <EuiFlexGroup direction="column">
-        {!isEisEnabled && <EisCallouts />}
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />

@@ -1,7 +1,10 @@
 post:
   summary: Lookup single agent configuration
-  description: |
-    This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.
+  deprecated: true
+  description: >
+    DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied.
+    Do not use for new integrations.
+    It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.
   operationId: searchSingleConfiguration
   tags:
     - APM agent configuration

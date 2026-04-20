@@ -27,7 +27,12 @@ export const AGENT_BUILDER_EVENT_TYPES = {
   ToolCallError: `${TELEMETRY_PREFIX}_tool_call_error`,
 } as const;
 
-export type OptInSource = 'security_settings_menu' | 'stack_management' | 'security_ab_tour';
+export type OptInSource =
+  | 'security_settings_menu'
+  | 'stack_management'
+  | 'security_ab_tour'
+  | 'agent_builder_nav_control';
+
 export type OptInAction =
   | 'step_reached'
   | 'confirmation_shown'
@@ -41,7 +46,7 @@ export interface ReportOptInActionParams {
 }
 
 export interface ReportOptOutParams {
-  source: 'security_settings_menu' | 'stack_management';
+  source: 'security_settings_menu' | 'stack_management' | 'agent_builder_nav_control';
 }
 
 export interface ReportAddToChatClickedParams {
@@ -204,7 +209,7 @@ const OPT_IN_EVENT: AgentBuilderTelemetryEvent = {
       type: 'keyword',
       _meta: {
         description:
-          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour)',
+          'Source of the opt-in action (security_settings_menu|stack_management|security_ab_tour|agent_builder_nav_control)',
         optional: false,
       },
     },
@@ -217,7 +222,8 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
     source: {
       type: 'keyword',
       _meta: {
-        description: 'Source of the opt-out action (security_settings_menu|stack_management)',
+        description:
+          'Source of the opt-out action (security_settings_menu|stack_management|agent_builder_nav_control)',
         optional: false,
       },
     },

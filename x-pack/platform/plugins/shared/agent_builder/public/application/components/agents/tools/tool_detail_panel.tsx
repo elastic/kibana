@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,6 +21,7 @@ import { useToolService } from '../../../hooks/tools/use_tools';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
+import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
 
 interface ToolDetailPanelProps {
   toolId: string;
@@ -45,7 +45,7 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
       isLoading={isLoading}
       isEmpty={!tool}
       title={tool?.id ?? toolId}
-      showAutoIcon={isAutoIncluded}
+      isReadOnly={isReadOnly}
       headerContent={
         <EuiText
           size="xs"
@@ -76,23 +76,10 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
         onConfirm: onRemove,
       }}
     >
-      <div
-        css={css`
-          padding: ${euiTheme.size.l};
-        `}
-      >
-        <EuiTitle size="xxxs">
-          <h4>{labels.agentTools.toolDetailDescriptionLabel}</h4>
-        </EuiTitle>
-        <EuiText
-          size="s"
-          css={css`
-            margin-top: ${euiTheme.size.s};
-          `}
-        >
-          {tool?.description || '\u2014'}
-        </EuiText>
-      </div>
+      <RenderMarkdownReadOnly
+        content={tool?.description ?? ''}
+        label={labels.agentTools.toolDetailDescriptionLabel}
+      />
     </DetailPanelLayout>
   );
 };

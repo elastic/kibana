@@ -8,11 +8,55 @@
 import React from 'react';
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getSurveyFeedbackURL } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
+const KIBANA_VERSION_QUERY_PARAM = 'version';
+const KIBANA_DEPLOYMENT_TYPE_PARAM = 'deployment_type';
+const SANITIZED_PATH_PARAM = 'path';
+
+const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): string => {
+  if (isServerlessEnv) {
+    return 'Serverless';
+  }
+  if (isCloudEnv) {
+    return 'Elastic Cloud';
+  }
+  return 'Self-Managed';
+};
+
+const getSurveyFeedbackURL = ({
+  formUrl,
+  kibanaVersion,
+  sanitizedPath,
+  isCloudEnv,
+  isServerlessEnv,
+}: {
+  formUrl: string;
+  kibanaVersion?: string;
+  sanitizedPath?: string;
+  isCloudEnv?: boolean;
+  isServerlessEnv?: boolean;
+}) => {
+  const deploymentType =
+    isCloudEnv !== undefined || isServerlessEnv !== undefined
+      ? getDeploymentType(isCloudEnv, isServerlessEnv)
+      : undefined;
+
+  const url = new URL(formUrl);
+  if (kibanaVersion) {
+    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
+  }
+  if (deploymentType) {
+    url.searchParams.append(KIBANA_DEPLOYMENT_TYPE_PARAM, deploymentType);
+  }
+  if (sanitizedPath) {
+    url.searchParams.append(SANITIZED_PATH_PARAM, sanitizedPath);
+  }
+
+  return url.href;
+};
 
 interface Props {
   disabled?: boolean;

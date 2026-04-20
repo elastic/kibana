@@ -7,12 +7,13 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { MlFeatures } from '../../common/constants/app';
 import {
-  CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
-  CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
-  CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
-} from '../../common/constants/cases';
+  ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+  ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+  ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
+import type { MlFeatures } from '../../common/constants/app';
+import { casesSchemaValidator } from '../../common/util/cases_utils';
 
 export function registerCasesPersistableState(
   cases: CasesServerSetup,
@@ -21,31 +22,34 @@ export function registerCasesPersistableState(
 ) {
   if (enabledFeatures.ad === true) {
     try {
-      cases.attachmentFramework.registerPersistableState({
-        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+      cases.attachmentFramework.registerUnified({
+        id: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
+        schemaValidator: casesSchemaValidator,
       });
     } catch (error) {
       logger.warn(
-        `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE}`
+        `ML failed to register cases persistable state for ${ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE}`
       );
     }
     try {
-      cases.attachmentFramework.registerPersistableState({
-        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+      cases.attachmentFramework.registerUnified({
+        id: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
+        schemaValidator: casesSchemaValidator,
       });
     } catch (error) {
       logger.warn(
-        `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS}`
+        `ML failed to register cases persistable state for ${ML_ANOMALY_CHARTS_ATTACHMENT_TYPE}`
       );
     }
 
     try {
-      cases.attachmentFramework.registerPersistableState({
-        id: CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
+      cases.attachmentFramework.registerUnified({
+        id: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
+        schemaValidator: casesSchemaValidator,
       });
     } catch (error) {
       logger.warn(
-        `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER}`
+        `ML failed to register cases persistable state for ${ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE}`
       );
     }
   }

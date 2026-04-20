@@ -17,9 +17,12 @@ import { WORKFLOWS_EVENTS_DATA_STREAM } from './constants';
 export const initializeTriggerEventsDataStream = (coreDataStreams: DataStreamsSetup): void => {
   coreDataStreams.registerDataStream({
     name: WORKFLOWS_EVENTS_DATA_STREAM,
-    version: 2,
+    version: 3,
     template: {
       mappings: triggerEventsMappings,
+      settings: {
+        auto_expand_replicas: '0-1',
+      },
     },
   });
 };

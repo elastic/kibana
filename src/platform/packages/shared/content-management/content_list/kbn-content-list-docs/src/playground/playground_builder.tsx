@@ -30,9 +30,13 @@ import { ContentListToolbar } from '@kbn/content-list-toolbar';
 import { ContentListFooter } from '@kbn/content-list-footer';
 
 import {
+  buildMockItems,
   createMockFavoritesClient,
   createStoryFindItems,
+  createMockTagFacetProvider,
+  createMockUserProfileFacetProvider,
   mockTagsService,
+  mockContentListUserProfilesServices,
   toJsx,
 } from '../stories_helpers';
 import { BuilderPanel } from './builder_panel';
@@ -113,22 +117,22 @@ const usePreview = (state: PlaygroundState) => {
 
   const sortFields = useMemo(() => buildSortFields(state.table.columns), [state.table.columns]);
 
-  const hasTagsFilter = toolbar.filters.some((f) => f.type === 'tags');
-  const hasTagsColumn = table.columns.some((c) => c.type === 'name' && c.props.showTags);
-  const hasTags = hasTagsFilter || hasTagsColumn;
-
-  // `features.starred` is the master switch in the playground: the favorites client
-  // and provider feature are only enabled when it is explicitly turned on.
-  // Starred columns and filters render silently empty without it.
+  // Feature toggles are master switches: the service and provider feature
+  // are only enabled when the toggle is on. Columns and filters for a
+  // disabled feature render silently empty.
+  const hasTags = features.tags;
   const hasStarred = features.starred;
+  const hasUserProfiles = features.userProfiles;
 
   // Memoized before `dataSource` so both the provider and findItems share the same
   // in-memory favorites set — starring an item is immediately reflected when the
-  // `starredOnly` filter is toggled.
+  // `starred` filter is toggled.
   const favoritesClient = useMemo(
     () => (hasStarred ? createMockFavoritesClient() : undefined),
     [hasStarred]
   );
+
+  const mockItems = useMemo(() => buildMockItems(data.totalItems), [data.totalItems]);
 
   const dataSource = useMemo(() => {
     const baseOptions = {
@@ -155,8 +159,11 @@ const usePreview = (state: PlaygroundState) => {
         ? { initialPageSize: features.initialPageSize }
         : (false as const),
       search: features.search ? {} : (false as const),
-      tags: hasTags ? true : (false as const),
+      tags: hasTags ? createMockTagFacetProvider(mockItems) : (false as const),
       starred: hasStarred ? true : (false as const),
+      userProfiles: hasUserProfiles
+        ? createMockUserProfileFacetProvider(mockItems)
+        : (false as const),
     }),
     [
       features.sorting,
@@ -166,6 +173,8 @@ const usePreview = (state: PlaygroundState) => {
       sortFields,
       hasTags,
       hasStarred,
+      hasUserProfiles,
+      mockItems,
     ]
   );
 
@@ -202,6 +211,8 @@ const usePreview = (state: PlaygroundState) => {
             return <Column.Name key={col.instanceId} {...cleanProps} />;
           case 'updatedAt':
             return <Column.UpdatedAt key={col.instanceId} {...cleanProps} />;
+          case 'createdBy':
+            return <Column.CreatedBy key={col.instanceId} {...cleanProps} />;
           case 'type': {
             const { columnTitle, ...rest } = cleanProps;
             return (
@@ -256,34 +267,20 @@ const usePreview = (state: PlaygroundState) => {
     const filterParts =
       toolbar.filters.length > 0
         ? toolbar.filters.map((f) => {
-            if (f.type === 'starred') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Starred />
-                </React.Fragment>
-              );
+            switch (f.type) {
+              case 'starred':
+                return <Filters.Starred key={f.instanceId} />;
+              case 'sort':
+                return <Filters.Sort key={f.instanceId} />;
+              case 'tags':
+                return <Filters.Tags key={f.instanceId} />;
+              case 'createdBy':
+                return <Filters.CreatedBy key={f.instanceId} />;
+              default:
+                return null;
             }
-            if (f.type === 'sort') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Sort />
-                </React.Fragment>
-              );
-            }
-            if (f.type === 'tags') {
-              return (
-                <React.Fragment key={f.instanceId}>
-                  <Filters.Tags />
-                </React.Fragment>
-              );
-            }
-            return null;
           })
-        : [
-            <React.Fragment key="sort">
-              <Filters.Sort />
-            </React.Fragment>,
-          ];
+        : [<Filters.Sort key="sort" />];
 
     return (
       <ContentListToolbar>
@@ -302,8 +299,11 @@ const usePreview = (state: PlaygroundState) => {
     if (hasStarred && favoritesClient) {
       s.favorites = favoritesClient;
     }
+    if (hasUserProfiles) {
+      s.userProfiles = mockContentListUserProfilesServices;
+    }
     return Object.keys(s).length > 0 ? s : undefined;
-  }, [hasTags, hasStarred, favoritesClient]);
+  }, [hasTags, hasStarred, favoritesClient, hasUserProfiles]);
 
   const providerProps = useMemo(
     () => ({

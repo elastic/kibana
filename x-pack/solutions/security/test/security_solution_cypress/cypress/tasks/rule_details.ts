@@ -29,14 +29,12 @@ import {
   EXCEPTIONS_TAB,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
-  EXECUTION_LOG_CONTAINER,
   EXECUTION_RESULTS_CONTAINER,
   EXECUTION_RESULTS_TABLE,
   EXECUTION_RESULTS_TABLE_ACTION_VIEW_DETAILS,
   EXECUTION_DETAILS_FLYOUT,
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
-  EXECUTION_TABLE,
   EXECUTIONS_TAB,
   EXPORT_RULE_ACTION_BUTTON,
   FIELDS_BROWSER_BTN,
@@ -140,19 +138,6 @@ export const goToExecutionLogTab = () => {
   cy.get(EXECUTIONS_TAB).click();
 };
 
-export const waitForExecutionLogTabToBePopulated = (minRowCount = 1) => {
-  cy.waitUntil(
-    () => {
-      cy.log('Waiting for execution logs to appear in execution log table');
-      refreshRuleExecutionTable();
-      return getExecutionLogTableRow().then((rows) => {
-        return rows.length > minRowCount - 1;
-      });
-    },
-    { interval: 5000, timeout: 20000 }
-  );
-};
-
 export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_EXPIRED_FILTER).click();
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
@@ -221,11 +206,6 @@ export const hasInvestigationFields = (fields: string) => {
 export const goToRuleEditSettings = () => {
   cy.get(EDIT_RULE_SETTINGS_LINK).click();
 };
-
-export const getExecutionLogTableRow = () => cy.get(EXECUTION_TABLE).find('tbody tr');
-
-export const refreshRuleExecutionTable = () =>
-  cy.get(`${EXECUTION_LOG_CONTAINER} ${LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE}`).click();
 
 export const getExecutionResultsTableRows = () => cy.get(EXECUTION_RESULTS_TABLE).find('tbody tr');
 

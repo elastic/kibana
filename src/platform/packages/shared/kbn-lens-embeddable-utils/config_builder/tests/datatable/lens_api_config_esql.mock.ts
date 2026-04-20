@@ -142,19 +142,21 @@ export const fullConfigESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
+    paging: 10,
   },
-  paging: 10,
 } satisfies DatatableStateESQL;
 
 /**
@@ -233,24 +235,26 @@ export const sortedByPivotedMetricColumnESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
-  },
-  paging: 10,
-  sort_by: {
-    column_type: 'pivoted_metric',
-    index: 0,
-    values: ['US', 'MM'],
-    direction: 'desc',
+    paging: 10,
+    sort_by: {
+      column_type: 'pivoted_metric',
+      index: 0,
+      values: ['US', 'MM'],
+      direction: 'desc',
+    },
   },
 } satisfies DatatableStateESQL;
 
@@ -330,22 +334,24 @@ export const sortedByRowColumnESQLDatatable: DatatableState = {
       column: 'geo.dest',
     },
   ],
-  density: {
-    mode: 'compact',
-    height: {
-      value: {
-        type: 'auto',
-      },
-      header: {
-        type: 'custom',
-        max_lines: 4,
+  styling: {
+    density: {
+      mode: 'compact',
+      height: {
+        value: {
+          type: 'auto',
+        },
+        header: {
+          type: 'custom',
+          max_lines: 4,
+        },
       },
     },
-  },
-  paging: 10,
-  sort_by: {
-    column_type: 'row',
-    index: 1,
-    direction: 'desc',
+    paging: 10,
+    sort_by: {
+      column_type: 'row',
+      index: 1,
+      direction: 'desc',
+    },
   },
 } satisfies DatatableStateESQL;

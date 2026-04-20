@@ -8,6 +8,27 @@
  */
 
 import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ContentListServices } from '@kbn/content-list-provider';
+
+/**
+ * UI settings accessor interface.
+ *
+ * Matches the minimal surface of `IUiSettingsClient` needed by the client provider.
+ */
+interface UiSettingsAccessor {
+  get: <T = unknown>(key: string) => T;
+}
+
+/**
+ * Services required by the client provider.
+ *
+ * Extends the base `ContentListServices` with `uiSettings`, which is used to read
+ * the `savedObjects:perPage` setting for default page size.
+ */
+export interface ContentListClientServices extends ContentListServices {
+  /** UI settings accessor. Required for reading defaults like page size. */
+  uiSettings: UiSettingsAccessor;
+}
 
 /**
  * Reference type matching `SavedObjectsFindOptionsReference` from Kibana core.

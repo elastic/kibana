@@ -76,7 +76,7 @@ const getSelectedOptions = (
 
 export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) => {
   const { state, setDefaultModelId, setDisallowOtherModels } = defaultModelSettings;
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
     state.defaultModelId
   );

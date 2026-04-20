@@ -6,9 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import { memoize, random } from 'lodash';
 import { parseDuration } from '../parse-duration/parse-duration';
 
+// parseDuration is on the hot path of retry delay computation,
+// so we memoize it to avoid redundant parsing of the same duration strings across retries.
+// The number of unique duration strings is expected to be small (e.g. "5s", "1m", "5m"),
+// so the memory overhead of memoization should be minimal.
+const parseDurationMemoized = memoize(parseDuration);
 /**
  * Configuration for retry delay computation.
  * Matches the retry section of workflow on-failure config (delay, strategy, multiplier, max-delay, jitter).
@@ -44,7 +49,7 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
     if (!hasDelay || !config.delay) {
       return 0;
     }
-    let delayMs = parseDuration(config.delay);
+    let delayMs = parseDurationMemoized(config.delay);
     if (config.jitter) {
       delayMs = applyJitter(delayMs);
     }
@@ -53,12 +58,12 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
 
   // strategy === 'exponential'
   const initialDelayStr = config.delay ?? DEFAULT_EXPONENTIAL_INITIAL_DELAY;
-  const initialMs = parseDuration(initialDelayStr);
+  const initialMs = parseDurationMemoized(initialDelayStr);
   const multiplier = config.multiplier ?? DEFAULT_EXPONENTIAL_MULTIPLIER;
   let delayMs = initialMs * Math.pow(multiplier, attempt);
 
   if (config['max-delay']) {
-    const maxMs = parseDuration(config['max-delay']);
+    const maxMs = parseDurationMemoized(config['max-delay']);
     delayMs = Math.min(delayMs, maxMs);
   }
 
@@ -70,8 +75,8 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
 }
 
 /**
- * Applies full jitter: delay * random(0, 1) to spread retries and avoid thundering herd.
+ * Applies full jitter: delay * random(0.5, 1) to spread retries and avoid thundering herd.
  */
 function applyJitter(delayMs: number): number {
-  return Math.floor(delayMs * Math.random());
+  return Math.floor(random(delayMs / 2, delayMs));
 }

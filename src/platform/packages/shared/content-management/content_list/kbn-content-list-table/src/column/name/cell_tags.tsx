@@ -35,7 +35,7 @@ export interface NameCellTagsProps {
  * Consumers can override this behavior via the `onTagClick` prop.
  */
 export const NameCellTags = memo(function NameCellTags({ tagIds, onTagClick }: NameCellTagsProps) {
-  const toggleTag = useTagFilterToggle();
+  const toggle = useTagFilterToggle();
 
   const handleTagClick = useCallback(
     (tag: Tag, withModifierKey: boolean) => {
@@ -45,10 +45,10 @@ export const NameCellTags = memo(function NameCellTags({ tagIds, onTagClick }: N
       }
 
       if (tag.id) {
-        toggleTag(tag.id, tag.name, withModifierKey);
+        toggle(tag.id, withModifierKey ? 'exclude' : 'include');
       }
     },
-    [toggleTag, onTagClick]
+    [toggle, onTagClick]
   );
 
   if (tagIds.length === 0) {

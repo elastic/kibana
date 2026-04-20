@@ -9,7 +9,7 @@ export const KIBANA_HOME = '/app/home#/';
 export const LOGOUT_URL = '/logout';
 
 // Common
-export const GET_STARTED_URL = '/app/security/get_started';
+
 export const MANAGE_URL = '/app/security/manage';
 export const DASHBOARDS_URL = '/app/security/dashboards';
 
@@ -26,6 +26,8 @@ export const RESPONSE_ACTIONS_HISTORY = `app/security/administration/response_ac
 
 export const CSP_BENCHMARKS_URL = '/app/security/cloud_security_posture/benchmarks';
 export const CSP_DASHBOARD_URL = '/app/security/cloud_security_posture/dashboard';
+export const CLOUD_NATIVE_VULN_MGMT_URL =
+  '/app/security/cloud_security_posture/vulnerability_dashboard';
 export const CSP_FINDINGS_URL = '/app/security/cloud_security_posture/findings/configurations';
 export const CSP_VULNERABILITIES_URL =
   '/app/security/cloud_security_posture/findings/vulnerabilities';
@@ -39,6 +41,10 @@ export const NETWORK_URL = '/app/security/network/events';
 export const OVERVIEW_URL = '/app/security/overview';
 
 export const ENTITY_ANALYTICS_URL = '/app/security/entity_analytics';
+
+export const KUBERNETES_URL = '/app/security/kubernetes';
+
+export const DATA_QUALITY_URL = '/app/security/data_quality';
 
 export const THREAT_INTELLIGENCE_URL = '/app/security/threat_intelligence';
 export const INDICATORS_URL = '/app/security/threat_intelligence/indicators';
@@ -115,3 +121,11 @@ export const CUSTOM_ROLES_URL = 'app/management/security/roles/edit';
 // Alerting
 export const STACK_RULES_URL = 'app/management/insightsAndAlerting/triggersActions/rules';
 export const MAINTENANCE_WINDOW_URL = 'app/management/insightsAndAlerting/maintenanceWindows';
+
+// Launchpad
+export const GET_STARTED_URL = '/app/security/get_started';
+export const SIEM_READINESS_URL = 'app/security/siem_readiness/visibility/coverage';
+export const VALUE_REPORTS_URL = 'app/security/reports/ai_value';
+export const MANAGE_AUTOMATIC_MIGRATIONS_URL = 'app/security/siem_migrations/manage';
+export const TRANSLATED_RULES_PAGE_URL = 'app/security/siem_migrations/rules';
+export const TRANSLATED_DASHBOARDS_PAGE_URL = 'app/security/siem_migrations/dashboards';

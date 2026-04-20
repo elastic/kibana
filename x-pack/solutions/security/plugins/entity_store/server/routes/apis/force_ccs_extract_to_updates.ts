@@ -33,6 +33,9 @@ export function registerForceCcsExtractToUpdates(router: EntityStorePluginRouter
     .post({
       path: ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES,
       access: 'internal',
+      summary: 'Force cross-cluster search extraction',
+      description:
+        'Trigger an immediate cross-cluster search extraction for the specified entity type, index patterns, and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

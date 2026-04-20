@@ -35,6 +35,9 @@ jest.mock('../../../../common', () => ({
     isLoading: false,
   })),
   generateId: jest.fn(() => 'mock-id'),
+  normalizeTitleName: jest.fn((v: string) => v.toLowerCase().replace(/\s+/g, '_')),
+  isValidNameFormat: jest.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+  startsWithLetter: jest.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
   useKibana: jest.fn(() => ({
     services: {
       http: {},
@@ -49,6 +52,7 @@ jest.mock('../../../../common/lib/api', () => ({
       items: [],
     })
   ),
+  getAllIntegrations: jest.fn(() => Promise.resolve([])),
 }));
 
 const mockReportAnalyzeLogsTriggered = jest.fn();
@@ -236,6 +240,52 @@ describe('CreateDataStreamFlyout', () => {
 
       expect(getByTestId('analyzeLogsButton')).toBeDisabled();
     });
+
+    it('should keep analyze button disabled when integration title is a single character', async () => {
+      const Wrapper = createWrapper({
+        title: 'A',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'Valid stream',
+        dataStreamDescription: 'Stream description',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
+
+    it('should keep analyze button disabled when data stream title is a single character', async () => {
+      const Wrapper = createWrapper({
+        title: 'Integration',
+        description: 'Integration description',
+        connectorId: 'connector-1',
+        dataStreamTitle: 'B',
+        dataStreamDescription: 'Stream description',
+        dataCollectionMethod: ['filestream'],
+        logSample: '2024-01-01 level=info msg=test',
+      });
+      const { getByTestId } = render(
+        <Wrapper>
+          <CreateDataStreamFlyout onClose={mockOnClose} />
+        </Wrapper>
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeInTheDocument();
+      });
+
+      expect(getByTestId('analyzeLogsButton')).toBeDisabled();
+    });
   });
 
   describe('log source selection', () => {
@@ -251,7 +301,6 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceUploadCard')).toBeInTheDocument();
       });
 
-      // Upload card should be checked by default
       const uploadCard = getByTestId('logsSourceUploadCard');
       const radio = uploadCard.querySelector('input[type="radio"]');
       expect(radio).toBeChecked();
@@ -269,12 +318,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Click the index source card
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // Index card should now be checked
       expect(radio).toBeChecked();
     });
 
@@ -290,16 +337,13 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Index select should be disabled initially (upload is default)
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('[data-test-subj="comboBoxSearchInput"]')).toBeDisabled();
 
-      // Click the index source card
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // Index select should now be enabled
       await waitFor(() => {
         expect(
           indexSelect.querySelector('[data-test-subj="comboBoxSearchInput"]')
@@ -328,12 +372,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Switch to index source
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // Error should be displayed
       await waitFor(() => {
         expect(getByText('Index is missing event.original field')).toBeInTheDocument();
       });
@@ -361,12 +403,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Switch to index source
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
@@ -390,12 +430,10 @@ describe('CreateDataStreamFlyout', () => {
         expect(getByTestId('logsSourceIndexCard')).toBeInTheDocument();
       });
 
-      // Switch to index source
       const indexCard = getByTestId('logsSourceIndexCard');
       const radio = indexCard.querySelector('input[type="radio"]');
       fireEvent.click(radio!);
 
-      // The combobox should show loading state
       const indexSelect = getByTestId('indexSelect');
       expect(indexSelect.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });

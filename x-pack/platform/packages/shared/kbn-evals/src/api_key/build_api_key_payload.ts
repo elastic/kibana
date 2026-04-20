@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import goldenClusterPrivileges from './golden_cluster_privileges.json';
+import { goldenClusterPrivileges } from '@kbn/evals-common';
 
 /**
  * Builds the Dev Tools console payload for creating a golden cluster API key.
  *
- * Privileges are read from golden_cluster_privileges.json so the CLI, README,
+ * Privileges are sourced from @kbn/evals-common so the CLI, plugin UI,
  * and upload scripts all share a single source of truth.
  */
 export const buildApiKeyPayload = (userIdentifier: string): string => {
@@ -18,6 +18,7 @@ export const buildApiKeyPayload = (userIdentifier: string): string => {
     name: `kbn-evals-${userIdentifier}`,
     expiration: '90d',
     ...goldenClusterPrivileges,
+    metadata: { application: 'kbn-evals', purpose: 'local development' },
   };
 
   return `POST kbn:/internal/security/api_key\n${JSON.stringify(body, null, 2)}`;

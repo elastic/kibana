@@ -145,7 +145,7 @@ export const AboutSection = memo(() => {
       title={ABOUT_SECTION_TITLE}
       localStorageKey={FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS}
       sectionId={KEY}
-      gutterSize="s"
+      gutterSize="none"
       data-test-subj={ABOUT_SECTION_TEST_ID}
     >
       {content}

@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const TABLE_CAPTION = i18n.translate('xpack.evals.runsList.tableCaption', {
+  defaultMessage: 'Evaluation runs',
+});
+
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.evals.runsList.searchPlaceholder', {
   defaultMessage: 'Filter by branch...',
 });
@@ -63,3 +67,38 @@ export const SUITE_FILTER_ARIA_LABEL = i18n.translate('xpack.evals.runsList.suit
 export const SUITE_FILTER_ALL_OPTION = i18n.translate('xpack.evals.runsList.suiteFilterAllOption', {
   defaultMessage: 'All suites',
 });
+
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.runsList.loadErrorTitle', {
+  defaultMessage: 'Unable to load runs',
+});
+
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.runsList.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading runs: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.runsList.retryButton', {
+  defaultMessage: 'Retry',
+});
+
+export const COMPARE_SELECTED_BUTTON = i18n.translate(
+  'xpack.evals.runsList.compareSelectedButton',
+  {
+    defaultMessage: 'Compare selected',
+  }
+);
+
+export const COMPARE_SELECTION_HINT = i18n.translate('xpack.evals.runsList.compareSelectionHint', {
+  defaultMessage: 'Select exactly 2 runs from the same suite to compare',
+});
+
+export const COMPARE_DIFFERENT_SUITE_HINT = i18n.translate(
+  'xpack.evals.runsList.compareDifferentSuiteHint',
+  { defaultMessage: 'Only runs from the same suite can be compared' }
+);
+
+export const COMPARE_MAX_SELECTED_HINT = i18n.translate(
+  'xpack.evals.runsList.compareMaxSelectedHint',
+  { defaultMessage: '2 runs already selected - deselect one to pick a different run' }
+);

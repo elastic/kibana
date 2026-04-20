@@ -11,35 +11,51 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { markdownEmbeddableFactory } from './markdown_embeddable';
 import type { MarkdownEditorApi } from './types';
+import type { MarkdownEmbeddableState } from '../server/embeddable/schemas';
+import { markdownEmbeddableSchema } from '../server/embeddable/schemas';
 
 jest.mock('./markdown_client/markdown_client', () => {
   return {
     markdownClient: {
+      get: jest.fn(() => {
+        return Promise.resolve({
+          data: {
+            title: 'Markdown from library',
+            description: 'some description',
+            content: 'Loaded **markdown** content.',
+            settings: {
+              open_links_in_new_tab: true,
+            },
+          },
+        });
+      }),
       create: jest.fn().mockResolvedValue({ id: 'markdown-id-123' }),
       update: jest.fn().mockResolvedValue({ id: 'markdown-id-123' }),
     },
   };
 });
 
-jest.mock('./markdown_client/load_from_library', () => {
-  return {
-    loadFromLibrary: jest.fn((savedObjectId) => {
-      return Promise.resolve({
-        title: 'Markdown from library',
-        description: 'some description',
-        content: 'Loaded **markdown** content.',
-      });
-    }),
-  };
-});
+const defaultByValueState = {
+  content: '[click here](https://example.com)',
+  settings: {
+    open_links_in_new_tab: true,
+  },
+};
 
 const renderEmbeddable = async (
-  overrideParams?: Partial<Parameters<(typeof markdownEmbeddableFactory)['buildEmbeddable']>[0]>
+  initialState?: MarkdownEmbeddableState,
+  lastSavedState?: MarkdownEmbeddableState
 ) => {
+  function getInitialState() {
+    return initialState ?? defaultByValueState;
+  }
+  function getLastSavedState() {
+    return lastSavedState ?? getInitialState();
+  }
   const parentApiStub = {
     replacePanel: jest.fn(),
     children$: new BehaviorSubject([]),
@@ -47,15 +63,15 @@ const renderEmbeddable = async (
     setFocusedPanelId: jest.fn(),
     addNewPanel: jest.fn(),
     viewMode$: new BehaviorSubject<ViewMode>('view'),
+    lastSavedStateForChild$: () => of(getLastSavedState()),
+    getLastSavedStateForChild: getLastSavedState,
   };
 
   const factory = markdownEmbeddableFactory;
 
   const embeddable = await factory.buildEmbeddable({
     initializeDrilldownsManager: jest.fn(),
-    initialState: {
-      content: '[click here](https://example.com)',
-    },
+    initialState: getInitialState(),
     parentApi: parentApiStub,
     finalizeApi: (api) =>
       ({
@@ -64,7 +80,6 @@ const renderEmbeddable = async (
         parentApi: parentApiStub,
       } as unknown as MarkdownEditorApi),
     uuid: 'test-uuid',
-    ...overrideParams,
   });
 
   await act(async () => render(<embeddable.Component />));
@@ -81,15 +96,8 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('renders markdown content as HTML', async () => {
-    await renderEmbeddable({
-      initialState: { content: '# Heading' },
-    });
+    await renderEmbeddable({ ...defaultByValueState, content: '# Heading' });
     expect(screen.getByRole('heading', { name: 'Heading' })).toBeInTheDocument();
-  });
-
-  it('uses default empty content when no initial content provided', async () => {
-    await renderEmbeddable({ initialState: { content: '' } });
-    expect(screen.getByTestId('markdownRenderer')).toHaveTextContent(/^$/);
   });
 
   it('renders links with target="_blank"', async () => {
@@ -100,25 +108,19 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('resolves document relative links against current URL', async () => {
-    await renderEmbeddable({
-      initialState: { content: '[go to discover](discover)' },
-    });
+    await renderEmbeddable({ ...defaultByValueState, content: '[go to discover](discover)' });
     const link = screen.getByRole('link', { name: /go to discover/i });
     expect(link).toHaveAttribute('href', '/discover');
   });
 
   it('does not modify absolute links during relative resolution', async () => {
-    await renderEmbeddable({
-      initialState: { content: '[elastic](https://elastic.co)' },
-    });
+    await renderEmbeddable({ ...defaultByValueState, content: '[elastic](https://elastic.co)' });
     const link = screen.getByRole('link', { name: /elastic/i });
     expect(link).toHaveAttribute('href', 'https://elastic.co');
   });
 
   it('shows renderer in view mode, shows editor in edit mode', async () => {
-    const { embeddable } = await renderEmbeddable({
-      initialState: { content: 'HELLO' },
-    });
+    const { embeddable } = await renderEmbeddable({ ...defaultByValueState, content: 'HELLO' });
 
     expect(screen.getByTestId('markdownRenderer')).toBeInTheDocument();
     expect(screen.queryByLabelText(/Dashboard markdown editor/i)).not.toBeInTheDocument();
@@ -135,7 +137,8 @@ describe('MarkdownEmbeddable', () => {
   describe('Discard button behavior', () => {
     it('removes panel when Discard clicked for new panel', async () => {
       const { embeddable, parentApi } = await renderEmbeddable({
-        initialState: { content: 'HELLO' },
+        ...defaultByValueState,
+        content: 'HELLO',
       });
 
       await act(async () => {
@@ -148,7 +151,8 @@ describe('MarkdownEmbeddable', () => {
 
     it('does not remove panel if not new panel when Discard clicked', async () => {
       const { embeddable, parentApi } = await renderEmbeddable({
-        initialState: { content: 'HELLO' },
+        ...defaultByValueState,
+        content: 'HELLO',
       });
       await act(async () => {
         await embeddable.api.onEdit({ isNewPanel: false });
@@ -160,9 +164,7 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('saves content when Apply clicked', async () => {
-    const { embeddable } = await renderEmbeddable({
-      initialState: { content: 'HELLO' },
-    });
+    const { embeddable } = await renderEmbeddable({ ...defaultByValueState, content: 'HELLO' });
 
     await act(async () => {
       await embeddable.api.onEdit({ isNewPanel: true });
@@ -200,9 +202,7 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('loads content from library when by reference', async () => {
-    const { embeddable } = await renderEmbeddable({
-      initialState: { ref_id: '123' },
-    });
+    const { embeddable } = await renderEmbeddable({ ref_id: '123' });
 
     expect(embeddable.api.defaultTitle$?.value).toBe('Markdown from library');
     expect(embeddable.api.defaultDescription$?.value).toBe('some description');
@@ -210,23 +210,23 @@ describe('MarkdownEmbeddable', () => {
 
   it('can link to library when by value', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { content: 'by value markdown' },
+      ...defaultByValueState,
+      content: 'by value markdown',
     });
 
     expect(await embeddable.api.canLinkToLibrary()).toBe(true);
   });
 
   it('can unlink from library when by reference', async () => {
-    const { embeddable } = await renderEmbeddable({
-      initialState: { ref_id: '123' },
-    });
+    const { embeddable } = await renderEmbeddable({ ref_id: '123' });
 
     expect(await embeddable.api.canUnlinkFromLibrary()).toBe(true);
   });
 
   it('saves to library', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { content: 'by value markdown' },
+      ...defaultByValueState,
+      content: 'by value markdown',
     });
 
     const newId = await embeddable.api.saveToLibrary('My Markdown Title');
@@ -234,19 +234,15 @@ describe('MarkdownEmbeddable', () => {
   });
 
   it('gets serialized state by value', async () => {
-    const { embeddable } = await renderEmbeddable({
-      initialState: { content: 'by value markdown' },
-    });
+    const { embeddable } = await renderEmbeddable();
 
-    expect(embeddable.api.getSerializedStateByValue()).toEqual({
-      content: 'by value markdown',
-      settings: { open_links_in_new_tab: true },
-    });
+    expect(embeddable.api.getSerializedStateByValue()).toEqual(defaultByValueState);
   });
 
   it('gets serialized state by reference', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: { content: 'by value markdown' },
+      ...defaultByValueState,
+      content: 'by value markdown',
     });
 
     expect(embeddable.api.getSerializedStateByReference('new-id')).toEqual({
@@ -256,12 +252,10 @@ describe('MarkdownEmbeddable', () => {
 
   it('unlinks from library', async () => {
     const { embeddable } = await renderEmbeddable({
-      initialState: {
-        ref_id: '123',
-        title: 'Some title',
-        description: 'some description',
-        hide_title: true,
-      },
+      ref_id: '123',
+      title: 'Some title',
+      description: 'some description',
+      hide_title: true,
     });
 
     expect(embeddable.api.getSerializedStateByValue()).toEqual({
@@ -276,10 +270,8 @@ describe('MarkdownEmbeddable', () => {
   describe('open links in new tab setting', () => {
     it('renders links with target="_self" when open_links_in_new_tab is false', async () => {
       await renderEmbeddable({
-        initialState: {
-          content: '[click here](https://example.com)',
-          settings: { open_links_in_new_tab: false },
-        },
+        content: '[click here](https://example.com)',
+        settings: { open_links_in_new_tab: false },
       });
       const link = screen.getByRole('link', { name: /click here/i });
       expect(link).toHaveAttribute('target', '_self');
@@ -287,10 +279,8 @@ describe('MarkdownEmbeddable', () => {
 
     it('toggles link target via the settings popover in edit mode', async () => {
       const { embeddable } = await renderEmbeddable({
-        initialState: {
-          content: '[click here](https://example.com)',
-          settings: { open_links_in_new_tab: true },
-        },
+        content: '[click here](https://example.com)',
+        settings: { open_links_in_new_tab: true },
       });
 
       // Verify initial state: links open in new tab
@@ -312,6 +302,38 @@ describe('MarkdownEmbeddable', () => {
 
       // Links should now open in the same tab
       expect(screen.getByRole('link', { name: /click here/i })).toHaveAttribute('target', '_self');
+    });
+  });
+
+  describe('unsaved chnages', () => {
+    it('should have unsaved changes when content has changed', async () => {
+      const lastSavedState = markdownEmbeddableSchema.validate({
+        content: 'hello',
+      });
+      const initialState = markdownEmbeddableSchema.validate({
+        content: 'goodbye',
+      });
+      const { embeddable } = await renderEmbeddable(initialState, lastSavedState);
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(true);
+    });
+
+    it('should not have unsaved changes for by value state when there are no changes', async () => {
+      const initialState = markdownEmbeddableSchema.validate({
+        content: 'hello',
+      });
+      const { embeddable } = await renderEmbeddable(initialState);
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
+    });
+
+    it('should not have unsaved changes for by reference state when there are no changes', async () => {
+      const initialState = markdownEmbeddableSchema.validate({
+        ref_id: '1234',
+      });
+      const { embeddable } = await renderEmbeddable(initialState);
+      const hasUnsavedChanges = await firstValueFrom(embeddable.api.hasUnsavedChanges$);
+      expect(hasUnsavedChanges).toBe(false);
     });
   });
 });

@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { renderHook, act } from '@testing-library/react';
 import { coreServices } from '../../services/kibana_services';
+import { dashboardClient, findService } from '../../dashboard_client';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import type { DashboardSavedObjectUserContent } from '../types';
 import { useDashboardListingTable } from './use_dashboard_listing_table';
@@ -43,11 +45,15 @@ jest.mock('../_dashboard_listing_strings', () => ({
   },
 }));
 
-const mockDeleteDashboards = jest.fn().mockResolvedValue(true);
 jest.mock('../../dashboard_client', () => ({
   dashboardClient: {
-    delete: () => mockDeleteDashboards(),
+    delete: jest.fn().mockResolvedValue(true),
+    update: jest.fn().mockResolvedValue(true),
   },
+  findService: {
+    findById: jest.fn(),
+  },
+  checkForDuplicateDashboardTitle: jest.fn(),
 }));
 
 describe('useDashboardListingTable', () => {
@@ -182,7 +188,7 @@ describe('useDashboardListingTable', () => {
       ]);
     });
 
-    expect(mockDeleteDashboards).toHaveBeenCalled();
+    expect(dashboardClient.delete).toHaveBeenCalled();
   });
 
   test('should call goToDashboard when editItem is called', () => {
@@ -233,6 +239,43 @@ describe('useDashboardListingTable', () => {
     expect(confirmCreateWithUnsaved).toHaveBeenCalled();
     expect(clearStateMock).toHaveBeenCalled();
     expect(goToDashboard).toHaveBeenCalled();
+  });
+
+  test('contentEditor.onSave should not include access_control in update payload', async () => {
+    (findService.findById as jest.Mock).mockResolvedValue({
+      id: 'test-id',
+      status: 'success',
+      attributes: {
+        title: 'Old title',
+        description: 'Old description',
+        access_control: { access_mode: 'default' },
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useDashboardListingTable({
+        getDashboardUrl,
+        goToDashboard,
+      })
+    );
+
+    await act(async () => {
+      await result.current.tableListViewTableProps.contentEditor?.onSave?.({
+        id: 'test-id',
+        title: 'New title',
+      } as Parameters<Required<OpenContentEditorParams>['onSave']>[0]);
+    });
+
+    const payload = (dashboardClient.update as jest.Mock).mock.lastCall[1];
+    expect(dashboardClient.update).toHaveBeenCalledWith(
+      'test-id',
+      expect.objectContaining({
+        title: 'New title',
+        description: 'Old description',
+      })
+    );
+
+    expect(payload).not.toHaveProperty('access_control');
   });
 
   test('createItem should be undefined when showWriteControls equals false', () => {

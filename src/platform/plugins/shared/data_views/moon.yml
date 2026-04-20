@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/doc-links'
   - '@kbn/core-deprecations-common'
   - '@kbn/cps'
+  - '@kbn/cps-utils'
 tags:
   - plugin
   - prod

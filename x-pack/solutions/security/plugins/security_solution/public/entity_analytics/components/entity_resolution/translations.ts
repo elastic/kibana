@@ -24,7 +24,7 @@ export const RESOLUTION_GROUP_LINK_TOOLTIP = i18n.translate(
 
 export const RESOLUTION_EMPTY_STATE = i18n.translate(
   'xpack.securitySolution.entityResolution.emptyState',
-  { defaultMessage: 'No entity resolution' }
+  { defaultMessage: 'No resolved entities' }
 );
 
 export const ENTITY_NAME_COLUMN = i18n.translate(
@@ -39,7 +39,7 @@ export const ENTITY_ID_COLUMN = i18n.translate(
 
 export const SOURCE_COLUMN = i18n.translate(
   'xpack.securitySolution.entityResolution.columns.source',
-  { defaultMessage: 'Source' }
+  { defaultMessage: 'Data source' }
 );
 
 export const RISK_SCORE_COLUMN = i18n.translate(
@@ -50,6 +50,16 @@ export const RISK_SCORE_COLUMN = i18n.translate(
 export const ACTIONS_COLUMN = i18n.translate(
   'xpack.securitySolution.entityResolution.columns.actions',
   { defaultMessage: 'Actions' }
+);
+
+export const GROUP_RISK_SCORE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityResolution.groupRiskScore',
+  { defaultMessage: 'Group risk score:' }
+);
+
+export const EXPAND_ENTITY_BUTTON = i18n.translate(
+  'xpack.securitySolution.entityResolution.expandEntity',
+  { defaultMessage: 'Open entity details' }
 );
 
 export const REMOVE_ENTITY_BUTTON = i18n.translate(
@@ -84,12 +94,32 @@ export const ADD_ENTITY_BUTTON = i18n.translate(
 
 export const ENTITY_RESOLVED_TOAST = i18n.translate(
   'xpack.securitySolution.entityResolution.entityResolved',
-  { defaultMessage: 'Entity resolved' }
+  { defaultMessage: 'Entity was resolved' }
+);
+
+export const ENTITY_RESOLVED_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.entityResolution.entityResolvedText',
+  { defaultMessage: 'Resolution group risk score will be recalculated within 1 hour.' }
+);
+
+export const RESOLUTION_GROUP_CREATED_TOAST = i18n.translate(
+  'xpack.securitySolution.entityResolution.groupCreated',
+  { defaultMessage: 'Resolution group was created' }
+);
+
+export const RESOLUTION_GROUP_CREATED_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.entityResolution.groupCreatedText',
+  { defaultMessage: 'Resolution group risk score will be calculated within 1 hour.' }
 );
 
 export const ENTITY_REMOVED_TOAST = i18n.translate(
   'xpack.securitySolution.entityResolution.entityRemoved',
-  { defaultMessage: 'Entity removed from resolution group' }
+  { defaultMessage: 'Entity was removed from the resolution group' }
+);
+
+export const ENTITY_REMOVED_TOAST_TEXT = i18n.translate(
+  'xpack.securitySolution.entityResolution.entityRemovedText',
+  { defaultMessage: 'Resolution group risk score will be recalculated within 1 hour.' }
 );
 
 export const CONFIRM_MODAL_TITLE = i18n.translate(
@@ -115,6 +145,16 @@ export const RESOLUTION_ERROR_TITLE = i18n.translate(
 export const RESOLUTION_FETCH_ERROR = i18n.translate(
   'xpack.securitySolution.entityResolution.fetchError',
   { defaultMessage: 'Unable to load resolution group' }
+);
+
+export const RISK_SCORE_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.entityResolution.riskScoreNotAvailable',
+  { defaultMessage: 'N/A' }
+);
+
+export const LAST_SEEN_COLUMN = i18n.translate(
+  'xpack.securitySolution.entityResolution.columns.lastSeen',
+  { defaultMessage: 'Last seen' }
 );
 
 export const ENTITY_HAS_ALIASES_ERROR = i18n.translate(

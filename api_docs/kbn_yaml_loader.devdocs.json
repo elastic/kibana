@@ -1,0 +1,1734 @@
+{
+  "id": "@kbn/yaml-loader",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/yaml-loader",
+        "id": "def-common.Document",
+        "type": "Class",
+        "tags": [],
+        "label": "Document",
+        "description": [],
+        "signature": [
+          "Document",
+          "<Contents, Strict>"
+        ],
+        "path": "node_modules/yaml/dist/doc/Document.d.ts",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.NODE_TYPE",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "[NODE_TYPE]",
+            "description": [],
+            "signature": [
+              "symbol"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 21,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.commentBefore",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "commentBefore",
+            "description": [
+              "A comment before this Document"
+            ],
+            "signature": [
+              "string | null"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 22,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.comment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "comment",
+            "description": [
+              "A comment immediately after this Document"
+            ],
+            "signature": [
+              "string | null"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 24,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.contents",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "contents",
+            "description": [
+              "The document contents."
+            ],
+            "signature": [
+              "Strict extends true ? Contents | null : Contents"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 26,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.directives",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "directives",
+            "description": [],
+            "signature": [
+              "Strict extends true ? ",
+              "Directives",
+              " | undefined : ",
+              "Directives"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 28,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [
+              "Errors encountered during parsing."
+            ],
+            "signature": [
+              "YAMLError",
+              "[]"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 29,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "{ strict: boolean; logLevel: ",
+              "LogLevelId",
+              "; intAsBigInt: boolean; keepSourceTokens: boolean; prettyErrors: boolean; stringKeys: boolean; uniqueKeys: boolean | ((a: ",
+              "ParsedNode",
+              ", b: ",
+              "ParsedNode",
+              ") => boolean); }"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 31,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.range",
+            "type": "Object",
+            "tags": [],
+            "label": "range",
+            "description": [
+              "\nThe `[start, value-end, node-end]` character offsets for the part of the\nsource parsed into this document (undefined if not parsed). The `value-end`\nand `node-end` positions are themselves not included in their respective\nranges."
+            ],
+            "signature": [
+              "Range",
+              " | undefined"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 32,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "The schema used with the document. Use `setSchema()` to change."
+            ],
+            "signature": [
+              "Schema"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 39,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [
+              "Warnings encountered during parsing."
+            ],
+            "signature": [
+              "YAMLWarning",
+              "[]"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 41,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 43,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.Unnamed.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [
+                  "- The initial value for the document, which will be wrapped"
+                ],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 47,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "(",
+                  "DocumentOptions",
+                  " & ",
+                  "SchemaOptions",
+                  " & ",
+                  "ParseOptions",
+                  " & ",
+                  "CreateNodeOptions",
+                  ") | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 47,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 48,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.Unnamed.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 48,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "replacer",
+                "description": [],
+                "signature": [
+                  "Replacer",
+                  " | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 48,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.Unnamed.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "(",
+                  "DocumentOptions",
+                  " & ",
+                  "SchemaOptions",
+                  " & ",
+                  "ParseOptions",
+                  " & ",
+                  "CreateNodeOptions",
+                  ") | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 48,
+                "columnNumber": 56,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.clone",
+            "type": "Function",
+            "tags": [],
+            "label": "clone",
+            "description": [
+              "\nCreate a deep copy of this Document and its contents.\n\nCustom Node values that inherit from `Object` still refer to their original instances."
+            ],
+            "signature": [
+              "() => ",
+              "Document",
+              "<Contents, Strict>"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 49,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [
+              "Adds a value to the document."
+            ],
+            "signature": [
+              "(value: any) => void"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 55,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.add.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 56,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.addIn",
+            "type": "Function",
+            "tags": [],
+            "label": "addIn",
+            "description": [
+              "Adds a value to the document."
+            ],
+            "signature": [
+              "(path: Iterable<unknown>, value: unknown) => void"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 57,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.addIn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "Iterable<unknown>"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 58,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.addIn.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 58,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.createAlias",
+            "type": "Function",
+            "tags": [],
+            "label": "createAlias",
+            "description": [
+              "\nCreate a new `Alias` node, ensuring that the target `node` has the required anchor.\n\nIf `node` already has an anchor, `name` is ignored.\nOtherwise, the `node.anchor` value will be set to `name`,\nor if an anchor with that name is already present in the document,\n`name` will be used as a prefix for a new unique anchor.\nIf `name` is undefined, the generated anchor will use 'a' as a prefix."
+            ],
+            "signature": [
+              "(node: Strict extends true ? ",
+              "Scalar",
+              "<unknown> | ",
+              "YAMLMap",
+              "<unknown, unknown> | ",
+              "YAMLSeq",
+              "<unknown> : ",
+              "Node",
+              "<unknown>, name?: string | undefined) => ",
+              "Alias"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 59,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createAlias.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "Strict extends true ? ",
+                  "Scalar",
+                  "<unknown> | ",
+                  "YAMLMap",
+                  "<unknown, unknown> | ",
+                  "YAMLSeq",
+                  "<unknown> : ",
+                  "Node",
+                  "<unknown>"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 68,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createAlias.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 68,
+                "columnNumber": 80,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.createNode",
+            "type": "Function",
+            "tags": [],
+            "label": "createNode",
+            "description": [
+              "\nConvert any value into a `Node` using the current schema, recursively\nturning objects into collections."
+            ],
+            "signature": [
+              "{ <T = unknown>(value: T, options?: ",
+              "CreateNodeOptions",
+              " | undefined): ",
+              "NodeType",
+              "<T>; <T = unknown>(value: T, replacer: ",
+              "CreateNodeOptions",
+              " | ",
+              "Replacer",
+              " | null, options?: ",
+              "CreateNodeOptions",
+              " | undefined): ",
+              "NodeType",
+              "<T>; }"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 69,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createNode.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 73,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createNode.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CreateNodeOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 73,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.createNode",
+            "type": "Function",
+            "tags": [],
+            "label": "createNode",
+            "description": [],
+            "signature": [
+              "{ <T = unknown>(value: T, options?: ",
+              "CreateNodeOptions",
+              " | undefined): ",
+              "NodeType",
+              "<T>; <T = unknown>(value: T, replacer: ",
+              "CreateNodeOptions",
+              " | ",
+              "Replacer",
+              " | null, options?: ",
+              "CreateNodeOptions",
+              " | undefined): ",
+              "NodeType",
+              "<T>; }"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 74,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createNode.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 74,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createNode.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "replacer",
+                "description": [],
+                "signature": [
+                  "CreateNodeOptions",
+                  " | ",
+                  "Replacer",
+                  " | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 74,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createNode.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CreateNodeOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 74,
+                "columnNumber": 86,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.createPair",
+            "type": "Function",
+            "tags": [],
+            "label": "createPair",
+            "description": [
+              "\nConvert a key and a value into a `Pair` using the current schema,\nrecursively wrapping all values as `Scalar` or `Collection` nodes."
+            ],
+            "signature": [
+              "<K extends ",
+              "Node",
+              "<unknown> = ",
+              "Node",
+              "<unknown>, V extends ",
+              "Node",
+              "<unknown> = ",
+              "Node",
+              "<unknown>>(key: unknown, value: unknown, options?: ",
+              "CreateNodeOptions",
+              " | undefined) => ",
+              "Pair",
+              "<K, V>"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 75,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createPair.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 79,
+                "columnNumber": 62,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createPair.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 79,
+                "columnNumber": 76,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.createPair.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CreateNodeOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 79,
+                "columnNumber": 92,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nRemoves a value from the document."
+            ],
+            "signature": [
+              "(key: unknown) => boolean"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 80,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.delete.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 84,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "`true` if the item was found and removed."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.deleteIn",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteIn",
+            "description": [
+              "\nRemoves a value from the document."
+            ],
+            "signature": [
+              "(path: Iterable<unknown> | null) => boolean"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 85,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.deleteIn.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "Iterable<unknown> | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 89,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": [
+              "`true` if the item was found and removed."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nReturns item at `key`, or `undefined` if not found. By default unwraps\nscalar values from their surrounding node; to disable set `keepScalar` to\n`true` (collections are always returned intact)."
+            ],
+            "signature": [
+              "(key: unknown, keepScalar?: boolean | undefined) => Strict extends true ? unknown : any"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 90,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.get.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 95,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.get.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "keepScalar",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 95,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.getIn",
+            "type": "Function",
+            "tags": [],
+            "label": "getIn",
+            "description": [
+              "\nReturns item at `path`, or `undefined` if not found. By default unwraps\nscalar values from their surrounding node; to disable set `keepScalar` to\n`true` (collections are always returned intact)."
+            ],
+            "signature": [
+              "(path: Iterable<unknown> | null, keepScalar?: boolean | undefined) => Strict extends true ? unknown : any"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 96,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.getIn.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "Iterable<unknown> | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 101,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.getIn.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "keepScalar",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 101,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [
+              "\nChecks if the document includes a value with the key `key`."
+            ],
+            "signature": [
+              "(key: unknown) => boolean"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 102,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.has.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 105,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.hasIn",
+            "type": "Function",
+            "tags": [],
+            "label": "hasIn",
+            "description": [
+              "\nChecks if the document includes a value at `path`."
+            ],
+            "signature": [
+              "(path: Iterable<unknown> | null) => boolean"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 106,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.hasIn.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "Iterable<unknown> | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 109,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "\nSets a value in this document. For `!!set`, `value` needs to be a\nboolean to add/remove the item from the set."
+            ],
+            "signature": [
+              "(key: any, value: unknown) => void"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 110,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.set.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 114,
+                "columnNumber": 9,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.set.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 114,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.setIn",
+            "type": "Function",
+            "tags": [],
+            "label": "setIn",
+            "description": [
+              "\nSets a value in this document. For `!!set`, `value` needs to be a\nboolean to add/remove the item from the set."
+            ],
+            "signature": [
+              "(path: Iterable<unknown> | null, value: unknown) => void"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 115,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.setIn.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "path",
+                "description": [],
+                "signature": [
+                  "Iterable<unknown> | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 119,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.setIn.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 119,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.setSchema",
+            "type": "Function",
+            "tags": [],
+            "label": "setSchema",
+            "description": [
+              "\nChange the YAML version and schema used by the document.\nA `null` version disables support for directives, explicit tags, anchors, and aliases.\nIt also requires the `schema` option to be given as a `Schema` instance value.\n\nOverrides all previously set schema options."
+            ],
+            "signature": [
+              "(version: \"next\" | \"1.1\" | \"1.2\" | null, options?: ",
+              "SchemaOptions",
+              " | undefined) => void"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 120,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.setSchema.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "version",
+                "description": [],
+                "signature": [
+                  "\"next\" | \"1.1\" | \"1.2\" | null"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 127,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.setSchema.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SchemaOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 127,
+                "columnNumber": 55,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.toJS",
+            "type": "Function",
+            "tags": [],
+            "label": "toJS",
+            "description": [
+              "A plain JavaScript representation of the document `contents`."
+            ],
+            "signature": [
+              "(opt?: (",
+              "ToJSOptions",
+              " & { [ignored: string]: unknown; }) | undefined) => any"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 128,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.toJS.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "opt",
+                "description": [],
+                "signature": [
+                  "(",
+                  "ToJSOptions",
+                  " & { [ignored: string]: unknown; }) | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 129,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [
+              "\nA JSON representation of the document `contents`.\n"
+            ],
+            "signature": [
+              "(jsonArg?: string | null | undefined, onAnchor?: ((value: unknown, count: number) => void) | undefined) => any"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 132,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.toJSON.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "jsonArg",
+                "description": [
+                  "Used by `JSON.stringify` to indicate the array index or"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 138,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.toJSON.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "onAnchor",
+                "description": [],
+                "signature": [
+                  "((value: unknown, count: number) => void) | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 138,
+                "columnNumber": 37,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Document.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [
+              "A YAML representation of the document."
+            ],
+            "signature": [
+              "(options?: ",
+              "ToStringOptions",
+              " | undefined) => string"
+            ],
+            "path": "node_modules/yaml/dist/doc/Document.d.ts",
+            "lineNumber": 139,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Document.toString.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ToStringOptions",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/doc/Document.d.ts",
+                "lineNumber": 140,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/yaml-loader",
+        "id": "def-common.Pair",
+        "type": "Class",
+        "tags": [],
+        "label": "Pair",
+        "description": [],
+        "signature": [
+          "Pair",
+          "<K, V>"
+        ],
+        "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.NODE_TYPE",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "[NODE_TYPE]",
+            "description": [],
+            "signature": [
+              "symbol"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 11,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.key",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "Always Node or null when parsed, but can be set to anything."
+            ],
+            "signature": [
+              "K"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 12,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.value",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "Always Node or null when parsed, but can be set to anything."
+            ],
+            "signature": [
+              "V | null"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 14,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.srcToken",
+            "type": "Object",
+            "tags": [],
+            "label": "srcToken",
+            "description": [
+              "The CST token that was composed into this pair."
+            ],
+            "signature": [
+              "CollectionItem",
+              " | undefined"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 16,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 18,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.Unnamed.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "K"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 18,
+                "columnNumber": 17,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "V | null | undefined"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 18,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.clone",
+            "type": "Function",
+            "tags": [],
+            "label": "clone",
+            "description": [],
+            "signature": [
+              "(schema?: ",
+              "Schema",
+              " | undefined) => ",
+              "Pair",
+              "<K, V>"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 19,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.clone.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  "Schema",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 19,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.toJSON",
+            "type": "Function",
+            "tags": [],
+            "label": "toJSON",
+            "description": [],
+            "signature": [
+              "(_?: unknown, ctx?: ",
+              "ToJSContext",
+              " | undefined) => ",
+              "MapLike"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 20,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.toJSON.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "_",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 20,
+                "columnNumber": 12,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.toJSON.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  "ToJSContext",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 20,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/yaml-loader",
+            "id": "def-common.Pair.toString",
+            "type": "Function",
+            "tags": [],
+            "label": "toString",
+            "description": [],
+            "signature": [
+              "(ctx?: ",
+              "StringifyContext",
+              " | undefined, onComment?: (() => void) | undefined, onChompKeep?: (() => void) | undefined) => string"
+            ],
+            "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+            "lineNumber": 21,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.toString.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  "StringifyContext",
+                  " | undefined"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 21,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.toString.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "onComment",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 21,
+                "columnNumber": 38,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/yaml-loader",
+                "id": "def-common.Pair.toString.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "onChompKeep",
+                "description": [],
+                "signature": [
+                  "(() => void) | undefined"
+                ],
+                "path": "node_modules/yaml/dist/nodes/Pair.d.ts",
+                "lineNumber": 21,
+                "columnNumber": 62,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/yaml-loader",
+        "id": "def-common.loadYaml",
+        "type": "Function",
+        "tags": [],
+        "label": "loadYaml",
+        "description": [
+          "\nLoads the yaml package asynchronously. Use this in browser code to avoid\npulling the full yaml library into the initial bundle.\nThe returned promise resolves to the yaml module (parse, stringify, Document, etc.)."
+        ],
+        "signature": [
+          "() => Promise<typeof ",
+          "node_modules/yaml/dist/index",
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-yaml-loader/src/load_yaml.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/yaml-loader",
+        "id": "def-common.Document",
+        "type": "Object",
+        "tags": [],
+        "label": "Document",
+        "description": [],
+        "signature": [
+          "typeof ",
+          "Document"
+        ],
+        "path": "node_modules/yaml/dist/doc/Document.d.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

@@ -27,6 +27,7 @@ test.describe(
       });
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
+      await serviceMapPage.settleServiceMapLayout();
     });
 
     test('renders service map with controls', async ({ pageObjects: { serviceMapPage } }) => {
@@ -65,8 +66,7 @@ test.describe(
     }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
       await expect(serviceMapPage.serviceMapPopover).toBeVisible();
 
       const popoverTitle = await serviceMapPage.getPopoverTitle();
@@ -78,8 +78,7 @@ test.describe(
     test('dismisses popover when clicking outside', async ({ pageObjects: { serviceMapPage } }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
       await serviceMapPage.clickFitView();
@@ -91,8 +90,7 @@ test.describe(
     test('shows popover when clicking on an edge', async ({ pageObjects: { serviceMapPage } }) => {
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForEdgeToLoad(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await serviceMapPage.clickEdge(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openEdgePopover(EDGE_OPBEANS_JAVA_TO_POSTGRESQL);
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
       await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toBeVisible();
       await expect(serviceMapPage.serviceMapEdgeExploreTracesButton).toHaveText('Explore traces');
@@ -107,8 +105,7 @@ test.describe(
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
-      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openNodePopover(`>${DEPENDENCY_POSTGRESQL}`);
       await expect(serviceMapPage.serviceMapPopoverContent).toBeVisible();
 
       const popoverTitle = await serviceMapPage.getPopoverTitle();
@@ -123,8 +120,7 @@ test.describe(
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.serviceMapServiceDetailsButton.click();
 
       await expect(page).toHaveURL(
@@ -142,8 +138,7 @@ test.describe(
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.clickServiceNode(SERVICE_OPBEANS_JAVA);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openServiceNodePopover(SERVICE_OPBEANS_JAVA);
       await serviceMapPage.serviceMapFocusMapButton.click();
 
       await expect(page).toHaveURL(
@@ -160,8 +155,7 @@ test.describe(
       await serviceMapPage.dismissPopoverIfOpen();
       await serviceMapPage.clickFitView();
       await serviceMapPage.waitForNodeToLoad(`>${DEPENDENCY_POSTGRESQL}`);
-      await serviceMapPage.clickNode(`>${DEPENDENCY_POSTGRESQL}`);
-      await serviceMapPage.waitForPopoverToBeVisible();
+      await serviceMapPage.openNodePopover(`>${DEPENDENCY_POSTGRESQL}`);
       await serviceMapPage.serviceMapDependencyDetailsButton.click();
 
       await expect(page).toHaveURL(new RegExp(`/app/apm/dependencies/overview`));

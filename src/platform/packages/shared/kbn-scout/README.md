@@ -400,7 +400,7 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 
 ```json
 {
-  "serverless": true
+  "serverless": true,
   "projectType": "es",
   "isCloud": true,
   "cloudHostName": "elastic_cloud_hostname_qa_staging_prod",
@@ -426,6 +426,7 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 
 - **`--arch`**: `stateful` or `serverless`.
 - **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
+- **`--preserveEsData`**: Reuse existing serverless ES object store data on startup instead of cleaning it (useful when restarting after crashes).
 
 This command is useful for manual testing or running tests via an IDE.
 

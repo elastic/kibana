@@ -33,7 +33,6 @@ export function UnifiedWaterfallFlyout({ waterfallItemId, traceItems, toggleFlyo
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
 

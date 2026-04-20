@@ -14,6 +14,7 @@ import type {
 } from '@kbn/server-route-repository';
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import { getApmInternalServices } from '../../plugin';
 import type { FetchOptions } from '../../../common/fetch_options';
 import type { CallApi } from './call_api';
 import { callApi } from './call_api';
@@ -60,6 +61,7 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
     };
 
     const { method, pathname, version } = formatRequest(endpoint, params?.path);
+    const projectRouting = getApmInternalServices()?.cpsManager?.getProjectRouting();
 
     return callApi(core, {
       ...options,
@@ -68,6 +70,10 @@ export function createCallApmApi(core: CoreStart | CoreSetup) {
       body: params?.body,
       query: params?.query,
       version,
+      headers: {
+        ...(options as any)?.headers,
+        ...(projectRouting ? { 'x-project-routing': projectRouting } : {}),
+      },
     } as unknown as Parameters<CallApi>[1]);
   }) as APMClient;
 }

@@ -73,6 +73,7 @@ const buildApi = (overrides: {
   fleetGetByIDs?: jest.Mock;
   fleetAgentPolicyGetByIds?: jest.Mock;
   fleetGetInstallation?: jest.Mock;
+  fleetGetAgentStatusForAgentPolicy?: jest.Mock;
 }): MonitorIntegrationHealthApi => {
   const fleetGetByIDs = overrides.fleetGetByIDs ?? jest.fn().mockResolvedValue([]);
 
@@ -85,6 +86,11 @@ const buildApi = (overrides: {
   const fleetGetInstallation =
     overrides.fleetGetInstallation ?? jest.fn().mockResolvedValue({ install_status: 'installed' });
 
+  // Default: all agents healthy (active > 0, online > 0)
+  const fleetGetAgentStatusForAgentPolicy =
+    overrides.fleetGetAgentStatusForAgentPolicy ??
+    jest.fn().mockResolvedValue({ all: 1, active: 1, online: 1 });
+
   const server = {
     coreStart: {
       savedObjects: {
@@ -96,6 +102,11 @@ const buildApi = (overrides: {
       agentPolicyService: { getByIds: fleetAgentPolicyGetByIds },
       packageService: {
         asInternalUser: { getInstallation: fleetGetInstallation },
+      },
+      agentService: {
+        asInternalUser: {
+          getAgentStatusForAgentPolicy: fleetGetAgentStatusForAgentPolicy,
+        },
       },
     },
   } as unknown as SyntheticsServerSetup;
@@ -599,6 +610,97 @@ describe('MonitorIntegrationHealthApi', () => {
         PrivateLocationHealthStatusValue.Healthy
       );
       expect(result.monitors[0].privateLocations[0].packagePolicyId).toBe(legacyPolicyId);
+    });
+  });
+
+  describe('missing agents', () => {
+    it('returns MissingAgents when no agents are enrolled in the agent policy', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const expectedPolicyId = 'mon-1-priv-loc-1';
+      const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
+      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const fleetGetAgentStatusForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue({ all: 0, active: 0, online: 0 });
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.MissingAgents);
+      expect(locStatus.reason).toBeDefined();
+      expect(result.monitors[0].isHealthy).toBe(false);
+    });
+  });
+
+  describe('unhealthy agent', () => {
+    it('returns UnhealthyAgent when agents are enrolled but none are online', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const expectedPolicyId = 'mon-1-priv-loc-1';
+      const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
+      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const fleetGetAgentStatusForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue({ all: 2, active: 2, online: 0 });
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      const locStatus = result.monitors[0].privateLocations[0];
+      expect(locStatus.status).toBe(PrivateLocationHealthStatusValue.UnhealthyAgent);
+      expect(locStatus.reason).toBeDefined();
+      expect(result.monitors[0].isHealthy).toBe(false);
+    });
+
+    it('returns Healthy when at least one agent is online', async () => {
+      const privateLoc = createPrivateLocation('priv-loc-1', 'agent-policy-1');
+      const so = createMonitorSO('mon-1', {
+        locations: [{ id: 'priv-loc-1', label: 'Private Loc 1', isServiceManaged: false }],
+      });
+
+      mockedGetPrivateLocations.mockResolvedValue([privateLoc]);
+
+      const expectedPolicyId = 'mon-1-priv-loc-1';
+      const packagePolicy = createPackagePolicy(expectedPolicyId, ['agent-policy-1']);
+      const fleetGetByIDs = jest.fn().mockResolvedValue([packagePolicy]);
+      const fleetGetAgentStatusForAgentPolicy = jest
+        .fn()
+        .mockResolvedValue({ all: 3, active: 3, online: 1 });
+
+      const api = buildApi({
+        monitorConfigRepository: { get: jest.fn().mockResolvedValue(so) },
+        fleetGetByIDs,
+        fleetGetAgentStatusForAgentPolicy,
+      });
+
+      const result = await api.getHealth(['mon-1']);
+
+      expect(result.monitors[0].privateLocations[0].status).toBe(
+        PrivateLocationHealthStatusValue.Healthy
+      );
+      expect(result.monitors[0].isHealthy).toBe(true);
     });
   });
 

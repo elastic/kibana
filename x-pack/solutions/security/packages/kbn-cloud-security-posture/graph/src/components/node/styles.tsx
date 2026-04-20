@@ -205,9 +205,9 @@ export const getRelationshipColors = (
   euiTheme: EuiThemeComputed
 ): { backgroundColor: string; borderColor: string; textColor: string } => {
   return {
-    backgroundColor: euiTheme.colors.backgroundFilledText,
+    backgroundColor: euiTheme.colors.backgroundLightText,
     borderColor: euiTheme.colors.borderBaseProminent,
-    textColor: euiTheme.colors.textInverse,
+    textColor: euiTheme.colors.textParagraph,
   };
 };
 

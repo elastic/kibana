@@ -51,6 +51,8 @@
     "@kbn/observability-utils-server",
     "@kbn/calculate-auto",
     "@kbn/search-inference-endpoints",
+    "@kbn/inference-connectors",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

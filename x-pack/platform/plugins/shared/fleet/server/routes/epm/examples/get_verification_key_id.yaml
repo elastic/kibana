@@ -1,0 +1,21 @@
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          getVerificationKeyIdExample:
+            description: 'The GPG key ID used to verify package signatures'
+            value:
+              id: 'D27D666CD88E42B4'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

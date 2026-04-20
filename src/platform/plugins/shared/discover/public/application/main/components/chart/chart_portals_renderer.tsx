@@ -311,6 +311,7 @@ const CustomChartSectionWrapper = ({
         fetchParams,
         isComponentVisible,
         ...unifiedHistogramProps,
+        setLensRequestAdapter: api.setLensRequestAdapter,
         initialState: metricsGridState,
         onInitialStateChange,
       })}

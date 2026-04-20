@@ -15,10 +15,6 @@ import {
   DOCUMENT_TYPE_ENTITY,
   INDEX_PATTERN_REGEX,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
-import {
-  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
-  GRAPH_TARGET_EUID_SOURCE_FIELDS,
-} from '@kbn/cloud-security-posture-common/constants';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import {
   getEuidEsqlEvaluation,
@@ -35,6 +31,11 @@ import {
   concatJsonObjectPropertyEsqlExprAsString,
   concatJsonObjectPropertyString,
 } from './utils';
+import {
+  type EuidSourceFields,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  GRAPH_TARGET_EUID_SOURCE_FIELDS,
+} from './constants';
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
@@ -145,7 +146,14 @@ const buildDslFilter = (
         : [
             {
               bool: {
-                should: GRAPH_TARGET_EUID_SOURCE_FIELDS.map((field) => ({ exists: { field } })),
+                should: [
+                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
+                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
+                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
+                  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+                ].map((field) => ({
+                  exists: { field },
+                })),
                 minimum_should_match: 1,
               },
             },
@@ -196,8 +204,14 @@ const buildV2ActorResolution = (): string => {
   // MV_EXPAND typed actor source fields so EUID CONCAT receives single values.
   // entity.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND actorEntityId.
-  const typedActorFields = GRAPH_ACTOR_EUID_SOURCE_FIELDS.filter((f) => f !== 'entity.id');
-  const mvExpandStatements = typedActorFields.map((field) => `| MV_EXPAND \`${field}\``).join('\n');
+  const typedActorFields = Object.keys(GRAPH_ACTOR_EUID_SOURCE_FIELDS)
+    .filter((f) => TYPED_ENTITY_PREFIXES.includes(f))
+    .map((f) => GRAPH_ACTOR_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
+    .flat();
+  const mvExpandStatements = typedActorFields
+    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'))
+    .map((field) => `| MV_EXPAND \`${field}\``)
+    .join('\n');
 
   // Combine field evaluations (entity.namespace) and user EUID into a single EVAL
   // to prevent the ES|QL optimizer from pruning the intermediate entity.namespace column.
@@ -240,8 +254,12 @@ const buildV2TargetResolution = (): string => {
   // MV_EXPAND typed target source fields so EUID CONCAT receives single values.
   // entity.target.id is excluded: its EUID is the raw value (no CONCAT),
   // and multi-value is handled by the downstream MV_EXPAND targetEntityId.
-  const typedTargetFields = GRAPH_TARGET_EUID_SOURCE_FIELDS.filter((f) => f !== 'entity.target.id');
+  const typedTargetFields = Object.keys(GRAPH_TARGET_EUID_SOURCE_FIELDS)
+    .filter((f) => TYPED_ENTITY_PREFIXES.includes(f))
+    .map((f) => GRAPH_TARGET_EUID_SOURCE_FIELDS[f as keyof EuidSourceFields])
+    .flat();
   const mvExpandStatements = typedTargetFields
+    .filter((f) => !f.startsWith('event.') && !f.startsWith('data_stream.'))
     .map((field) => `| MV_EXPAND \`${field}\``)
     .join('\n');
 
@@ -284,20 +302,10 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
 
   const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
 
-  const actorRawChecks = GRAPH_ACTOR_EUID_SOURCE_FIELDS.map(
-    (f) => `${ENTITY_FIELD_COLUMN_MAP[f] ?? f} IN (${pinnedParamsStr})`
-  ).join(' OR ');
-
-  const targetRawChecks = GRAPH_TARGET_EUID_SOURCE_FIELDS.map(
-    (f) => `${ENTITY_FIELD_COLUMN_MAP[f] ?? f} IN (${pinnedParamsStr})`
-  ).join(' OR ');
-
   return `| EVAL pinned = CASE(
     _id IN (${pinnedParamsStr}), _id,
     actorEntityId IN (${pinnedParamsStr}), actorEntityId,
-    ${actorRawChecks}, actorEntityId,
     targetEntityId IN (${pinnedParamsStr}), targetEntityId,
-    ${targetRawChecks}, targetEntityId,
     null
   )`;
 };
@@ -308,10 +316,20 @@ const buildPinnedEsql = (pinnedIds?: string[]): string => {
  * with entity store values. The saved variables are used by buildSourceFieldsJson()
  * to build the sourceFields JSON from the original log event values.
  */
-const ENTITY_FIELD_COLUMN_MAP: Record<string, string> = Object.fromEntries([
-  ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.map((f) => [f, `_sf_${f.replace(/\./g, '_')}`]),
-  ...GRAPH_TARGET_EUID_SOURCE_FIELDS.map((f) => [f, `_sf_${f.replace(/\./g, '_')}`]),
-]);
+const ENTITY_FIELD_COLUMN_MAP: Record<string, string> = Object.fromEntries(
+  [
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.all,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.all,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.generic,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.host,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.user,
+    ...GRAPH_TARGET_EUID_SOURCE_FIELDS.service,
+  ].map((f) => [f, `_sf_${f.replace(/\./g, '_')}`])
+);
 
 /**
  * Generates an EVAL statement that saves all EUID source fields.
@@ -329,18 +347,7 @@ const buildSaveSourceFieldsEsql = (): string => {
   return `| EVAL ${assignments}`;
 };
 
-/**
- * Maps a source field name to its entity type prefix for EUID matching.
- * Returns null for generic fields (entity.id, entity.target.id).
- */
-const getFieldEntityTypePrefix = (field: string): string | null => {
-  if (field.startsWith('user')) return 'user';
-  if (field.startsWith('host')) return 'host';
-  if (field.startsWith('service')) return 'service';
-  return null; // generic entity
-};
-
-const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
+const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'];
 
 /**
  * Generates an ESQL CONCAT fragment that builds a JSON "sourceFields" object.
@@ -353,26 +360,33 @@ const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
  * entity.id value post MV_EXPAND).
  * Uses REPLACE to fix null properties.
  */
-const buildSourceFieldsJson = (fields: readonly string[], euidColumn: string): string => {
-  const properties = fields
-    .map((field) => {
-      const typePrefix = getFieldEntityTypePrefix(field);
-
-      if (typePrefix) {
-        // Typed field: only include when EUID matches the entity type
-        const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
-        return `CASE(STARTS_WITH(${euidColumn}, "${typePrefix}:"),
-          ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${column})`)}, "")`;
+const buildSourceFieldsJson = (fields: EuidSourceFields, euidColumn: string): string => {
+  const properties = Object.keys(fields)
+    .map((type) => {
+      if (type === 'all') {
+        return fields[type as keyof EuidSourceFields].map((field) => {
+          const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
+          return concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), column);
+        });
+      } else if (type === 'generic') {
+        // Generic field: include when EUID doesn't match any typed prefix
+        // Use the EUID column directly as the value (it IS the raw entity.id post MV_EXPAND)
+        const notTypedCondition = TYPED_ENTITY_PREFIXES.map(
+          (p) => `NOT STARTS_WITH(${euidColumn}, "${p}:")`
+        ).join(' AND ');
+        return fields[type as keyof EuidSourceFields].map((field) => {
+          return `CASE(${notTypedCondition},
+            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), euidColumn)}, "")`;
+        });
+      } else {
+        return fields[type as keyof EuidSourceFields].map((field) => {
+          const column = ENTITY_FIELD_COLUMN_MAP[field] ?? `\`${field}\``;
+          return `CASE(STARTS_WITH(${euidColumn}, "${type}:"),
+            ${concatJsonObjectPropertyEsqlExprSafe(field.replace('.target', ''), column)}, "")`;
+        });
       }
-
-      // Generic field: include when EUID doesn't match any typed prefix
-      // Use the EUID column directly as the value (it IS the raw entity.id post MV_EXPAND)
-      const notTypedCondition = TYPED_ENTITY_PREFIXES.map(
-        (p) => `NOT STARTS_WITH(${euidColumn}, "${p}:")`
-      ).join(' AND ');
-      return `CASE(${notTypedCondition},
-        ${concatJsonObjectPropertyEsqlExprSafe(field, `TO_STRING(${euidColumn})`)}, "")`;
     })
+    .flat()
     .join(`, ${JSON_OBJECT_SEPARATOR},\n      `);
   return `
   REPLACE(

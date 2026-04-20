@@ -10,12 +10,19 @@ export function getIndexPattern(namespace: string): string {
 }
 
 /**
- * Okta event actions that represent a user authenticating to an application.
- * These events have AppInstance-type entries in okta.target, making them the
- * right signal for user→service communicates_with relationships.
+ * Okta event actions where an actor (admin user) operates on a target user.
+ * These events have User-type entries in okta.target, which the ingest pipeline
+ * maps to user.target.{id,email,full_name} — real user entities in the entity store.
  */
-export const OKTA_AUTH_EVENT_ACTIONS = [
-  'user.authentication.sso',
-  'user.authentication.auth_via_mfa',
-  'user.session.start',
+export const OKTA_USER_ADMIN_EVENT_ACTIONS = [
+  'user.lifecycle.create',
+  'user.lifecycle.activate',
+  'user.lifecycle.deactivate',
+  'user.lifecycle.suspend',
+  'user.lifecycle.unsuspend',
+  'group.user_membership.add',
+  'group.user_membership.remove',
+  'application.user_membership.add',
+  'application.user_membership.remove',
+  'application.user_membership.change_username',
 ];

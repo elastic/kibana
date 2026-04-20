@@ -86,10 +86,14 @@ test.describe(
         );
       });
 
-      await test.step('screen reader announcement region exists within service map', async () => {
+      await test.step('polite live regions exist for keyboard announcements and find-in-page', async () => {
         const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
-        const liveRegion = serviceMapContainer.locator('[aria-live="polite"]');
-        await expect(liveRegion).toHaveCount(1);
+        await expect(page.testSubj.locator('serviceMapControlsSearch')).toBeVisible();
+        const politeLiveRegions = serviceMapContainer.locator('[aria-live="polite"]');
+        await expect(politeLiveRegions).toHaveCount(2);
+        await expect(
+          serviceMapContainer.locator('[data-test-subj="serviceMapFindMatchSummary"]')
+        ).toHaveAttribute('aria-live', 'polite');
       });
     });
   }

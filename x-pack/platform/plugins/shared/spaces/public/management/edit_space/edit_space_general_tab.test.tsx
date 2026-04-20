@@ -212,6 +212,50 @@ describe('EditSpaceSettings', () => {
     expect(navigateSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('specifies a color when updating a space without a color or imageUrl', async () => {
+    const spaceToUpdate = {
+      id: 'existing-space',
+      name: 'Existing Space',
+      description: 'hey an existing space',
+      initials: 'AB',
+      disabledFeatures: [],
+      solution: 'es' as SolutionView,
+    };
+
+    render(
+      <TestComponent>
+        <EditSpaceSettingsTab
+          space={spaceToUpdate}
+          history={history}
+          features={[]}
+          allowFeatureVisibility={false}
+          allowSolutionVisibility={false}
+          reloadWindow={reloadWindow}
+        />
+      </TestComponent>
+    );
+
+    // update the space name
+    const nameInput = screen.getByTestId('addSpaceName');
+    fireEvent.change(nameInput, { target: { value: 'Updated Name Of Space' } });
+
+    expect(screen.queryByTestId('space-edit-page-user-impact-warning')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('confirmModalTitleText')).not.toBeInTheDocument();
+
+    const updateButton = await screen.findByTestId('save-space-button'); // appears via re-render
+    await userEvent.click(updateButton);
+
+    expect(updateSpaceSpy).toHaveBeenCalledWith({
+      ...spaceToUpdate,
+      name: 'Updated Name Of Space',
+      initials: 'UN',
+      imageUrl: '',
+      color: '#FFC7DB',
+    });
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('allows space to be deleted', async () => {
     const spaceToDelete = {
       id: 'delete-me-space',

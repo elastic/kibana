@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
@@ -57,19 +57,17 @@ export const NotesDetails = memo(({ hit }: NotesDetailsProps) => {
       <EuiFlyoutHeader
         hasBorder
         css={css`
-          padding-block-end: ${euiTheme.size.m} !important;
+          padding-block: ${euiTheme.size.s} !important;
         `}
       >
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiPanel data-test-subj={NOTES_DETAILS_TEST_ID} hasBorder={false} hasShadow={false}>
-          <NotesDetailsContent
-            hit={hit}
-            timelineConfig={timelineConfig}
-            hideTimelineIcon={!isInSecurityApp}
-          />
-        </EuiPanel>
+      <EuiFlyoutBody data-test-subj={NOTES_DETAILS_TEST_ID}>
+        <NotesDetailsContent
+          hit={hit}
+          timelineConfig={timelineConfig}
+          hideTimelineIcon={!isInSecurityApp}
+        />
       </EuiFlyoutBody>
     </>
   );

@@ -16,7 +16,7 @@ import {
   generateApiLayer,
   isTextBasedLayer,
 } from '../../../utils';
-import { convertAppearanceToAPIFormat } from './appearance';
+import { convertStylingToAPIFormat } from './styling';
 import { convertDatatableColumnsToAPI } from './columns';
 
 export function buildVisualizationAPI(
@@ -37,7 +37,7 @@ export function buildVisualizationAPI(
       data_source: dataSource,
       ...generateApiLayer(layer),
       ...columns,
-      ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
+      ...convertStylingToAPIFormat(visualization, columnIdMapping),
     };
   }
 
@@ -56,6 +56,6 @@ export function buildVisualizationAPI(
     data_source: dataSource,
     ...generateApiLayer(layer),
     ...columns,
-    ...convertAppearanceToAPIFormat(visualization, columnIdMapping),
+    ...convertStylingToAPIFormat(visualization, columnIdMapping),
   };
 }

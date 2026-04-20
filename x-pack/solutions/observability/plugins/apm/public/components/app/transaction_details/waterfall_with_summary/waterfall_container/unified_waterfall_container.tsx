@@ -75,28 +75,30 @@ export function UnifiedWaterfallContainer({
   };
 
   return (
-    <TraceWaterfall
-      traceItems={traceItems}
-      errors={errors}
-      onClick={handleNodeClick}
-      onErrorClick={handleErrorClick}
-      getServiceBadgeHref={getServiceBadgeHref}
-      serviceName={serviceName}
-      showLegend
-      showCriticalPathControl
-      agentMarks={agentMarks}
-      showCriticalPath={showCriticalPath}
-      onShowCriticalPathChange={onShowCriticalPathChange}
-      entryTransactionId={entryTransactionId}
-      traceDocsTotal={traceDocsTotal}
-      maxTraceItems={maxTraceItems}
-      discoverHref={discoverHref}
-    >
-      <UnifiedWaterfallFlyout
-        waterfallItemId={waterfallItemId}
+    <div data-test-subj="waterfallContainer">
+      <TraceWaterfall
         traceItems={traceItems}
-        toggleFlyout={toggleFlyout}
-      />
-    </TraceWaterfall>
+        errors={errors}
+        onClick={handleNodeClick}
+        onErrorClick={handleErrorClick}
+        getServiceBadgeHref={getServiceBadgeHref}
+        serviceName={serviceName}
+        showLegend
+        showCriticalPathControl
+        agentMarks={agentMarks}
+        showCriticalPath={showCriticalPath}
+        onShowCriticalPathChange={onShowCriticalPathChange}
+        entryTransactionId={entryTransactionId}
+        traceDocsTotal={traceDocsTotal}
+        maxTraceItems={maxTraceItems}
+        discoverHref={discoverHref}
+      >
+        <UnifiedWaterfallFlyout
+          waterfallItemId={waterfallItemId}
+          traceItems={traceItems}
+          toggleFlyout={toggleFlyout}
+        />
+      </TraceWaterfall>
+    </div>
   );
 }

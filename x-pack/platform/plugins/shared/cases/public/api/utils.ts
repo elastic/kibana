@@ -24,6 +24,7 @@ import type {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isUnifiedAttachmentRequest,
 } from '../../common/utils/attachments';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
@@ -101,6 +102,10 @@ export const convertAttachmentToCamelCase = (attachment: AttachmentRequestV2): A
 
   if (isCommentRequestTypePersistableState(attachment)) {
     return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
+  }
+
+  if (isUnifiedAttachmentRequest(attachment)) {
+    return convertAttachmentToCamelExceptProperty(attachment, 'data');
   }
 
   return convertToCamelCase<AttachmentRequestV2, AttachmentUIV2>(attachment);

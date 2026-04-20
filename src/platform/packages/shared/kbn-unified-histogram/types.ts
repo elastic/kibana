@@ -322,4 +322,10 @@ export interface ChartSectionProps {
    * Controls whether or not the chart is visible (used for Show and Hide toggle)
    */
   isComponentVisible: boolean;
+  /**
+   * Optional callback for registering a request adapter for custom chart section requests
+   * in the Inspector. When called, the adapter will be synced to
+   * inspectorAdapters.lensRequests via the unified histogram state service.
+   */
+  setLensRequestAdapter?: (adapter: RequestAdapter | undefined) => void;
 }

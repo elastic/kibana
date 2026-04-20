@@ -70,6 +70,7 @@ dependsOn:
   - '@kbn/apm-utils'
   - '@kbn/std'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/css-utils'
 tags:
   - plugin
   - prod

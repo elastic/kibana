@@ -96,7 +96,7 @@ describe('createVisualizationResolver', () => {
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
-        config: { attributes: { type: 'bar' } },
+        config: { type: 'bar' },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });

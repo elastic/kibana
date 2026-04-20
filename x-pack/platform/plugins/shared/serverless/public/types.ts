@@ -24,10 +24,10 @@ export interface ServerlessPluginStart {
     params?: Partial<ChromeSetProjectBreadcrumbsParams>
   ) => void;
   initNavigation(id: SolutionId, navigationTree$: Observable<NavigationTreeDefinition>): void;
-  getNavigationCards(
+  getNavigationCards$(
     roleManagementEnabled?: boolean,
     extendCardNavDefinitions?: Record<string, CardNavExtensionDefinition>
-  ): Record<string, CardNavExtensionDefinition> | undefined;
+  ): Observable<Record<string, CardNavExtensionDefinition> | undefined>;
 }
 
 export interface ServerlessPluginSetupDependencies {

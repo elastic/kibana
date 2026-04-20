@@ -60,7 +60,13 @@ import type {
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
-import { isLegacyAttachmentRequest } from '../../common/utils/attachments';
+import {
+  isLegacyAttachmentRequest,
+  isEventAttachmentType,
+  getIndexFromMetadata,
+  toStringArray,
+} from '../../common/utils/attachments';
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../common/constants/attachments';
 
 /**
  * Default sort field for querying saved objects.
@@ -172,7 +178,14 @@ export const flattenAttachmentSavedObject = (
 });
 
 export const getIDsAndIndicesAsArrays = (
-  comment: AlertAttachmentPayload | EventAttachmentPayload
+  comment:
+    | AlertAttachmentPayload
+    | EventAttachmentPayload
+    | {
+        type: typeof SECURITY_EVENT_ATTACHMENT_TYPE;
+        attachmentId: string | string[];
+        metadata?: unknown;
+      }
 ): { ids: string[]; indices: string[] } => {
   if (comment.type === AttachmentType.alert) {
     return {
@@ -181,9 +194,24 @@ export const getIDsAndIndicesAsArrays = (
     };
   }
 
+  if (comment.type === AttachmentType.event) {
+    return {
+      ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
+      indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    };
+  }
+
+  if (comment.type === SECURITY_EVENT_ATTACHMENT_TYPE) {
+    const metadataIndex = getIndexFromMetadata(comment.metadata);
+    return {
+      ids: toStringArray(comment.attachmentId),
+      indices: toStringArray(metadataIndex),
+    };
+  }
+
   return {
-    ids: Array.isArray(comment.eventId) ? comment.eventId : [comment.eventId],
-    indices: Array.isArray(comment.index) ? comment.index : [comment.index],
+    ids: [],
+    indices: [],
   };
 };
 
@@ -375,10 +403,17 @@ export const countEventsForID = ({
   comments: SavedObjectsFindResponse<AttachmentAttributes>;
 }): number | undefined => {
   return comments.saved_objects.reduce((sum, current) => {
-    if (current.attributes.type === AttachmentType.event) {
-      return sum + [current.attributes.eventId].flat().length;
+    const attrs = current.attributes;
+    if (!isEventAttachmentType(attrs.type)) {
+      return sum;
     }
-
+    if ('attachmentId' in attrs && attrs.attachmentId != null) {
+      const id = attrs.attachmentId;
+      return sum + (Array.isArray(id) ? id.length : 1);
+    }
+    if ('eventId' in attrs && attrs.eventId != null) {
+      return sum + [attrs.eventId].flat().length;
+    }
     return sum;
   }, 0);
 };

@@ -48,6 +48,7 @@
     "@kbn/core-execution-context-server-mocks",
     "@kbn/core-execution-context-common",
     "@kbn/core-http-server",
+    "@kbn/core-security-server",
   ],
   "exclude": ["target/**/*"]
 }

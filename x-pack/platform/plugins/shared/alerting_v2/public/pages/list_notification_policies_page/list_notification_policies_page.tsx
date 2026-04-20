@@ -18,7 +18,6 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
   type EuiTableSelectionType,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type {
@@ -75,7 +74,6 @@ export const ListNotificationPoliciesPage = () => {
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
   const [selectedPolicies, setSelectedPolicies] = useState<NotificationPolicyResponse[]>([]);
 
-  const { euiTheme } = useEuiTheme();
   const { navigateToUrl } = useService(CoreStart('application'));
   const { basePath } = useService(CoreStart('http'));
   const settings = useService(CoreStart('settings'));
@@ -478,8 +476,7 @@ export const ListNotificationPoliciesPage = () => {
                 display: none;
               }
               .euiTableRowCellCheckbox {
-                vertical-align: top;
-                padding-top: ${euiTheme.size.xs};
+                vertical-align: middle;
               }
             `}
             sorting={{

@@ -335,11 +335,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
           await expandedFlyoutGraph.expectFilterTextEquals(
             0,
-            'user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com OR user.name: Service Account'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
           await expandedFlyoutGraph.expectFilterPreviewEquals(
             0,
-            'user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com OR user.name: Service Account'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
 
           await expandedFlyoutGraph.showEntityDetails('d45b28b33930cc202a6c9d8d8eab3ae6');

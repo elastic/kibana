@@ -60,7 +60,8 @@ type FormType = 'simple' | 'steps';
 
 interface LiveQueryFormProps {
   defaultValue?: DefaultLiveQueryFormFields;
-  onSuccess?: () => void;
+  onSuccess?: (actionId: string) => void;
+  redirectsOnSuccess?: boolean;
   queryField?: boolean;
   ecsMappingField?: boolean;
   formType?: FormType;
@@ -72,6 +73,7 @@ interface LiveQueryFormProps {
 const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   defaultValue,
   onSuccess,
+  redirectsOnSuccess,
   queryField = true,
   formType = 'steps',
   enabled = true,
@@ -335,7 +337,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 <LiveQueryQueryField handleSubmitForm={handleSubmit(onSubmit)} />
               </EuiFlexItem>
               {submitButtonContent}
-              {data?.action_id ? (
+              {data?.action_id && !redirectsOnSuccess ? (
                 <EuiFlexItem>
                   {isHistoryEnabled ? (
                     <PackQueriesStatusTable

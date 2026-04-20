@@ -632,7 +632,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await browser.pressKeys(browser.keys.ESCAPE);
 
-      await testSubjects.existOrFail('ESQLEditor-footerPopoverButton-warning');
+      await retry.waitForWithTimeout(
+        'ES|QL KEEP warning footer button to appear',
+        testSubjects.TRY_TIME,
+        async () =>
+          await testSubjects.exists('ESQLEditor-footerPopoverButton-warning', { timeout: 1000 })
+      );
 
       await testSubjects.click('ESQLEditor-footerPopoverButton-warning');
       const warningContent = await testSubjects.find('ESQLEditor-errors-warnings-content');

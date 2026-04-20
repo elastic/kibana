@@ -11,6 +11,7 @@ import React from 'react';
 import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
+import { InvalidRouteParamsException } from './errors/invalid_route_params_exception';
 import { createMemoryHistory } from 'history';
 import { last } from 'lodash';
 
@@ -437,6 +438,231 @@ describe('createRouter', () => {
       expect(
         router.getRoutePath(last(router.getRoutesToMatch('/services/opbeans-java/errors'))!)
       ).toBe('/services/{serviceName}/errors');
+    });
+  });
+
+  describe('invalid query params recovery', () => {
+    it('throws InvalidRouteParamsException when a query param has null value and a default exists', () => {
+      // ?rangeFrom (bare key, parsed as null by query-string) + valid rangeTo
+      history.push('/services?rangeFrom&rangeTo=now&transactionType=request');
+
+      expect(() => {
+        router.getParams('/services', history.location);
+      }).toThrow(InvalidRouteParamsException);
+
+      try {
+        router.getParams('/services', history.location);
+      } catch (e) {
+        const error = e as InvalidRouteParamsException;
+        // rangeFrom should be replaced with default, rangeTo and transactionType preserved
+        expect(error.patched.query).toEqual(
+          expect.objectContaining({
+            rangeFrom: 'now-30m',
+            rangeTo: 'now',
+            transactionType: 'request',
+          })
+        );
+      }
+    });
+
+    it('throws InvalidRouteParamsException preserving valid params when a codec fails and param is optional', () => {
+      const recoverableRoutes = {
+        '/': {
+          element: <></>,
+          params: t.type({
+            query: t.intersection([
+              t.type({
+                rangeFrom: t.string,
+                rangeTo: t.string,
+              }),
+              t.partial({
+                page: toNumberRt,
+              }),
+            ]),
+          }),
+        },
+      };
+
+      const recoverableRouter = createRouter(recoverableRoutes);
+
+      // page=abc will fail toNumberRt; rangeFrom and rangeTo are valid
+      history.push('/?rangeFrom=now-15m&rangeTo=now&page=abc');
+
+      expect(() => {
+        recoverableRouter.getParams('/', history.location);
+      }).toThrow(InvalidRouteParamsException);
+
+      try {
+        recoverableRouter.getParams('/', history.location);
+      } catch (e) {
+        const error = e as InvalidRouteParamsException;
+        // page has no default so it should be removed; rangeFrom and rangeTo preserved
+        expect(error.patched.query).toEqual(
+          expect.objectContaining({
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+          })
+        );
+        expect(error.patched.query).not.toHaveProperty('page');
+      }
+    });
+
+    it('throws a plain Error when recovery with defaults also fails', () => {
+      // rangeTo is required with no default — removing the invalid param still won't satisfy the codec
+      history.push('/services?transactionType=request');
+
+      expect(() => {
+        router.getParams('/services', history.location);
+      }).not.toThrow(InvalidRouteParamsException);
+
+      expect(() => {
+        router.getParams('/services', history.location);
+      }).toThrow(Error);
+    });
+
+    it('does not throw when all query params are valid', () => {
+      history.push('/services?rangeFrom=now-15m&rangeTo=now&transactionType=request');
+
+      expect(() => {
+        router.getParams('/services', history.location);
+      }).not.toThrow();
+    });
+
+    it('throws InvalidParamsException when a child route param is null and the child has its own default', () => {
+      const parentChildRoutes = {
+        '/': {
+          element: <></>,
+          params: t.type({
+            query: t.type({
+              rangeFrom: t.string,
+              rangeTo: t.string,
+            }),
+          }),
+          defaults: {
+            query: {
+              rangeFrom: 'now-30m',
+            },
+          },
+          children: {
+            '/inventory': {
+              element: <></>,
+              params: t.type({
+                query: t.type({
+                  sortField: t.string,
+                }),
+              }),
+              defaults: {
+                query: {
+                  sortField: 'name',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const parentChildRouter = createRouter(parentChildRoutes);
+
+      // sortField is null (bare key); parent params are valid
+      history.push('/inventory?rangeFrom=now-15m&rangeTo=now&sortField');
+
+      expect(() => {
+        parentChildRouter.getParams('/inventory', history.location);
+      }).toThrow(InvalidRouteParamsException);
+
+      try {
+        parentChildRouter.getParams('/inventory', history.location);
+      } catch (e) {
+        const error = e as InvalidRouteParamsException;
+        // sortField should be replaced with child's default; parent params preserved in query
+        expect(error.patched.query).toEqual(
+          expect.objectContaining({
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+            sortField: 'name',
+          })
+        );
+      }
+    });
+
+    it('recovers both parent and child null params in a single InvalidParamsException', () => {
+      const parentChildRoutes = {
+        '/': {
+          element: <></>,
+          params: t.type({
+            query: t.type({
+              rangeFrom: t.string,
+              rangeTo: t.string,
+            }),
+          }),
+          defaults: {
+            query: {
+              rangeFrom: 'now-30m',
+            },
+          },
+          children: {
+            '/inventory': {
+              element: <></>,
+              params: t.type({
+                query: t.type({
+                  sortField: t.string,
+                }),
+              }),
+              defaults: {
+                query: {
+                  sortField: 'name',
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const parentChildRouter = createRouter(parentChildRoutes);
+
+      // Both rangeFrom (parent) and sortField (child) are null bare keys
+      history.push('/inventory?rangeFrom&rangeTo=now&sortField');
+
+      expect(() => {
+        parentChildRouter.getParams('/inventory', history.location);
+      }).toThrow(InvalidRouteParamsException);
+
+      try {
+        parentChildRouter.getParams('/inventory', history.location);
+      } catch (e) {
+        const error = e as InvalidRouteParamsException;
+        // Both should be recovered: rangeFrom from parent default, sortField from child default
+        expect(error.patched.query).toEqual(
+          expect.objectContaining({
+            rangeFrom: 'now-30m',
+            rangeTo: 'now',
+            sortField: 'name',
+          })
+        );
+      }
+    });
+
+    it('respects codecs that accept null as a valid value', () => {
+      const nullableRoutes = {
+        '/': {
+          element: <></>,
+          params: t.type({
+            query: t.type({
+              filter: t.union([t.string, t.null]),
+            }),
+          }),
+        },
+      };
+
+      const nullableRouter = createRouter(nullableRoutes);
+
+      // ?filter (bare key, parsed as null) should pass because t.null is in the union
+      history.push('/?filter');
+      const params = nullableRouter.getParams('/', history.location);
+      expect(params).toEqual({
+        path: {},
+        query: { filter: null },
+      });
     });
   });
 });

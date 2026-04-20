@@ -165,8 +165,9 @@ export const useToggleEntityAnalytics = ({
     setIsToggling(true);
     try {
       const riskOn = riskEngineStatus === RiskEngineStatusEnum.ENABLED;
-      const storeOn =
-        !isEntityStoreFeatureFlagDisabled && entityStoreStatus === StoreStatusEnum.running;
+      const storeOn = isEntityStoreV2Enabled
+        ? entityStoreStatus === StoreStatusEnum.running
+        : !isEntityStoreFeatureFlagDisabled && entityStoreStatus === StoreStatusEnum.running;
 
       if (isEntityStoreV2Enabled) {
         if (storeOn) {

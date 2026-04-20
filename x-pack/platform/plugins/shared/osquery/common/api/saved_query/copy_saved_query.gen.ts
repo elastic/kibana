@@ -16,5 +16,37 @@
 
 import { z } from '@kbn/zod/v4';
 
+import {
+  SavedQueryId,
+  SavedQueryDescriptionOrUndefined,
+  Query,
+  SnapshotOrUndefined,
+  RemovedOrUndefined,
+  PlatformOrUndefined,
+  ECSMappingOrUndefined,
+} from '../model/schema/common_attributes.gen';
+
+/**
+ * The response for copying a saved query.
+ */
 export type CopySavedQueryResponse = z.infer<typeof CopySavedQueryResponse>;
-export const CopySavedQueryResponse = z.object({});
+export const CopySavedQueryResponse = z.object({
+  data: z.object({
+    saved_object_id: z.string(),
+    id: SavedQueryId,
+    description: SavedQueryDescriptionOrUndefined.optional(),
+    query: Query.optional(),
+    interval: z.union([z.number().int(), z.string()]).optional(),
+    timeout: z.number().int().optional(),
+    snapshot: SnapshotOrUndefined.optional(),
+    removed: RemovedOrUndefined.optional(),
+    platform: PlatformOrUndefined.optional(),
+    ecs_mapping: ECSMappingOrUndefined.optional(),
+    created_at: z.string().datetime().optional(),
+    created_by: z.string().nullable().optional(),
+    created_by_profile_uid: z.string().optional(),
+    updated_at: z.string().datetime().optional(),
+    updated_by: z.string().nullable().optional(),
+    updated_by_profile_uid: z.string().optional(),
+  }),
+});

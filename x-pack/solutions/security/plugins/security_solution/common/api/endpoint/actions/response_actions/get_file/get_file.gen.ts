@@ -16,19 +16,22 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type GetFileRouteRequestBody = z.infer<typeof GetFileRouteRequestBody>;
 export const GetFileRouteRequestBody = BaseActionSchema.merge(
   z.object({
     parameters: z.object({
+      /**
+       * The full file path to retrieve from the endpoint.
+       */
       path: z.string(),
     }),
   })
 );
-
-export type GetFileRouteResponse = z.infer<typeof GetFileRouteResponse>;
-export const GetFileRouteResponse = z.object({});
 
 export type EndpointGetFileActionRequestBody = z.infer<typeof EndpointGetFileActionRequestBody>;
 export const EndpointGetFileActionRequestBody = GetFileRouteRequestBody;
@@ -37,4 +40,4 @@ export type EndpointGetFileActionRequestBodyInput = z.input<
 >;
 
 export type EndpointGetFileActionResponse = z.infer<typeof EndpointGetFileActionResponse>;
-export const EndpointGetFileActionResponse = GetFileRouteResponse;
+export const EndpointGetFileActionResponse = ResponseActionCreateSuccessResponse;

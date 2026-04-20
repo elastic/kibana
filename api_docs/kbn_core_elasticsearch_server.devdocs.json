@@ -6090,7 +6090,7 @@
         "tags": [],
         "label": "UrlRequest",
         "description": [
-          "\nA minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in\nnon-HTTP contexts - for example, background tasks or scheduled jobs - where no real\n{@link KibanaRequest} is available. The space is derived from the URL pathname\n(e.g. `/s/<spaceId>/...`).\n\nIn route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies\n{@link ScopeableUrlRequest} without needing this type."
+          "\nA minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in\nnon-HTTP contexts - for example, background tasks or scheduled jobs - where no real\n{@link KibanaRequest} is available. The space is derived from the URL pathname\n(e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.\n\nIn route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies\n{@link ScopeableUrlRequest} without needing this type."
         ],
         "signature": [
           "UrlRequest",
@@ -6110,7 +6110,7 @@
             "tags": [],
             "label": "url",
             "description": [
-              "The URL of the request, used to extract the current space for CPS routing."
+              "\nURL used to resolve the space for CPS. Synthetic callers set this to a path that includes\n`/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape."
             ],
             "signature": [
               "URL"
@@ -7149,7 +7149,7 @@
           "FakeRequest"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 39,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7162,7 +7162,7 @@
         "tags": [],
         "label": "ScopeableUrlRequest",
         "description": [
-          "\nA request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.\n\nCovers both {@link KibanaRequest} (the typical caller from route handlers, whose URL is set by\nthe HTTP layer) and {@link UrlRequest} (a lightweight synthetic alternative for programmatic\nuse). In both cases the space is extracted from the URL pathname (e.g. `/s/<spaceId>/...`).\n"
+          "\nA request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.\n\nCovers both {@link KibanaRequest} (the typical caller from route handlers) and\n{@link UrlRequest} (a lightweight synthetic alternative). Space resolution uses\n`getSpaceNPRE` from `@kbn/cps-server-utils`: for {@link KibanaRequest}, when\n`rewrittenUrl` is set (original URL before the first pre-routing `rewriteUrl`), that URL is\npreferred over `url` so the space segment remains visible after Spaces strips `/s/:spaceId`\nfrom `request.url`. Synthetic {@link UrlRequest} values only supply `url`.\n"
         ],
         "signature": [
           "KibanaRequest",
@@ -7170,7 +7170,7 @@
           "UrlRequest"
         ],
         "path": "src/core/packages/elasticsearch/server/src/client/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

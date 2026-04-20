@@ -26,7 +26,8 @@
       "fieldFormats",
       "charts",
       "management",
-      "kibanaUtils"
+      "kibanaUtils",
+      "share"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["alerting", "kibanaReact"],

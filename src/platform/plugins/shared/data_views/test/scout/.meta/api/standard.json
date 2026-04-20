@@ -1,5 +1,5 @@
 {
-  "sha1": "91fa1a61db5e7849f49f64cba975e2dbe84111a9",
+  "sha1": "50fd549a7fc08bebe6880bfc1c0969c81bc92630",
   "tests": [
     {
       "id": "6a1a7d28753a6bb-37b3571f127ad93",
@@ -1146,6 +1146,206 @@
       }
     },
     {
+      "id": "066d64566374188-bb5289a9aee2035",
+      "title": "rollup data views - fields for wildcard returns 200 and best effort response despite lack of rollup support",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/rollup_data_views.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e98edd3490deff-56c774db5c0b479",
+      "title": "POST api/data_views/data_view/{id}/runtime_field - create errors (data view api) returns an error when runtime field object is not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_errors.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "12759971e3c7f0b-08cc9e8a2abd326",
+      "title": "POST api/data_views/data_view/{id}/runtime_field - create main (data view api) can create a new runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_main.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "12759971e3c7f0b-6dea31bc4e3d2d5",
+      "title": "POST api/data_views/data_view/{id}/runtime_field - create main (data view api) newly created runtime field is available in the data view object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_main.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "12759971e3c7f0b-6c81bd665ade403",
+      "title": "POST api/data_views/data_view/{id}/runtime_field - create main (data view api) prevents field name collisions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_create_main.spec.ts",
+        "line": 135,
+        "column": 12
+      }
+    },
+    {
+      "id": "286004876fa8414-80af683075abee0",
+      "title": "GET api/data_views/data_view/{id}/runtime_field/{name} - get errors (data view api) returns 404 error on non-existing data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_errors.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "286004876fa8414-02cc8731ba58191",
+      "title": "GET api/data_views/data_view/{id}/runtime_field/{name} - get errors (data view api) returns 404 error on non-existing runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_errors.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "286004876fa8414-eefe88cab56b31c",
+      "title": "GET api/data_views/data_view/{id}/runtime_field/{name} - get errors (data view api) returns error when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/runtime_fields_get_errors.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
       "id": "88b7be0d387b0e8-b05dd4339134bfb",
       "title": "POST api/index_patterns/index_pattern - main (legacy index pattern api) can create an index_pattern with just a title",
       "expectedStatus": "passed",
@@ -2208,6 +2408,206 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/default_index_pattern.spec.ts",
         "line": 112,
+        "column": 12
+      }
+    },
+    {
+      "id": "6dcef40eeee4042-135d31fa04c74d0",
+      "title": "POST api/index_patterns/index_pattern/{id}/runtime_field - create errors (legacy index pattern api) returns an error when runtime field object is not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_errors.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "1219008d9a6bfba-8279dd9bd9f37eb",
+      "title": "POST api/index_patterns/index_pattern/{id}/runtime_field - create main (legacy index pattern api) can create a new runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_main.spec.ts",
+        "line": 38,
+        "column": 12
+      }
+    },
+    {
+      "id": "1219008d9a6bfba-a0cb3f97f78a0ef",
+      "title": "POST api/index_patterns/index_pattern/{id}/runtime_field - create main (legacy index pattern api) newly created runtime field is available in the index pattern object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_main.spec.ts",
+        "line": 77,
+        "column": 12
+      }
+    },
+    {
+      "id": "1219008d9a6bfba-77ca8687f5ea776",
+      "title": "POST api/index_patterns/index_pattern/{id}/runtime_field - create main (legacy index pattern api) prevents field name collisions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_create_main.spec.ts",
+        "line": 145,
+        "column": 12
+      }
+    },
+    {
+      "id": "9564164389b6bf5-2b73d8379eb68a7",
+      "title": "GET api/index_patterns/index_pattern/{id}/runtime_field/{name} - get errors (legacy index pattern api) returns 404 error on non-existing index pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "9564164389b6bf5-d96992f456cdc0d",
+      "title": "GET api/index_patterns/index_pattern/{id}/runtime_field/{name} - get errors (legacy index pattern api) returns 404 error on non-existing runtime field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "9564164389b6bf5-0b68ca6f5943e97",
+      "title": "GET api/index_patterns/index_pattern/{id}/runtime_field/{name} - get errors (legacy index pattern api) returns error when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "fdc00415d051d30-c298478ad3950b5",
+      "title": "scripted fields disabled scripted fields are ignored when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_disabled.spec.ts",
+        "line": 45,
         "column": 12
       }
     }

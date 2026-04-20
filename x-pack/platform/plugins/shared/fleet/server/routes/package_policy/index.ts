@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { schema } from '@kbn/config-schema';
 
 import { getRouteRequiredAuthz } from '../../services/security';
@@ -63,6 +65,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.LIST_PATTERN)
         ).granted,
       summary: 'Get package policies',
+      description: 'List all package policies.',
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -70,6 +73,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_package_policies.yaml'),
+        },
         validate: {
           request: GetPackagePoliciesRequestSchema,
           response: {
@@ -99,6 +105,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           getRouteRequiredAuthz('post', PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN)
         ).granted,
       summary: 'Bulk get package policies',
+      description: 'Get multiple package policies by ID.',
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -106,6 +113,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_bulk_get_package_policies.yaml'),
+        },
         validate: {
           request: BulkGetPackagePoliciesRequestSchema,
           response: {
@@ -147,6 +158,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/get_package_policy.yaml'),
+        },
         validate: {
           request: GetOnePackagePolicyRequestSchema,
           response: {
@@ -178,10 +192,19 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { readIntegrationPolicies: true },
       },
+      summary: 'Get orphaned package policies',
+      description: 'Get package policies that are not assigned to any agent policy.',
+      options: {
+        tags: ['oas-tag:Fleet package policies'],
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_orphaned_package_policies.yaml'),
+        },
         validate: {
           request: {},
           response: {
@@ -205,6 +228,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       summary: 'Create a package policy',
+      description: 'Create a new package policy and assign it to an agent policy.',
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -212,6 +236,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/post_package_policy.yaml'),
+        },
         validate: {
           request: CreatePackagePolicyRequestSchema,
           response: {
@@ -253,6 +280,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/put_package_policy.yaml'),
+        },
         validate: {
           request: UpdatePackagePolicyRequestSchema,
           response: {
@@ -291,6 +321,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Bulk delete package policies',
+      description: 'Delete multiple package policies by ID.',
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -298,6 +329,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_delete_package_policies.yaml'),
+        },
         validate: {
           request: DeletePackagePoliciesRequestSchema,
           response: {
@@ -335,6 +370,9 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/delete_package_policy.yaml'),
+        },
         validate: {
           request: DeleteOnePackagePolicyRequestSchema,
           response: {
@@ -373,6 +411,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_upgrade_package_policies.yaml'),
+        },
         validate: {
           request: UpgradePackagePoliciesRequestSchema,
           response: {
@@ -403,6 +445,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       summary: 'Dry run a package policy upgrade',
+      description:
+        'Preview the changes that would be applied by upgrading a package policy to a newer package version.',
       options: {
         tags: ['oas-tag:Fleet package policies'],
       },
@@ -410,6 +454,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_dryrun_package_policies.yaml'),
+        },
         validate: {
           request: DryRunPackagePoliciesRequestSchema,
           response: {

@@ -11,7 +11,7 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import { useContentListFilters } from '@kbn/content-list-provider';
+import { useContentListFilters, getIncludeExcludeFlag } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
 import { StarredCell } from './starred_cell';
@@ -21,17 +21,14 @@ const DEFAULT_WIDTH = '40px';
 /**
  * Column header for `Column.Starred`.
  *
- * Renders a filled star when `filters.starredOnly` is active, and an empty
- * star otherwise, giving the header a live indicator of the filter state.
+ * Renders a filled star when the `starred` flag filter is active, and an
+ * empty star otherwise, giving the header a live indicator of the filter state.
  */
 const StarredColumnHeader = () => {
   const { filters } = useContentListFilters();
+  const isStarredActive = getIncludeExcludeFlag(filters.starred)?.state === 'include';
   return (
-    <EuiIcon
-      type={filters.starredOnly ? 'starFilled' : 'starEmpty'}
-      size="m"
-      aria-label="Starred"
-    />
+    <EuiIcon type={isStarredActive ? 'starFilled' : 'starEmpty'} size="m" aria-label="Starred" />
   );
 };
 

@@ -6,13 +6,12 @@
  */
 
 import { htmlIdGenerator } from '@elastic/eui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes, StreamlangUIBranch } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
   convertUIStepsToDSL,
   isActionBlock,
-  isConditionBlock,
   type StreamlangProcessorDefinition,
 } from '@kbn/streamlang';
 import type { StreamlangConditionBlock, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
@@ -53,6 +52,7 @@ import type {
 import {
   getActiveDataSourceSamplesFromParent,
   getStepsForSimulation,
+  maybeAutoFilterByParentCondition,
   spawnStep,
   type StepSpawner,
 } from './utils';
@@ -83,7 +83,10 @@ export const interactiveModeMachine = setup({
           options,
         }: {
           processor?: StreamlangProcessorDefinition;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+          options?: {
+            parentId: StreamlangStepWithUIAttributes['parentId'];
+            branch?: StreamlangUIBranch;
+          };
         }
       ) => {
         if (!processor) {
@@ -106,22 +109,16 @@ export const interactiveModeMachine = setup({
         );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
-          conversionOptions.parentId
+          conversionOptions.parentId,
+          conversionOptions.branch ?? 'if'
         );
 
-        // If the processor is created under a condition block, automatically select that condition.
-        const parentId = conversionOptions.parentId;
-        if (parentId) {
-          const parentStep = assignArgs.context.stepRefs
-            .find((ref) => ref.id === parentId)
-            ?.getSnapshot()?.context.step;
-          if (parentStep && isConditionBlock(parentStep)) {
-            assignArgs.context.parentRef.send({
-              type: 'simulation.filterByConditionAuto',
-              conditionId: parentId,
-            });
-          }
-        }
+        maybeAutoFilterByParentCondition(
+          assignArgs.context.stepRefs,
+          conversionOptions.parentId,
+          assignArgs.context.parentRef,
+          conversionOptions.branch
+        );
 
         return {
           stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
@@ -151,7 +148,11 @@ export const interactiveModeMachine = setup({
         assignArgs.context.grokCollection,
         { isNew: true }
       );
-      const insertIndex = findInsertIndex(assignArgs.context.stepRefs, parentId);
+      const insertIndex = findInsertIndex(
+        assignArgs.context.stepRefs,
+        parentId,
+        targetStepUIDefinition.branch ?? 'if'
+      );
 
       return {
         stepRefs: insertAtIndex(assignArgs.context.stepRefs, newProcessorRef, insertIndex),
@@ -165,7 +166,10 @@ export const interactiveModeMachine = setup({
           options,
         }: {
           condition?: StreamlangConditionBlock;
-          options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+          options?: {
+            parentId: StreamlangStepWithUIAttributes['parentId'];
+            branch?: StreamlangUIBranch;
+          };
         }
       ) => {
         if (!condition) {
@@ -194,7 +198,8 @@ export const interactiveModeMachine = setup({
         );
         const insertIndex = findInsertIndex(
           assignArgs.context.stepRefs,
-          conversionOptions.parentId
+          conversionOptions.parentId,
+          conversionOptions.branch ?? 'if'
         );
 
         // Automatically filter the simulation by the newly created condition.
@@ -216,14 +221,12 @@ export const interactiveModeMachine = setup({
       const step = stepRef?.getSnapshot()?.context.step;
       if (!step || !isActionBlock(step)) return;
 
-      const parentId = step.parentId;
-      if (!parentId) return;
-
-      const parentStep = context.stepRefs.find((ref) => ref.id === parentId)?.getSnapshot()
-        ?.context.step;
-      if (parentStep && isConditionBlock(parentStep)) {
-        context.parentRef.send({ type: 'simulation.filterByConditionAuto', conditionId: parentId });
-      }
+      maybeAutoFilterByParentCondition(
+        context.stepRefs,
+        step.parentId,
+        context.parentRef,
+        step.branch
+      );
     },
     deleteStep: assign(({ context }, params: { id: string }) => {
       const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
@@ -244,7 +247,7 @@ export const interactiveModeMachine = setup({
         params: {
           sourceStepId: string;
           targetStepId: string;
-          operation: 'before' | 'after' | 'inside';
+          operation: 'before' | 'after' | 'inside' | 'inside-else';
         }
       ) => {
         const steps = context.stepRefs.map((ref) => ref.getSnapshot().context.step);
@@ -254,15 +257,21 @@ export const interactiveModeMachine = setup({
           return;
         }
 
-        // Determine the new parentId for the source step
+        // Determine the new parentId and branch for the source step
         let newParentId: string | null;
+        let newBranch: StreamlangUIBranch;
 
         // Nested inside a where block
         if (params.operation === 'inside') {
           newParentId = params.targetStepId;
+          newBranch = 'if';
+        } else if (params.operation === 'inside-else') {
+          newParentId = params.targetStepId;
+          newBranch = 'else';
         } else {
-          // Use sibling's parentId
+          // Use sibling's parentId and branch
           newParentId = targetStep.parentId ?? null;
+          newBranch = targetStep.branch ?? 'if';
         }
 
         // Reorder the steps
@@ -278,15 +287,18 @@ export const interactiveModeMachine = setup({
           stepRefs: [...reorderedStepRefs],
         });
 
-        // Update the source step actor's parentId
+        // Update the source step actor's parentId and branch
         const sourceStepRef = reorderedStepRefs.find((ref) => ref.id === params.sourceStepId);
 
         if (sourceStepRef) {
-          const currentParentId = sourceStepRef.getSnapshot().context.step.parentId;
+          const currentStep = sourceStepRef.getSnapshot().context.step;
 
-          if (currentParentId !== newParentId) {
-            // Send event to child actor to update its parentId
-            enqueue.sendTo(sourceStepRef, { type: 'step.changeParent', parentId: newParentId });
+          if (currentStep.parentId !== newParentId || currentStep.branch !== newBranch) {
+            enqueue.sendTo(sourceStepRef, {
+              type: 'step.changeParent',
+              parentId: newParentId,
+              branch: newBranch,
+            });
           }
         }
       }

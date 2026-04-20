@@ -85,6 +85,10 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
+  /** Whether the action is currently unavailable */
+  disabled?: boolean;
+  /** Optional explanation shown when a disabled action remains visible */
+  disabledReason?: string;
   /** Handler function called when the button is clicked */
   handler: () => void | Promise<void>;
 }

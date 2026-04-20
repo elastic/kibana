@@ -46,8 +46,7 @@ describe('LinksEditor', () => {
       .getAttribute('aria-checked');
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/253303
-  describe.skip('dashboard link options', () => {
+  describe('dashboard link options', () => {
     test('starts with default when options not provided', async () => {
       render(<LinkEditor {...defaultProps} />);
       await waitFor(() => {

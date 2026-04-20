@@ -42,10 +42,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('renders the correct nav and navigate to links', async () => {
         await solutionNavigation.sidenav.expandMore();
         await retry.waitFor('redirect or status response', async () => {
-          await solutionNavigation.sidenav.clickLink({ navId: 'aiAssistantContainer' }); // click on AI Assistant link
-          return (await browser.getCurrentUrl()).includes('/app/observabilityAIAssistant');
+          await solutionNavigation.sidenav.clickLink({ navId: 'agent_builder' }); // click on Agents link
+          return (await browser.getCurrentUrl()).includes('/app/agent_builder');
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Agents' });
 
         // Open other tools more popover
         await solutionNavigation.sidenav.expandMore();

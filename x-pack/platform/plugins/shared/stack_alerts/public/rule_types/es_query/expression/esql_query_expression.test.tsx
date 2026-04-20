@@ -202,7 +202,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
     );
   });
 
-  test('should pass undefined projectRouting to getFieldsForWildcard when query has no SET project_routing', async () => {
+  test('should not pass projectRouting to getFieldsForWildcard when query has no SET project_routing', async () => {
     getProjectRoutingFromEsqlQuery.mockReturnValue(undefined);
 
     await act(async () => {
@@ -237,7 +237,11 @@ describe('EsqlQueryRuleTypeExpression', () => {
       expect.objectContaining({
         pattern: '*',
         allowNoIndex: true,
-        projectRouting: undefined,
+      })
+    );
+    expect(dataViewMock.getFieldsForWildcard).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        projectRouting: expect.anything(),
       })
     );
   });

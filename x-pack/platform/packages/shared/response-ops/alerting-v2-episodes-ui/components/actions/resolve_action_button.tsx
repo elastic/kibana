@@ -7,10 +7,10 @@
 
 import React, { useCallback } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useCreateAlertAction } from '../../hooks/use_create_alert_action';
+import * as i18n from './translations';
 
 export interface AlertEpisodeResolveActionButtonProps {
   lastDeactivateAction?: string | null;
@@ -29,13 +29,7 @@ export function AlertEpisodeResolveActionButton({
     : ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const { mutate: createAlertAction } = useCreateAlertAction(http);
 
-  const label = isDeactivated
-    ? i18n.translate('xpack.alertingV2.episodesUi.resolveAction.activate', {
-        defaultMessage: 'Unresolve',
-      })
-    : i18n.translate('xpack.alertingV2.episodesUi.resolveAction.deactivate', {
-        defaultMessage: 'Resolve',
-      });
+  const label = isDeactivated ? i18n.RESOLVE_ACTION_ACTIVATE : i18n.RESOLVE_ACTION_DEACTIVATE;
 
   const iconType = isDeactivated ? 'check' : 'cross';
 
@@ -47,9 +41,7 @@ export function AlertEpisodeResolveActionButton({
       groupHash,
       actionType,
       body: {
-        reason: i18n.translate('xpack.alertingV2.episodesUi.resolveAction.reason', {
-          defaultMessage: 'Updated from episodes actions UI',
-        }),
+        reason: i18n.RESOLVE_ACTION_REASON,
       },
     });
   }, [createAlertAction, groupHash, actionType]);

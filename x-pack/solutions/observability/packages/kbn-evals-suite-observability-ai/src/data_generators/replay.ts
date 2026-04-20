@@ -6,9 +6,42 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { createGcsRepository, replaySnapshot, type LoadResult } from '@kbn/es-snapshot-loader';
+import {
+  createGcsRepository,
+  replaySnapshot,
+  TEMP_INDEX_PREFIX,
+  type LoadResult,
+} from '@kbn/es-snapshot-loader';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { GcsConfig } from '../scenarios/types';
+
+async function deleteStaleTemporaryIndices(esClient: Client, log: ToolingLog): Promise<void> {
+  let staleIndices: string[];
+  try {
+    const resolved = await esClient.indices.resolveIndex({
+      name: `${TEMP_INDEX_PREFIX}*`,
+    });
+    staleIndices = resolved.indices.map((entry) => entry.name);
+  } catch (error) {
+    log.error(`Failed to resolve stale temporary indices: ${(error as Error).message}`);
+    return;
+  }
+
+  if (staleIndices.length === 0) {
+    return;
+  }
+
+  log.warning(`Found ${staleIndices.length} stale temporary indices from a previous run; deleting`);
+  try {
+    await esClient.indices.delete({
+      index: staleIndices.join(','),
+      ignore_unavailable: true,
+    });
+    log.info(`Deleted ${staleIndices.length} stale temporary indices`);
+  } catch (error) {
+    log.error(`Failed to delete stale temporary indices: ${(error as Error).message}`);
+  }
+}
 
 export async function replayObservabilityDataStreams(
   esClient: Client,
@@ -20,7 +53,9 @@ export async function replayObservabilityDataStreams(
     `Replaying data from snapshot: ${snapshotName} (${gcsConfig.bucket}/${gcsConfig.basePath})`
   );
 
-  return await replaySnapshot({
+  await deleteStaleTemporaryIndices(esClient, log);
+
+  const result = await replaySnapshot({
     esClient,
     log,
     repository: createGcsRepository({
@@ -30,6 +65,12 @@ export async function replayObservabilityDataStreams(
     snapshotName,
     patterns: ['logs-*', 'metrics-*', 'traces-*'],
   });
+
+  if (!result.success) {
+    await deleteStaleTemporaryIndices(esClient, log);
+  }
+
+  return result;
 }
 
 /** deleteByQuery on each distinct destination from snapshot replay (`reindexedIndices` only). */

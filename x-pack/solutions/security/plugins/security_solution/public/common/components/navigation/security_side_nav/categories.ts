@@ -9,8 +9,7 @@ import { LinkCategoryType, type SeparatorLinkCategory } from '@kbn/security-solu
 import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
-  enableAlertsAndAttacksAlignment?: boolean,
-  securityClassicNavUpdate?: boolean
+  enableAlertsAndAttacksAlignment?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
@@ -41,17 +40,5 @@ export const getNavCategories = (
     },
   ];
 
-  return securityClassicNavUpdate
-    ? categories
-    : [
-        ...categories,
-        {
-          type: LinkCategoryType.separator,
-          linkIds: [
-            SecurityPageName.siemReadiness,
-            SecurityPageName.aiValue,
-            SecurityPageName.siemMigrationsLanding,
-          ],
-        },
-      ];
+  return categories;
 };

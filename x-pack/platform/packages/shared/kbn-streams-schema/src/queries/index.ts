@@ -25,7 +25,15 @@ interface StreamQueryBase {
   description: string;
 }
 
+export const QUERY_TYPE_MATCH = 'match' as const;
+export const QUERY_TYPE_STATS = 'stats' as const;
+
+export type QueryType = typeof QUERY_TYPE_MATCH | typeof QUERY_TYPE_STATS;
+
+export const queryTypeSchema = z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]);
+
 export interface StreamQuery extends StreamQueryBase {
+  type: QueryType;
   esql: EsqlQuery;
   // from 0 to 100. aligned with anomaly detection scoring
   severity_score?: number;
@@ -38,7 +46,13 @@ const streamQueryBaseSchema = z.object({
   description: z.string(),
 }) satisfies z.Schema<StreamQueryBase>;
 
+/**
+ * The `type` default exists for backward compatibility with pre-migration
+ * stored documents that lack a type field. For all new writes the type MUST
+ * be derived server-side via {@link deriveQueryType} — never trust the default.
+ */
 export const streamQuerySchema: z.Schema<StreamQuery> = streamQueryBaseSchema.extend({
+  type: queryTypeSchema.default(QUERY_TYPE_MATCH),
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   esql: esqlQuerySchema,
@@ -51,12 +65,26 @@ export const querySchema: z.ZodType<QueryDslQueryContainer> = z.lazy(() =>
   )
 );
 
+/**
+ * Wire schema for creating/updating a query. The `type` field is intentionally
+ * omitted — the server derives it from the ES|QL content via `deriveQueryType`
+ * on every write, so client-supplied values would be ignored.
+ */
 export const upsertStreamQueryRequestSchema = z.object({
   title: NonEmptyString,
   esql: esqlQuerySchema,
   severity_score: z.number().optional(),
   evidence: z.array(z.string()).optional(),
   description: z.string().default(''),
+});
+
+/**
+ * Wire schema for the bulk endpoint index operations.
+ * Same as {@link upsertStreamQueryRequestSchema} but with `id` included,
+ * and `type` intentionally omitted — derived server-side.
+ */
+export const bulkStreamQueryInputSchema = upsertStreamQueryRequestSchema.extend({
+  id: NonEmptyString,
 });
 
 export interface QueriesGetResponse {

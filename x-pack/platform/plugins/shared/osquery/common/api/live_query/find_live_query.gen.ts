@@ -16,12 +16,29 @@
 
 import { z } from '@kbn/zod/v4';
 
+import { ECSMappingOrUndefined } from '../model/schema/common_attributes.gen';
+
 export type FindLiveQueryRequestQuery = z.infer<typeof FindLiveQueryRequestQuery>;
 export const FindLiveQueryRequestQuery = z.object({
+  /**
+   * A KQL search string to filter live queries.
+   */
   kuery: z.string().optional(),
+  /**
+   * The page number to return. The default is 1.
+   */
   page: z.number().int().optional(),
+  /**
+   * The number of results to return per page. The default is 20.
+   */
   pageSize: z.number().int().optional(),
+  /**
+   * The field to sort results by.
+   */
   sort: z.string().optional(),
+  /**
+   * The sort order.
+   */
   sortOrder: z.enum(['asc', 'desc']).optional(),
   /**
       * When true, the response includes result_counts on each item with aggregated result statistics from the action responses index.
@@ -31,7 +48,116 @@ export const FindLiveQueryRequestQuery = z.object({
 });
 
 export type FindLiveQueryResponse = z.infer<typeof FindLiveQueryResponse>;
-export const FindLiveQueryResponse = z.object({});
+export const FindLiveQueryResponse = z.object({
+  data: z
+    .object({
+      /**
+       * The total number of live queries.
+       */
+      total: z.number().int().optional(),
+      /**
+       * An array of live query action items.
+       */
+      items: z
+        .array(
+          z.object({
+            _source: z
+              .object({
+                action_id: z.string().optional(),
+                expiration: z.string().datetime().optional(),
+                '@timestamp': z.string().datetime().optional(),
+                agents: z.array(z.string()).optional(),
+                user_id: z.string().optional(),
+                pack_id: z.string().optional(),
+                queries: z
+                  .array(
+                    z.object({
+                      action_id: z.string().optional(),
+                      id: z.string().optional(),
+                      query: z.string().optional(),
+                      saved_query_id: z.string().optional(),
+                      ecs_mapping: ECSMappingOrUndefined.optional(),
+                      agents: z.array(z.string()).optional(),
+                    })
+                  )
+                  .optional(),
+                /**
+                 * Result count statistics (present when withResultCounts is true).
+                 */
+                result_counts: z
+                  .object({
+                    total_rows: z.number().int().optional(),
+                    responded_agents: z.number().int().optional(),
+                    successful_agents: z.number().int().optional(),
+                    error_agents: z.number().int().optional(),
+                  })
+                  .optional(),
+              })
+              .optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+});
 
 export type FindLiveQueryDetailsResponse = z.infer<typeof FindLiveQueryDetailsResponse>;
-export const FindLiveQueryDetailsResponse = z.object({});
+export const FindLiveQueryDetailsResponse = z.object({
+  data: z
+    .object({
+      action_id: z.string().optional(),
+      expiration: z.string().datetime().optional(),
+      '@timestamp': z.string().datetime().optional(),
+      agents: z.array(z.string()).optional(),
+      user_id: z.string().optional(),
+      user_profile_uid: z.string().optional(),
+      pack_id: z.string().optional(),
+      pack_name: z.string().optional(),
+      prebuilt_pack: z.boolean().optional(),
+      tags: z.array(z.string()).optional(),
+      /**
+       * Global status of the live query (completed, running).
+       */
+      status: z.enum(['completed', 'running']).optional(),
+      /**
+       * The queries with their execution status.
+       */
+      queries: z
+        .array(
+          z.object({
+            action_id: z.string().optional(),
+            id: z.string().optional(),
+            query: z.string().optional(),
+            saved_query_id: z.string().optional(),
+            ecs_mapping: ECSMappingOrUndefined.optional(),
+            agents: z.array(z.string()).optional(),
+            /**
+             * Number of result documents.
+             */
+            docs: z.number().int().optional(),
+            /**
+             * Number of failed queries.
+             */
+            failed: z.number().int().optional(),
+            /**
+             * Number of pending agents.
+             */
+            pending: z.number().int().optional(),
+            /**
+             * Total responded agents.
+             */
+            responded: z.number().int().optional(),
+            /**
+             * Number of successful agents.
+             */
+            successful: z.number().int().optional(),
+            /**
+             * Status of this individual query.
+             */
+            status: z.enum(['completed', 'running']).optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+});

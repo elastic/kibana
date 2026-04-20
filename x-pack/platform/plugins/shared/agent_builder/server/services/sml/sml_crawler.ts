@@ -9,6 +9,7 @@ import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
+import { getSchemaVersion } from '@kbn/storage-adapter';
 import type {
   SmlTypeDefinition,
   SmlContext,
@@ -21,7 +22,8 @@ import {
   createSmlCrawlerStateStorage,
   type SmlCrawlerStateStorage,
 } from './sml_crawler_state_storage';
-import { smlIndexName } from './sml_storage';
+import { createSmlStorage, smlIndexName, storageSettings } from './sml_storage';
+import { isNotFoundError } from './sml_service';
 
 export type { SmlCrawler };
 
@@ -65,13 +67,18 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const crawlStartTime = new Date().toISOString();
     this.logger.info(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
+    const indexRecreated = await this.recreateIndexIfMappingsChanged({ esClient });
+
     // Data integrity check: if the SML data index is empty for this type but
     // state docs exist, clear state to force a full re-index.
-    const integrityResetNeeded = await this.checkDataIntegrity({
-      esClient,
-      stateClient,
-      attachmentType: definition.id,
-    });
+    // Also triggered when the index was just recreated due to a schema change.
+    const integrityResetNeeded =
+      indexRecreated ||
+      (await this.checkDataIntegrity({
+        esClient,
+        stateClient,
+        attachmentType: definition.id,
+      }));
 
     // Stream source items page by page. For each page, batch-lookup state
     // docs by ID, diff, and write state updates stamped with crawlStartTime.
@@ -167,6 +174,47 @@ export class SmlCrawlerImpl implements SmlCrawler {
       );
       return true;
     }
+    return false;
+  }
+
+  /**
+   * Compare the current schema version with the one stored in the index _meta.
+   * If they differ, drop and recreate the index so the new mappings take effect.
+   * Returns true when the index was recreated.
+   */
+  private async recreateIndexIfMappingsChanged({
+    esClient,
+  }: {
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    const storage = createSmlStorage({ logger: this.logger, esClient });
+    const smlClient = storage.getClient();
+
+    const indexExists = await smlClient.existsIndex();
+    if (!indexExists) {
+      return false;
+    }
+
+    try {
+      const expectedVersion = getSchemaVersion(storageSettings);
+      const response = await esClient.indices.getMapping({ index: smlIndexName });
+      const existingVersion = Object.values(response)[0]?.mappings?._meta?.version as
+        | string
+        | undefined;
+
+      if (existingVersion !== expectedVersion) {
+        this.logger.warn(
+          `SML crawler: schema version mismatch (existing='${existingVersion}', expected='${expectedVersion}') — deleting index '${smlIndexName}' and recreating with current schema`
+        );
+        await smlClient.clean();
+        return true;
+      }
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+    }
+
     return false;
   }
 

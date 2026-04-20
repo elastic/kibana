@@ -130,22 +130,9 @@ export class AgentBuilderPageObject extends FtrService {
   }
 
   /**
-   * Ensure the Chats accordion in the sidebar is expanded.
-   * It defaults to open but can be collapsed by the user or when agent settings routes are active.
-   */
-  private async ensureChatsAccordionOpen() {
-    const toggle = await this.testSubjects.find('agentBuilderSidebarChatsToggle');
-    const isExpanded = await toggle.getAttribute('aria-expanded');
-    if (isExpanded !== 'true') {
-      await toggle.click();
-    }
-  }
-
-  /**
    * Navigate to an existing conversation by clicking on it in the history sidebar
    */
   async navigateToConversationViaHistory(conversationId: string) {
-    await this.ensureChatsAccordionOpen();
     const conversationItem = await this.testSubjects.find(
       `agentBuilderSidebarConversation-${conversationId}`
     );
@@ -198,8 +185,6 @@ export class AgentBuilderPageObject extends FtrService {
    * Delete a conversation by clicking the title button popover and then the delete button
    */
   async deleteConversation(conversationId: string) {
-    await this.ensureChatsAccordionOpen();
-
     // Click on conversation to open it
     const conversationItem = await this.testSubjects.find(
       `agentBuilderSidebarConversation-${conversationId}`
@@ -227,8 +212,6 @@ export class AgentBuilderPageObject extends FtrService {
    * Check if a conversation exists in the history by conversation ID
    */
   async isConversationInHistory(conversationId: string): Promise<boolean> {
-    await this.ensureChatsAccordionOpen();
-
     try {
       await this.testSubjects.find(`agentBuilderSidebarConversation-${conversationId}`);
       return true;

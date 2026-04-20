@@ -205,6 +205,41 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
   });
 
+  it('classifies gap errors as user errors', async () => {
+    const queryAlertType = securityRuleTypeWrapper(
+      createQueryAlertType({
+        id: QUERY_RULE_TYPE_ID,
+        name: 'Custom Query Rule',
+      })
+    );
+
+    alerting.registerType(queryAlertType);
+
+    services.scopedClusterClient.asCurrentUser.search.mockResolvedValue({
+      hits: {
+        hits: [],
+        total: { relation: 'eq', value: 0 },
+      },
+      took: 0,
+      timed_out: false,
+      _shards: { failed: 0, skipped: 0, successful: 1, total: 1 },
+    });
+
+    const params = getQueryRuleParams();
+
+    await executor({
+      params,
+      previousStartedAt: new Date(Date.now() - 60 * 60 * 1000),
+    });
+
+    expect(mockedStatusLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'were not queried between this rule execution and the last execution'
+      ),
+      expect.objectContaining({ userError: true })
+    );
+  });
+
   it('sends an alert when events are found and logs a warning when hasTimestampFields throws an error', async () => {
     (hasTimestampFields as jest.Mock).mockImplementationOnce(async () => {
       throw Error('hastTimestampFields test error');

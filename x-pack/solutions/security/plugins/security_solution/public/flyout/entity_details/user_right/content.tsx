@@ -74,7 +74,10 @@ export const UserPanelContent = ({
   return (
     <>
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
-        <EntityHighlightsAccordion entityIdentifier={userName} entityType={EntityType.user} />
+        <EntityHighlightsAccordion
+          entityIdentifier={entityRecord ? entityRecord.entity.id : userName}
+          entityType={EntityType.user}
+        />
       )}
       {!skipRiskAndCriticality &&
         riskScoreState.hasEngineBeenInstalled &&
@@ -94,7 +97,12 @@ export const UserPanelContent = ({
         )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
-          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            entityType={EntityType.user}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
           <EuiHorizontalRule />
         </>
       )}

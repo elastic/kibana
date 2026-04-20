@@ -7,13 +7,15 @@
 
 import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
+import { ClassicStream } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { deleteStream, getStream, putStream, putIngest } from './helpers/requests';
 
 const REMOTE_CLUSTER_NAME = 'ftr-remote';
-const LEADER_STREAM = 'logs-ccr-leader-test';
+const LEADER_STREAM = 'my-ccr-logs-test';
 const AUTO_FOLLOW_PATTERN_NAME = 'streams-ccr-test';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -75,8 +77,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('GET returns replicated: true for a replicated data stream', async () => {
       const response = await getStream(apiClient, LEADER_STREAM);
-      expect((response as unknown as Record<string, unknown>).replicated).to.be(true);
       expect(response.stream.name).to.be(LEADER_STREAM);
+      // Public GET must match the same schema the stream detail UI validates (Zod / DeepStrict).
+      expect(ClassicStream.GetResponse.is(response as Streams.all.GetResponse)).to.be(true);
+      const classicResponse = response as ClassicStream.GetResponse;
+      expect(classicResponse.replicated).to.be(true);
+      if (classicResponse.elasticsearch_assets !== undefined) {
+        expect(typeof classicResponse.elasticsearch_assets.indexTemplate).to.be('string');
+      }
     });
 
     it('PUT allows updating description on a replicated data stream', async () => {

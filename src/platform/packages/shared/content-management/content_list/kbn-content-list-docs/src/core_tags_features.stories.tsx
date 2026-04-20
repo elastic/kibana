@@ -15,7 +15,13 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { ContentListTable } from '@kbn/content-list-table';
 import { ContentListFooter } from '@kbn/content-list-footer';
 import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { createStoryFindItems, mockTagsService, StateDiagnosticPanel } from './stories_helpers';
+import {
+  buildMockItems,
+  createStoryFindItems,
+  createMockTagFacetProvider,
+  mockTagsService,
+  StateDiagnosticPanel,
+} from './stories_helpers';
 
 // =============================================================================
 // Storybook Meta
@@ -62,6 +68,8 @@ const TagsFeaturesWrapper = () => {
     []
   );
 
+  const mockItems = useMemo(() => buildMockItems(30), []);
+
   const dataSource = useMemo(() => {
     const findItems = createStoryFindItems({ totalItems: 30 });
     return { findItems };
@@ -82,9 +90,9 @@ const TagsFeaturesWrapper = () => {
         ],
       },
       pagination: { initialPageSize: 20 },
-      tags: true as const,
+      tags: createMockTagFacetProvider(mockItems),
     }),
-    []
+    [mockItems]
   );
 
   const itemConfig = useMemo(

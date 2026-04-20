@@ -18,6 +18,7 @@ import {
   getAllConnectorsWithDynamic,
   getCachedAllConnectorsMap,
   getCachedDynamicConnectorTypes,
+  getDeprecatedStepMetadataMap,
 } from './schema';
 
 describe('schema - additional coverage', () => {
@@ -45,6 +46,22 @@ describe('schema - additional coverage', () => {
       const first = getAllConnectorsInternal();
       const second = getAllConnectorsInternal();
       expect(first).toBe(second);
+    });
+  });
+
+  describe('getDeprecatedStepMetadataMap', () => {
+    it('should freeze the cached metadata map', () => {
+      const metadata = getDeprecatedStepMetadataMap();
+
+      expect(Object.isFrozen(metadata)).toBe(true);
+    });
+
+    it('should return the same cached frozen object on subsequent calls', () => {
+      const first = getDeprecatedStepMetadataMap();
+      const second = getDeprecatedStepMetadataMap();
+
+      expect(first).toBe(second);
+      expect(Object.isFrozen(second)).toBe(true);
     });
   });
 

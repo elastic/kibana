@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopover,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -23,6 +30,8 @@ import { useInvestigateInTimeline } from '../../../detections/components/alerts_
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
+import { useKibana } from '../../../common/lib/kibana';
+import { getExploreUrl } from '../utils/get_explore_url';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -32,6 +41,16 @@ const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeA
 const ADD_NOTE = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeAction.addNoteLabel', {
   defaultMessage: 'Add note',
 });
+
+const EXPLORE_IN_ALERTS = i18n.translate(
+  'xpack.securitySolution.flyoutV2.footer.takeAction.exploreInAlertsLabel',
+  { defaultMessage: 'Explore in Alerts' }
+);
+
+const EXPLORE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.flyoutV2.footer.takeAction.exploreInTimelineLabel',
+  { defaultMessage: 'Explore in Timeline' }
+);
 
 export interface TakeActionButtonProps {
   /**
@@ -73,6 +92,8 @@ export const TakeActionButton = memo(
     onAlertUpdated,
     onShowNotes,
   }: TakeActionButtonProps) => {
+    const { services } = useKibana();
+
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const togglePopoverHandler = useCallback(() => {
       setIsPopoverOpen((open) => !open);
@@ -136,7 +157,6 @@ export const TakeActionButton = memo(
           'data-test-subj': 'add-note-action',
           key: 'add-note-action',
           name: ADD_NOTE,
-          size: 's' as const,
           onClick: () => {
             closePopoverHandler();
             onShowNotes();
@@ -163,27 +183,55 @@ export const TakeActionButton = memo(
         ],
       });
 
+    const exploreActionItems = useMemo(() => {
+      const timelinesURL = services.application.getUrlForApp('securitySolutionUI', {
+        path: 'alerts',
+      });
+      const exploreUrl = getExploreUrl(hit, timelinesURL);
+      const label = isAlert ? EXPLORE_IN_ALERTS : EXPLORE_IN_TIMELINE;
+      return [
+        {
+          'data-test-subj': 'explore-in-alerts-or-timeline',
+          key: 'explore-action',
+          name: (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="flexStart">
+              <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="external" size="m" aria-hidden={true} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+          onClick: () => {
+            closePopoverHandler();
+            window.open(exploreUrl, '_blank', 'noopener,noreferrer');
+          },
+        },
+      ];
+    }, [closePopoverHandler, hit, isAlert, services.application]);
+
     const items = useMemo(
       () => [
         ...addToCaseActionItems,
         ...(isAlert ? statusActionItems : []),
-        ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
-        ...(isAlert ? alertAssigneesItems : []),
         ...(isAlert ? alertTagsItems : []),
+        ...(isAlert ? alertAssigneesItems : []),
+        ...(isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem),
         ...(isAlert ? [] : noteItems),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
+        ...(!isInSecurityApp ? exploreActionItems : []),
       ],
       [
         addToCaseActionItems,
-        isAlert,
-        statusActionItems,
-        runWorkflowMenuItem,
-        documentWorkflowMenuItem,
         alertAssigneesItems,
         alertTagsItems,
-        noteItems,
-        isInSecurityApp,
+        documentWorkflowMenuItem,
+        exploreActionItems,
         investigateInTimelineActionItems,
+        isAlert,
+        isInSecurityApp,
+        noteItems,
+        runWorkflowMenuItem,
+        statusActionItems,
       ]
     );
 
@@ -196,13 +244,13 @@ export const TakeActionButton = memo(
         ...(isAlert ? runAlertWorkflowPanel : runDocumentWorkflowPanel),
       ],
       [
-        items,
-        isAlert,
-        statusActionPanels,
         alertAssigneesPanels,
         alertTagsPanels,
+        isAlert,
+        items,
         runAlertWorkflowPanel,
         runDocumentWorkflowPanel,
+        statusActionPanels,
       ]
     );
 

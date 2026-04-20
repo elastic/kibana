@@ -1093,7 +1093,6 @@ export const apiXYWithNoYTitleAndInsideLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },
@@ -1174,7 +1173,6 @@ export const apiXYWithTopListWithTruncationLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },
@@ -1253,7 +1251,6 @@ export const apiXYWithNoTitleAndCustomOutsideLegend: LensApiState = {
       },
     },
     y: {
-      anchor: 'start',
       title: {
         visible: false,
       },

@@ -422,6 +422,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                         <EuiCopy
                           beforeMessage={copyToClipboardSourceDescription}
                           textToCopy={copyToClipboardSource}
+                          tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
                             <EuiButtonIcon

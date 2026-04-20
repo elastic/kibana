@@ -36,7 +36,8 @@ import {
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
 } from '../../document_details/preview/constants';
-import { useToasts } from '../../../common/lib/kibana';
+import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
 import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
@@ -87,6 +88,11 @@ export type GraphVisualizationProps = (
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
   const { scopeId } = props;
+
+  const {
+    application: { capabilities },
+  } = useKibana().services;
+  const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
 
   const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
@@ -321,7 +327,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                     },
                   }
             }
-            showInvestigateInTimeline={true}
+            showInvestigateInTimeline={hasTimelineAccess}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}

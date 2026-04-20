@@ -7,10 +7,13 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { merge } from 'lodash';
-import { dump } from 'js-yaml';
-import yamlDoc from 'yaml';
+import yaml, { type Pair } from 'yaml';
 
-import { getNormalizedInputs, isIntegrationPolicyTemplate } from '../../../../common/services';
+import {
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+  createYamlKeysSorter,
+} from '../../../../common/services';
 
 import {
   getStreamsForInputType,
@@ -28,7 +31,6 @@ import type {
   PackagePolicyConfigRecordEntry,
   RegistryInput,
 } from '../../../../common/types';
-import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
 import { generateOtelcolConfig } from '../../agent_policies/otel_collector';
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 import { getInputsWithIds } from '../../package_policies/get_input_with_ids';
@@ -39,6 +41,27 @@ import { getPackageInfo } from '.';
 import { getAgentTemplateAssetsMap } from './get';
 
 type Format = 'yml' | 'json';
+
+const POLICY_KEYS_ORDER = [
+  'id',
+  'name',
+  'revision',
+  'dataset',
+  'type',
+  'outputs',
+  'fleet',
+  'output_permissions',
+  'agent',
+  'inputs',
+  'enabled',
+  'use_output',
+  'meta',
+  'input',
+  'download',
+  'signed',
+];
+
+const _sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER, yaml);
 
 type PackageWithInputAndStreamIndexed = Record<
   string,
@@ -234,14 +257,13 @@ export async function getTemplateInputs(
   if (format === 'json') {
     return { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
   } else if (format === 'yml') {
-    const yaml = dump(
-      { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) },
-      {
-        skipInvalid: true,
-        sortKeys: _sortYamlKeys,
-      }
-    );
-    return addCommentsToYaml(yaml, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
+    const data = { inputs: filteredInputs, ...(otelcolConfig ? otelcolConfig : {}) };
+    const doc = new yaml.Document(data, {
+      sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
+      strict: false,
+    });
+    const yamlStr = doc.toString({ singleQuote: true });
+    return addCommentsToYaml(yamlStr, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
 
   return { inputs: [] };
@@ -306,20 +328,20 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
 }
 
 function addCommentsToYaml(
-  yaml: string,
+  yamlStr: string,
   packageIndexInputAndStreams: PackageWithInputAndStreamIndexed,
   inputIdsDestinationMap: Map<string, { originalId: string; streams: Map<string, string> }>
 ) {
-  const doc = yamlDoc.parseDocument(yaml);
+  const doc = yaml.parseDocument(yamlStr);
   // Add input and streams comments
   const yamlInputs = doc.get('inputs');
-  if (yamlDoc.isCollection(yamlInputs)) {
+  if (yaml.isCollection(yamlInputs)) {
     yamlInputs.items.forEach((inputItem) => {
-      if (!yamlDoc.isMap(inputItem)) {
+      if (!yaml.isMap(inputItem)) {
         return;
       }
       const inputIdNode = inputItem.get('id', true);
-      if (!yamlDoc.isScalar(inputIdNode)) {
+      if (!yaml.isScalar(inputIdNode)) {
         return;
       }
       const inputId =
@@ -334,15 +356,15 @@ function addCommentsToYaml(
         commentVariablesInYaml(inputItem, pkgInput.vars ?? []);
 
         const yamlStreams = inputItem.get('streams');
-        if (!yamlDoc.isCollection(yamlStreams)) {
+        if (!yaml.isCollection(yamlStreams)) {
           return;
         }
         yamlStreams.items.forEach((streamItem) => {
-          if (!yamlDoc.isMap(streamItem)) {
+          if (!yaml.isMap(streamItem)) {
             return;
           }
           const streamIdNode = streamItem.get('id', true);
-          if (yamlDoc.isScalar(streamIdNode)) {
+          if (yaml.isScalar(streamIdNode)) {
             const streamId =
               inputIdsDestinationMap
                 .get(inputIdNode.value as string)
@@ -360,13 +382,13 @@ function addCommentsToYaml(
     });
   }
 
-  return doc.toString();
+  return doc.toString({ singleQuote: true });
 }
 
-function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[] = []) {
+function commentVariablesInYaml(rootNode: yaml.Node, vars: RegistryVarsEntry[] = []) {
   // Node need to be deleted after the end of the visit to be able to visit every node
   const toDeleteFn: Array<() => void> = [];
-  yamlDoc.visit(rootNode, {
+  yaml.visit(rootNode, {
     Scalar(key, node, path) {
       if (node.value) {
         const val = node.value.toString();
@@ -377,17 +399,17 @@ function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[
 
             const paths = [...path].reverse();
 
-            let prevPart: yamlDoc.Node | yamlDoc.Document | yamlDoc.Pair = node;
+            let prevPart: yaml.Node | yaml.Document | yaml.Pair = node;
 
             for (const pathPart of paths) {
-              if (yamlDoc.isCollection(pathPart)) {
+              if (yaml.isCollection(pathPart)) {
                 // If only one items in the collection comment the whole collection
                 if (pathPart.items.length === 1) {
                   continue;
                 }
               }
-              if (yamlDoc.isSeq(pathPart)) {
-                const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLSeq());
+              if (yaml.isSeq(pathPart)) {
+                const commentDoc = new yaml.Document(new yaml.YAMLSeq());
                 commentDoc.add(prevPart);
                 const commentStr = commentDoc.toString().trimEnd();
                 pathPart.comment = pathPart.comment
@@ -398,16 +420,16 @@ function commentVariablesInYaml(rootNode: yamlDoc.Node, vars: RegistryVarsEntry[
                 toDeleteFn.push(() => {
                   pathPart.items.forEach((item, index) => {
                     if (item === keyToDelete) {
-                      pathPart.delete(new yamlDoc.Scalar(index));
+                      pathPart.delete(new yaml.Scalar(index));
                     }
                   });
                 });
                 return;
               }
 
-              if (yamlDoc.isMap(pathPart)) {
-                if (yamlDoc.isPair(prevPart)) {
-                  const commentDoc = new yamlDoc.Document(new yamlDoc.YAMLMap());
+              if (yaml.isMap(pathPart)) {
+                if (yaml.isPair(prevPart)) {
+                  const commentDoc = new yaml.Document(new yaml.YAMLMap());
                   commentDoc.add(prevPart);
                   const commentStr = commentDoc.toString().trimEnd();
 

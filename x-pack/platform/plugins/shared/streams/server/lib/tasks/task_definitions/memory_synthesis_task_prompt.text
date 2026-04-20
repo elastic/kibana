@@ -1,0 +1,19 @@
+## Source stream (indicator context)
+
+Indicators below were discovered from stream `{{{streamName}}}`. This is **task input** (data lineage), not a deliverable. Prioritize cross-stream wiki content under **services**, **infrastructure**, and **operations**. Add or refine a **streams/{{{streamName}}}** page only when indicators clearly warrant stream-specific documentation.
+
+## Available indicators ({{indicatorCount}} total)
+
+{{{indicatorSummaries}}}
+
+## Existing wiki pages
+
+{{{existingPages}}}
+
+## Task
+
+Review the indicator summaries above. Fetch details for indicators that seem important for understanding relationships across the system. Read any existing pages that need updating. Then write or update wiki pages accordingly.
+
+Assign **architecture** only for holistic content. For stream-focused overviews, use **streams/{{{streamName}}}** and a clear page name. Cross-reference related pages by ID.
+
+Remember: brief pages that capture relationships across indicators are far more valuable than detailed pages that repeat raw data.

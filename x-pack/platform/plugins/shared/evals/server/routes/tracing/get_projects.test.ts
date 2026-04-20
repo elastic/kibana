@@ -10,6 +10,8 @@ import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mock
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { EVALS_TRACING_PROJECTS_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { registerGetTracingProjectsRoute } from './get_projects';
 
 const buildProjectBucket = ({
@@ -19,9 +21,9 @@ const buildProjectBucket = ({
   lastTrace = '2025-06-01T12:00:00Z',
   p50 = 500_000_000,
   p99 = 2_000_000_000,
-  inputTokens = 100,
-  outputTokens = 200,
+  traceIds = [] as string[],
   errorDocCount = 1,
+  distinctErrorTraces = 1,
 }: {
   name: string;
   docCount?: number;
@@ -29,25 +31,44 @@ const buildProjectBucket = ({
   lastTrace?: string;
   p50?: number;
   p99?: number;
-  inputTokens?: number;
-  outputTokens?: number;
+  traceIds?: string[];
   errorDocCount?: number;
+  distinctErrorTraces?: number;
 }) => ({
   key: name,
   doc_count: docCount,
   distinct_traces: { value: distinctTraces },
   last_trace: { value_as_string: lastTrace },
   latency_percentiles: { values: { '50.0': p50, '99.0': p99 } },
-  total_input_tokens: { value: inputTokens },
-  total_output_tokens: { value: outputTokens },
-  error_count: { doc_count: errorDocCount },
+  trace_ids: { buckets: traceIds.map((id) => ({ key: id, doc_count: 1 })) },
+  error_count: { doc_count: errorDocCount, distinct_traces: { value: distinctErrorTraces } },
+});
+
+const buildTokenResponse = (
+  traceTokens: Array<{ traceId: string; input: number; output: number }>
+) => ({
+  aggregations: {
+    per_trace: {
+      buckets: traceTokens.map(({ traceId, input, output }) => ({
+        key: traceId,
+        input_tokens: { value: input },
+        output_tokens: { value: output },
+      })),
+    },
+  },
 });
 
 describe('GET /internal/evals/tracing/projects', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetTracingProjectsRoute({ router, logger });
+    registerGetTracingProjectsRoute({
+      router,
+      logger,
+      canEncrypt: false,
+      getEncryptedSavedObjectsStart: async () => ({} as EncryptedSavedObjectsPluginStart),
+      getInternalRemoteConfigsSoClient: async () => ({} as SavedObjectsClientContract),
+    });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
     const { handler } = versionedRouter.getRoute('get', EVALS_TRACING_PROJECTS_URL).versions[
@@ -129,8 +150,66 @@ describe('GET /internal/evals/tracing/projects', () => {
     );
   });
 
+  it('applies name filter as wildcard on name field when provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest({ name: 'alert' }), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const filters = searchCall.query.bool.filter;
+    expect(filters).toEqual(
+      expect.arrayContaining([{ wildcard: { name: { value: '*alert*', case_insensitive: true } } }])
+    );
+  });
+
+  it('escapes wildcard metacharacters in the name filter', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest({ name: 'my*project?' }), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const wildcardFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.wildcard !== undefined
+    );
+    expect(wildcardFilter).toEqual({
+      wildcard: { name: { value: '*my\\*project\\?*', case_insensitive: true } },
+    });
+  });
+
+  it('does not add name filter when name is not provided', async () => {
+    const { handler, context, esClient } = setup();
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 0 },
+        projects: { buckets: [] },
+      },
+    } as any);
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    const searchCall = esClient.search.mock.calls[0][0] as any;
+    const wildcardFilter = searchCall.query.bool.filter.find(
+      (f: Record<string, unknown>) => f.wildcard !== undefined
+    );
+    expect(wildcardFilter).toBeUndefined();
+  });
+
   it('returns parsed projects with correct field mappings', async () => {
     const { handler, context, esClient } = setup();
+    const traceIds = ['trace-1', 'trace-2'];
+
     esClient.search.mockResolvedValueOnce({
       aggregations: {
         project_count: { value: 1 },
@@ -142,14 +221,21 @@ describe('GET /internal/evals/tracing/projects', () => {
               lastTrace: '2025-06-15T10:30:00Z',
               p50: 500_000_000,
               p99: 3_000_000_000,
-              inputTokens: 5000,
-              outputTokens: 3000,
+              traceIds,
               errorDocCount: 2,
+              distinctErrorTraces: 2,
             }),
           ],
         },
       },
     } as any);
+
+    esClient.search.mockResolvedValueOnce(
+      buildTokenResponse([
+        { traceId: 'trace-1', input: 3000, output: 1500 },
+        { traceId: 'trace-2', input: 2000, output: 1500 },
+      ]) as any
+    );
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
@@ -165,6 +251,31 @@ describe('GET /internal/evals/tracing/projects', () => {
     expect(project.p99_latency_ms).toBe(3000);
     expect(project.total_tokens).toBe(8000);
     expect(project.error_rate).toBeCloseTo(2 / 42, 2);
+  });
+
+  it('fetches tokens from all spans via second query, not just root spans', async () => {
+    const { handler, context, esClient } = setup();
+    const traceIds = ['trace-abc'];
+
+    esClient.search.mockResolvedValueOnce({
+      aggregations: {
+        project_count: { value: 1 },
+        projects: {
+          buckets: [buildProjectBucket({ name: 'my-project', traceIds })],
+        },
+      },
+    } as any);
+
+    esClient.search.mockResolvedValueOnce(
+      buildTokenResponse([{ traceId: 'trace-abc', input: 500, output: 300 }]) as any
+    );
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(esClient.search).toHaveBeenCalledTimes(2);
+    const tokenQuery = esClient.search.mock.calls[1][0] as any;
+    expect(tokenQuery.query).toEqual({ terms: { trace_id: ['trace-abc'] } });
+    expect(response.payload.projects[0].total_tokens).toBe(800);
   });
 
   it('paginates aggregation buckets correctly', async () => {
@@ -208,13 +319,19 @@ describe('GET /internal/evals/tracing/projects', () => {
     expect(response.payload.projects).toEqual([]);
   });
 
-  it('handles zero trace count without dividing by zero for error_rate', async () => {
+  it('handles zero doc_count without dividing by zero for error_rate', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
         project_count: { value: 1 },
         projects: {
-          buckets: [buildProjectBucket({ name: 'empty-project', distinctTraces: 0 })],
+          buckets: [
+            buildProjectBucket({
+              name: 'empty-project',
+              distinctTraces: 0,
+              distinctErrorTraces: 0,
+            }),
+          ],
         },
       },
     } as any);

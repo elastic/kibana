@@ -19,12 +19,12 @@ export const allowedExperimentalValues = Object.freeze({
    *   - Introduces search input and users filter
    *   - Introduces scheduled responses support
    */
-  queryHistoryRework: false,
+  queryHistoryRework: true,
   /**
    * Replaces the legacy EuiDataGrid results table with UnifiedDataTable,
    * adding KQL search, document flyout, per-row actions, and column curation.
    */
-  unifiedDataTable: false,
+  unifiedDataTable: true,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

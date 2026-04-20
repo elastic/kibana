@@ -12,7 +12,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import type { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNavigationPluginSetup {}
@@ -37,6 +37,7 @@ export interface AppPluginSetupDependencies {
 
 export interface AppPluginStartDependencies {
   serverless?: ServerlessPluginStart;
+  share: SharePluginStart;
   spaces?: SpacesPluginStart;
 }
 

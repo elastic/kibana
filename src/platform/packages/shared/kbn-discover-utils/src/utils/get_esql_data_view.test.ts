@@ -43,19 +43,22 @@ describe('getEsqlDataView', () => {
   const services = {
     dataViews: mockDataViewsService,
     http: {
-      get: jest.fn(),
+      post: jest.fn(),
     } as unknown as HttpStart,
   };
 
   const mockGetTimeFieldRoute = (query: string, timeFieldResponse: string) => {
-    const originalHttpGet = services.http.get;
-    services.http.get = jest.fn().mockImplementation((url: string) => {
-      if (url.includes(`${TIMEFIELD_ROUTE}${encodeURIComponent(query)}`)) {
-        return Promise.resolve({ timeField: timeFieldResponse });
-      }
-      return Promise.resolve('');
-    });
-    return originalHttpGet;
+    const originalHttpPost = services.http.post;
+    services.http.post = jest
+      .fn()
+      .mockImplementation((url: string, options?: { body?: string }) => {
+        const body = options?.body ? JSON.parse(options.body) : undefined;
+        if (url === TIMEFIELD_ROUTE && body?.query === query) {
+          return Promise.resolve({ timeField: timeFieldResponse });
+        }
+        return Promise.resolve('');
+      });
+    return originalHttpPost;
   };
 
   it('returns the current dataview if it is adhoc with no named params and query index pattern is the same as the dataview index pattern', async () => {

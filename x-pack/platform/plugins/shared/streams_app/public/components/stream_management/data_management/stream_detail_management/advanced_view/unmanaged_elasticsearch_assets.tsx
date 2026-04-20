@@ -21,6 +21,11 @@ import { DataStreamDetails } from '../data_stream_details';
 import { IndexConfiguration } from './index_configuration';
 import { Row, RowMetadata } from './row';
 
+/**
+ * Loads `GET /internal/streams/{name}/_unmanaged_assets` (classic streams only). The advanced tab
+ * only mounts this when the stream is not replicated (`classic_advanced_view.tsx`), so the UI
+ * should not call this for CCR follower streams.
+ */
 export function UnmanagedElasticsearchAssets({
   definition,
   refreshDefinition,

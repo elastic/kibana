@@ -254,6 +254,36 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
+    it('bulk create fails when the document id already exists', async () => {
+      await client.index({
+        id: 'existing-doc',
+        document: { foo: 'first' },
+      });
+
+      const conflictResponse = await client.bulk({
+        refresh: 'wait_for',
+        operations: [
+          {
+            create: {
+              _id: 'existing-doc',
+              document: { foo: 'second' },
+            },
+          },
+        ],
+      });
+
+      expect(conflictResponse.errors).toBe(true);
+      expect(conflictResponse.items).toHaveLength(1);
+      expect(conflictResponse.items[0].create?.status).toBe(409);
+      expect(conflictResponse.items[0].create?.error).toEqual(
+        expect.objectContaining({
+          type: expect.stringMatching(
+            /version_conflict_engine_exception|document_already_exists_exception/
+          ),
+        })
+      );
+    });
+
     describe('migrates a document with a legacy property', () => {
       let migratingClient: SimpleIStorageClient<typeof storageSettings>;
       beforeAll(async () => {
@@ -441,6 +471,56 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
+  describe('automatic mapping reconciliation on read', () => {
+    const updatedStorageSettings = {
+      name: TEST_INDEX_NAME,
+      schema: {
+        properties: {
+          foo: { type: 'keyword' as const },
+          bar: { type: 'keyword' as const },
+        },
+      },
+    } satisfies StorageSettings;
+
+    afterAll(async () => {
+      await client?.clean();
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+    });
+
+    it('updates stale mappings before the first search', async () => {
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('current_version');
+      await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      await verifyIndex();
+
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('read_updated');
+
+      const updatedAdapter = createStorageIndexAdapter(updatedStorageSettings);
+      const updatedClient = updatedAdapter.getClient();
+
+      await updatedClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      const getIndicesResponse = await esClient.indices.get({ index: TEST_INDEX_NAME });
+      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
+
+      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('read_updated');
+      expect(getIndicesResponse[writeIndexName].mappings?.properties).toMatchObject({
+        foo: { type: 'keyword' },
+        bar: { type: 'keyword' },
+      });
+    });
+
+    it('does not create resources when searching on a clean instance', async () => {
+      await client.clean();
+
+      const freshAdapter = createStorageIndexAdapter(storageSettings);
+      const freshClient = freshAdapter.getClient();
+
+      await freshClient.search({ track_total_hits: true, size: 1, query: { match_all: {} } });
+
+      await verifyNoIndex();
+    });
+  });
+
   describe('when writing/bootstrapping with an existing, incompatible index', () => {
     beforeAll(async () => {
       await client.index({ id: 'foo', document: { foo: 'bar' } });
@@ -576,6 +656,10 @@ describe('StorageIndexAdapter', () => {
         is_write_index: true,
       },
     });
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.number_of_shards).toEqual('1');
   }
 
   async function verifyClean() {

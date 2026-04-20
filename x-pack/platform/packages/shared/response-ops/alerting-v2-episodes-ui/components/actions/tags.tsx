@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiBadge, EuiPopover, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import * as i18n from './translations';
 
 export function AlertEpisodeTags({
   tags,
@@ -30,9 +30,7 @@ export function AlertEpisodeTags({
       key="more"
       iconType="tag"
       onClick={onMoreTagsClick}
-      onClickAriaLabel={i18n.translate('xpack.alertingV2.episodesUi.tags.moreTags.ariaLabel', {
-        defaultMessage: 'more tags badge',
-      })}
+      onClickAriaLabel={i18n.TAGS_MORE_BADGE_ARIA_LABEL}
       color="hollow"
     >
       <FormattedMessage
@@ -59,9 +57,7 @@ export function AlertEpisodeTags({
       {oneLine ? ' ' : <br />}
       <EuiFlexItem grow={false}>
         <EuiPopover
-          aria-label={i18n.translate('xpack.alertingV2.episodesUi.tags.moreTagsAriaLabel', {
-            defaultMessage: 'more tags',
-          })}
+          aria-label={i18n.TAGS_MORE_POPOVER_ARIA_LABEL}
           button={moreTags}
           isOpen={isMoreTagsOpen}
           closePopover={closePopover}

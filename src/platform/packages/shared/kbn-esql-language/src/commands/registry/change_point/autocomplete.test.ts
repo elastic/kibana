@@ -99,10 +99,10 @@ describe('CHANGE_POINT Autocomplete', () => {
   });
 
   describe('configuration order', () => {
-    it('suggests ON and pipe after AS clause (reversed order)', async () => {
+    it('suggests the pipe after the AS clause, On clause should not be suggested', async () => {
       await changePointExpectSuggestions(
         `from a | change_point value as changePointType, pValue `,
-        ['ON ', '| ']
+        ['| ']
       );
     });
   });

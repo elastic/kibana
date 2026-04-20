@@ -217,6 +217,7 @@ describe('useCreateRule', () => {
       expect(body.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
+        recovering_count: 0,
       });
     });
   });
@@ -256,7 +257,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('omits state_transition when kind is alert but state transition is empty', async () => {
+  it('emits pending_count: 0 and recovering_count: 0 when kind is alert and both modes are immediate', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
@@ -285,7 +286,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       const body = getLastPostedBody(http);
-      expect(body.state_transition).toBeUndefined();
+      expect(body.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
     });
   });
 
@@ -320,7 +321,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       const body = getLastPostedBody(http);
-      expect(body.state_transition).toEqual({ pending_count: 5 });
+      expect(body.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
     });
   });
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import { AS_CODE_ESQL_DATA_SOURCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type {
   DiscoverSessionEmbeddableByReferenceState,
   DiscoverSessionEmbeddableState,
@@ -29,7 +29,7 @@ export function isDiscoverSessionEmbeddableByReferenceState(
 }
 
 export function isDiscoverSessionEsqlTab(tab: DiscoverSessionTab): tab is DiscoverSessionEsqlTab {
-  return isOfAggregateQueryType(tab.query);
+  return 'data_source' in tab && tab.data_source.type === AS_CODE_ESQL_DATA_SOURCE_TYPE;
 }
 
 export function isSearchEmbeddableByValueState(

@@ -133,5 +133,32 @@ describe('useBulkActionItems', () => {
         )
       ).toBeUndefined();
     });
+
+    it('should not include workflow menu items when showRunWorkflowActions is false', () => {
+      const mockMenuItem = {
+        key: 'run-document-workflow-action',
+        'data-test-subj': 'run-document-workflow-action',
+        name: 'Run workflow',
+        panel: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID',
+      };
+      mockUseRunDocumentWorkflowPanel.mockReturnValue({
+        runWorkflowMenuItem: [mockMenuItem],
+        runDocumentWorkflowPanel: [{ id: 'RUN_DOCUMENT_WORKFLOW_PANEL_ID' }],
+      });
+
+      const { result } = renderUseBulkActionItems({
+        showRunWorkflowActions: false,
+        data: [{ _id: 'mockEventId', _index: 'test-index', data: [], ecs: { _id: 'mockEventId' } }],
+      });
+
+      expect(
+        result.current.items.find(
+          (item) => item['data-test-subj'] === 'run-document-workflow-action'
+        )
+      ).toBeUndefined();
+      expect(
+        result.current.panels.find((panel) => panel.id === 'RUN_DOCUMENT_WORKFLOW_PANEL_ID')
+      ).toBeUndefined();
+    });
   });
 });

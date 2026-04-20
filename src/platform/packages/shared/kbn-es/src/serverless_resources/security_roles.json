@@ -215,6 +215,8 @@
             ".entities.v1.history.*.security_*",
             ".entities.v1.reset*",
             ".entities.v1.updates.security_*",
+            ".entities.v2.*",
+            "entities-latest-*",
             ".entity_analytics.monitoring*"
           ],
           "privileges": [

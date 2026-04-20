@@ -137,6 +137,7 @@ const createPreflightResult = (
 
   const rawWorkflows = (overrides.workflows ?? []).map((w) => ({
     id: w.id,
+    originalId: w.id,
     yaml: 'yaml' in w && w.yaml && typeof w.yaml === 'string' ? w.yaml : `name: ${w.name ?? w.id}`,
   }));
 
@@ -358,7 +359,7 @@ describe('ImportWorkflowsFlyout', () => {
             valid: false,
           }),
         ],
-        rawWorkflows: [{ id: 'fallback-id', yaml: 'bad yaml' }],
+        rawWorkflows: [{ id: 'fallback-id', originalId: 'fallback-id', yaml: 'bad yaml' }],
       });
       clientResult.workflows[0].name = null;
       mockParseImportFile.mockResolvedValue(clientResult);
@@ -591,8 +592,8 @@ describe('ImportWorkflowsFlyout', () => {
       await waitFor(() => {
         const [{ workflows }] = mockBulkCreateWorkflows.mock.calls[0];
         expect(workflows).toHaveLength(1);
-        expect(workflows[0].id).not.toBe('w-1');
-        expect(workflows[0].id).toMatch(/^workflow-/);
+        // The original ID 'w-1' conflicts, so a numeric postfix is appended
+        expect(workflows[0].id).toBe('w-1-1');
       });
     });
   });

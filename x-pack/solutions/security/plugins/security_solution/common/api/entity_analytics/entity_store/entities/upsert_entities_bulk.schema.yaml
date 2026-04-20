@@ -24,6 +24,7 @@ paths:
           schema:
             type: boolean
             default: false
+          description: When true, allows updating protected fields.
       requestBody:
         description: Schema for the updating many entities
         required: true
@@ -44,20 +45,25 @@ components:
   schemas:
     EntityContainer:
       type: object
+      description: A wrapper that pairs an entity type with the entity record to upsert.
       required:
         - type
         - record
       properties:
-        type: 
+        type:
           $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          description: The entity type of the record.
         record:
           $ref: './common.schema.yaml#/components/schemas/Entity'
+          description: The entity record to create or update.
     EntitiesContainer:
       type: object
+      description: A collection of entities to upsert in bulk.
       required:
         - entities
       properties:
         entities:
           type: array
+          description: The entities to create or update.
           items:
             $ref: '#/components/schemas/EntityContainer'

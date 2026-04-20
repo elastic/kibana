@@ -16,6 +16,9 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * A unique identifier
+ */
 export type Id = z.infer<typeof Id>;
 export const Id = z.string();
 
@@ -131,11 +134,17 @@ export const Commands = z.array(Command).max(50);
 export type Timeout = z.infer<typeof Timeout>;
 export const Timeout = z.number().int().min(1);
 
+/**
+ * The status of a response action.
+ */
 export type Status = z.infer<typeof Status>;
 export const Status = z.enum(['failed', 'pending', 'successful']);
 export type StatusEnum = typeof Status.enum;
 export const StatusEnum = Status.enum;
 
+/**
+ * A list of response action statuses to filter by.
+ */
 export type Statuses = z.infer<typeof Statuses>;
 export const Statuses = z.array(Status);
 
@@ -178,7 +187,7 @@ export type Comment = z.infer<typeof Comment>;
 export const Comment = z.string();
 
 /**
- * Optional parameters object
+ * Parameters object
  */
 export type Parameters = z.infer<typeof Parameters>;
 export const Parameters = z.object({});
@@ -219,6 +228,9 @@ export const NoParametersRequestSchema = z.object({
 
 export type ProtectionUpdatesNoteResponse = z.infer<typeof ProtectionUpdatesNoteResponse>;
 export const ProtectionUpdatesNoteResponse = z.object({
+  /**
+   * A note associated with the protection updates for the given package policy.
+   */
   note: z.string().optional(),
 });
 
@@ -328,5 +340,8 @@ export const ResponseActionCreateSuccessResponse = z.object({
   data: ResponseActionDetails.optional(),
 });
 
+/**
+ * A generic successful response.
+ */
 export type SuccessResponse = z.infer<typeof SuccessResponse>;
 export const SuccessResponse = z.object({});

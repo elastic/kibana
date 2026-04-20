@@ -4695,7 +4695,7 @@
           "\nDiscover-specific app menu config with typed menu items"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 78,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4718,7 +4718,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4741,7 +4741,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 83,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4791,22 +4791,6 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.DiscoverAppMenuContext.parentTestId",
-            "type": "string",
-            "tags": [],
-            "label": "parentTestId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 35,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4832,7 +4816,7 @@
           "AppMenuRunActionParams"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 38,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4854,7 +4838,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7301,7 +7285,7 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 63,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7338,7 +7322,7 @@
           "[] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7367,7 +7351,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 71,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7394,7 +7378,7 @@
           ") => void | React.ReactNode | React.ReactElement<any> | Promise<void | React.ReactNode | React.ReactElement<any>>"
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-        "lineNumber": 45,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7417,7 +7401,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-discover-utils/src/components/app_menu/types.ts",
-            "lineNumber": 49,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

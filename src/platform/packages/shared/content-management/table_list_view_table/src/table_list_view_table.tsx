@@ -1148,9 +1148,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   // ------------
   // Render
   // ------------
-  if (!hasInitialFetchReturned) {
-    return null;
-  }
 
   if (!showFetchError && hasNoItems) {
     return (

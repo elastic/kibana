@@ -51,7 +51,9 @@ const baseWorkflowEditSchema = z.object({
   description: z.string().optional().describe('Human-readable description of what the change does'),
 });
 
-const stepDefinitionSchema = z.object({
+const ENABLE_EXTENDED_STEP_PROPERTIES = true;
+
+export const stepDefinitionSchema = z.object({
   name: z.string(),
   type: z.string(),
   'connector-id': z.string().optional(),
@@ -60,6 +62,17 @@ const stepDefinitionSchema = z.object({
   with: z.record(z.string(), z.unknown()).optional(),
   output: z.record(z.string(), z.unknown()).optional(),
   steps: z.array(z.record(z.string(), z.unknown())).optional(),
+  ...(ENABLE_EXTENDED_STEP_PROPERTIES
+    ? {
+        'on-failure': z.unknown().optional(),
+        timeout: z.string().optional(),
+        description: z.string().optional(),
+        do: z.array(z.record(z.string(), z.unknown())).optional(),
+        then: z.array(z.record(z.string(), z.unknown())).optional(),
+        else: z.array(z.record(z.string(), z.unknown())).optional(),
+        condition: z.string().optional(),
+      }
+    : {}),
 });
 
 const findWorkflowYamlAttachment = (
@@ -429,9 +442,9 @@ export function registerWorkflowEditTools(
   });
 
   agentBuilder.tools.register({
-    id: workflowTools.replaceYaml,
+    id: workflowTools.setYaml,
     type: ToolType.builtin,
-    description: `Replace the entire workflow YAML content, or create a new workflow from scratch when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists yet. For large-scale changes or when multiple properties and steps need to change at once. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.`,
+    description: `Set the complete workflow YAML content. Creates a new workflow when no ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment exists, or replaces the entire YAML of an existing workflow. Use this for both creation and large-scale edits. Do NOT use attachments.add to create workflow attachments — this tool handles creation automatically. When an attachment exists, returns diffAttachmentId, attachmentId, and attachmentVersion — render the diff with <render_attachment id="{diffAttachmentId}"/> and the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/>. When creating new, returns an attachmentId — render it with <render_attachment id="{attachmentId}"/>.`,
     schema: z.object({
       ...baseWorkflowEditSchema.shape,
       yaml: z.string().describe('The complete new workflow YAML content'),
@@ -458,7 +471,7 @@ export function registerWorkflowEditTools(
         const validation = await runCompactValidation(yaml, api, context);
 
         aiTelemetryClient.reportEditResult({
-          toolId: workflowTools.replaceYaml,
+          toolId: workflowTools.setYaml,
           conversationId: extractConversationId(context),
           editSuccess: true,
           isCreation: true,
@@ -474,7 +487,7 @@ export function registerWorkflowEditTools(
                 created: true,
                 proposalId,
                 attachmentId: newAttachment.id,
-                toolId: workflowTools.replaceYaml,
+                toolId: workflowTools.setYaml,
                 description: description ?? 'New workflow created',
                 ...(validation ? { validation } : {}),
               },
@@ -492,13 +505,13 @@ export function registerWorkflowEditTools(
         description,
         attachment.workflowId,
         attachment.name,
-        workflowTools.replaceYaml
+        workflowTools.setYaml
       );
 
       const validation = await runCompactValidation(yaml, api, context);
 
       aiTelemetryClient.reportEditResult({
-        toolId: workflowTools.replaceYaml,
+        toolId: workflowTools.setYaml,
         conversationId: extractConversationId(context),
         editSuccess: true,
         isCreation: false,
@@ -515,7 +528,7 @@ export function registerWorkflowEditTools(
               diffAttachmentId,
               attachmentId: attachment.attachmentId,
               attachmentVersion,
-              toolId: workflowTools.replaceYaml,
+              toolId: workflowTools.setYaml,
               description: description ?? 'Full YAML replacement proposed',
               ...(validation ? { validation } : {}),
             },

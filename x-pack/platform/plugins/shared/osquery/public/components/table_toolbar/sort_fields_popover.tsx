@@ -127,6 +127,7 @@ const SortFieldsPopoverComponent: React.FC<SortFieldsPopoverProps> = ({
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={SORT_FIELDS_LABEL}
     >
       <div style={POPOVER_CONTENT_STYLE}>
         <EuiPopoverTitle paddingSize="s">

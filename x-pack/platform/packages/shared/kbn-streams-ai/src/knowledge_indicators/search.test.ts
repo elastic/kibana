@@ -26,6 +26,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
 function makeStreamQuery(overrides: Partial<StreamQuery> = {}): StreamQuery {
   return {
     id: 'query-id',
+    type: 'match',
     title: 'Query title',
     description: 'Query description',
     esql: { query: 'FROM logs-*' },

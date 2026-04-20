@@ -61,6 +61,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,
       },
     },
+    uiSettings: {
+      ...xpackFunctionalTestsConfig.get('uiSettings'),
+      globalDefaults: {
+        ...xpackFunctionalTestsConfig.get('uiSettings.globalDefaults'),
+        hideAnnouncements: true,
+      },
+    },
   };
 }
 

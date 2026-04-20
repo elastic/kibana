@@ -51,6 +51,16 @@ jest.mock(
     useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
   })
 );
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (_appId: string, { path }: { path: string }) =>
+          `/app/securitySolutionUI/${path}`,
+      },
+    },
+  }),
+}));
 
 const mockUseAddToCaseActions = useAddToCaseActions as jest.Mock;
 const mockUseAlertsActions = useAlertsActions as jest.Mock;
@@ -378,5 +388,117 @@ describe('<TakeActionButton />', () => {
     fireEvent.click(getByText('Add note'));
 
     expect(mockOnShowNotes).toHaveBeenCalledTimes(1);
+  });
+
+  describe('Explore action (Discover context only)', () => {
+    const alertHit = createMockHit({
+      'event.kind': 'signal',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+    });
+    const eventHit = createMockHit({
+      'event.kind': 'event',
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+    });
+
+    beforeEach(() => {
+      jest.spyOn(window, 'open').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('should not show the explore action when in Security app', () => {
+      mockUseIsInSecurityApp.mockReturnValue(true);
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Explore in Alerts')).not.toBeInTheDocument();
+      expect(queryByText('Explore in Timeline')).not.toBeInTheDocument();
+    });
+
+    it('should show "Explore in Alerts" for alert documents in Discover', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Explore in Alerts')).toBeInTheDocument();
+    });
+
+    it('should show "Explore in Timeline" for non-alert documents in Discover', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Explore in Timeline')).toBeInTheDocument();
+    });
+
+    it('should open a new tab when "Explore in Alerts" is clicked', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: alertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Explore in Alerts'));
+
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('timeline'),
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+
+    it('should open a new tab when "Explore in Timeline" is clicked', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: eventHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Explore in Timeline'));
+
+      expect(window.open).toHaveBeenCalledWith(
+        expect.stringContaining('timeline'),
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+
+    it('should use kibana.alert.url directly when present on an alert document', () => {
+      mockUseIsInSecurityApp.mockReturnValue(false);
+      const hitWithAlertUrl = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.url': 'https://kibana.example.com/app/security/alerts/redirect/abc123',
+      });
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: hitWithAlertUrl,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+      fireEvent.click(getByText('Explore in Alerts'));
+
+      expect(window.open).toHaveBeenCalledWith(
+        'https://kibana.example.com/app/security/alerts/redirect/abc123',
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
   });
 });

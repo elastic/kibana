@@ -9,6 +9,7 @@
 
 import { parseDocument } from 'yaml';
 
+import { stepDefinitionSchema } from './workflow_edit_tools';
 import {
   deleteStep,
   insertStep,
@@ -1060,6 +1061,151 @@ steps:
 
       const afterParsed = parseDocument(result.yaml).toJSON();
       expect(afterParsed.steps).toEqual(beforeParsed.steps);
+    });
+  });
+
+  describe('stepDefinitionSchema preserves extended step properties', () => {
+    it('preserves on-failure in the parsed output', () => {
+      const input = {
+        name: 'fetch_data',
+        type: 'http',
+        with: { method: 'GET', url: 'https://example.com' },
+        'on-failure': { retry: { 'max-attempts': 3 } },
+      };
+      const parsed = stepDefinitionSchema.parse(input);
+      expect(parsed).toHaveProperty('on-failure');
+      expect((parsed as any)['on-failure']).toEqual({ retry: { 'max-attempts': 3 } });
+    });
+
+    it('preserves timeout in the parsed output', () => {
+      const input = {
+        name: 'fetch_data',
+        type: 'http',
+        with: { method: 'GET', url: 'https://example.com' },
+        timeout: '30s',
+      };
+      const parsed = stepDefinitionSchema.parse(input);
+      expect(parsed).toHaveProperty('timeout');
+      expect((parsed as any).timeout).toBe('30s');
+    });
+
+    it('preserves description in the parsed output', () => {
+      const input = {
+        name: 'fetch_data',
+        type: 'http',
+        description: 'Fetches data from external API',
+      };
+      const parsed = stepDefinitionSchema.parse(input);
+      expect(parsed).toHaveProperty('description');
+      expect((parsed as any).description).toBe('Fetches data from external API');
+    });
+
+    it('preserves do/then/else in the parsed output', () => {
+      const input = {
+        name: 'branch_step',
+        type: 'condition',
+        condition: 'steps.check.output.ok == true',
+        do: [{ name: 'a', type: 'console' }],
+        then: [{ name: 'b', type: 'console' }],
+        else: [{ name: 'c', type: 'console' }],
+      };
+      const parsed = stepDefinitionSchema.parse(input);
+      expect(parsed).toHaveProperty('do');
+      expect(parsed).toHaveProperty('then');
+      expect(parsed).toHaveProperty('else');
+      expect(parsed).toHaveProperty('condition');
+    });
+  });
+
+  describe('modifyStepProperty appends new property with correct indentation', () => {
+    it('appends on-failure to a step in a YAML sequence with valid indentation', () => {
+      const yamlWithStep = `version: "1"
+name: Test
+steps:
+  - name: fetch_data
+    type: http
+    with:
+      method: GET
+      url: https://example.com
+`;
+      const result = modifyStepProperty(yamlWithStep, 'fetch_data', 'on-failure', {
+        retry: { 'max-attempts': 3 },
+      });
+      expect(result.success).toBe(true);
+      const doc = parseDocument(result.yaml);
+      expect(doc.errors).toHaveLength(0);
+      const parsed = doc.toJSON();
+      const step = parsed.steps.find((s: any) => s.name === 'fetch_data');
+      expect(step['on-failure']).toEqual({ retry: { 'max-attempts': 3 } });
+    });
+
+    it('appends timeout to a step preserving valid YAML indentation', () => {
+      const yamlWithStep = `version: "1"
+name: Test
+steps:
+  - name: fetch_data
+    type: http
+    with:
+      method: GET
+      url: https://example.com
+`;
+      const result = modifyStepProperty(yamlWithStep, 'fetch_data', 'timeout', '30s');
+      expect(result.success).toBe(true);
+      const doc = parseDocument(result.yaml);
+      expect(doc.errors).toHaveLength(0);
+      const parsed = doc.toJSON();
+      const step = parsed.steps.find((s: any) => s.name === 'fetch_data');
+      expect(step.timeout).toBe('30s');
+    });
+  });
+
+  describe('modifyStepProperty handles dot-notation paths', () => {
+    it('resolves with.message to update message inside the with block', () => {
+      const result = modifyStepProperty(
+        SAMPLE_WORKFLOW,
+        'log_greeting',
+        'with.message',
+        'Updated message'
+      );
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      const step = parsed.steps.find((s: any) => s.name === 'log_greeting');
+      expect(step.with.message).toBe('Updated message');
+      expect(step['with.message']).toBeUndefined();
+    });
+
+    it('resolves with.url to update url inside the with block', () => {
+      const result = modifyStepProperty(SAMPLE_WORKFLOW, 'search_data', 'with.index', 'new-index');
+      expect(result.success).toBe(true);
+      const parsed = parseDocument(result.yaml).toJSON();
+      const step = parsed.steps.find((s: any) => s.name === 'search_data');
+      expect(step.with.index).toBe('new-index');
+      expect(step['with.index']).toBeUndefined();
+    });
+  });
+
+  describe('modifyStep preserves extended step properties end-to-end', () => {
+    it('preserves on-failure in the output YAML', () => {
+      const result = modifyStep(SAMPLE_WORKFLOW, 'log_greeting', {
+        name: 'log_greeting',
+        type: 'console',
+        with: { message: 'Hello, world!' },
+        'on-failure': { retry: { 'max-attempts': 3 } },
+      });
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('on-failure');
+      expect(result.yaml).toContain('max-attempts');
+    });
+
+    it('preserves timeout in the output YAML', () => {
+      const result = modifyStep(SAMPLE_WORKFLOW, 'log_greeting', {
+        name: 'log_greeting',
+        type: 'console',
+        with: { message: 'Hello, world!' },
+        timeout: '30s',
+      });
+      expect(result.success).toBe(true);
+      expect(result.yaml).toContain('timeout: 30s');
     });
   });
 });

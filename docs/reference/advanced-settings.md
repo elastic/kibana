@@ -495,6 +495,9 @@ $$$rollups-enableindexpatterns$$$`rollups:enableIndexPatterns` {applies_to}`stac
 
 ### {{product.elasticsearch}} [kibana-search-settings]
 
+$$$query-activity-minrunningtime$$$`query_activity:minRunningTime` {applies_to}`stack: preview 9.4` {applies_to}`serverless: preview`
+:   The minimum time in milliseconds that a query must be running before it appears on the [Query activity](docs-content://deploy-manage/monitor/query-activity.md) page. Increase this value to filter out fast-completing queries and focus on long-running ones. `100` by default.
+
 $$$courier-ignorefilteriffieldnotinindex$$$`courier:ignoreFilterIfFieldNotInIndex` {applies_to}`stack: ga` {applies_to}`elasticsearch: ga`
 :   Enhances support for dashboards containing visualizations accessing several dissimilar {{data-sources}}. When activated, filters are ignored for a visualization when the visualization's data view does not contain the filtering field. When deactivated, all filters are applied to all visualizations. `false` by default.
 

@@ -71,9 +71,7 @@ export const getSharedFieldConfigurations = (
     },
     [TRACE_ID]: {
       title: fieldLabels.TRACE_ID_LABEL,
-      formatter: (value: unknown, formattedValue: string) => (
-        <HighlightField value={value as string} formattedValue={formattedValue} />
-      ),
+      formatter: (value: unknown) => <HighlightField value={value as string} />,
     },
   };
 };

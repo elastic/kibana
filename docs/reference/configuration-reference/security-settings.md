@@ -139,7 +139,7 @@ xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink ![logo
 #### Discontinued SAML settings
 
 ```{applies_to}
-ess: removed 8.0
+ess: removed
 ```
 The following settings are available in {{ecloud}} for all supported versions before 8.0:
 

@@ -10,12 +10,10 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 import type { DiscoverServices, HistoryLocationState } from '../build_services';
-import type { ProjectRouting } from '@kbn/es-query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
-import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import {
   analyticsServiceMock,
   coreMock,
@@ -52,6 +50,7 @@ import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -192,8 +191,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
   history.push('/');
 
   const { profilesManagerMock } = createContextAwarenessMocks();
-  const projectPickerAccess$ = new BehaviorSubject(ProjectRoutingAccess.EDITABLE);
-  const projectRouting$ = new BehaviorSubject<ProjectRouting>(undefined);
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
@@ -241,7 +238,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
-      get: jest.fn((path: string) => {
+      post: jest.fn((path: string) => {
         // Mock ES|QL timefield endpoint so an ES|QL data view can be created
         if (path.startsWith('/internal/esql/get_timefield')) {
           return Promise.resolve({ timeField: '@timestamp' });
@@ -309,22 +306,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
-    cps: {
-      cpsManager: {
-        whenReady: jest.fn().mockResolvedValue(undefined),
-        fetchProjects: jest.fn().mockResolvedValue(null),
-        getTotalProjectCount: jest.fn().mockReturnValue(0),
-        getProjectRouting$: jest.fn().mockReturnValue(projectRouting$),
-        setProjectRouting: jest.fn((projectRouting: ProjectRouting) => {
-          projectRouting$.next(projectRouting);
-        }),
-        getProjectRouting: jest.fn((overrideValue?: ProjectRouting) => overrideValue),
-        getDefaultProjectRouting: jest.fn().mockReturnValue(undefined),
-        updateDefaultProjectRouting: jest.fn(),
-        getProjectPickerAccess$: jest.fn().mockReturnValue(projectPickerAccess$),
-        registerAppAccess: jest.fn(),
-      },
-    },
+    cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {

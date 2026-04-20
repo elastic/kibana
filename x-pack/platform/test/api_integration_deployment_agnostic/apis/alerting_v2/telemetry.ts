@@ -182,7 +182,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           { name: '10m', value: 1 },
           { name: '5m', value: 1 },
         ]);
-        expect(parsedState.count_with_query_condition).to.be(0);
         expect(parsedState.count_with_recovery_policy).to.be(1);
         expect(parsedState.count_by_recovery_policy_type).to.eql({ no_breach: 1 });
         expect(parsedState.count_with_grouping).to.be(1);

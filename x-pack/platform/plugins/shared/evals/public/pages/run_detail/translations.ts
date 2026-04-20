@@ -108,6 +108,31 @@ export const getTraceFlyoutTitle = (traceId: string) =>
     values: { traceId },
   });
 
+export const RUN_NOT_FOUND_TITLE = i18n.translate('xpack.evals.runDetail.runNotFoundTitle', {
+  defaultMessage: 'Run not found',
+});
+
+export const RUN_LOAD_ERROR_TITLE = i18n.translate('xpack.evals.runDetail.runLoadErrorTitle', {
+  defaultMessage: 'Unable to load run',
+});
+
+export const BACK_TO_RUNS = i18n.translate('xpack.evals.runDetail.backToRuns', {
+  defaultMessage: 'Back to Runs',
+});
+
+export const getRunNotFoundBody = (runId: string) =>
+  i18n.translate('xpack.evals.runDetail.runNotFoundBody', {
+    defaultMessage:
+      'The run {runId} could not be found. It may have been deleted or the URL may be incorrect.',
+    values: { runId },
+  });
+
+export const getRunLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.runDetail.runLoadErrorBody', {
+    defaultMessage: 'An error occurred while loading run details: {errorMessage}',
+    values: { errorMessage },
+  });
+
 export const getExamplesLoadError = (errorMessage: string) =>
   i18n.translate('xpack.evals.runDetail.examplesLoadError', {
     defaultMessage: 'Failed to load dataset examples: {errorMessage}',

@@ -24,6 +24,15 @@ export const request = <T = unknown>(
     headers: { ...API_HEADERS, ...options.headers },
   });
 
+/** Persist global `hideAnnouncements` (agent builder announcement modal). */
+export const suppressGlobalAnnouncements = (): Cypress.Chainable<Cypress.Response<unknown>> =>
+  request({
+    method: 'POST',
+    url: '/internal/kibana/global_settings',
+    body: { changes: { hideAnnouncements: true } },
+    failOnStatusCode: false,
+  });
+
 const ES_URL =
   Cypress.env('ELASTICSEARCH_URL') || `http://localhost:${Cypress.env('configport') || 9220}`;
 

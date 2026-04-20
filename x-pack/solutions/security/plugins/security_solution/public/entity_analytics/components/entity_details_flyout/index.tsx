@@ -99,9 +99,11 @@ export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProp
 export const getResolutionGroupTab = ({
   entityId,
   entityType,
+  scopeId,
 }: {
   entityId: string;
   entityType: EntityStoreEntityType;
+  scopeId: string;
 }) => ({
   id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
   'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
@@ -111,5 +113,5 @@ export const getResolutionGroupTab = ({
       defaultMessage="Resolution group"
     />
   ),
-  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} />,
+  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
 });

@@ -16,6 +16,15 @@ import {
   FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID,
 } from './constants/test_ids';
 
+jest.mock(
+  '../../detections/components/attacks/table/attack_details/attack_ai_assistant_button',
+  () => ({
+    AttackAiAssistantButton: () => (
+      <div data-test-subj="attackAiAssistantButton">{'AttackAiAssistantButton'}</div>
+    ),
+  })
+);
+
 const defaultSearchHit = {
   _id: 'attack-1',
   _source: {},
@@ -69,17 +78,29 @@ describe('PanelFooter', () => {
     expect(screen.getByRole('button', { name: 'Take action' })).toBeInTheDocument();
   });
 
-  it('does not render the Take Action button when attack is null', () => {
+  it('does not render the footer when attack is null', () => {
     renderFooter({ attack: null });
 
-    expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(FLYOUT_FOOTER_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('does not render the Take Action button when attackId is empty and attack is null', () => {
+  it('does not render the footer when attackId is empty and attack is null', () => {
     renderFooter({ attackId: '', attack: null });
 
-    expect(screen.getByTestId(FLYOUT_FOOTER_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(FLYOUT_FOOTER_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(FLYOUT_FOOTER_TAKE_ACTION_BUTTON_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('renders the AI assistant button when attack is present', () => {
+    renderFooter();
+
+    expect(screen.getByTestId('attackAiAssistantButton')).toBeInTheDocument();
+  });
+
+  it('does not render the AI assistant button when attack is null', () => {
+    renderFooter({ attack: null });
+
+    expect(screen.queryByTestId('attackAiAssistantButton')).not.toBeInTheDocument();
   });
 });

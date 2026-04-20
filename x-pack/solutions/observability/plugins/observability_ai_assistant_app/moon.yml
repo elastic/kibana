@@ -94,6 +94,8 @@ dependsOn:
   - '@kbn/agent-builder-plugin'
   - '@kbn/object-utils'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/react-query'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod

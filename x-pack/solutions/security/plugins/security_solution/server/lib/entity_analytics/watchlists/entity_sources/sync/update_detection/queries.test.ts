@@ -137,5 +137,43 @@ describe('Watchlist sync queries', () => {
         range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
       });
     });
+
+    it('applies queryRule as KQL filter', () => {
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        undefined,
+        undefined,
+        'event.action: "login"'
+      );
+      const must = searchBody.query?.bool?.must as unknown[];
+      expect(must).toHaveLength(2);
+      expect(must[1]).toBeDefined();
+    });
+
+    it('does not add KQL filter when queryRule is undefined', () => {
+      const searchBody = buildEntitiesSearchBody('user');
+      expect(searchBody.query?.bool?.must).toHaveLength(1);
+    });
+
+    it('composes queryRule with syncMarker and allowedEntityIds', () => {
+      const syncMarker = '2024-01-15T00:00:00Z';
+      const searchBody = buildEntitiesSearchBody(
+        'user',
+        undefined,
+        100,
+        syncMarker,
+        ['user:jdoe'],
+        'user.roles: "admin"'
+      );
+      expect(searchBody.query?.bool?.must).toHaveLength(4);
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        terms: { euid: ['user:jdoe'] },
+      });
+      expect(searchBody.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: syncMarker, lte: 'now' } },
+      });
+    });
   });
 });

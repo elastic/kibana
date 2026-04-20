@@ -7,10 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import {
-  isLensESQLConfig,
-  isLensLegacyAttributes,
-} from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
@@ -90,14 +87,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       const requestBodyData = req.body;
       if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
-      }
-
-      if (isLensESQLConfig(req.body)) {
-        return res.badRequest({
-          body: {
-            message: 'ES|QL charts are not yet supported in Lens.',
-          },
-        });
       }
 
       // TODO fix IContentClient to type this client based on the actual

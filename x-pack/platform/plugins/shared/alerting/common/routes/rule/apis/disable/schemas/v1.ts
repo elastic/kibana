@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
+
+export const disableRuleParamsExamples = () => path.join(__dirname, 'examples_disable_rule.yaml');
 
 export const disableRuleRequestBodySchema = schema.nullable(
   schema.maybe(

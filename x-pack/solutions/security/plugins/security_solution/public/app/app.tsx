@@ -19,8 +19,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EntityStoreEuidApiProvider, useInstallEntityStoreV2 } from '@kbn/entity-store/public';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { THREAT_HUNTING_AGENT_ID, APP_NAME } from '../../common/constants';
+import { APP_NAME } from '../../common/constants';
 import { UpsellingProvider } from '../common/components/upselling_provider';
 import { ManageUserInfo } from '../detections/components/user_info';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
@@ -115,27 +114,25 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   useInstallEntityStoreV2(services);
 
-  // Set conversation flyout active config on mount, clear on unmount
+  // Set conversation flyout active config on mount, clear on unmount.
+  // Skip if the sidebar is already open (e.g. navigating from Agent Builder
+  // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
-    if (services.agentBuilder?.setChatConfig) {
-      const skillsEnabled = services.uiSettings.get<boolean>(
-        AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-        false
-      );
+    const isSidebarOpen = services.chrome.sidebar.isOpen();
 
+    if (services.agentBuilder?.setChatConfig && !isSidebarOpen) {
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
-        ...(skillsEnabled ? {} : { agentId: THREAT_HUNTING_AGENT_ID }),
         newConversation: false,
       });
     }
 
     return () => {
-      if (services.agentBuilder?.clearChatConfig) {
+      if (services.agentBuilder?.clearChatConfig && !isSidebarOpen) {
         services.agentBuilder.clearChatConfig();
       }
     };
-  }, [services.agentBuilder, services.uiSettings]);
+  }, [services.agentBuilder, services.chrome.sidebar, services.uiSettings]);
 
   return (
     <KibanaContextProvider

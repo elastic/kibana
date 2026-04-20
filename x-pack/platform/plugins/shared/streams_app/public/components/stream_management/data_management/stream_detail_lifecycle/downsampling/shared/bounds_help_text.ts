@@ -7,7 +7,7 @@
 
 import type { PreservedTimeUnit } from './time_unit_types';
 import { formatMillisecondsInUnit } from './duration_utils';
-import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
 
 export const getBoundsHelpTextValues = ({
   lowerBoundMs,

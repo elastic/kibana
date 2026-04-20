@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
+import type { DocViewerProps } from '@kbn/unified-doc-viewer';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiFlyoutProps } from '@elastic/eui';
@@ -17,22 +19,21 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiPortal,
-  EuiPagination,
   EuiHorizontalRule,
+  EuiPagination,
+  EuiPortal,
+  EuiSpacer,
+  isDOMNode,
   keys,
   useEuiTheme,
   useIsWithinMinBreakpoint,
-  isDOMNode,
-  EuiSpacer,
 } from '@elastic/eui';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStart } from '@kbn/core/public';
 import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
@@ -261,7 +262,7 @@ export function UnifiedDocViewerFlyout({
   // Document Viewer flyout and any nested flyouts (e.g. Trace Waterfall) into
   // the same back-button navigation history, enabling "Back" to return the user
   // from the Trace Waterfall to the Document Viewer.
-  const historyKey = useMemo(() => Symbol('docViewerFlyout'), []);
+  const historyKey = DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
   return (
     <FlyoutHistoryKeyContext.Provider value={historyKey}>
@@ -334,6 +335,7 @@ export function UnifiedDocViewerFlyout({
               </>
             )}
             <UnifiedDocViewer
+              key={actualHit.id}
               ref={docViewerRef}
               initialTabId={initialTabId}
               initialState={initialDocViewerState}

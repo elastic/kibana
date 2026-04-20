@@ -123,12 +123,6 @@ export const findLeadsResponseSchema = z.object({
 
 export type FindLeadsResponse = z.infer<typeof findLeadsResponseSchema>;
 
-export const getLeadByIdRequestSchema = z.object({
-  id: z.string().min(1),
-});
-
-export type GetLeadByIdRequest = z.infer<typeof getLeadByIdRequestSchema>;
-
 export const dismissLeadRequestSchema = z.object({
   id: z.string().min(1),
 });

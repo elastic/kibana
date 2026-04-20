@@ -20,11 +20,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 
-export function CurrentStreamEntry({
-  definition,
-}: {
-  definition: Streams.WiredStream.GetResponse;
-}) {
+export function CurrentStreamEntry({ definition }: { definition: Streams.ingest.all.GetResponse }) {
   const { euiTheme } = useEuiTheme();
   const router = useStreamsAppRouter();
 

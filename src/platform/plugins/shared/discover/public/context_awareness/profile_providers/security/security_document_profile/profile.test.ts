@@ -71,15 +71,11 @@ describe('createSecurityDocumentProfileProvider — getDocViewer', () => {
     });
   });
 
-  it('registers the overview tab when event.kind is absent', () => {
+  it('does NOT register the overview tab when event.kind is absent', () => {
     const registry = new DocViewsRegistry();
     const docViewer = getDocViewerFor(buildRecord({}));
     docViewer.docViewsRegistry(registry);
-    expect(registry.getAll()).toHaveLength(1);
-    expect(registry.getAll()[0]).toMatchObject({
-      id: 'doc_view_alerts_overview',
-      title: 'Event Overview',
-    });
+    expect(registry.getAll()).toHaveLength(0);
   });
 
   it('does NOT register the overview tab for a scheduled attack discovery alert', () => {

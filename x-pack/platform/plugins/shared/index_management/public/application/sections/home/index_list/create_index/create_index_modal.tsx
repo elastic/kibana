@@ -36,7 +36,7 @@ import {
 import { LOOKUP_INDEX_MODE, STANDARD_INDEX_MODE } from '../../../../../../common/constants';
 import { indexModeDescriptions, indexModeLabels } from '../../../../lib/index_mode_labels';
 import { createIndex } from '../../../../services';
-import { notificationService } from '../../../../services/notification';
+import { useServices } from '../../../../app_context';
 
 import { generateRandomIndexName, isValidIndexName } from './utils';
 
@@ -57,6 +57,7 @@ export interface CreateIndexModalProps {
 }
 
 export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalProps) => {
+  const { notificationService } = useServices();
   const modalTitleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
 
@@ -98,7 +99,7 @@ export const CreateIndexModal = ({ closeModal, loadIndices }: CreateIndexModalPr
       setIsSaving(false);
       setCreateError(e.message);
     }
-  }, [closeModal, indexMode, indexName, loadIndices]);
+  }, [closeModal, indexMode, indexName, loadIndices, notificationService]);
 
   const onSave = () => {
     if (isValidIndexName(indexName)) {

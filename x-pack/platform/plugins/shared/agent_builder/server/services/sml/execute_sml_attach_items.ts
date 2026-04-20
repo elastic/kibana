@@ -19,6 +19,7 @@ export type SmlResolvedItemResult =
         type: string;
         data: unknown;
         origin: string;
+        description: string;
       };
     }
   | {
@@ -118,6 +119,7 @@ export const resolveSmlAttachItems = async ({
             type: convertedAttachment.type,
             data: convertedAttachment.data,
             origin: convertedAttachment.origin ?? smlDoc.origin_id,
+            description: convertedAttachment.description ?? `${smlDoc.type}/${smlDoc.title}`,
           },
         };
       } catch (error) {

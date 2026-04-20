@@ -43,7 +43,6 @@ dependsOn:
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/object-utils'
   - '@kbn/react-query'
-  - '@kbn/search-api-panels'
   - '@kbn/cloud-plugin'
   - '@kbn/core-http-router-server-mocks'
   - '@kbn/logging-mocks'
@@ -53,6 +52,7 @@ dependsOn:
   - '@kbn/inference-common'
   - '@kbn/inference-plugin'
   - '@kbn/management-settings-ids'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -65,6 +65,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout_inference_test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -17,9 +17,16 @@ import { APIRoutes } from '../../common/types';
 import { MockRouter } from '../../__mocks__/router.mock';
 import { defineInferenceSettingsRoutes } from './inference_settings';
 
+const mockFeatureRegistry = {
+  getAll: jest.fn().mockReturnValue([]),
+  get: jest.fn(),
+  register: jest.fn(),
+};
+
 describe('Inference Settings API', () => {
   const mockLogger = loggingSystemMock.createLogger().get();
   let mockRouter: MockRouter;
+  let getConnectorById: jest.Mock;
   const mockSOClient = {
     create: jest.fn(),
     get: jest.fn(),
@@ -34,6 +41,7 @@ describe('Inference Settings API', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    getConnectorById = jest.fn().mockRejectedValue(new Error('Not found'));
 
     context = {
       core: Promise.resolve(mockCore),
@@ -51,6 +59,8 @@ describe('Inference Settings API', () => {
       defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
+        featureRegistry: mockFeatureRegistry as any,
+        getConnectorById,
       });
     });
 
@@ -86,6 +96,7 @@ describe('Inference Settings API', () => {
               { feature_id: 'agent_builder', endpoints: [{ id: '.anthropic-claude-3.7-sonnet' }] },
             ],
           },
+          invalidEndpoints: [],
         },
         headers: { 'content-type': 'application/json' },
       });
@@ -235,6 +246,8 @@ describe('Inference Settings API', () => {
       defineInferenceSettingsRoutes({
         logger: mockLogger,
         router: mockRouter.router,
+        featureRegistry: mockFeatureRegistry as any,
+        getConnectorById,
       });
     });
 

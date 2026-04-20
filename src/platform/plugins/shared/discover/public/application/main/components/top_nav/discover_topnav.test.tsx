@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
-import React, { useContext } from 'react';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { ComponentProps } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DiscoverTopNavProps } from './discover_topnav';
 import { DiscoverTopNav } from './discover_topnav';
@@ -28,6 +28,22 @@ import { DiscoverTopNavMenuProvider, discoverTopNavMenuContext } from './discove
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 
 let mockDiscoverService = createDiscoverServicesMock();
+type AggregateQueryTopNavMenuProps = ComponentProps<
+  typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu
+>;
+
+const MockAggregateQueryTopNavMenu = ({
+  dataViewPickerComponentProps,
+  dataViewPickerOverride,
+}: AggregateQueryTopNavMenuProps) => (
+  <div
+    data-test-subj="aggregate-query-top-nav-menu"
+    data-has-data-view-picker-component-props={String(Boolean(dataViewPickerComponentProps))}
+    data-has-data-view-picker-override={String(Boolean(dataViewPickerOverride))}
+  >
+    {dataViewPickerOverride}
+  </div>
+);
 
 const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu =
   () => <div data-test-subj="custom-search-bar" />;
@@ -69,6 +85,7 @@ async function setup(
   if (capabilities) {
     mockDiscoverService.capabilities = capabilities as typeof mockDiscoverService.capabilities;
   }
+  mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu = MockAggregateQueryTopNavMenu;
 
   const toolkit = getDiscoverInternalStateMock({
     services: mockDiscoverService,
@@ -97,20 +114,28 @@ async function setup(
 let capturedTopNavMenu: AppMenuConfig | undefined;
 const TopNavMenuCapture = () => {
   const { topNavMenu$ } = useContext(discoverTopNavMenuContext);
-  topNavMenu$.subscribe((menu) => {
-    capturedTopNavMenu = menu;
-  });
+
+  useEffect(() => {
+    const subscription = topNavMenu$.subscribe((menu) => {
+      capturedTopNavMenu = menu;
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [topNavMenu$]);
+
   return null;
 };
 
-const getTestComponent = ({
+const renderTestComponent = ({
   toolkit,
   props,
 }: {
   toolkit: InternalStateMockToolkit;
   props: DiscoverTopNavProps;
 }) =>
-  mountWithIntl(
+  renderWithKibanaRenderContext(
     <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverTopNavMenuProvider customizationContext={toolkit.customizationContext}>
         <TopNavMenuCapture />
@@ -141,8 +166,10 @@ describe('Discover topnav component', () => {
 
   test('generated config of AppMenuConfig is correct when discover save permissions are assigned', async () => {
     const { toolkit, props } = await setup({ capabilities: { discover_v2: { save: true } } });
-    await act(async () => {
-      getTestComponent({ toolkit, props });
+    renderTestComponent({ toolkit, props });
+
+    await waitFor(() => {
+      expect(capturedTopNavMenu).toBeDefined();
     });
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
@@ -152,8 +179,10 @@ describe('Discover topnav component', () => {
 
   test('generated config of AppMenuConfig is correct when no discover save permissions are assigned', async () => {
     const { toolkit, props } = await setup({ capabilities: { discover_v2: { save: false } } });
-    await act(async () => {
-      getTestComponent({ toolkit, props });
+    renderTestComponent({ toolkit, props });
+
+    await waitFor(() => {
+      expect(capturedTopNavMenu).toBeDefined();
     });
 
     const itemIds = capturedTopNavMenu?.items?.map((item) => item.id) || [];
@@ -170,28 +199,22 @@ describe('Discover topnav component', () => {
       });
 
       const { toolkit, props } = await setup();
-      let component: ReturnType<typeof mountWithIntl>;
-      await act(async () => {
-        component = getTestComponent({ toolkit, props });
-      });
+      renderTestComponent({ toolkit, props });
 
-      expect(component!.find({ 'data-test-subj': 'custom-search-bar' })).toHaveLength(1);
+      expect(screen.getByTestId('custom-search-bar')).toBeVisible();
+      expect(screen.queryByTestId('aggregate-query-top-nav-menu')).not.toBeInTheDocument();
     });
 
     it('should render CustomDataViewPicker', async () => {
       mockUseCustomizations = true;
       const { toolkit, props } = await setup();
-      let component: ReturnType<typeof mountWithIntl>;
-      await act(async () => {
-        component = getTestComponent({ toolkit, props });
-      });
+      renderTestComponent({ toolkit, props });
 
-      const topNav = component!.find(toolkit.services.navigation.ui.AggregateQueryTopNavMenu).at(0);
-      expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
-      const dataViewPickerOverride = mountWithIntl(
-        topNav.prop('dataViewPickerOverride') as ReactElement
-      ).find(mockSearchBarCustomization.CustomDataViewPicker!);
-      expect(dataViewPickerOverride.length).toBe(1);
+      const topNav = screen.getByTestId('aggregate-query-top-nav-menu');
+
+      expect(topNav).toHaveAttribute('data-has-data-view-picker-component-props', 'false');
+      expect(topNav).toHaveAttribute('data-has-data-view-picker-override', 'true');
+      expect(screen.getByTestId('custom-data-view-picker')).toBeVisible();
     });
 
     it('should not render the dataView picker when hideDataViewPicker is true', async () => {
@@ -202,13 +225,13 @@ describe('Discover topnav component', () => {
       });
 
       const { toolkit, props } = await setup();
-      let component: ReturnType<typeof mountWithIntl>;
-      await act(async () => {
-        component = getTestComponent({ toolkit, props });
-      });
+      renderTestComponent({ toolkit, props });
 
-      const topNav = component!.find(toolkit.services.navigation.ui.AggregateQueryTopNavMenu).at(0);
-      expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
+      const topNav = screen.getByTestId('aggregate-query-top-nav-menu');
+
+      expect(topNav).toHaveAttribute('data-has-data-view-picker-component-props', 'false');
+      expect(topNav).toHaveAttribute('data-has-data-view-picker-override', 'false');
+      expect(screen.queryByTestId('custom-data-view-picker')).not.toBeInTheDocument();
     });
   });
 });

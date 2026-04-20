@@ -12,7 +12,7 @@
           "\nA wrapper around the session storage which provides strongly typed helper methods\nfor common incoming and outgoing states used by the embeddable infrastructure.\n"
         ],
         "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-        "lineNumber": 23,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -25,7 +25,7 @@
             "label": "isTransferInProgress",
             "description": [],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 30,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41,7 +41,7 @@
               "any"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 34,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -59,7 +59,7 @@
                   " | undefined) => Promise<void>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 35,
+                "lineNumber": 46,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -77,7 +77,7 @@
                   "<string | undefined>"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 36,
+                "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -96,7 +96,7 @@
                   "> | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 37,
+                "lineNumber": 48,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -120,7 +120,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 38,
+                "lineNumber": 49,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -142,7 +142,7 @@
               "(appId: string) => string | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 48,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -160,7 +160,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 52,
+                "lineNumber": 64,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -190,7 +190,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 54,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -208,7 +208,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 61,
+                "lineNumber": 79,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -227,7 +227,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 62,
+                "lineNumber": 80,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -249,7 +249,7 @@
               "(appId?: string | undefined) => void"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 80,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -267,7 +267,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 86,
+                "lineNumber": 104,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -297,7 +297,7 @@
               "<object>[] | undefined"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 98,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -315,7 +315,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 105,
+                "lineNumber": 123,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -334,7 +334,7 @@
                   "boolean | undefined"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 106,
+                "lineNumber": 124,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -364,7 +364,7 @@
               "; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 118,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -380,7 +380,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 123,
+                "lineNumber": 141,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -394,7 +394,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 124,
+                "lineNumber": 142,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -410,7 +410,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 125,
+                    "lineNumber": 143,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -426,7 +426,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 126,
+                    "lineNumber": 144,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -442,7 +442,7 @@
                       "boolean | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 127,
+                    "lineNumber": 145,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -464,7 +464,7 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 128,
+                    "lineNumber": 146,
                     "columnNumber": 7,
                     "deprecated": false,
                     "trackAdoption": false
@@ -495,7 +495,7 @@
               "<SerializedStateType>[]; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-            "lineNumber": 138,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -511,7 +511,7 @@
                   "string"
                 ],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 143,
+                "lineNumber": 161,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -525,7 +525,7 @@
                 "label": "options",
                 "description": [],
                 "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                "lineNumber": 144,
+                "lineNumber": 162,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -541,7 +541,7 @@
                       "string | undefined"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 144,
+                    "lineNumber": 162,
                     "columnNumber": 17,
                     "deprecated": false,
                     "trackAdoption": false
@@ -564,12 +564,75 @@
                       "<SerializedStateType>[]"
                     ],
                     "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
-                    "lineNumber": 144,
+                    "lineNumber": 162,
                     "columnNumber": 32,
                     "deprecated": false,
                     "trackAdoption": false
                   }
                 ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableStateTransfer.onTransferEmbeddablePackage$",
+            "type": "Function",
+            "tags": [],
+            "label": "onTransferEmbeddablePackage$",
+            "description": [],
+            "signature": [
+              "(appId: string, removeAfterFetch?: boolean | undefined) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.EmbeddablePackageState",
+                "text": "EmbeddablePackageState"
+              },
+              "<object>[] | undefined>"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+            "lineNumber": 268,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableStateTransfer.onTransferEmbeddablePackage$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 268,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.EmbeddableStateTransfer.onTransferEmbeddablePackage$.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "removeAfterFetch",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/plugins/shared/embeddable/public/state_transfer/embeddable_state_transfer.ts",
+                "lineNumber": 268,
+                "columnNumber": 54,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []

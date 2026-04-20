@@ -8,10 +8,9 @@
 import type { SavedObject } from '@kbn/core/server';
 
 import type {
-  AlertAttachmentAttributes,
   AttachmentsV2,
   AttachmentV2,
-  EventAttachmentAttributes,
+  DocumentAttachmentAttributesV2,
 } from '../../../common/types/domain';
 import { AttachmentType } from '../../../common';
 import type { DocumentResponse, AttachmentsFindResponse } from '../../../common/types/api';
@@ -41,7 +40,7 @@ import { Operations } from '../../authorization';
 import { AttachmentRtV2, AttachmentsRtV2 } from '../../../common/types/domain';
 
 const normalizeDocumentResponse = (
-  documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
+  documents: Array<SavedObject<DocumentAttachmentAttributesV2>>
 ): DocumentResponse =>
   documents.reduce((acc: DocumentResponse, document) => {
     const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
@@ -91,6 +90,7 @@ export const getAllDocumentsAttachedToCase = async (
       attachmentTypes,
       caseId: theCase.id,
       filter: combineFilters(filterArray),
+      owner: theCase.owner,
     });
 
     ensureSavedObjectsAreAuthorized(

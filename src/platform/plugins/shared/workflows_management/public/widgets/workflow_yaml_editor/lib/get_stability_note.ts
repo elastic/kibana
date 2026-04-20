@@ -14,9 +14,7 @@ import { HardcodedIcons } from '../../../shared/ui/step_icons/hardcoded_icons';
 /**
  * Returns a markdown blockquote stability note.
  */
-export function getStabilityNote(
-  stability: StepStabilityLevel | undefined = 'tech_preview'
-): string {
+export function getStabilityNote(stability: StepStabilityLevel | undefined): string {
   if (stability === 'tech_preview') {
     const flaskImg = `<img src="${HardcodedIcons.flask}" width="11" height="11" alt="" style="vertical-align: middle;" />`;
     const label = i18n.translate('workflows.techPreviewStabilityNote.label', {

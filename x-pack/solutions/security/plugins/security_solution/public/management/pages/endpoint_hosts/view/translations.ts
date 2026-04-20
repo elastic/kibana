@@ -182,6 +182,24 @@ export const WORKFLOW_INSIGHTS = {
         defaultMessage: 'Failed to fetch insights after multiple attempts',
       }
     ),
+    scanFailedAllCombos: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.scanFailedAllCombos',
+      {
+        defaultMessage: 'Scan failed.',
+      }
+    ),
+    scanTimedOut: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.scanTimedOut',
+      {
+        defaultMessage: 'Scan timed out.',
+      }
+    ),
+    unexpectedError: i18n.translate(
+      'xpack.securitySolution.endpointDetails.workflowInsights.toast.unexpectedError',
+      {
+        defaultMessage: 'An unexpected error occurred.',
+      }
+    ),
   },
 };
 

@@ -262,7 +262,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       ? {
           name: strings.getUngroupMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           onClick: () => {
             ungroupNodes();
             closePopover();
@@ -271,7 +271,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       : {
           name: strings.getGroupMenuItemLabel(),
           className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
-          icon: <EuiIcon type="empty" size="m" />,
+          icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
           disabled: selectedNodes.length < 2,
           onClick: () => {
             groupNodes();
@@ -282,7 +282,7 @@ export const EditMenu: FunctionComponent<Props> = ({
     const orderMenuItem = {
       name: strings.getOrderMenuItemLabel(),
       disabled: selectedNodes.length !== 1, // TODO: change to === 0 when we support relayering multiple elements
-      icon: <EuiIcon type="empty" size="m" />,
+      icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
       panel: {
         id: 1,
         title: strings.getOrderMenuItemLabel(),
@@ -315,7 +315,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       name: strings.getAlignmentMenuItemLabel(),
       className: 'canvasContextMenu',
       disabled: groupIsSelected || selectedNodes.length < 2,
-      icon: <EuiIcon type="empty" size="m" />,
+      icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
       panel: {
         id: 2,
         title: strings.getAlignmentMenuItemLabel(),
@@ -376,7 +376,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       name: strings.getDistributionMenuItemLabel(),
       className: 'canvasContextMenu',
       disabled: groupIsSelected || selectedNodes.length < 3,
-      icon: <EuiIcon type="empty" size="m" />,
+      icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
       panel: {
         id: 3,
         title: strings.getAlignmentMenuItemLabel(),
@@ -403,7 +403,7 @@ export const EditMenu: FunctionComponent<Props> = ({
 
     const savedElementMenuItem = {
       name: strings.getSaveElementMenuItemLabel(),
-      icon: <EuiIcon type="indexOpen" size="m" />,
+      icon: <EuiIcon type="indexOpen" size="m" aria-hidden={true} />,
       disabled: selectedNodes.length < 1,
       className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
       'data-test-subj': 'canvasWorkpadEditMenu__saveElementButton',
@@ -417,7 +417,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         // TODO: check history and disable when there are no more changes to revert
         name: strings.getUndoMenuItemLabel(),
-        icon: <EuiIcon type="undo" size="m" />,
+        icon: <EuiIcon type="undo" size="m" aria-hidden={true} />,
         onClick: () => {
           undoHistory();
         },
@@ -425,14 +425,14 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         // TODO: check history and disable when there are no more changes to reapply
         name: strings.getRedoMenuItemLabel(),
-        icon: <EuiIcon type="redo" size="m" />,
+        icon: <EuiIcon type="redo" size="m" aria-hidden={true} />,
         onClick: () => {
           redoHistory();
         },
       },
       {
         name: shortcutHelp.CUT,
-        icon: <EuiIcon type="scissors" size="m" />,
+        icon: <EuiIcon type="scissors" size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         disabled: selectedNodes.length < 1,
         onClick: () => {
@@ -443,14 +443,14 @@ export const EditMenu: FunctionComponent<Props> = ({
       {
         name: shortcutHelp.COPY,
         disabled: selectedNodes.length < 1,
-        icon: <EuiIcon type="copy" size="m" />,
+        icon: <EuiIcon type="copy" size="m" aria-hidden={true} />,
         onClick: () => {
           copyNodes();
         },
       },
       {
         name: shortcutHelp.PASTE, // TODO: can this be disabled if clipboard is empty?
-        icon: <EuiIcon type="copy" size="m" />,
+        icon: <EuiIcon type="copy" size="m" aria-hidden={true} />,
         disabled: !hasPasteData,
         onClick: () => {
           pasteNodes();
@@ -459,7 +459,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       },
       {
         name: shortcutHelp.DELETE,
-        icon: <EuiIcon type="trash" size="m" />,
+        icon: <EuiIcon type="trash" size="m" aria-hidden={true} />,
         disabled: selectedNodes.length < 1,
         onClick: () => {
           deleteNodes();
@@ -469,7 +469,7 @@ export const EditMenu: FunctionComponent<Props> = ({
       },
       {
         name: shortcutHelp.CLONE,
-        icon: <EuiIcon type="empty" size="m" />,
+        icon: <EuiIcon type="empty" size="m" aria-hidden={true} />,
         disabled: selectedNodes.length < 1,
         onClick: () => {
           cloneNodes();

@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { type Interval, intervalFromDate } from '@kbn/task-manager-plugin/server/lib/intervals';
 import {
   Action,
+  type HealthDiagnosticQuery,
   type HealthDiagnosticQueryBase,
   type HealthDiagnosticQueryStats,
 } from './health_diagnostic_service.types';
@@ -197,6 +198,30 @@ export async function applyFilterlist(
 
   return filteredResult;
 }
+
+/**
+ * Merges two query arrays with v2 taking precedence on `id` conflicts.
+ * Queries without an `id` (ParseFailureQuery with no id field) are always
+ * included — they will be reported as skipped at execution time.
+ */
+export const mergeByPriority = (
+  v1Queries: HealthDiagnosticQuery[],
+  v2Queries: HealthDiagnosticQuery[]
+): HealthDiagnosticQuery[] => {
+  const map = new Map<string, HealthDiagnosticQuery>();
+  const idless: HealthDiagnosticQuery[] = [];
+
+  for (const q of [...v1Queries, ...v2Queries]) {
+    const id = (q as { id?: string }).id;
+    if (id !== undefined) {
+      map.set(id, q); // v2 entries overwrite v1 for the same id
+    } else {
+      idless.push(q);
+    }
+  }
+
+  return [...map.values(), ...idless];
+};
 
 async function maskValue(value: string, salt: string): Promise<string> {
   const encoder = new TextEncoder();

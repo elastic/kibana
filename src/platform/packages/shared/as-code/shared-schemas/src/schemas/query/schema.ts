@@ -24,7 +24,14 @@ export const asCodeQuerySchema = schema.object(
       },
     }),
   },
-  { meta: { id: 'kbn-as-code-query' } }
+  {
+    meta: {
+      id: 'kbn-as-code-query',
+      title: 'Query',
+      description:
+        'A search query consisting of an expression and its language. Supports KQL and Lucene syntax.',
+    },
+  }
 );
 
 export type AsCodeQuery = TypeOf<typeof asCodeQuerySchema>;

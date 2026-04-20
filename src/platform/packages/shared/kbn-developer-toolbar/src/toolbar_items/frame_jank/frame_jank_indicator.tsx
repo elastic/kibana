@@ -62,7 +62,7 @@ const getContainerStyles = (euiTheme: EuiThemeComputed) => css`
   height: ${HEIGHT}px;
 
   background-color: ${euiTheme.colors.emptyShade};
-  border-radius: 2px; // badge border radius is 2px, TODO: not available in euiTheme.border
+  border-radius: 24px;
   overflow: hidden;
 `;
 
@@ -80,10 +80,13 @@ const getGraphContainerStyles = (euiTheme: EuiThemeComputed) => css`
   overflow: hidden;
 `;
 
-const getBadgeStyles = (euiTheme: EuiThemeComputed) => css`
+const getBadgeStyles = () => css`
   background-color: transparent;
   z-index: 1;
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   cursor: default;
 `;
 
@@ -242,7 +245,7 @@ export const FrameJankIndicator: React.FC = () => {
   return (
     <EuiToolTip content={tooltipContent}>
       <div css={getContainerStyles(euiTheme)}>
-        <EuiBadge color={'default'} css={getBadgeStyles(euiTheme)}>
+        <EuiBadge color={'default'} css={getBadgeStyles()}>
           Jank {perfInfo ? `${perfInfo.jankPercentage}%` : '-%'}
         </EuiBadge>
         <div css={getGraphContainerStyles(euiTheme)}>

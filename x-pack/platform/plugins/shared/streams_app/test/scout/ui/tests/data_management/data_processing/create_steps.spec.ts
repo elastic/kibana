@@ -13,9 +13,10 @@ import { generateLogsData } from '../../../fixtures/generators';
 // Note: Processor creation, conditional steps, and nested steps API correctness is covered by
 // API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
+// TODO: consistently fails on MKI - needs investigation: https://github.com/elastic/kibana/issues/258589
 test.describe(
   'Stream data processing - creating steps',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -44,7 +45,7 @@ test.describe(
       await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+          body: JSON.stringify({ connectors: [], soEntryFound: false }),
         });
       });
       await page.reload();

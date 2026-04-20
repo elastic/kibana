@@ -14,6 +14,7 @@ import type { LogsSource } from '../../public/components/telemetry_context';
  */
 export enum AutomaticImportTelemetryEventType {
   CreateIntegrationPageLoaded = 'automatic_import_create_integration_page_loaded',
+  EditIntegrationPageLoaded = 'automatic_import_edit_integration_page_loaded',
   DataStreamFlyoutOpened = 'automatic_import_data_stream_flyout_opened',
   AnalyzeLogsTriggered = 'automatic_import_analyze_logs_triggered',
   EditDataStreamFlyoutOpened = 'automatic_import_edit_data_stream_flyout_opened',
@@ -42,27 +43,40 @@ export interface CreateIntegrationPageLoadedPayload {
   sessionId?: string;
 }
 
+export interface EditIntegrationPageLoadedPayload {
+  sessionId?: string;
+  integrationId?: string;
+}
+
 export interface DataStreamFlyoutOpenedPayload {
   sessionId?: string;
-  /** Boolean flag if this is the first data stream being created for a new integration */
-  isFirstDataStream: boolean;
+  integrationId?: string;
 }
 
 export interface EditDataStreamFlyoutOpenedPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
 }
 
 export interface AnalyzeLogsTriggeredPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
   logsSource: LogsSource;
+  inputTypes: string[];
 }
 
 export interface EditPipelineTabOpenedPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
 }
 
 export interface CodeEditorCopyClickedPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
 }
 
 export interface DataStreamCreationCompletePayload {
@@ -71,6 +85,10 @@ export interface DataStreamCreationCompletePayload {
   integrationName: string;
   dataStreamId: string;
   dataStreamName: string;
+  connectorId: string;
+  modelName?: string;
+  connectorType?: string;
+  connectorName?: string;
   durationMs: number;
   success: boolean;
   errorMessage?: string;
@@ -89,27 +107,49 @@ export type UploadIntegrationClickedPayload = Record<string, never>;
 
 export interface CancelButtonClickedPayload {
   sessionId?: string;
+  integrationId?: string;
 }
 
 export interface DoneButtonClickedPayload {
   sessionId?: string;
+  integrationId?: string;
 }
 
-export type ReviewApproveMenuClickedPayload = Record<string, never>;
-export type IntegrationDownloadZipClickedPayload = Record<string, never>;
-export type ApproveModalCancelClickedPayload = Record<string, never>;
-export type ApproveModalApproveClickedPayload = Record<string, never>;
+export interface ReviewApproveMenuClickedPayload {
+  integrationId?: string;
+  version?: string;
+}
+
+export interface IntegrationDownloadZipClickedPayload {
+  integrationId?: string;
+}
+
+export interface ApproveModalCancelClickedPayload {
+  integrationId?: string;
+}
+
+export interface ApproveModalApproveClickedPayload {
+  integrationId?: string;
+  version?: string;
+  dataStreamCount: number;
+}
 
 export interface DataStreamDeleteConfirmedPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
 }
 
 export interface DataStreamRefreshConfirmedPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
 }
 
 export interface PipelineEditedPayload {
   sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
   linesAdded: number;
   linesRemoved: number;
   netLineChange: number;
@@ -118,6 +158,8 @@ export interface PipelineEditedPayload {
 export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTelemetryEventType> =
   T extends AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded
     ? CreateIntegrationPageLoadedPayload
+    : T extends AutomaticImportTelemetryEventType.EditIntegrationPageLoaded
+    ? EditIntegrationPageLoadedPayload
     : T extends AutomaticImportTelemetryEventType.DataStreamFlyoutOpened
     ? DataStreamFlyoutOpenedPayload
     : T extends AutomaticImportTelemetryEventType.EditDataStreamFlyoutOpened

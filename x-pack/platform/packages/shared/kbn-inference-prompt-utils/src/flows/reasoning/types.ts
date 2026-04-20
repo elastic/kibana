@@ -33,6 +33,12 @@ export interface ReasoningPromptOptions {
   maxSteps?: number;
   prevMessages?: undefined;
   power?: ReasoningPower;
+  /**
+   * An optional AbortSignal that allows cancellation of the reasoning agent loop.
+   * When the signal is aborted, the agent will stop between reasoning steps
+   * and forward the signal to inference calls so in-progress requests are cancelled.
+   */
+  abortSignal?: AbortSignal;
 }
 
 export type ReasoningPromptResponseOf<

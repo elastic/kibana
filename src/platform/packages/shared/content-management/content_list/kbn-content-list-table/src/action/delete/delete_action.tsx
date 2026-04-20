@@ -98,6 +98,7 @@ export const buildDeleteAction = (
     color: 'danger',
     isPrimary: true,
     onClick: (item) => actions?.onDelete?.([item]),
+    ...(attributes.enabled && { enabled: attributes.enabled }),
     'data-test-subj': 'content-list-table-action-delete',
   };
 };

@@ -10,19 +10,17 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { orderBy } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
-import { SearchGettingStartedSectionHeading } from '../section_heading';
 import { isNew } from '../../common/utils';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { TutorialCardStyles } from './styles';
 
 interface TutorialMetadata {
   title: string;
@@ -34,8 +32,6 @@ interface TutorialMetadata {
 
 export const ConsoleTutorialsGroup = () => {
   const { console: consolePlugin } = useKibana().services;
-  const assetBasePath = useAssetBasePath();
-  const { euiTheme } = useEuiTheme();
   const isMediumBreakpoint = useIsWithinMaxBreakpoint('m');
   const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const tutorialColumns = isSmallBreakpoint ? 1 : isMediumBreakpoint ? 2 : 3;
@@ -136,67 +132,63 @@ export const ConsoleTutorialsGroup = () => {
     []
   );
 
-  const tutorialCardStyles = css`
-    cursor: pointer;
-    border-radius: ${euiTheme.border.radius.medium};
-    border: 1px solid ${euiTheme.colors.borderBaseSubdued};
-    padding: ${euiTheme.size.base};
-    &:hover {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-      .tutorialTitle {
-        color: ${euiTheme.colors.textPrimary};
-      }
-      border-color: transparent;
-    }
-  `;
-
   return (
-    <EuiFlexGroup gutterSize="l" direction="column" justifyContent="spaceBetween">
-      <SearchGettingStartedSectionHeading
-        title={i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
-          defaultMessage: 'Explore the API',
-        })}
-        icon={`${assetBasePath}/command_line.svg`}
-        description={i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
-          defaultMessage:
-            'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
-        })}
-      />
-      <EuiFlexGrid columns={tutorialColumns}>
-        {orderBy(tutorials, ({ publishedAt }) => publishedAt.getTime(), ['desc']).map(
-          (tutorial) => (
-            <EuiFlexGroup
-              gutterSize="xs"
-              direction="column"
-              key={tutorial.dataTestSubj}
-              css={tutorialCardStyles}
-              data-test-subj={tutorial.dataTestSubj}
-              data-telemetry-id={tutorial.dataTestSubj}
-              onClick={() => openConsole(tutorial.request)}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                  {isNew(tutorial.publishedAt) && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="accent" fill>
-                        {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
-                          defaultMessage: 'New',
-                        })}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  <EuiTitle size="xxs" className="tutorialTitle">
-                    <h4>{tutorial.title}</h4>
-                  </EuiTitle>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                {tutorial.description}
-              </EuiText>
-            </EuiFlexGroup>
-          )
-        )}
-      </EuiFlexGrid>
+    <EuiFlexGroup gutterSize="m" direction="column" justifyContent="spaceBetween">
+      <EuiFlexItem>
+        <EuiTitle size="xs">
+          <h5>
+            {i18n.translate('xpack.searchGettingStarted.consoleTutorials.label', {
+              defaultMessage: 'Explore the API',
+            })}
+          </h5>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>
+            {i18n.translate('xpack.searchGettingStarted.consoleTutorials.description', {
+              defaultMessage:
+                'Choose a tutorial and use Console to quickly start interacting with the Elasticsearch API.',
+            })}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGrid columns={tutorialColumns}>
+          {orderBy(tutorials, ({ publishedAt }) => publishedAt.getTime(), ['desc']).map(
+            (tutorial) => (
+              <EuiFlexGroup
+                gutterSize="xs"
+                direction="column"
+                key={tutorial.dataTestSubj}
+                css={TutorialCardStyles}
+                data-test-subj={tutorial.dataTestSubj}
+                data-telemetry-id={tutorial.dataTestSubj}
+                onClick={() => openConsole(tutorial.request)}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    {isNew(tutorial.publishedAt) && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="accent" fill>
+                          {i18n.translate('xpack.searchGettingStarted.consoleTutorials.newBadge', {
+                            defaultMessage: 'New',
+                          })}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                    <EuiTitle size="xxs" className="tutorialTitle">
+                      <h4>{tutorial.title}</h4>
+                    </EuiTitle>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiText size="xs" color="subdued">
+                  {tutorial.description}
+                </EuiText>
+              </EuiFlexGroup>
+            )
+          )}
+        </EuiFlexGrid>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

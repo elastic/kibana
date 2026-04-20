@@ -171,6 +171,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/product-doc-common'
   - '@kbn/lens-common'
+  - '@kbn/alerting-v2-episodes-ui'
 tags:
   - test-helper
   - package
@@ -181,8 +182,6 @@ fileGroups:
   src:
     - index.d.ts
     - '**/*'
-    - ./api_integration/apis/logstash/pipeline/fixtures/*.json
-    - ./api_integration/apis/logstash/pipelines/fixtures/*.json
     - ./api_integration/apis/telemetry/fixtures/*.json
     - ./monitoring_api_integration/fixtures/**/*.json
     - '!target/**/*'

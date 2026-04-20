@@ -16,7 +16,6 @@ import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/
 import { useKibana } from '../../../../../common/lib/kibana/use_kibana';
 import { getEntityFields } from '../utils';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
-import { useSecurityAgentId } from '../../../../../agent_builder/hooks/use_security_agent_id';
 
 const createEntityDataProviders = (
   entityType: EntityType | undefined,
@@ -44,7 +43,6 @@ export const useLeadingControlColumns = ({
 }: UseLeadingControlColumnsArgs): RowControlColumn[] => {
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const { agentBuilder } = useKibana().services;
-  const agentId = useSecurityAgentId();
 
   return useMemo(() => {
     const columns: RowControlColumn[] = [];
@@ -119,7 +117,6 @@ export const useLeadingControlColumns = ({
                     },
                   ],
                   sessionTag: 'security',
-                  ...(agentId ? { agentId } : {}),
                 });
               }}
               data-test-subj="entity-analytics-home-ai-action-icon"
@@ -130,5 +127,5 @@ export const useLeadingControlColumns = ({
     }
 
     return columns;
-  }, [canUseTimeline, investigateInTimeline, isAgentBuilderEnabled, agentBuilder, agentId]);
+  }, [canUseTimeline, investigateInTimeline, isAgentBuilderEnabled, agentBuilder]);
 };

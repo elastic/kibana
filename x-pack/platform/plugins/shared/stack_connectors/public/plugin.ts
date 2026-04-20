@@ -49,6 +49,7 @@ export class StackConnectorsPublicPlugin
       registerConnectorTypesFromSpecs({
         connectorTypeRegistry: triggersActionsUi.actionTypeRegistry,
         uiSettingsPromise: core.getStartServices().then(([coreStart]) => coreStart.uiSettings),
+        isEarsEnabled: actions.isEarsEnabled,
       });
     }
   }

@@ -11,7 +11,7 @@ import { useGetWatchlistFormData } from './use_get_watchlist_form_data';
 import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
 
@@ -66,16 +66,15 @@ export const useEditWatchlistFormState = ({
     }
   }, [normalizedWatchlistId]);
 
-  const isNameChanged = watchlist.name.trim() !== initialWatchlist.name.trim();
-  const { isNameInvalid } = getWatchlistNameValidation(watchlist.name, isNameChanged);
-
   const isMissingId = !normalizedWatchlistId;
   const hasChanges =
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
     watchlist.description?.trim() !== initialWatchlist.description?.trim() ||
     watchlist.riskModifier !== initialWatchlist.riskModifier ||
     JSON.stringify(watchlist.entitySources) !== JSON.stringify(initialWatchlist.entitySources);
-  const isDisabled = isMissingId || isNameInvalid || !hasChanges;
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const isDisabled =
+    isMissingId || !watchlist.name.trim() || !hasChanges || isNameTooLong || isDescriptionTooLong;
 
   return {
     watchlist,
@@ -83,7 +82,8 @@ export const useEditWatchlistFormState = ({
     ruleBasedSourceIds: ruleBasedSourceIds ?? {},
     isEditMode: true,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
     setWatchlistField,
   };
 };

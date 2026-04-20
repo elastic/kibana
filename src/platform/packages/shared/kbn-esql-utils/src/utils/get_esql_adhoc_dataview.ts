@@ -87,9 +87,8 @@ export async function getESQLAdHocDataview({
   if (timeFieldCache.has(query)) {
     timeFieldName = await timeFieldCache.get(query);
   } else if (http) {
-    const encodedQuery = encodeURIComponent(query);
     const pendingRequest = http
-      .get(`${TIMEFIELD_ROUTE}${encodedQuery}`)
+      .post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query }) })
       .then((response) => (response as { timeField?: string } | undefined)?.timeField)
       .catch((error) => {
         // eslint-disable-next-line no-console

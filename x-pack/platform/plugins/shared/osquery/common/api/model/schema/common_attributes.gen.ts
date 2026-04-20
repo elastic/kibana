@@ -110,7 +110,7 @@ export type SavedQueryDescriptionOrUndefined = z.infer<typeof SavedQueryDescript
 export const SavedQueryDescriptionOrUndefined = SavedQueryDescription.nullable();
 
 /**
- * The ID of the pack you want to run, retrieve, update, or delete.
+ * The ID of the pack.
  */
 export type PackId = z.infer<typeof PackId>;
 export const PackId = z.string();
@@ -156,6 +156,27 @@ export const ECSMapping = z.object({}).catchall(ECSMappingItem);
 
 export type ECSMappingOrUndefined = z.infer<typeof ECSMappingOrUndefined>;
 export const ECSMappingOrUndefined = ECSMapping.nullable();
+
+/**
+ * ECS mapping item in saved-object storage format (key-value pair).
+ */
+export type ECSMappingArrayItem = z.infer<typeof ECSMappingArrayItem>;
+export const ECSMappingArrayItem = z.object({
+  /**
+   * The ECS field name.
+   */
+  key: z.string().optional(),
+  value: ECSMappingItem.optional(),
+});
+
+/**
+ * ECS mapping in saved-object storage format (array of key-value pairs). The find and copy pack endpoints return this format. The read endpoint returns object format (ECSMapping).
+ */
+export type ECSMappingArray = z.infer<typeof ECSMappingArray>;
+export const ECSMappingArray = z.array(ECSMappingArrayItem);
+
+export type ECSMappingArrayOrUndefined = z.infer<typeof ECSMappingArrayOrUndefined>;
+export const ECSMappingArrayOrUndefined = ECSMappingArray.nullable();
 
 export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
 export const ArrayQueriesItem = z.object({

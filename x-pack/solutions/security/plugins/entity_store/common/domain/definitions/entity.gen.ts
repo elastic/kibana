@@ -16,41 +16,130 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * One relationship direction: a dynamic `raw_identifiers` object (ECS-style dotted keys → string arrays, no enumerated sub-properties) and canonical target EUIDs under `ids`.
+ */
+export type EntityRelationship = z.infer<typeof EntityRelationship>;
+export const EntityRelationship = z
+  .object({
+    raw_identifiers: z
+      .object({
+        'entity.id': z.array(z.string()).optional(),
+        'host.id': z.array(z.string()).optional(),
+        'host.name': z.array(z.string()).optional(),
+        'user.email': z.array(z.string()).optional(),
+        'user.id': z.array(z.string()).optional(),
+        'user.name': z.array(z.string()).optional(),
+        'service.name': z.array(z.string()).optional(),
+      })
+      .strict()
+      .optional(),
+    /**
+     * Target entity EUIDs for this relationship; used for graph LOOKUP JOIN and DSL filters.
+     */
+    ids: z.array(z.string()).optional(),
+  })
+  .strict();
+
+/**
+ * Internal metadata attached to an entity by the engine that produced it.
+ */
 export type EngineMetadata = z.infer<typeof EngineMetadata>;
 export const EngineMetadata = z
   .object({
+    /**
+     * The engine type that produced this entity record.
+     */
     Type: z.string().optional(),
   })
   .strict();
 
+/**
+ * The risk level classification of an entity.
+ */
 export type EntityRiskLevels = z.infer<typeof EntityRiskLevels>;
 export const EntityRiskLevels = z.enum(['Unknown', 'Low', 'Moderate', 'High', 'Critical']);
 export type EntityRiskLevelsEnum = typeof EntityRiskLevels.enum;
 export const EntityRiskLevelsEnum = EntityRiskLevels.enum;
 
+/**
+ * Core entity fields shared across all entity types.
+ */
 export type EntityField = z.infer<typeof EntityField>;
 export const EntityField = z
   .object({
+    /**
+     * Unique identifier for this entity.
+     */
     id: z.string().optional(),
+    /**
+     * Human-readable name of the entity.
+     */
     name: z.string().optional(),
+    /**
+     * The entity type.
+     */
     type: z.string().optional(),
+    /**
+     * Optional sub-type classification for the entity.
+     */
     sub_type: z.string().optional(),
+    /**
+     * Sources that produced this entity record.
+     */
     source: z.array(z.string()).optional(),
+    /**
+     * Schema version of the entity record.
+     */
     schema_version: z.string().optional(),
+    /**
+     * URL associated with the entity.
+     */
     url: z.string().optional(),
     EngineMetadata: EngineMetadata.optional(),
+    /**
+     * Boolean flags describing characteristics of the entity.
+     */
     attributes: z
       .object({
         /**
          * Watchlist identifiers the entity belongs to (v2).
          */
         watchlists: z.array(z.string()).optional(),
+        /**
+         * Whether the entity is classified as an asset.
+         */
         asset: z.boolean().optional(),
+        /**
+         * Whether the entity is managed (for example, via a directory service).
+         */
         managed: z.boolean().optional(),
+        /**
+         * Whether multi-factor authentication is enabled for the entity.
+         */
         mfa_enabled: z.boolean().optional(),
+        /**
+         * Storage tier or class assigned to a storage resource (e.g. hot, warm, cold, standard, archive).
+         */
+        storage_class: z.string().optional(),
+        /**
+         * Action-level permissions granted to this entity (not roles or groups).
+         */
+        permissions: z.array(z.string()).optional(),
+        /**
+         * Known redirect URIs or URLs (e.g. OAuth application callbacks).
+         */
+        known_redirects: z.array(z.string()).optional(),
+        /**
+         * OAuth consent restriction (e.g. admin_only, verified_only, unrestricted).
+         */
+        oauth_consent_restriction: z.string().optional(),
       })
       .strict()
       .optional(),
+    /**
+     * Behavioral signals observed for the entity.
+     */
     behaviors: z
       .object({
         /**
@@ -58,35 +147,81 @@ export const EntityField = z
          */
         rule_names: z.array(z.string()).optional(),
         /**
-         * ML anomaly job identifiers (v2).
+         * Machine learning anomaly job identifiers (v2).
          */
         anomaly_job_ids: z.array(z.string()).optional(),
       })
       .strict()
       .optional(),
+    /**
+     * Timestamps tracking the entity lifecycle.
+     */
     lifecycle: z
       .object({
+        /**
+         * When the entity was first observed.
+         */
         first_seen: z.string().datetime().optional(),
+        /**
+         * When the entity was last observed.
+         */
         last_seen: z.string().datetime().optional(),
+        /**
+         * When the entity last generated activity.
+         */
         last_activity: z.string().datetime().optional(),
       })
       .strict()
       .optional(),
+    /**
+     * Connections between this entity and other entities.
+     */
     relationships: z
       .object({
-        communicates_with: z.array(z.string()).optional(),
-        depends_on: z.array(z.string()).optional(),
-        owns: z.array(z.string()).optional(),
-        accesses_frequently: z.array(z.string()).optional(),
-        accesses_infrequently: z.array(z.string()).optional(),
-        owns_inferred: z.array(z.string()).optional(),
-        supervises: z.array(z.string()).optional(),
+        /**
+         * Entities this entity administers (for example, a user who is an admin of a service).
+         */
+        administers: EntityRelationship.optional(),
+        /**
+         * Entities this entity communicates with.
+         */
+        communicates_with: EntityRelationship.optional(),
+        /**
+         * Entities this entity depends on.
+         */
+        depends_on: EntityRelationship.optional(),
+        /**
+         * Entities inferred to be owned by this entity.
+         */
+        owns_inferred: EntityRelationship.optional(),
+        /**
+         * Entities this entity accesses infrequently.
+         */
+        accesses_infrequently: EntityRelationship.optional(),
+        /**
+         * Entities this entity accesses frequently.
+         */
+        accesses_frequently: EntityRelationship.optional(),
+        /**
+         * Entities owned by this entity.
+         */
+        owns: EntityRelationship.optional(),
+        /**
+         * Entities supervised by this entity.
+         */
+        supervises: EntityRelationship.optional(),
+        /**
+         * Resolution metadata linking this entity to another.
+         */
         resolution: z
           .object({
             /**
              * entity.id of the entity this one resolves to
              */
             resolved_to: z.string().optional(),
+            /**
+             * Aggregated risk score for the resolution group.
+             */
             risk: z
               .object({
                 /**
@@ -110,6 +245,9 @@ export const EntityField = z
       })
       .strict()
       .optional(),
+    /**
+     * Risk scoring information for the entity.
+     */
     risk: z
       .object({
         /**
@@ -143,17 +281,47 @@ export const AssetCriticalityLevel = z.enum([
 export type AssetCriticalityLevelEnum = typeof AssetCriticalityLevel.enum;
 export const AssetCriticalityLevelEnum = AssetCriticalityLevel.enum;
 
+/**
+ * Asset metadata associated with the entity.
+ */
 export type Asset = z.infer<typeof Asset>;
 export const Asset = z
   .object({
+    /**
+     * Unique identifier for the asset.
+     */
     id: z.string().optional(),
+    /**
+     * Human-readable asset name.
+     */
     name: z.string().optional(),
+    /**
+     * The owner of the asset.
+     */
     owner: z.string().optional(),
+    /**
+     * Serial number of the asset.
+     */
     serial_number: z.string().optional(),
+    /**
+     * Model name or number.
+     */
     model: z.string().optional(),
+    /**
+     * Vendor or manufacturer.
+     */
     vendor: z.string().optional(),
+    /**
+     * Deployment environment (for example, production, staging).
+     */
     environment: z.string().optional(),
-    criticality: AssetCriticalityLevel.optional(),
+    /**
+     * The criticality level assigned to this asset.
+     */
+    criticality: AssetCriticalityLevel.nullable().optional(),
+    /**
+     * Business unit the asset belongs to.
+     */
     business_unit: z.string().optional(),
   })
   .strict();
@@ -179,29 +347,68 @@ export const EntityRiskSummary = z
   })
   .strict();
 
+/**
+ * An entity record representing a user.
+ */
 export type UserEntity = z.infer<typeof UserEntity>;
 export const UserEntity = z
   .object({
+    /**
+     * The time the entity record was last updated.
+     */
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField.optional(),
+    /**
+     * Elastic Common Schema (ECS) user fields collected on the entity.
+     */
     user: z
       .object({
+        /**
+         * Observed full names of the user.
+         */
         full_name: z.array(z.string()).optional(),
+        /**
+         * Observed user domains.
+         */
         domain: z.array(z.string()).optional(),
+        /**
+         * Observed roles assigned to the user.
+         */
         roles: z.array(z.string()).optional(),
+        /**
+         * Primary user name.
+         */
         name: z.string().optional(),
+        /**
+         * Observed user identifiers.
+         */
         id: z.array(z.string()).optional(),
+        /**
+         * Observed email addresses.
+         */
         email: z.array(z.string()).optional(),
+        /**
+         * Observed user hashes.
+         */
         hash: z.array(z.string()).optional(),
         risk: EntityRiskSummary.optional(),
       })
       .strict()
       .optional(),
     asset: Asset.optional(),
+    /**
+     * Custom key-value labels attached to the entity.
+     */
     labels: z.object({}).catchall(z.unknown()).optional(),
+    /**
+     * Tags attached to the entity.
+     */
     tags: z.array(z.string()).optional(),
     event: z
       .object({
+        /**
+         * When the event was ingested into Elasticsearch.
+         */
         ingested: z.string().datetime().optional(),
       })
       .strict()
@@ -209,23 +416,56 @@ export const UserEntity = z
   })
   .strict();
 
+/**
+ * An entity record representing a host.
+ */
 export type HostEntity = z.infer<typeof HostEntity>;
 export const HostEntity = z
   .object({
+    /**
+     * The time the entity record was last updated.
+     */
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField.optional(),
+    /**
+     * Elastic Common Schema (ECS) host fields collected on the entity.
+     */
     host: z
       .object({
+        /**
+         * Observed hostnames.
+         */
         hostname: z.array(z.string()).optional(),
+        /**
+         * Observed host domains.
+         */
         domain: z.array(z.string()).optional(),
+        /**
+         * Observed IP addresses.
+         */
         ip: z.array(z.string()).optional(),
+        /**
+         * Primary host name.
+         */
         name: z.string().optional(),
+        /**
+         * Observed host identifiers.
+         */
         id: z.array(z.string()).optional(),
+        /**
+         * Observed host types.
+         */
         type: z.array(z.string()).optional(),
+        /**
+         * Observed MAC addresses.
+         */
         mac: z.array(z.string()).optional(),
+        /**
+         * Observed CPU architectures.
+         */
         architecture: z.array(z.string()).optional(),
         /**
-         * ECS host.os fields materialized on the entity latest index (v2).
+         * Elastic Common Schema (ECS) host.os fields collected on the entity latest index (v2).
          */
         os: z
           .object({
@@ -244,10 +484,19 @@ export const HostEntity = z
       .strict()
       .optional(),
     asset: Asset.optional(),
+    /**
+     * Custom key-value labels attached to the entity.
+     */
     labels: z.object({}).catchall(z.unknown()).optional(),
+    /**
+     * Tags attached to the entity.
+     */
     tags: z.array(z.string()).optional(),
     event: z
       .object({
+        /**
+         * When the event was ingested into Elasticsearch.
+         */
         ingested: z.string().datetime().optional(),
       })
       .strict()
@@ -255,38 +504,92 @@ export const HostEntity = z
   })
   .strict();
 
+/**
+ * An entity record representing a service.
+ */
 export type ServiceEntity = z.infer<typeof ServiceEntity>;
 export const ServiceEntity = z
   .object({
+    /**
+     * The time the entity record was last updated.
+     */
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField.optional(),
+    /**
+     * Elastic Common Schema (ECS) service fields collected on the entity.
+     */
     service: z
       .object({
+        /**
+         * Primary service name.
+         */
         name: z.string().optional(),
+        /**
+         * Service address.
+         */
         address: z.string().optional(),
+        /**
+         * Service environment (for example, production, staging).
+         */
         environment: z.string().optional(),
+        /**
+         * Ephemeral identifier of the service.
+         */
         ephemeral_id: z.string().optional(),
+        /**
+         * Unique identifier of the service.
+         */
         id: z.string().optional(),
+        /**
+         * Node information for the service.
+         */
         node: z
           .object({
+            /**
+             * Node name.
+             */
             name: z.string().optional(),
+            /**
+             * Node role.
+             */
             role: z.string().optional(),
+            /**
+             * Node roles.
+             */
             roles: z.array(z.string()).optional(),
           })
           .strict()
           .optional(),
+        /**
+         * Current state of the service.
+         */
         state: z.string().optional(),
+        /**
+         * Service type.
+         */
         type: z.string().optional(),
+        /**
+         * Service version.
+         */
         version: z.string().optional(),
         risk: EntityRiskSummary.optional(),
       })
       .strict()
       .optional(),
     asset: Asset.optional(),
+    /**
+     * Custom key-value labels attached to the entity.
+     */
     labels: z.object({}).catchall(z.unknown()).optional(),
+    /**
+     * Tags attached to the entity.
+     */
     tags: z.array(z.string()).optional(),
     event: z
       .object({
+        /**
+         * When the event was ingested into Elasticsearch.
+         */
         ingested: z.string().datetime().optional(),
       })
       .strict()
@@ -294,12 +597,21 @@ export const ServiceEntity = z
   })
   .strict();
 
+/**
+ * A generic entity record that can represent cloud resources, orchestrator workloads, or other entity types not covered by user, host, or service.
+ */
 export type GenericEntity = z.infer<typeof GenericEntity>;
 export const GenericEntity = z
   .object({
+    /**
+     * The time the entity record was last updated.
+     */
     '@timestamp': z.string().datetime().optional(),
     entity: EntityField.optional(),
     asset: Asset.optional(),
+    /**
+     * Elastic Common Schema (ECS) cloud fields for cloud-hosted entities.
+     */
     cloud: z
       .object({
         account: z
@@ -341,6 +653,9 @@ export const GenericEntity = z
       })
       .strict()
       .optional(),
+    /**
+     * Elastic Common Schema (ECS) orchestrator fields for container-orchestrated entities.
+     */
     orchestrator: z
       .object({
         api_version: z.string().optional(),
@@ -387,6 +702,9 @@ export const GenericEntity = z
   })
   .strict();
 
+/**
+ * An entity record from the Entity Store. The `entity` namespace is a root-level field in the latest index, unlike source logs where it is nested under `host`, `user`, or `service`.
+ */
 export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity, GenericEntity]);
 
 export type Entity = z.infer<typeof EntityInternal>;

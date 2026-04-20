@@ -88,14 +88,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/annotations/actions/save_action.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/save_modal.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/save_modal.tsx"
           }
         ],
         "returnComment": [],
@@ -317,14 +309,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/top_nav_config.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/save_discover_session/on_save_discover_session.tsx"
           },
           {
             "plugin": "dashboard",

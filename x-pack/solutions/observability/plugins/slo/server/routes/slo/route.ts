@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { batchGetCompositeSLORoute } from './composite_slo/batch_get_composite_slo';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
 import { createCompositeSLORoute } from './composite_slo/create_composite_slo';
@@ -34,6 +35,8 @@ import { inspectSLORoute } from './inspect_slo';
 import { getPurgeInstancesStatusRoute, purgeInstancesRoute } from './purge_instances';
 import { resetSLORoute } from './reset_slo';
 import { repairSLORoute } from './repair_slo';
+import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
+import { getCompositeSLOSuggestionsRoute } from './composite_slo/get_composite_slo_suggestions';
 import { updateCompositeSLORoute } from './composite_slo/update_composite_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
@@ -94,5 +97,8 @@ export const getSloRouteRepository = ({
     ...(isCompositeSloEnabled ? findCompositeSLORoute : {}),
     ...(isCompositeSloEnabled ? updateCompositeSLORoute : {}),
     ...(isCompositeSloEnabled ? deleteCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? fetchCompositeHistoricalSummaryRoute : {}),
+    ...(isCompositeSloEnabled ? batchGetCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? getCompositeSLOSuggestionsRoute : {}),
   };
 };

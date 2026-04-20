@@ -16,6 +16,7 @@ import { DataRetentionTab } from './data_retention';
 import { useSettingsBreadcrumbs } from './use_settings_breadcrumbs';
 import { ManagePrivateLocations } from './private_locations/manage_private_locations';
 import { AdvancedSettingsForm } from './advanced/advanced_settings_form';
+import { RemoteClustersForm } from './remote_clusters/remote_clusters_form';
 
 export const SettingsPage = () => {
   useSettingsBreadcrumbs();
@@ -42,6 +43,12 @@ export const SettingsPage = () => {
         return (
           <EuiPanel hasShadow={false} hasBorder={true}>
             <AdvancedSettingsForm />
+          </EuiPanel>
+        );
+      case 'remote-clusters':
+        return (
+          <EuiPanel hasShadow={false} hasBorder={true}>
+            <RemoteClustersForm />
           </EuiPanel>
         );
       default:

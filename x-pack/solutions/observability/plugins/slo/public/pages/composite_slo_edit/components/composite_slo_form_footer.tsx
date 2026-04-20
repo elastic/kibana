@@ -42,7 +42,7 @@ export function CompositeSloFormFooter({ compositeSloId, isEditMode }: Props) {
       await createCompositeSlo({ compositeSlo: values });
     }
 
-    navigateToUrl(basePath.prepend(paths.slos));
+    navigateToUrl(basePath.prepend(paths.slosComposite));
   };
 
   const isLoading = isCreating || isUpdating;

@@ -6,7 +6,7 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -24,11 +24,12 @@ export const initComponent = memoize(
     SingleMetricViewerComponent: SingleMetricViewerSharedComponent
   ) => {
     return React.memo(
-      (props: PersistableStateAttachmentViewProps) => {
-        const { persistableStateAttachmentState, caseData } = props;
+      (props: UnifiedValueAttachmentViewProps) => {
+        const { caseData } = props;
+        const attachmentState = props.data.state as Record<string, unknown>;
 
         const inputProps = transformTimeRangeOut(
-          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState
+          attachmentState as unknown as SingleMetricViewerEmbeddableState
         );
 
         const dataFormatter = fieldFormats.deserialize({
@@ -86,11 +87,7 @@ export const initComponent = memoize(
           </>
         );
       },
-      (prevProps, nextProps) =>
-        deepEqual(
-          prevProps.persistableStateAttachmentState,
-          nextProps.persistableStateAttachmentState
-        )
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
     );
   }
 );

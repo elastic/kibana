@@ -30,7 +30,7 @@ import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { Row, RowMetadata } from './row';
-import { parseDuration } from '../../stream_detail_lifecycle/helpers/helpers';
+import { parseDuration } from '../../../../../util/parse_duration';
 
 interface Setting {
   invalid: boolean;

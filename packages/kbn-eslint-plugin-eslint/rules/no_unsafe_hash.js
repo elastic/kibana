@@ -27,14 +27,6 @@ const ALLOWED_UNSAFE_HASHES = [
     path: 'src/platform/packages/shared/kbn-babel-register/cache/lmdb_cache.js',
     algorithms: ['sha1'],
   },
-  {
-    path: 'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/report_failures_to_file.ts',
-    algorithms: ['md5'],
-  },
-  {
-    path: 'packages/kbn-failed-test-reporter-cli/failed_tests_reporter/generate_scout_test_failure_artifacts.ts',
-    algorithms: ['md5'],
-  },
 ];
 
 const allowedAlgorithms = ['sha256', 'sha3-256', 'sha512'];

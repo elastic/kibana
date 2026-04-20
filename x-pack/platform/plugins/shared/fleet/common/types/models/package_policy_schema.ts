@@ -95,6 +95,7 @@ const PackagePolicyStreamsSchema = {
 
 export const PackagePolicyInputsSchema = {
   id: schema.maybe(schema.string()),
+  name: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
   enabled: schema.boolean(),

@@ -9,8 +9,10 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
+  EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -31,10 +33,16 @@ import { getStepPanelColour } from '../../../utils';
 import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { CreateStepButton } from '../../../create_step_button';
+import { EmptyBranchDropTarget } from '../../empty_branch_drop_target';
 import { WhereBlockConfiguration } from './configuration';
 import { ConnectedNodesList } from './connected_nodes_list';
 import { NestedChildrenProcessingSummary } from './nested_children_processing_summary';
 import { WhereBlockSummary } from './summary';
+
+// Maximum condition nesting depth allowed in interactive mode (matches validate_structural check).
+// Level is 0-indexed, so level >= 2 means a child condition would reach depth 3.
+export const MAX_INTERACTIVE_NESTING_LEVEL = 2;
 
 export const WhereBlock = (props: StepConfigurationProps) => {
   const { stepRef, stepUnderEdit, rootLevelMap, stepsProcessingSummaryMap, level } = props;
@@ -55,14 +63,22 @@ export const WhereBlock = (props: StepConfigurationProps) => {
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
   const [isExpanded, toggle] = useToggle(true);
 
-  const childSteps = useInteractiveModeSelector((state) =>
-    state.context.stepRefs.filter(
+  const { childSteps, ifBranchSteps, elseBranchSteps } = useInteractiveModeSelector((state) => {
+    const allChildren = state.context.stepRefs.filter(
       (ref) => ref.getSnapshot().context.step.parentId === step.customIdentifier
-    )
-  );
-  const { filterSimulationByCondition, clearSimulationConditionFilter } =
+    );
+    return {
+      childSteps: allChildren,
+      ifBranchSteps: allChildren.filter((ref) => ref.getSnapshot().context.step.branch !== 'else'),
+      elseBranchSteps: allChildren.filter(
+        (ref) => ref.getSnapshot().context.step.branch === 'else'
+      ),
+    };
+  });
+  const { filterSimulationByCondition, clearSimulationConditionFilter, reorderStepByDragDrop } =
     useStreamEnrichmentEvents();
   const hasChildren = childSteps.length > 0;
+  const hasElseBranch = elseBranchSteps.length > 0;
 
   const filteringEnabled = useConditionFilteringEnabled(step.customIdentifier);
 
@@ -196,22 +212,104 @@ export const WhereBlock = (props: StepConfigurationProps) => {
         {hasChildren && isExpanded && (
           <>
             <EuiSpacer size="s" />
-            <ConnectedNodesList>
-              {childSteps.map((childStep, index) => (
-                <li key={childStep.id}>
-                  <StepsListItem
-                    stepRef={childStep}
-                    level={level + 1}
-                    stepUnderEdit={stepUnderEdit}
-                    rootLevelMap={rootLevelMap}
-                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                    isFirstStepInLevel={index === 0}
-                    isLastStepInLevel={index === childSteps.length - 1}
-                    readOnly={props.readOnly}
-                  />
-                </li>
-              ))}
-            </ConnectedNodesList>
+            {ifBranchSteps.length > 0 && (
+              <ConnectedNodesList>
+                {ifBranchSteps.map((childStep, index) => (
+                  <li key={childStep.id}>
+                    <StepsListItem
+                      stepRef={childStep}
+                      level={level + 1}
+                      stepUnderEdit={stepUnderEdit}
+                      rootLevelMap={rootLevelMap}
+                      stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                      isFirstStepInLevel={index === 0}
+                      isLastStepInLevel={index === ifBranchSteps.length - 1}
+                      readOnly={props.readOnly}
+                    />
+                  </li>
+                ))}
+              </ConnectedNodesList>
+            )}
+            {(hasElseBranch || !props.readOnly) && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiFlexGroup
+                  gutterSize="s"
+                  alignItems="center"
+                  css={css`
+                    position: relative;
+                    z-index: 1;
+                  `}
+                >
+                  <EuiFlexItem
+                    grow={false}
+                    css={css`
+                      width: ${euiTheme.size.l};
+                    `}
+                  >
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText
+                      size="s"
+                      css={css`
+                        font-weight: ${euiTheme.font.weight.bold};
+                      `}
+                    >
+                      {i18n.translate(
+                        'xpack.streams.streamDetailView.managementTab.enrichment.elseBranchLabel',
+                        { defaultMessage: 'ELSE' }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                  {!props.readOnly && (
+                    <EuiFlexItem grow={false}>
+                      <CreateStepButton
+                        parentId={step.customIdentifier}
+                        branch="else"
+                        mode="inline"
+                        nestingDisabled={level >= MAX_INTERACTIVE_NESTING_LEVEL}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem>
+                    <EuiHorizontalRule margin="none" />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {hasElseBranch ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <ConnectedNodesList>
+                      {elseBranchSteps.map((childStep, index) => (
+                        <li key={childStep.id}>
+                          <StepsListItem
+                            stepRef={childStep}
+                            level={level + 1}
+                            stepUnderEdit={stepUnderEdit}
+                            rootLevelMap={rootLevelMap}
+                            stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                            isFirstStepInLevel={index === 0}
+                            isLastStepInLevel={index === elseBranchSteps.length - 1}
+                            readOnly={props.readOnly}
+                          />
+                        </li>
+                      ))}
+                    </ConnectedNodesList>
+                  </>
+                ) : (
+                  !props.readOnly && (
+                    <>
+                      <EuiSpacer size="s" />
+                      <EmptyBranchDropTarget
+                        parentId={step.customIdentifier}
+                        branch="else"
+                        onDrop={reorderStepByDragDrop}
+                      />
+                    </>
+                  )
+                )}
+              </>
+            )}
           </>
         )}
       </EuiPanel>

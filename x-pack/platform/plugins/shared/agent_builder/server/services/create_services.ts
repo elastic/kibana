@@ -15,7 +15,7 @@ import type {
 } from './types';
 import { ToolsService } from './tools';
 import { AgentsService } from './agents';
-import { RunnerFactoryImpl } from './runner';
+import { RunnerFactoryImpl } from './execution/runner';
 import { ConversationServiceImpl } from './conversation';
 import { type AttachmentService, createAttachmentService } from './attachments';
 import { HooksService } from './hooks';
@@ -162,6 +162,7 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       config: this.config,
+      getToolRegistry: tools.getRegistry,
     });
 
     const runnerFactory = new RunnerFactoryImpl({

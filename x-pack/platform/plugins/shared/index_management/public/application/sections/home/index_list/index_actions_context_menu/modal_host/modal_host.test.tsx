@@ -11,17 +11,17 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ModalHost, type ModalHostHandles } from './modal_host';
 import { getIndexDetailsLink } from '../../../../../services/routing';
-import { notificationService } from '../../../../../services/notification';
+import { AppContextProvider } from '../../../../../app_context';
+import type { AppDependencies } from '../../../../../app_context';
+import { NotificationService } from '../../../../../services/notification';
 
 jest.mock('../../../../../services/routing', () => ({
   ...jest.requireActual('../../../../../services/routing'),
   getIndexDetailsLink: jest.fn().mockReturnValue('/mocked-link'),
 }));
 
-jest.mock('../../../../../services/notification', () => ({
-  ...jest.requireActual('../../../../../services/notification'),
-  notificationService: { showSuccessToast: jest.fn(), showDangerToast: jest.fn() },
-}));
+let notificationService: NotificationService;
+let showSuccessToastSpy: jest.SpyInstance;
 
 jest.mock(
   '../../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container',
@@ -63,12 +63,25 @@ const baseProps: React.ComponentProps<typeof ModalHost> = {
 };
 
 const renderWithI18n = (ui: React.ReactElement) => {
-  return render(<I18nProvider>{ui}</I18nProvider>);
+  const ctx = {
+    services: {
+      notificationService,
+    },
+  } as unknown as AppDependencies;
+
+  return render(
+    <I18nProvider>
+      <AppContextProvider value={ctx}>{ui}</AppContextProvider>
+    </I18nProvider>
+  );
 };
 
 describe('ModalHost', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const toasts = { add: jest.fn() } as any;
+    notificationService = new NotificationService(toasts);
+    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
   });
 
   describe('WHEN rendering and opening modals', () => {
@@ -277,7 +290,7 @@ describe('ModalHost', () => {
 
           expect(getIndexDetailsLink).toHaveBeenCalled();
           expect(baseProps.history.push).toHaveBeenCalledWith('/mocked-link');
-          expect(notificationService.showSuccessToast).toHaveBeenCalled();
+          expect(showSuccessToastSpy).toHaveBeenCalled();
         });
       });
 

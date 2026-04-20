@@ -1,0 +1,100 @@
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          pageModeExample:
+            summary: "Page mode response with host entities"
+            description: "A paginated list of host entities sorted by timestamp in descending order, including query inspection data."
+            value:
+              records:
+                - "@timestamp": "2026-04-10T08:30:00.000Z"
+                  entity:
+                    id: "host:web-server-prod-01"
+                    name: "web-server-prod-01"
+                    type: "host"
+                    source:
+                      - "logs"
+                    attributes:
+                      asset: true
+                      managed: true
+                    lifecycle:
+                      first_seen: "2026-01-15T10:00:00.000Z"
+                      last_activity: "2026-04-10T08:30:00.000Z"
+                    risk:
+                      calculated_level: "Moderate"
+                      calculated_score: 47.5
+                      calculated_score_norm: 47.5
+                  host:
+                    name: "web-server-prod-01"
+                    hostname:
+                      - "web-server-prod-01.example.com"
+                    ip:
+                      - "10.0.1.42"
+                    os:
+                      name: "Ubuntu"
+                      type: "linux"
+                  asset:
+                    criticality: "high_impact"
+                    environment: "production"
+              total: 1
+              page: 1
+              per_page: 10
+              inspect:
+                dsl:
+                  - '{"index":["entities-latest-default"],"body":{"terms":{"entity.EngineMetadata.Type":["host"]}}}'
+                response:
+                  - '{"took":1,"timed_out":false,"hits":{"total":{"value":1,"relation":"eq"}}}'
+          searchAfterModeExample:
+            summary: "Search-after mode response"
+            description: "A cursor-based response with entities and a search_after token for the next page."
+            value:
+              entities:
+                - "@timestamp": "2026-04-10T08:30:00.000Z"
+                  entity:
+                    id: "user:jane.doe@example.com"
+                    name: "jane.doe"
+                    type: "user"
+                  user:
+                    name: "jane.doe"
+                    email:
+                      - "jane.doe@example.com"
+              nextSearchAfter:
+                - 1712736600000
+                - 1
+          emptyResultExample:
+            summary: "Empty result"
+            description: "No entities matched the query."
+            value:
+              records: []
+              total: 0
+              page: 1
+              per_page: 10
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          invalidFilterExample:
+            summary: "Invalid filter"
+            description: "The provided Kibana Query Language filter could not be parsed."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Invalid filter: Expected \"(\", \"{\", value, whitespace but \":\" found.\ninvalid :: query\n---------^"
+          mixedModesExample:
+            summary: "Mixed pagination modes"
+            description: "Cannot combine page-based pagination with cursor-based pagination in the same request."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request query]: Cannot combine page/per_page with searchAfter"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=%40timestamp&sort_order=desc"
+  - lang: Console
+    source: |
+      GET kbn://api/security/entity_store/entities?entity_types=host&page=1&per_page=10&sort_field=@timestamp&sort_order=desc

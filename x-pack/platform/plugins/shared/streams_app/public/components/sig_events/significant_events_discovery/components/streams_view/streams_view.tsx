@@ -6,19 +6,12 @@
  */
 
 import type { EuiSearchBarProps, Query } from '@elastic/eui';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSearchBar,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
-import { TaskStatus } from '@kbn/streams-schema';
+import { OnboardingStep, TaskStatus } from '@kbn/streams-schema';
 import pMap from 'p-map';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -34,10 +27,9 @@ import { useTaskPolling } from '../../../../../hooks/use_task_polling';
 import { getFormattedError } from '../../../../../util/errors';
 import { StreamsAppSearchBar } from '../../../../streams_app_search_bar';
 import { useOnboardingStatusUpdateQueue } from '../../hooks/use_onboarding_status_update_queue';
-import { InsightsConnectorPopover } from './insights_connector_popover';
-import { OnboardingConfigPopover } from './onboarding_config_popover';
+import { GenerateSplitButton } from './generate_split_button';
+import { InsightsSplitButton } from './insights_split_button';
 import {
-  DISCOVER_INSIGHTS_BUTTON_LABEL,
   getInsightsCompleteToastTitle,
   INSIGHTS_COMPLETE_TOAST_VIEW_BUTTON,
   INSIGHTS_SCHEDULING_FAILURE_TITLE,
@@ -48,10 +40,6 @@ import {
 } from './translations';
 import { StreamsTreeTable } from './tree_table';
 import { useFetchStreams } from '../../hooks/use_fetch_streams';
-
-const onboardingButtonStyle = css`
-  min-width: 160px;
-`;
 
 const datePickerStyle = css`
   .euiFormControlLayout,
@@ -81,15 +69,14 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     featuresConnectors,
     queriesConnectors,
     discoveryConnectors,
-    genAiConnectors,
+    allConnectors,
+    connectorError,
     isConnectorCatalogUnavailable,
     discoveryConnectorOverride,
     setDiscoveryConnectorOverride,
     displayDiscoveryConnectorId,
     onboardingConfig,
     setOnboardingConfig,
-    displayConnectors,
-    dynamicButtonLabel,
   } = useConnectorConfig();
 
   const streamsListFetch = useFetchStreams({
@@ -237,44 +224,72 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
     });
   }, [onboardingStatusUpdateQueue, processStatusUpdateQueue, streamsListFetch.data]);
 
-  const isStreamActionable = (streamName: string) => {
-    const result = streamOnboardingResultMap[streamName];
-    if (!result) return false;
-    return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
-  };
+  const isStreamActionable = useCallback(
+    (streamName: string) => {
+      const result = streamOnboardingResultMap[streamName];
+      if (!result) return false;
+      return ![TaskStatus.InProgress, TaskStatus.BeingCanceled].includes(result.status);
+    },
+    [streamOnboardingResultMap]
+  );
 
-  const getActionableStreamNames = () =>
-    selectedStreams
-      .filter((item) => isStreamActionable(item.stream.name))
-      .map((item) => item.stream.name);
+  const getActionableStreamNames = useCallback(
+    () =>
+      selectedStreams
+        .filter((item) => isStreamActionable(item.stream.name))
+        .map((item) => item.stream.name),
+    [selectedStreams, isStreamActionable]
+  );
 
-  const bulkScheduleOnboardingTask = async (
-    streamList: string[],
-    options?: ScheduleOnboardingOptions
-  ) => {
-    try {
-      await pMap(
-        streamList,
-        async (streamName) => {
-          await scheduleOnboardingTask(streamName, options);
-        },
-        { concurrency: 10 }
-      );
-    } catch (error) {
-      toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
-    }
+  const bulkScheduleOnboardingTask = useCallback(
+    async (streamList: string[], options?: ScheduleOnboardingOptions) => {
+      try {
+        await pMap(
+          streamList,
+          async (streamName) => {
+            await scheduleOnboardingTask(streamName, options);
+          },
+          { concurrency: 10 }
+        );
+      } catch (error) {
+        toasts.addError(getFormattedError(error), { title: ONBOARDING_SCHEDULING_FAILURE_TITLE });
+      }
 
-    streamList.forEach((streamName) => {
-      onboardingStatusUpdateQueue.add(streamName);
-    });
-    processStatusUpdateQueue();
-  };
+      streamList.forEach((streamName) => {
+        onboardingStatusUpdateQueue.add(streamName);
+      });
+      processStatusUpdateQueue();
+    },
+    [scheduleOnboardingTask, toasts, onboardingStatusUpdateQueue, processStatusUpdateQueue]
+  );
 
-  const onBulkOnboardStreamsClick = async () => {
+  const onBulkOnboardStreamsClick = useCallback(async () => {
     const streamList = getActionableStreamNames();
     setSelectedStreams([]);
     await bulkScheduleOnboardingTask(streamList, onboardingConfig);
-  };
+  }, [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig]);
+
+  const onBulkOnboardStep = useCallback(
+    async (step: OnboardingStep) => {
+      const streamList = getActionableStreamNames();
+      setSelectedStreams([]);
+      await bulkScheduleOnboardingTask(streamList, {
+        steps: [step],
+        connectors: onboardingConfig.connectors,
+      });
+    },
+    [getActionableStreamNames, bulkScheduleOnboardingTask, onboardingConfig.connectors]
+  );
+
+  const onBulkOnboardFeaturesOnly = useCallback(
+    () => onBulkOnboardStep(OnboardingStep.FeaturesIdentification),
+    [onBulkOnboardStep]
+  );
+
+  const onBulkOnboardQueriesOnly = useCallback(
+    () => onBulkOnboardStep(OnboardingStep.QueriesGeneration),
+    [onBulkOnboardStep]
+  );
 
   const onOnboardStreamActionClick = async (streamName: string) => {
     await bulkScheduleOnboardingTask([streamName]);
@@ -301,86 +316,51 @@ export function StreamsView({ refreshUnbackedQueriesCount }: StreamsViewProps) {
           <EuiFlexItem grow={false} css={datePickerStyle}>
             <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <GenerateSplitButton
+              config={onboardingConfig}
+              allConnectors={allConnectors}
+              connectorError={connectorError}
+              featuresResolvedConnectorId={featuresConnectors.resolvedConnectorId}
+              queriesResolvedConnectorId={queriesConnectors.resolvedConnectorId}
+              onConfigChange={setOnboardingConfig}
+              onRun={onBulkOnboardStreamsClick}
+              onRunFeaturesOnly={onBulkOnboardFeaturesOnly}
+              onRunQueriesOnly={onBulkOnboardQueriesOnly}
+              isRunDisabled={
+                selectedStreams.length === 0 ||
+                isConnectorCatalogUnavailable ||
+                featuresConnectors.loading ||
+                queriesConnectors.loading
+              }
+              isConfigDisabled={selectedStreams.length === 0}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <InsightsSplitButton
+              allConnectors={allConnectors}
+              connectorError={connectorError}
+              resolvedConnectorId={discoveryConnectors.resolvedConnectorId}
+              displayConnectorId={displayDiscoveryConnectorId}
+              onConnectorChange={setDiscoveryConnectorOverride}
+              onRun={scheduleInsightsTask}
+              isLoading={isSchedulingInsights || isWaitingForInsightsTask}
+              isDisabled={isConnectorCatalogUnavailable || discoveryConnectors.loading}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiText size="s">
-            {i18n.translate(
-              'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
-              {
-                defaultMessage: '{count} streams',
-                values: { count: streamsListFetch.data?.streams.length ?? 0 },
-              }
-            )}
-          </EuiText>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={onBulkOnboardStreamsClick}
-                  iconType="radar"
-                  disabled={selectedStreams.length === 0 || onboardingConfig.steps.length === 0}
-                  size="xs"
-                  css={onboardingButtonStyle}
-                  data-test-subj="significant_events_onboard_streams_button"
-                >
-                  {dynamicButtonLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <OnboardingConfigPopover
-                  config={onboardingConfig}
-                  displayConnectors={displayConnectors}
-                  connectorList={genAiConnectors?.connectors ?? []}
-                  connectorError={genAiConnectors?.error}
-                  onConfigChange={setOnboardingConfig}
-                  onRun={onBulkOnboardStreamsClick}
-                  isRunDisabled={
-                    selectedStreams.length === 0 ||
-                    isConnectorCatalogUnavailable ||
-                    featuresConnectors.loading ||
-                    queriesConnectors.loading
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="crosshair"
-                  onClick={() => scheduleInsightsTask()}
-                  disabled={isConnectorCatalogUnavailable}
-                  isLoading={isSchedulingInsights || isWaitingForInsightsTask}
-                  data-test-subj="significant_events_discover_insights_button"
-                  size="xs"
-                >
-                  {DISCOVER_INSIGHTS_BUTTON_LABEL}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <InsightsConnectorPopover
-                  displayConnectorId={displayDiscoveryConnectorId}
-                  connectorList={genAiConnectors?.connectors ?? []}
-                  connectorError={genAiConnectors?.error}
-                  onConnectorChange={setDiscoveryConnectorOverride}
-                  onRun={scheduleInsightsTask}
-                  isRunDisabled={
-                    isConnectorCatalogUnavailable ||
-                    isSchedulingInsights ||
-                    isWaitingForInsightsTask ||
-                    discoveryConnectors.loading
-                  }
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.streams.significantEventsDiscovery.streamsTree.streamsCountLabel',
+            {
+              defaultMessage: '{count} streams',
+              values: { count: streamsListFetch.data?.streams.length ?? 0 },
+            }
+          )}
+        </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem>

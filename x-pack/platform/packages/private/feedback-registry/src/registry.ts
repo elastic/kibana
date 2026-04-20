@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { FeedbackRegistryEntry } from '@kbn/feedback-components';
 import {
   DEFAULT_EXPERIENCE_QUESTION_ID,
   DEFAULT_GENERAL_QUESTION_ID,
   DEFAULT_REGISTRY_ID,
 } from './constants';
-import type { FeedbackRegistry, FeedbackRegistryEntry } from './types';
+import type { FeedbackRegistry } from './types';
 
 const feedbackRegistry: FeedbackRegistry = new Map([
   [

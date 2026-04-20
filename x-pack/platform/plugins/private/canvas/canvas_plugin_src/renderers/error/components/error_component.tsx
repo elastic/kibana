@@ -53,6 +53,9 @@ function ErrorComponent({ onLoaded, parentNode, error }: ErrorComponentProps) {
               width: buttonSize,
             }}
             type="warning"
+            aria-label={i18n.translate('xpack.canvas.errorComponent.errorIconAriaLabel', {
+              defaultMessage: 'View error details',
+            })}
           />
         }
         isOpen={isPopoverOpen}

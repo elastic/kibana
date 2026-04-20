@@ -30,10 +30,25 @@ export type OsqueryGetScheduledActionResultsRequestQuery = z.infer<
   typeof OsqueryGetScheduledActionResultsRequestQuery
 >;
 export const OsqueryGetScheduledActionResultsRequestQuery = z.object({
+  /**
+   * The kuery to filter the results by.
+   */
   kuery: KueryOrUndefined.optional(),
+  /**
+   * The page number to return. The default is 1.
+   */
   page: PageOrUndefined.optional(),
+  /**
+   * The number of results to return per page. The default is 20.
+   */
   pageSize: PageSizeOrUndefined.optional(),
+  /**
+   * The field that is used to sort the results.
+   */
   sort: SortOrUndefined.optional(),
+  /**
+   * Specifies the sort order.
+   */
   sortOrder: SortOrderOrUndefined.optional(),
 });
 export type OsqueryGetScheduledActionResultsRequestQueryInput = z.input<
@@ -44,7 +59,13 @@ export type OsqueryGetScheduledActionResultsRequestParams = z.infer<
   typeof OsqueryGetScheduledActionResultsRequestParams
 >;
 export const OsqueryGetScheduledActionResultsRequestParams = z.object({
+  /**
+   * The schedule ID of the scheduled query.
+   */
   scheduleId: z.string(),
+  /**
+   * The execution count for this scheduled query run.
+   */
   executionCount: z.number().int(),
 });
 export type OsqueryGetScheduledActionResultsRequestParamsInput = z.input<
@@ -59,11 +80,29 @@ export type OsqueryGetScheduledQueryResultsRequestQuery = z.infer<
   typeof OsqueryGetScheduledQueryResultsRequestQuery
 >;
 export const OsqueryGetScheduledQueryResultsRequestQuery = z.object({
+  /**
+   * The kuery to filter the results by.
+   */
   kuery: KueryOrUndefined.optional(),
+  /**
+   * The page number to return. The default is 1.
+   */
   page: PageOrUndefined.optional(),
+  /**
+   * The number of results to return per page. The default is 20.
+   */
   pageSize: PageSizeOrUndefined.optional(),
+  /**
+   * The field that is used to sort the results.
+   */
   sort: SortOrUndefined.optional(),
+  /**
+   * Specifies the sort order.
+   */
   sortOrder: SortOrderOrUndefined.optional(),
+  /**
+   * The start date filter (ISO 8601) to narrow down results.
+   */
   startDate: z.string().optional(),
 });
 export type OsqueryGetScheduledQueryResultsRequestQueryInput = z.input<
@@ -74,7 +113,13 @@ export type OsqueryGetScheduledQueryResultsRequestParams = z.infer<
   typeof OsqueryGetScheduledQueryResultsRequestParams
 >;
 export const OsqueryGetScheduledQueryResultsRequestParams = z.object({
+  /**
+   * The schedule ID of the scheduled query.
+   */
   scheduleId: z.string(),
+  /**
+   * The execution count for this scheduled query run.
+   */
   executionCount: z.number().int(),
 });
 export type OsqueryGetScheduledQueryResultsRequestParamsInput = z.input<

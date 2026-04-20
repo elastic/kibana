@@ -163,10 +163,12 @@ export async function runMaintainer({
 
         for (const record of records) {
           const freq =
-            record.accesses_frequently.length > 0 ? record.accesses_frequently.join(', ') : 'none';
+            record.accesses_frequently.ids.length > 0
+              ? record.accesses_frequently.ids.join(', ')
+              : 'none';
           const infreq =
-            record.accesses_infrequently.length > 0
-              ? record.accesses_infrequently.join(', ')
+            record.accesses_infrequently.ids.length > 0
+              ? record.accesses_infrequently.ids.join(', ')
               : 'none';
           logger.info(
             `[${integration.id}] Entity ${record.entityId}: frequently=[${freq}], infrequently=[${infreq}]`

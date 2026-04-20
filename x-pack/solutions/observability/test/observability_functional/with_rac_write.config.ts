@@ -98,6 +98,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         'dateFormat:tz': 'UTC',
         'observability:enableLegacyUptimeApp': true,
       },
+      globalDefaults: {
+        hideAnnouncements: true,
+      },
     },
     testFiles: [resolve(__dirname, './apps/observability')],
     junit: {

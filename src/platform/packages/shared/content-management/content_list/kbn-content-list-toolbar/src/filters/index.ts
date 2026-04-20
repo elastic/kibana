@@ -15,15 +15,18 @@ export {
   type TagFilterProps,
   TagFilterRenderer,
   type TagFilterRendererProps,
-  useTagQueryParser,
 } from './tags';
 export {
   StarredFilter,
   type StarredFilterProps,
   StarredFilterRenderer,
   type StarredFilterRendererProps,
-  useStarredQueryParser,
 } from './starred';
+export {
+  CreatedByFilter,
+  CreatedByFilterRenderer,
+  type CreatedByFilterRendererProps,
+} from './created_by';
 
 // Common popover components.
 export { FilterPopover, useFilterPopover, type FilterPopoverProps } from './filter_popover';
@@ -51,9 +54,6 @@ export {
   type ModifierKeyTipProps,
   type FilterCountBadgeProps,
 } from './filter_utils';
-
-// Query parser pipeline — implement `QueryParser` to add a new filter type.
-export { parseFiltersFromQuery, type QueryParser, type QueryParserResult } from './query_parser';
 
 // Part factory and context (used by `useFilters` hook).
 export { filter, type FilterPresets, type FilterContext } from './part';

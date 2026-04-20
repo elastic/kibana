@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
-        jestExpect(spnegoResponse.body).toEqual({
+        jestExpect(spnegoResponse.body).toMatchObject({
           username: 'tester@TEST.ELASTIC.CO',
           roles: expectedUserRoles,
           full_name: null,

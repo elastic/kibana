@@ -136,24 +136,28 @@ export const updateCasesInputWithVersionFixture = {
 
 export const setCustomFieldTextInputFixture = {
   case_id: caseIdFixture,
+  owner: 'securitySolution',
   field_name: 'cf_text',
   value: 'new value',
 };
 
 export const setCustomFieldToggleInputFixture = {
   case_id: caseIdFixture,
+  owner: 'securitySolution',
   field_name: 'cf_toggle',
   value: true,
 };
 
 export const setCustomFieldNumberInputFixture = {
   case_id: caseIdFixture,
+  owner: 'securitySolution',
   field_name: 'cf_number',
   value: 42,
 };
 
 export const setCustomFieldNullInputFixture = {
   case_id: caseIdFixture,
+  owner: 'securitySolution',
   field_name: 'cf_optional',
   value: null,
 };

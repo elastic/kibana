@@ -1,0 +1,32 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        putUpdatePackageRequestExample:
+          description: 'Update keep_policies_up_to_date setting for a package'
+          value:
+            keepPoliciesUpToDate: true
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          putUpdatePackageExample:
+            description: 'Updated package settings'
+            value:
+              item:
+                name: 'aws'
+                version: '2.10.0'
+                keepPoliciesUpToDate: true
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

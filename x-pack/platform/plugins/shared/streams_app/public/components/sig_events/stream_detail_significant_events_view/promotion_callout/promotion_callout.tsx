@@ -105,7 +105,7 @@ export function PromotionCallout({ streamName, onReviewClick }: PromotionCallout
             <p>
               <FormattedMessage
                 id="xpack.streams.significantEvents.promotionCallout.message"
-                defaultMessage="We detected {queryCount} that you can promote in {ruleCount}, based on the last run."
+                defaultMessage="Based on severity, we detected {queryCount} that you can promote in {ruleCount}, based on the last run."
                 values={{
                   queryCount: <strong>{QUERY_COUNT_LABEL(queries.length)}</strong>,
                   ruleCount: RULE_COUNT_LABEL(queries.length),

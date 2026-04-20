@@ -345,13 +345,15 @@ describe(
       });
       cy.url().should('include', '/app/osquery/history/');
 
-      // Run a new query and verify it appears in history
+      // Run a new query and verify redirect to detail page
       navigateTo('/app/osquery/new');
       selectAllAgents();
       inputQuery('select * from os_version;');
       submitQuery();
+      cy.url().should('include', '/app/osquery/history/');
       checkResults();
 
+      // Navigate back to history list and verify the query appears
       navigateTo('/app/osquery/history');
       cy.getBySel(UNIFIED_HISTORY_TABLE, { timeout: 60000 }).should('exist');
       cy.getBySel(UNIFIED_HISTORY_TABLE).find('tbody tr').first().should('contain', 'os_version');

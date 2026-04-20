@@ -10,34 +10,15 @@
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { ScopedHistory } from '@kbn/core-application-browser';
-import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
-import { AccessDenied } from './components/access_denied/access_denied';
+import { WorkflowsAvailabilityWrapper } from './components/workflows_availability';
+import { WorkflowsPrivilegesWrapper } from './components/workflows_privileges';
 import { WorkflowDetailStoreProvider } from './entities/workflows/store/provider';
 import { WorkflowDetailPage } from './pages/workflow_detail';
 import { WorkflowsPage } from './pages/workflows';
 
-const ReadWorkflowPermissionText = i18n.translate(
-  'platform.plugins.shared.workflows_management.readWorkflowPermissionText',
-  { defaultMessage: 'Workflows: Read' }
-);
-
-/** Wrapper component to check if the user has the required permissions to access the workflows management page */
-export const WorkflowsReadPermissionsWrapper: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
-  const capabilities = useWorkflowsCapabilities();
-  if (!capabilities.canReadWorkflow) {
-    return <AccessDenied requirements={[ReadWorkflowPermissionText]} />;
-  }
-
-  return children;
-};
-WorkflowsReadPermissionsWrapper.displayName = 'WorkflowsReadPermissionsWrapper';
-
-/** Route component to display the workflow detail page to edit or create a workflow */
+/** Wraps the workflow detail page in a store provider */
 type WorkflowDetailPageRouteProps = RouteComponentProps<{ id?: string }>;
 const WorkflowDetailPageRoute = React.memo<WorkflowDetailPageRouteProps>((props) => {
   return (
@@ -48,19 +29,20 @@ const WorkflowDetailPageRoute = React.memo<WorkflowDetailPageRouteProps>((props)
 });
 WorkflowDetailPageRoute.displayName = 'WorkflowDetailPageRoute';
 
-// The exported router component
 interface WorkflowsAppDeps {
   history: ScopedHistory;
 }
 export const WorkflowsRoutes = React.memo<WorkflowsAppDeps>(({ history }) => (
   <Router history={history}>
     <I18nProvider>
-      <WorkflowsReadPermissionsWrapper>
-        <Routes>
-          <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
-          <Route path="/" exact component={WorkflowsPage} />
-        </Routes>
-      </WorkflowsReadPermissionsWrapper>
+      <WorkflowsAvailabilityWrapper>
+        <WorkflowsPrivilegesWrapper>
+          <Routes>
+            <Route path={['/create', '/:id']} component={WorkflowDetailPageRoute} />
+            <Route path="/" exact component={WorkflowsPage} />
+          </Routes>
+        </WorkflowsPrivilegesWrapper>
+      </WorkflowsAvailabilityWrapper>
     </I18nProvider>
   </Router>
 ));

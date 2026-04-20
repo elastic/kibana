@@ -6,12 +6,27 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiTextBlockTruncate,
+  euiTextBreakWord,
+  logicalCSS,
+} from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { AgentAvatar } from '../agent_avatar';
 import { OptionText } from '../../conversations/conversation_input/input_actions/option_text';
+
+const agentOptionNameCellStyles = css`
+  ${logicalCSS('min-width', '0')}
+`;
+
+const agentOptionNameTruncateStyles = css`
+  ${euiTextBreakWord()}
+`;
 
 type AgentOptionData = EuiSelectableOption<{ agent?: AgentDefinition }>;
 
@@ -44,8 +59,10 @@ const AgentOption: React.FC<AgentOptionProps> = ({ agent }) => {
         direction="row"
         justifyContent="spaceBetween"
       >
-        <EuiFlexItem component="span" grow={false}>
-          {agent.name}
+        <EuiFlexItem component="span" grow={true} css={agentOptionNameCellStyles}>
+          <EuiTextBlockTruncate title={agent.name} lines={2} css={agentOptionNameTruncateStyles}>
+            {agent.name}
+          </EuiTextBlockTruncate>
         </EuiFlexItem>
         <EuiFlexItem component="span" grow={false}>
           <EuiIconTip

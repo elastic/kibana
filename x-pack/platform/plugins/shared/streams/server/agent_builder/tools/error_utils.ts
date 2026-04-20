@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const classifyError = (err: unknown, listToolId: string): string => {
+import { STREAMS_LIST_STREAMS_TOOL_ID } from './tool_ids';
+
+export const classifyError = (err: unknown): string => {
   const message = err instanceof Error ? err.message : String(err);
   const statusCode = (err as { statusCode?: number }).statusCode;
 
@@ -14,7 +16,7 @@ export const classifyError = (err: unknown, listToolId: string): string => {
     message.includes('not found') ||
     message.includes('Cannot find stream')
   ) {
-    return `Stream not found. Use ${listToolId} to discover available streams.`;
+    return `Stream not found. Use ${STREAMS_LIST_STREAMS_TOOL_ID} to discover available streams.`;
   }
   if (message.includes('security_exception')) {
     return 'Insufficient index privileges. The API key or user may need additional permissions (e.g. monitor, read).';
@@ -25,5 +27,8 @@ export const classifyError = (err: unknown, listToolId: string): string => {
   if (message.includes('No connector available')) {
     return 'No inference connector configured. Configure an LLM connector in Kibana Stack Management to enable natural language querying.';
   }
-  return 'Unexpected server error.';
+  if (statusCode === 409 || message.includes('Could not acquire lock')) {
+    return 'Another stream operation is in progress. Try again in a moment.';
+  }
+  return `Unexpected error: ${message.slice(0, 200)}`;
 };

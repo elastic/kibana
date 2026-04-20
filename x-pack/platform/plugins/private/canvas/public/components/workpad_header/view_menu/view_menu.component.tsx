@@ -242,7 +242,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: strings.getFullscreenMenuItemLabel(),
-        icon: <EuiIcon type="fullScreen" size="m" />,
+        icon: <EuiIcon type="fullScreen" size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           enterFullscreen();
@@ -265,7 +265,7 @@ export const ViewMenu: FunctionComponent<Props> = ({
       },
       {
         name: isWriteable ? strings.getHideEditModeLabel() : strings.getShowEditModeLabel(),
-        icon: <EuiIcon type={isWriteable ? 'eyeSlash' : 'eye'} size="m" />,
+        icon: <EuiIcon type={isWriteable ? 'eyeSlash' : 'eye'} size="m" aria-hidden={true} />,
         className: CONTEXT_MENU_TOP_BORDER_CLASSNAME,
         onClick: () => {
           toggleWriteable();

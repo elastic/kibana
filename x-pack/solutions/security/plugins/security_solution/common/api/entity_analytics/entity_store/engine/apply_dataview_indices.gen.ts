@@ -16,11 +16,23 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * The result of applying data view index changes to a single engine.
+ */
 export type EngineDataviewUpdateResult = z.infer<typeof EngineDataviewUpdateResult>;
 export const EngineDataviewUpdateResult = z.object({
+  /**
+   * The entity type of the engine that was updated.
+   */
   type: z.string(),
+  /**
+   * The changes applied to the engine.
+   */
   changes: z
     .object({
+      /**
+       * The updated list of index patterns now used by the engine.
+       */
       indexPatterns: z.array(z.string()).optional(),
     })
     .optional(),
@@ -30,6 +42,12 @@ export type ApplyEntityEngineDataviewIndicesResponse = z.infer<
   typeof ApplyEntityEngineDataviewIndicesResponse
 >;
 export const ApplyEntityEngineDataviewIndicesResponse = z.object({
+  /**
+   * Whether all engines updated successfully.
+   */
   success: z.boolean().optional(),
+  /**
+   * Per-engine update results.
+   */
   result: z.array(EngineDataviewUpdateResult).optional(),
 });

@@ -185,6 +185,23 @@ export interface RanExperiment {
   experimentMetadata?: Record<string, unknown>;
 }
 
+/**
+ * Emitted by the executor client after each evaluator completes for a single
+ * example+repetition. Consumers (e.g. the Playwright fixture) can use this to
+ * incrementally export score documents to Elasticsearch so that results survive
+ * worker crashes.
+ */
+export interface EvaluationCompleteEvent {
+  experimentId: string;
+  datasetId: string;
+  datasetName: string;
+  taskRun: TaskRun;
+  evaluationRun: EvaluationRun;
+  exampleId: string;
+}
+
+export type OnEvaluationComplete = (event: EvaluationCompleteEvent) => Promise<void>;
+
 export interface ReportDisplayOptions {
   /**
    * Display options for individual evaluators, keyed by evaluator name.

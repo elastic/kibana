@@ -181,6 +181,54 @@ AND \`ip\` != "127.0.0.2/32"`
     );
   });
 
+  it('appends MV_CONTAINS clauses for multivalue fields with + operation when esFieldType is provided', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-*',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
+    );
+  });
+
+  it('appends NOT MV_CONTAINS clauses for multivalue fields with - operation when esFieldType is provided', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-*',
+        'tags.keyword',
+        ['info', 'success'],
+        '-',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-*
+| WHERE NOT MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
+    );
+  });
+
+  it('uses a scalar value for MV_CONTAINS when a single multivalue entry is selected', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-*',
+        'tags.keyword',
+        ['info'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-*
+| WHERE MV_CONTAINS(\`tags.keyword\`, "info"::keyword)`
+    );
+  });
+
   it('appends AND MATCH clauses for multivalue fields when WHERE clause already exists', () => {
     expect(
       appendWhereClauseToESQLQuery(
@@ -193,6 +241,79 @@ AND \`ip\` != "127.0.0.2/32"`
     ).toBe(
       `from logstash-* | WHERE country == "GR"
 AND MATCH(\`tags.keyword\`, "info") AND MATCH(\`tags.keyword\`, "success")`
+    );
+  });
+
+  it('appends AND MV_CONTAINS clauses for multivalue fields when WHERE clause already exists and esFieldType is provided', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE country == "GR"',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-* | WHERE country == "GR"
+AND MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
+    );
+  });
+
+  it('does not append MV_CONTAINS clauses for multivalue fields when WHERE clause already exists with the same filter', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"]::keyword)',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(`from logstash-* | WHERE MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`);
+  });
+
+  it('negates the MV_CONTAINS clause for multivalue fields when WHERE clause already exists with the same filter', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"]::keyword)',
+        'tags.keyword',
+        ['info', 'success'],
+        '-',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-* | WHERE NOT MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
+    );
+  });
+
+  it('negates existing MV_CONTAINS clauses without inline casts', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, ["info", "success"])',
+        'tags.keyword',
+        ['info', 'success'],
+        '-',
+        'string',
+        'keyword'
+      )
+    ).toBe(`from logstash-* | WHERE NOT MV_CONTAINS(\`tags.keyword\`, ["info", "success"])`);
+  });
+
+  it('appends a new MV_CONTAINS clause when an existing one only partially matches the selected values', () => {
+    expect(
+      appendWhereClauseToESQLQuery(
+        'from logstash-* | WHERE MV_CONTAINS(`tags.keyword`, "info"::keyword)',
+        'tags.keyword',
+        ['info', 'success'],
+        '+',
+        'string',
+        'keyword'
+      )
+    ).toBe(
+      `from logstash-* | WHERE MV_CONTAINS(\`tags.keyword\`, "info"::keyword)
+AND MV_CONTAINS(\`tags.keyword\`, ["info", "success"]::keyword)`
     );
   });
 

@@ -11,18 +11,17 @@ import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CreateIndexModal } from './create_index_modal';
+import { AppContextProvider } from '../../../../app_context';
+import type { AppDependencies } from '../../../../app_context';
+import { NotificationService } from '../../../../services/notification';
 
 const mockCreateIndex = jest.fn();
 jest.mock('../../../../services', () => ({
   createIndex: (...args: unknown[]) => mockCreateIndex(...args),
 }));
 
-const mockShowSuccessToast = jest.fn();
-jest.mock('../../../../services/notification', () => ({
-  notificationService: {
-    showSuccessToast: (...args: unknown[]) => mockShowSuccessToast(...args),
-  },
-}));
+let notificationService: NotificationService;
+let showSuccessToastSpy: jest.SpyInstance;
 
 jest.mock('./utils', () => ({
   generateRandomIndexName: () => 'search-abcd',
@@ -38,10 +37,18 @@ const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal
     loadIndices: jest.fn(),
   };
 
+  const ctx = {
+    services: {
+      notificationService,
+    },
+  } as unknown as AppDependencies;
+
   return render(
     <I18nProvider>
       <EuiThemeProvider>
-        <CreateIndexModal {...defaultProps} {...props} />
+        <AppContextProvider value={ctx}>
+          <CreateIndexModal {...defaultProps} {...props} />
+        </AppContextProvider>
       </EuiThemeProvider>
     </I18nProvider>
   );
@@ -50,6 +57,9 @@ const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal
 describe('CreateIndexModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const toasts = { add: jest.fn() } as any;
+    notificationService = new NotificationService(toasts);
+    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
   });
 
   it('renders the modal with title and description', () => {
@@ -133,7 +143,7 @@ describe('CreateIndexModal', () => {
     });
 
     await waitFor(() => {
-      expect(mockShowSuccessToast).toHaveBeenCalled();
+      expect(showSuccessToastSpy).toHaveBeenCalled();
       expect(closeModal).toHaveBeenCalled();
       expect(loadIndices).toHaveBeenCalled();
     });
@@ -152,7 +162,7 @@ describe('CreateIndexModal', () => {
     });
 
     await waitFor(() => {
-      expect(mockShowSuccessToast).toHaveBeenCalled();
+      expect(showSuccessToastSpy).toHaveBeenCalled();
       expect(closeModal).toHaveBeenCalled();
       expect(loadIndices).toHaveBeenCalled();
     });

@@ -486,10 +486,12 @@
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
-          "owns": [
-            "host:relationships-target-host-1",
-            "host:relationships-target-host-2"
-          ]
+          "owns": {
+                        "ids": [
+              "host:relationships-target-host-1",
+              "host:relationships-target-host-2"
+            ]
+          }
         }
       },
       "event": {
@@ -695,15 +697,19 @@
         "sub_type": "GCP Service Account",
         "type": "Service Account",
         "relationships": {
-          "owns": [
-            "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
-            "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
-            "host:projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
-          ],
-          "communicates_with": [
-            "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
-            "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
-          ]
+          "owns": {
+                        "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
+              "host:projects/my-gcp-project/zones/us-west1-a/instances/db-server-prod-1"
+            ]
+          },
+          "communicates_with": {
+                        "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          }
         }
       },
       "event": {
@@ -992,11 +998,13 @@
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
-          "owns": [
-            "host:rel-hierarchy-host-1",
-            "service:Hierarchy Service 1",
-            "user:rel-hierarchy-identity-1@gcp"
-          ]
+          "owns": {
+                        "ids": [
+              "host:rel-hierarchy-host-1",
+              "service:Hierarchy Service 1",
+              "user:rel-hierarchy-identity-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -1038,10 +1046,12 @@
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "relationships": {
-          "communicates_with": [
-            "rel-hierarchy-storage-1",
-            "rel-hierarchy-storage-2"
-          ]
+          "communicates_with": {
+                        "ids": [
+              "rel-hierarchy-storage-1",
+              "rel-hierarchy-storage-2"
+            ]
+          }
         }
       },
       "event": {
@@ -1083,10 +1093,12 @@
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
-          "communicates_with": [
-            "rel-hierarchy-database-1",
-            "rel-hierarchy-database-2"
-          ]
+          "communicates_with": {
+                        "ids": [
+              "rel-hierarchy-database-1",
+              "rel-hierarchy-database-2"
+            ]
+          }
         }
       },
       "event": {
@@ -1128,16 +1140,22 @@
         "sub_type": "AWS IAM Role",
         "type": "Identity",
         "relationships": {
-          "communicates_with": [
-            "rel-hierarchy-network-1",
-            "rel-hierarchy-network-2"
-          ],
-          "supervises": [
-            "user:rel-hierarchy-delegate-1@gcp"
-          ],
-          "depends_on": [
-            "user:rel-hierarchy-delegate-1@gcp"
-          ]
+          "communicates_with": {
+                        "ids": [
+              "rel-hierarchy-network-1",
+              "rel-hierarchy-network-2"
+            ]
+          },
+          "supervises": {
+                        "ids": [
+              "user:rel-hierarchy-delegate-1@gcp"
+            ]
+          },
+          "depends_on": {
+                        "ids": [
+              "user:rel-hierarchy-delegate-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -1428,9 +1446,11 @@
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
-          "communicates_with": [
-            "user:rel-hierarchy-identity-1@gcp"
-          ]
+          "communicates_with": {
+                        "ids": [
+              "user:rel-hierarchy-identity-1@gcp"
+            ]
+          }
         }
       },
       "event": {

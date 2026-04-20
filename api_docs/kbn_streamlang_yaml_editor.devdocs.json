@@ -112,7 +112,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-        "lineNumber": 105,
+        "lineNumber": 118,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -134,7 +134,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-            "lineNumber": 109,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -157,7 +157,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/yaml_line_mapper.ts",
-            "lineNumber": 110,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -327,7 +327,7 @@
         "tags": [],
         "label": "stripCustomIdentifiers",
         "description": [
-          "\nRecursively removes customIdentifier from all steps in the DSL.\nThis is used to clean the DSL before displaying it to users, as customIdentifiers\nare internal implementation details used for tracking and should not be visible."
+          "\nRecursively removes customIdentifier from all steps in the DSL.\nThis creates a new DSL object without modifying the original.\nUseful for comparing DSLs based on content only, ignoring internal tracking IDs."
         ],
         "signature": [
           "(dsl: ",
@@ -347,8 +347,8 @@
             "text": "StreamlangDSL"
           }
         ],
-        "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/strip_custom_identifiers.ts",
-        "lineNumber": 11,
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+        "lineNumber": 16,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -369,8 +369,8 @@
                 "text": "StreamlangDSL"
               }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-streamlang-yaml-editor/src/utils/strip_custom_identifiers.ts",
-            "lineNumber": 16,
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/src/utilities/diff_utilities.ts",
+            "lineNumber": 21,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,

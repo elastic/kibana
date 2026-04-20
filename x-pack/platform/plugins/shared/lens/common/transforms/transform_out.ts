@@ -70,7 +70,10 @@ export const getTransformOut = (
       throw new Error(`Lens "${chartType}" chart type is not supported`);
     }
 
-    const apiConfig = builder.toAPIFormat({
+    const {
+      title: _, // ignore attributes title
+      ...apiConfig
+    } = builder.toAPIFormat({
       ...migratedAttributes,
       visualizationType: migratedAttributes.visualizationType ?? LENS_UNKNOWN_VIS,
     });

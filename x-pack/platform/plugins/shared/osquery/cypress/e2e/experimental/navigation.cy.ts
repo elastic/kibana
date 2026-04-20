@@ -28,14 +28,9 @@ describe(
       cy.login(ServerlessRoleName.SOC_MANAGER);
     });
 
-    it('should display renamed tabs: History, Packs, Queries', () => {
-      navigateTo('/app/osquery');
-      cy.contains('History').should('exist');
-      cy.contains('Packs').should('exist');
-      cy.contains('Queries').should('exist');
-      cy.contains('Live queries').should('not.exist');
-      cy.contains('Saved queries').should('not.exist');
-    });
+    // Removed: 'should display renamed tabs: History, Packs, Queries'
+    // Migrated to Jest component test: public/components/main_navigation.test.tsx
+    // Phase 2 migration — tab label rendering based on feature flag is a UI-only assertion
 
     it('should redirect root /app/osquery to /app/osquery/history', () => {
       navigateTo('/app/osquery');

@@ -16,12 +16,16 @@ import {
   enableQueryStreams,
 } from '../../fixtures/query_stream_helpers';
 
+const ROOT_STREAM_NAMES = ['logs.ecs', 'logs.otel'];
 const STREAM_NAMES_CREATED_BY_SPEC = ['logs.ecs.host-1', 'test-query-stream'];
 
 test.describe('Query streams - Create query stream', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient }) => {
+  test.beforeEach(async ({ browserAuth, kbnClient, pageObjects, esClient, apiServices }) => {
     await browserAuth.loginAsAdmin();
     await enableQueryStreams(kbnClient);
+    for (const rootStreamName of ROOT_STREAM_NAMES) {
+      await apiServices.streams.restoreDataStream(rootStreamName);
+    }
     await createRootStreamViews(esClient);
     await pageObjects.streams.gotoStreamMainPage();
   });
@@ -94,10 +98,6 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
 
     // child query stream created appears in the UI
     await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();
-    // Wait for query mode to be unselected before we click it
-    await expect(
-      pageObjects.streams.childStreamTypeSelector.getByTestId('queryMode')
-    ).toHaveAttribute('aria-pressed', 'false');
     await pageObjects.streams.selectChildStreamType('Query');
     await expect(
       page.getByTestId(`queryStream-${parentStreamName}.${childStreamName}`)

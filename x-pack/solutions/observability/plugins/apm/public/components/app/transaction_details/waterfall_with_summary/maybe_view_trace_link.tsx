@@ -63,7 +63,6 @@ export function MaybeViewTraceLink({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer',
     '/dependencies/operation'
   );
 

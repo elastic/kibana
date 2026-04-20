@@ -13,7 +13,6 @@ import type {
   ESQLAstExpression,
   ESQLAstPromqlCommand,
   ESQLLocation,
-  ESQLMessage,
 } from '@elastic/esql/types';
 import { isIdentifier, isList, isSource, Walker } from '@elastic/esql';
 import type {
@@ -33,7 +32,7 @@ import { getPromqlExpressionType } from '../../definitions/utils/expressions';
 import { sourceExists } from '../../definitions/utils/sources';
 import { errors } from '../../definitions/utils/errors';
 import { validateColumnForCommand } from '../../definitions/utils/validation/column';
-import type { PromQLFunctionDefinition } from '../../definitions/types';
+import type { ESQLMessage, PromQLFunctionDefinition } from '../../definitions/types';
 import {
   getPromqlFunctionArityCheck,
   getPromqlMatchingSignatures,

@@ -91,16 +91,15 @@ describe('WorkflowsPlugin', () => {
   });
 
   describe('start()', () => {
-    it('should initialize step and trigger schema registries and return an empty object', () => {
+    it('should initialize step and trigger schema registries', () => {
       // Setup first (UI disabled path is fine for start testing)
       coreSetup.uiSettings.get.mockReturnValue(false);
       plugin.setup(coreSetup, setupDeps as any);
 
-      const result = plugin.start(coreStart, startDeps as any);
+      plugin.start(coreStart, startDeps as any);
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
       expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
-      expect(result).toEqual({});
     });
 
     it('should subscribe to license changes', () => {

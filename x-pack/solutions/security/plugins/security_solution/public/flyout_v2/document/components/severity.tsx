@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
@@ -25,12 +26,17 @@ export interface DocumentSeverityProps {
    * The document to display
    */
   hit: DataTableRecord;
+  /**
+   * Optional content rendered after the badge (e.g. a spacer).
+   * When omitted nothing is rendered after the badge.
+   */
+  children?: ReactNode;
 }
 
 /**
  * Document details severity displayed in flyout right section header
  */
-export const DocumentSeverity = memo(({ hit }: DocumentSeverityProps) => {
+export const DocumentSeverity = memo(({ hit, children }: DocumentSeverityProps) => {
   const { euiTheme } = useEuiTheme();
 
   const severityToColorMap = useRiskSeverityColors();
@@ -70,9 +76,12 @@ export const DocumentSeverity = memo(({ hit }: DocumentSeverityProps) => {
   return (
     <>
       {displayValue != null && (
-        <EuiBadge color={color} data-test-subj={SEVERITY_VALUE_TEST_ID}>
-          {displayValue}
-        </EuiBadge>
+        <>
+          <EuiBadge color={color} data-test-subj={SEVERITY_VALUE_TEST_ID}>
+            {displayValue}
+          </EuiBadge>
+          {children}
+        </>
       )}
     </>
   );

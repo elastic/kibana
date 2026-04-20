@@ -24,6 +24,7 @@ export {
   modifyFilterKueryNode,
 } from './mapped_params_utils';
 export {
+  API_KEY_ATTRIBUTES_TO_STRIP,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
   addMissingUiamKeyTagIfNeeded,

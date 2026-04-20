@@ -39,7 +39,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     handler: async ({ core, plugins, dataRegistry, logger, request, params, response }) => {
       const { alertId } = params.body;
 
-      const [coreStart, startDeps] = await core.getStartServices();
+      const [, startDeps] = await core.getStartServices();
       const { inference, ruleRegistry } = startDeps;
 
       const { connectorId, connector } = await resolveConnectorForFeature({
@@ -47,8 +47,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
         request,
         logger,
-        coreStart,
-        inference,
       });
 
       const inferenceClient = inference.getClient({ request });
@@ -99,7 +97,7 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
     handler: async ({ request, core, plugins, dataRegistry, params, response, logger }) => {
       const { errorId, serviceName, start, end, environment = '' } = params.body;
 
-      const [coreStart, startDeps] = await core.getStartServices();
+      const [, startDeps] = await core.getStartServices();
       const { inference } = startDeps;
 
       const { connectorId, connector } = await resolveConnectorForFeature({
@@ -107,8 +105,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
         request,
         logger,
-        coreStart,
-        inference,
       });
 
       const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
@@ -176,8 +172,6 @@ export function getObservabilityAgentBuilderAiInsightsRouteRepository(): ServerR
         featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
         request,
         logger,
-        coreStart,
-        inference,
       });
 
       const inferenceClient = inference.getClient({ request });

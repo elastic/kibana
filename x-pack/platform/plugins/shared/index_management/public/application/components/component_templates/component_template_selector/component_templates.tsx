@@ -114,6 +114,12 @@ const i18nTexts = {
   searchBoxPlaceholder: i18n.translate(
     'xpack.idxMgmt.componentTemplatesSelector.searchBox.placeholder',
     {
+      defaultMessage: 'Search',
+    }
+  ),
+  searchBoxAriaLabel: i18n.translate(
+    'xpack.idxMgmt.componentTemplatesSelector.searchBox.ariaLabel',
+    {
       defaultMessage: 'Search component templates',
     }
   ),
@@ -221,7 +227,7 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
               onChange={(e) => {
                 setSearchValue(e.target.value);
               }}
-              aria-label={i18nTexts.searchBoxPlaceholder}
+              aria-label={i18nTexts.searchBoxAriaLabel}
               css={styles.searchBox}
               data-test-subj="componentTemplateSearchBox"
             />

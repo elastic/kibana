@@ -58,7 +58,9 @@ export interface BulkOptionalAttributes<T>
   saved_objects: Array<OptionalAttributes<T>>;
 }
 
-export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+export type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs & {
+  owner: string;
+};
 
 export interface AlertIdsAggsResult {
   alertIds: {
@@ -69,7 +71,13 @@ export interface AlertIdsAggsResult {
 }
 
 export interface EventIdsAggsResult {
-  eventIds: {
+  legacyEventIds: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+  /** Present only when `cases-attachments` is included in the find `type` list (attachments feature enabled). */
+  unifiedEventIds?: {
     buckets: Array<{
       key: string;
     }>;

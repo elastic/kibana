@@ -13,9 +13,7 @@ import { suggestForExpression } from '../suggestion_engine';
 import type { ExpressionContext } from '../types';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { buildExpressionFunctionParameterContext } from '../utils';
-
-/** Matches comma followed by optional whitespace at end of text */
-const STARTING_NEW_PARAM_REGEX = /,\s*$/;
+import { TRAILING_COMMA_REGEX } from '../../../shared';
 
 /** Suggests completions when cursor is inside a function call (e.g., CONCAT(field1, /)) */
 export async function suggestInFunction(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
@@ -32,7 +30,12 @@ export async function suggestInFunction(ctx: ExpressionContext): Promise<ISugges
   } = ctx;
 
   const functionExpression = expressionRoot as ESQLFunction;
-  const paramContext = buildExpressionFunctionParameterContext(functionExpression, context);
+  const startingNewParam = TRAILING_COMMA_REGEX.test(innerText);
+  const paramContext = buildExpressionFunctionParameterContext(
+    functionExpression,
+    context,
+    startingNewParam
+  );
 
   if (!paramContext) {
     return [];
@@ -69,7 +72,7 @@ function determineTargetExpression(
   innerText: string
 ): ESQLSingleAstItem | undefined {
   const { args } = functionExpression;
-  const startingNewParam = STARTING_NEW_PARAM_REGEX.test(innerText);
+  const startingNewParam = TRAILING_COMMA_REGEX.test(innerText);
   const firstArgEmpty = isFirstArgumentEmpty(args, innerText);
 
   const lastArg = args[args.length - 1];

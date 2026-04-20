@@ -6,6 +6,7 @@
  */
 
 import type { LeadEntity, ObservationSeverity } from '../../types';
+import { entityTypeLabel } from '../utils';
 
 export const MODULE_ID = 'behavioral_analysis';
 export const MODULE_NAME = 'Behavioral Analysis';
@@ -54,7 +55,7 @@ export const ALERT_SEVERITY_TIERS: readonly AlertSeverityTier[] = [
     getSeverity: (c) => ((c.critical ?? 0) > 0 ? 'critical' : 'high'),
     getScore: (_count, s) => Math.min(100, s.maxRiskScore),
     getDescription: (entity, _count, c) =>
-      `Entity ${entity.name} has ${c.critical ?? 0} critical and ${
+      `${entityTypeLabel(entity)} ${entity.name} has ${c.critical ?? 0} critical and ${
         c.high ?? 0
       } high severity alerts in the last 7 days`,
   },
@@ -66,7 +67,9 @@ export const ALERT_SEVERITY_TIERS: readonly AlertSeverityTier[] = [
     getSeverity: () => 'medium',
     getScore: (count) => Math.min(100, count * 15),
     getDescription: (entity, count) =>
-      `Entity ${entity.name} has ${count} medium severity alerts in the last 7 days`,
+      `${entityTypeLabel(entity)} ${
+        entity.name
+      } has ${count} medium severity alerts in the last 7 days`,
   },
   {
     type: 'low_severity_alerts',
@@ -76,6 +79,8 @@ export const ALERT_SEVERITY_TIERS: readonly AlertSeverityTier[] = [
     getSeverity: () => 'low',
     getScore: (count) => Math.min(100, count * 10),
     getDescription: (entity, count) =>
-      `Entity ${entity.name} has ${count} low severity alerts in the last 7 days`,
+      `${entityTypeLabel(entity)} ${
+        entity.name
+      } has ${count} low severity alerts in the last 7 days`,
   },
 ] as const;

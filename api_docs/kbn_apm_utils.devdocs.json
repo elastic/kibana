@@ -106,7 +106,7 @@
           ", opts?: AddLabelsOptions | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
-        "lineNumber": 33,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -128,7 +128,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -145,7 +145,7 @@
               "AddLabelsOptions | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 54,
             "deprecated": false,
             "trackAdoption": false,

@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   useGeneratedHtmlId,
@@ -19,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -26,6 +28,8 @@ interface KnowledgeIndicatorTypeFilterProps {
   statusFilter: 'active' | 'excluded';
   selectedTypes: string[];
   onSelectedTypesChange: (selectedTypes: string[]) => void;
+  hideComputedTypes?: boolean;
+  selectedStreams?: string[];
 }
 
 export function KnowledgeIndicatorsTypeFilter({
@@ -34,6 +38,8 @@ export function KnowledgeIndicatorsTypeFilter({
   statusFilter,
   selectedTypes,
   onSelectedTypesChange,
+  hideComputedTypes = false,
+  selectedStreams = [],
 }: KnowledgeIndicatorTypeFilterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({
@@ -45,47 +51,47 @@ export function KnowledgeIndicatorsTypeFilter({
   const availableTypes = useMemo(() => {
     const types = new Set<string>();
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
-      if (knowledgeIndicator.kind === 'feature') {
-        types.add(knowledgeIndicator.feature.type);
+    knowledgeIndicators.forEach((ki) => {
+      if (
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+        })
+      ) {
+        return;
+      }
+      if (ki.kind === 'feature') {
+        types.add(ki.feature.type);
       } else {
         types.add('query');
       }
     });
 
     return Array.from(types).sort((left, right) => left.localeCompare(right));
-  }, [knowledgeIndicators]);
+  }, [knowledgeIndicators, statusFilter, hideComputedTypes, selectedStreams]);
 
   const typeCounts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
     const counts: Record<string, number> = {};
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
-      const matchesStatusFilter =
-        statusFilter === 'active'
-          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
-          : knowledgeIndicator.kind === 'feature' &&
-            Boolean(knowledgeIndicator.feature.excluded_at);
-
-      if (!matchesStatusFilter) {
+    knowledgeIndicators.forEach((ki) => {
+      if (
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+          searchTerm,
+        })
+      ) {
         return;
       }
 
-      const type =
-        knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
-
-      const title =
-        knowledgeIndicator.kind === 'feature'
-          ? (knowledgeIndicator.feature.title ?? '').toLowerCase()
-          : (knowledgeIndicator.query.title ?? '').toLowerCase();
-
-      if (!normalizedSearchTerm || title.includes(normalizedSearchTerm)) {
-        counts[type] = (counts[type] ?? 0) + 1;
-      }
+      const type = ki.kind === 'feature' ? ki.feature.type : 'query';
+      counts[type] = (counts[type] ?? 0) + 1;
     });
 
     return counts;
-  }, [knowledgeIndicators, searchTerm, statusFilter]);
+  }, [knowledgeIndicators, searchTerm, statusFilter, hideComputedTypes, selectedStreams]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () => [
@@ -137,13 +143,16 @@ export function KnowledgeIndicatorsTypeFilter({
           }}
         >
           {(list) => (
-            <div
+            <EuiPanel
+              hasShadow={false}
+              hasBorder={false}
+              paddingSize="none"
               css={css`
                 min-width: 260px;
               `}
             >
               {list}
-            </div>
+            </EuiPanel>
           )}
         </EuiSelectable>
       </EuiPopover>

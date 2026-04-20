@@ -7,21 +7,27 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
-import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '@kbn/aiops-change-point-detection/constants';
-import { CASES_ATTACHMENT_LOG_PATTERN } from '@kbn/aiops-log-pattern-analysis/constants';
-import { CASES_ATTACHMENT_LOG_RATE_ANALYSIS } from '@kbn/aiops-log-rate-analysis/constants';
+import {
+  AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+  AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+  AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+} from '@kbn/cases-plugin/common';
+import { casesSchemaValidator } from '../common/utils';
 
-export function registerCasesPersistableState(cases: CasesServerSetup | undefined, logger: Logger) {
+export function registerCaseAttachments(cases: CasesServerSetup | undefined, logger: Logger) {
   if (cases) {
     try {
-      cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
+      cases.attachmentFramework.registerUnified({
+        id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
+        schemaValidator: casesSchemaValidator,
       });
-      cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_LOG_PATTERN,
+      cases.attachmentFramework.registerUnified({
+        id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
+        schemaValidator: casesSchemaValidator,
       });
-      cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_LOG_RATE_ANALYSIS,
+      cases.attachmentFramework.registerUnified({
+        id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
+        schemaValidator: casesSchemaValidator,
       });
     } catch (error) {
       logger.warn(`AIOPs failed to register cases persistable state`);

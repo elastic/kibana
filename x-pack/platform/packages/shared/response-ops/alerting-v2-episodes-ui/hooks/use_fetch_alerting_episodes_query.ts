@@ -29,6 +29,9 @@ const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection
 /**
  * Hook to fetch alerting episodes data with filters and sort.
  * Returns an ad-hoc data view too, constructed from the query columns.
+ *
+ * Deactivation state is resolved server-side in the ESQL query via an
+ * `effective_status` column, so no separate pre-fetch is needed.
  */
 export const useFetchAlertingEpisodesQuery = ({
   pageSize,
@@ -40,6 +43,7 @@ export const useFetchAlertingEpisodesQuery = ({
   const dataView = useAlertingEpisodesDataView({ services });
 
   const queryKey = queryKeys.list(pageSize, filterState, sortState, timeRange ?? undefined);
+
   const query = useQuery({
     enabled: dataView != null,
     queryKey,

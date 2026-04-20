@@ -15,6 +15,7 @@ import {
 } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
+import { escapeWildcard } from './utils';
 
 export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
@@ -37,16 +38,26 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
       },
       async (context, request, response) => {
         try {
-          const { from, to, page, per_page: perPage } = request.query;
+          const { from, to, page, per_page: perPage, name: nameFilter } = request.query;
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-          const rangeFilter: Array<Record<string, unknown>> = [];
+          const ES_MAX_TERMS_COUNT = 60_000;
+          const maxTraceIdsPerProject = Math.min(10_000, Math.floor(ES_MAX_TERMS_COUNT / perPage));
+
+          const extraFilters: Array<Record<string, unknown>> = [];
           if (from || to) {
             const range: Record<string, string> = {};
             if (from) range.gte = from;
             if (to) range.lte = to;
-            rangeFilter.push({ range: { '@timestamp': range } });
+            extraFilters.push({ range: { '@timestamp': range } });
+          }
+          if (nameFilter) {
+            extraFilters.push({
+              wildcard: {
+                name: { value: `*${escapeWildcard(nameFilter)}*`, case_insensitive: true },
+              },
+            });
           }
 
           const searchResponse = await esClient.search({
@@ -59,7 +70,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                   { exists: { field: 'attributes.evaluator.name' } },
                 ],
                 filter: [
-                  ...rangeFilter,
+                  ...extraFilters,
                   {
                     terms: { 'scope.name': ['@kbn/evals', 'inference'] },
                   },
@@ -89,15 +100,17 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
                       percents: [50, 99],
                     },
                   },
-                  total_input_tokens: {
-                    sum: { field: 'attributes.gen_ai.usage.input_tokens' },
-                  },
-                  total_output_tokens: {
-                    sum: { field: 'attributes.gen_ai.usage.output_tokens' },
+                  trace_ids: {
+                    terms: { field: 'trace_id', size: maxTraceIdsPerProject },
                   },
                   error_count: {
                     filter: {
                       term: { 'status.code': 'ERROR' },
+                    },
+                    aggs: {
+                      distinct_traces: {
+                        cardinality: { field: 'trace_id' },
+                      },
                     },
                   },
                 },
@@ -114,6 +127,60 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
           const startIndex = (page - 1) * perPage;
           const pagedBuckets = allBuckets.slice(startIndex, startIndex + perPage);
 
+          const traceIdToProject: Record<string, string> = {};
+          for (const bucket of pagedBuckets) {
+            const projectName = bucket.key as string;
+            const traceIdBuckets =
+              (bucket.trace_ids as { buckets: Array<{ key: string }> })?.buckets ?? [];
+            for (const tb of traceIdBuckets) {
+              traceIdToProject[tb.key] = projectName;
+            }
+          }
+
+          const allTraceIds = Object.keys(traceIdToProject);
+          const tokensByProject: Record<string, number> = {};
+
+          if (allTraceIds.length > 0) {
+            const tokenResponse = await esClient.search({
+              index: TRACES_INDEX_PATTERN,
+              size: 0,
+              query: {
+                terms: { trace_id: allTraceIds },
+              },
+              aggs: {
+                per_trace: {
+                  terms: { field: 'trace_id', size: allTraceIds.length },
+                  aggs: {
+                    input_tokens: {
+                      sum: { field: 'attributes.gen_ai.usage.input_tokens' },
+                    },
+                    output_tokens: {
+                      sum: { field: 'attributes.gen_ai.usage.output_tokens' },
+                    },
+                  },
+                },
+              },
+            });
+
+            const perTraceAgg = tokenResponse.aggregations?.per_trace as {
+              buckets: Array<{
+                key: string;
+                input_tokens: { value: number };
+                output_tokens: { value: number };
+              }>;
+            };
+
+            for (const traceBucket of perTraceAgg?.buckets ?? []) {
+              const projectName = traceIdToProject[traceBucket.key];
+              if (projectName) {
+                tokensByProject[projectName] =
+                  (tokensByProject[projectName] ?? 0) +
+                  (traceBucket.input_tokens?.value ?? 0) +
+                  (traceBucket.output_tokens?.value ?? 0);
+              }
+            }
+          }
+
           const projects = pagedBuckets.map((bucket) => {
             const name = bucket.key as string;
             const distinctTraces = bucket.distinct_traces as { value: number };
@@ -125,11 +192,12 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
             };
             const p50Ns = latencyPercentiles?.values?.['50.0'] ?? 0;
             const p99Ns = latencyPercentiles?.values?.['99.0'] ?? 0;
-            const totalInputTokens = bucket.total_input_tokens as { value: number };
-            const totalOutputTokens = bucket.total_output_tokens as { value: number };
-            const totalTokens = (totalInputTokens?.value ?? 0) + (totalOutputTokens?.value ?? 0);
-            const errorCount = bucket.error_count as { doc_count: number };
-            const errorRate = traceCount > 0 ? (errorCount?.doc_count ?? 0) / traceCount : 0;
+            const errorCount = bucket.error_count as {
+              doc_count: number;
+              distinct_traces: { value: number };
+            };
+            const distinctErrorTraces = errorCount?.distinct_traces?.value ?? 0;
+            const errorRate = traceCount > 0 ? distinctErrorTraces / traceCount : 0;
 
             return {
               name,
@@ -137,7 +205,7 @@ export const registerGetTracingProjectsRoute = ({ router, logger }: RouteDepende
               error_rate: Math.round(errorRate * 100) / 100,
               p50_latency_ms: Math.round((p50Ns / 1_000_000) * 100) / 100,
               p99_latency_ms: Math.round((p99Ns / 1_000_000) * 100) / 100,
-              total_tokens: totalTokens,
+              total_tokens: tokensByProject[name] ?? 0,
               last_trace_time: lastTraceTime,
             };
           });

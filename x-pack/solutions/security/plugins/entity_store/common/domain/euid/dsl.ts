@@ -20,7 +20,6 @@ import {
   getFieldsToBeFilteredOn,
   getFieldsToBeFilteredOut,
   getSourceFieldNames,
-  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -30,8 +29,6 @@ import {
 
 /**
  * Returns a DSL filter that matches documents considered for the given entity type.
- * Combines documentsFilter and postAggFilter (when present) so the filter is
- * equivalent to the ESQL extraction logic: only IDP or non-IDP documents pass.
  *
  * This is the DSL equivalent of {@link getEuidEsqlDocumentsContainsIdFilter}.
  * Use it to pre-filter searches/aggregations to only documents that could
@@ -54,9 +51,7 @@ export function getEuidDslDocumentsContainsIdFilter(
       isNotEmptyCondition(identityField.singleField)
     ) as QueryDslQueryContainer;
   }
-  return conditionToQueryDsl(
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
-  ) as QueryDslQueryContainer;
+  return conditionToQueryDsl(identityField.documentsFilter) as QueryDslQueryContainer;
 }
 
 /**

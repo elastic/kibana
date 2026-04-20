@@ -78,10 +78,30 @@ describe('useCreateAlertAction', () => {
       actionType: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
     });
 
-    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(3));
 
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.actionsAll() });
     expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.groupActionsAll() });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagSuggestions() });
+  });
+
+  it('invalidates episode tag filter options after a successful TAG action', async () => {
+    mockHttp.post.mockResolvedValue({});
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
+
+    const { result } = renderHook(() => useCreateAlertAction(mockHttp), {
+      wrapper,
+    });
+
+    await result.current.mutateAsync({
+      groupHash: 'gh',
+      actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
+      body: { tags: ['new-tag'] },
+    });
+
+    await waitFor(() => expect(invalidateSpy).toHaveBeenCalledTimes(4));
+
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: queryKeys.tagOptionsAll() });
   });
 
   it('does not invalidate queries when the request fails', async () => {

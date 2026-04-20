@@ -161,6 +161,7 @@ export {
 
 export {
   INFERENCE_CONNECTORS_INTERNAL_API_PATH,
+  type ApiInferenceConnector,
   type InferenceConnectorsApiResponseBody,
 } from './src/inference_connectors_api';
 

@@ -11,6 +11,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
+import { DEFAULT_MODEL_SAVE_SUCCESS, DEFAULT_MODEL_SAVE_ERROR } from '../../common/translations';
 import { useKibana } from './use_kibana';
 
 export interface DefaultModelSettingsState {
@@ -92,9 +93,10 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
       const newSaved = getSavedState();
       setSavedState(newSaved);
       setState(newSaved);
+      notifications.toasts.addSuccess({ title: DEFAULT_MODEL_SAVE_SUCCESS });
     } catch (e) {
       notifications.toasts.addDanger({
-        title: 'Failed to save default model settings',
+        title: DEFAULT_MODEL_SAVE_ERROR,
         text: (e as Error)?.message ?? 'Unknown error',
       });
     }

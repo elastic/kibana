@@ -16,7 +16,10 @@
 
 import { z } from '@kbn/zod/v4';
 
-import { BaseActionSchema } from '../../../model/schema/common.gen';
+import {
+  ResponseActionCreateSuccessResponse,
+  BaseActionSchema,
+} from '../../../model/schema/common.gen';
 
 export type KillProcessRouteRequestBody = z.infer<typeof KillProcessRouteRequestBody>;
 export const KillProcessRouteRequestBody = BaseActionSchema.merge(
@@ -44,9 +47,6 @@ export const KillProcessRouteRequestBody = BaseActionSchema.merge(
   })
 );
 
-export type KillProcessRouteResponse = z.infer<typeof KillProcessRouteResponse>;
-export const KillProcessRouteResponse = z.object({});
-
 export type EndpointKillProcessActionRequestBody = z.infer<
   typeof EndpointKillProcessActionRequestBody
 >;
@@ -56,4 +56,4 @@ export type EndpointKillProcessActionRequestBodyInput = z.input<
 >;
 
 export type EndpointKillProcessActionResponse = z.infer<typeof EndpointKillProcessActionResponse>;
-export const EndpointKillProcessActionResponse = KillProcessRouteResponse;
+export const EndpointKillProcessActionResponse = ResponseActionCreateSuccessResponse;

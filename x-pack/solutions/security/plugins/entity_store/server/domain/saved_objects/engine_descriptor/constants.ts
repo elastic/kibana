@@ -16,6 +16,12 @@ export const EngineLogExtractionState = z.object({
   paginationTimestamp: z.string().optional(),
   paginationId: z.string().optional(),
   lastExecutionTimestamp: z.string().optional(),
+  /** Exclusive lower bound for log-slice scan within the extraction window (`@timestamp`, `_id`). */
+  logsPageCursorStartTimestamp: z.string().optional(),
+  logsPageCursorStartId: z.string().optional(),
+  /** Inclusive upper bound for the current log slice. */
+  logsPageCursorEndTimestamp: z.string().optional(),
+  logsPageCursorEndId: z.string().optional(),
 });
 
 export type EngineError = z.infer<typeof EngineError>;

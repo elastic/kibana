@@ -13,6 +13,7 @@
   "kbn_references": [
     "@kbn/std",
     "@kbn/io-ts-utils",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*",

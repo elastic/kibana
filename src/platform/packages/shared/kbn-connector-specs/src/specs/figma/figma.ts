@@ -56,6 +56,7 @@ export const FigmaConnector: ConnectorSpec = {
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-file-nodes
     // Response always includes components and styles maps alongside the document tree.
     getFile: {
+      isTool: true,
       description:
         "Get a Figma file's structure, metadata, components, and styles. " +
         'File keys appear in Figma URLs as the segment after the file type: ' +
@@ -105,6 +106,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/file-endpoints/#get-image
     renderNodes: {
+      isTool: true,
       description:
         'Render Figma nodes as images. Provide a file key and one or more node IDs to get ' +
         'temporary image URLs (valid for 30 days). Supports PNG, JPG, SVG, and PDF formats. ' +
@@ -146,6 +148,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-project-files
     listProjectFiles: {
+      isTool: true,
       description:
         'List all files in a Figma project. Returns file names, keys, thumbnail URLs, and ' +
         'last modified dates. Use the file keys from the results with the getFile or ' +
@@ -166,6 +169,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/projects-endpoints/#get-team-projects
     listTeamProjects: {
+      isTool: true,
       description:
         'List all projects in a Figma team. Returns project names and IDs alongside the ' +
         'teamId (so it can be reused in later steps). Use the project IDs with listProjectFiles ' +
@@ -210,6 +214,7 @@ export const FigmaConnector: ConnectorSpec = {
 
     // https://developers.figma.com/docs/rest-api/users-endpoints/#get-me
     whoAmI: {
+      isTool: true,
       description:
         'Get the currently authenticated Figma user. Returns the user ID, handle, email, ' +
         'and profile image URL for the API credentials in use. Useful for verifying which ' +

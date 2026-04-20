@@ -38,7 +38,7 @@ export interface CloudConfigType {
   users_and_roles_url?: string;
   performance_url?: string;
   trial_end_date?: string;
-  is_ece?: boolean;
+  isSaasContainer?: boolean;
   is_elastic_staff_owned?: boolean;
   onboarding?: {
     default_solution?: string;
@@ -94,7 +94,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned,
       isCloudEnabled: this.isCloudEnabled,
-      isEce: this.config.is_ece,
+      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
       onboarding: {
         defaultSolution: parseOnboardingSolution(this.config.onboarding?.default_solution),
       },

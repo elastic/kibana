@@ -16,6 +16,8 @@ import {
   applyColorToSchema,
   colorByValueAbsoluteSchema,
   legacyColorByValueAbsoluteSchema,
+  autoColorSchema,
+  AUTO_COLOR,
 } from '../color';
 import { horizontalAlignmentSchema, verticalAlignmentSchema } from '../alignments';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
@@ -78,7 +80,11 @@ const legacyMetricStateMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema])),
+  color: schema.maybe(
+    schema.oneOf([colorByValueAbsoluteSchema, legacyColorByValueAbsoluteSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 export const legacyMetricStateSchemaNoESQL = schema.object(

@@ -216,7 +216,8 @@ export function MapPopover({
         closePopover={onClose}
         isOpen={isOpen}
         ref={popoverRef}
-        zIndex={Number(euiTheme.levels.menu)}
+        // Below EUI flyouts so nested SLO / alert flyouts stay on top; above map canvas (content).
+        zIndex={Number(euiTheme.levels.flyout) - 1}
         data-test-subj="serviceMapPopover"
         aria-label={popoverAriaLabel}
         panelProps={{

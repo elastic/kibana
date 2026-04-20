@@ -40,8 +40,6 @@ export function ErrorBudgetChartPanel({
   onBrushed,
   hideHeaderDurationLabel = false,
 }: Props) {
-  const [isMouseOver, setIsMouseOver] = useState(false);
-
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
   const { embeddable } = useKibana().services;
 
@@ -77,22 +75,11 @@ export function ErrorBudgetChartPanel({
         color="transparent"
         hasBorder
         data-test-subj="errorBudgetChartPanel"
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
       >
         <EuiFlexGroup direction="column" gutterSize="l">
           <ErrorBudgetHeader
             slo={slo}
             hideHeaderDurationLabel={hideHeaderDurationLabel}
-            isMouseOver={isMouseOver}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
           />
 

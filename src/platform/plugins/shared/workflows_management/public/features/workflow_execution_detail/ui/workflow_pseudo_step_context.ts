@@ -112,6 +112,22 @@ export function buildOverviewStepExecutionFromContext(
     };
   }
 
+  // Surface document-level error on Overview kv tree when the trigger row does not
+  // already attach the same execution.error (failed-before-steps → trigger pseudo-step only).
+  const failedBeforeSteps = isFailedBeforeSteps(
+    workflowExecution.status,
+    workflowExecution.stepExecutions
+  );
+  if (workflowExecution.error && !failedBeforeSteps) {
+    contextData = {
+      ...contextData,
+      executionError: {
+        type: workflowExecution.error.type,
+        message: workflowExecution.error.message,
+      },
+    };
+  }
+
   return {
     id: '__overview',
     stepId: 'Overview',

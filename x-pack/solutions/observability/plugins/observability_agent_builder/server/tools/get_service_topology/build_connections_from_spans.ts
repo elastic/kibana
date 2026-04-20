@@ -6,6 +6,7 @@
  */
 
 import {
+  AGENT_NAME,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_TYPE,
@@ -21,10 +22,18 @@ export function buildConnectionsFromSpans(spans: ExitSpanSample[]): ConnectionWi
   const connectionMap = new Map<string, ConnectionWithKey>();
 
   for (const span of spans) {
-    const source = { [SERVICE_NAME]: span.serviceName };
+    const source = {
+      [SERVICE_NAME]: span.serviceName,
+      ...(span.agentName && { [AGENT_NAME]: span.agentName }),
+    };
 
     const target = span.destinationService
-      ? { [SERVICE_NAME]: span.destinationService.serviceName }
+      ? {
+          [SERVICE_NAME]: span.destinationService.serviceName,
+          ...(span.destinationService.agentName && {
+            [AGENT_NAME]: span.destinationService.agentName,
+          }),
+        }
       : {
           [SPAN_DESTINATION_SERVICE_RESOURCE]: span.spanDestinationServiceResource,
           [SPAN_TYPE]: span.spanType,

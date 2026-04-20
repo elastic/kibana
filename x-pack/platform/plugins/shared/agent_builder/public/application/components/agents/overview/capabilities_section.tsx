@@ -11,58 +11,88 @@ import { labels } from '../../../utils/i18n';
 import { CapabilityCard } from './capability_card';
 import skillsImage from './assets/connected-power-plug.svg';
 import pluginsImage from './assets/projects-folder.svg';
+import toolsImage from './assets/wrench_gear.svg';
 const { agentOverview: overviewLabels } = labels;
 
 export interface CapabilitiesSectionProps {
   skillsCount: number;
   pluginsCount: number;
+  toolsCount: number;
+  skillsCountLoading: boolean;
+  pluginsCountLoading: boolean;
+  toolsCountLoading: boolean;
   enableElasticCapabilities: boolean;
   isExperimentalFeaturesEnabled: boolean;
   skillsHref: string;
   pluginsHref: string;
+  toolsHref: string;
   onNavigateToSkills: () => void;
   onNavigateToPlugins: () => void;
+  onNavigateToTools: () => void;
 }
 
 export const CapabilitiesSection: React.FC<CapabilitiesSectionProps> = ({
   skillsCount,
   pluginsCount,
+  toolsCount,
+  skillsCountLoading,
+  pluginsCountLoading,
+  toolsCountLoading,
   isExperimentalFeaturesEnabled,
   skillsHref,
   pluginsHref,
+  toolsHref,
   onNavigateToSkills,
   onNavigateToPlugins,
+  onNavigateToTools,
 }) => (
   <>
     <EuiTitle size="s">
       <h2>{overviewLabels.capabilitiesTitle}</h2>
     </EuiTitle>
     <EuiSpacer size="l" />
-    <EuiFlexGroup gutterSize="m" alignItems="stretch">
-      <EuiFlexItem grow={1}>
+    <EuiFlexGroup gutterSize="m" alignItems="stretch" wrap>
+      <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
         <CapabilityCard
+          dataTestSubj="agentOverviewCapabilityCardSkills"
           count={skillsCount}
-          title={overviewLabels.skillsLabel(skillsCount)}
+          title={overviewLabels.skillsLabel(skillsCountLoading ? 0 : skillsCount)}
           description={overviewLabels.skillsDescription}
           emptyDescription={overviewLabels.skillsOnboardingDescription}
           image={skillsImage}
-          href={skillsHref}
-          onClick={onNavigateToSkills}
+          href={skillsCountLoading ? undefined : skillsHref}
+          onClick={skillsCountLoading ? undefined : onNavigateToSkills}
+          isCountLoading={skillsCountLoading}
         />
       </EuiFlexItem>
       {isExperimentalFeaturesEnabled && (
-        <EuiFlexItem grow={1}>
+        <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
           <CapabilityCard
+            dataTestSubj="agentOverviewCapabilityCardPlugins"
             count={pluginsCount}
-            title={overviewLabels.pluginsLabel(pluginsCount)}
+            title={overviewLabels.pluginsLabel(pluginsCountLoading ? 0 : pluginsCount)}
             description={overviewLabels.pluginsDescription}
             emptyDescription={overviewLabels.pluginsOnboardingDescription}
             image={pluginsImage}
-            href={pluginsHref}
-            onClick={onNavigateToPlugins}
+            href={pluginsCountLoading ? undefined : pluginsHref}
+            onClick={pluginsCountLoading ? undefined : onNavigateToPlugins}
+            isCountLoading={pluginsCountLoading}
           />
         </EuiFlexItem>
       )}
+      <EuiFlexItem grow={1} style={{ minWidth: 240 }}>
+        <CapabilityCard
+          dataTestSubj="agentOverviewCapabilityCardTools"
+          count={toolsCount}
+          title={overviewLabels.toolsCapabilityLabel(toolsCountLoading ? 0 : toolsCount)}
+          description={overviewLabels.toolsDescription}
+          emptyDescription={overviewLabels.toolsOnboardingDescription}
+          image={toolsImage}
+          href={toolsCountLoading ? undefined : toolsHref}
+          onClick={toolsCountLoading ? undefined : onNavigateToTools}
+          isCountLoading={toolsCountLoading}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   </>
 );

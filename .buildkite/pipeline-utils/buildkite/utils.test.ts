@@ -11,7 +11,7 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 jest.mock('child_process', () => ({
   execFileSync: jest.fn(),

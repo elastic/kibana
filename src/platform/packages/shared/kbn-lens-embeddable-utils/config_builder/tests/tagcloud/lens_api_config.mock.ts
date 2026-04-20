@@ -95,12 +95,14 @@ export const comprehensiveTagcloudWithAdHocDataView = {
     index_pattern: 'test-index',
     time_field: '@timestamp',
   },
-  orientation: 'angled',
-  font_size: {
-    min: 35,
-    max: 58,
+  styling: {
+    orientation: 'angled',
+    font_size: {
+      min: 35,
+      max: 58,
+    },
+    caption: { visible: false },
   },
-  caption: { visible: false },
   metric: {
     operation: 'sum',
     field: 'bytes',
@@ -158,12 +160,14 @@ export const comprehensiveTagcloudWithDataView = {
     type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
     ref_id: 'my-custom-data-view-id',
   },
-  orientation: 'angled',
-  font_size: {
-    min: 35,
-    max: 58,
+  styling: {
+    orientation: 'angled',
+    font_size: {
+      min: 35,
+      max: 58,
+    },
+    caption: { visible: false },
   },
-  caption: { visible: false },
   metric: {
     operation: 'sum',
     field: 'bytes',
@@ -221,12 +225,14 @@ export const comprehensiveEsqlTagcloud = {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
-  orientation: 'angled',
-  font_size: {
-    min: 35,
-    max: 58,
+  styling: {
+    orientation: 'angled',
+    font_size: {
+      min: 35,
+      max: 58,
+    },
+    caption: { visible: false },
   },
-  caption: { visible: false },
   metric: {
     column: 'bytes',
   },

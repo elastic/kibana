@@ -16,8 +16,16 @@ import type {
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
+import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { GaugeState, LensApiState } from '../../schema';
-import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
+import {
+  AUTO_COLOR,
+  NO_COLOR,
+  fromColorByValueAPIToLensState,
+  fromColorByValueLensStateToAPI,
+  isAutoColor,
+  isNoColor,
+} from '../coloring';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import type { DeepMutable, DeepPartial } from '../utils';
@@ -37,6 +45,7 @@ import {
   getMetricAccessor,
   getSharedChartAPIToLensState,
   getSharedChartLensStateToAPI,
+  stripUndefined,
 } from './utils';
 import type { GaugeStateESQL, GaugeStateNoESQL } from '../../schema/charts/gauge';
 import { fromMetricAPItoLensState } from '../columns/metric';
@@ -50,6 +59,24 @@ function getAccessorName(type: 'metric' | 'max' | 'min' | 'goal') {
   return `${ACCESSOR}_${type}`;
 }
 
+function convertColorToLensState(color: GaugeState['metric']['color']): {
+  colorMode: GaugeVisualizationState['colorMode'];
+  palette?: PaletteOutput<CustomPaletteParams>;
+} {
+  if (!color || isAutoColor(color)) {
+    return { colorMode: 'palette' };
+  }
+
+  if (isNoColor(color)) {
+    return { colorMode: 'none' };
+  }
+
+  return {
+    colorMode: 'palette' as const,
+    palette: fromColorByValueAPIToLensState(color),
+  };
+}
+
 function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
   const layer = config;
 
@@ -60,20 +87,18 @@ function buildVisualizationState(config: GaugeState): GaugeVisualizationState {
     minAccessor: layer.metric.min ? getAccessorName('min') : undefined,
     maxAccessor: layer.metric.max ? getAccessorName('max') : undefined,
     goalAccessor: layer.metric.goal ? getAccessorName('goal') : undefined,
-    shape: layer.shape
-      ? layer.shape.type === 'bullet'
-        ? layer.shape.orientation === 'horizontal'
+    shape: layer.styling?.shape
+      ? layer.styling?.shape.type === 'bullet'
+        ? layer.styling?.shape.orientation === 'horizontal'
           ? 'horizontalBullet'
           : 'verticalBullet'
-        : layer.shape.type === 'semi_circle'
+        : layer.styling?.shape.type === 'semi_circle'
         ? 'semiCircle'
-        : layer.shape.type
+        : layer.styling?.shape.type
       : 'horizontalBullet',
-    ...(layer.metric.color
-      ? { colorMode: 'palette', palette: fromColorByValueAPIToLensState(layer.metric.color) }
-      : {}),
+    ...convertColorToLensState(layer.metric.color),
     ticksPosition:
-      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'auto',
+      layer.metric.ticks?.visible === false ? 'hidden' : layer.metric.ticks?.mode ?? 'bands',
     ...(layer.metric.title?.visible === false
       ? { labelMajorMode: 'none' }
       : layer.metric.title?.text
@@ -110,14 +135,16 @@ function reverseBuildVisualizationState(
 
   const props: DeepPartial<DeepMutable<GaugeState>> = {
     ...generateApiLayer(layer),
-    shape:
-      visualization.shape === 'horizontalBullet'
-        ? { type: 'bullet', orientation: 'horizontal' }
-        : visualization.shape === 'verticalBullet'
-        ? { type: 'bullet', orientation: 'vertical' }
-        : {
-            type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
-          },
+    styling: stripUndefined({
+      shape:
+        visualization.shape === 'horizontalBullet'
+          ? { type: 'bullet', orientation: 'horizontal' }
+          : visualization.shape === 'verticalBullet'
+          ? { type: 'bullet', orientation: 'vertical' }
+          : {
+              type: visualization.shape === 'semiCircle' ? 'semi_circle' : visualization.shape,
+            },
+    }),
     metric: isEsqlTableTypeDataSource(dataSource)
       ? {
           ...getValueApiColumn(metricAccessor, layer as TextBasedLayer),
@@ -183,8 +210,10 @@ function reverseBuildVisualizationState(
           : { visible: true, mode: 'auto' };
     }
 
-    if (visualization.colorMode === 'palette' && visualization.palette) {
-      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette);
+    if (visualization.colorMode === 'palette') {
+      props.metric.color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
+    } else {
+      props.metric.color = NO_COLOR;
     }
   }
 

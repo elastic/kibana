@@ -28,50 +28,59 @@ const tagcloudStateTagsByOptionsSchema = {
   color: schema.maybe(colorMappingSchema),
 };
 
-const tagcloudStateSharedOptionsSchema = {
-  orientation: schema.maybe(
-    builderEnums.orientation({
-      meta: { description: 'Orientation of the tagcloud' },
-      defaultValue: 'horizontal',
-    })
-  ),
-  font_size: schema.maybe(
-    schema.object(
-      {
-        min: schema.number({
-          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
-          min: 1,
-          meta: { description: 'Minimum font size' },
-        }),
-        max: schema.number({
-          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
-          max: 120,
-          meta: { description: 'Maximum font size' },
-        }),
-      },
-      { meta: { description: 'Minimum and maximum font size for the tags' } }
-    )
-  ),
-  /**
-   * Show the metric caption
-   */
-  caption: schema.maybe(
-    schema.object(
-      {
-        visible: schema.boolean({
-          meta: { description: 'Show caption' },
-          defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
-        }),
-      },
-      {
-        meta: {
-          description:
-            'Caption configuration representing the metric and the tag_by operations labels',
+const tagcloudStylingSchema = schema.object(
+  {
+    orientation: schema.maybe(
+      builderEnums.orientation({
+        meta: { description: 'Orientation of the tagcloud' },
+        defaultValue: 'horizontal',
+      })
+    ),
+    font_size: schema.maybe(
+      schema.object(
+        {
+          min: schema.number({
+            defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.minFontSize,
+            min: 1,
+            meta: { description: 'Minimum font size' },
+          }),
+          max: schema.number({
+            defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.maxFontSize,
+            max: 120,
+            meta: { description: 'Maximum font size' },
+          }),
         },
-      }
-    )
-  ),
-};
+        { meta: { description: 'Minimum and maximum font size for the tags' } }
+      )
+    ),
+    /**
+     * Show the metric caption
+     */
+    caption: schema.maybe(
+      schema.object(
+        {
+          visible: schema.boolean({
+            meta: { description: 'Show caption' },
+            defaultValue: LENS_TAGCLOUD_DEFAULT_STATE.showCaption,
+          }),
+        },
+        {
+          meta: {
+            description:
+              'Caption configuration representing the metric and the tag_by operations labels',
+          },
+        }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'tagcloudStyling',
+      title: 'Tag cloud styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 export const tagcloudStateSchemaNoESQL = schema.object(
   {
@@ -80,7 +89,7 @@ export const tagcloudStateSchemaNoESQL = schema.object(
     ...dslOnlyPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceSchema,
-    ...tagcloudStateSharedOptionsSchema,
+    styling: schema.maybe(tagcloudStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */
@@ -99,7 +108,7 @@ export const tagcloudStateSchemaESQL = schema.object(
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
     ...dataSourceEsqlTableSchema,
-    ...tagcloudStateSharedOptionsSchema,
+    styling: schema.maybe(tagcloudStylingSchema),
     /**
      * Primary value configuration, must define operation.
      */

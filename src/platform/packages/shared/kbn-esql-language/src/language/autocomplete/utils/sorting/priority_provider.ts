@@ -23,6 +23,7 @@ const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.PIPE]: 200,
   [SuggestionCategory.COMMA]: 201,
   [SuggestionCategory.VALUE]: 202,
+  [SuggestionCategory.SUBQUERY]: 203, // (FROM ...) after Browse data sources
 
   [SuggestionCategory.CONSTANT_VALUE]: 250, // Prompt text, query text constants
 

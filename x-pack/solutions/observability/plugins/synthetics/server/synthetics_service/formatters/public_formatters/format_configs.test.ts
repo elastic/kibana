@@ -338,6 +338,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -366,6 +367,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -394,6 +396,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -421,6 +424,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': undefined,
         run_once: undefined,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -448,6 +452,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: true,
         test_run_id: undefined,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -476,6 +481,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },
@@ -505,6 +511,7 @@ describe('formatHeartbeatRequest', () => {
         'monitor.project.id': testBrowserConfig.project_id,
         run_once: undefined,
         test_run_id: testRunId,
+        'monitor.interval': 180,
         meta: {
           space_id: 'test-space-id',
         },

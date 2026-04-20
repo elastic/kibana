@@ -29,3 +29,11 @@ export const SERVICE_KEY_LEGACY = 'index_pattern';
 export const SERVICE_KEY = 'data_view';
 
 export const ID_OVER_MAX_LENGTH = 'x'.repeat(1759);
+
+export const INTERNAL_COMMON_HEADERS = {
+  'kbn-xsrf': 'some-xsrf-token',
+  [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+  [ELASTIC_HTTP_VERSION_HEADER]: '1',
+};
+
+export const FIELDS_FOR_WILDCARD_PATH = 'internal/data_views/_fields_for_wildcard';

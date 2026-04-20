@@ -159,6 +159,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
 
   return (
     <AlertHeaderBlock
+      gutterSize="xs"
       hasBorder
       title={
         <FormattedMessage

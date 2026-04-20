@@ -11,7 +11,11 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { Document, Pair, Scalar } from 'yaml';
 import { isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { getBuiltInStepStability, isBuiltInStepType } from '@kbn/workflows';
+import {
+  getBuiltInStepStability,
+  isBuiltInStepType,
+  resolveKibanaStepTypeAlias,
+} from '@kbn/workflows';
 import { getStepNodesWithType } from '../../../../../common/lib/yaml';
 import { getCachedAllConnectorsMap } from '../../../../../common/schema';
 import { stepSchemas } from '../../../../../common/step_schemas';
@@ -159,12 +163,14 @@ export const useConnectorTypeDecorations = ({
           continue;
         }
 
-        if (!typeExists(connectorType)) {
+        const resolvedConnectorType = resolveKibanaStepTypeAlias(connectorType);
+
+        if (!typeExists(resolvedConnectorType)) {
           // eslint-disable-next-line no-continue
           continue;
         }
 
-        const baseConnectorType = resolveBaseConnectorType(connectorType);
+        const baseConnectorType = resolveBaseConnectorType(resolvedConnectorType);
         if (!baseConnectorType) {
           // eslint-disable-next-line no-continue
           continue;
@@ -188,7 +194,7 @@ export const useConnectorTypeDecorations = ({
 
         decorations.push(
           buildConnectorDecoration(
-            connectorType,
+            resolvedConnectorType,
             baseConnectorType,
             targetLineNumber,
             startColumn,

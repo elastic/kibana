@@ -65,11 +65,11 @@ describe('Metric Schema', () => {
           },
         ],
         styling: {
+          icon: {
+            name: 'star_empty',
+            alignment: 'left',
+          },
           primary: {
-            icon: {
-              name: 'star_empty',
-              alignment: 'left',
-            },
             labels: { alignment: 'left' },
             value: { sizing: 'auto', alignment: 'left' },
           },
@@ -490,12 +490,10 @@ describe('Metric Schema', () => {
         ...baseMetricConfig,
 
         styling: {
-          primary: {
-            icon: {
-              // @ts-expect-error - camelCase icon name
-              name: 'starEmpty',
-              alignment: 'right',
-            },
+          icon: {
+            // @ts-expect-error - camelCase icon name
+            name: 'starEmpty',
+            alignment: 'right',
           },
         },
         metrics: [
@@ -556,10 +554,10 @@ describe('Metric Schema', () => {
           limit: 5,
         },
         styling: {
+          icon: { name: 'star_empty', alignment: 'right' },
           primary: {
             labels: { alignment: 'left' },
             value: { sizing: 'auto', alignment: 'right' },
-            icon: { name: 'star_empty', alignment: 'right' },
           },
           secondary: {
             label: { visible: true, placement: 'before' },

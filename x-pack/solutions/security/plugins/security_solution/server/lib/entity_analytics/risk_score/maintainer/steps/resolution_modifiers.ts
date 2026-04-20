@@ -17,9 +17,9 @@ const criticalityRank: Partial<Record<AssetCriticalityLevel, number>> = {
 };
 
 const getHigherCriticality = (
-  left?: AssetCriticalityLevel,
-  right?: AssetCriticalityLevel
-): AssetCriticalityLevel | undefined => {
+  left?: AssetCriticalityLevel | null,
+  right?: AssetCriticalityLevel | null
+): AssetCriticalityLevel | undefined | null => {
   if (!left) return right;
   if (!right) return left;
   return (criticalityRank[left] ?? 0) >= (criticalityRank[right] ?? 0) ? left : right;
@@ -37,7 +37,7 @@ export const buildResolutionModifierEntity = ({
     ...score.related_entities.map((entity) => entity.entity_id),
   ];
 
-  let maxCriticality: AssetCriticalityLevel | undefined;
+  let maxCriticality: AssetCriticalityLevel | null | undefined;
   const watchlists = new Set<string>();
 
   for (const memberId of memberIds) {

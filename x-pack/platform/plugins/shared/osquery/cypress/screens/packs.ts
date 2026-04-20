@@ -19,6 +19,9 @@ export const FLYOUT_SAVED_QUERY_CANCEL_BUTTON = 'query-flyout-cancel-button';
 export const customActionEditSavedQuerySelector = (savedQueryName: string) =>
   `[aria-label="Edit ${savedQueryName}"]`;
 
+export const rowActionsMenuSelector = (itemName: string) =>
+  `[aria-label="Actions for ${itemName}"]`;
+
 export const customActionRunSavedQuerySelector = (savedQueryName: string) =>
   `[aria-label="Run ${savedQueryName}"]`;
 

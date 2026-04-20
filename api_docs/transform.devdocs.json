@@ -282,7 +282,7 @@
         "label": "PostTransformsPreviewResponseSchema",
         "description": [],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-        "lineNumber": 202,
+        "lineNumber": 210,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -300,7 +300,7 @@
               "; }; settings: { index: { number_of_shards: string; auto_expand_replicas: string; }; }; aliases: Record<string, any>; }"
             ],
             "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-            "lineNumber": 203,
+            "lineNumber": 211,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -317,7 +317,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-            "lineNumber": 218,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -338,7 +338,7 @@
           "CreateDataViewApiResponseSchema"
         ],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-        "lineNumber": 163,
+        "lineNumber": 171,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -354,7 +354,7 @@
               "TransformCreated[]"
             ],
             "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-            "lineNumber": 164,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -370,7 +370,7 @@
               "CreatedError[]"
             ],
             "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-            "lineNumber": 165,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -459,7 +459,7 @@
           "{ readonly pivot?: Readonly<{ aggregations?: any; group_by?: any; max_page_search_size?: number | undefined; } & {}> | undefined; readonly latest?: Readonly<{} & { sort: string; unique_key: string[]; }> | undefined; readonly source: Readonly<{ query?: Record<string, any> | undefined; runtime_mappings?: Readonly<{} & {}> | undefined; } & { index: string | string[]; }>; }"
         ],
         "path": "x-pack/platform/plugins/private/transform/server/routes/api_schemas/transforms.ts",
-        "lineNumber": 180,
+        "lineNumber": 188,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -720,7 +720,7 @@
           "{ readonly TRANSFORM_HEALTH: \"transform_health\"; }"
         ],
         "path": "x-pack/platform/plugins/private/transform/common/constants.ts",
-        "lineNumber": 178,
+        "lineNumber": 191,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

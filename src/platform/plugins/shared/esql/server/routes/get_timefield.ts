@@ -72,9 +72,9 @@ export const registerGetTimeFieldRoute = (
   router: IRouter,
   { logger }: PluginInitializerContext
 ) => {
-  router.get(
+  router.post(
     {
-      path: `${TIMEFIELD_ROUTE}{query}`,
+      path: TIMEFIELD_ROUTE,
       security: {
         authz: {
           enabled: false,
@@ -82,13 +82,13 @@ export const registerGetTimeFieldRoute = (
         },
       },
       validate: {
-        params: schema.object({
+        body: schema.object({
           query: schema.string(),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
-      const { query } = request.params;
+      const { query } = request.body;
 
       // Query is of the form "from index | where timefield >= ?_tstart".
       // At this point we just want to extract the timefield if present in the query

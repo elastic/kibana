@@ -21,7 +21,7 @@ import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
-import { getKibanaUrl } from '../utils';
+import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -322,19 +322,37 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
 
   /**
    * Reads a fetch Response body as a stream with size enforcement.
-   * Delegates to the shared stream reader with 'throw' behavior on size exceeded.
+   * Binary content types are returned as a raw Buffer to preserve the original bytes.
+   * Text/JSON content types are decoded as UTF-8 and parsed normally.
+   *
+   * NOTE: Binary responses are returned as a Node.js Buffer. This works correctly within
+   * the same execution (e.g. download → base64_encode → use), but Buffers serialize to
+   * JSON as { type: "Buffer", data: [n, n, ...] } which is ~4x larger than the raw bytes.
+   * After ES persistence and reload the deserialized object is a plain object, not a Buffer,
+   * so Buffer.isBuffer() and the base64_encode filter would not handle it correctly.
+   * For now this is acceptable since binary data is typically consumed immediately.
    */
-  private async readResponseBody(response: Response): Promise<any> {
+  private async readResponseBody(
+    response: Response
+  ): Promise<Buffer | Record<string, unknown> | string | null> {
     if (!response.body) {
       return null;
     }
 
+    const contentType = response.headers.get('content-type');
     const maxSize = this.getMaxResponseBytes();
-    const text = await this.readStreamWithLimit(response, {
-      maxBytes: maxSize,
-      onExceed: 'throw',
-    });
-    if (!text) return null;
+    const { buffer, truncated } = await readResponseStream(response, maxSize);
+
+    if (truncated) {
+      throw new ResponseSizeLimitError(maxSize, this.step.name);
+    }
+    if (buffer.byteLength === 0) return null;
+
+    if (!isTextContentType(contentType)) {
+      return buffer;
+    }
+
+    const text = buffer.toString('utf-8');
     try {
       return JSON.parse(text);
     } catch {
@@ -343,36 +361,14 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
   }
 
   /**
-   * Reads a Response body stream with a byte-size limit.
-   * Two behaviors when the limit is exceeded:
-   *  - 'throw': cancels the stream and throws a ResponseSizeLimitError
-   *  - 'truncate': cancels the stream and returns the data read so far with a truncation marker
+   * Reads a Response body stream as a UTF-8 string with truncation for error bodies.
    */
   private async readStreamWithLimit(
     response: Response,
-    opts: { maxBytes: number; onExceed: 'throw' | 'truncate' }
+    opts: { maxBytes: number; onExceed: 'truncate' }
   ): Promise<string> {
-    if (!response.body) return '';
-    const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
-    let totalBytes = 0;
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        totalBytes += value.byteLength;
-        if (opts.maxBytes > 0 && totalBytes > opts.maxBytes) {
-          void reader.cancel();
-          if (opts.onExceed === 'throw') {
-            throw new ResponseSizeLimitError(opts.maxBytes, this.step.name);
-          }
-          return `${Buffer.concat(chunks).toString('utf-8')}... [truncated]`;
-        }
-        chunks.push(value);
-      }
-    } finally {
-      reader.releaseLock();
-    }
-    return Buffer.concat(chunks).toString('utf-8');
+    const { buffer, truncated } = await readResponseStream(response, opts.maxBytes);
+    const text = buffer.toString('utf-8');
+    return truncated ? `${text}... [truncated]` : text;
   }
 }

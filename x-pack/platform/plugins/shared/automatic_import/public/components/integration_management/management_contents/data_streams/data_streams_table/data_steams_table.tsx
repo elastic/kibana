@@ -43,9 +43,9 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   const handleOpenEditPipelineFlyout = useCallback(
     (item: DataStreamResponse) => {
       openEditPipelineFlyout(item);
-      reportEditDataStreamFlyoutOpened();
+      reportEditDataStreamFlyoutOpened({ integrationId, dataStreamId: item.dataStreamId });
     },
-    [reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
+    [integrationId, reportEditDataStreamFlyoutOpened, openEditPipelineFlyout]
   );
   const [dataStreamDeleteTarget, setDataStreamDeleteTarget] = useState<DataStreamResponse | null>(
     null
@@ -92,7 +92,10 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
   const handleReAnalyzeConfirm = () => {
     if (!formData?.connectorId || !dataStreamReanalyzeTarget) return;
 
-    reportDataStreamRefreshConfirmed();
+    reportDataStreamRefreshConfirmed({
+      integrationId,
+      dataStreamId: dataStreamReanalyzeTarget.dataStreamId,
+    });
     setDataStreamReanalyzeTarget(null);
     reanalyzeDataStreamMutation.mutate({
       integrationId,
@@ -107,7 +110,10 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const handleDeleteConfirm = () => {
     if (dataStreamDeleteTarget) {
-      reportDataStreamDeleteConfirmed();
+      reportDataStreamDeleteConfirmed({
+        integrationId,
+        dataStreamId: dataStreamDeleteTarget.dataStreamId,
+      });
       setDataStreamDeleteTarget(null);
       deleteDataStreamMutation.mutate({
         integrationId,

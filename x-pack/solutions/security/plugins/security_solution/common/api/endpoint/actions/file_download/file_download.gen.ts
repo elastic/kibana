@@ -18,6 +18,9 @@ import { z } from '@kbn/zod/v4';
 
 export type EndpointFileDownloadRequestParams = z.infer<typeof EndpointFileDownloadRequestParams>;
 export const EndpointFileDownloadRequestParams = z.object({
+  /**
+   * The ID of the response action that generated the file.
+   */
   action_id: z.string(),
   /**
       * The file identifier is constructed in one of two ways:

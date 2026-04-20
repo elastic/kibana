@@ -60,7 +60,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   inference: InferenceServerSetup;
   productDocBase: ProductDocBaseStartContract;
   usageCollection?: UsageCollectionSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -77,5 +77,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   inference: InferenceServerStart;
   llmTasks: LlmTasksPluginStart;
   productDocBase: ProductDocBaseStartContract;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }

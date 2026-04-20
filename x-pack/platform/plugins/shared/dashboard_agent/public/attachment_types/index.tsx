@@ -10,8 +10,10 @@ import { EMPTY, switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { AttachmentLifecycleParams } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
+import { attachmentDataToDashboardState } from '@kbn/dashboard-agent-common';
 import type {
   DashboardApi,
   DashboardRendererProps,
@@ -23,17 +25,22 @@ import { DashboardCanvasContent } from './canvas_integration/dashboard_canvas_co
 import { createDashboardAppIntegration$ } from './dashboard_integration/dashboard_app_integration';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
 import { selectDashboardAttachmentForSync } from './dashboard_integration/select_dashboard_attachment_for_sync';
+import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
 export const registerDashboardAttachmentUiDefinition = ({
   agentBuilder,
   dashboardLocator,
   unifiedSearch,
+  filterManager,
   dashboardPlugin,
+  canWriteDashboards,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   dashboardLocator?: DashboardRendererProps['locator'];
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  filterManager: DataPublicPluginStart['query']['filterManager'];
   dashboardPlugin: DashboardStart;
+  canWriteDashboards: boolean;
 }): (() => void) => {
   const { attachments } = agentBuilder;
   let dashboardApi: DashboardApi | undefined;
@@ -98,10 +105,12 @@ export const registerDashboardAttachmentUiDefinition = ({
         {...callbacks}
         dashboardLocator={dashboardLocator}
         searchBarComponent={unifiedSearch.ui.SearchBar}
+        filterManager={filterManager}
         checkSavedDashboardExist={checkSavedDashboardExist}
+        canWriteDashboards={canWriteDashboards}
       />
     ),
-    getActionButtons: ({ attachment, openCanvas, isCanvas, updateOrigin }) => {
+    getActionButtons: ({ attachment, openCanvas, isCanvas, isSidebar, updateOrigin }) => {
       if (isCanvas) {
         return [];
       }
@@ -113,7 +122,8 @@ export const registerDashboardAttachmentUiDefinition = ({
           icon: 'eye',
           type: ActionButtonType.SECONDARY,
           handler: () => {
-            if (dashboardApi) {
+            // sidebar in dashboard experience - synchronize dashboard app to attachment
+            if (dashboardApi && canWriteDashboards) {
               return previewAttachmentInDashboard({
                 attachment,
                 dashboardApi,
@@ -121,7 +131,25 @@ export const registerDashboardAttachmentUiDefinition = ({
                 updateOrigin,
               });
             }
-
+            // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
+            if (isSidebar && dashboardLocator && canWriteDashboards) {
+              const dashboardState = attachmentDataToDashboardState(attachment.data);
+              return handleEditInDashboard({
+                locator: dashboardLocator,
+                getExistingDashboardId: async () => {
+                  if (!attachment.origin) {
+                    return undefined;
+                  }
+                  const exists = await checkSavedDashboardExist(attachment.origin);
+                  return exists ? attachment.origin : undefined;
+                },
+                dashboardLocatorParams: {
+                  ...dashboardState,
+                  viewMode: 'edit',
+                },
+              });
+            }
+            // full screen - open canvas
             openCanvas?.();
           },
         },

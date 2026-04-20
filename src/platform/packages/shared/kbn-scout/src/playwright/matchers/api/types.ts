@@ -110,4 +110,6 @@ export interface AsymmetricMatchers {
   arrayContaining<T>(expected: T[]): AsymmetricMatcher;
   /** Matches an object that contains and matches all of the properties in the expected object */
   objectContaining<T extends Record<string, unknown>>(expected: T): AsymmetricMatcher;
+  /** Matches a string that contains the expected substring */
+  stringContaining(expected: string): AsymmetricMatcher;
 }

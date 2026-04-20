@@ -21,6 +21,7 @@ const streams = [
     queries: [
       {
         id: 'logs-query',
+        type: 'match',
         title: 'logs-query',
         description: '',
         esql: { query: 'FROM logs | WHERE level == "error"' },
@@ -37,6 +38,7 @@ const streams = [
     queries: [
       {
         id: 'hello-query',
+        type: 'match',
         title: 'hello-query',
         description: '',
         esql: { query: 'FROM logs | WHERE greeting == "hello"' },
@@ -65,6 +67,7 @@ describe('content pack export', () => {
         queries: [
           {
             id: 'logs-query',
+            type: 'match',
             title: 'logs-query',
             description: '',
             esql: { query: 'FROM logs | WHERE level == "error"' },
@@ -81,6 +84,7 @@ describe('content pack export', () => {
         queries: [
           {
             id: 'hello-query',
+            type: 'match',
             title: 'hello-query',
             description: '',
             esql: { query: 'FROM logs | WHERE greeting == "hello"' },
@@ -123,6 +127,7 @@ describe('content pack export', () => {
         queries: [
           {
             id: 'hello-query',
+            type: 'match',
             title: 'hello-query',
             description: '',
             esql: { query: 'FROM logs | WHERE greeting == "hello"' },

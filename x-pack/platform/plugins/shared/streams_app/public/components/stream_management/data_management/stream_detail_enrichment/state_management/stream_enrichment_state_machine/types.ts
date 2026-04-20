@@ -15,6 +15,7 @@ import type {
   StreamlangDSL,
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
+  StreamlangUIBranch,
   StreamlangValidationError,
 } from '@kbn/streamlang';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -124,7 +125,10 @@ export type StreamEnrichmentEvent =
   | {
       type: 'step.addProcessor';
       step?: StreamlangProcessorDefinition;
-      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+      options?: {
+        parentId: StreamlangStepWithUIAttributes['parentId'];
+        branch?: StreamlangUIBranch;
+      };
     }
   | {
       type: 'step.duplicateProcessor';
@@ -133,14 +137,17 @@ export type StreamEnrichmentEvent =
   | {
       type: 'step.addCondition';
       step?: StreamlangConditionBlock;
-      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+      options?: {
+        parentId: StreamlangStepWithUIAttributes['parentId'];
+        branch?: StreamlangUIBranch;
+      };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   | {
       type: 'step.reorderByDragDrop';
       sourceStepId: string;
       targetStepId: string;
-      operation: 'before' | 'after' | 'inside';
+      operation: 'before' | 'after' | 'inside' | 'inside-else';
     }
   // YAML events forwarded to YAML mode machine
   | { type: 'yaml.contentChanged'; streamlangDSL: StreamlangDSL; yaml: string }

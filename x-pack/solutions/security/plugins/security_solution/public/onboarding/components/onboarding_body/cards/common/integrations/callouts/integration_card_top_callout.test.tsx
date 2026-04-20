@@ -16,6 +16,12 @@ jest.mock('../../../../../hooks/use_onboarding_service', () => ({
   useOnboardingService: jest.fn(),
 }));
 
+jest.mock('react-router-dom', () => ({
+  matchPath: jest.fn(),
+  useLocation: jest.fn().mockReturnValue({
+    pathname: '/test-path',
+  }),
+}));
 jest.mock('./agentless_available_callout');
 jest.mock('./active_integrations_callout');
 jest.mock('./endpoint_callout');

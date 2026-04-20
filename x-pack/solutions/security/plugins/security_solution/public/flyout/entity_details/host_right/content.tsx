@@ -71,7 +71,10 @@ export const HostPanelContent = ({
   return (
     <>
       {!skipRiskAndCriticality && isEntityDetailsHighlightsAIEnabled && (
-        <EntityHighlightsAccordion entityIdentifier={hostName} entityType={EntityType.host} />
+        <EntityHighlightsAccordion
+          entityIdentifier={entityRecord ? entityRecord.entity.id : hostName}
+          entityType={EntityType.host}
+        />
       )}
       {!skipRiskAndCriticality &&
         riskScoreState.hasEngineBeenInstalled &&
@@ -91,7 +94,12 @@ export const HostPanelContent = ({
         )}
       {entityStoreEntityId && !isPreviewMode && hasEntityResolutionLicense && (
         <>
-          <ResolutionSection entityId={entityStoreEntityId} openDetailsPanel={openDetailsPanel} />
+          <ResolutionSection
+            entityId={entityStoreEntityId}
+            entityType={EntityType.host}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
           <EuiHorizontalRule />
         </>
       )}

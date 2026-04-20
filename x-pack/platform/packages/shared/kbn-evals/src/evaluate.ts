@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { hostname as osHostname } from 'os';
 import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inference-common';
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
@@ -27,7 +28,12 @@ import {
   checkEvaluationsPluginEnabled,
 } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
-import { mapToEvaluationScoreDocuments, exportEvaluations } from './utils/report_model_score';
+import {
+  mapToEvaluationScoreDocuments,
+  exportEvaluations,
+  buildSingleScoreDocument,
+} from './utils/report_model_score';
+import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
@@ -324,6 +330,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           }
         : undefined;
 
+      const incrementalGitMetadata = getGitMetadata();
+      const incrementalHostName = osHostname();
+
       const executorClient = new KibanaEvalsClient({
         log,
         model,
@@ -331,6 +340,19 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         repetitions,
         upsertDataset,
         getDatasetByName,
+        onEvaluationComplete: async (event) => {
+          const document = buildSingleScoreDocument({
+            event,
+            taskModel: model,
+            evaluatorModel,
+            runId: currentRunId,
+            totalRepetitions: repetitions,
+            timestamp: new Date().toISOString(),
+            gitMetadata: incrementalGitMetadata,
+            hostName: incrementalHostName,
+          });
+          await scoreRepository.indexSingleScore(document);
+        },
       });
 
       await use(executorClient);

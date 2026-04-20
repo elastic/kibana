@@ -52,10 +52,9 @@ export {
   type FilterType,
 } from './src/filters';
 
-// Query parser pipeline — implement `QueryParser` to add a new filter type.
+// Created By filter.
 export {
-  parseFiltersFromQuery,
-  useTagQueryParser,
-  type QueryParser,
-  type QueryParserResult,
+  CreatedByFilter,
+  CreatedByFilterRenderer,
+  type CreatedByFilterRendererProps,
 } from './src/filters';

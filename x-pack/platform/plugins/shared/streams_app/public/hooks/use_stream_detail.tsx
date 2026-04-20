@@ -45,6 +45,7 @@ export function StreamDetailContextProvider({
       },
     },
   } = useKibana();
+  const canManageInUi = typeof canManage === 'boolean' ? canManage : false;
   const {
     value: definition,
     loading,
@@ -61,18 +62,18 @@ export function StreamDetailContextProvider({
             },
           },
         })
-        .then((response) => {
+        .then((response): Streams.all.GetResponse => {
           if (Streams.ingest.all.GetResponse.is(response)) {
             // Replicated streams (via CCR) can still have Kibana-side metadata edited
             // (description, dashboards, queries, rules) but not ingest-level settings.
-            const isReplicated = 'replicated' in response && response.replicated === true;
+            const isReplicated = response.replicated === true;
             return {
               ...response,
               privileges: {
                 ...response.privileges,
                 // restrict the manage privilege by the Elasticsearch-level data-stream specific privilege and the Kibana-level UI privilege
                 // the UI should only enable manage features if the user has privileges on both levels for the current stream
-                manage: response.privileges.manage && canManage,
+                manage: response.privileges.manage && canManageInUi,
                 lifecycle: response.privileges.lifecycle && !isReplicated,
                 simulate: response.privileges.simulate && !isReplicated,
               },
@@ -86,7 +87,7 @@ export function StreamDetailContextProvider({
           throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },
-    [streamsRepositoryClient, name, canManage]
+    [streamsRepositoryClient, name, canManageInUi]
   );
 
   const {

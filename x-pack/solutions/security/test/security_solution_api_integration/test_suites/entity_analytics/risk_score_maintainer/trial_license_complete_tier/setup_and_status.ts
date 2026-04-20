@@ -7,19 +7,21 @@
 
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
+import {
+  getDefaultRiskEngineConfiguration,
+  getRiskEngineConfigurationSavedObjectId,
+} from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/utils/saved_object_configuration';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   EntityStoreUtils,
   riskEngineRouteHelpersFactory,
   entityMaintainerRouteHelpersFactory,
-  waitForMaintainerRun,
   cleanUpRiskScoreMaintainer,
 } from '../../utils';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const spaces = getService('spaces');
-  const retry = getService('retry');
   const es = getService('es');
   const log = getService('log');
   const customSpaceName = 'ea-customspace-it';
@@ -33,6 +35,46 @@ export default ({ getService }: FtrProviderContext) => {
 
   const entityStoreUtils = EntityStoreUtils(getService);
   const entityStoreUtilsCustomSpace = EntityStoreUtils(getService, customSpaceName);
+
+  const listRiskEngineConfigs = async (spaceId?: string) => {
+    const soResponse = await kibanaServer.savedObjects.find({
+      type: riskEngineConfigurationTypeName,
+      ...(spaceId ? { space: spaceId } : {}),
+    });
+    return soResponse.saved_objects;
+  };
+
+  const deleteRiskEngineConfigs = async (spaceId?: string) => {
+    const savedObjects = await listRiskEngineConfigs(spaceId);
+    for (const savedObject of savedObjects) {
+      await kibanaServer.savedObjects.delete({
+        type: riskEngineConfigurationTypeName,
+        id: savedObject.id,
+        ...(spaceId ? { space: spaceId } : {}),
+      });
+    }
+  };
+
+  const createLegacyRiskEngineConfig = async ({
+    id,
+    spaceId,
+    attributes,
+  }: {
+    id: string;
+    spaceId?: string;
+    attributes?: Record<string, unknown>;
+  }) => {
+    await kibanaServer.savedObjects.create({
+      id,
+      type: riskEngineConfigurationTypeName,
+      overwrite: false,
+      ...(spaceId ? { space: spaceId } : {}),
+      attributes: {
+        ...getDefaultRiskEngineConfiguration({ namespace: spaceId ?? 'default' }),
+        ...attributes,
+      },
+    });
+  };
 
   const enableEntityStoreV2Setting = async (namespace: string = 'default') => {
     let settingsUrl = '/internal/kibana/settings';
@@ -51,13 +93,11 @@ export default ({ getService }: FtrProviderContext) => {
     spaceId: string,
     maintainerRoutesHelper: ReturnType<typeof entityMaintainerRouteHelpersFactory>
   ) => {
-    const isDefaultSpace = spaceId === 'default';
-    const soResponse = await kibanaServer.savedObjects.find({
-      type: riskEngineConfigurationTypeName,
-      ...(isDefaultSpace ? {} : { namespace: spaceId }),
-    });
-
-    expect(soResponse.saved_objects.length).to.eql(1);
+    const savedObjects = await listRiskEngineConfigs(spaceId === 'default' ? undefined : spaceId);
+    expect(savedObjects.length).to.eql(1);
+    expect(savedObjects[0].id).to.eql(
+      getRiskEngineConfigurationSavedObjectId({ namespace: spaceId })
+    );
 
     const componentTemplateName = `.risk-score-mappings-${spaceId}`;
     const indexTemplateName = `.risk-score.risk-score-${spaceId}-index-template`;
@@ -103,6 +143,8 @@ export default ({ getService }: FtrProviderContext) => {
       await entityStoreUtilsCustomSpace.cleanEngines();
       await cleanUpRiskScoreMaintainer({ es, log });
       await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
+      await deleteRiskEngineConfigs();
+      await deleteRiskEngineConfigs(customSpaceName);
     });
 
     afterEach(async () => {
@@ -110,6 +152,8 @@ export default ({ getService }: FtrProviderContext) => {
       await entityStoreUtilsCustomSpace.cleanEngines();
       await cleanUpRiskScoreMaintainer({ es, log });
       await cleanUpRiskScoreMaintainer({ es, log, namespace: customSpaceName });
+      await deleteRiskEngineConfigs();
+      await deleteRiskEngineConfigs(customSpaceName);
     });
 
     after(async () => {
@@ -130,12 +174,46 @@ export default ({ getService }: FtrProviderContext) => {
         await riskEngineRoutes.getStatus(400);
       });
 
+      it('adopts a legacy risk score config into the fixed saved object id', async () => {
+        const legacyId = 'legacy-risk-engine-configuration';
+        await createLegacyRiskEngineConfig({
+          id: legacyId,
+          attributes: {
+            pageSize: 1234,
+            enableResetToZero: false,
+            excludeAlertStatuses: ['open'],
+            filters: [{ entity_types: ['host'], filter: 'host.name:*' }],
+          },
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['host'],
+          waitForEntities: false,
+          maintainerAutoStart: false,
+        });
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const savedObjects = await listRiskEngineConfigs();
+        expect(savedObjects.length).to.eql(1);
+        expect(savedObjects[0].id).to.eql(
+          getRiskEngineConfigurationSavedObjectId({ namespace: 'default' })
+        );
+        expect(savedObjects[0].attributes.pageSize).to.eql(1234);
+        expect(savedObjects[0].attributes.enableResetToZero).to.eql(false);
+        expect(savedObjects[0].attributes.excludeAlertStatuses).to.eql(['open']);
+        expect(savedObjects[0].attributes.filters).to.eql([
+          { entity_types: ['host'], filter: 'host.name:*' },
+        ]);
+        expect(savedObjects.some(({ id }) => id === legacyId)).to.be(false);
+      });
+
       it('should setup risk score assets and configuration when entity store is enabled', async () => {
         await entityStoreUtils.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
+          maintainerAutoStart: false,
         });
-        await waitForMaintainerRun({ retry, routes: maintainerRoutes });
+        await maintainerRoutes.runMaintainerSync('risk-score');
 
         await checkAssets('default', maintainerRoutes);
       });
@@ -144,8 +222,9 @@ export default ({ getService }: FtrProviderContext) => {
         await entityStoreUtilsCustomSpace.installEntityStoreV2({
           entityTypes: ['host'],
           waitForEntities: false,
+          maintainerAutoStart: false,
         });
-        await waitForMaintainerRun({ retry, routes: maintainerRoutesCustomSpace });
+        await maintainerRoutesCustomSpace.runMaintainerSync('risk-score');
 
         await checkAssets(customSpaceName, maintainerRoutesCustomSpace);
       });

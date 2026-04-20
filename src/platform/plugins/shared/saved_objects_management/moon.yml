@@ -43,6 +43,7 @@ dependsOn:
   - '@kbn/shared-ux-table-persist'
   - '@kbn/css-utils'
   - '@kbn/content-management-plugin'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -54,6 +55,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout*/**/*
     - '!target/**/*'
     - '!public/management_section/objects_table/saved_objects_table_pseudo.tsx'
   jest-config:

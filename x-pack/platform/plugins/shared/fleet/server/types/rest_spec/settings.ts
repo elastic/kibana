@@ -54,6 +54,7 @@ const EnrollmentSettingsOutputSchema = schema.object({
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   allow_edit: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   preset: schema.maybe(

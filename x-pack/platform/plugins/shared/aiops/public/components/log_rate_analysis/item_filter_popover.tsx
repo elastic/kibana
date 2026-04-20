@@ -220,7 +220,6 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
               onClick={() => {
                 onChange(skippedItems);
                 setItemSearchText('');
-                setIsItemSelectionPopoverOpen(false);
                 closePopover();
               }}
               disabled={disabledApplyButton || selectedItemCount < selectedItemLimit || !isTouched}

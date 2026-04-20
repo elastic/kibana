@@ -95,6 +95,7 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/kbn-client"
   ]
 }

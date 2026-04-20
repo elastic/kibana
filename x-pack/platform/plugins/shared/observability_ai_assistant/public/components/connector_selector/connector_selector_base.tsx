@@ -55,7 +55,7 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="danger">
             {i18n.translate('xpack.observabilityAiAssistant.connectorSelector.error', {
-              defaultMessage: 'Failed to load connectors',
+              defaultMessage: 'Failed to load models',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -69,7 +69,7 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="warning">
             {i18n.translate('xpack.observabilityAiAssistant.connectorSelector.empty', {
-              defaultMessage: 'No connectors',
+              defaultMessage: 'No models',
             })}
           </EuiText>
         </EuiFlexItem>
@@ -88,9 +88,9 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
       <EuiFlexItem grow>
         <EuiSuperSelect
           aria-label={i18n.translate(
-            'xpack.observabilityAiAssistant.connectorSelector.connectorSelectAriaLabel',
+            'xpack.observabilityAiAssistant.connectorSelector.modelSelectAriaLabel',
             {
-              defaultMessage: 'Connector',
+              defaultMessage: 'Model',
             }
           )}
           compressed
@@ -102,9 +102,9 @@ export function ConnectorSelectorBase(props: ConnectorSelectorBaseProps) {
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued">
                     {i18n.translate(
-                      'xpack.observabilityAiAssistant.connectorSelector.connectorSelectLabel',
+                      'xpack.observabilityAiAssistant.connectorSelector.modelSelectLabel',
                       {
-                        defaultMessage: 'Connector:',
+                        defaultMessage: 'Model:',
                       }
                     )}
                   </EuiText>
