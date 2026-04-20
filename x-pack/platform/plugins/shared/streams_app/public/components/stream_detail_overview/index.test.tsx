@@ -20,7 +20,6 @@ jest.mock('../../hooks/use_stream_detail', () => ({
   useStreamDetail: () => mockUseStreamDetail(),
 }));
 
-
 jest.mock('./data_quality_card', () => ({
   DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
 }));
