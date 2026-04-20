@@ -604,7 +604,7 @@
           "\nA list of allowed values that can be used in `xpack.osquery.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly queryHistoryRework: false; readonly unifiedDataTable: false; }"
+          "{ readonly queryHistoryRework: true; readonly unifiedDataTable: true; }"
         ],
         "path": "x-pack/platform/plugins/shared/osquery/common/experimental_features.ts",
         "lineNumber": 12,

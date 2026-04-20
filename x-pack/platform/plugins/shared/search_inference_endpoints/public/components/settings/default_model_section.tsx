@@ -18,9 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { NO_DEFAULT_MODEL } from '../../../common/constants';
-import * as i18n from '../../../common/translations';
 import { useConnectors } from '../../hooks/use_connectors';
 import { useConnectorExists } from '../../hooks/use_connector_exists';
 import type { UseDefaultModelSettingsReturn } from '../../hooks/use_default_model_settings';
@@ -30,7 +30,9 @@ interface Props {
 }
 
 const NoDefaultOption: EuiComboBoxOptionOption<string> = {
-  label: i18n.DEFAULT_MODEL_NO_DEFAULT_OPTION,
+  label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.noDefault', {
+    defaultMessage: 'No default model',
+  }),
   value: NO_DEFAULT_MODEL,
 };
 
@@ -48,12 +50,19 @@ const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<
   return [
     NoDefaultOption,
     {
-      label: i18n.DEFAULT_MODEL_PRECONFIGURED_GROUP,
+      label: i18n.translate(
+        'xpack.searchInferenceEndpoints.settings.defaultModel.preconfiguredGroup',
+        {
+          defaultMessage: 'Pre-configured',
+        }
+      ),
       value: 'preconfigured',
       options: preconfigured,
     },
     {
-      label: i18n.DEFAULT_MODEL_CUSTOM_GROUP,
+      label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.customGroup', {
+        defaultMessage: 'Custom connectors',
+      }),
       value: 'custom',
       options: custom,
     },
@@ -76,7 +85,7 @@ const getSelectedOptions = (
 
 export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) => {
   const { state, setDefaultModelId, setDisallowOtherModels } = defaultModelSettings;
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
   const { exists: connectorExists, loading: connectorExistsLoading } = useConnectorExists(
     state.defaultModelId
   );
@@ -90,10 +99,25 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
   const validationErrors = useMemo(() => {
     const errors: string[] = [];
     if (!connectorExists && !connectorExistsLoading && state.defaultModelId !== NO_DEFAULT_MODEL) {
-      errors.push(i18n.DEFAULT_MODEL_CONNECTOR_NOT_EXIST_ERROR);
+      errors.push(
+        i18n.translate(
+          'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
+          {
+            defaultMessage:
+              'The model previously selected is not available. Please select a different option.',
+          }
+        )
+      );
     }
     if (state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL) {
-      errors.push(i18n.DEFAULT_MODEL_DISALLOW_NO_DEFAULT_ERROR);
+      errors.push(
+        i18n.translate(
+          'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
+          {
+            defaultMessage: 'When disallowing all other models, a default model must be selected.',
+          }
+        )
+      );
     }
     return errors;
   }, [connectorExists, connectorExistsLoading, state.defaultModelId, state.disallowOtherModels]);
@@ -118,22 +142,40 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem>
                 <EuiTitle size="xs">
-                  <h3 data-test-subj="defaultModelTitle">{i18n.DEFAULT_MODEL_TITLE}</h3>
+                  <h3 data-test-subj="defaultModelTitle">
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.title', {
+                      defaultMessage: 'Default model',
+                    })}
+                  </h3>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
-          description={<p>{i18n.DEFAULT_MODEL_DESCRIPTION}</p>}
+          description={
+            <p>
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.description', {
+                defaultMessage:
+                  'Choose a default model for all AI features. Individual features can override this with their own model.',
+              })}
+            </p>
+          }
         >
           <EuiFormRow
             fullWidth
-            label={i18n.DEFAULT_MODEL_LABEL}
+            label={i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.label', {
+              defaultMessage: 'Default model',
+            })}
             isInvalid={validationErrors.length > 0}
             error={validationErrors}
           >
             <EuiComboBox
               data-test-subj="defaultModelComboBox"
-              placeholder={i18n.DEFAULT_MODEL_PLACEHOLDER}
+              placeholder={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.defaultModel.placeholder',
+                {
+                  defaultMessage: 'Select a default model',
+                }
+              )}
               singleSelection={{ asPlainText: true }}
               options={options}
               selectedOptions={selectedOptions}
@@ -159,7 +201,12 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
             <EuiSwitch
               id="disallowOtherModelsCheckbox"
               data-test-subj="disallowOtherModelsCheckbox"
-              label={i18n.DISALLOW_OTHER_MODELS_LABEL}
+              label={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
+                {
+                  defaultMessage: 'Only allow the default model to be used.',
+                }
+              )}
               checked={state.disallowOtherModels}
               onChange={(e) => onChangeDisallow(e.target.checked)}
             />
@@ -167,8 +214,20 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
               {state.disallowOtherModels
-                ? i18n.DISALLOW_OTHER_MODELS_DESCRIPTION
-                : i18n.ALLOW_OTHER_MODELS_DESCRIPTION}
+                ? i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.description',
+                    {
+                      defaultMessage:
+                        'Model selection is hidden and only the default model will be used.',
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
+                    {
+                      defaultMessage:
+                        'Features can allow users to select other models than the default.',
+                    }
+                  )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

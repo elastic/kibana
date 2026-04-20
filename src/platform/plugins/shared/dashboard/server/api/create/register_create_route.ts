@@ -28,6 +28,7 @@ export function registerCreateRoute(
     path: basePath,
     summary: 'Create a dashboard',
     ...routeConfig,
+    description: 'Creates a new dashboard and returns its ID, full state, and metadata.',
   });
 
   // Do not call getDashboardStateSchema when registering route.
