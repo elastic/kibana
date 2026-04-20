@@ -13,7 +13,8 @@ import type { RangeSliderControlState } from '@kbn/controls-schemas';
 import type { DataControlApi } from '../types';
 
 export type RangeSliderControlApi = DefaultEmbeddableApi<RangeSliderControlState> &
-  DataControlApi & PublishesUnsavedChanges & {
+  DataControlApi &
+  PublishesUnsavedChanges & {
     clearSelections: () => void;
     hasSelections$: PublishingSubject<boolean | undefined>;
   };

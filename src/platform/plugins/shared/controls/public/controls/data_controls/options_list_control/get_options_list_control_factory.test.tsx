@@ -273,15 +273,15 @@ describe('Options List Control Api', () => {
   });
 
   describe('unsaved changes', () => {
-    test('should have unsaved changes when data view id changes', async () => {
+    test('should have unsaved changes when there are changes', async () => {
       const lastSavedState = optionsListDSLControlSchema.validate({
         data_view_id: 'oldDataViewId',
         field_name: 'myFieldName',
       });
       const initialState = {
         ...lastSavedState,
-        data_view_id: 'newDataViewId'
-      }
+        data_view_id: 'newDataViewId',
+      };
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,

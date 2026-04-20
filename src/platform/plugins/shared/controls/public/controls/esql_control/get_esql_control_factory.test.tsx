@@ -10,7 +10,10 @@
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, ESQLVariableType } from '@kbn/esql-types';
-import { optionsListESQLControlSchema, type OptionsListESQLControlState } from '@kbn/controls-schemas';
+import {
+  optionsListESQLControlSchema,
+  type OptionsListESQLControlState,
+} from '@kbn/controls-schemas';
 import { DEFAULT_ESQL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
@@ -204,20 +207,18 @@ describe('ESQLControlApi', () => {
   });
 
   describe('unsaved changes', () => {
-    test('should have unsaved changes when variable_name changes', async () => {
+    test('should have unsaved changes when there are changes', async () => {
       const lastSavedState = optionsListESQLControlSchema.validate({
-        "control_type": "VALUES_FROM_QUERY",
-        "selected_options": [
-          "osx"
-        ],
-        "variable_name": "old name",
-        "variable_type": "values",
-        "esql_query": "from kibana_sample_data_logs | KEEP machine.os.keyword"
+        control_type: 'VALUES_FROM_QUERY',
+        selected_options: ['osx'],
+        variable_name: 'old name',
+        variable_type: 'values',
+        esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
       });
       const initialState = {
         ...lastSavedState,
-        variable_name: "new name"
-      }
+        variable_name: 'new name',
+      };
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState,
@@ -234,13 +235,11 @@ describe('ESQLControlApi', () => {
 
     test('should not have unsaved changes when there are no changes', async () => {
       const initialState = optionsListESQLControlSchema.validate({
-        "control_type": "VALUES_FROM_QUERY",
-        "selected_options": [
-          "osx"
-        ],
-        "variable_name": "machineOs",
-        "variable_type": "values",
-        "esql_query": "from kibana_sample_data_logs | KEEP machine.os.keyword"
+        control_type: 'VALUES_FROM_QUERY',
+        selected_options: ['osx'],
+        variable_name: 'machineOs',
+        variable_type: 'values',
+        esql_query: 'from kibana_sample_data_logs | KEEP machine.os.keyword',
       });
       const embeddable = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),

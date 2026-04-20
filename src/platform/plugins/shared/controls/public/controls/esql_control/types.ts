@@ -29,7 +29,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
   PublishesESQLVariable &
-  PublishesUnsavedChanges & 
+  PublishesUnsavedChanges &
   HasEditCapabilities &
   PublishesDataLoading &
   ReturnType<typeof initializeLabelManager>['api'];
