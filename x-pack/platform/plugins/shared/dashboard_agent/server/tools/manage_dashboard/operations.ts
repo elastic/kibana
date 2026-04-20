@@ -16,7 +16,6 @@ import type {
 import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
 import {
   appendPanelsToDashboard,
   findPanelById,
@@ -45,7 +44,7 @@ export const addMarkdownOperationSchema = z.object({
     .string()
     .optional()
     .describe(
-      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+      'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
     ),
 });
 
@@ -65,7 +64,7 @@ export const addPanelsFromAttachmentsOperationSchema = z.object({
           .string()
           .optional()
           .describe(
-            'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+            'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
           ),
       })
     )
@@ -113,7 +112,7 @@ export const addSectionOperationSchema = z.object({
 
 export const removeSectionOperationSchema = z.object({
   operation: z.literal('remove_section'),
-  uid: z.string().describe('Section uid to remove.'),
+  id: z.string().describe('Section id to remove.'),
   panelAction: z
     .enum(['promote', 'delete'])
     .describe('How to handle section panels: promote to top-level or delete them.'),
@@ -129,7 +128,7 @@ const createVisualizationPanelSchema = visualizationPanelInputSchema.extend({
     .string()
     .optional()
     .describe(
-      'UID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
+      'ID of an existing section to add this panel into. The section must already exist (use add_section first). If omitted, panel is added at the top level.'
     ),
 });
 
@@ -139,7 +138,7 @@ export const createVisualizationPanelsOperationSchema = z.object({
 });
 
 const editVisualizationPanelSchema = z.object({
-  panelId: z.string().describe('Existing panel uid to update.'),
+  panelId: z.string().describe('Existing panel id to update.'),
   query: z
     .string()
     .describe('A natural language query describing how to update the visualization.'),
@@ -171,7 +170,7 @@ export const updatePanelLayoutsOperationSchema = z.object({
   panels: z
     .array(
       z.object({
-        panelId: z.string().describe('UID of the panel to update.'),
+        panelId: z.string().describe('ID of the panel to update.'),
         grid: panelGridSchema
           .optional()
           .describe('New grid position/size. Omit to keep the current grid.'),
@@ -180,7 +179,7 @@ export const updatePanelLayoutsOperationSchema = z.object({
           .nullable()
           .optional()
           .describe(
-            'Move panel to an existing section by its uid. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
+            'Move panel to an existing section by its id. The section must already exist (use add_section first). null promotes to top level. Omit to keep the current location.'
           ),
       })
     )
@@ -368,10 +367,12 @@ const materializeResolvedVisualizationPanels = ({
 
     successfulPanels.push({
       request,
-      panel: toEmbeddablePanel({
-        ...resolvedPanel.visContent,
+      panel: {
+        id: uuidv4(),
+        type: resolvedPanel.visContent.type,
+        config: resolvedPanel.visContent.config,
         grid: request.panelInput.grid,
-      }),
+      },
     });
   }
 
@@ -416,11 +417,12 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = toEmbeddablePanel({
+        const markdownPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: operation.markdownContent },
           grid: operation.grid,
-        });
+          id: uuidv4(),
+        };
         nextDashboardData = appendPanelsToDashboard({
           dashboardData: nextDashboardData,
           panelsToAdd: [markdownPanel],
@@ -511,10 +513,10 @@ export const executeDashboardOperations = async ({
             dashboardData: nextDashboardData,
             panelId: panelInput.panelId,
             transformPanel: (panel) => ({
-              ...toEmbeddablePanel({
+              ...{
                 ...panel,
                 ...resolvedPanel.visContent,
-              }),
+              },
             }),
           });
 
@@ -591,7 +593,7 @@ export const executeDashboardOperations = async ({
 
       case 'add_section': {
         let nextSection: DashboardSection = {
-          uid: uuidv4(),
+          id: uuidv4(),
           title: operation.title,
           collapsed: false,
           grid: operation.grid,
@@ -622,9 +624,9 @@ export const executeDashboardOperations = async ({
       }
 
       case 'remove_section': {
-        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.uid);
+        const sectionIndex = findSectionIndex(nextDashboardData.panels, operation.id);
         if (sectionIndex === -1) {
-          throw new Error(`Section "${operation.uid}" not found.`);
+          throw new Error(`Section "${operation.id}" not found.`);
         }
 
         const sectionToRemove = nextDashboardData.panels[sectionIndex] as DashboardSection;

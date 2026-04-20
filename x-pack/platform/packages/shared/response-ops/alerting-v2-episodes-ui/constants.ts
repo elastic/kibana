@@ -6,5 +6,8 @@
  */
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
+export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
 export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
+export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
+export const TIME_FIELD = '@timestamp';

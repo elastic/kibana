@@ -33,7 +33,7 @@ export const panelGridSchema = z.object({
  */
 const attachmentPanelSchema = z.object({
   type: z.string(),
-  uid: z.string(),
+  id: z.string(),
   config: z.record(z.string(), z.unknown()),
   grid: panelGridSchema,
 });
@@ -49,7 +49,7 @@ export const sectionGridSchema = z.object({
 });
 
 const dashboardSectionSchema = z.object({
-  uid: z.string(),
+  id: z.string(),
   title: z.string(),
   collapsed: z.boolean(),
   grid: sectionGridSchema,

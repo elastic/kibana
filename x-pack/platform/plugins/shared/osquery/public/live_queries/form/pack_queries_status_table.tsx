@@ -174,6 +174,7 @@ interface PackQueriesStatusTableProps {
   executionCount?: number;
   packName?: string;
   tags?: string[];
+  onSaveQuery?: () => void;
 }
 
 const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = ({
@@ -189,6 +190,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   executionCount,
   packName,
   tags,
+  onSaveQuery,
 }) => {
   const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const [queryDetailsFlyoutOpen, setQueryDetailsFlyoutOpen] = useState<{
@@ -674,6 +676,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
           addToTimeline={addToTimeline}
           isScheduled={!!scheduleId}
+          onSaveQuery={onSaveQuery}
         />
       )}
       <EuiBasicTable

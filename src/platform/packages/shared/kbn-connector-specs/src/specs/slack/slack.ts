@@ -14,7 +14,6 @@ import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
-const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
 // Slack API/connector constants (avoid magic numbers)
@@ -39,82 +38,37 @@ const SlackSearchMessagesInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.query.description',
-        {
-          defaultMessage:
-            'Search query to find messages (supports Slack search operators; see optional constraint fields)',
-        }
-      )
+      'Plain text search query to find messages. Do NOT embed Slack search operators like from: or in: here — use the dedicated fromUser, inChannel, after, and before parameters instead. Keep queries focused on a few keywords rather than long phrases for better results.'
     ),
   inChannel: z
     .string()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.inChannel.description',
-        {
-          defaultMessage:
-            'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).',
-        }
-      )
+      'Optional Slack search constraint. Adds `in:CHANNEL_NAME` to the query (e.g. in:general).'
     ),
   fromUser: z
     .string()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.fromUser.description',
-        {
-          defaultMessage:
-            'Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query.',
-        }
-      )
+      "Optional Slack search constraint. Adds `from:USER_ID` (e.g. from:U012ABCDEF) or `from:username` to the query. Accepts a Slack username or user ID, NOT a full name. If you only know a person's full name, search for it as keywords in the query parameter first, then use the sender.username field from results for subsequent filtered searches."
     ),
   after: z
     .string()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.after.description',
-        {
-          defaultMessage:
-            'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).',
-        }
-      )
+      'Optional Slack search constraint. Adds `after:YYYY-MM-DD` to the query (e.g. after:2026-02-10).'
     ),
   before: z
     .string()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.before.description',
-        {
-          defaultMessage:
-            'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).',
-        }
-      )
+      'Optional Slack search constraint. Adds `before:YYYY-MM-DD` to the query (e.g. before:2026-02-10).'
     ),
   sort: z
     .enum(['score', 'timestamp'])
     .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sort.description',
-        {
-          defaultMessage: 'Sort order: score (relevance) or timestamp',
-        }
-      )
-    ),
-  sortDir: z
-    .enum(['asc', 'desc'])
-    .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.sortDir.description',
-        { defaultMessage: 'Sort direction' }
-      )
-    ),
+    .describe('Sort order: score (relevance) or timestamp'),
+  sortDir: z.enum(['asc', 'desc']).optional().describe('Sort direction'),
   count: z
     .number()
     .int()
@@ -122,72 +76,31 @@ const SlackSearchMessagesInputSchema = z.object({
     .max(SLACK_MAX_SEARCH_RESULTS_PER_PAGE)
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.count.description',
-        {
-          defaultMessage: `Number of results to return (1-${SLACK_MAX_SEARCH_RESULTS_PER_PAGE}). Slack returns up to ${SLACK_MAX_SEARCH_RESULTS_PER_PAGE} results per page.`,
-        }
-      )
+      `Number of results to return (1-${SLACK_MAX_SEARCH_RESULTS_PER_PAGE}). Slack returns up to ${SLACK_MAX_SEARCH_RESULTS_PER_PAGE} results per page.`
     ),
   cursor: z
     .string()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.cursor.description',
-        {
-          defaultMessage:
-            'Pagination cursor to fetch the next page of results (use response_metadata.next_cursor from a previous call).',
-        }
-      )
+      'Pagination cursor to fetch the next page of results (use response_metadata.next_cursor from a previous call).'
     ),
   includeContextMessages: z
     .boolean()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.includeContextMessages.description',
-        {
-          defaultMessage:
-            'Include contextual messages (messages before/after the matched message, or thread context). Defaults to true.',
-        }
-      )
+      'Include contextual messages (messages before/after the matched message, or thread context). Defaults to true.'
     ),
-  includeBots: z
-    .boolean()
-    .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.includeBots.description',
-        {
-          defaultMessage: 'Include bot-authored messages. Defaults to false.',
-        }
-      )
-    ),
+  includeBots: z.boolean().optional().describe('Include bot-authored messages. Defaults to false.'),
   includeMessageBlocks: z
     .boolean()
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.includeMessageBlocks.description',
-        {
-          defaultMessage:
-            'Include Block Kit blocks in message results (useful for extracting mentions/links). Defaults to true.',
-        }
-      )
+      'Include Block Kit blocks in message results (useful for extracting mentions/links). Defaults to true.'
     ),
   raw: z
     .boolean()
     .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.input.raw.description',
-        {
-          defaultMessage:
-            'Return the full raw Slack API response instead of a compact, LLM-friendly result.',
-        }
-      )
-    ),
+    .describe('Return the full raw Slack API response instead of a compact, LLM-friendly result.'),
 });
 type SlackSearchMessagesInput = z.infer<typeof SlackSearchMessagesInputSchema>;
 
@@ -196,56 +109,25 @@ const SlackResolveChannelIdInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.name.description',
-        {
-          defaultMessage:
-            'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).',
-        }
-      )
+      'Channel name to resolve (e.g. "general" or "#general"). Returns the matching conversation ID (C.../G...).'
     ),
   types: z
     .array(z.enum(SLACK_CONVERSATION_TYPES))
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.types.description',
-        {
-          defaultMessage:
-            'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.',
-        }
-      )
+      'Conversation types to search. Defaults to public_channel. Valid: public_channel, private_channel, im, mpim.'
     ),
   match: z
     .enum(['exact', 'contains'])
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.match.description',
-        {
-          defaultMessage:
-            'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.',
-        }
-      )
+      'How to match the channel name. exact is fastest/most precise. contains can help when you only know part of the name.'
     ),
-  excludeArchived: z
-    .boolean()
-    .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.excludeArchived.description',
-        { defaultMessage: 'Exclude archived channels (default true)' }
-      )
-    ),
+  excludeArchived: z.boolean().default(true).describe('Exclude archived channels (default true)'),
   cursor: z
     .string()
     .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.cursor.description',
-        { defaultMessage: 'Optional cursor to resume a previous scan (advanced). Usually omit.' }
-      )
-    ),
+    .describe('Optional cursor to resume a previous scan (advanced). Usually omit.'),
   limit: z
     .number()
     .int()
@@ -253,12 +135,7 @@ const SlackResolveChannelIdInputSchema = z.object({
     .max(SLACK_MAX_CONVERSATIONS_LIST_LIMIT)
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.limit.description',
-        {
-          defaultMessage: `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`,
-        }
-      )
+      `Channels per page to request (1-${SLACK_MAX_CONVERSATIONS_LIST_LIMIT}). Defaults to ${SLACK_DEFAULT_CONVERSATIONS_LIST_LIMIT}.`
     ),
   maxPages: z
     .number()
@@ -267,12 +144,7 @@ const SlackResolveChannelIdInputSchema = z.object({
     .max(SLACK_MAX_RESOLVE_CHANNEL_MAX_PAGES)
     .optional()
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.input.maxPages.description',
-        {
-          defaultMessage: `Maximum number of pages to scan before giving up. Defaults to ${SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES}.`,
-        }
-      )
+      `Maximum number of pages to scan before giving up. Defaults to ${SLACK_DEFAULT_RESOLVE_CHANNEL_MAX_PAGES}.`
     ),
 });
 type SlackResolveChannelIdInput = z.infer<typeof SlackResolveChannelIdInputSchema>;
@@ -282,25 +154,12 @@ const SlackCreateConversationInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.createConversation.input.name.description',
-        {
-          defaultMessage:
-            'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.',
-        }
-      )
+      'Name of the channel to create. Channel names can only contain lowercase letters, numbers, hyphens, and underscores, and must be 80 characters or fewer.'
     ),
   isPrivate: z
     .boolean()
     .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.createConversation.input.isPrivate.description',
-        {
-          defaultMessage: 'Whether to create a private channel. Defaults to false (public).',
-        }
-      )
-    ),
+    .describe('Whether to create a private channel. Defaults to false (public).'),
 });
 type SlackCreateConversationInput = z.infer<typeof SlackCreateConversationInputSchema>;
 
@@ -308,25 +167,12 @@ const SlackInviteToConversationInputSchema = z.object({
   channel: z
     .string()
     .min(1)
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.inviteToConversation.input.channel.description',
-        {
-          defaultMessage: 'The ID of the channel to invite users to (e.g. C... or G...).',
-        }
-      )
-    ),
+    .describe('The ID of the channel to invite users to (e.g. C... or G...).'),
   users: z
     .string()
     .min(1)
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.inviteToConversation.input.users.description',
-        {
-          defaultMessage:
-            'Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234).',
-        }
-      )
+      'Comma-separated list of user IDs to invite to the channel (e.g. U01PWE77HD2,U02ABC1234).'
     ),
 });
 type SlackInviteToConversationInput = z.infer<typeof SlackInviteToConversationInputSchema>;
@@ -336,55 +182,18 @@ const SlackSendMessageInputSchema = z.object({
     .string()
     .min(1)
     .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.channel.description',
-        {
-          defaultMessage:
-            'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.',
-        }
-      )
+      'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs). Use resolveChannelId to discover channel IDs.'
     ),
-  text: z
-    .string()
-    .min(1)
-    .describe(
-      i18n.translate('core.kibanaConnectorSpecs.slack.actions.sendMessage.input.text.description', {
-        defaultMessage: 'The message text to send',
-      })
-    ),
+  text: z.string().min(1).describe('The message text to send'),
   threadTs: z
     .string()
     .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.threadTs.description',
-        {
-          defaultMessage: 'Timestamp of another message to reply to (creates a threaded reply)',
-        }
-      )
-    ),
+    .describe('Timestamp of another message to reply to (creates a threaded reply)'),
   unfurlLinks: z
     .boolean()
     .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.unfurlLinks.description',
-        {
-          defaultMessage: 'Whether to enable unfurling of primarily text-based content',
-        }
-      )
-    ),
-  unfurlMedia: z
-    .boolean()
-    .optional()
-    .describe(
-      i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.sendMessage.input.unfurlMedia.description',
-        {
-          defaultMessage: 'Whether to enable unfurling of media content',
-        }
-      )
-    ),
+    .describe('Whether to enable unfurling of primarily text-based content'),
+  unfurlMedia: z.boolean().optional().describe('Whether to enable unfurling of media content'),
 });
 type SlackSendMessageInput = z.infer<typeof SlackSendMessageInputSchema>;
 
@@ -535,36 +344,18 @@ export const Slack: ConnectorSpec = {
 
   auth: {
     types: [
-      ...(ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH
-        ? ([
-            {
-              type: 'bearer',
-              defaults: {
-                token: '',
-              },
-              overrides: {
-                meta: {
-                  token: {
-                    sensitive: true,
-                    label: i18n.translate(
-                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.label',
-                      {
-                        defaultMessage: 'Temporary Slack user token',
-                      }
-                    ),
-                    helpText: i18n.translate(
-                      'core.kibanaConnectorSpecs.slack.auth.temporaryManualToken.helpText',
-                      {
-                        defaultMessage:
-                          'Temporary option for testing only. Paste a Slack user token (e.g. xoxp-...) here.',
-                      }
-                    ),
-                  },
-                },
-              },
-            },
-          ] as const)
-        : []),
+      {
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://slack.com/oauth/v2/authorize',
+          tokenUrl: 'https://slack.com/api/oauth.v2.access',
+          scope:
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+          scopeParamName: 'user_scope',
+          accessTokenPath: 'authed_user.access_token',
+          tokenType: 'Bearer',
+        },
+      },
     ],
   },
 
@@ -575,13 +366,8 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.searchMessages.description',
-        {
-          defaultMessage:
-            'Search Slack messages using the Real-time Search API (assistant.search.context)',
-        }
-      ),
+      description:
+        'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSearchMessagesInput = SlackSearchMessagesInputSchema.parse(input);
@@ -671,13 +457,8 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.resolveChannelId.description',
-        {
-          defaultMessage:
-            'Look up a Slack channel/conversation ID from a human-readable channel name. Use this before sendMessage when you only know the channel name.',
-        }
-      ),
+      description:
+        'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use this before sendMessage when you only know the channel name — sendMessage requires a channel ID, not a name.',
       input: SlackResolveChannelIdInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackResolveChannelIdInput =
@@ -772,12 +553,8 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.create
     createConversation: {
       isTool: false,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.createConversation.description',
-        {
-          defaultMessage: 'Create a new Slack channel (public or private)',
-        }
-      ),
+      description:
+        'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackCreateConversationInput =
@@ -828,12 +605,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
       isTool: false,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.inviteToConversation.description',
-        {
-          defaultMessage: 'Invite users to a Slack channel',
-        }
-      ),
+      description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackInviteToConversationInput =
@@ -884,12 +656,8 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.slack.actions.sendMessage.description',
-        {
-          defaultMessage: 'Send a message to a Slack channel',
-        }
-      ),
+      description:
+        'Send a message to a Slack channel or DM. Requires a channel ID (use resolveChannelId to look up by name). Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
       input: SlackSendMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackSendMessageInput = SlackSendMessageInputSchema.parse(input);
@@ -985,22 +753,6 @@ export const Slack: ConnectorSpec = {
   },
 
   skill: [
-    '## Slack Connector Usage Guide',
-    '',
-    '### Searching Messages (searchMessages)',
-    '',
-    'Use `searchMessages` to find Slack messages. Important tips:',
-    '',
-    '- The `query` parameter is a plain text search query — do NOT embed Slack search operators like `from:` or `in:` in the query string. Use the dedicated parameters instead:',
-    '  - Use the `fromUser` parameter to filter by sender (accepts a Slack username or user ID, NOT a full name)',
-    '  - Use the `inChannel` parameter to filter by channel name',
-    '  - Use `after` and `before` parameters for date filtering (format: YYYY-MM-DD)',
-    '- If searching for messages from a person and you only know their full name, search for their name as keywords in the `query` parameter instead. Look at the `sender.username` field in results to find their Slack username for subsequent searches.',
-    '- Keep queries focused on a few keywords rather than long phrases for better results.',
-    '- Use `sort: "timestamp"` and `sortDir: "desc"` to find the most recent messages first.',
-    '',
-    '### Sending Messages (sendMessage)',
-    '',
-    'Before sending a message to a channel by name, always use `resolveChannelId` first to get the channel ID, then pass it to `sendMessage` via the `channel` parameter.',
+    'Before sending a message to a channel by name, always call resolveChannelId first to get the channel ID, then pass it to sendMessage.',
   ].join('\n'),
 };

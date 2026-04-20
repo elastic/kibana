@@ -37,6 +37,10 @@ export const GetTracingProjectsRequestQuery = z.object({
    * End of time range (ISO 8601)
    */
   to: z.string().optional(),
+  /**
+   * Filter projects by name (case-insensitive substring match)
+   */
+  name: z.string().optional(),
   page: z.coerce.number().int().min(1).optional().default(1),
   per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
 });

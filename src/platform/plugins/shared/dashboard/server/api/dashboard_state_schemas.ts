@@ -16,7 +16,7 @@ import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
  * Currently, controls are the only pinnable panels. However, if we intend to make this extendable, we should instead
  * get the pinned panel schema from a pinned panel registry **independent** from controls
  */
-import { controlsGroupSchema as pinnedPanelsSchema } from '@kbn/controls-schemas';
+import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -30,23 +30,30 @@ const MAX_PANELS = 100;
 
 export const panelGridSchema = schema.object(
   {
-    x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units' } }),
-    y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units' } }),
+    x: schema.number({ meta: { description: 'The x coordinate of the panel in grid units.' } }),
+    y: schema.number({ meta: { description: 'The y coordinate of the panel in grid units.' } }),
     w: schema.number({
       defaultValue: DEFAULT_PANEL_WIDTH,
       min: 1,
       max: DASHBOARD_GRID_COLUMN_COUNT,
-      meta: { description: 'The width of the panel in grid units' },
+      meta: {
+        description:
+          'The width of the panel in grid units. Minimum `1`, maximum `48`. Defaults to `24`.',
+      },
     }),
     h: schema.number({
       defaultValue: DEFAULT_PANEL_HEIGHT,
       min: 1,
-      meta: { description: 'The height of the panel in grid units' },
+      meta: {
+        description: 'The height of the panel in grid units. Minimum `1`. Defaults to `15`.',
+      },
     }),
   },
   {
     meta: {
       id: 'kbn-dashboard-panel-grid',
+      title: 'Panel grid',
+      description: 'The position and size of the panel on the dashboard grid.',
     },
   }
 );
@@ -54,12 +61,7 @@ export const panelGridSchema = schema.object(
 export function getPanelSchema(isDashboardAppRequest: boolean) {
   const basePanelProps = {
     grid: panelGridSchema,
-    /**
-     * `uid` was chosen as a name instead of `id` to avoid bwc issues with legacy dashboard URL state that used `id` to
-     * represent ids of library items in by-reference panels. This was previously called `panelIndex` in DashboardPanelState.
-     * In the stored object, `uid` continues to map to `panelIndex`.
-     */
-    uid: schema.maybe(
+    id: schema.maybe(
       schema.string({
         meta: { description: 'The unique ID of the panel.' },
       })
@@ -106,7 +108,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
     panelSchemas as [
       ObjectType<{
         grid: ObjectType<{ x: Type<number>; y: Type<number>; w: Type<number>; h: Type<number> }>;
-        uid: Type<string | undefined>;
+        id: Type<string | undefined>;
         version: Type<string | undefined>;
         type: Type<string>;
         config: ObjectType<{}>;
@@ -116,7 +118,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
 }
 
 const sectionGridSchema = schema.object({
-  y: schema.number({ meta: { description: 'The y coordinate of the section in grid units' } }),
+  y: schema.number({ meta: { description: 'The y coordinate of the section in grid units.' } }),
 });
 
 export function getSectionSchema(isDashboardAppRequest: boolean) {
@@ -126,7 +128,10 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         meta: { description: 'The title of the section.' },
       }),
       collapsed: schema.boolean({
-        meta: { description: 'The collapsed state of the section.' },
+        meta: {
+          description:
+            'When `true`, the section is collapsed and its panels are not rendered until expanded. Useful for improving initial load time on large dashboards. Defaults to `false`.',
+        },
         defaultValue: false,
       }),
       grid: sectionGridSchema,
@@ -135,7 +140,7 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
         defaultValue: [],
         maxSize: MAX_PANELS,
       }),
-      uid: schema.maybe(
+      id: schema.maybe(
         schema.string({
           meta: { description: 'The unique ID of the section.' },
         })
@@ -143,9 +148,9 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
     },
     {
       meta: {
-        description: 'Collapsable section',
+        description: 'A collapsible group of panels.',
         id: 'kbn-dashboard-section',
-        title: 'section',
+        title: 'Section',
       },
     }
   );
@@ -155,32 +160,41 @@ export const optionsSchema = schema.object(
   {
     auto_apply_filters: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters,
-      meta: { description: 'Auto apply control filters.' },
+      meta: {
+        description:
+          "When `true`, control filter changes are applied automatically. When `false`, control filter changes are applied manually through the dashboard's search update button. Defaults to `true`.",
+      },
     }),
     hide_panel_titles: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles,
-      meta: { description: 'Hide the panel titles in the dashboard.' },
+      meta: { description: 'When `true`, panel titles are hidden. Defaults to `false`.' },
     }),
     hide_panel_borders: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders,
-      meta: { description: 'Hide the panel borders in the dashboard.' },
+      meta: { description: 'When `true`, panel borders are hidden. Defaults to `false`.' },
     }),
     use_margins: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.use_margins,
-      meta: { description: 'Show margins between panels in the dashboard layout.' },
+      meta: { description: 'When `true`, panels are separated by a margin. Defaults to `true`.' },
     }),
     sync_colors: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_colors,
-      meta: { description: 'Synchronize colors between related panels in the dashboard.' },
+      meta: {
+        description:
+          'When `true`, colors are synchronized across panels that share a data source. Defaults to `false`.',
+      },
     }),
     sync_tooltips: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_tooltips,
-      meta: { description: 'Synchronize tooltips between related panels in the dashboard.' },
+      meta: {
+        description: 'When `true`, tooltips are synchronized across panels. Defaults to `false`.',
+      },
     }),
     sync_cursor: schema.boolean({
       defaultValue: DEFAULT_DASHBOARD_OPTIONS.sync_cursor,
       meta: {
-        description: 'Synchronize cursor position between related panels in the dashboard.',
+        description:
+          'When `true`, the cursor position is synchronized across panels. Defaults to `true`.',
       },
     }),
   },
@@ -188,24 +202,49 @@ export const optionsSchema = schema.object(
     defaultValue: DEFAULT_DASHBOARD_OPTIONS,
     meta: {
       id: 'kbn-dashboard-options',
+      title: 'Options',
+      description: 'Display and behavior settings for the dashboard.',
     },
   }
 );
 
 export const accessControlSchema = schema.maybe(
-  schema.object({
-    access_mode: schema.maybe(
-      schema.oneOf([schema.literal('write_restricted'), schema.literal('default')])
-    ),
-  })
+  schema.object(
+    {
+      access_mode: schema.maybe(
+        schema.oneOf([schema.literal('write_restricted'), schema.literal('default')], {
+          meta: {
+            description:
+              'Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).',
+          },
+        })
+      ),
+    },
+    {
+      meta: {
+        description: 'Access control settings for the dashboard.',
+        id: 'kbn-dashboard-access-control',
+        title: 'Access control',
+      },
+    }
+  )
 );
 
 export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
   return schema.object(
     {
-      pinned_panels: pinnedPanelsSchema,
-      description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
-      filters: schema.maybe(schema.arrayOf(asCodeFilterSchema, { maxSize: 500 })),
+      pinned_panels: getPinnedPanelsSchema(),
+      description: schema.maybe(
+        schema.string({ meta: { description: 'A short description of the dashboard.' } })
+      ),
+      filters: schema.maybe(
+        schema.arrayOf(asCodeFilterSchema, {
+          maxSize: 500,
+          meta: {
+            description: 'Filters applied across all panels, including pinned panels.',
+          },
+        })
+      ),
       options: optionsSchema,
       panels: schema.arrayOf(
         schema.oneOf([
@@ -215,23 +254,30 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         {
           defaultValue: [],
           maxSize: MAX_PANELS,
+          meta: {
+            description:
+              'Panels and sections in the dashboard. Each entry is either a panel (with a `type` and `config`) or a collapsible section (with a `title`, `collapsed` state, and nested `panels`).',
+          },
         }
       ),
-      project_routing: schema.maybe(schema.string()),
+      project_routing: schema.maybe(
+        schema.string({
+          meta: {
+            description:
+              'Controls [cross-project search](https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing) behavior for this dashboard (Serverless only). Set to `_alias:_origin` to scope data to the current project, or `_alias:*` to search across all projects. When omitted, the space default applies.',
+          },
+        })
+      ),
       query: schema.maybe(asCodeQuerySchema),
       refresh_interval: schema.maybe(refreshIntervalSchema),
       tags: schema.maybe(
-        schema.arrayOf(
-          schema.string({
-            meta: { description: 'An array of tags ids applied to this dashboard' },
-          }),
-          {
-            maxSize: 100,
-          }
-        )
+        schema.arrayOf(schema.string(), {
+          maxSize: 100,
+          meta: { description: 'Tag IDs to associate with this dashboard.' },
+        })
       ),
       time_range: schema.maybe(timeRangeSchema),
-      title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
+      title: schema.string({ meta: { description: 'A human-readable title for the dashboard.' } }),
       access_control: accessControlSchema,
     },
     {
