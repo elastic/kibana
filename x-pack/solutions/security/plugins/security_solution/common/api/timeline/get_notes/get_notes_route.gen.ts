@@ -46,15 +46,45 @@ export const GetNotesResult = z.object({
 
 export type GetNotesRequestQuery = z.infer<typeof GetNotesRequestQuery>;
 export const GetNotesRequestQuery = z.object({
+  /**
+   * Elasticsearch document `_id` values (or serialized array) to fetch notes for.
+   */
   documentIds: DocumentIds.optional(),
+  /**
+   * Saved object ids (for example timeline `savedObjectId`) whose notes should be returned.
+   */
   savedObjectIds: SavedObjectIds.optional(),
+  /**
+   * 1-based page index for pagination (string for compatibility with existing clients).
+   */
   page: z.string().nullable().optional(),
+  /**
+   * Page size as a string (for example `20`).
+   */
   perPage: z.string().nullable().optional(),
+  /**
+   * Free-text filter applied to note body content.
+   */
   search: z.string().nullable().optional(),
+  /**
+   * Field name to sort by (implementation-specific; commonly `updated` or `created`).
+   */
   sortField: z.string().nullable().optional(),
+  /**
+   * Sort direction (`asc` or `desc`).
+   */
   sortOrder: z.string().nullable().optional(),
+  /**
+   * Advanced filter expression supported by the notes finder.
+   */
   filter: z.string().nullable().optional(),
+  /**
+   * Optional filter on author username or identifier.
+   */
   createdByFilter: z.string().nullable().optional(),
+  /**
+   * Restrict results based on how notes are linked to documents and saved objects.
+   */
   associatedFilter: AssociatedFilterType.optional(),
 });
 export type GetNotesRequestQueryInput = z.input<typeof GetNotesRequestQuery>;

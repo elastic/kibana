@@ -30,3 +30,6 @@ export const DeleteNoteRequestBody = z.union([
     .nullable(),
 ]);
 export type DeleteNoteRequestBodyInput = z.input<typeof DeleteNoteRequestBody>;
+
+export type DeleteNoteResponse = z.infer<typeof DeleteNoteResponse>;
+export const DeleteNoteResponse = z.object({}).catchall(z.unknown());
