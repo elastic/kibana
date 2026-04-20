@@ -21,12 +21,10 @@ export const MOCK_CONNECTOR = {
 
 export const CONNECTORS_WITH_ONE = {
   connectors: [MOCK_CONNECTOR],
-  allConnectors: [MOCK_CONNECTOR],
   soEntryFound: false,
 };
 
 export const CONNECTORS_EMPTY_RESPONSE = {
   connectors: [],
-  allConnectors: [],
   soEntryFound: false,
 };
