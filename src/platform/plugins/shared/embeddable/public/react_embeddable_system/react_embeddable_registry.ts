@@ -42,7 +42,6 @@ export const registerEmbeddablePublicDefinition = <
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.invalidTypeError', {
         defaultMessage: 'Type must be lower case and snake cased.',
-        values: { key: type },
       })
     );
 
