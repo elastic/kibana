@@ -9,7 +9,13 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, SESSION_API_PATH, COMMON_HEADERS, randomSessionId } from '../fixtures';
+import {
+  apiTest,
+  SESSION_API_PATH,
+  SESSION_VERSION_HEADER,
+  COMMON_HEADERS,
+  randomSessionId,
+} from '../fixtures';
 
 apiTest.describe(
   'search session - cross-user security (stateful only)',
@@ -105,9 +111,10 @@ apiTest.describe(
 
     apiTest('should prevent unauthorized users from creating sessions', async ({ apiClient }) => {
       const sessionId = randomSessionId();
-      // No auth headers — unauthenticated request
+      // No auth headers — unauthenticated request. Version header is kept so the
+      // 401 isolates the auth check rather than failing on missing version.
       const response = await apiClient.post(SESSION_API_PATH, {
-        headers: { 'kbn-xsrf': 'foo' },
+        headers: { ...SESSION_VERSION_HEADER, 'kbn-xsrf': 'foo' },
         body: {
           sessionId,
           name: 'My Session',
