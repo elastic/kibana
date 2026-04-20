@@ -33,11 +33,16 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
     path: LENS_VIS_API_PATH,
     access: LENS_API_ACCESS,
     summary: 'Create visualization',
-    description: 'Create a new visualization.',
+    description: [
+      'Creates a Lens visualization and saves it to the library.',
+      '',
+      'ES|QL visualizations cannot be created through this endpoint.',
+    ].join('\n'),
     options: {
       tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {

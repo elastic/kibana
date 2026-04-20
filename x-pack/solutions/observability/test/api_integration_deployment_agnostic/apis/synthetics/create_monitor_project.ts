@@ -24,7 +24,10 @@ import {
 } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
@@ -81,7 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
