@@ -6,15 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBetaBadge,
-  EuiLink,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiConfirmModal, EuiLink, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
@@ -33,24 +25,9 @@ export const AIAgentConfirmationModal: React.FC<AIAgentConfirmationModalProps> =
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'aiAgentConfirmModalTitle' });
   return (
     <EuiConfirmModal
-      title={
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {i18n.translate('aiAssistantManagementSelection.agentConfirmModal.title', {
-              defaultMessage: 'Switch to AI Agent',
-            })}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge
-              label={i18n.translate('aiAssistantManagementSelection.agentConfirmModal.betaLabel', {
-                defaultMessage: 'Beta',
-              })}
-              size="m"
-              css={{ verticalAlign: 'middle' }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
+      title={i18n.translate('aiAssistantManagementSelection.agentConfirmModal.title', {
+        defaultMessage: 'Switch to AI Agent',
+      })}
       titleProps={{ id: confirmModalTitleId }}
       aria-labelledby={confirmModalTitleId}
       onCancel={onCancel}
