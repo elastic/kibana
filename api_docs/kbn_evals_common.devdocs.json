@@ -127,7 +127,7 @@
           "(id?: string | undefined, family?: string | undefined, provider?: string | undefined) => string"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-        "lineNumber": 375,
+        "lineNumber": 379,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -143,7 +143,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 375,
+            "lineNumber": 379,
             "columnNumber": 37,
             "deprecated": false,
             "trackAdoption": false,
@@ -160,7 +160,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 375,
+            "lineNumber": 379,
             "columnNumber": 50,
             "deprecated": false,
             "trackAdoption": false,
@@ -177,7 +177,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 375,
+            "lineNumber": 379,
             "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
@@ -301,7 +301,7 @@
           "({ page, perPage }: RunsListingPaginationOptions) => { total_runs: { cardinality: { field: string; }; }; runs: { terms: { field: string; size: number; order: { latest_timestamp: \"desc\"; }; }; aggs: { latest_timestamp: { max: { field: string; }; }; suite_id: { terms: { field: string; size: number; }; }; dataset_id: { terms: { field: string; size: number; }; }; dataset_name: { terms: { field: string; size: number; }; }; task_model_id: { terms: { field: string; size: number; }; }; task_model_family: { terms: { field: string; size: number; }; }; task_model_provider: { terms: { field: string; size: number; }; }; evaluator_model_id: { terms: { field: string; size: number; }; }; evaluator_model_family: { terms: { field: string; size: number; }; }; evaluator_model_provider: { terms: { field: string; size: number; }; }; git_branch: { terms: { field: string; size: number; }; }; git_commit_sha: { terms: { field: string; size: number; }; }; total_repetitions: { max: { field: string; }; }; build_url: { terms: { field: string; size: number; }; }; pull_request: { terms: { field: string; size: number; }; }; }; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-        "lineNumber": 207,
+        "lineNumber": 211,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -317,7 +317,7 @@
               "RunsListingPaginationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 207,
+            "lineNumber": 211,
             "columnNumber": 45,
             "deprecated": false,
             "trackAdoption": false,
@@ -389,6 +389,248 @@
       },
       {
         "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.computePairedTTestResults",
+        "type": "Function",
+        "tags": [],
+        "label": "computePairedTTestResults",
+        "description": [
+          "\nCompute paired t-test results grouped by dataset and evaluator.\nAccepts either raw score documents (which are paired internally)\nor pre-computed pairs to avoid duplicate pairing work."
+        ],
+        "signature": [
+          "(pairs: ",
+          {
+            "pluginId": "@kbn/evals-common",
+            "scope": "common",
+            "docId": "kibKbnEvalsCommonPluginApi",
+            "section": "def-common.PairedScore",
+            "text": "PairedScore"
+          },
+          "[]) => { datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: any; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+        "lineNumber": 110,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.computePairedTTestResults.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "pairs",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/evals-common",
+                "scope": "common",
+                "docId": "kibKbnEvalsCommonPluginApi",
+                "section": "def-common.PairedScore",
+                "text": "PairedScore"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 115,
+            "columnNumber": 43,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.computePairedTTestResults",
+        "type": "Function",
+        "tags": [],
+        "label": "computePairedTTestResults",
+        "description": [],
+        "signature": [
+          "(scoresA: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[], scoresB: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]) => { datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: any; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+        "lineNumber": 116,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.computePairedTTestResults.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "scoresA",
+            "description": [],
+            "signature": [
+              "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.computePairedTTestResults.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "scoresB",
+            "description": [],
+            "signature": [
+              "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 118,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.computePairedTTestResults",
+        "type": "Function",
+        "tags": [],
+        "label": "computePairedTTestResults",
+        "description": [],
+        "signature": [
+          "(scoresAOrPairs: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[] | ",
+          {
+            "pluginId": "@kbn/evals-common",
+            "scope": "common",
+            "docId": "kibKbnEvalsCommonPluginApi",
+            "section": "def-common.PairedScore",
+            "text": "PairedScore"
+          },
+          "[], scoresB: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[] | undefined) => { datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: any; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+        "lineNumber": 120,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.computePairedTTestResults.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scoresAOrPairs",
+            "description": [],
+            "signature": [
+              "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[] | ",
+              {
+                "pluginId": "@kbn/evals-common",
+                "scope": "common",
+                "docId": "kibKbnEvalsCommonPluginApi",
+                "section": "def-common.PairedScore",
+                "text": "PairedScore"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 121,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.computePairedTTestResults.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "scoresB",
+            "description": [],
+            "signature": [
+              "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.pairScores",
+        "type": "Function",
+        "tags": [],
+        "label": "pairScores",
+        "description": [
+          "\nPair scores by dataset, example, evaluator, and repetition index."
+        ],
+        "signature": [
+          "(scoresA: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[], scoresB: { \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]) => { pairs: ",
+          {
+            "pluginId": "@kbn/evals-common",
+            "scope": "common",
+            "docId": "kibKbnEvalsCommonPluginApi",
+            "section": "def-common.PairedScore",
+            "text": "PairedScore"
+          },
+          "[]; skippedMissingPairs: number; skippedNullScores: number; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.pairScores.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "scoresA",
+            "description": [],
+            "signature": [
+              "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.pairScores.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "scoresB",
+            "description": [],
+            "signature": [
+              "{ \"@timestamp\": string; run_id: string; experiment_id: string; example: { id: string; index: number; dataset: { id: string; name: string; }; input?: any; }; task: { repetition_index: number; model: { id: string; family?: string | undefined; provider?: string | undefined; }; trace_id?: any; output?: any; }; evaluator: { name: string; model: { id: string; family?: string | undefined; provider?: string | undefined; }; score?: any; label?: any; explanation?: any; metadata?: any; trace_id?: any; }; run_metadata: { total_repetitions: number; git_branch?: any; git_commit_sha?: any; }; environment: { hostname?: string | undefined; }; suite?: { id?: string | undefined; } | undefined; ci?: { buildkite?: { build_id?: string | undefined; job_id?: string | undefined; build_url?: string | undefined; pipeline_slug?: string | undefined; pull_request?: string | undefined; branch?: string | undefined; commit?: string | undefined; } | undefined; } | undefined; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
         "id": "def-common.parseRunsListingResponse",
         "type": "Function",
         "tags": [],
@@ -407,7 +649,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-        "lineNumber": 244,
+        "lineNumber": 248,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -423,7 +665,7 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 245,
+            "lineNumber": 249,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -440,7 +682,7 @@
               "RunsListingPaginationOptions"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 246,
+            "lineNumber": 250,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -471,7 +713,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-        "lineNumber": 335,
+        "lineNumber": 339,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -487,7 +729,7 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 336,
+            "lineNumber": 340,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -501,13 +743,94 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.PairedScore",
+        "type": "Interface",
+        "tags": [],
+        "label": "PairedScore",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.PairedScore.datasetId",
+            "type": "string",
+            "tags": [],
+            "label": "datasetId",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.PairedScore.datasetName",
+            "type": "string",
+            "tags": [],
+            "label": "datasetName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.PairedScore.evaluatorName",
+            "type": "string",
+            "tags": [],
+            "label": "evaluatorName",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.PairedScore.scoreA",
+            "type": "number",
+            "tags": [],
+            "label": "scoreA",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/evals-common",
+            "id": "def-common.PairedScore.scoreB",
+            "type": "number",
+            "tags": [],
+            "label": "scoreB",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/statistical_analysis.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
         "id": "def-common.RunDetailEvaluatorStat",
         "type": "Interface",
         "tags": [],
         "label": "RunDetailEvaluatorStat",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-        "lineNumber": 317,
+        "lineNumber": 321,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -520,7 +843,7 @@
             "label": "dataset_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 318,
+            "lineNumber": 322,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -533,7 +856,7 @@
             "label": "dataset_name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 319,
+            "lineNumber": 323,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -546,7 +869,7 @@
             "label": "evaluator_name",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 320,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -562,7 +885,7 @@
               "{ mean: number; median: number; std_dev: number; min: number; max: number; count: number; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/query_builders.ts",
-            "lineNumber": 321,
+            "lineNumber": 325,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -739,6 +1062,57 @@
       },
       {
         "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.CompareRunsRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "CompareRunsRequestQuery",
+        "description": [],
+        "signature": [
+          "{ run_id_a: string; run_id_b: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
+        "lineNumber": 30,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.CompareRunsRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "CompareRunsRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ run_id_a: string; run_id_b: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.CompareRunsResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CompareRunsResponse",
+        "description": [],
+        "signature": [
+          "{ results: { datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: any; }[]; pairing: { totalPairs: number; skippedMissingPairs: number; skippedNullScores: number; truncatedA: boolean; truncatedB: boolean; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
+        "lineNumber": 43,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
         "id": "def-common.CreateEvaluationDatasetRequestBody",
         "type": "Type",
         "tags": [],
@@ -799,7 +1173,7 @@
           "\"f77b3ee3-7bc6-4bf8-9e43-d7fca9e69ae0\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 38,
+        "lineNumber": 39,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -952,7 +1326,7 @@
           "\"/internal/evals/datasets/{datasetId}/examples/{exampleId}\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -969,7 +1343,7 @@
           "\"/internal/evals/datasets/{datasetId}/examples\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 24,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -986,7 +1360,7 @@
           "\"/internal/evals/datasets/_upsert\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1003,7 +1377,7 @@
           "\"/internal/evals/datasets/{datasetId}\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1020,7 +1394,7 @@
           "\"/internal/evals/datasets\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1037,7 +1411,7 @@
           "\"/internal/evals/examples/{exampleId}/scores\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1071,7 +1445,7 @@
           "\"/internal/evals/runs/{runId}/datasets/{datasetId}/examples\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1113,6 +1487,23 @@
       },
       {
         "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.EVALS_RUNS_COMPARE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "EVALS_RUNS_COMPARE_URL",
+        "description": [],
+        "signature": [
+          "\"/internal/evals/runs/compare\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
         "id": "def-common.EVALS_RUNS_URL",
         "type": "string",
         "tags": [],
@@ -1139,7 +1530,7 @@
           "\"/internal/evals/traces/{traceId}\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 17,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1156,7 +1547,7 @@
           "\"/internal/evals/tracing/projects/{projectName}/traces\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1173,7 +1564,7 @@
           "\"/internal/evals/tracing/projects\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1224,7 +1615,7 @@
           "\"kibana-evaluations*\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1734,7 +2125,7 @@
           "{ projectName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 42,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1751,7 +2142,7 @@
           "{ projectName: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 46,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1768,7 +2159,7 @@
           "{ sort_field: any; sort_order: any; page: number; per_page: number; from?: string | undefined; to?: string | undefined; name?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 48,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1785,7 +2176,7 @@
           "{ sort_field: any; sort_order: any; from?: string | undefined; to?: string | undefined; name?: string | undefined; page?: unknown; per_page?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 67,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1802,7 +2193,7 @@
           "{ traces: { trace_id: string; name: string; start_time: string; duration_ms: number; status?: string | undefined; total_spans?: number | undefined; input_preview?: string | undefined; output_preview?: string | undefined; error?: string | undefined; tokens?: { input?: number | undefined; output?: number | undefined; total?: number | undefined; } | undefined; prompt_id?: string | undefined; model?: string | undefined; }[]; total: number; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 69,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1921,7 +2312,7 @@
           "\"internal\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1938,7 +2329,7 @@
           "10000"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 40,
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1955,7 +2346,7 @@
           "10000"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 41,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1972,6 +2363,23 @@
           "{ id: string; family?: string | undefined; provider?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.PairedTTestResult",
+        "type": "Type",
+        "tags": [],
+        "label": "PairedTTestResult",
+        "description": [],
+        "signature": [
+          "{ datasetId: string; datasetName: string; evaluatorName: string; sampleSize: number; meanA: number; meanB: number; pValue: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
         "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
@@ -2040,7 +2448,7 @@
           "\"traces-*\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 28,
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2072,23 +2480,6 @@
         "description": [],
         "signature": [
           "{ trace_id: string; name: string; start_time: string; duration_ms: number; status?: string | undefined; total_spans?: number | undefined; input_preview?: string | undefined; output_preview?: string | undefined; error?: string | undefined; tokens?: { input?: number | undefined; output?: number | undefined; total?: number | undefined; } | undefined; prompt_id?: string | undefined; model?: string | undefined; }"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 26,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/evals-common",
-        "id": "def-common.TraceSummaryTokens",
-        "type": "Type",
-        "tags": [],
-        "label": "TraceSummaryTokens",
-        "description": [],
-        "signature": [
-          "{ input?: number | undefined; output?: number | undefined; total?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
         "lineNumber": 19,
@@ -2520,7 +2911,7 @@
           "{ readonly internal: { readonly v1: \"1\"; }; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/constants.ts",
-        "lineNumber": 30,
+        "lineNumber": 31,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2569,6 +2960,86 @@
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
         "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.CompareRunsRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "CompareRunsRequestQuery",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ run_id_a: ",
+          "ZodString",
+          "; run_id_b: ",
+          "ZodString",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.CompareRunsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "CompareRunsResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ results: ",
+          "ZodArray",
+          "<",
+          "ZodObject",
+          "<{ datasetId: ",
+          "ZodString",
+          "; datasetName: ",
+          "ZodString",
+          "; evaluatorName: ",
+          "ZodString",
+          "; sampleSize: ",
+          "ZodNumber",
+          "; meanA: ",
+          "ZodNumber",
+          "; meanB: ",
+          "ZodNumber",
+          "; pValue: ",
+          "ZodNullable",
+          "<",
+          "ZodNumber",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>>; pairing: ",
+          "ZodObject",
+          "<{ totalPairs: ",
+          "ZodNumber",
+          "; skippedMissingPairs: ",
+          "ZodNumber",
+          "; skippedNullScores: ",
+          "ZodNumber",
+          "; truncatedA: ",
+          "ZodBoolean",
+          "; truncatedB: ",
+          "ZodBoolean",
+          "; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4842,7 +5313,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 43,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4886,7 +5357,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 49,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4968,7 +5439,7 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 70,
+        "lineNumber": 69,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5160,6 +5631,25 @@
       },
       {
         "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.goldenClusterPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "goldenClusterPrivileges",
+        "description": [
+          "\nShared privilege descriptors for the golden cluster API key.\n\nUsed by the CLI (`node scripts/evals init`) and the evals plugin\n(remote Kibana configuration UI). Consumers override `name` and\n`metadata` to suit their context."
+        ],
+        "signature": [
+          "{ readonly kibana_role_descriptors: { readonly 'kbn-evals-all': { readonly elasticsearch: { readonly cluster: readonly [\"manage_index_templates\"]; readonly indices: readonly [{ readonly names: readonly [\"kibana-evaluations*\"]; readonly privileges: readonly [\"auto_configure\", \"create_index\", \"create_doc\", \"read\", \"view_index_metadata\"]; }, { readonly names: readonly [\"traces-*\"]; readonly privileges: readonly [\"auto_configure\", \"create_index\", \"create_doc\", \"read\", \"view_index_metadata\"]; }, { readonly names: readonly [\"kibana-evaluation-dataset*\"]; readonly privileges: readonly [\"auto_configure\", \"create_index\", \"create_doc\", \"read\", \"view_index_metadata\", \"delete\", \"index\"]; }]; }; readonly kibana: readonly [{ readonly base: readonly []; readonly spaces: readonly [\"*\"]; readonly feature: { readonly evals: readonly [\"all\"]; }; }]; }; }; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/golden_cluster_privileges.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
         "id": "def-common.Model",
         "type": "Object",
         "tags": [],
@@ -5182,6 +5672,42 @@
           "$strip>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/common_attributes.gen.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals-common",
+        "id": "def-common.PairedTTestResult",
+        "type": "Object",
+        "tags": [],
+        "label": "PairedTTestResult",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ datasetId: ",
+          "ZodString",
+          "; datasetName: ",
+          "ZodString",
+          "; evaluatorName: ",
+          "ZodString",
+          "; sampleSize: ",
+          "ZodNumber",
+          "; meanA: ",
+          "ZodNumber",
+          "; meanB: ",
+          "ZodNumber",
+          "; pValue: ",
+          "ZodNullable",
+          "<",
+          "ZodNumber",
+          ">; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/runs/compare_runs_route.gen.ts",
         "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
@@ -5391,38 +5917,6 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; }, ",
-          "node_modules/zod/v4/core/schemas",
-          "$strip>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/tracing/get_project_traces_route.gen.ts",
-        "lineNumber": 27,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/evals-common",
-        "id": "def-common.TraceSummaryTokens",
-        "type": "Object",
-        "tags": [],
-        "label": "TraceSummaryTokens",
-        "description": [],
-        "signature": [
-          "ZodObject",
-          "<{ input: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; output: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
-          ">; total: ",
-          "ZodOptional",
-          "<",
-          "ZodNumber",
           ">; }, ",
           "node_modules/zod/v4/core/schemas",
           "$strip>"
