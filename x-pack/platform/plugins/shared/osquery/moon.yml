@@ -87,6 +87,8 @@ dependsOn:
   - '@kbn/core-chrome-browser'
   - '@kbn/scout'
   - '@kbn/core-http-browser'
+  - '@kbn/es'
+  - '@kbn/dev-utils'
 tags:
   - plugin
   - prod
