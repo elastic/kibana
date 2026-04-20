@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import {
@@ -86,12 +86,14 @@ export const PrevalenceDetails: React.FC = () => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <PrevalenceDetailsView
-      hit={hit}
-      investigationFields={investigationFields}
-      scopeId={scopeId}
-      columns={columns}
-    />
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      <PrevalenceDetailsView
+        hit={hit}
+        investigationFields={investigationFields}
+        scopeId={scopeId}
+        columns={columns}
+      />
+    </EuiPanel>
   );
 };
 
