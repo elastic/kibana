@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 
 import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
@@ -91,9 +90,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
-import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
-import type { RuleCreationSource } from '../../../../common/lib/telemetry/types';
-import { extractThreatTechniqueIds } from '../../../common/telemetry_helpers';
+import { useRuleCreationTelemetry } from './hooks/use_rule_creation_telemetry';
 
 const MyEuiPanel = styled(EuiPanel)<{
   zindex?: number;
@@ -121,7 +118,7 @@ const MyEuiPanel = styled(EuiPanel)<{
 MyEuiPanel.displayName = 'MyEuiPanel';
 
 const CreateRulePageComponent: React.FC<{}> = () => {
-  const { application, triggersActionsUi, cps, telemetry, aiRuleCreation } = useKibana().services;
+  const { application, triggersActionsUi, cps } = useKibana().services;
   const { navigateToApp } = application;
   useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
@@ -227,9 +224,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   const onAiCreatedRuleAppliedRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
-  const isAiRuleAppliedRef = useRef(false);
-  const ruleSavedRef = useRef(false);
-  const manualSessionRef = useRef<{ sessionId: string; startTimestamp: number } | null>(null);
+  const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
+    useRuleCreationTelemetry(ruleType);
 
   const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
@@ -268,49 +264,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   ]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
-
-  const ruleTypeRef = useRef(ruleType);
-  ruleTypeRef.current = ruleType;
-  useEffect(() => {
-    const aiSession = aiRuleCreation.getSession();
-    if (!aiSession) {
-      const manualSession = { sessionId: uuidv4(), startTimestamp: Date.now() };
-      manualSessionRef.current = manualSession;
-      telemetry.reportEvent(RuleCreationEventTypes.CreationInitialized, {
-        creationSource: 'manual',
-        sessionId: manualSession.sessionId,
-      });
-    }
-
-    return () => {
-      if (ruleSavedRef.current) {
-        return;
-      }
-
-      const aiSessionOnUnmount = aiRuleCreation.getSession();
-      const isAi = aiSessionOnUnmount != null && isAiRuleAppliedRef.current;
-      const sessionId = isAi
-        ? aiSessionOnUnmount.sessionId
-        : manualSessionRef.current?.sessionId ?? '';
-      const sessionStart = isAi
-        ? aiSessionOnUnmount.startTimestamp
-        : manualSessionRef.current?.startTimestamp ?? Date.now();
-
-      telemetry.reportEvent(RuleCreationEventTypes.CreationAbandoned, {
-        creationSource: isAi ? 'ai' : 'manual',
-        sessionId,
-        ruleType: ruleTypeRef.current ?? 'unknown',
-        numberOfAiEdits: isAi ? aiSessionOnUnmount.applyCount : 0,
-        durationSinceSessionStartMs: Date.now() - sessionStart,
-      });
-
-      if (isAi) {
-        aiRuleCreation.clearSession();
-      }
-    };
-    // Only run on mount/unmount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
@@ -363,7 +316,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       }
       setActiveStep(step);
     },
-    [activeStep, openSteps]
+    [activeStep, isAiRuleAppliedRef, openSteps]
   );
 
   const toggleStepAccordion = (step: RuleStep | null) => {
@@ -493,7 +446,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         goToStep(step);
       }
     },
-    [validateStep, activeStep, goToStep]
+    [validateStep, activeStep, goToStep, isAiRuleAppliedRef]
   );
 
   const createRuleFromFormData = useCallback(
@@ -511,16 +464,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         await startMlJobs(localDefineStepData.machineLearningJobId);
       };
 
-      const aiSession = aiRuleCreation.getSession();
-      const isAiCreated = isAiRuleAppliedRef.current && aiSession != null;
-      const creationSource: RuleCreationSource = isAiCreated ? 'ai' : 'manual';
-      const sessionId = isAiCreated
-        ? aiSession.sessionId
-        : manualSessionRef.current?.sessionId ?? '';
-      const sessionStart = isAiCreated
-        ? aiSession.startTimestamp
-        : manualSessionRef.current?.startTimestamp ?? Date.now();
-
       const formattedRule = formatRule<RuleCreateProps>(
         localDefineStepData,
         localAboutStepData,
@@ -532,12 +475,9 @@ const CreateRulePageComponent: React.FC<{}> = () => {
         triggersActionsUi.actionTypeRegistry
       );
 
-      if (isAiCreated) {
-        formattedRule.meta = {
-          ...formattedRule.meta,
-          creationSource: 'ai',
-          aiSessionId: aiSession.sessionId,
-        };
+      const aiMeta = getAiMeta();
+      if (aiMeta) {
+        formattedRule.meta = { ...formattedRule.meta, ...aiMeta };
       }
 
       try {
@@ -546,21 +486,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
           createRule(formattedRule),
         ]);
 
-        ruleSavedRef.current = true;
-
-        telemetry.reportEvent(RuleCreationEventTypes.RuleCreated, {
-          creationSource,
-          sessionId,
-          ruleType: createdRule.type,
-          enabled: createdRule.enabled,
-          numberOfAiEdits: isAiCreated ? aiSession.applyCount : 0,
-          threatTechniques: extractThreatTechniqueIds(createdRule.threat),
-          durationSinceSessionStartMs: Date.now() - sessionStart,
-        });
-
-        if (isAiCreated) {
-          aiRuleCreation.clearSession();
-        }
+        reportRuleCreated({ rule: createdRule });
 
         addSuccess(i18n.SUCCESSFULLY_CREATED_RULES(createdRule.name));
 
@@ -569,18 +495,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
           path: getRuleDetailsUrl(createdRule.id),
         });
       } catch (error) {
-        telemetry.reportEvent(RuleCreationEventTypes.RuleCreationError, {
-          creationSource,
-          sessionId,
-          ruleType,
-          errorMessage: error?.message ?? 'Unknown error',
-          numberOfAiEdits: isAiCreated ? aiSession.applyCount : 0,
-          durationSinceSessionStartMs: Date.now() - sessionStart,
-        });
-
-        if (isAiCreated) {
-          aiRuleCreation.clearSession();
-        }
+        reportRuleCreationError({ ruleType, error });
         throw error;
       }
     },
@@ -588,15 +503,16 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       aboutStepForm,
       actionsStepForm,
       addSuccess,
-      aiRuleCreation,
       createRule,
       defineFieldsTransform,
       defineStepForm,
+      getAiMeta,
       navigateToApp,
+      reportRuleCreated,
+      reportRuleCreationError,
       ruleType,
       scheduleStepForm,
       startMlJobs,
-      telemetry,
       triggersActionsUi.actionTypeRegistry,
     ]
   );
