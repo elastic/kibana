@@ -134,7 +134,7 @@ describe('RuleFilter', () => {
     await user.click(screen.getByTestId('quickFilterRule'));
     await clickOption(user, 'quickFilterRuleList', 'Memory Alert');
 
-    expect(onChange).toHaveBeenCalledWith('(rule.id : "rule-1" or rule.id : "rule-2")');
+    expect(onChange).toHaveBeenCalledWith('(rule.id : "rule-1" OR rule.id : "rule-2")');
   });
 
   it('reflects existing rule.id from matcher as checked', async () => {
@@ -241,7 +241,7 @@ describe('StatusFilter', () => {
     await clickOption(user, 'quickFilterStatusList', 'Pending');
 
     expect(onChange).toHaveBeenCalledWith(
-      '(episode_status : "active" or episode_status : "pending")'
+      '(episode_status : "active" OR episode_status : "pending")'
     );
   });
 
@@ -331,7 +331,7 @@ describe('TagsFilter', () => {
     await user.click(screen.getByTestId('quickFilterTags'));
     await clickOption(user, 'quickFilterTagsList', 'staging');
 
-    expect(onChange).toHaveBeenCalledWith('(rule.tags : "production" or rule.tags : "staging")');
+    expect(onChange).toHaveBeenCalledWith('(rule.tags : "production" OR rule.tags : "staging")');
   });
 
   it('reflects existing rule.tags from matcher as checked', async () => {

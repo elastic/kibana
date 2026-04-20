@@ -70,13 +70,22 @@ const splitOnTopLevelAnd = (matcher: string): string[] => {
  */
 const parseFieldValues = (matcher: string, fieldName: string): string[] => {
   const escapedField = escapeRegExp(fieldName);
-  const re = new RegExp(`${escapedField}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 'gi');
+  const quotedRe = new RegExp(`(?<![\\w.])${escapedField}\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`, 'gi');
+  const unquotedRe = new RegExp(`(?<![\\w.])${escapedField}\\s*:\\s*([^"\\s()][^\\s)"]*)`, 'gi');
   const found = new Set<string>();
-  let m: RegExpExecArray | null = re.exec(matcher);
+
+  let m: RegExpExecArray | null = quotedRe.exec(matcher);
   while (m !== null) {
     found.add(unescapeKqlValue(m[1]));
-    m = re.exec(matcher);
+    m = quotedRe.exec(matcher);
   }
+
+  m = unquotedRe.exec(matcher);
+  while (m !== null) {
+    found.add(m[1]);
+    m = unquotedRe.exec(matcher);
+  }
+
   return [...found];
 };
 
@@ -94,7 +103,7 @@ const stripQuotedContent = (s: string): string => s.replace(/"(?:[^"\\]|\\.)*"/g
  */
 const stripFieldClauses = (matcher: string, fieldName: string): string => {
   const escapedField = escapeRegExp(fieldName);
-  const fieldPattern = new RegExp(`${escapedField}\\s*:`, 'i');
+  const fieldPattern = new RegExp(`(?<![\\w.])${escapedField}\\s*:`, 'i');
 
   return splitOnTopLevelAnd(matcher)
     .map((segment) => segment.trim())
@@ -115,7 +124,7 @@ const stripFieldClauses = (matcher: string, fieldName: string): string => {
 const buildFieldClause = (fieldName: string, values: readonly string[]): string | null => {
   if (values.length === 0) return null;
   if (values.length === 1) return `${fieldName} : "${escapeKqlValue(values[0])}"`;
-  return `(${values.map((v) => `${fieldName} : "${escapeKqlValue(v)}"`).join(' or ')})`;
+  return `(${values.map((v) => `${fieldName} : "${escapeKqlValue(v)}"`).join(' OR ')})`;
 };
 
 /**

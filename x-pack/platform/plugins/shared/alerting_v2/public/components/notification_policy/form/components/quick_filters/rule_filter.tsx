@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiCode,
@@ -45,8 +45,6 @@ const kindLabel = (kind: RuleResponse['kind']): string =>
 
 export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const hasBeenOpened = useRef(false);
-  if (isOpen) hasBeenOpened.current = true;
 
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebouncedValue(search, 300);
@@ -55,7 +53,7 @@ export const RuleFilter = ({ matcher, onChange }: QuickFiltersProps) => {
     page: 1,
     perPage: 50,
     search: debouncedSearch || undefined,
-    enabled: hasBeenOpened.current,
+    enabled: isOpen,
   });
   const items = data?.items;
 

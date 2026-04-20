@@ -37,7 +37,9 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const statusPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterStatus' });
 
+  const knownValues = new Set<string>(EPISODE_STATUS_FILTER_OPTIONS.map((o) => o.value));
   const selectedStatuses = useMemo(() => parseEpisodeStatusesFromMatcher(matcher), [matcher]);
+  const recognizedCount = selectedStatuses.filter((s) => knownValues.has(s)).length;
 
   const statusOptions = useMemo((): Array<EuiSelectableOption<StatusSelectableMeta>> => {
     const selectedSet = new Set(selectedStatuses);
@@ -94,8 +96,8 @@ export const StatusFilter = ({ matcher, onChange }: QuickFiltersProps) => {
           iconSide="right"
           onClick={() => setIsOpen((o) => !o)}
           isSelected={isOpen}
-          hasActiveFilters={selectedStatuses.length > 0}
-          numActiveFilters={selectedStatuses.length}
+          hasActiveFilters={recognizedCount > 0}
+          numActiveFilters={recognizedCount}
           data-test-subj="quickFilterStatus"
         >
           {i18n.translate('xpack.alertingV2.notificationPolicy.form.quickFilters.status', {

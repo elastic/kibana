@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiCode,
   EuiFilterButton,
@@ -32,13 +32,11 @@ interface TagSelectableMeta {
 
 export const TagsFilter = ({ matcher, onChange }: QuickFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const hasBeenOpened = useRef(false);
-  if (isOpen) hasBeenOpened.current = true;
 
   const tagsPopoverId = useGeneratedHtmlId({ prefix: 'npQuickFilterTags' });
 
   const { data: apiTags = [], isLoading } = useFetchRuleTags({
-    enabled: hasBeenOpened.current,
+    enabled: isOpen,
   });
   const selectedTags = useMemo(() => parseRuleTagsFromMatcher(matcher), [matcher]);
 

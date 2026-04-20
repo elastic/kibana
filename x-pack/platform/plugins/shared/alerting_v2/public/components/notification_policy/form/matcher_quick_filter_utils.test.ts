@@ -40,6 +40,18 @@ describe('matcher_quick_filter_utils', () => {
     it('deduplicates repeated values', () => {
       expect(parseRuleIdsFromMatcher('rule.id : "abc" AND rule.id : "abc"')).toEqual(['abc']);
     });
+
+    it('does not match a field that ends with the target field name', () => {
+      expect(parseRuleIdsFromMatcher('my_rule.id : "abc"')).toEqual([]);
+    });
+
+    it('parses unquoted values', () => {
+      expect(parseRuleIdsFromMatcher('rule.id : abc-123')).toEqual(['abc-123']);
+    });
+
+    it('parses unquoted values alongside quoted values', () => {
+      expect(parseRuleIdsFromMatcher('rule.id : abc AND rule.id : "def"')).toEqual(['def', 'abc']);
+    });
   });
 
   describe('mergeRuleIdsIntoMatcher', () => {
@@ -48,7 +60,7 @@ describe('matcher_quick_filter_utils', () => {
     });
 
     it('builds OR group for multiple ids', () => {
-      expect(mergeRuleIdsIntoMatcher('', ['u1', 'u2'])).toBe('(rule.id : "u1" or rule.id : "u2")');
+      expect(mergeRuleIdsIntoMatcher('', ['u1', 'u2'])).toBe('(rule.id : "u1" OR rule.id : "u2")');
     });
 
     it('appends to existing unrelated clauses', () => {
@@ -78,6 +90,16 @@ describe('matcher_quick_filter_utils', () => {
     it('returns empty string when clearing the only clause', () => {
       expect(mergeRuleIdsIntoMatcher('rule.id : "abc"', [])).toBe('');
     });
+
+    it('does not strip a field whose name ends with the target field name', () => {
+      expect(mergeRuleIdsIntoMatcher('my_rule.id : "abc" AND rule.id : "old"', ['new'])).toBe(
+        'my_rule.id : "abc" AND rule.id : "new"'
+      );
+    });
+
+    it('strips unquoted rule.id clauses when replacing', () => {
+      expect(mergeRuleIdsIntoMatcher('rule.id : old-id', ['new-id'])).toBe('rule.id : "new-id"');
+    });
   });
 
   describe('parseEpisodeStatusesFromMatcher', () => {
@@ -94,6 +116,10 @@ describe('matcher_quick_filter_utils', () => {
         parseEpisodeStatusesFromMatcher('(episode_status : "active" or episode_status : "pending")')
       ).toEqual(['active', 'pending']);
     });
+
+    it('parses unquoted status values', () => {
+      expect(parseEpisodeStatusesFromMatcher('episode_status : active')).toEqual(['active']);
+    });
   });
 
   describe('mergeEpisodeStatusIntoMatcher', () => {
@@ -103,7 +129,7 @@ describe('matcher_quick_filter_utils', () => {
 
     it('merges with existing non-status clauses', () => {
       expect(mergeEpisodeStatusIntoMatcher('rule.id : "x"', ['active', 'recovering'])).toBe(
-        'rule.id : "x" AND (episode_status : "active" or episode_status : "recovering")'
+        'rule.id : "x" AND (episode_status : "active" OR episode_status : "recovering")'
       );
     });
 
@@ -146,7 +172,7 @@ describe('matcher_quick_filter_utils', () => {
 
     it('builds OR group for multiple tags', () => {
       expect(mergeRuleTagsIntoMatcher('', ['prod', 'staging'])).toBe(
-        '(rule.tags : "prod" or rule.tags : "staging")'
+        '(rule.tags : "prod" OR rule.tags : "staging")'
       );
     });
 
