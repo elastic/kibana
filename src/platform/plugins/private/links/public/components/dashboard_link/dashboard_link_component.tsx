@@ -18,8 +18,8 @@ import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import type { DashboardNavigationOptions } from '@kbn/dashboard-plugin/server';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 import type { LinksLayoutType } from '../../../common/content_management';
 import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
