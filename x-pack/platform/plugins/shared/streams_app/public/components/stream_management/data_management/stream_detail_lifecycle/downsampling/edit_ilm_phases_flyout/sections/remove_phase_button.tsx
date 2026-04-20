@@ -7,13 +7,12 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { PhaseName } from '@kbn/streams-schema';
 import { EuiButton } from '@elastic/eui';
+import { useFormContext, type FieldPath } from 'react-hook-form';
 import type { IlmPhasesFlyoutFormInternal } from '../form';
 
 export interface RemovePhaseButtonProps {
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   phaseName: PhaseName | undefined;
   enabledPhases: PhaseName[];
   dataTestSubj: string;
@@ -21,53 +20,16 @@ export interface RemovePhaseButtonProps {
 }
 
 export const RemovePhaseButton = ({
-  form,
   phaseName,
   enabledPhases,
   dataTestSubj,
   setSelectedPhase,
 }: RemovePhaseButtonProps) => {
+  const { setValue, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
   if (!phaseName) return null;
   if (phaseName === 'hot') return null;
 
-  const getFieldsToRevalidateAfterDisable = (phase: PhaseName): string[] => {
-    const minAgePath = (p: Exclude<PhaseName, 'hot'>) => `_meta.${p}.minAgeValue`;
-    const downsampleIntervalPath = (p: 'hot' | 'warm' | 'cold') =>
-      `_meta.${p}.downsample.fixedIntervalValue`;
-
-    const fields: string[] = [];
-
-    // Clear errors on the disabled phase itself.
-    if (phase !== 'hot') {
-      fields.push(minAgePath(phase));
-    }
-    if (phase === 'hot' || phase === 'warm' || phase === 'cold') {
-      fields.push(downsampleIntervalPath(phase));
-    }
-
-    // Clear errors on phases whose validations depend on the removed one.
-    if (phase === 'hot') {
-      fields.push(downsampleIntervalPath('warm'), downsampleIntervalPath('cold'));
-    }
-    if (phase === 'warm') {
-      fields.push(minAgePath('cold'), minAgePath('frozen'), minAgePath('delete'));
-      fields.push(downsampleIntervalPath('cold'));
-    }
-    if (phase === 'cold') {
-      fields.push(minAgePath('frozen'), minAgePath('delete'));
-      fields.push('_meta.searchableSnapshot.repository');
-    }
-    if (phase === 'frozen') {
-      fields.push(minAgePath('delete'));
-      fields.push('_meta.searchableSnapshot.repository');
-    }
-
-    return fields;
-  };
-
-  const enabledPath = `_meta.${phaseName}.enabled`;
-  const enabledField = form.getFields()[enabledPath];
-  if (!enabledField) return null;
+  const enabledPath = `_meta.${phaseName}.enabled` satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
 
   const hotEnabled = enabledPhases.includes('hot');
   const nonDeleteEnabledPhases = enabledPhases.filter((p) => p !== 'delete');
@@ -85,16 +47,11 @@ export const RemovePhaseButton = ({
       data-test-subj={`${dataTestSubj}RemoveItemButton`}
       disabled={isRemoveDisabled}
       onClick={() => {
-        enabledField.setValue(false);
+        setValue(enabledPath, false);
 
-        // Delay to the next tick so `hook_form_lib` propagates the enabled toggle change into
-        // the flattened `formData` snapshot that validators read from.
-        const fieldsToRevalidate = getFieldsToRevalidateAfterDisable(phaseName);
+        // Delay to the next tick so dependent validations see the updated enabled state.
         setTimeout(() => {
-          const fields = form.getFields();
-          const existing = fieldsToRevalidate.filter((path) => fields[path] !== undefined);
-          if (existing.length === 0) return;
-          void form.validateFields(existing, true);
+          void trigger();
         }, 0);
 
         const remaining = enabledPhases.filter((p) => p !== phaseName);
