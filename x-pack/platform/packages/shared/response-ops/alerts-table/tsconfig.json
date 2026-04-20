@@ -47,6 +47,7 @@
     "@kbn/field-types",
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/es-query",
     "@kbn/rison",
     "@kbn/core-mount-utils-browser",
     "@kbn/reporting-common",

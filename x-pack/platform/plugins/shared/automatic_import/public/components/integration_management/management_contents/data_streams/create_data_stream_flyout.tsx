@@ -444,29 +444,8 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
     isValidatingIndex,
   ]);
 
-  const handleAnalyzeLogs = useCallback(async () => {
-    if (!formData) return;
-
-    const trimmedIntegrationTitle = formData.title?.trim() ?? '';
-    const trimmedDataStreamTitle = formData.dataStreamTitle?.trim() ?? '';
-    if (!isValidTitle(trimmedIntegrationTitle) || !isValidTitle(trimmedDataStreamTitle)) {
-      return;
-    }
-
-    const integrationId = currentIntegrationId ?? normalizeTitleName(trimmedIntegrationTitle);
-    const dataStreamId = normalizeTitleName(trimmedDataStreamTitle);
-    const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
-      name: method as InputType['name'],
-    }));
-
-    const newDataStream: DataStream = {
-      dataStreamId,
-      title: formData.dataStreamTitle,
-      description: formData.dataStreamDescription ?? formData.dataStreamTitle,
-      inputTypes,
-    };
-
-    try {
+  const uploadSamples = useCallback(
+    async ({ integrationId, dataStreamId }: { integrationId: string; dataStreamId: string }) => {
       if (logsSourceOption === 'file' && logSample) {
         const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(logSample);
 
@@ -500,6 +479,41 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
           },
         });
       }
+    },
+    [
+      logsSourceOption,
+      logSample,
+      notifications,
+      uploadSamplesMutation,
+      uploadedFileName,
+      selectedIndex,
+    ]
+  );
+
+  const handleAnalyzeLogs = useCallback(async () => {
+    if (!formData) return;
+
+    const trimmedIntegrationTitle = formData.title?.trim() ?? '';
+    const trimmedDataStreamTitle = formData.dataStreamTitle?.trim() ?? '';
+    if (!isValidTitle(trimmedIntegrationTitle) || !isValidTitle(trimmedDataStreamTitle)) {
+      return;
+    }
+
+    const integrationId = currentIntegrationId ?? normalizeTitleName(trimmedIntegrationTitle);
+    const dataStreamId = normalizeTitleName(trimmedDataStreamTitle);
+    const inputTypes: InputType[] = (formData.dataCollectionMethod ?? []).map((method) => ({
+      name: method as InputType['name'],
+    }));
+
+    const newDataStream: DataStream = {
+      dataStreamId,
+      title: formData.dataStreamTitle,
+      description: formData.dataStreamDescription ?? formData.dataStreamTitle,
+      inputTypes,
+    };
+
+    try {
+      await uploadSamples({ integrationId, dataStreamId });
 
       const result = await createUpdateIntegrationMutation.mutateAsync({
         connectorId: formData.connectorId,
@@ -524,18 +538,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       });
     } finally {
       reportAnalyzeLogsTriggered({
+        integrationId,
+        dataStreamId: normalizeTitleName(formData?.dataStreamTitle ?? ''),
         logsSource: logsSourceOption,
+        inputTypes: formData?.dataCollectionMethod ?? [],
       });
     }
   }, [
     formData,
     createUpdateIntegrationMutation,
-    uploadSamplesMutation,
+    uploadSamples,
     currentIntegrationId,
     logsSourceOption,
-    logSample,
-    selectedIndex,
-    uploadedFileName,
     onClose,
     reportAnalyzeLogsTriggered,
     notifications,

@@ -9,7 +9,7 @@
 import type { FormBasedLayer, DatatableVisualizationState, TextBasedLayer } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { DatatableState } from '../../../../schema';
+import type { DatatableConfig } from '../../../../schema';
 import {
   buildDataSourceStateESQL,
   buildDataSourceStateNoESQL,
@@ -26,7 +26,7 @@ export function buildVisualizationAPI(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): DatatableState {
+): DatatableConfig {
   if (isTextBasedLayer(layer)) {
     const dataSource = buildDataSourceStateESQL(layer);
 
