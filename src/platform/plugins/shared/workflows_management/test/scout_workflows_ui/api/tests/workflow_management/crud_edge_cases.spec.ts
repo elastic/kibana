@@ -140,7 +140,7 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
     expect(result.status).not.toBe(200);
   });
 
-  spaceTest('update with invalid YAML preserves previous valid state', async () => {
+  spaceTest('update with invalid YAML persists draft and marks workflow invalid', async () => {
     const workflow = await workflowsApi.create(BASIC_WORKFLOW_YAML);
     expect(workflow.valid).toBe(true);
 
@@ -148,8 +148,10 @@ spaceTest.describe('Workflow management CRUD edge cases', { tag: tags.stateful.c
       yaml: 'this is: completely: broken: yaml: [[[',
     });
 
+    // Server persists the submitted yaml as a draft even when validation fails,
+    // flipping `valid` to false while preserving the prior name from the stored doc.
     const fetched = await workflowsApi.getWorkflow(workflow.id);
-    expect(fetched.valid).toBe(true);
+    expect(fetched.valid).toBe(false);
     expect(fetched.name).toBe('CRUD Edge Case Workflow');
   });
 });
