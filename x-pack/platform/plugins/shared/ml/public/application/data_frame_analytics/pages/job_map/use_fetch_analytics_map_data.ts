@@ -15,6 +15,7 @@ import {
   type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlApi } from '../../../contexts/kibana';
+
 export interface GetDataObjectParameter {
   analyticsId?: string;
   id?: string;
@@ -44,8 +45,9 @@ export const useFetchAnalyticsMapData = () => {
     const { elements: nodeElements, details, error: fetchError } = analyticsMap;
 
     if (fetchError !== null) {
-      setIsLoading(false);
       setError(fetchError);
+      setIsLoading(false);
+      return;
     }
 
     if (nodeElements?.length === 0) {
@@ -59,11 +61,26 @@ export const useFetchAnalyticsMapData = () => {
 
     if (nodeElements?.length > 0) {
       if (treatAsRoot === false) {
-        setElements(nodeElements);
+        if (!isEqual(nodeElements, elements)) {
+          setElements(nodeElements);
+        }
         nodeDetails.current = details;
       } else {
-        const uniqueElements = uniqWith([...nodeElements, ...elements], isEqual);
-        setElements(uniqueElements);
+        // Existing elements come first so ID-based dedup preserves their state
+        // (e.g. isRoot). The API marks the subject of each fetch as root, not
+        // the original source node, so naively placing nodeElements first would
+        // strip the yellow highlight from the source node when fetching its
+        // neighbours. New elements whose IDs are not yet in the graph are
+        // appended from nodeElements.
+        const uniqueElements = uniqWith(
+          [...elements, ...nodeElements],
+          (a, b) => a.data.id === b.data.id
+        );
+        // Only update state when the merged result actually differs; avoids a
+        // needless dagre re-layout and fitView animation when nothing changed.
+        if (!isEqual(uniqueElements, elements)) {
+          setElements(uniqueElements);
+        }
         nodeDetails.current = { ...details, ...nodeDetails.current };
       }
     }
@@ -73,15 +90,7 @@ export const useFetchAnalyticsMapData = () => {
   const fetchAndSetElementsWrapper = async (params?: GetDataObjectParameter) => {
     const { analyticsId, id, modelId, type } = params ?? {};
     const treatAsRoot = id !== undefined;
-    let idToUse: string;
-
-    if (id !== undefined) {
-      idToUse = id;
-    } else if (modelId !== undefined) {
-      idToUse = modelId;
-    } else {
-      idToUse = analyticsId as string;
-    }
+    const idToUse = id ?? modelId ?? (analyticsId as string);
 
     await fetchAndSetElements(
       idToUse,

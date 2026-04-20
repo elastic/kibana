@@ -67,7 +67,6 @@ export function mapElementsToFlowGraph(
     source,
     target,
     type: 'smoothstep',
-    animated: false,
     style: { stroke: edgeColor, strokeWidth: JOB_MAP_EDGE_STROKE_WIDTH },
     markerEnd: {
       type: MarkerType.ArrowClosed,

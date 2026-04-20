@@ -123,11 +123,10 @@ const JobMapReactFlowInner: FC<JobMapReactFlowInnerProps> = ({
     [onSelectNodeData, toasts]
   );
 
-  const divStyle = useMemo(() => ({ height, width }), [height, width]);
-
   const canvasCss = css`
     background: ${euiTheme.colors.backgroundBasePlain};
-    ${divStyle}
+    width: ${width}px;
+    height: ${height}px;
   `;
 
   if (width <= 0 || height <= 0) {

@@ -16,7 +16,10 @@ import { JobMapNodeFlyout, JobMapLegend, JobMapReactFlow } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
-import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
+import {
+  useFetchAnalyticsMapData,
+  type GetDataObjectParameter,
+} from './use_fetch_analytics_map_data';
 import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 import type { JobMapNodeData } from './map_elements_to_flow';
 import { isNodeElement } from './map_elements_to_flow';
@@ -157,6 +160,12 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
 
   const { ref, width, height } = useRefDimensions();
 
+  const getNodeData = useCallback(
+    (params?: GetDataObjectParameter) => fetchRef.current(params),
+    // fetchRef is a stable ref — no dep needed.
+    []
+  );
+
   const refreshCallback = useCallback(
     () => fetchRef.current({ analyticsId, modelId }),
     [analyticsId, modelId]
@@ -164,10 +173,9 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
 
   const hasMissingJobNode = useMemo(
     () =>
-      elements
-        .filter(isNodeElement)
-        .map(({ data }) => data.type)
-        .includes(JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING),
+      elements.some(
+        (el) => isNodeElement(el) && el.data.type === JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING
+      ),
     [elements]
   );
 
@@ -207,7 +215,7 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
         />
         <JobMapNodeFlyout
           details={nodeDetails}
-          getNodeData={fetchAndSetElementsWrapper}
+          getNodeData={getNodeData}
           modelId={modelId}
           selectedNodeData={selectedNodeData}
           onClearSelection={onClearSelection}

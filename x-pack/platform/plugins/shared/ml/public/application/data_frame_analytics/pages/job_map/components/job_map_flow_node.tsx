@@ -140,7 +140,7 @@ export const JobMapFlowNode = memo(({ data, selected }: NodeProps<JobMapFlowNode
           font-size: ${fontSizeXs};
           line-height: ${euiTheme.font.lineHeightMultiplier};
           text-align: center;
-          max-width: 200px;
+          max-width: ${JOB_MAP_NODE_WIDTH}px;
           word-break: break-word;
           padding: 0 ${euiTheme.size.xs} ${euiTheme.size.s};
         `}

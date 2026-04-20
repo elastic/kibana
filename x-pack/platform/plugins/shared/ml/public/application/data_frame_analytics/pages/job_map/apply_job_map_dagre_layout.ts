@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * Assigns (x, y) positions to React Flow nodes using the Dagre layered-graph
+ * algorithm. React Flow requires explicit positions; without them every node
+ * renders at (0, 0). Dagre places nodes in ranked columns (left-to-right by
+ * default) so the job-map reads as a data-lineage pipeline. A square-grid
+ * fallback is used if Dagre throws (e.g. the graph contains a cycle).
+ */
+
 import Dagre from '@dagrejs/dagre';
 import type { Edge, Node } from '@xyflow/react';
 import {
