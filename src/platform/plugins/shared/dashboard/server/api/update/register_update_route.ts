@@ -27,8 +27,8 @@ export function registerUpdateRoute(
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
     path: `${basePath}/{id}`,
-    summary: `Upsert dashboard`,
     ...routeConfig,
+    summary: `Upsert a dashboard`,
   });
 
   // Do not call getDashboardStateSchema when registering route.
