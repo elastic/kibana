@@ -16,6 +16,25 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import type { DatasetService } from './storage/dataset_service';
 import type { ServerEvaluator } from './lib/evaluation_engine';
 
+/**
+ * Structural placeholder for the `@kbn/agent-builder-plugin` Setup/Start
+ * contract.
+ *
+ * We cannot import the real AgentBuilderPluginSetup / AgentBuilderPluginStart
+ * types here because agent_builder already optionally depends on `evals`
+ * (for the skill-eval UI surface), which would form a TS project-reference
+ * cycle. The proper fix is to extract the plugin contract into a shared
+ * `@kbn/evals-agent-builder-contract` package and have both plugins depend
+ * on it. Tracked as tech debt against PR B6 (Agent Builder integration
+ * slice).
+ *
+ * For now we preserve the erased-call-site shape the routes use
+ * (`skills.x`, `agents.x`, etc.) via an indexed signature, so adding fields
+ * to the real plugin contract doesn't break this boundary.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AgentBuilderContractLike = Record<string, any>;
+
 export interface EvalsPluginSetup {
   registerEvaluator: (evaluator: ServerEvaluator) => void;
 }
@@ -27,22 +46,19 @@ export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   actions?: ActionsPluginSetup;
-  agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
-  workflows?: any; // Optional: Required for AESOP workflow registration
+  agentBuilder?: AgentBuilderContractLike;
 }
 
 export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   actions?: ActionsPluginStart;
-  agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
-  workflows?: any; // Optional: Required for AESOP workflow execution
+  agentBuilder?: AgentBuilderContractLike;
 }
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   getActionsStart: () => ActionsPluginStart | undefined;
-
-  getAgentBuilderStart: () => Promise<any | undefined>;
+  getAgentBuilderStart: () => Promise<AgentBuilderContractLike | undefined>;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{
