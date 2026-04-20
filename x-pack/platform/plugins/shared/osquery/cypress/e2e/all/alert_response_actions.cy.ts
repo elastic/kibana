@@ -29,6 +29,7 @@ import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
   RESPONSE_ACTIONS_ITEM_0,
+  RESPONSE_ACTIONS_ITEM_1,
 } from '../../tasks/response_actions';
 import {
   closeDateTabIfVisible,
