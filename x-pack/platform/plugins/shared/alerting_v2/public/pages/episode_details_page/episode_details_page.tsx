@@ -575,6 +575,7 @@ export function EpisodeDetailsPage() {
                 http={http}
                 openInDiscoverHref={openInDiscoverHref}
                 expressions={expressions}
+                lastAssigneeUid={episodeAction?.lastAssigneeUid}
                 buttonsOutlined={false}
               />,
             ]}

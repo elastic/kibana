@@ -45,6 +45,14 @@ export const ACTIONS_OPEN_IN_DISCOVER_LABEL = i18n.translate(
   }
 );
 
+/** --- Edit assignee action --- */
+export const ACTIONS_EDIT_ASSIGNEE_LABEL = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.editAssignee',
+  {
+    defaultMessage: 'Edit assignee',
+  }
+);
+
 /** --- Resolve action --- */
 export const RESOLVE_ACTION_ACTIVATE = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.activate',
@@ -277,5 +285,107 @@ export const TAGS_ACTION_SELECT_NONE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.selectNone',
   {
     defaultMessage: 'Select none',
+  }
+);
+
+/** --- Edit episode assignee flyout --- */
+/** Matches Cases `noSelectedAssigneesTitle` with `totalCases = 1`. */
+export const ASSIGNEE_FLYOUT_EMPTY_LIST_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.emptyListTitle',
+  {
+    defaultMessage:
+      'The selected {totalCases, plural, =1 {case does} other {cases do}} not have any assigned users',
+    values: { totalCases: 1 },
+  }
+);
+
+/** Matches Cases `noSelectedAssigneesHelpText`. */
+export const ASSIGNEE_FLYOUT_EMPTY_LIST_HELP = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.emptyListHelp',
+  {
+    defaultMessage: 'Search to assign users.',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_NO_MATCHES_USER_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.noMatchesUserTitle',
+  {
+    defaultMessage: "User doesn't exist or is unavailable",
+  }
+);
+
+export const ASSIGNEE_FLYOUT_NO_MATCHES_MODIFY_SEARCH = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.noMatchesModifySearch',
+  {
+    defaultMessage: "Modify your search or check the user's privileges.",
+  }
+);
+
+export const ASSIGNEE_FLYOUT_NO_MATCHES_LEARN_PRIVILEGES = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.noMatchesLearnPrivileges',
+  {
+    defaultMessage: 'Learn what privileges grant access to cases.',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_CURRENT_PROFILE_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.currentProfileErrorTitle',
+  {
+    defaultMessage: 'Could not load current assignee',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_SUGGEST_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.suggestErrorTitle',
+  {
+    defaultMessage: 'Could not search users',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_SAVE_SUCCESS = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.saveSuccess',
+  {
+    defaultMessage: 'Assignee updated.',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_SAVE_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.saveErrorTitle',
+  {
+    defaultMessage: 'Could not update assignee',
+  }
+);
+
+export const getAssigneeFlyoutSubtitle = (episodeId: string) =>
+  i18n.translate('xpack.alertingV2.episodes.assignees.flyout.subtitle', {
+    defaultMessage: 'Episode: {episodeId}',
+    values: { episodeId },
+  });
+
+export const ASSIGNEE_FLYOUT_TITLE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.title',
+  {
+    defaultMessage: 'Edit assignee',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.searchPlaceholder',
+  {
+    defaultMessage: 'Search users',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_CANCEL = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const ASSIGNEE_FLYOUT_SAVE = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.save',
+  {
+    defaultMessage: 'Save',
   }
 );

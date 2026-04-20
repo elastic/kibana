@@ -12,6 +12,9 @@ import { createRouteDependencies } from '../test_utils';
 import { SuggestUserProfilesRoute } from './suggest_user_profiles_route';
 
 const request = httpServerMock.createKibanaRequest({ body: { name: 'john', size: 10 } });
+const requestWithDataPath = httpServerMock.createKibanaRequest({
+  body: { name: 'john', size: 10, dataPath: 'avatar' },
+});
 const securityStart = securityMock.createStart();
 const spacesStart = spacesMock.createStart();
 
@@ -39,6 +42,25 @@ describe('SuggestUserProfilesRoute', () => {
       },
     });
     expect(ctx.response.ok).toHaveBeenCalledWith({ body: [{ uid: 'u-1' }] });
+  });
+
+  it('accepts dataPath in body', async () => {
+    const { ctx } = createRouteDependencies();
+
+    securityStart.userProfiles.suggest.mockResolvedValue([]);
+
+    const route = new SuggestUserProfilesRoute(
+      ctx,
+      requestWithDataPath,
+      securityStart,
+      spacesStart
+    );
+
+    await route.handle();
+
+    expect(securityStart.userProfiles.suggest).toHaveBeenCalledWith(
+      expect.objectContaining({ dataPath: 'avatar' })
+    );
   });
 
   it('returns customError on suggest failure', async () => {
