@@ -463,3 +463,10 @@ export const TABLE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Actions',
   }
 );
+
+export const UPCOMING_EVENTS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.upcomingEventsPopover.ariaLabel',
+  {
+    defaultMessage: 'Upcoming events',
+  }
+);
