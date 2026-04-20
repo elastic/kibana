@@ -114,16 +114,20 @@ export class ObservabilityAIAssistantService {
       productDoc: plugins.productDocBase.management,
     });
 
+    const actionsClient = await plugins.actions.getActionsClientWithRequest(request);
+
     return new ObservabilityAIAssistantClient({
       core: this.core,
       config: this.config,
-      actionsClient: await plugins.actions.getActionsClientWithRequest(request),
+      actionsClient,
       uiSettingsClient,
       namespace: spaceId,
       esClient: {
         asInternalUser,
         asCurrentUser,
       },
+      getConnectorById: (id: string) =>
+        plugins.inference.getConnectorByIdWithoutClientRequest(id, actionsClient, asInternalUser),
       inferenceClient,
       logger: this.logger,
       user: user

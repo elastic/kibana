@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Alert, BrowserFields, LegacyField } from '@kbn/alerting-types';
+import type { Alert, BrowserFields } from '@kbn/alerting-types';
 import type { RowSelectionState } from '../types';
 import { AlertsField } from '../types';
 import type { AdditionalContext, RenderContext } from '../types';
@@ -113,60 +113,6 @@ export const mockAlerts: Alert[] = [
     [ALERT_FLAPPING]: [false],
   },
 ];
-export const mockOldAlertsData = [
-  [
-    {
-      field: AlertsField.name,
-      value: ['one'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['two'],
-    },
-  ],
-  [
-    {
-      field: AlertsField.name,
-      value: ['three'],
-    },
-    {
-      field: AlertsField.reason,
-      value: ['four'],
-    },
-  ],
-] as LegacyField[][];
-export const mockEcsData = [
-  [
-    {
-      '@timestamp': ['2023-01-28T10:48:49.559Z'],
-      _id: 'SomeId',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['one'],
-          },
-          reason: ['two'],
-        },
-      },
-    },
-  ],
-  [
-    {
-      '@timestamp': ['2023-01-27T10:48:49.559Z'],
-      _id: 'SomeId2',
-      _index: 'SomeIndex',
-      kibana: {
-        alert: {
-          rule: {
-            name: ['three'],
-          },
-          reason: ['four'],
-        },
-      },
-    },
-  ],
-];
 
 export const mockCases = getCasesMapMock();
 export const mockMaintenanceWindows = getMaintenanceWindowsMock().reduce(
@@ -191,8 +137,6 @@ export const mockRenderContext = createPartialObjectMock<RenderContext<Additiona
   isLoading: false,
   isLoadingAlerts: false,
   alerts: mockAlerts,
-  ecsAlertsData: mockEcsData,
-  oldAlertsData: mockOldAlertsData,
   alertsCount: mockAlerts.length,
   browserFields: mockBrowserFields,
   isLoadingCases: false,
