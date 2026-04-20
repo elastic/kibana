@@ -21,7 +21,13 @@ jest.mock('../../../hooks', () => ({
     data: undefined,
     sendRequest: jest.fn(),
   }),
-  useLink: jest.fn().mockReturnValue({ getHref: jest.fn().mockReturnValue('#') }),
+  useLink: jest.fn().mockReturnValue({
+    getHref: jest.fn().mockReturnValue('#'),
+    getPath: jest.fn().mockImplementation((page: string, values: any) => {
+      if (page === 'agent_details') return `/agents/${values.agentId}`;
+      return '#';
+    }),
+  }),
   useBreadcrumbs: jest.fn(),
   useStartServices: jest.fn().mockReturnValue({
     application: { navigateToApp: jest.fn() },
@@ -116,5 +122,27 @@ describe('AgentDetailsPage', () => {
     setupMocks({ agent: mockAgent({ type: 'OPAMP' }), enableOtelUI: false });
     const { container } = await render();
     expect(container.querySelector('#collector-config')).toBeNull();
+  });
+
+  it('should redirect to agent details when navigating directly to collector-config for non-OPAMP agent', async () => {
+    setupMocks({ agent: mockAgent({ type: 'PERMANENT' }), enableOtelUI: true });
+    const renderer = createFleetTestRendererMock();
+    renderer.mountHistory.push('/agents/agent-1/collector-config');
+    let result: ReturnType<typeof renderer.render>;
+    await act(async () => {
+      result = renderer.render(<AgentDetailsPage />);
+    });
+    expect(renderer.mountHistory.location.pathname).toBe('/agents/agent-1');
+  });
+
+  it('should not render collector-config route when enableOtelUI is false', async () => {
+    setupMocks({ agent: mockAgent({ type: 'OPAMP' }), enableOtelUI: false });
+    const renderer = createFleetTestRendererMock();
+    renderer.mountHistory.push('/agents/agent-1/collector-config');
+    let result: ReturnType<typeof renderer.render>;
+    await act(async () => {
+      result = renderer.render(<AgentDetailsPage />);
+    });
+    expect(result!.queryByText('AgentCollectorConfig')).toBeNull();
   });
 });

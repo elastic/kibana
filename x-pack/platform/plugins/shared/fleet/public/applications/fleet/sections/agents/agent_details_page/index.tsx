@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { useRouteMatch, useLocation } from 'react-router-dom';
+import { useRouteMatch, useLocation, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 import type { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
@@ -325,6 +325,8 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   outputs?: OutputsForAgentPolicy;
 }> = ({ agent, agentPolicy, outputs }) => {
+  const { enableOtelUI } = ExperimentalFeaturesService.get();
+  const { getPath } = useLink();
   useBreadcrumbs('agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -352,12 +354,17 @@ const AgentDetailsPageContent: React.FunctionComponent<{
           return <AgentSettings agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
-      <Route
-        path={FLEET_ROUTING_PATHS.agent_details_collector_config}
-        render={() => {
-          return <AgentCollectorConfig agent={agent} />;
-        }}
-      />
+      {enableOtelUI && (
+        <Route
+          path={FLEET_ROUTING_PATHS.agent_details_collector_config}
+          render={() => {
+            if (agent.type !== 'OPAMP') {
+              return <Redirect to={getPath('agent_details', { agentId: agent.id })} />;
+            }
+            return <AgentCollectorConfig agent={agent} />;
+          }}
+        />
+      )}
       <Route
         path={FLEET_ROUTING_PATHS.agent_details}
         render={() => {
