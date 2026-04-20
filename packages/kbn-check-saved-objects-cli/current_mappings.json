@@ -4749,6 +4749,9 @@
         "properties": {
           "apiKeyId": {
             "type": "keyword"
+          },
+          "uiamApiKeyId": {
+            "type": "keyword"
           }
         }
       }
