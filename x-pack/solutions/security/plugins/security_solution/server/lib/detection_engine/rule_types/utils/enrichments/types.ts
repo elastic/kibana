@@ -117,12 +117,13 @@ export type CreateFieldsMatchEnrichment = <T extends DetectionAlertLatest>(
   }
 ) => Promise<EventsMapByEnrichments>;
 
+export type EnrichEventsParams<T extends DetectionAlertLatest> = BasedEnrichParameters<T> & {
+  spaceId: string;
+  experimentalFeatures: ExperimentalFeatures;
+};
+
 export type EnrichEvents = <T extends DetectionAlertLatest>(
-  params: BasedEnrichParameters<T> & {
-    spaceId: string;
-    experimentalFeatures: ExperimentalFeatures;
-    entityStoreCrudClient?: EntityStoreCRUDClient;
-  }
+  params: EnrichEventsParams<T>
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
 export type EnrichEventsWrapper = <T extends DetectionAlertLatest>(

@@ -6,9 +6,7 @@
  */
 
 import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
-import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
-import type { ExperimentalFeatures } from '../../../../../../common/experimental_features';
 import {
   createV2HostRiskEnrichments,
   createHostRiskEnrichments,
@@ -31,8 +29,8 @@ import {
 } from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
 import type {
-  BasedEnrichParameters,
   EnrichEvents,
+  EnrichEventsParams,
   EnrichmentOptions,
   EventsForEnrichment,
   EventsMapByEnrichments,
@@ -110,11 +108,7 @@ export const enrichEvents: EnrichEvents = async <T extends DetectionAlertLatest>
   spaceId,
   experimentalFeatures,
   entityStoreCrudClient,
-}: BasedEnrichParameters<T> & {
-  spaceId: string;
-  experimentalFeatures: ExperimentalFeatures;
-  entityStoreCrudClient?: EntityStoreCRUDClient | null;
-}): Promise<Array<EventsForEnrichment<T>>> => {
+}: EnrichEventsParams<T>): Promise<Array<EventsForEnrichment<T>>> => {
   try {
     logger.debug('Alert enrichments started');
 

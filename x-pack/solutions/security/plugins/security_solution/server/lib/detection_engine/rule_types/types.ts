@@ -102,7 +102,7 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   experimentalFeatures: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
   spaceId: string;
-  entityStoreCrudClient?: EntityStoreCRUDClient | null;
+  entityStoreCrudClient?: EntityStoreCRUDClient;
   ignoreFields: Record<string, boolean>;
   ignoreFieldsRegexes: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
