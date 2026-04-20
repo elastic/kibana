@@ -244,6 +244,9 @@ export function Summary({ count }: { count: number }) {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBasicTable
+              tableCaption={i18n.translate('xpack.streams.insights.tableCaption', {
+                defaultMessage: 'Significant events insights',
+              })}
               data-test-subj="streamsInsightsTable"
               columns={columns}
               items={insights}
