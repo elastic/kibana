@@ -306,6 +306,10 @@ If you build a helper that will benefit other tests, consider upstreaming it:
 
 For the full guidance, see [Scout](../scout.md#contribute-to-scout-when-possible).
 
+:::::{tip} Keep Scout packages package and plugin-agnostic
+When you move a helper into `@kbn/scout` or a solution Scout package, **don't import types from plugins or plugin-scoped packages**. Scout packages are intentionally slim, shared infrastructure — adding a dependency on a specific plugin's types pulls that plugin into every consumer and breaks the sharing model.
+:::::
+
 ---
 
 ## UI tests [ui-tests]
