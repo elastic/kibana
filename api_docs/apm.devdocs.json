@@ -223,7 +223,7 @@
           ">"
         ],
         "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-        "lineNumber": 56,
+        "lineNumber": 57,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -239,7 +239,7 @@
               "any"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 62,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -256,7 +256,7 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 62,
+                "lineNumber": 63,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -286,7 +286,7 @@
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>; }"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -305,7 +305,7 @@
                   ", unknown>"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 66,
+                "lineNumber": 67,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -322,7 +322,7 @@
                   "APMPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 66,
+                "lineNumber": 67,
                 "columnNumber": 61,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -346,7 +346,7 @@
               ") => void"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 270,
+            "lineNumber": 275,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -362,7 +362,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 270,
+                "lineNumber": 275,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -379,7 +379,7 @@
                   "APMPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-                "lineNumber": 270,
+                "lineNumber": 275,
                 "columnNumber": 33,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -399,7 +399,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/observability/plugins/apm/server/plugin.ts",
-            "lineNumber": 294,
+            "lineNumber": 299,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
