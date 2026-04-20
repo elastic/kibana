@@ -1,0 +1,64 @@
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          resolutionGroupExample:
+            summary: "Resolution group with linked entities"
+            description: "Returns the resolution group for an entity, including the target entity, all aliases, and the group size."
+            value:
+              target:
+                "@timestamp": "2026-04-10T08:30:00.000Z"
+                user:
+                  name: "jane.doe"
+                  email:
+                    - "jane.doe@example.com"
+                entity:
+                  name: "jane.doe"
+                  id: "user:jane.doe@example.com"
+                  type: "user"
+              aliases:
+                - "@timestamp": "2026-04-10T08:25:00.000Z"
+                  user:
+                    name: "jdoe"
+                  entity:
+                    name: "jdoe"
+                    id: "user:jdoe@example.com"
+                    type: "user"
+                    relationships:
+                      resolution:
+                        resolved_to: "user:jane.doe@example.com"
+              group_size: 2
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          truncatedSearchExample:
+            summary: "Search results truncated"
+            description: "The resolution search returned too many results and was truncated."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "Resolution search truncated"
+  404:
+    description: "Entity not found."
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: "Entity not found"
+            description: "The specified entity does not exist or has no resolution group."
+            value:
+              statusCode: 404
+              error: "Not Found"
+              message: "Entities not found: [user:nonexistent@example.com]"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/resolution/group?entity_id=user%3Ajane.doe%40example.com"
+  - lang: Console
+    source: |
+      GET kbn://api/security/entity_store/resolution/group?entity_id=user:jane.doe@example.com

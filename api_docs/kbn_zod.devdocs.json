@@ -18505,6 +18505,110 @@
                 "path": "x-pack/platform/plugins/shared/alerting_v2/server/lib/notification_policy_client/utils.ts"
               },
               {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/create_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/create_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/live_query/find_live_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/copy_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/copy_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/create_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/create_pack.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/find_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/update_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/packs/update_packs.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/copy_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/copy_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/create_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/create_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/find_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/update_saved_query.gen.ts"
+              },
+              {
+                "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/common/api/saved_query/update_saved_query.gen.ts"
+              },
+              {
                 "plugin": "@kbn/securitysolution-exceptions-common",
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/api/model/exception_list_common.gen.ts"
               },
