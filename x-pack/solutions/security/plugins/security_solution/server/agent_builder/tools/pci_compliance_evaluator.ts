@@ -304,6 +304,18 @@ export async function evaluateRequirement({
 }
 
 /**
+ * Default per-call concurrency for requirement evaluation.
+ *
+ * Each requirement issues at most 3 sequential ES|QL / field-caps round-trips (violation,
+ * coverage, preflight). Running them 4-wide keeps a full PCI posture report (~20
+ * requirements) under ~5× the latency of a single requirement while staying well below
+ * Elasticsearch's default `indices.query.bool.max_clause_count` and the ES|QL task-queue
+ * thresholds observed in `@kbn/evals-suite-pci-compliance` runs. Raise cautiously if the
+ * target cluster has dedicated search capacity.
+ */
+export const PCI_REQUIREMENT_CONCURRENCY = 4;
+
+/**
  * Concurrency-limited task runner that preserves input order in the result array.
  *
  * Used by the consolidated PCI tool so both check-mode and report-mode outputs are stable

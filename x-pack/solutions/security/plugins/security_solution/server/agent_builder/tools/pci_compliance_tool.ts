@@ -33,6 +33,7 @@ import {
   type EvaluatedRequirement,
   evaluateRequirement,
   runWithConcurrency,
+  PCI_REQUIREMENT_CONCURRENCY,
 } from './pci_compliance_evaluator';
 
 const REPORT_FORMATS = ['summary', 'detailed', 'executive'] as const;
@@ -92,8 +93,6 @@ const pciComplianceSchema = z
   );
 
 export const PCI_COMPLIANCE_TOOL_ID = securityTool('pci_compliance');
-
-const CONCURRENCY_LIMIT = 4;
 
 const scoreToStatus = (score: number): ComplianceStatus => {
   if (score >= 85) return 'GREEN';
@@ -226,7 +225,7 @@ export const pciComplianceTool = (
         });
       });
 
-      const rows = await runWithConcurrency(tasks, CONCURRENCY_LIMIT);
+      const rows = await runWithConcurrency(tasks, PCI_REQUIREMENT_CONCURRENCY);
 
       const requiredFieldsChecked = Array.from(
         new Set(requirementIds.flatMap((id) => PCI_REQUIREMENTS[id]?.requiredFields ?? []))

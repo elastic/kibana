@@ -19,12 +19,27 @@ import {
 describe('PCI compliance requirement builders', () => {
   const indexPattern = 'logs-*';
 
+  /**
+   * Requirements that intentionally scan the full index rather than the caller-supplied
+   * time window. These queries must still be injection-safe (no interpolated time values),
+   * but they do not — and should not — reference ?_tstart / ?_tend.
+   */
+  const FULL_INDEX_REQUIREMENT_IDS = new Set(['10.5']);
+
   describe('ES|QL query safety', () => {
-    it('uses ?_tstart / ?_tend placeholders in every coverage query', () => {
+    it('uses ?_tstart / ?_tend placeholders in every time-scoped coverage query', () => {
       for (const [id, def] of Object.entries(PCI_REQUIREMENTS)) {
         const esql = def.buildCoverageEsql(indexPattern);
-        expect(esql).toContain('?_tstart');
-        expect(esql).toContain('?_tend');
+
+        if (FULL_INDEX_REQUIREMENT_IDS.has(id)) {
+          // Full-index scans have no user-supplied time value to interpolate, but they
+          // must still not leak any time literal or unbound `${...}` template marker.
+          expect(esql).not.toMatch(/\?_tstart|\?_tend/);
+        } else {
+          expect(esql).toContain('?_tstart');
+          expect(esql).toContain('?_tend');
+        }
+
         // No time string interpolated into the query.
         expect(esql).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
         // No unbound ${...} interpolation markers remaining.

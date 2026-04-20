@@ -451,9 +451,14 @@ export const PCI_REQUIREMENTS: Record<string, PciRequirementDefinition> = {
       'Ensure log retention policies maintain at least 12 months of audit logs.',
       'Verify that the most recent 3 months of logs are immediately available for analysis.',
     ],
-    // Retention intentionally spans the full index rather than the caller-supplied window.
+    // Retention intentionally spans the full index rather than the caller-supplied window,
+    // so this query has no WHERE clause on @timestamp — there is no user-supplied time
+    // value to bind. `total_events` is projected first so the evaluator's generic
+    // `values[0][0]` count-based scoring path treats "any events exist" as evidence;
+    // `oldest_log`, `newest_log`, and `retention_days` remain available as context for
+    // reviewers inspecting raw evidence.
     buildCoverageEsql: (i) =>
-      `FROM ${i} | STATS oldest_log = MIN(@timestamp), newest_log = MAX(@timestamp), total_events = COUNT(*) | EVAL retention_days = DATE_DIFF("day", oldest_log, newest_log) | LIMIT 1`,
+      `FROM ${i} | STATS total_events = COUNT(*), oldest_log = MIN(@timestamp), newest_log = MAX(@timestamp) | EVAL retention_days = DATE_DIFF("day", oldest_log, newest_log)`,
   },
 
   '11.5': {
