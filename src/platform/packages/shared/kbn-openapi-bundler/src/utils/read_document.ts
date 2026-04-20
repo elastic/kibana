@@ -45,19 +45,7 @@ async function readFile(filePath: string): Promise<unknown> {
 async function readYamlFile(filePath: string): Promise<Record<string, unknown>> {
   let fileContent = await fs.readFile(filePath, { encoding: 'utf8' });
 
-  // Normalize multi-line single-quoted YAML scalars. The yaml package rejects
-  // single-quoted scalars whose continuation lines are not indented beyond the
-  // current block level (a pattern accepted by js-yaml). Fold such spans into a
-  // single line by replacing each line-break and its leading whitespace with a
-  // single space, matching YAML's flow-scalar line-folding semantics.
-  //
-  // The lookbehind (?<=[\s\[{,:]) restricts matching to ' characters that open
-  // a YAML single-quoted scalar (preceded by whitespace or a flow-context
-  // structural character). This prevents matching bare apostrophes inside
-  // unquoted plain scalars (e.g. "alerts'" where ' is preceded by a word char).
-  fileContent = fileContent.replace(/(?<=[\s\[{,:])'(?:[^']|'')*'/gs, (match) =>
-    match.includes('\n') ? match.replace(/\n[ \t]*/g, ' ') : match
-  );
+  fileContent = normalizeSingleQuotedScalars(fileContent);
 
   const maybeObject = parse(fileContent, { schema: 'yaml-1.1' });
 
@@ -68,6 +56,86 @@ async function readYamlFile(filePath: string): Promise<Record<string, unknown>> 
   }
 
   return maybeObject;
+}
+
+/**
+ * Folds multi-line single-quoted YAML scalars that the yaml package rejects
+ * (continuation lines not indented beyond the current block level, a pattern
+ * accepted by js-yaml). Each such span is collapsed to a single line by
+ * replacing line-breaks and their leading whitespace with a single space,
+ * matching YAML's flow-scalar line-folding semantics.
+ *
+ * Block scalar content (lines after a `|` or `>` header) is masked before the
+ * regex runs so that literal `'` characters inside verbatim text — e.g. curl
+ * example JSON bodies like `-d '{ ... }'` — are never treated as YAML scalar
+ * delimiters. The original content is restored verbatim after normalisation.
+ */
+function normalizeSingleQuotedScalars(fileContent: string): string {
+  const placeholders: string[] = [];
+  const lines = fileContent.split('\n');
+  const maskedLines: string[] = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Detect a block scalar header: a line whose YAML value is | or > with
+    // optional chomping/indent modifiers and an optional trailing comment.
+    if (/(?::\s*|-\s+)[|>][+\-]?\d?\s*(?:#[^\r\n]*)?\s*$/.test(line)) {
+      maskedLines.push(line);
+      i++;
+
+      // Preserve any empty lines that precede the first content line.
+      while (i < lines.length && lines[i].trim() === '') {
+        maskedLines.push(lines[i++]);
+      }
+
+      if (i >= lines.length) {
+        continue;
+      }
+
+      // Content indentation is determined by the first non-empty content line.
+      const contentIndent = (lines[i].match(/^(\s*)/) ?? ['', ''])[1].length;
+
+      // Collect all lines that belong to this block scalar (empty lines are
+      // always part of the block; non-empty lines end the block when their
+      // indentation is less than contentIndent).
+      const blockLines: string[] = [];
+      while (i < lines.length) {
+        const bLine = lines[i];
+        const indent =
+          bLine.trim() === '' ? Infinity : (bLine.match(/^(\s*)/) ?? ['', ''])[1].length;
+        if (indent < contentIndent) break;
+        blockLines.push(bLine);
+        i++;
+      }
+
+      const token = `\x00BLOCK_${placeholders.length}\x00`;
+      placeholders.push(blockLines.join('\n'));
+      maskedLines.push(token);
+      continue;
+    }
+
+    maskedLines.push(line);
+    i++;
+  }
+
+  // Apply the single-quoted normalisation only to the non-block-scalar regions.
+  // The lookbehind (?<=[\s\[{,:]) restricts matches to ' characters that open a
+  // YAML single-quoted scalar (preceded by whitespace or a flow-context
+  // structural character), preventing matches on bare apostrophes inside plain
+  // scalars (e.g. "alerts'" where ' is preceded by a word character).
+  let masked = maskedLines.join('\n');
+  masked = masked.replace(/(?<=[\s\[{,:])'(?:[^']|'')*'/gs, (match) =>
+    match.includes('\n') ? match.replace(/\n[ \t]*/g, ' ') : match
+  );
+
+  // Restore each block scalar's original verbatim content.
+  for (let j = 0; j < placeholders.length; j++) {
+    masked = masked.replace(`\x00BLOCK_${j}\x00`, placeholders[j]);
+  }
+
+  return masked;
 }
 
 async function readJsonFile(filePath: string): Promise<Record<string, unknown>> {
