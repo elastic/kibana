@@ -36,11 +36,26 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
   }
 
   getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
-    const { userScope } = taskInstance;
+    const { userScope, uiamApiKey } = taskInstance;
     if (!userScope || userScope.apiKeyCreatedByUser) {
       return [];
     }
-    return [{ apiKeyId: userScope.apiKeyId }];
+
+    const targets: InvalidationTarget[] = [{ apiKeyId: userScope.apiKeyId }];
+
+    // Defense-in-depth for rollbacks / config changes: a deployment may have
+    // previously run with `EsAndUiamApiKeyStrategy` and persisted a UIAM key
+    // alongside the ES key on existing tasks. If the deployment later falls
+    // back to `EsApiKeyStrategy` (e.g., `api_key_type` flipped back to `es`,
+    // or UIAM disabled), those UIAM keys would otherwise become orphaned and
+    // never be invalidated. Still emit an invalidation target for them so the
+    // invalidation task can clean them up. Invalidation is best-effort and
+    // idempotent, so it is safe to always emit when both values are present.
+    if (userScope.uiamApiKeyId && uiamApiKey) {
+      targets.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
+    }
+
+    return targets;
   }
 
   async markForInvalidation(

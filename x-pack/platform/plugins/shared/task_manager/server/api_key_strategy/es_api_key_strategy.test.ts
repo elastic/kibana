@@ -80,6 +80,55 @@ describe('EsApiKeyStrategy', () => {
 
       expect(strategy.getApiKeyIdsForInvalidation(task)).toEqual([]);
     });
+
+    test('also emits a UIAM invalidation target when task has a residual uiamApiKey (post-rollback)', () => {
+      // Simulates a task scheduled under EsAndUiamApiKeyStrategy that now has
+      // a lingering UIAM key after the deployment rolled back to EsApiKeyStrategy.
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        uiamApiKey: 'essu_uiam-key',
+        userScope: {
+          apiKeyId: 'es-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
+      });
+
+      expect(strategy.getApiKeyIdsForInvalidation(task)).toEqual([
+        { apiKeyId: 'es-key-id' },
+        { apiKeyId: 'uiam-key-id', uiamApiKey: 'essu_uiam-key' },
+      ]);
+    });
+
+    test('does not emit UIAM target when userScope.uiamApiKeyId is present but uiamApiKey value is missing', () => {
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        userScope: {
+          apiKeyId: 'es-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: false,
+        },
+      });
+
+      expect(strategy.getApiKeyIdsForInvalidation(task)).toEqual([{ apiKeyId: 'es-key-id' }]);
+    });
+
+    test('returns empty array when apiKeyCreatedByUser is true even if a residual uiamApiKey is present', () => {
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        uiamApiKey: 'essu_uiam-key',
+        userScope: {
+          apiKeyId: 'es-key-id',
+          uiamApiKeyId: 'uiam-key-id',
+          spaceId: 'default',
+          apiKeyCreatedByUser: true,
+        },
+      });
+
+      expect(strategy.getApiKeyIdsForInvalidation(task)).toEqual([]);
+    });
   });
 
   describe('markForInvalidation', () => {

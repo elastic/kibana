@@ -76,25 +76,72 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
     });
 
-    test('falls back to apiKey when typeToUse is UIAM but uiamApiKey is missing', () => {
-      const { strategy } = createStrategy(ApiKeyType.UIAM);
+    test('falls back to apiKey and warns when typeToUse is UIAM but uiamApiKey is missing and apiKeyCreatedByUser is false', () => {
+      const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        userScope: {
+          apiKeyId: 'es-key-id',
+          apiKeyCreatedByUser: false,
+          spaceId: 'default',
+        },
+      });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-key');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(logger.debug).not.toHaveBeenCalled();
+    });
+
+    test('falls back to apiKey and warns when typeToUse is UIAM but uiamApiKey is missing and userScope is absent', () => {
+      const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({ apiKey: 'es-key' });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-key');
+      expect(logger.warn).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
+      expect(logger.debug).not.toHaveBeenCalled();
+    });
+
+    test('falls back to apiKey with a debug log when uiamApiKey is missing but apiKeyCreatedByUser is true', () => {
+      const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
+      const task = mockTaskInstance({
+        apiKey: 'es-key',
+        userScope: {
+          apiKeyId: 'es-key-id',
+          apiKeyCreatedByUser: true,
+          spaceId: 'default',
+        },
+      });
+
+      expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-key');
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+        expect.objectContaining({ tags: expect.any(Array) })
+      );
     });
 
     test('returns apiKey when typeToUse is ES even if uiamApiKey exists', () => {
-      const { strategy } = createStrategy(ApiKeyType.ES);
+      const { strategy, logger } = createStrategy(ApiKeyType.ES);
       const task = mockTaskInstance({ apiKey: 'es-key', uiamApiKey: 'essu_uiam-key' });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-key');
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
     });
 
-    test('returns undefined when task has no keys', () => {
-      const { strategy } = createStrategy(ApiKeyType.UIAM);
+    test('returns undefined and does not log when task has no keys', () => {
+      const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance();
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
     });
   });
 

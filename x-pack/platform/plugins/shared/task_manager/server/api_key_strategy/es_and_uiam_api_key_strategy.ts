@@ -20,7 +20,11 @@ import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
 import type { ApiKeySOFields, ApiKeyStrategy, InvalidationTarget } from './api_key_strategy';
 import { markApiKeysForInvalidation } from './api_key_strategy';
-import { UIAM_LOGS_CREDENTIALS_TAGS, UIAM_LOGS_GRANT_TAGS } from '../constants';
+import {
+  UIAM_LOGS_CREDENTIALS_TAGS,
+  UIAM_LOGS_GRANT_TAGS,
+  UIAM_LOGS_USAGE_TAGS,
+} from '../constants';
 
 interface UiamApiKeyResult {
   apiKey: string;
@@ -50,6 +54,22 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
 
     const requestBasePath = basePath.get(request);
     const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
+    // `apiKeyCreatedByUser` is derived from whether the incoming request is
+    // authenticated with an API key (ES or UIAM). It is stored on `userScope`
+    // and is used by `getApiKeyIdsForInvalidation` to short-circuit invalidation
+    // of BOTH the ES and UIAM keys associated with this task.
+    //
+    // Invariant: when this flag is true, the same flag must govern invalidation
+    // for every credential (ES and UIAM) that this strategy persists on the task.
+    // This is safe today because we only attach a UIAM key when the request is
+    // either UIAM-authenticated (reused as-is) or credential-less (granted anew),
+    // and in both cases `apiKeyCreatedByUser` correctly reflects ownership for
+    // both credentials. If future changes allow the ES and UIAM credentials to
+    // have different ownership (e.g., mint a new UIAM key while reusing a
+    // caller-supplied ES key), this invariant breaks and both fields must become
+    // independent flags on `userScope` (e.g., `esApiKeyCreatedByUser` /
+    // `uiamApiKeyCreatedByUser`) with matching per-credential checks in
+    // `getApiKeyIdsForInvalidation`.
     const apiKeyCreatedByUser = requestHasApiKey(security, request);
 
     const result = new Map<string, ApiKeySOFields>();
@@ -154,13 +174,41 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
       if (taskInstance.uiamApiKey) {
         return taskInstance.uiamApiKey;
       }
-      return taskInstance.apiKey;
+
+      // No UIAM key available even though the strategy is configured to use UIAM.
+      // Fall back to the ES API key so the task can still run, but emit
+      // observability so we can detect UIAM regressions in production:
+      //   - If the task was scheduled with a user-supplied ES API key
+      //     (`apiKeyCreatedByUser: true`), it is *expected* not to have a UIAM
+      //     key attached. Emit a debug-level message.
+      //   - Otherwise, the task should have had a UIAM key. Emit a warn-level
+      //     message so the fallback is actioned.
+      // Mirrors the alerting rule loader behavior (see PR #264434).
+      const { userScope, apiKey } = taskInstance;
+      if (apiKey) {
+        if (userScope?.apiKeyCreatedByUser) {
+          this.logger.debug(
+            'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
+            { tags: UIAM_LOGS_USAGE_TAGS }
+          );
+        } else {
+          this.logger.warn(
+            'UIAM API key is not provided to create a fake request, falling back to regular API key.',
+            { tags: UIAM_LOGS_USAGE_TAGS }
+          );
+        }
+      }
+      return apiKey;
     }
     return taskInstance.apiKey;
   }
 
   getApiKeyIdsForInvalidation(taskInstance: ConcreteTaskInstance): InvalidationTarget[] {
     const { userScope, uiamApiKey } = taskInstance;
+    // `apiKeyCreatedByUser` gates invalidation for BOTH the ES and UIAM keys.
+    // See the invariant documented in `grantApiKeys`: both credentials are
+    // currently persisted with the same ownership, so a single flag is
+    // sufficient. Revisit if ES and UIAM credentials ever diverge in ownership.
     if (!userScope || userScope.apiKeyCreatedByUser) {
       return [];
     }

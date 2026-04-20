@@ -39,3 +39,4 @@ export const UIAM_LOGS_CREDENTIALS_TAGS = [
   ...UIAM_LOGS_COMMON_TAGS,
   'uiam-api-key-invalid-credentials',
 ];
+export const UIAM_LOGS_USAGE_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-missing'];

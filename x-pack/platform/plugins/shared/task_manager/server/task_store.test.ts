@@ -10,7 +10,11 @@ import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
-import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
+import type {
+  TaskInstance,
+  SerializedConcreteTaskInstance,
+  PartialConcreteTaskInstance,
+} from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
@@ -2259,6 +2263,79 @@ describe('TaskStore', () => {
       );
     });
 
+    test('uses scoped (encrypted) repository when docs have uiamApiKey but no apiKey', async () => {
+      const mockUiamApiKey = 'essu_uiam-api-key';
+      const mockUiamUserScope = {
+        apiKeyId: 'apiKeyId',
+        uiamApiKeyId: 'uiamApiKeyId',
+        apiKeyCreatedByUser: false,
+        spaceId: 'testSpace',
+      };
+
+      const mockScopedClient = {
+        bulkUpdate: jest.fn().mockResolvedValue({
+          saved_objects: [
+            {
+              id: 'task:324242',
+              type: 'task',
+              attributes: {
+                ...bulkUpdateTask,
+                uiamApiKey: mockUiamApiKey,
+                userScope: mockUiamUserScope,
+                state: '{"foo":"bar"}',
+                params: '{"hello":"world"}',
+              },
+              references: [],
+              version: '123',
+            },
+          ],
+        }),
+      };
+      mockGetScopedClient.mockReturnValue(mockScopedClient);
+
+      await store.bulkUpdate(
+        [{ ...bulkUpdateTask, uiamApiKey: mockUiamApiKey, userScope: mockUiamUserScope }],
+        {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        }
+      );
+
+      expect(mockGetScopedClient).toHaveBeenCalledWith(mockRequest, {
+        includedHiddenTypes: ['task'],
+        excludedExtensions: ['security', 'spaces'],
+      });
+      expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(logger.debug).not.toHaveBeenCalled();
+    });
+
+    test('throws an error when no request is provided but docs have uiamApiKey and userScope', async () => {
+      await expect(
+        store.bulkUpdate(
+          [
+            {
+              ...bulkUpdateTask,
+              uiamApiKey: 'essu_uiam-api-key',
+              userScope: {
+                apiKeyId: 'apiKeyId',
+                uiamApiKeyId: 'uiamApiKeyId',
+                apiKeyCreatedByUser: false,
+                spaceId: 'testSpace',
+              },
+            },
+          ],
+          {
+            validate: false,
+            mergeAttributes: false,
+            options: {},
+          }
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Request is not defined but some of the tasks have API key or user scope. Cannot get the encrypted saved objects repository to bulk update tasks."`
+      );
+    });
+
     test('throws an error when no request is provided but docs have apiKey and userScope', async () => {
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
@@ -2888,6 +2965,60 @@ describe('TaskStore', () => {
         '[TaskStore] Invalid interval "invalid-interval". Task task2 will not be updated.'
       );
     });
+
+    test(`should strip apiKey and uiamApiKey from partial update body so they are never persisted via raw esClient.bulk`, async () => {
+      const task = {
+        id: '324242',
+        version: 'WzQsMV0=',
+        attempts: 3,
+        apiKey: 'should-not-be-persisted-as-plaintext',
+        uiamApiKey: 'essu_should-not-be-persisted-as-plaintext',
+        userScope: {
+          apiKeyId: 'api-key-id',
+          uiamApiKeyId: 'uiam-api-key-id',
+          apiKeyCreatedByUser: false,
+          spaceId: 'default',
+        },
+      } as PartialConcreteTaskInstance;
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        took: 0,
+        items: [
+          {
+            update: {
+              _index: '.kibana_task_manager_8.16.0_001',
+              _id: 'task:324242',
+              _version: 2,
+              result: 'updated',
+              _shards: { total: 1, successful: 1, failed: 0 },
+              _seq_no: 84,
+              _primary_term: 1,
+              status: 200,
+            },
+          },
+        ],
+      });
+
+      await store.bulkPartialUpdate([task]);
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        body: [
+          { update: { _id: 'task:324242', if_primary_term: 1, if_seq_no: 4 } },
+          { doc: { task: { attempts: 3 } } },
+        ],
+        index: 'tasky',
+        refresh: false,
+      });
+
+      const [[bulkArgs]] = esClient.bulk.mock.calls;
+      const serialized = JSON.stringify(bulkArgs);
+      expect(serialized).not.toContain('should-not-be-persisted-as-plaintext');
+      expect(serialized).not.toContain('essu_');
+      expect(serialized).not.toContain('userScope');
+      expect(serialized).not.toContain('apiKey');
+      expect(serialized).not.toContain('uiamApiKey');
+    });
   });
 
   describe('remove', () => {
@@ -3130,6 +3261,100 @@ describe('TaskStore', () => {
         `"Failure"`
       );
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test('marks API keys for invalidation when task has uiamApiKey but no apiKey', async () => {
+      const getApiKeyIdsForInvalidation = jest.fn().mockReturnValue([
+        { apiKeyId: 'uiamApiKeyId', uiamApiKey: 'essu_uiam-api-key' },
+      ]);
+      const markForInvalidation = jest.fn().mockResolvedValue(undefined);
+      const spyStrategy = {
+        shouldGrantUiam: true,
+        typeToUse: 'uiam',
+        grantApiKeys: jest.fn(),
+        getApiKeyForFakeRequest: jest.fn(),
+        getApiKeyIdsForInvalidation,
+        markForInvalidation,
+      };
+
+      const uiamOnlyStore = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
+        executionContext: mockExecutionContextStart,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        apiKeyStrategy: spyStrategy as any,
+      });
+
+      const uiamOnlyTask = {
+        id: 'task-uiam-only',
+        type: 'task',
+        attributes: {
+          attempts: 0,
+          params: '{"hello":"world"}',
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          startedAt: null,
+          state: '{"foo":"bar"}',
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          uiamApiKey: 'essu_uiam-api-key',
+          userScope: {
+            apiKeyId: 'apiKeyId',
+            uiamApiKeyId: 'uiamApiKeyId',
+            apiKeyCreatedByUser: false,
+            spaceId: 'testSpace',
+          },
+        },
+        references: [],
+        version: '123',
+      };
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [uiamOnlyTask] };
+        },
+      });
+
+      uiamOnlyStore.registerEncryptedSavedObjectsClient(esoClient);
+
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [uiamOnlyTask],
+      });
+
+      await uiamOnlyStore.bulkRemove(['task-uiam-only']);
+
+      expect(getApiKeyIdsForInvalidation).toHaveBeenCalledTimes(1);
+      const [[calledWith]] = getApiKeyIdsForInvalidation.mock.calls;
+      expect(calledWith).toMatchObject({
+        id: 'task-uiam-only',
+        uiamApiKey: 'essu_uiam-api-key',
+      });
+      expect(calledWith.apiKey).toBeUndefined();
+      expect(markForInvalidation).toHaveBeenCalledWith(
+        [{ apiKeyId: 'uiamApiKeyId', uiamApiKey: 'essu_uiam-api-key' }],
+        expect.anything(),
+        expect.anything()
+      );
     });
   });
 

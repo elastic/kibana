@@ -246,7 +246,7 @@ export class TaskStore {
   }
 
   private async regenerateApiKeyFromRequest(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
-    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    const hasEncryptedFields = docs.some(docHasEncryptedApiKey);
     const invalidationTargets: Array<{
       taskId: string;
       targets: InvalidationTarget[];
@@ -258,8 +258,7 @@ export class TaskStore {
       const docsWithApiKeys: ConcreteTaskInstance[] = [];
 
       docs.forEach((taskInstance) => {
-        const { apiKey, userScope } = taskInstance;
-        if (apiKey && userScope) {
+        if (docHasEncryptedApiKey(taskInstance)) {
           docsWithApiKeys.push(taskInstance);
           const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(taskInstance);
           if (targets.length > 0) {
@@ -278,7 +277,7 @@ export class TaskStore {
   }
 
   private getSoClientForUpdate(docs: ConcreteTaskInstance[], options?: ApiKeyOptions) {
-    const hasEncryptedFields = docs.some((doc) => doc.apiKey && doc.userScope);
+    const hasEncryptedFields = docs.some(docHasEncryptedApiKey);
 
     // If a task with an API key is updated without a request, throw an error.
     if (hasEncryptedFields && !options?.request) {
@@ -912,7 +911,7 @@ export class TaskStore {
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (unwrappedTaskInstance.apiKey && unwrappedTaskInstance.userScope) {
+      if (docHasEncryptedApiKey(unwrappedTaskInstance)) {
         const targets = this.apiKeyStrategy.getApiKeyIdsForInvalidation(unwrappedTaskInstance);
         allInvalidationTargets.push(...targets);
       }
@@ -1328,6 +1327,18 @@ export function correctVersionConflictsForContinuation(
   return maxDocs && versionConflicts + updated > maxDocs ? maxDocs - updated : versionConflicts;
 }
 
+/**
+ * Returns true when a task document holds an encrypted API key credential
+ * (either an ES API key or a UIAM API key) together with the `userScope`
+ * metadata required to process it. Must be kept in sync with every credential
+ * field registered for ESO encryption on the `task` saved object type.
+ */
+export function docHasEncryptedApiKey(
+  doc: Pick<ConcreteTaskInstance, 'apiKey' | 'uiamApiKey' | 'userScope'>
+): boolean {
+  return Boolean((doc.apiKey || doc.uiamApiKey) && doc.userScope);
+}
+
 export function taskInstanceToAttributes(
   doc: TaskInstance,
   id: string
@@ -1350,7 +1361,7 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'userScope', 'apiKey'),
+    ...omit(doc, 'id', 'version', 'userScope', 'apiKey', 'uiamApiKey'),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),
