@@ -76,7 +76,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 | # | Requirement | Details | Requested By |
 |---|-------------|---------|--------------|
-| **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Versioning](#4-versioning). | Security (andrew-goldstein) |
+| **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup). | Security (andrew-goldstein) |
 | **S2** | **Caller-provided execution ID** | Support a caller-specified unique execution ID for correlation and deduplication. | O11y (ruflin, cesco-f) |
 | **S3** | **Caller-provided execution metadata** | Allow callers to attach arbitrary metadata to an execution for debugging and correlation. | — |
 | **S4** | **Force override** | A `--force` flag on mutation APIs to allow intentional override of read-only protection for testing, recovery, or urgent fixes. Not as restrictive as system indices. | O11y (ruflin) |
@@ -205,8 +205,8 @@ These are capabilities that interact with or are prerequisites for managed workf
 
 ### Licensing
 
-12. **How to reconcile Enterprise-only with Basic tier consumers?**
-    The epic mandates Enterprise (#16665). Entity Analytics (#15382) explicitly needs Basic tier ("no matter what license"). A possible approach: enable the managed workflow engine for all tiers (the platform capability is tier-agnostic), and let each team control whether their workflow is installed on a given cluster via the `shouldInstall(ctx)` hook defined per a system workflow, where the license/tier context is available. This pushes the licensing decision to the registering plugin — Security can gate on Enterprise, Entity Analytics can allow Basic — without the platform imposing a blanket tier requirement. See the [`shouldInstall` hook](#3-registration) in the registration contract.
+12. <a id="licensing"></a>**How to reconcile Enterprise-only with Basic tier consumers?**
+    The epic mandates Enterprise (#16665). Entity Analytics (#15382) explicitly needs Basic tier ("no matter what license"). Today, the workflow engine itself is gated to Enterprise — it is unavailable on lower tiers entirely. To support per-plugin gating via `shouldInstall`, the workflow engine must first be available on all tiers (the platform capability becomes tier-agnostic). Once the engine is tier-agnostic, each team controls whether their workflow is installed on a given cluster via the `shouldInstall(ctx)` hook, where the license/tier context is available. This pushes the licensing decision to the registering plugin — Security can gate on Enterprise, Entity Analytics can allow Basic — without the platform imposing a blanket tier requirement. This means R9 would need to change: instead of a blanket Enterprise gate, the platform runs on all tiers and individual workflows declare their own tier requirements. See the [`shouldInstall` hook](#3-registration) in the registration contract.
 
 13. **Should managed workflows be registered from integrations?**
     ruflin: "Eventually, ship workflows as integrations in two forms: A) overwrite a managed workflow (rare), B) register a new managed workflow." This is a future direction, not first delivery.
@@ -518,7 +518,7 @@ When a new space is created, the provisioning logic runs for all registered mana
 - **Option B: Lazy provisioning on first access** — When any workflow API is called in a space, check if managed workflows are provisioned. Cache the result per space. This is the pattern Security Insights uses today and avoids the need for a space-creation hook, but has the "missing until first use" problem.
 - **Option C: Periodic reconciliation** — A Task Manager task that periodically scans all spaces and provisions missing workflows. More robust but adds background load.
 
-**Recommendation:** Option A if a space-creation hook can be added (or already exists internally). Fall back to Option B for the first delivery, with Option C as a follow-up for robustness.
+**Recommendation:** Option A is the only approach that fully satisfies R11 ("auto-provisioned into newly created spaces"). If a space-creation hook can be added (or already exists internally), it should be the v1 approach. Option B (lazy provisioning) does not meet R11 — workflows would be missing until first API access in the space. If Option A is not feasible for v1, R11 should be downgraded to a "should have" for the first delivery, with Option C (periodic reconciliation) as a follow-up for robustness.
 
 **What about integrations?**
 
