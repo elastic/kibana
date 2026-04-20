@@ -14,6 +14,7 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
@@ -37,6 +38,7 @@ interface EsqlPluginStartDependencies {
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   // LOOKUP JOIN deps
   share: SharePluginStart;
   data: DataPublicPluginStart;
@@ -67,6 +69,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      cps,
       licensing,
       fileUpload,
       fieldFormats,
@@ -121,7 +124,17 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       getLicense: async () => await licensing?.getLicense(),
     };
 
-    setKibanaServices(start, core, data, storage, uiActions, kql, fieldsMetadata, usageCollection);
+    setKibanaServices(
+      start,
+      core,
+      data,
+      storage,
+      uiActions,
+      kql,
+      fieldsMetadata,
+      usageCollection,
+      cps
+    );
 
     return start;
   }

@@ -1,0 +1,383 @@
+{
+  "sha1": "05260a2fdcfa34a7d665fde531a69ef6bbd8bf34",
+  "tests": [
+    {
+      "id": "db4898614990d08-c129e7cf5767d21",
+      "title": "Ingest Synthetics test data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/global.setup.ts",
+        "line": 11,
+        "column": 16
+      }
+    },
+    {
+      "id": "f972911a2d8bbe7-dde61c28b008571",
+      "title": "AddMonitor creates, edits, and deletes http monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "f972911a2d8bbe7-c348d1c4310c5b6",
+      "title": "AddMonitor creates, edits, and deletes tcp monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "f972911a2d8bbe7-09bea5465d62261",
+      "title": "AddMonitor creates, edits, and deletes icmp monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "f972911a2d8bbe7-f14b950e7a6c957",
+      "title": "AddMonitor creates, edits, and deletes multistep monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "f972911a2d8bbe7-fdb02a1561730cb",
+      "title": "AddMonitor creates, edits, and deletes multistep__recorder monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/add_monitor.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "16c7bd9098ec38e-be21be8c0f093a7",
+      "title": "AlertingDefaults configures alerting defaults: add Slack connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "16c7bd9098ec38e-a4c1e1e301cd7d5",
+      "title": "AlertingDefaults configures alerting defaults: add Email connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "3d44a2f50baed58-cfa2476ff58cabc",
+      "title": "CustomStatusAlert creates a custom status alert rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_status_alert.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "ca66767fd9fda95-74afbfcf9ca5efd",
+      "title": "Creates a custom TLS alert rule can filter monitors by KQL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
+        "line": 56,
+        "column": 7
+      }
+    },
+    {
+      "id": "ca66767fd9fda95-41c3eabe24bb637",
+      "title": "Creates a custom TLS alert rule can filter monitors by type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "id": "ca66767fd9fda95-761cf21fcc31efc",
+      "title": "Creates a custom TLS alert rule can create rule and fire alert",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/custom_tls_alert.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "210079aca1b9c83-036cb48539f2f34",
+      "title": "DefaultStatusAlert creates default alert, triggers on down status, and recovers",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "2212ae9276aadff-689c0c7e10a7c6d",
+      "title": "MonitorDetailFlyout creates HTTP monitor and opens detail flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/detail_flyout.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "11f0fb11404caa0-56c73ac2d78fb44",
+      "title": "FilterMonitors filters monitors by tags with AND/OR logic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/filter_monitors.spec.ts",
+        "line": 24,
+        "column": 7
+      }
+    },
+    {
+      "id": "8bf518130cd5529-32566624ccc15f6",
+      "title": "GettingStarted creates a basic monitor from getting started page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/getting_started.spec.ts",
+        "line": 23,
+        "column": 7
+      }
+    },
+    {
+      "id": "e4d1544f38f2284-7ada0e77e30fad0",
+      "title": "GlobalParameters creates, edits, searches, and deletes global parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/global_parameters.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "bf381dc6853a0f7-bbee831728860ca",
+      "title": "ManagementList displays management list with search and filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/management_list.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "f5360e86dcbc7a2-2f5c513b2301dec",
+      "title": "MonitorFormValidation validates HTTP monitor form fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/monitor_form_validation.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "b3e9b840385f404-82a810aa09fe45c",
+      "title": "MonitorSelector navigates between monitors using the selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/monitor_selector.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "0ffb4babb4c147d-1128db6b7fad457",
+      "title": "OverviewCompactView switches to compact view and persists the selection",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_compact_view.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "63227c5cfe04f39-ccf6627ff5bcb2c",
+      "title": "OverviewSaveLensVisualization opens save lens visualization modal with correct attributes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_save_lens_visualization.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "2e5a5b7852925c8-3fccd3a6d8c2aba",
+      "title": "OverviewSorting sorts monitors correctly in overview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/overview_sorting.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    },
+    {
+      "id": "86e3509bc958d9c-76560b416d87b10",
+      "title": "PrivateLocationsSettings manages private locations lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/private_locations.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "ba641b586ec1a1b-8fa17d839dd5b8c",
+      "title": "ProjectAPIKeys generates API key and verifies viewer restrictions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/project_api_keys.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "bd706a98dc6bd6f-4400b6af6810211",
+      "title": "ProjectMonitorReadOnly project monitor is read-only and can be re-pushed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/project_monitor_read_only.spec.ts",
+        "line": 26,
+        "column": 7
+      }
+    },
+    {
+      "id": "c4cfa77c0ba5f6a-ec9bfa8647930ac",
+      "title": "StepDetailsPage displays step detail metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/step_details.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -323,7 +323,7 @@ export const EdgeHighlighting: StoryObj = {
           <EuiCallOut
             size="s"
             title="Click a node to highlight its connected edges"
-            iconType="crosshairs"
+            iconType="crosshair"
           />
           <EuiSpacer size="s" />
           <EuiText size="xs" color="subdued">

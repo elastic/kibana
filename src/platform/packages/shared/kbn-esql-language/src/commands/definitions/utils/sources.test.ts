@@ -16,6 +16,7 @@ import {
   sourceExists,
   buildSourcesDefinitions,
   getLookupJoinSource,
+  getIndexSourcesFromQuery,
 } from './sources';
 import { EsqlQuery, synth, Walker } from '@elastic/esql';
 import type { ESQLAstJoinCommand } from '@elastic/esql/types';
@@ -176,6 +177,16 @@ describe('buildSourcesDefinitions with timeseries', () => {
     // Regular suggestion should not have TS prefix or range replacement
     expect(regularSuggestion?.text).toBe('regular_index');
     expect(regularSuggestion?.rangeToReplace).toBeUndefined();
+  });
+});
+
+describe('getIndexSourcesFromQuery', () => {
+  it('returns multiple index names from a comma-separated FROM clause', () => {
+    expect(getIndexSourcesFromQuery('FROM stream-a, stream-b')).toEqual(['stream-a', 'stream-b']);
+  });
+
+  it('returns an empty array when the query has no FROM command', () => {
+    expect(getIndexSourcesFromQuery('ROW x = 1')).toEqual([]);
   });
 });
 

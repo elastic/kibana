@@ -401,7 +401,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -633,7 +633,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="infraExpressionRowButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={toggle}
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
@@ -693,7 +693,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType="minusInCircleFilled"
+                  iconType="minusCircle"
                   onClick={toggleWarningThreshold}
                 />
               </EuiFlexGroup>
@@ -713,7 +713,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   color="primary"
                   flush="left"
                   size="xs"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   onClick={toggleWarningThreshold}
                 >
                   <FormattedMessage

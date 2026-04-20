@@ -15,7 +15,7 @@ export interface EntityStoreTaskConfig extends TaskScheduleConfig {
   type: string;
 }
 
-export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
+export const TasksConfig = {
   [EntityStoreTaskType.enum.extractEntity]: {
     title: 'Entity Store - Execute Entity Task',
     type: 'entity_store:v2:extract_entity_task',
@@ -26,4 +26,15 @@ export const TasksConfig: Record<EntityStoreTaskType, EntityStoreTaskConfig> = {
     title: 'Entity Store - Entity Maintainer Task',
     type: 'entity_store:v2:entity_maintainer_task',
   },
-};
+  [EntityStoreTaskType.enum.historySnapshot]: {
+    title: 'Entity Store - History Snapshot Task',
+    type: 'entity_store:v2:history_snapshot_task',
+    timeout: '30m',
+  },
+  [EntityStoreTaskType.enum.statusReport]: {
+    title: 'Entity Store - Status Report Task',
+    type: 'entity_store:v2:status_report_task',
+    timeout: '5m',
+    interval: '12h',
+  },
+} as const satisfies Record<EntityStoreTaskType, EntityStoreTaskConfig>;

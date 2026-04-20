@@ -97,12 +97,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     const {
       isSelected: isCloudConnectorSelected,
       cloudProvider,
+      accountType,
       iacTemplateUrl,
       cloudConnectorVars,
       handleCloudConnectorUpdate,
     } = useVarGroupCloudConnector({
       varGroups,
       varGroupSelections,
+      packagePolicy,
       updatePackagePolicy,
     });
 
@@ -313,7 +315,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   cloudProvider={cloudProvider}
                   templateName={packageInfo.name}
                   iacTemplateUrl={iacTemplateUrl}
-                  accountType="single-account"
+                  accountType={accountType}
                 />
               </EuiFlexItem>
             )}
@@ -361,7 +363,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       size="xs"
-                      iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
+                      iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
                       flush="left"
                       aria-expanded={isShowingAdvanced}

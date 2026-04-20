@@ -40,12 +40,19 @@ export {
   isAgentEligibleForPrivilegeLevelChange,
 } from './agent_privilege_level_change_helpers';
 export {
+  addUseAPMVarIfNotPresent,
+  DATA_STREAM_USE_APM_VAR,
+  shouldIncludeUseAPMVar,
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
   filterPolicyTemplatesTiles,
   hasMultipleEnabledPolicyTemplates,
+  getPolicyTemplateInputDefinition,
+  registryInputAllowsDynamicSignalTypes,
+  packagePolicyInputAllowsUndefinedDataStreamType,
+  hasDynamicSignalTypes,
 } from './policy_template';
 export { doesPackageHaveIntegrations } from './packages_with_integrations';
 export type {
@@ -121,3 +128,9 @@ export {
 
 // Cloud Connector accessor module
 export * from './cloud_connectors';
+
+export {
+  packageInfoHasOtelInputs,
+  packagePolicyHasOtelInputs,
+  OTEL_INPUTS_MINIMUM_VERSION,
+} from './otelcol_helpers';

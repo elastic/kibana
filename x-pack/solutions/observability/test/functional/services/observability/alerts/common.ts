@@ -56,21 +56,15 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const navigateToRulesPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      '/alerts/rules',
-      '',
-      { ensureCurrentUrl: false }
-    );
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '', '', {
+      ensureCurrentUrl: false,
+    });
   };
 
   const navigateToRulesLogsPage = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      '/alerts/rules/logs',
-      '',
-      { ensureCurrentUrl: false }
-    );
+    return await pageObjects.common.navigateToUrlWithBrowserHistory('rules', '/logs', '', {
+      ensureCurrentUrl: false,
+    });
   };
 
   const navigateToAlertDetails = async (alertId: string) => {
@@ -84,10 +78,12 @@ export function ObservabilityAlertsCommonProvider({
 
   const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
-      'observability',
-      `/alerts/rules/${ruleId}`,
+      'rules',
+      `rule/${encodeURIComponent(ruleId)}`,
       '?',
-      { ensureCurrentUrl: false }
+      {
+        ensureCurrentUrl: false,
+      }
     );
   };
 

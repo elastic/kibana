@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { DashboardState, DashboardPinnedPanelsState, DashboardPinnedPanel } from '../server';
@@ -34,11 +34,12 @@ export interface DashboardCapabilities {
  * Used to navigate to a specific dashboard with optional state.
  */
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'filters'> & {
+  Omit<DashboardState, 'filters' | 'query'> & {
     /**
      * Filters to apply. Pinned-ness is encoded on each filter (`$state.store`).
      */
     filters?: Filter[];
+    query?: Query;
     viewMode?: ViewMode;
 
     /**

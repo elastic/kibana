@@ -70,7 +70,7 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
   );
 
   return (
-    <EuiCallOut iconType="search" size="s">
+    <EuiCallOut iconType="magnify" size="s">
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           {i18n.translate('xpack.synthetics.statusRuleViz.ruleAppliesToFlexItemLabel', {

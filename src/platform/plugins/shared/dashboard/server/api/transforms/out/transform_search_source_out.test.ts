@@ -37,7 +37,7 @@ describe('transformSearchSourceOut', () => {
     const result = transformSearchSourceOut(meta, references);
     expect(result).toEqual({
       filters: [{ data_view_id: 'fizzle-1234', type: 'dsl', dsl: { query: { foo: 'bar' } } }],
-      query: { query: 'test', language: 'kuery' },
+      query: { expression: 'test', language: 'kql' },
     });
   });
 
@@ -60,7 +60,7 @@ describe('transformSearchSourceOut', () => {
     const result = transformSearchSourceOut(meta, []);
     expect(result).toEqual({
       filters: [{ type: 'dsl', dsl: { query: { foo: 'bar' } } }],
-      query: { query: 'test', language: 'kuery' },
+      query: { expression: 'test', language: 'kql' },
     });
   });
 });

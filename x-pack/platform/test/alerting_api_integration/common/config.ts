@@ -93,6 +93,7 @@ const enabledActionTypes = [
   'test.connector-with-hooks',
   'test.deprecated',
   'test.single_file_connector',
+  'test.oauth-connector',
 ];
 
 export const getPreConfiguredActions = (
@@ -355,6 +356,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify([
             'localhost',
+            '127.0.0.1',
             'some.non.existent.com',
             'smtp-mail.outlook.com',
             'slack.com',

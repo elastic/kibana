@@ -9,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import {
   type AgentDefinition,
+  AgentVisibility,
   type ToolSelection,
   defaultAgentToolIds,
 } from '@kbn/agent-builder-common';
@@ -16,6 +17,9 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
 import { useAgentBuilderAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
+import { useSkillsService } from '../skills/use_skills';
+import { usePluginsService } from '../plugins/use_plugins';
+import { useExperimentalFeatures } from '../use_experimental_features';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
 import { searchParamNames } from '../../search_param_names';
@@ -33,13 +37,16 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  visibility: AgentVisibility.Public,
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
+    enable_elastic_capabilities: false,
     workflow_ids: [],
+    plugin_ids: [],
   },
 });
 
@@ -57,7 +64,10 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
+  const { skills, isLoading: skillsLoading, error: skillsError } = useSkillsService();
+  const { plugins, isLoading: pluginsLoading, error: pluginsError } = usePluginsService();
   const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
@@ -93,11 +103,13 @@ export function useAgentEdit({
   useEffect(() => {
     if (!agentId) {
       setState(emptyState());
+
       return;
     }
 
     if (agent) {
       const { type, ...agentState } = agent;
+      agentState.visibility = agentState.visibility ?? AgentVisibility.Public;
       if (isClone) {
         agentState.id = duplicateName(agentState.id);
       }
@@ -107,19 +119,24 @@ export function useAgentEdit({
 
   const submit = useCallback(
     async (data: AgentEditState) => {
-      const cleanedData = cleanInvalidToolReferences(data, tools);
+      const requestData = cleanInvalidToolReferences(data, tools);
 
       if (editingAgentId) {
-        const { id, ...updatedAgent } = cleanedData;
+        const { id, ...updatedAgent } = requestData;
         await updateMutation.mutateAsync(updatedAgent);
       } else {
-        await createMutation.mutateAsync(cleanedData);
+        await createMutation.mutateAsync(requestData);
       }
     },
     [editingAgentId, createMutation, updateMutation, tools]
   );
 
-  const isLoading = agentId ? agentLoading || toolsLoading : false;
+  const isLoading = agentId
+    ? agentLoading ||
+      toolsLoading ||
+      skillsLoading ||
+      (isExperimentalFeaturesEnabled && pluginsLoading)
+    : false;
 
   return {
     state,
@@ -127,6 +144,12 @@ export function useAgentEdit({
     isSubmitting: createMutation.isLoading || updateMutation.isLoading,
     submit,
     tools,
-    error: toolsError || agentError,
+    skills,
+    plugins,
+    error:
+      toolsError ||
+      skillsError ||
+      (isExperimentalFeaturesEnabled ? pluginsError : undefined) ||
+      agentError,
   };
 }

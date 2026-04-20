@@ -15,7 +15,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const { common, discover, header, timePicker, dashboard } = getPageObjects([
+  const { appMenu, common, discover, header, timePicker, dashboard } = getPageObjects([
+    'appMenu',
     'common',
     'discover',
     'header',
@@ -122,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.saveSearch(savedSearchTitle);
 
       // start a new search session
-      await testSubjects.click('discoverNewButton');
+      await appMenu.clickMenuItem('discoverNewButton');
       await header.waitUntilLoadingHasFinished();
       expect((await dataGrid.getDocTableRows()).length).to.be(6); // as in settings
       await dataGrid.checkCurrentRowsPerPageToBe(6);

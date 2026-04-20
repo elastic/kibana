@@ -33,7 +33,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import { useFlyoutState } from '../../hooks/use_flyout_state';
-import { getConnectorsManagementHref } from '../../utils/navigate_to_connectors';
+import { getModelManagementHref } from '../../utils/navigate_to_connectors';
 import { RegenerateResponseButton } from '../buttons/regenerate_response_button';
 import { StartChatButton } from '../buttons/start_chat_button';
 import { StopGeneratingButton } from '../buttons/stop_generating_button';
@@ -430,7 +430,7 @@ export function Insight({
     }
   } else if (!connectors.loading && !connectors.connectors?.length) {
     children = (
-      <MissingCredentialsCallout connectorsManagementHref={getConnectorsManagementHref(http!)} />
+      <MissingCredentialsCallout connectorsManagementHref={getModelManagementHref(http!)} />
     );
   } else if (messages.status === FETCH_STATUS.FAILURE) {
     children = (

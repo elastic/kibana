@@ -13,7 +13,7 @@ import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-service
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
-export const INSTALLED_VERSION = '1.4.2';
+export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
 
 export class PrivateLocationTestService {
   private supertestWithAuth: ReturnType<typeof KibanaSupertestProvider>;
@@ -26,43 +26,65 @@ export class PrivateLocationTestService {
     this.retry = getService('retry');
   }
 
-  async installSyntheticsPackage(
-    { version }: { version: string } = { version: INSTALLED_VERSION }
-  ) {
-    await this.supertestWithAuth
-      .post('/api/fleet/setup')
-      .set('kbn-xsrf', 'true')
-      .send()
-      .expect(200);
+  async fetchSyntheticsPackageVersion(): Promise<string> {
+    const res = await this.supertestWithAuth
+      .get('/api/fleet/epm/packages/synthetics')
+      .set('kbn-xsrf', 'true');
+    return res.body?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
+  }
+
+  async installSyntheticsPackage({ version }: { version?: string } = {}) {
+    await this.retry.try(async () => {
+      await this.supertestWithAuth
+        .post('/api/fleet/setup')
+        .set('kbn-xsrf', 'true')
+        .send()
+        .expect(200);
+    });
+    const resolvedVersion = version ?? (await this.fetchSyntheticsPackageVersion());
     await this.retry.try(async () => {
       await this.supertestWithAuth
         .delete(`/api/fleet/epm/packages/synthetics`)
         .set('kbn-xsrf', 'true');
       await this.supertestWithAuth
-        .post(`/api/fleet/epm/packages/synthetics/${version}`)
+        .post(`/api/fleet/epm/packages/synthetics/${resolvedVersion}`)
         .set('kbn-xsrf', 'true')
         .send({ force: true })
         .expect(200);
+      // Verify the version actually took effect — background Fleet tasks
+      // (e.g. deferred upgradePackageInstallVersion) can race and overwrite it
+      const installedVersion = await this.fetchSyntheticsPackageVersion();
+      if (installedVersion !== resolvedVersion) {
+        throw new Error(
+          `Package version mismatch after install: expected ${resolvedVersion} but got ${installedVersion}`
+        );
+      }
     });
   }
 
-  async addTestPrivateLocation(spaceId?: string) {
-    const apiResponse = await this.addFleetPolicy(uuidv4());
+  async addTestPrivateLocation(spaceId = 'default') {
+    const apiResponse = await this.addFleetPolicy(uuidv4(), [spaceId]);
     const testPolicyId = apiResponse.body.item.id;
     return (await this.setTestLocations([testPolicyId], spaceId))[0];
   }
 
-  async addFleetPolicy(name: string) {
+  async addFleetPolicy(name: string, spaceIds = ['default']) {
     return await this.retry.try(async () => {
       const response = await this.supertestWithAuth
-        .post('/api/fleet/agent_policies?sys_monitoring=true')
+        .post(
+          `${
+            spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : ``
+          }/api/fleet/agent_policies?sys_monitoring=true`
+        )
         .set('kbn-xsrf', 'true')
         .send({
           name,
           description: '',
           namespace: 'default',
           monitoring_enabled: [],
-        });
+          space_ids: spaceIds.length > 1 ? spaceIds : undefined,
+        })
+        .expect(200);
       return response;
     });
   }

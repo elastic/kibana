@@ -20,6 +20,7 @@ import type {
   ToolProgressEvent,
   ToolResultEvent,
   RuntimeAgentConfigurationOverrides,
+  CompactionStep,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
@@ -50,6 +51,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { getCurrentTraceId } from '../../../../tracing';
 import type { ConvertedEvents } from '../default/convert_graph_events';
 import { isFinalStateEvent } from '../default/events';
+import type { CompactedConversation } from './conversation_compactor';
 
 type SourceEvents = ConvertedEvents;
 
@@ -69,6 +71,7 @@ export const addRoundCompleteEvent = ({
   stateManager,
   attachmentStateManager,
   configurationOverrides,
+  compactionResult,
 }: {
   pendingRound: ConversationRound | undefined;
   userInput: RoundInput;
@@ -79,6 +82,8 @@ export const addRoundCompleteEvent = ({
   attachmentStateManager: AttachmentStateManager;
   endTime?: Date;
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  /** Result of the compaction pipeline; used to build the compaction step and audit trail */
+  compactionResult?: CompactedConversation;
 }): OperatorFunction<SourceEvents, SourceEvents | RoundCompleteEvent> => {
   return (events$) => {
     const shared$ = events$.pipe(share());
@@ -98,6 +103,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                compactionResult,
               })
             : createRound({
                 events,
@@ -107,6 +113,7 @@ export const addRoundCompleteEvent = ({
                 modelProvider,
                 attachmentRefs,
                 configurationOverrides,
+                compactionResult,
               });
 
           round.state = buildRoundState({ round, events, stateManager });
@@ -137,6 +144,7 @@ const resumeRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  compactionResult,
 }: {
   pendingRound: ConversationRound;
   events: SourceEvents[];
@@ -146,11 +154,15 @@ const resumeRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  compactionResult?: CompactedConversation;
 }): ConversationRound => {
-  // resuming / replaying tool events for the pending step
-  const lastStep = pendingRound.steps[pendingRound.steps.length - 1];
-  if (isToolCallStep(lastStep) && lastStep.results.length === 0) {
-    const toolCallId = lastStep.tool_call_id;
+  // Replay tool events for all pending steps (those with empty results)
+  const pendingSteps = pendingRound.steps
+    .filter(isToolCallStep)
+    .filter((step) => step.results.length === 0);
+
+  for (const step of pendingSteps) {
+    const toolCallId = step.tool_call_id;
     const toolResults = events
       .filter(isToolResultEvent)
       .filter(({ data }) => data.tool_call_id === toolCallId);
@@ -158,11 +170,8 @@ const resumeRound = ({
       .filter(isToolProgressEvent)
       .filter(({ data }) => data.tool_call_id === toolCallId);
 
-    lastStep.results = toolResults.flatMap(({ data }) => data.results);
-    lastStep.progression = [
-      ...(lastStep.progression ?? []),
-      ...toolProgressions.map(({ data }) => data),
-    ];
+    step.results = toolResults.flatMap(({ data }) => data.results);
+    step.progression = [...(step.progression ?? []), ...toolProgressions.map(({ data }) => data)];
   }
 
   const followUp = createRound({
@@ -173,6 +182,7 @@ const resumeRound = ({
     modelProvider,
     attachmentRefs,
     configurationOverrides,
+    compactionResult,
   });
 
   return mergeRounds(pendingRound, followUp);
@@ -194,7 +204,7 @@ const mergeRounds = (previous: ConversationRound, next: ConversationRound): Conv
   const mergedRound: ConversationRound = {
     id: previous.id,
     status: next.status,
-    pending_prompt: next.pending_prompt,
+    pending_prompts: next.pending_prompts,
     state: undefined, // state is recomputed after the merge
     input: mergeRoundInput(previous.input, next.input),
     steps: [...previous.steps, ...next.steps],
@@ -215,6 +225,7 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   return {
     ...previous,
     ...next,
+    message: next.message || previous.message,
     ...(mergedRefs ? { attachment_refs: mergedRefs } : {}),
   };
 };
@@ -248,6 +259,7 @@ const createRound = ({
   modelProvider,
   attachmentRefs,
   configurationOverrides,
+  compactionResult,
 }: {
   events: SourceEvents[];
   input: RoundInput;
@@ -256,6 +268,7 @@ const createRound = ({
   modelProvider: ModelProvider;
   attachmentRefs: AttachmentVersionRef[];
   configurationOverrides?: RuntimeAgentConfigurationOverrides;
+  compactionResult?: CompactedConversation;
 }): ConversationRound => {
   const toolResults = events.filter(isToolResultEvent);
   const toolProgressions = events.filter(isToolProgressEvent);
@@ -287,9 +300,9 @@ const createRound = ({
   };
 
   const lastMessage = messages.length ? messages[messages.length - 1] : undefined;
-  const promptRequest = promptRequestEvents.length ? promptRequestEvents[0] : undefined;
+  const hasPromptRequests = promptRequestEvents.length > 0;
 
-  if (!lastMessage && !promptRequest) {
+  if (!lastMessage && !hasPromptRequests) {
     throw new Error('No response event found in round events');
   }
 
@@ -298,18 +311,32 @@ const createRound = ({
     ? thinkingCompleteEvent.data.time_to_first_token
     : timeToLastToken;
 
+  const steps: ConversationRoundStep[] = [];
+
+  if (compactionResult?.compactionTriggered && compactionResult.summary) {
+    const compactionStep: CompactionStep = {
+      type: ConversationRoundStepType.compaction,
+      token_count_before: compactionResult.tokensBefore ?? 0,
+      token_count_after: compactionResult.tokensAfter ?? 0,
+      summarized_round_count: compactionResult.summary.summarized_round_count,
+    };
+    steps.push(compactionStep);
+  }
+
+  steps.push(...stepEvents.flatMap(eventToStep));
+
   const round: ConversationRound = {
     id: uuidv4(),
-    status: promptRequest
+    status: hasPromptRequests
       ? ConversationRoundStatus.awaitingPrompt
       : ConversationRoundStatus.completed,
-    pending_prompt: promptRequest ? promptRequest.data.prompt : undefined,
+    pending_prompts: hasPromptRequests ? promptRequestEvents.map((e) => e.data.prompt) : undefined,
     state: undefined,
     input: {
       ...input,
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
-    steps: stepEvents.flatMap(eventToStep),
+    steps,
     trace_id: getCurrentTraceId(),
     started_at: startTime.toISOString(),
     time_to_first_token: timeToFirstToken,
@@ -331,6 +358,8 @@ const createReasoningStep = (event: ReasoningEvent): ReasoningStep => {
   return {
     type: ConversationRoundStepType.reasoning,
     reasoning: event.data.reasoning,
+    tool_call_id: event.data.tool_call_id,
+    tool_call_group_id: event.data.tool_call_group_id,
   };
 };
 
@@ -389,32 +418,35 @@ const buildRoundState = ({
     return undefined;
   }
 
-  const promptRequest = promptRequestEvents[0];
-  const toolCallId = promptRequest.source.tool_call_id;
-  const toolCall = round.steps
-    .filter(isToolCallStep)
-    .find((step) => step.tool_call_id === toolCallId);
+  const nodes = promptRequestEvents.map((promptRequest) => {
+    const toolCallId = promptRequest.source.tool_call_id;
+    const toolCall = round.steps
+      .filter(isToolCallStep)
+      .find((step) => step.tool_call_id === toolCallId);
 
-  if (!toolCall) {
-    throw new Error(`Could not find tool call with id ${toolCallId} in round steps`);
-  }
+    if (!toolCall) {
+      throw new Error(`Could not find tool call with id ${toolCallId} in round steps`);
+    }
 
-  const toolState = stateManager
-    .getToolStateManager({ toolId: toolCall.tool_id, toolCallId })
-    .getState();
+    const toolState = stateManager
+      .getToolStateManager({ toolId: toolCall.tool_id, toolCallId })
+      .getState();
+
+    return {
+      step: 'execute_tool' as const,
+      tool_call_id: toolCallId,
+      tool_id: toolCall.tool_id,
+      tool_params: toolCall.params,
+      tool_state: toolState,
+    };
+  });
 
   const state: RoundState = {
-    version: 1,
+    version: 2,
     agent: {
       current_cycle: finalGraphState.currentCycle ?? 0,
       error_count: finalGraphState.errorCount ?? 0,
-      node: {
-        step: 'execute_tool',
-        tool_call_id: toolCallId,
-        tool_id: toolCall.tool_id,
-        tool_params: toolCall.params,
-        tool_state: toolState,
-      },
+      nodes,
     },
   };
 

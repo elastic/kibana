@@ -38,17 +38,19 @@ test.describe(
 
     test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
       page,
-      config,
     }) => {
-      // In the empty state without AI connectors, the Technical Preview badge should be hidden
+      // Mock the connectors endpoint to return no connectors, ensuring AI features
+      // are disabled regardless of the environment (local, ECH, serverless)
+      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+        });
+      });
+      await page.reload();
+
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
-      // Only check for hidden badge in stateful mode - in serverless/production environments,
-      // AI features are always available so the Technical Preview badge will be shown
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!config.serverless) {
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(page.getByText('Technical Preview')).toBeHidden();
-      }
+      await expect(page.getByText('Technical Preview')).toBeHidden();
     });
 
     test('should create a new processor successfully', async ({ pageObjects }) => {

@@ -41,7 +41,7 @@ export const checkForDuplicateTitle = async ({
     }
 
     const { markdowns } = await markdownClient.search({
-      search: `"${title}"`,
+      query: `"${title}"`,
     });
 
     const existing = markdowns.find(

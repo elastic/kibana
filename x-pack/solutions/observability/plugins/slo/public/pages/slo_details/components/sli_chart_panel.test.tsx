@@ -9,14 +9,17 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
 import { render } from '../../../utils/test_helper';
 import { buildSlo } from '../../../data/slo/slo';
 import { SliChartPanel } from './sli_chart_panel';
 import type { ChartData } from '../../../typings/slo';
 
 jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_fetch_apm_indices');
 
 const useKibanaMock = useKibana as jest.Mock;
+const useFetchApmIndexMock = useFetchApmIndex as jest.Mock;
 
 const mockChartData: ChartData[] = [
   { key: new Date('2024-01-01').getTime(), value: 0.99 },
@@ -38,8 +41,12 @@ describe('SliChartPanel', () => {
             return '';
           },
         },
+        share: { url: { locators: { get: () => undefined } } },
+        http: { basePath: { prepend: (path: string) => path } },
+        application: { capabilities: { apm: { show: false } } },
       },
     });
+    useFetchApmIndexMock.mockReturnValue({ data: { metric: '', transaction: '', span: '' } });
   });
 
   it('renders the SLI chart panel', () => {

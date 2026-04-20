@@ -25,12 +25,13 @@ export interface FilterContextType {
   addControl: (controls: FilterControlConfig) => void;
 }
 
-export type FilterControlConfig = Omit<OptionsListDSLControlState, 'data_view_id'> & {
-  /*
-   * Determines the presence and order of a control
-   * */
-  persist?: boolean;
-};
+export type FilterControlConfig = Pick<OptionsListDSLControlState, 'field_name'> &
+  Partial<Omit<OptionsListDSLControlState, 'data_view_id'>> & {
+    /*
+     * Determines the presence and order of a control
+     * */
+    persist?: boolean;
+  };
 
 export type FilterGroupHandler = ControlGroupRendererApi;
 

@@ -134,7 +134,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           defaultMessage: 'Role ARN',
         })
       : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.cloudConnectorIdLabel', {
-          defaultMessage: 'Cloud Connector ID',
+          defaultMessage: 'Federated Identity ID',
         });
 
   const handleSaveName = () => {
@@ -153,7 +153,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const tableCaption = useMemo(
     () =>
       i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.tableCaption', {
-        defaultMessage: 'Integrations using cloud connector {name}',
+        defaultMessage: 'Integrations using federated identity {name}',
         values: { name: cloudConnectorName },
       }),
     [cloudConnectorName]
@@ -335,7 +335,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               <p>
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.policiesFlyout.errorBody"
-                  defaultMessage="There was an error loading the policies using this cloud connector. Please try again."
+                  defaultMessage="There was an error loading the policies using this federated identity. Please try again."
                 />
               </p>
             }
@@ -358,7 +358,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               <h3>
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.policiesFlyout.emptyStateTitle"
-                  defaultMessage="No integrations using this cloud connector"
+                  defaultMessage="No integrations using this federated identity"
                 />
               </h3>
             }
@@ -366,7 +366,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
               <p>
                 <FormattedMessage
                   id="xpack.fleet.cloudConnector.policiesFlyout.emptyStateBody"
-                  defaultMessage="This cloud connector is not currently used by any integrations."
+                  defaultMessage="This federated identity is not currently used by any integrations."
                 />
               </p>
             }
@@ -407,7 +407,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                           'xpack.fleet.cloudConnector.policiesFlyout.deleteDisabledTooltip',
                           {
                             defaultMessage:
-                              "This action isn't available because this connector is used by other integrations. To delete the connector, replace it in all other integrations",
+                              "This action isn't available because this identity is used by other integrations. To delete the identity, replace it in all other integrations",
                           }
                         )
                       : undefined
@@ -425,7 +425,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
                   >
                     <FormattedMessage
                       id="xpack.fleet.cloudConnector.policiesFlyout.deleteConnectorButton"
-                      defaultMessage="Delete Connector"
+                      defaultMessage="Delete Identity"
                     />
                   </EuiButtonEmpty>
                 </EuiToolTip>
@@ -453,7 +453,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
       {isDeleteModalVisible && (
         <EuiConfirmModal
           title={i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.deleteModalTitle', {
-            defaultMessage: "You're about to delete a connector",
+            defaultMessage: "You're about to delete a federated identity",
           })}
           aria-labelledby={deleteModalTitleId}
           titleProps={{ id: deleteModalTitleId }}
@@ -468,7 +468,7 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
           confirmButtonText={i18n.translate(
             'xpack.fleet.cloudConnector.policiesFlyout.deleteModalConfirm',
             {
-              defaultMessage: 'Delete connector',
+              defaultMessage: 'Delete identity',
             }
           )}
           buttonColor="danger"

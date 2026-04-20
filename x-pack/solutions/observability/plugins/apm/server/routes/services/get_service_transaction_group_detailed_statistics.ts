@@ -15,6 +15,7 @@ import {
 import type { ApmTransactionDocumentType } from '../../../common/document_type';
 import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
 import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
@@ -129,21 +130,30 @@ async function getServiceTransactionGroupDetailedStatistics({
   const totalDuration = response.aggregations?.total_duration.value;
   return buckets.map((bucket) => {
     const transactionName = bucket.key as string;
-    const latency = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-      x: timeseriesBucket.key,
-      y: getLatencyValue({
-        latencyAggregationType,
-        aggregation: timeseriesBucket.latency,
-      }),
-    }));
-    const throughput = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-      x: timeseriesBucket.key,
-      y: timeseriesBucket.doc_count, // sparklines only shows trend (no axis)
-    }));
-    const errorRate = bucket.timeseries.buckets.map((timeseriesBucket) => ({
-      x: timeseriesBucket.key,
-      y: calculateFailedTransactionRate(timeseriesBucket),
-    }));
+    const latency = nullifyLeadingTrailingEmptyRedMetricPoints(
+      bucket.timeseries.buckets.map((timeseriesBucket) => ({
+        x: timeseriesBucket.key,
+        docCount: timeseriesBucket.doc_count,
+        y: getLatencyValue({
+          latencyAggregationType,
+          aggregation: timeseriesBucket.latency,
+        }),
+      }))
+    );
+    const throughput = nullifyLeadingTrailingEmptyRedMetricPoints(
+      bucket.timeseries.buckets.map((timeseriesBucket) => ({
+        x: timeseriesBucket.key,
+        docCount: timeseriesBucket.doc_count,
+        y: timeseriesBucket.doc_count,
+      }))
+    );
+    const errorRate = nullifyLeadingTrailingEmptyRedMetricPoints(
+      bucket.timeseries.buckets.map((timeseriesBucket) => ({
+        x: timeseriesBucket.key,
+        docCount: timeseriesBucket.doc_count,
+        y: calculateFailedTransactionRate(timeseriesBucket),
+      }))
+    );
     const transactionGroupTotalDuration = bucket.transaction_group_total_duration.value || 0;
     return {
       transactionName,

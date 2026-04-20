@@ -11,12 +11,14 @@ import type { Logger } from '@kbn/logging';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import type { EvalsConfig } from './config';
 import type {
+  EvalsRequestHandlerContext,
   EvalsPluginSetup,
   EvalsPluginStart,
   EvalsSetupDependencies,
   EvalsStartDependencies,
 } from './types';
 import { registerRoutes } from './routes/register_routes';
+import { DatasetService } from './storage/dataset_service';
 
 export class EvalsPlugin
   implements
@@ -24,6 +26,7 @@ export class EvalsPlugin
 {
   private readonly logger: Logger;
   private readonly config: EvalsConfig;
+  private datasetService?: DatasetService;
 
   constructor(context: PluginInitializerContext<EvalsConfig>) {
     this.logger = context.logger.get();
@@ -40,6 +43,20 @@ export class EvalsPlugin
     }
 
     this.logger.info('Setting up Evals plugin');
+    this.datasetService = new DatasetService(this.logger);
+
+    coreSetup.http.registerRouteHandlerContext<EvalsRequestHandlerContext, 'evals'>(
+      'evals',
+      async () => {
+        if (!this.datasetService) {
+          throw new Error('DatasetService has not been initialized');
+        }
+
+        return {
+          datasetService: this.datasetService,
+        };
+      }
+    );
 
     features.registerKibanaFeature({
       id: PLUGIN_ID,
@@ -47,10 +64,12 @@ export class EvalsPlugin
       order: 9000,
       category: DEFAULT_APP_CATEGORIES.management,
       app: ['kibana', PLUGIN_ID],
+      management: { ai: [PLUGIN_ID] },
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
           api: [PLUGIN_ID],
+          management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
@@ -60,6 +79,7 @@ export class EvalsPlugin
         read: {
           app: ['kibana', PLUGIN_ID],
           api: [PLUGIN_ID],
+          management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
@@ -69,14 +89,16 @@ export class EvalsPlugin
       },
     });
 
-    const router = coreSetup.http.createRouter();
+    const router = coreSetup.http.createRouter<EvalsRequestHandlerContext>();
     registerRoutes({ router, logger: this.logger });
 
     return {};
   }
 
   start(_core: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
-    return {};
+    return {
+      datasetService: this.datasetService,
+    };
   }
 
   stop() {}

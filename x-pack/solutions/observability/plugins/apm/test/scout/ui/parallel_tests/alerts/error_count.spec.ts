@@ -15,7 +15,7 @@ import type { ExtendedScoutTestFixtures } from '../../fixtures';
 const SERVICE_NAME = 'unstable-java';
 const START_DATE = 'now-15m';
 const END_DATE = 'now';
-const RULE_NAME = `Error count threshold ${faker.string.uuid()}`;
+const RULE_NAME = `Error count threshold ${faker.string.uuid()} ${Date.now()}`;
 const APM_ALERTS_INDEX_PATTERN = '.alerts-observability.apm.alerts-*';
 const RULE_TYPE_ID = 'apm.error_rate';
 // Stateful uses rollover index with .internal prefix

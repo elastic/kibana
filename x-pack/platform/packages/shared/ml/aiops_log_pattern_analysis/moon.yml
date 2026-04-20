@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/aiops-log-pattern-analysis'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/ml-ui'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/aiops-log-pattern-analysis'
+  title: '@kbn/aiops-log-pattern-analysis'
   description: Moon project for @kbn/aiops-log-pattern-analysis
   channel: ''
   owner: '@elastic/ml-ui'
-  metadata:
-    sourceRoot: x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis
+  sourceRoot: x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis
 dependsOn:
   - '@kbn/ml-random-sampler-utils'
   - '@kbn/config-schema'
@@ -38,16 +37,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

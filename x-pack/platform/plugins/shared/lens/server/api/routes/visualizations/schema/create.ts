@@ -12,13 +12,6 @@ import { lensCMCreateOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
 import { lensResponseItemSchema } from './common';
 
-export const lensCreateRequestParamsSchema = schema.object(
-  {
-    id: schema.maybe(schema.string()),
-  },
-  { unknowns: 'forbid' }
-);
-
 export const lensCreateRequestQuerySchema = schema.object(
   {
     ...pickFromObjectSchema(lensCMCreateOptionsSchema.getPropSchemas(), ['overwrite']),

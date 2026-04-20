@@ -1,0 +1,23 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/management-plugin",
+    "@kbn/i18n-react",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/deeplinks-analytics",
+    "@kbn/discover-plugin",
+    "@kbn/share-plugin",
+    "@kbn/config-schema",
+    "@kbn/test-jest-helpers",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/features-plugin"
+  ],
+  "exclude": ["target/**/*"]
+}

@@ -1885,13 +1885,13 @@ describe('config schema', () => {
 describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;
-    mockRandomBytes.mockReturnValue('ab'.repeat(16));
+    mockRandomBytes.mockReturnValue('ab'.repeat(32));
 
     const logger = loggingSystemMock.create().get();
     const config = createConfig(ConfigSchema.validate({}, { dist: true }), logger, {
       isTLSEnabled: true,
     });
-    expect(config.encryptionKey).toEqual('ab'.repeat(16));
+    expect(config.encryptionKey).toEqual('ab'.repeat(32));
 
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
       Array [

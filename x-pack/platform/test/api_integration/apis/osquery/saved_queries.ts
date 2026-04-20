@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+// Only the "users route" tests remain here — they require the queryHistoryRework
+// experimental flag (enabled in config.ts) which registers the internal endpoint.
+// All other saved-query tests have been migrated to Scout:
+//   x-pack/platform/plugins/shared/osquery/test/scout/api/tests/saved_queries_*.spec.ts
+
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const osqueryPublicApiVersion = '2023-10-31';
@@ -23,62 +28,60 @@ export default function ({ getService }: FtrProviderContext) {
         interval: '3600',
       });
 
-  const getSavedQuery = (savedObjectId: string) =>
-    supertest
-      .get(`/api/osquery/saved_queries/${savedObjectId}`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', osqueryPublicApiVersion);
-
   const deleteSavedQuery = (savedObjectId: string) =>
     supertest
       .delete(`/api/osquery/saved_queries/${savedObjectId}`)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', osqueryPublicApiVersion);
 
-  const updateSavedQuery = (savedObjectId: string, id: string) =>
-    supertest
-      .put(`/api/osquery/saved_queries/${savedObjectId}`)
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', osqueryPublicApiVersion)
-      .send({
-        id,
-        query: 'select 2;',
-        interval: 3600,
+  describe('Saved queries', () => {
+    describe('users route', () => {
+      const usersPrefix = `users-query-${Date.now()}`;
+      const savedObjectIds: string[] = [];
+
+      before(async () => {
+        for (const suffix of ['one', 'two']) {
+          const response = await createSavedQuery(`${usersPrefix}-${suffix}`).expect(200);
+          savedObjectIds.push(response.body.data.saved_object_id);
+        }
       });
 
-  const findSavedQueries = () =>
-    supertest
-      .get('/api/osquery/saved_queries?page=1&pageSize=20')
-      .set('kbn-xsrf', 'true')
-      .set('elastic-api-version', osqueryPublicApiVersion);
+      after(async () => {
+        for (const soId of savedObjectIds) {
+          await deleteSavedQuery(soId);
+        }
+      });
 
-  describe('Saved queries', () => {
-    it('creates, reads, and deletes a saved query', async () => {
-      const savedQueryId = `saved-query-${Date.now()}`;
+      it('returns unique users with profile UIDs', async () => {
+        const response = await supertest
+          .get('/internal/osquery/saved_queries/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
 
-      const createResponse = await createSavedQuery(savedQueryId);
-      expect(createResponse.status).to.be(200);
-      const savedObjectId = createResponse.body.data.saved_object_id;
+        expect(response.body.data).to.be.an(Array);
+        expect(response.body.data.length).to.be.greaterThan(0);
 
-      const readResponse = await getSavedQuery(savedObjectId);
-      expect(readResponse.status).to.be(200);
-      expect(readResponse.body.data.id).to.be(savedQueryId);
+        const users = response.body.data.map((c: { created_by: string }) => c.created_by);
+        expect(users).to.contain('elastic');
 
-      const updatedSavedQueryId = `${savedQueryId}-updated`;
-      const updateResponse = await updateSavedQuery(savedObjectId, updatedSavedQueryId);
-      expect(updateResponse.status).to.be(200);
-      expect(updateResponse.body.data.id).to.be(updatedSavedQueryId);
+        const uniqueUsers = [...new Set(users)];
+        expect(uniqueUsers.length).to.be(users.length);
+      });
 
-      const findResponse = await findSavedQueries();
-      expect(findResponse.status).to.be(200);
-      expect(
-        findResponse.body.data.some(
-          (savedQuery: { id: string }) => savedQuery.id === updatedSavedQueryId
-        )
-      ).to.be(true);
+      it('includes created_by_profile_uid when available', async () => {
+        const response = await supertest
+          .get('/internal/osquery/saved_queries/users')
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '1')
+          .expect(200);
 
-      const deleteResponse = await deleteSavedQuery(savedObjectId);
-      expect(deleteResponse.status).to.be(200);
+        const elastic = response.body.data.find(
+          (c: { created_by: string }) => c.created_by === 'elastic'
+        );
+        expect(elastic).to.be.ok();
+        expect(elastic).to.have.property('created_by');
+      });
     });
   });
 }

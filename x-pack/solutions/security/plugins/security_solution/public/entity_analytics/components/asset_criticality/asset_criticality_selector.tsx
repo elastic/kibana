@@ -30,11 +30,14 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useMutation } from '@kbn/react-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
+import type { Entity as ApiEntity } from '../../../../common/api/entity_analytics';
+import { sanitizeEntityRecordForUpsert } from '../entity_store/helpers';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { PICK_ASSET_CRITICALITY } from './translations';
 import { AssetCriticalityBadge } from './asset_criticality_badge';
@@ -48,6 +51,12 @@ import type {
 interface Props {
   entity: Entity;
   onChange?: () => void;
+  /** When using Entity Store v2: criticality from the store record. */
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  /** When using Entity Store v2: the full entity record for upsert on save. */
+  entityRecord?: ApiEntity;
+  /** When using Entity Store v2: called after updating criticality via entity store API. */
+  onSaveViaEntityStore?: (updatedRecord: ApiEntity) => Promise<void>;
 }
 const AssetCriticalitySelectorComponent: React.FC<{
   criticality: State;
@@ -113,7 +122,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
             <EuiFlexItem css={{ flexGrow: 'unset' }}>
               <EuiButtonEmpty
                 data-test-subj="asset-criticality-change-btn"
-                iconType="arrowStart"
+                iconType="chevronLimitLeft"
                 iconSide="left"
                 flush="right"
                 onClick={() => toggleModal(true)}
@@ -148,14 +157,68 @@ const AssetCriticalitySelectorComponent: React.FC<{
 export const AssetCriticalitySelector = React.memo(AssetCriticalitySelectorComponent);
 AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';
 
-const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity, onChange }) => {
+const AssetCriticalityAccordionComponent: React.FC<Props> = ({
+  entity,
+  onChange,
+  criticalityFromEntityStore,
+  entityRecord,
+  onSaveViaEntityStore,
+}) => {
   const { euiTheme } = useEuiTheme();
   const privileges = useAssetCriticalityPrivileges(entity.name);
-  const criticality = useAssetCriticalityData({
+  const standardCriticality = useAssetCriticalityData({
     entity,
-    enabled: !!privileges.data?.has_read_permissions,
+    enabled: !!privileges.data?.has_read_permissions && !entityRecord,
     onChange,
   });
+
+  const entityStoreMutation = useMutation({
+    mutationFn: async (params: {
+      criticalityLevel: CriticalityLevelWithUnassigned;
+      idField: string;
+      idValue: string;
+    }) => {
+      if (!entityRecord || !onSaveViaEntityStore) return;
+      const criticalityLevel = params.criticalityLevel;
+      const updatedRecord: ApiEntity = sanitizeEntityRecordForUpsert({
+        ...entityRecord,
+        asset: {
+          ...entityRecord.asset,
+          criticality: criticalityLevel === 'unassigned' ? undefined : criticalityLevel,
+        },
+      });
+      await onSaveViaEntityStore(updatedRecord);
+      onChange?.();
+    },
+  });
+
+  const criticalityFromStoreState: State | null = useMemo(() => {
+    if (!entityRecord || !onSaveViaEntityStore) return null;
+    return {
+      status:
+        criticalityFromEntityStore && criticalityFromEntityStore !== 'unassigned'
+          ? 'update'
+          : 'create',
+      query: {
+        data: criticalityFromEntityStore ? { criticality_level: criticalityFromEntityStore } : null,
+        isLoading: false,
+        isError: false,
+        error: null,
+        isSuccess: true,
+        refetch: () => {},
+      } as State['query'],
+      mutation: entityStoreMutation as unknown as State['mutation'],
+      privileges,
+    };
+  }, [
+    entityRecord,
+    onSaveViaEntityStore,
+    criticalityFromEntityStore,
+    entityStoreMutation,
+    privileges,
+  ]);
+
+  const criticality = criticalityFromStoreState ?? standardCriticality;
 
   if (privileges.isLoading || !privileges.data?.has_read_permissions) {
     return null;
@@ -203,19 +266,19 @@ export const AssetCriticalityTitle = () => (
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="info" color="subdued" />
+        <EuiIcon type="info" color="subdued" aria-hidden={true} />
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiToolTip>
 );
 
-interface ModalProps {
+export interface AssetCriticalityModalProps {
   initialCriticalityLevel: CriticalityLevel | undefined;
   toggle: (nextValue: boolean) => void;
   onSave: (value: CriticalityLevelWithUnassigned) => void;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({
+export const AssetCriticalityModal: React.FC<AssetCriticalityModalProps> = ({
   initialCriticalityLevel,
   toggle,
   onSave,

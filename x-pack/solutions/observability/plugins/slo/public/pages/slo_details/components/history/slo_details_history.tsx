@@ -13,8 +13,10 @@ import React from 'react';
 import { getDefaultRangeFromSlo, useUrlAppState } from './hooks/use_url_app_state';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { isApmIndicatorType } from '../../../../utils/slo/indicator';
 import { toDuration } from '../../../../utils/slo/duration';
 import type { TimeBounds } from '../../types';
+import { ApmSourcePanel } from '../apm_source_panel';
 import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { CalendarPeriodPicker } from './calendar_period_picker';
@@ -77,7 +79,15 @@ export function SloDetailsHistory({ slo }: Props) {
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-
+      {isApmIndicatorType(slo.indicator) && (
+        <ApmSourcePanel
+          slo={slo}
+          timeRange={{
+            from: state.range.from.toISOString(),
+            to: state.range.to.toISOString(),
+          }}
+        />
+      )}
       <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorRatePanel">
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -97,7 +107,6 @@ export function SloDetailsHistory({ slo }: Props) {
           />
         </EuiFlexGroup>
       </EuiPanel>
-
       <HistoricalDataCharts
         slo={slo}
         isAutoRefreshing={false}
@@ -105,7 +114,6 @@ export function SloDetailsHistory({ slo }: Props) {
         onBrushed={onBrushed}
         hideHeaderDurationLabel={true}
       />
-
       <EventsChartPanel
         slo={slo}
         range={state.range}

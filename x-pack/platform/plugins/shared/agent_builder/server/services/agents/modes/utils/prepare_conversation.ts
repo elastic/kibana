@@ -6,6 +6,7 @@
  */
 
 import type {
+  CompactionSummary,
   ConversationAction,
   ConversationRound,
   ConverseInput,
@@ -16,16 +17,18 @@ import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/atta
 import {
   ATTACHMENT_REF_ACTOR,
   getLatestVersion,
-  hashContent,
+  getContentKey,
 } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
 import type {
   AttachmentFormatContext,
+  AttachmentResolveContext,
   AttachmentStateManager,
 } from '@kbn/agent-builder-server/attachments';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server/agents';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
+
 import {
   prepareAttachmentPresentation,
   type AttachmentPresentation,
@@ -48,6 +51,8 @@ export interface ProcessedConversation {
   attachmentStateManager: AttachmentStateManager;
   /** Presentation configuration for versioned attachments (inline vs summary mode) */
   versionedAttachmentPresentation?: AttachmentPresentation;
+  /** Compaction summary covering older rounds that were replaced by this summary */
+  compactionSummary?: CompactionSummary;
 }
 
 const createFormatContext = (agentContext: AgentHandlerContext): AttachmentFormatContext => {
@@ -62,7 +67,8 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
  **/
 const mergeInputAttachmentsIntoAttachmentState = async (
   attachmentStateManager: AttachmentStateManager,
-  inputs: AttachmentInput[]
+  inputs: AttachmentInput[],
+  options?: { updateOriginSnapshot?: boolean; resolveContext?: AttachmentResolveContext }
 ) => {
   if (inputs.length === 0) return;
 
@@ -87,12 +93,18 @@ const mergeInputAttachmentsIntoAttachmentState = async (
           },
           ATTACHMENT_REF_ACTOR.user
         );
+        if (options?.updateOriginSnapshot && existing.origin !== undefined) {
+          await attachmentStateManager.updateOrigin(
+            input.id,
+            existing.origin,
+            ATTACHMENT_REF_ACTOR.user
+          );
+        }
         continue;
       }
     }
 
-    const contentHash = hashContent(input.data);
-    const contentKey = `${input.type}:${contentHash}`;
+    const contentKey = getContentKey(input, 'unknown');
     if (existingByContentKey.has(contentKey)) {
       // already present (same content), nothing to do
       continue;
@@ -103,9 +115,11 @@ const mergeInputAttachmentsIntoAttachmentState = async (
         ...(input.id ? { id: input.id } : {}),
         type: input.type,
         data: input.data,
+        ...(input.origin !== undefined ? { origin: input.origin } : {}),
         ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
       },
-      ATTACHMENT_REF_ACTOR.user
+      ATTACHMENT_REF_ACTOR.user,
+      options?.resolveContext
     );
 
     const latest = getLatestVersion(created);
@@ -161,6 +175,14 @@ export const prepareConversation = async ({
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
+  const resolveContext: AttachmentResolveContext | undefined =
+    context.savedObjectsClient !== undefined
+      ? {
+          request: context.request,
+          spaceId: context.spaceId,
+          savedObjectsClient: context.savedObjectsClient,
+        }
+      : undefined;
 
   // Handle regenerate action: use last round's input and strip it from previous rounds
   const { effectiveRounds, effectiveNextInput } = prepareForAction({
@@ -177,9 +199,14 @@ export const prepareConversation = async ({
   ) as AttachmentInput[];
   const nextInputAttachments = (effectiveNextInput.attachments ?? []) as AttachmentInput[];
 
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments);
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, previousAttachments, {
+    resolveContext,
+  });
   attachmentStateManager.clearAccessTracking();
-  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments);
+  await mergeInputAttachmentsIntoAttachmentState(attachmentStateManager, nextInputAttachments, {
+    updateOriginSnapshot: true,
+    resolveContext,
+  });
 
   const strippedNextInput: ConverseInput = { ...effectiveNextInput, attachments: [] };
   const processedNextInput = await prepareRoundInput({
@@ -347,8 +374,16 @@ const prepareAttachment = async ({
 };
 
 const inputToFinal = (input: AttachmentInput): Attachment => {
+  if (input.data === undefined) {
+    throw createInternalError(
+      'Attachment is missing data; by-reference attachments must be resolved before formatting'
+    );
+  }
   return {
-    ...input,
     id: input.id ?? getToolResultId(),
-  };
+    type: input.type,
+    data: input.data,
+    hidden: input.hidden,
+    origin: input.origin,
+  } as Attachment;
 };

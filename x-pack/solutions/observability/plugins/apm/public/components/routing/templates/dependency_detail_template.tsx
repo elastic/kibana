@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { SpanIcon } from '@kbn/apm-ui-shared';
 import { unifiedSearchBarPlaceholder } from '../../../../common/dependencies';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 import { BetaBadge } from '../../shared/beta_badge';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { ApmMainTemplate } from './apm_main_template';
@@ -84,6 +84,13 @@ export function DependencyDetailTemplate({ children }: Props) {
   return (
     <ApmIndexSettingsContextProvider>
       <ApmMainTemplate
+        searchBar={
+          <SearchBar
+            showTimeComparison
+            showEnvironmentFilter
+            searchBarPlaceholder={unifiedSearchBarPlaceholder}
+          />
+        }
         pageHeader={{
           tabs,
           pageTitle: (
@@ -104,7 +111,6 @@ export function DependencyDetailTemplate({ children }: Props) {
           ),
         }}
       >
-        <SearchBar showTimeComparison searchBarPlaceholder={unifiedSearchBarPlaceholder} />
         {children}
       </ApmMainTemplate>
     </ApmIndexSettingsContextProvider>

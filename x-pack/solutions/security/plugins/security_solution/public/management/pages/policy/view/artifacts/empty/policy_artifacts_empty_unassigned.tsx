@@ -50,7 +50,7 @@ export const PolicyArtifactsEmptyUnassigned = memo<CommonProps>(
     );
     return (
       <EuiPageTemplate.EmptyPrompt
-        iconType="plusInCircle"
+        iconType="plusCircle"
         data-test-subj="policy-artifacts-empty-unassigned"
         color="subdued"
         title={<h2>{labels.emptyUnassignedTitle}</h2>}

@@ -1273,6 +1273,49 @@
       },
       {
         "parentPluginId": "@kbn/std",
+        "id": "def-common.isValidSlugIdentifier",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidSlugIdentifier",
+        "description": [
+          "\nValidates whether a string is already a valid slug identifier.\n"
+        ],
+        "signature": [
+          "(value: string) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+        "lineNumber": 47,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.isValidSlugIdentifier.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "- The string to validate"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+            "lineNumber": 53,
+            "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the value is a valid slug identifier"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
         "id": "def-common.map$",
         "type": "Function",
         "tags": [],
@@ -2305,6 +2348,43 @@
             "path": "src/platform/packages/shared/kbn-std/src/strip_version_qualifier.ts",
             "lineNumber": 14,
             "columnNumber": 39,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/std",
+        "id": "def-common.toSlugIdentifier",
+        "type": "Function",
+        "tags": [],
+        "label": "toSlugIdentifier",
+        "description": [],
+        "signature": [
+          "(value: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/std",
+            "id": "def-common.toSlugIdentifier.$1",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-std/src/slug_identifier.ts",
+            "lineNumber": 28,
+            "columnNumber": 34,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

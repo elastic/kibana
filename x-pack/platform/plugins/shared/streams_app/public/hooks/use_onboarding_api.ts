@@ -6,16 +6,24 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import type { OnboardingStep } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
 export interface UseOnboardingApiOptions {
-  connectorId?: string;
   saveQueries?: boolean;
 }
 
-export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboardingApiOptions) {
+export interface ScheduleOnboardingOptions {
+  steps?: OnboardingStep[];
+  connectors?: {
+    features?: string;
+    queries?: string;
+  };
+}
+
+export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions = {}) {
   const {
     dependencies: {
       start: {
@@ -28,7 +36,7 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
 
   return useMemo(
     () => ({
-      scheduleOnboardingTask: async (streamName: string) => {
+      scheduleOnboardingTask: async (streamName: string, options?: ScheduleOnboardingOptions) => {
         const { from, to } = getLast24HoursTimeRange();
 
         return streamsRepositoryClient.fetch(
@@ -42,7 +50,8 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
                 action: 'schedule' as const,
                 from,
                 to,
-                connectorId,
+                ...(options?.steps !== undefined && { steps: options.steps }),
+                ...(options?.connectors !== undefined && { connectors: options.connectors }),
               },
             },
           }
@@ -91,6 +100,6 @@ export function useOnboardingApi({ connectorId, saveQueries = true }: UseOnboard
         );
       },
     }),
-    [connectorId, saveQueries, signal, streamsRepositoryClient]
+    [saveQueries, signal, streamsRepositoryClient]
   );
 }

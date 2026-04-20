@@ -191,6 +191,12 @@ exports[`DonutChart component passes correct props without errors for valid prop
                 "padding": 0,
               },
               "rect": Object {
+                "dimmed": Object {
+                  "fill": "#ECF1F9",
+                  "texture": Object {
+                    "opacity": 0.25,
+                  },
+                },
                 "opacity": 1,
               },
               "rectBorder": Object {
@@ -435,6 +441,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "horizontalHeight": 64,
               "labelOptions": Object {
                 "maxLines": 1,
+                "widthLimit": 250,
               },
               "margin": 0,
               "spacingBuffer": 10,
@@ -511,7 +518,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "textLightColor": "#E3E8F2",
               "textSubtitleDarkColor": "#1D2A3E",
               "textSubtitleLightColor": "#CAD3E2",
-              "titleWeight": "bold",
+              "titleWeight": 500,
               "titlesTextAlign": "left",
               "valueFontSize": "default",
               "valuePosition": "bottom",
@@ -519,6 +526,9 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
             "partition": Object {
               "circlePadding": 4,
+              "dimmed": Object {
+                "fill": "#ECF1F9",
+              },
               "emptySizeRatio": 0,
               "fillLabel": Object {
                 "clipText": false,
@@ -872,7 +882,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
     </div>
     <span
       class="c0 greenCheckIcon"
-      data-euiicon-type="checkInCircleFilled"
+      data-euiicon-type="checkCircleFill"
     />
   </div>
   <div

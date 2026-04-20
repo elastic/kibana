@@ -5,41 +5,170 @@
  * 2.0.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import React, { useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
-import type { CoreStart, AppMountParameters } from '@kbn/core/public';
+import type { AppMountParameters, ChromeBreadcrumb } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { useHistory, useLocation } from 'react-router-dom';
 import { RunsListPage } from './pages/runs_list';
 import { RunDetailPage } from './pages/run_detail';
+import { DatasetsListPage } from './pages/datasets_list';
+import { DatasetDetailPage } from './pages/dataset_detail';
+import { TracingProjectsListPage } from './pages/tracing_projects_list';
+import { TracingProjectDetailPage } from './pages/tracing_project_detail';
 
-const queryClient = new QueryClient();
+const appTitleLabel = i18n.translate('xpack.evals.app.title', {
+  defaultMessage: 'Evaluations',
+});
 
-const EvalsApp: React.FC<{ coreStart: CoreStart; history: AppMountParameters['history'] }> = ({
-  coreStart,
-  history,
-}) => {
+const runsTabLabel = i18n.translate('xpack.evals.navigation.runs', {
+  defaultMessage: 'Runs',
+});
+
+const datasetsTabLabel = i18n.translate('xpack.evals.navigation.datasets', {
+  defaultMessage: 'Datasets',
+});
+
+const tracingTabLabel = i18n.translate('xpack.evals.navigation.tracing', {
+  defaultMessage: 'Tracing',
+});
+
+const ROOT_PATH = '/' as const;
+const DATASETS_PATH = '/datasets' as const;
+const TRACING_PATH = '/tracing' as const;
+
+const runDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.runDetail', {
+  defaultMessage: 'Run details',
+});
+
+const datasetDetailBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.datasetDetail', {
+  defaultMessage: 'Dataset details',
+});
+
+const EvalsHeader: React.FC = () => {
   return (
-    <KibanaRenderContextProvider {...coreStart}>
-      <KibanaContextProvider services={coreStart}>
-        <QueryClientProvider client={queryClient}>
-          <Router history={history}>
-            <Routes>
-              <Route exact path="/" component={RunsListPage} />
-              <Route path="/runs/:runId" component={RunDetailPage} />
-            </Routes>
-          </Router>
-        </QueryClientProvider>
-      </KibanaContextProvider>
-    </KibanaRenderContextProvider>
+    <>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+        css={{ flexGrow: 0 }}
+      >
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h2>{appTitleLabel}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
   );
 };
 
-export const renderApp = (coreStart: CoreStart, { element, history }: AppMountParameters) => {
-  ReactDOM.render(<EvalsApp coreStart={coreStart} history={history} />, element);
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
+const getBreadcrumbs = ({
+  pathname,
+  getHref,
+}: {
+  pathname: string;
+  getHref: (path: string) => string;
+}): ChromeBreadcrumb[] => {
+  const runsHref = getHref(ROOT_PATH);
+  const datasetsHref = getHref(DATASETS_PATH);
+  const tracingHref = getHref(TRACING_PATH);
+
+  if (pathname.startsWith(`${TRACING_PATH}/`)) {
+    const parts = pathname.split('/').filter(Boolean);
+    if (parts.length >= 2) {
+      const projectName = decodeURIComponent(parts[1]);
+      return [{ text: tracingTabLabel, href: tracingHref }, { text: projectName }];
+    }
+  }
+
+  if (pathname === TRACING_PATH) {
+    return [{ text: tracingTabLabel }];
+  }
+
+  if (pathname.startsWith(`${DATASETS_PATH}/`)) {
+    return [{ text: datasetsTabLabel, href: datasetsHref }, { text: datasetDetailBreadcrumbLabel }];
+  }
+
+  if (pathname === DATASETS_PATH) {
+    return [{ text: datasetsTabLabel }];
+  }
+
+  if (pathname.startsWith('/runs/')) {
+    return [{ text: runsTabLabel, href: runsHref }, { text: runDetailBreadcrumbLabel }];
+  }
+
+  return [{ text: runsTabLabel }];
+};
+
+const EvalsNavigation: React.FC = () => {
+  const history = useHistory();
+  const { pathname } = useLocation();
+  const isTracingSelected = pathname.startsWith(TRACING_PATH);
+  const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
+  const isRunsSelected = !isTracingSelected && !isDatasetsSelected;
+
+  return (
+    <div style={{ flex: '0 0 auto' }}>
+      <EuiTabs size="s">
+        <EuiTab isSelected={isRunsSelected} onClick={() => history.push(ROOT_PATH)}>
+          {runsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isDatasetsSelected} onClick={() => history.push(DATASETS_PATH)}>
+          {datasetsTabLabel}
+        </EuiTab>
+        <EuiTab isSelected={isTracingSelected} onClick={() => history.push(TRACING_PATH)}>
+          {tracingTabLabel}
+        </EuiTab>
+      </EuiTabs>
+    </div>
+  );
+};
+
+const EvalsBreadcrumbs: React.FC<{
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  getHref: (path: string) => string;
+  breadcrumbPrefix?: ChromeBreadcrumb[];
+}> = ({ setBreadcrumbs, getHref, breadcrumbPrefix = [] }) => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    setBreadcrumbs([...breadcrumbPrefix, ...getBreadcrumbs({ pathname, getHref })]);
+  }, [breadcrumbPrefix, getHref, pathname, setBreadcrumbs]);
+
+  return null;
+};
+
+export const EvalsApp: React.FC<{
+  history: AppMountParameters['history'];
+  setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
+  getHref: (path: string) => string;
+  breadcrumbPrefix?: ChromeBreadcrumb[];
+}> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix }) => {
+  return (
+    <Router history={history}>
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+        <EvalsHeader />
+        <EvalsNavigation />
+        <EvalsBreadcrumbs
+          setBreadcrumbs={setBreadcrumbs}
+          getHref={getHref}
+          breadcrumbPrefix={breadcrumbPrefix}
+        />
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <Routes>
+            <Route exact path={ROOT_PATH} component={RunsListPage} />
+            <Route exact path={DATASETS_PATH} component={DatasetsListPage} />
+            <Route path="/datasets/:datasetId" component={DatasetDetailPage} />
+            <Route path="/runs/:runId" component={RunDetailPage} />
+            <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
+            <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
+  );
 };

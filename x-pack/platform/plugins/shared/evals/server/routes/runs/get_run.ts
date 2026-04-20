@@ -24,7 +24,23 @@ import type { RouteDependencies } from '../register_routes';
 interface EvalDocSource {
   task?: { model?: { id?: string; family?: string; provider?: string } };
   evaluator?: { model?: { id?: string; family?: string; provider?: string } };
-  run_metadata?: { total_repetitions?: number };
+  run_metadata?: {
+    total_repetitions?: number;
+    git_branch?: string | null;
+    git_commit_sha?: string | null;
+  };
+  ci?: {
+    buildkite?: {
+      build_url?: string;
+      pull_request?: string;
+      pipeline_slug?: string;
+      build_id?: string;
+      job_id?: string;
+      branch?: string;
+      commit?: string;
+    };
+  };
+  '@timestamp'?: string;
 }
 
 export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
@@ -62,7 +78,8 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
             size: 1,
           });
 
-          const firstDoc = metadataResponse.hits?.hits[0]?._source;
+          const firstHit = metadataResponse.hits?.hits[0];
+          const firstDoc = firstHit?._source;
           if (!firstDoc) {
             return response.notFound({ body: { message: `Run not found: ${runId}` } });
           }
@@ -90,8 +107,12 @@ export const registerGetRunRoute = ({ router, logger }: RouteDependencies) => {
           return response.ok({
             body: {
               run_id: runId,
+              timestamp: firstDoc['@timestamp'],
               task_model: toModelDisplay(firstDoc.task?.model),
               evaluator_model: toModelDisplay(firstDoc.evaluator?.model),
+              git_branch: firstDoc.run_metadata?.git_branch ?? null,
+              git_commit_sha: firstDoc.run_metadata?.git_commit_sha ?? null,
+              ci: firstDoc.ci?.buildkite,
               total_repetitions: firstDoc.run_metadata?.total_repetitions ?? 1,
               stats,
             },

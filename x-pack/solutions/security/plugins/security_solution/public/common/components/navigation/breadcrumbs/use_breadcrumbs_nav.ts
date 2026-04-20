@@ -16,13 +16,14 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import type { GetSecuritySolutionUrl } from '../../link_to';
 import { useGetSecuritySolutionUrl } from '../../link_to';
 import { AppEventTypes, type TelemetryServiceStart } from '../../../lib/telemetry';
-import { useKibana, useNavigateTo, type NavigateTo } from '../../../lib/kibana';
+import { type NavigateTo, useKibana, useNavigateTo } from '../../../lib/kibana';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { updateBreadcrumbsNav } from '../../../breadcrumbs';
 import type { LinkInfo } from '../../../links';
 import { APP_NAME } from '../../../../../common/constants';
 import { getTrailingBreadcrumbs } from './trailing_breadcrumbs';
 import { useParentLinks } from '../../../links/links_hooks';
+import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const useBreadcrumbsNav = () => {
   const dispatch = useDispatch();
@@ -31,6 +32,7 @@ export const useBreadcrumbsNav = () => {
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const parentLinks = useParentLinks(routeProps.pageName);
+  const isClassicNavUpdateEnabled = useIsExperimentalFeatureEnabled('securityClassicNavUpdate');
 
   useEffect(() => {
     // cases manages its own breadcrumbs
@@ -38,23 +40,38 @@ export const useBreadcrumbsNav = () => {
       return;
     }
 
-    const leadingBreadcrumbs = getLeadingBreadcrumbs(parentLinks, getSecuritySolutionUrl);
+    const leadingBreadcrumbs = getLeadingBreadcrumbs(
+      parentLinks,
+      getSecuritySolutionUrl,
+      isClassicNavUpdateEnabled
+    );
     const trailingBreadcrumbs = getTrailingBreadcrumbs(routeProps, getSecuritySolutionUrl);
 
     updateBreadcrumbsNav({
       leading: addOnClicksHandlers(leadingBreadcrumbs, dispatch, navigateTo, telemetry),
       trailing: addOnClicksHandlers(trailingBreadcrumbs, dispatch, navigateTo, telemetry),
     });
-  }, [routeProps, parentLinks, getSecuritySolutionUrl, dispatch, navigateTo, telemetry]);
+  }, [
+    routeProps,
+    parentLinks,
+    getSecuritySolutionUrl,
+    dispatch,
+    navigateTo,
+    telemetry,
+    isClassicNavUpdateEnabled,
+  ]);
 };
 
 const getLeadingBreadcrumbs = (
   parentLinks: LinkInfo[],
-  getSecuritySolutionUrl: GetSecuritySolutionUrl
+  getSecuritySolutionUrl: GetSecuritySolutionUrl,
+  isClassicNavUpdateEnabled: boolean
 ): ChromeBreadcrumb[] => {
   const landingBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
-    href: getSecuritySolutionUrl({ deepLinkId: SecurityPageName.landing }),
+    href: getSecuritySolutionUrl({
+      deepLinkId: isClassicNavUpdateEnabled ? SecurityPageName.launchpad : SecurityPageName.landing,
+    }),
   };
 
   const breadcrumbs: ChromeBreadcrumb[] = parentLinks.map(({ title, id }) => ({

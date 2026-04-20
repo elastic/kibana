@@ -8,7 +8,6 @@
  */
 
 import React, { Fragment, useState, useCallback, useMemo } from 'react';
-import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiButtonEmptyProps } from '@elastic/eui';
@@ -24,19 +23,15 @@ import {
   EuiPopoverFooter,
   useEuiTheme,
 } from '@elastic/eui';
-import useObservable from 'react-use/lib/useObservable';
 
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type {
-  ChromeHelpExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpMenuLink,
-} from '@kbn/core-chrome-browser';
+import type { ChromeHelpMenuLink } from '@kbn/core-chrome-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import { useIsServerless, useKibanaVersion } from '@kbn/react-env';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 
 import { css } from '@emotion/react';
-import { HeaderExtension } from './header_extension';
 import { isModifiedOrPrevented } from './nav_link';
+import { useHelpMenu, useNavigateToUrl, useDocLinks } from './chrome_hooks';
 
 const buildDefaultContentLinks = ({
   kibanaDocLink,
@@ -67,18 +62,6 @@ const buildDefaultContentLinks = ({
   },
 ];
 
-interface Props {
-  navigateToUrl: InternalApplicationStart['navigateToUrl'];
-  globalHelpExtensionMenuLinks$: Observable<ChromeGlobalHelpExtensionMenuLink[]>;
-  helpExtension$: Observable<ChromeHelpExtension | undefined>;
-  helpSupportUrl$: Observable<string>;
-  defaultContentLinks$: Observable<ChromeHelpMenuLink[]>;
-  kibanaVersion: string;
-  kibanaDocLink: string;
-  docLinks: DocLinksStart;
-  isServerless: boolean;
-}
-
 const createCustomLink = (
   index: number,
   text: React.ReactNode,
@@ -95,24 +78,23 @@ const createCustomLink = (
   );
 };
 
-export const HeaderHelpMenu = ({
-  navigateToUrl,
-  globalHelpExtensionMenuLinks$,
-  helpExtension$,
-  helpSupportUrl$,
-  defaultContentLinks$,
-  kibanaVersion,
-  kibanaDocLink,
-  docLinks,
-  isServerless,
-}: Props) => {
+export const HeaderHelpMenu = () => {
+  const navigateToUrl = useNavigateToUrl();
+  const docLinks = useDocLinks();
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const isServerless = useIsServerless();
+  const kibanaVersion = useKibanaVersion();
+  const chromeStyle = useChromeStyle();
+  const kibanaDocLink =
+    chromeStyle === 'project' ? docLinks.links.elasticStackGetStarted : docLinks.links.kibana.guide;
 
-  const helpExtension = useObservable(helpExtension$, undefined);
-  const helpSupportUrl = useObservable(helpSupportUrl$, '');
-  const globalHelpExtensionMenuLinks = useObservable(globalHelpExtensionMenuLinks$, []);
-  const providedDefaultContentLinks = useObservable(defaultContentLinks$, []);
+  const {
+    menuLinks: providedDefaultContentLinks,
+    extension: helpExtension,
+    supportUrl: helpSupportUrl,
+    globalExtensionMenuLinks: globalHelpExtensionMenuLinks,
+  } = useHelpMenu();
 
   const defaultContentLinks = useMemo(
     () =>
@@ -124,15 +106,6 @@ export const HeaderHelpMenu = ({
 
   const closeMenu = useCallback(() => setIsOpen(false), []);
   const toggleMenu = useCallback(() => setIsOpen((prev) => !prev), []);
-
-  const helpExtensionLegacyContent = helpExtension?.content;
-  const helpExtensionMount = useCallback(
-    (domNode: HTMLDivElement) => {
-      const unmount = helpExtensionLegacyContent?.(domNode, { hideHelpMenu: closeMenu });
-      return unmount ?? (() => {});
-    },
-    [helpExtensionLegacyContent, closeMenu]
-  );
 
   const createOnClickHandler = useCallback(
     (href: string) => (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -198,7 +171,7 @@ export const HeaderHelpMenu = ({
 
   let customContent: React.ReactNode = null;
   if (helpExtension) {
-    const { appName, links, content, reactContent } = helpExtension;
+    const { appName, links, content } = helpExtension;
 
     const customLinks =
       links &&
@@ -234,12 +207,7 @@ export const HeaderHelpMenu = ({
         }
       });
 
-    let extensionContent: React.ReactNode = null;
-    if (reactContent) {
-      extensionContent = reactContent({ hideHelpMenu: closeMenu });
-    } else if (content) {
-      extensionContent = <HeaderExtension extension={helpExtensionMount} />;
-    }
+    const extensionContent = content?.({ hideHelpMenu: closeMenu }) ?? null;
 
     customContent = (
       <>
@@ -279,6 +247,9 @@ export const HeaderHelpMenu = ({
       id="headerHelpMenu"
       isOpen={isOpen}
       repositionOnScroll
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuAriaLabel', {
+        defaultMessage: 'Help menu',
+      })}
     >
       <EuiPopoverTitle>
         <EuiFlexGroup responsive={false}>

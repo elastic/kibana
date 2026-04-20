@@ -25,7 +25,9 @@ import { getGroupByCardinalityFilters } from '../apm_common/get_group_by_cardina
 export function ApmLatencyIndicatorTypeForm() {
   const { control, watch, getFieldState } =
     useFormContext<CreateSLOForm<APMTransactionDurationIndicator>>();
-  const { data: apmIndex } = useFetchApmIndex();
+  const {
+    data: { metric: apmIndex },
+  } = useFetchApmIndex();
 
   const [
     serviceName = '',

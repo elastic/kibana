@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
 import moment from 'moment';
 
 import type { BuildWorkflowInsightParams } from '.';
 import type { SecurityWorkflowInsight } from '../../../../../common/endpoint/types/workflow_insights';
 import {
-  ActionType,
-  Category,
-  SourceType,
-  TargetType,
+  WorkflowInsightType,
+  WorkflowInsightActionType,
+  WorkflowInsightCategory,
+  WorkflowInsightSourceType,
+  WorkflowInsightTargetType,
 } from '../../../../../common/endpoint/types/workflow_insights';
 
 const groupSeparator = ':::';
 
-function getMessage(insightType: DefendInsightType): string {
+function getMessage(insightType: WorkflowInsightType): string {
   switch (insightType) {
-    case DefendInsightType.enum.policy_response_failure:
+    case WorkflowInsightType.enum.policy_response_failure:
       return 'Policy response failure detected';
     default:
       return 'Potential issue detected';
@@ -42,20 +42,20 @@ export async function buildCustomWorkflowInsights({
       const workflowInsight: SecurityWorkflowInsight = {
         '@timestamp': currentTime,
         message: getMessage(insightType),
-        category: Category.Endpoint,
+        category: WorkflowInsightCategory.enum.endpoint,
         type: insightType,
         source: {
-          type: SourceType.LlmConnector,
+          type: WorkflowInsightSourceType.enum['llm-connector'],
           id: connectorId ?? '',
           data_range_start: currentTime,
           data_range_end: currentTime,
         },
         target: {
-          type: TargetType.Endpoint,
+          type: WorkflowInsightTargetType.enum.endpoint,
           ids: endpointIds,
         },
         action: {
-          type: ActionType.Refreshed,
+          type: WorkflowInsightActionType.enum.refreshed,
           timestamp: currentTime,
         },
         value: insight.group,

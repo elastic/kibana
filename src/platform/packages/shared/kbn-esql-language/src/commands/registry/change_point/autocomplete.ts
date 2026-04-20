@@ -8,14 +8,12 @@
  */
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
+import { isOptionNode } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { ESQL_NUMBER_TYPES } from '../../definitions/types';
 import { pipeCompleteItem } from '../complete_items';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../types';
-import {
-  buildUserDefinedColumnsDefinitions,
-  findFinalWord,
-} from '../../definitions/utils/autocomplete/helpers';
+import { buildUserDefinedColumnsDefinitions } from '../../definitions/utils/autocomplete/helpers';
 
 export enum Position {
   VALUE = 'value',
@@ -72,7 +70,6 @@ export const onSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.onDoc', {
     defaultMessage: 'On',
   }),
-  sortText: '1',
 });
 
 export const asSuggestion: ISuggestionItem = withAutoSuggest({
@@ -82,8 +79,18 @@ export const asSuggestion: ISuggestionItem = withAutoSuggest({
   detail: i18n.translate('kbn-esql-language.esql.definitions.asDoc', {
     defaultMessage: 'As',
   }),
-  sortText: '2',
 });
+
+const hasOption = (command: ESQLAstAllCommands, name: string): boolean =>
+  command.args.some((arg) => !Array.isArray(arg) && isOptionNode(arg) && arg.name === name);
+
+function getRemainingOptionSuggestions(command: ESQLAstAllCommands): ISuggestionItem[] {
+  return [
+    ...(!hasOption(command, 'on') ? [onSuggestion] : []),
+    ...(!hasOption(command, 'as') ? [asSuggestion] : []),
+    pipeCompleteItem,
+  ];
+}
 
 export async function autocomplete(
   query: string,
@@ -102,18 +109,9 @@ export async function autocomplete(
           advanceCursor: true,
           openSuggestions: true,
         })) ?? [];
-      const lastWord = findFinalWord(innerText);
-      if (lastWord !== '') {
-        numericFields.forEach((fieldSuggestion) => {
-          fieldSuggestion.rangeToReplace = {
-            start: innerText.length - lastWord.length + 1,
-            end: innerText.length + 1,
-          };
-        });
-      }
       return numericFields;
     case Position.AFTER_VALUE: {
-      return [onSuggestion, asSuggestion, pipeCompleteItem];
+      return getRemainingOptionSuggestions(command);
     }
     case Position.ON_COLUMN: {
       const onFields =
@@ -124,7 +122,7 @@ export async function autocomplete(
       return onFields;
     }
     case Position.AFTER_ON_CLAUSE:
-      return [asSuggestion, pipeCompleteItem];
+      return getRemainingOptionSuggestions(command);
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
       return buildUserDefinedColumnsDefinitions(['changePointType']).map((v) =>
@@ -138,7 +136,7 @@ export async function autocomplete(
       return buildUserDefinedColumnsDefinitions(['pValue']).map((v) => withAutoSuggest(v));
     }
     case Position.AFTER_AS_CLAUSE: {
-      return [pipeCompleteItem];
+      return getRemainingOptionSuggestions(command);
     }
     default:
       return [];

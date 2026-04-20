@@ -29,6 +29,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
 import type { UpdateRuleData } from './types';
@@ -414,26 +415,4 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
-}
-
-/**
- * Migrates legacy lastRun.outcomeMsg from string to string[]
- *
- * Rule SO schema forces lastRun.outcomeMsg to be string[].
- * However, some rules may have lastRun.outcomeMsg as string after upgrading from 7.x due to
- * lack of migration. lastRun.outcomeMsg schema change from string to string[] happened after
- * classical migrations were deprecated due to Serverless. And quite often it's not an issue
- * as lastRun is absent.
- */
-function migrateLegacyLastRunOutcomeMsg<LastRun extends { outcomeMsg?: unknown }>(
-  lastRun: LastRun
-): LastRun {
-  if (typeof lastRun.outcomeMsg === 'string') {
-    return {
-      ...lastRun,
-      outcomeMsg: [lastRun.outcomeMsg],
-    };
-  }
-
-  return lastRun;
 }

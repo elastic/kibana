@@ -8,7 +8,6 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingChart,
   EuiPanel,
@@ -16,7 +15,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
@@ -109,7 +107,6 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
 
           <EuiFlexItem grow={0}>
             <EuiLink
-              color="text"
               href={getDiscoverLink({
                 slo,
                 timeRange: {
@@ -122,11 +119,9 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
               })}
               data-test-subj="sloDetailDiscoverLink"
             >
-              <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
-              <FormattedMessage
-                id="xpack.slo.sloDetails.viewEventsLink"
-                defaultMessage="View events"
-              />
+              {i18n.translate('xpack.slo.sloDetails.viewEventsLink', {
+                defaultMessage: 'View events',
+              })}
             </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>

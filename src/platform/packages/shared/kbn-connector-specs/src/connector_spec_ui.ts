@@ -41,6 +41,7 @@ export interface BaseMetadata {
   sensitive?: boolean;
   order?: number;
   hidden?: boolean;
+  validate?: { allowedHosts?: boolean };
   [x: string]: unknown;
 }
 

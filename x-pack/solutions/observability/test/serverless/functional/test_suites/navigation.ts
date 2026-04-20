@@ -112,10 +112,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'observability-overview:alerts',
       });
       await testSubjects.click('manageRulesPageButton');
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
-      await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'observability-overview:alerts',
-      });
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Rules']);
     });
 
     it('navigates to integrations', async () => {

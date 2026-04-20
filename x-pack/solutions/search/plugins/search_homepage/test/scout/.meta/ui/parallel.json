@@ -1,6 +1,20 @@
 {
-  "sha1": "56e1d3ba196cdafb74fe057fa1c8174dd77beaed",
+  "sha1": "6e013bc79940c4a3958441f95eb6a0e3da67fd69",
   "tests": [
+    {
+      "id": "926362ac9e9161a-ce96c191932cf3e",
+      "title": "Homepage - Admin: Serverless search should show Changelog label in kibana version on serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin_serverless.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
     {
       "id": "1c8c85aed319853-a4c7c49ef896953",
       "title": "Homepage - Admin API keys button should be enabled",
@@ -114,6 +128,22 @@
       }
     },
     {
+      "id": "1c8c85aed319853-4c2a67b41567f1d",
+      "title": "Homepage - Admin should display kibana version badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
+        "line": 140,
+        "column": 9
+      }
+    },
+    {
       "id": "1c8c85aed319853-0eb16b3f96901e9",
       "title": "Homepage - Admin should display Getting Started banner with title and button",
       "expectedStatus": "passed",
@@ -125,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 140,
+        "line": 146,
         "column": 9
       }
     },
@@ -141,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 146,
+        "line": 152,
         "column": 9
       }
     },
@@ -157,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 155,
+        "line": 161,
         "column": 9
       }
     },
@@ -173,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 172,
+        "line": 178,
         "column": 9
       }
     },
@@ -189,8 +219,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_admin.spec.ts",
-        "line": 182,
+        "line": 188,
         "column": 9
+      }
+    },
+    {
+      "id": "1a545e8cafa9e0e-f66c3967c356256",
+      "title": "Homepage - Viewer: Serverless search should show Changelog label in kibana version on serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer_serverless.spec.ts",
+        "line": 21,
+        "column": 7
       }
     },
     {
@@ -258,6 +302,22 @@
       }
     },
     {
+      "id": "03e83e549838106-251b4e97ba9ad69",
+      "title": "Homepage - Viewer should display kibana version badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
       "id": "03e83e549838106-b6457ecf33dfae4",
       "title": "Homepage - Viewer should have embedded dev console that can be toggled",
       "expectedStatus": "passed",
@@ -269,7 +329,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 77,
+        "line": 83,
         "column": 9
       }
     },
@@ -285,7 +345,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 102,
+        "line": 108,
         "column": 9
       }
     },
@@ -301,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 110,
+        "line": 116,
         "column": 9
       }
     },
@@ -317,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 126,
+        "line": 132,
         "column": 9
       }
     },
@@ -333,7 +393,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 143,
+        "line": 149,
         "column": 9
       }
     },
@@ -349,7 +409,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_homepage/test/scout/ui/parallel_tests/homepage_viewer.spec.ts",
-        "line": 153,
+        "line": 159,
         "column": 9
       }
     }

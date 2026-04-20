@@ -187,7 +187,6 @@ export const markCommonFields = (
 
       return {
         ...suggestion,
-        sortText: '1-' + (suggestion.sortText || suggestion.label),
         detail,
         category: SuggestionCategory.LOOKUP_COMMON_FIELD,
         documentation: {

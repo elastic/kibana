@@ -228,6 +228,7 @@ interface GetInstalledPackagesOptions {
   perPage: number;
   sortOrder: 'asc' | 'desc';
   showOnlyActiveDataStreams?: boolean;
+  dependencyPackageName?: string;
 }
 export async function getInstalledPackages(options: GetInstalledPackagesOptions) {
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
@@ -359,7 +360,8 @@ export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {
-  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType } = options;
+  const { searchAfter, sortOrder, perPage, nameQuery, dataStreamType, dependencyPackageName } =
+    options;
 
   const result = await savedObjectsClient.find<Installation>({
     type: PACKAGES_SAVED_OBJECT_TYPE,
@@ -378,6 +380,15 @@ export async function getInstalledPackageSavedObjects(
         `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.install_status`,
         installationStatuses.Installed
       ),
+      ...(dependencyPackageName
+        ? [
+            buildFunctionNode(
+              'nested',
+              `${PACKAGES_SAVED_OBJECT_TYPE}.attributes.dependencies`,
+              nodeBuilder.is('name', dependencyPackageName)
+            ),
+          ]
+        : []),
       ...(dataStreamType
         ? [
             // Filter for a "queryable" marker
@@ -674,6 +685,29 @@ export const getPackageUsageStats = async ({
     agent_policy_count: agentPolicyCount.size,
   };
 };
+
+export async function getPackageDependencies(
+  pkgName: string,
+  pkgVersion: string
+): Promise<Array<{ name: string; version: string; title: string }>> {
+  const pkg = await Registry.fetchInfo(pkgName, pkgVersion).catch(() => undefined);
+  if (!pkg) {
+    throw new PackageNotFoundError(`[${pkgName}-${pkgVersion}] package not found in registry`);
+  }
+
+  const deps = pkg.requires?.content ?? [];
+
+  return Promise.all(
+    deps.map(async (dep) => {
+      const depPkg = await Registry.fetchFindLatestPackageOrUndefined(dep.package);
+      return {
+        name: dep.package,
+        version: dep.version,
+        title: depPkg && 'title' in depPkg ? depPkg.title : dep.package,
+      };
+    })
+  );
+}
 
 interface PackageResponse {
   paths: string[];

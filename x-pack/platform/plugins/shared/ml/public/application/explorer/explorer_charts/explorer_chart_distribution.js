@@ -72,6 +72,7 @@ export class ExplorerChartDistribution extends React.Component {
     tooltipService: PropTypes.object.isRequired,
     cursor$: PropTypes.object,
     euiTheme: PropTypes.object.isRequired,
+    isEmbeddable: PropTypes.bool,
   };
 
   constructor(props) {
@@ -755,7 +756,7 @@ export class ExplorerChartDistribution extends React.Component {
   };
 
   render() {
-    const { seriesConfig } = this.props;
+    const { seriesConfig, isEmbeddable } = this.props;
 
     if (typeof seriesConfig === 'undefined') {
       // just return so the empty directive renders without an error later on
@@ -764,12 +765,16 @@ export class ExplorerChartDistribution extends React.Component {
 
     // create a chart loading placeholder
     const isLoading = seriesConfig.loading;
+    const telemetrySource = isEmbeddable
+      ? 'embeddable_distribution_chart'
+      : 'explorer_distribution_chart';
 
     return (
       <>
         <RuleEditorFlyout
           setShowFunction={this.setShowRuleEditorFlyoutFunction}
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+          telemetrySource={telemetrySource}
         />
         {this.state.alertFlyoutVisible && this.state.alertFlyoutParams && (
           <MlAnomalyAlertFlyout

@@ -1,18 +1,36 @@
 {
-  "sha1": "b62bb77d48c8edac0e8fd294bc9e27701d4749b8",
+  "sha1": "1ccef901456e59e6c739f6ad24da3ca41a6a9c91",
   "tests": [
+    {
+      "id": "30a4f04aa24f29d-b2a90d16b4f88bb",
+      "title": "Getting Started - Admin: Serverless search should show Changelog label in Kibana version on serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.serverless.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
     {
       "id": "ace16ea93cb8904-1f34fdab863ed0b",
       "title": "Getting Started - Admin verifies page elements are rendered correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 17,
-        "column": 7
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -20,13 +38,15 @@
       "title": "Getting Started - Admin Add data button navigates to correct pages",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 94,
-        "column": 7
+        "line": 78,
+        "column": 9
       }
     },
     {
@@ -34,13 +54,15 @@
       "title": "Getting Started - Admin Skip and go to Home button navigates to home page",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 113,
-        "column": 7
+        "line": 97,
+        "column": 9
       }
     },
     {
@@ -48,13 +70,15 @@
       "title": "Getting Started - Admin Elasticsearch endpoint copy button shows feedback",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 118,
-        "column": 7
+        "line": 102,
+        "column": 9
       }
     },
     {
@@ -62,13 +86,15 @@
       "title": "Getting Started - Admin Connection details flyout works correctly",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 127,
-        "column": 7
+        "line": 111,
+        "column": 9
       }
     },
     {
@@ -76,13 +102,15 @@
       "title": "Getting Started - Admin Tutorial cards open embedded console",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 143,
-        "column": 7
+        "line": 127,
+        "column": 9
       }
     },
     {
@@ -90,13 +118,47 @@
       "title": "Getting Started - Admin Language selector shows correct code examples",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlSearch"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_admin.spec.ts",
-        "line": 166,
-        "column": 7
+        "line": 149,
+        "column": 9
+      }
+    },
+    {
+      "id": "2cdaac59f15380c-3579747f902d1e8",
+      "title": "Getting Started - Viewer: Serverless search should show Changelog label in Kibana version on serverless",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.serverless.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "af94f924c5951b5-e20ea19b94541fc",
+      "title": "Getting Started - Viewer should display kibana version badge",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
+        "line": 21,
+        "column": 9
       }
     },
     {
@@ -111,7 +173,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel_tests/getting_started_viewer.spec.ts",
-        "line": 21,
+        "line": 26,
         "column": 9
       }
     }

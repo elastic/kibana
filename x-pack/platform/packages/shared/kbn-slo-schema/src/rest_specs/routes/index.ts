@@ -31,3 +31,8 @@ export * from './slo_templates';
 export * from './health_scan';
 export * from './search_slo_definitions';
 export * from './get_grouped_stats';
+export * from './composite_slo/composite_slo_create';
+export * from './composite_slo/composite_slo_get';
+export * from './composite_slo/composite_slo_find';
+export * from './composite_slo/composite_slo_update';
+export * from './composite_slo/composite_slo_delete';

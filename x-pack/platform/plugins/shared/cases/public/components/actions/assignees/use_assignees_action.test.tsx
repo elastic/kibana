@@ -43,7 +43,7 @@ describe('useAssigneesAction', () => {
         "disabled": false,
         "icon": <EuiIcon
           size="m"
-          type="userAvatar"
+          type="user"
         />,
         "key": "cases-bulk-action-assignees",
         "name": "Edit assignees",

@@ -285,7 +285,8 @@ export const appendFilterToESQLQueryFromValueClickAction = ({
           column.name,
           value,
           getOperationForWhere(value, negate || false),
-          column.meta?.type
+          column.meta?.type,
+          column.meta?.esType
         );
 
         if (queryWithWhere) {

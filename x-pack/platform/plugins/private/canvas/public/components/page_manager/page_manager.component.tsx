@@ -6,7 +6,6 @@
  */
 
 import React, { Fragment, Component } from 'react';
-import PropTypes from 'prop-types';
 import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiIcon,
@@ -63,18 +62,6 @@ interface State {
 }
 
 export class PageManager extends Component<Props, State> {
-  static propTypes = {
-    isWriteable: PropTypes.bool.isRequired,
-    onAddPage: PropTypes.func.isRequired,
-    onMovePage: PropTypes.func.isRequired,
-    onPreviousPage: PropTypes.func.isRequired,
-    onRemovePage: PropTypes.func.isRequired,
-    pages: PropTypes.array.isRequired,
-    selectedPage: PropTypes.string,
-    workpadCSS: PropTypes.string,
-    workpadId: PropTypes.string.isRequired,
-  };
-
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -242,8 +229,9 @@ export class PageManager extends Component<Props, State> {
                   onClick={onAddPage}
                   className="canvasPageManager__addPage kbn-resetFocusState"
                   data-test-subj="canvasAddPageButton"
+                  aria-label={strings.getAddPageTooltip()}
                 >
-                  <EuiIcon color="ghost" type="plusInCircle" size="l" />
+                  <EuiIcon color="ghost" type="plusCircle" size="l" aria-hidden={true} />
                 </button>
               </EuiToolTip>
             </EuiFlexItem>

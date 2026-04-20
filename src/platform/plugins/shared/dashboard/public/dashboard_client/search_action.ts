@@ -9,11 +9,11 @@
 
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { dashboardClient } from './dashboard_client';
-import type { DashboardSearchRequestBody } from '../../server';
+import type { DashboardSearchRequestParams } from '../../server';
 
 interface Context {
   onResults: (dashboards: Array<{ id: string; isManaged: boolean; title: string }>) => void;
-  search: DashboardSearchRequestBody;
+  search: DashboardSearchRequestParams;
 }
 
 // temporary escape hatch to avoid circular dependencies

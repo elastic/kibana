@@ -8,11 +8,10 @@
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject, take } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
@@ -57,7 +56,6 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
   cloud?: { isCloudEnabled: boolean; baseUrl?: string };
-  licensing?: LicensingPluginStart;
 }
 
 export class ManagementPlugin
@@ -72,21 +70,22 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
-      (section: ManagementSection) => ({
+    const deepLinks: AppDeepLink[] = this.managementSections
+      .getAllSections()
+      .map((section: ManagementSection) => ({
         id: section.id,
         title: section.title,
         deepLinks: section
           .getAppsEnabled()
-          .filter((mgmtApp) => !mgmtApp.hideFromGlobalSearch)
+          .filter((mgmtApp) => mgmtApp.visibleIn || !mgmtApp.hideFromGlobalSearch)
           .map((mgmtApp) => ({
             id: mgmtApp.id,
             title: mgmtApp.title,
             path: mgmtApp.basePath,
             keywords: mgmtApp.keywords,
+            ...(mgmtApp.visibleIn ? { visibleIn: mgmtApp.visibleIn } : {}),
           })),
-      })
-    );
+      }));
 
     return { deepLinks };
   });
@@ -150,18 +149,21 @@ export class ManagementPlugin
         const [coreStart, deps] = await core.getStartServices();
         const chromeStyle$ = coreStart.chrome.getChromeStyle$();
 
-        // Check if user has enterprise license
-        const license = deps.licensing
-          ? await deps.licensing.license$.pipe(take(1)).toPromise()
-          : null;
-        const hasEnterpriseLicense = license?.hasAtLeast('enterprise') || false;
+        // Resolve fleet at runtime via `core.plugins.onStart` instead of declaring it
+        // as a plugin dependency to avoid massive circular dependency issues in the plugin graph.
+        const fleetResult = await coreStart.plugins.onStart<{
+          fleet: { config: { isAirGapped?: boolean } };
+        }>('fleet');
+        const isAirGapped =
+          Boolean(fleetResult.fleet.found && fleetResult.fleet.contract.config.isAirGapped) &&
+          !Boolean(deps.cloud?.isCloudEnabled);
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           coreStart,
           cloud: deps.cloud,
-          hasEnterpriseLicense,
+          isAirGapped,
           setBreadcrumbs: (newBreadcrumbs) => {
             if (deps.serverless) {
               // drop the root management breadcrumb in serverless because it comes from the navigation tree

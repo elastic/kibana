@@ -281,17 +281,17 @@ describe('validation logic', () => {
 
           await expectErrors(`from assignment = 1`, [
             "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown index "assignment"',
+            'Unknown data source "assignment"',
           ]);
         });
 
         test('errors on invalid syntax', async () => {
           const { expectErrors } = await setup();
 
-          await expectErrors('FROM `index`', ['Unknown index "`index`"']);
+          await expectErrors('FROM `index`', ['Unknown data source "`index`"']);
           await expectErrors(`from assignment = 1`, [
             "SyntaxError: mismatched input '=' expecting <EOF>",
-            'Unknown index "assignment"',
+            'Unknown data source "assignment"',
           ]);
         });
       });
@@ -722,7 +722,7 @@ describe('validation logic', () => {
 
     function excludeErrorsByContent(excludedCallback: string[]) {
       const contentByCallback = {
-        getSources: /Unknown index/,
+        getSources: /Unknown (index|data source)/,
         getPolicies: /Unknown policy/,
         getColumnsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
         getPreferences: /Unknown/,
@@ -779,7 +779,9 @@ describe('validation logic', () => {
           const errorCodes = errors.map((e) => e.code);
           // Verify errors related to excluded callback are not present
           if (excludedCallback === 'getSources') {
-            expect(errorCodes.every((code) => code !== 'unknownIndex')).toBe(true);
+            expect(
+              errorCodes.every((code) => code !== 'unknownIndex' && code !== 'unknownDataSource')
+            ).toBe(true);
           } else if (excludedCallback === 'getColumnsFor') {
             expect(
               errorCodes.every(
@@ -810,6 +812,7 @@ describe('validation logic', () => {
           errorCodes.every(
             (code) =>
               code !== 'unknownIndex' &&
+              code !== 'unknownDataSource' &&
               code !== 'unknownColumn' &&
               code !== 'wrongArgumentType' &&
               code !== 'unsupportedFieldType' &&
@@ -884,8 +887,10 @@ describe('validation logic', () => {
 
       expect(errors.length).toBeGreaterThan(0);
 
-      const hasUnknownIndexError = errors.some((e) => e.code === 'unknownIndex');
-      expect(hasUnknownIndexError).toBe(false);
+      const hasUnknownDataSourceError = errors.some(
+        (e) => e.code === 'unknownIndex' || e.code === 'unknownDataSource'
+      );
+      expect(hasUnknownDataSourceError).toBe(false);
     });
 
     it('should filter errors based on specific callback requirements', async () => {
@@ -899,7 +904,9 @@ describe('validation logic', () => {
         callbacksNoSources
       );
 
-      expect(errorsNoSources.some((e) => e.code === 'unknownIndex')).toBe(false);
+      expect(
+        errorsNoSources.some((e) => e.code === 'unknownIndex' || e.code === 'unknownDataSource')
+      ).toBe(false);
       expect(errorsNoSources.some((e) => e.code === 'unknownPolicy')).toBe(true);
 
       const callbacksNoPolicies = {
@@ -912,7 +919,9 @@ describe('validation logic', () => {
         callbacksNoPolicies
       );
 
-      expect(errorsNoPolicies.some((e) => e.code === 'unknownIndex')).toBe(true);
+      expect(
+        errorsNoPolicies.some((e) => e.code === 'unknownIndex' || e.code === 'unknownDataSource')
+      ).toBe(true);
       expect(errorsNoPolicies.some((e) => e.code === 'unknownPolicy')).toBe(false);
     });
 

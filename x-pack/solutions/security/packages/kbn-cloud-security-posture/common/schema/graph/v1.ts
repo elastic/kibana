@@ -69,13 +69,19 @@ export const entitySchema = schema.object({
   name: schema.maybe(schema.string()),
   type: schema.maybe(schema.string()),
   sub_type: schema.maybe(schema.string()),
+  engine_type: schema.maybe(schema.string()),
   host: schema.maybe(
     schema.object({
       ip: schema.maybe(schema.string()),
     })
   ),
   availableInEntityStore: schema.maybe(schema.boolean()),
-  ecsParentField: schema.maybe(schema.string()),
+  sourceFields: schema.maybe(
+    schema.recordOf(
+      schema.string(),
+      schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+    )
+  ),
 });
 
 export const nodeDocumentDataSchema = schema.object({

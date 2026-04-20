@@ -14,7 +14,7 @@ const CLASSIC_STREAM_TEMPLATE_NAME = 'classic_stream_template';
 const CLASSIC_STREAM_INDEX_PATTERN_PREFIX = 'classic-stream';
 
 function getCreatedStreamNameFromUrl(urlString: string): string {
-  const match = urlString.match(/\/app\/streams\/([^/]+)\/management\/retention/);
+  const match = urlString.match(/\/app\/streams\/([^/]+)\/management\/(overview|retention)/);
   return decodeURIComponent(match?.[1] ?? '');
 }
 
@@ -127,8 +127,8 @@ test.describe(
         // Flyout closes on successful creation + navigation to the stream management page.
         await expect(flyout).toBeHidden({ timeout: 30000 });
 
-        // Wait for navigation to the created stream management page.
-        await expect(page).toHaveURL(/\/app\/streams\/.+\/management\/retention/);
+        // Wait for navigation to the created stream management page (Overview when enabled, else Retention).
+        await expect(page).toHaveURL(/\/app\/streams\/.+\/management\/(overview|retention)/);
 
         // Derive created stream name from the URL.
         createdStreamName = getCreatedStreamNameFromUrl(page.url());

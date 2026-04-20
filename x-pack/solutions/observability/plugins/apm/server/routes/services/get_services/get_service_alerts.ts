@@ -34,6 +34,7 @@ export async function getServicesAlerts({
   maxNumServices = MAX_NUMBER_OF_SERVICES,
   serviceGroup,
   serviceName,
+  serviceNames,
   start,
   end,
   environment,
@@ -44,11 +45,22 @@ export async function getServicesAlerts({
   maxNumServices?: number;
   serviceGroup?: ServiceGroup | null;
   serviceName?: string;
+  /** When set, restricts results to these service names (e.g. service map nodes). */
+  serviceNames?: string[];
   start: number;
   end: number;
   environment?: string;
   searchQuery?: string;
 }): Promise<ServiceAlertsResponse> {
+  if (serviceNames && serviceNames.length === 0) {
+    return [];
+  }
+
+  const termsAggregationSize =
+    serviceNames && serviceNames.length > 0
+      ? Math.min(serviceNames.length, maxNumServices)
+      : maxNumServices;
+
   const params = {
     size: 0,
     track_total_hits: false,
@@ -59,7 +71,12 @@ export async function getServicesAlerts({
           ...rangeQuery(start, end),
           ...kqlQuery(kuery),
           ...serviceGroupWithOverflowQuery(serviceGroup),
-          ...termQuery(SERVICE_NAME, serviceName),
+          // Either a bounded list (e.g. service map) or a single service — not both. When
+          // neither is set, we aggregate across services (up to maxNumServices). `termQuery`
+          // is a no-op when `serviceName` is undefined.
+          ...(serviceNames && serviceNames.length > 0
+            ? [{ terms: { [SERVICE_NAME]: serviceNames } }]
+            : termQuery(SERVICE_NAME, serviceName)),
           ...wildcardQuery(SERVICE_NAME, searchQuery),
           ...alertsEnvironmentQuery(environment),
         ],
@@ -69,7 +86,7 @@ export async function getServicesAlerts({
       services: {
         terms: {
           field: SERVICE_NAME,
-          size: maxNumServices,
+          size: termsAggregationSize,
         },
         aggs: {
           alerts_count: {

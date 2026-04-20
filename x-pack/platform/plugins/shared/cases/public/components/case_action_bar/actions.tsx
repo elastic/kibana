@@ -43,7 +43,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     () => [
       {
         type: AttachmentActionType.BUTTON as const,
-        iconType: 'copyClipboard',
+        iconType: 'copy',
         label: i18n.COPY_ID_ACTION_LABEL,
         onClick: () => {
           navigator.clipboard.writeText(caseData.id);
@@ -54,7 +54,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
         ? [
             {
               type: AttachmentActionType.BUTTON as const,
-              iconType: 'popout',
+              iconType: 'external',
               label: i18n.VIEW_INCIDENT(currentExternalIncident?.externalTitle ?? ''),
               onClick: () => window.open(currentExternalIncident?.externalUrl, '_blank'),
             },

@@ -30,7 +30,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover unsaved changes notification indicator', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/260961
+  describe.skip('discover unsaved changes notification indicator', function describeIndexTests() {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(

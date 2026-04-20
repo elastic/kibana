@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
+} from '@kbn/as-code-data-views-schema';
 import type { RegionMapState } from '../../schema';
 
 /**
@@ -15,9 +19,9 @@ import type { RegionMapState } from '../../schema';
 export const basicRegionMapWithAdHocDataView = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -27,13 +31,13 @@ export const basicRegionMapWithAdHocDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
     rank_by: {
-      type: 'column',
-      metric: 0,
+      type: 'metric',
+      metric_index: 0,
       direction: 'desc',
     },
   },
@@ -47,9 +51,9 @@ export const basicRegionMapWithAdHocDataView = {
 export const basicRegionMapWithDataView = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'dataView',
-    id: 'test-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'test-id',
   },
   metric: {
     operation: 'percentile',
@@ -59,13 +63,13 @@ export const basicRegionMapWithDataView = {
   region: {
     operation: 'terms',
     fields: ['geo.dest'],
-    size: 5,
+    limit: 5,
     other_bucket: {
       include_documents_without_field: false,
     },
     rank_by: {
-      type: 'column',
-      metric: 0,
+      type: 'metric',
+      metric_index: 0,
       direction: 'desc',
     },
     ems: {
@@ -83,16 +87,14 @@ export const basicRegionMapWithDataView = {
 export const basicEsqlRegionMap = {
   title: 'Test Region Map',
   type: 'region_map',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   region: {
-    operation: 'value',
     column: 'geo.dest',
     ems: {
       boundaries: 'world_countries',
@@ -109,9 +111,9 @@ export const basicEsqlRegionMap = {
 export const comprehensiveRegionMapWithAdHocDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'index',
-    index: 'test-index',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+    index_pattern: 'test-index',
     time_field: '@timestamp',
   },
   metric: {
@@ -123,8 +125,8 @@ export const comprehensiveRegionMapWithAdHocDataView = {
     filters: [
       {
         filter: {
-          query: 'geo.dest : "US"',
-          language: 'kuery',
+          expression: 'geo.dest : "US"',
+          language: 'kql',
         },
         label: 'US',
       },
@@ -144,9 +146,9 @@ export const comprehensiveRegionMapWithAdHocDataView = {
 export const comprehensiveRegionMapWithDataView = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
-    type: 'dataView',
-    id: 'my-custom-data-view-id',
+  data_source: {
+    type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+    ref_id: 'my-custom-data-view-id',
   },
   metric: {
     operation: 'count',
@@ -157,8 +159,8 @@ export const comprehensiveRegionMapWithDataView = {
     filters: [
       {
         filter: {
-          query: 'geo.dest : "US"',
-          language: 'kuery',
+          expression: 'geo.dest : "US"',
+          language: 'kql',
         },
         label: 'US',
       },
@@ -178,16 +180,14 @@ export const comprehensiveRegionMapWithDataView = {
 export const comprehensiveEsqlRegionMap = {
   title: 'Comprehensive Test Region Map',
   type: 'region_map',
-  dataset: {
+  data_source: {
     type: 'esql',
     query: 'FROM test-index | STATS bytes=AVG(bytes) BY geo.dest',
   },
   metric: {
-    operation: 'value',
     column: 'bytes',
   },
   region: {
-    operation: 'value',
     column: 'geo.dest',
     ems: {
       boundaries: 'world_countries',

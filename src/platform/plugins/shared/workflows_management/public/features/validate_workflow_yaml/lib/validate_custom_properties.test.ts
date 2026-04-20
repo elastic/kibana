@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StepSelectionValues } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
+
+import { validateCustomProperties } from './validate_custom_properties';
+import { stepSchemas } from '../../../../common/step_schemas';
+import {
+  getCachedOption,
+  getCachedSearchOption,
+  getCacheKeyForValue,
+  setCachedOption,
+} from '../../../shared/lib/custom_property_selection_cache';
+import type { CustomPropertyItem } from '../model/types';
 
 // Mock the dependencies
 jest.mock('../../../../common/step_schemas', () => ({
@@ -22,21 +33,14 @@ jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
 }));
 
 jest.mock('../../../shared/lib/custom_property_selection_cache', () => ({
+  clearCache: jest.fn(),
   getCachedOption: jest.fn(),
   getCachedSearchOption: jest.fn(),
   getCacheKeyForValue: jest.fn(),
   setCachedOption: jest.fn(),
 }));
 
-import { validateCustomProperties } from './validate_custom_properties';
-import { stepSchemas } from '../../../../common/step_schemas';
-import {
-  getCachedOption,
-  getCachedSearchOption,
-  getCacheKeyForValue,
-  setCachedOption,
-} from '../../../shared/lib/custom_property_selection_cache';
-import type { CustomPropertyItem } from '../model/types';
+const EMPTY_VALUES: StepSelectionValues = { config: {}, input: {} };
 
 const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jest.MockedFunction<
   typeof stepSchemas.getAllConnectorsMapCache
@@ -94,6 +98,7 @@ describe('validateCustomProperties', () => {
           stepType: '1',
           scope: 'config',
           propertyKey: '1',
+          values: EMPTY_VALUES,
         },
         propertyValue: '1',
         propertyKey: '1',
@@ -109,6 +114,7 @@ describe('validateCustomProperties', () => {
       stepType: '1',
       scope: 'config',
       propertyKey: '1',
+      values: EMPTY_VALUES,
     });
     expect(selectionHandler.getDetails).toHaveBeenCalledWith(
       '1',
@@ -116,6 +122,7 @@ describe('validateCustomProperties', () => {
         stepType: '1',
         scope: 'config',
         propertyKey: '1',
+        values: EMPTY_VALUES,
       },
       null
     );
@@ -165,6 +172,7 @@ describe('validateCustomProperties', () => {
           stepType: '2',
           scope: 'input',
           propertyKey: '2',
+          values: EMPTY_VALUES,
         },
         propertyValue: '2',
         propertyKey: '2',
@@ -180,6 +188,7 @@ describe('validateCustomProperties', () => {
       stepType: '2',
       scope: 'input',
       propertyKey: '2',
+      values: EMPTY_VALUES,
     });
     expect(selectionHandler.getDetails).toHaveBeenCalledWith(
       '2',
@@ -187,6 +196,7 @@ describe('validateCustomProperties', () => {
         stepType: '2',
         scope: 'input',
         propertyKey: '2',
+        values: EMPTY_VALUES,
       },
       resolvedOption
     );
@@ -239,6 +249,7 @@ describe('validateCustomProperties', () => {
           stepType: '3',
           scope: 'config',
           propertyKey: '3',
+          values: EMPTY_VALUES,
         },
         propertyValue: '3',
         propertyKey: '3',
@@ -257,6 +268,7 @@ describe('validateCustomProperties', () => {
         stepType: '3',
         scope: 'config',
         propertyKey: '3',
+        values: EMPTY_VALUES,
       },
       cachedOption
     );
@@ -307,6 +319,7 @@ describe('validateCustomProperties', () => {
           stepType: '4',
           scope: 'input',
           propertyKey: '4',
+          values: EMPTY_VALUES,
         },
         propertyValue: '4',
         propertyKey: '4',
@@ -325,6 +338,7 @@ describe('validateCustomProperties', () => {
         stepType: '4',
         scope: 'input',
         propertyKey: '4',
+        values: EMPTY_VALUES,
       },
       cachedSearchOption
     );
@@ -366,6 +380,7 @@ describe('validateCustomProperties', () => {
           stepType: '5',
           scope: 'config',
           propertyKey: '5',
+          values: EMPTY_VALUES,
         },
         propertyValue: 'invalid', // String instead of number
         propertyKey: '5',
@@ -410,6 +425,7 @@ describe('validateCustomProperties', () => {
           stepType: '6a',
           scope: 'config',
           propertyKey: 'prop',
+          values: EMPTY_VALUES,
         },
         propertyValue: '{{ inputs.something }}',
         propertyKey: 'prop',
@@ -449,6 +465,7 @@ describe('validateCustomProperties', () => {
           stepType: '6',
           scope: 'config',
           propertyKey: '6',
+          values: EMPTY_VALUES,
         },
         propertyValue: '6',
         propertyKey: '6',
@@ -518,6 +535,7 @@ describe('validateCustomProperties', () => {
           stepType: '1',
           scope: 'config',
           propertyKey: '1',
+          values: EMPTY_VALUES,
         },
         propertyValue: '1',
         propertyKey: '1',
@@ -538,6 +556,7 @@ describe('validateCustomProperties', () => {
           stepType: '2',
           scope: 'input',
           propertyKey: '2',
+          values: EMPTY_VALUES,
         },
         propertyValue: '2',
         propertyKey: '2',

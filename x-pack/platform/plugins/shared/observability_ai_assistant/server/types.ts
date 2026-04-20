@@ -24,6 +24,10 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -56,6 +60,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   inference: InferenceServerSetup;
   productDocBase: ProductDocBaseStartContract;
   usageCollection?: UsageCollectionSetup;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -72,4 +77,5 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   inference: InferenceServerStart;
   llmTasks: LlmTasksPluginStart;
   productDocBase: ProductDocBaseStartContract;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
 }

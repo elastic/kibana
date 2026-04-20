@@ -14,7 +14,7 @@
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { Serializable } from '@kbn/synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
-import type { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
+import type { WiredIngestUpsertRequest } from '@kbn/streams-schema';
 import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';

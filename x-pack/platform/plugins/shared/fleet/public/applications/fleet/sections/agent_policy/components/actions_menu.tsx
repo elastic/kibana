@@ -214,7 +214,7 @@ export const AgentPolicyActionMenu = memo<{
             (!isFleetServerPolicy && authz.fleet.addAgents);
           const agentBasedMenuItems = [
             <EuiContextMenuItem
-              icon="plusInCircle"
+              icon="plusCircle"
               disabled={!isAuthorizedForAgentAction}
               data-test-subj="agentPolicyActionMenuAddAgentButton"
               toolTipContent={!isAuthorizedForAgentAction && agentBasedActionsDisabledTooltipText}
@@ -283,7 +283,7 @@ export const AgentPolicyActionMenu = memo<{
           ) {
             menuItems.push(
               <EuiContextMenuItem
-                icon="minusInCircle"
+                icon="minusCircle"
                 onClick={() => {
                   setIsContextMenuOpen(false);
                   setIsUninstallCommandFlyoutOpen(true);
@@ -354,7 +354,7 @@ export const AgentPolicyActionMenu = memo<{
                   fullButton
                     ? {
                         props: {
-                          iconType: 'arrowDown',
+                          iconType: 'chevronSingleDown',
                           iconSide: 'right',
                         },
                         children: (

@@ -19,6 +19,7 @@ import {
   ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   API_VERSIONS,
   ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
+  ASSET_CRITICALITY_CSV_UPLOAD_V2_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import type {
   AssetCriticalityRecord,
@@ -158,6 +159,21 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .attach('file', file, { filename: 'asset_criticality.csv' })
+      .expect(expectStatusCode);
+  },
+  uploadCsvV2: async (
+    fileContent: string | Buffer,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
+    const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
+    return supertest
+      .post(ASSET_CRITICALITY_CSV_UPLOAD_V2_URL)
+      .set('kbn-xsrf', 'true')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+      .attach('file', file, {
+        filename: 'asset_criticality_v2.csv',
+      })
       .expect(expectStatusCode);
   },
   list: async (

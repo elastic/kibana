@@ -18,7 +18,13 @@ import { useCapabilities } from '../../../components/use_capabilities';
 export const CreateUserPage: FunctionComponent = () => {
   const history = useHistory();
   const readOnly = !useCapabilities('users').save;
-  const backToUsers = () => history.push('/');
+  const backToUsers = () => {
+    if (history.length > 1) {
+      history.goBack();
+    } else {
+      history.push('/');
+    }
+  };
 
   useEffect(() => {
     if (readOnly) {

@@ -9,7 +9,7 @@ import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result'
 import { esqlMetricState } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/metric';
 import { gaugeStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/gauge';
 import { tagcloudStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/tagcloud';
-import { xyStateSchema } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
+import { xyStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/xy';
 import { regionMapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/region_map';
 import { heatmapStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/heatmap';
 import { datatableStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder/schema/charts/datatable';
@@ -21,6 +21,7 @@ import { mosaicStateSchemaESQL } from '@kbn/lens-embeddable-utils/config_builder
 interface ChartTypeRegistryEntry {
   schema: { validate: (config: unknown) => any; getSchema: () => any };
   guidance: { description: string; guideline: string };
+  configPromptRules?: string[];
 }
 
 /**
@@ -34,7 +35,7 @@ interface ChartTypeRegistryEntry {
  * TypeScript enforces exhaustiveness via `satisfies Record<SupportedChartType, ...>` —
  * a missing entry is a compile error.
  */
-export const chartTypeRegistry = {
+export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntry> = {
   [SupportedChartType.Metric]: {
     schema: esqlMetricState,
     guidance: {
@@ -52,9 +53,14 @@ export const chartTypeRegistry = {
       guideline:
         "Choose 'gauge' when showing a value within a range, progress toward a goal, or performance against min/max thresholds",
     },
+    configPromptRules: [
+      "Always omit the optional 'min' and 'max' fields from the final configuration.",
+      'Do not infer, synthesize, or backfill gauge bounds from the ES|QL results or the user request.',
+      'Only include goal/target-related fields when the user explicitly asks for a goal or threshold.',
+    ],
   },
   [SupportedChartType.XY]: {
-    schema: xyStateSchema,
+    schema: xyStateSchemaESQL,
     guidance: {
       description:
         'For displaying time series, trends, comparisons, or distributions using line charts, bar charts, or area charts. Best for showing data over time, comparing multiple series, histograms, or any visualization with X and Y axes (e.g., "show request count over time", "compare sales by region as a bar chart", "display CPU usage trend as a line chart").',
@@ -134,7 +140,7 @@ export const chartTypeRegistry = {
         "Choose 'mosaic' when visualizing the joint distribution of two categorical dimensions",
     },
   },
-} satisfies Record<SupportedChartType, ChartTypeRegistryEntry>;
+};
 
 export type ChartTypeRegistry = typeof chartTypeRegistry;
 

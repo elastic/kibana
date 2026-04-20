@@ -19,7 +19,7 @@ import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
-import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
+import { parseDurationInSeconds } from '../stream_management/data_management/stream_detail_lifecycle/helpers/helpers';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
 

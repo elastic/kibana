@@ -16,7 +16,7 @@ const collapsibleStatementStyle = ({ euiTheme }: UseEuiTheme) => css`
 `;
 
 function getToggleIconType(isCollapsed: boolean) {
-  return isCollapsed ? 'arrowRight' : 'arrowDown';
+  return isCollapsed ? 'chevronSingleRight' : 'chevronSingleDown';
 }
 
 interface CollapsibleStatementProps {

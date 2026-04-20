@@ -10,12 +10,12 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ModalHost, type ModalHostHandles } from './modal_host';
-import { navigateToIndexDetailsPage } from '../../../../../services/routing';
+import { getIndexDetailsLink } from '../../../../../services/routing';
 import { notificationService } from '../../../../../services/notification';
 
 jest.mock('../../../../../services/routing', () => ({
   ...jest.requireActual('../../../../../services/routing'),
-  navigateToIndexDetailsPage: jest.fn(),
+  getIndexDetailsLink: jest.fn().mockReturnValue('/mocked-link'),
 }));
 
 jest.mock('../../../../../services/notification', () => ({
@@ -59,8 +59,7 @@ const baseProps: React.ComponentProps<typeof ModalHost> = {
     toggles: [],
   } as unknown as React.ComponentProps<typeof ModalHost>['extensionsService'],
   getUrlForApp: jest.fn() as React.ComponentProps<typeof ModalHost>['getUrlForApp'],
-  application: {} as React.ComponentProps<typeof ModalHost>['application'],
-  http: {} as React.ComponentProps<typeof ModalHost>['http'],
+  history: { push: jest.fn() } as unknown as React.ComponentProps<typeof ModalHost>['history'],
 };
 
 const renderWithI18n = (ui: React.ReactElement) => {
@@ -276,7 +275,8 @@ describe('ModalHost', () => {
           const success = await screen.findByTestId('convert-success');
           await userEvent.click(success);
 
-          expect(navigateToIndexDetailsPage).toHaveBeenCalled();
+          expect(getIndexDetailsLink).toHaveBeenCalled();
+          expect(baseProps.history.push).toHaveBeenCalledWith('/mocked-link');
           expect(notificationService.showSuccessToast).toHaveBeenCalled();
         });
       });

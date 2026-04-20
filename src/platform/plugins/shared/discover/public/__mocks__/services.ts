@@ -50,6 +50,7 @@ import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
 import { createBrowserHistory } from 'history';
+import { cpsPluginMock } from '@kbn/cps/public/mocks';
 
 export function createDiscoverServicesMock(): DiscoverServices {
   const dataPlugin = dataPluginMock.createStartContract();
@@ -237,7 +238,13 @@ export function createDiscoverServicesMock(): DiscoverServices {
     uiSettings: uiSettingsMock,
     http: {
       basePath: '/',
-      get: jest.fn().mockResolvedValue(''),
+      get: jest.fn((path: string) => {
+        // Mock ES|QL timefield endpoint so an ES|QL data view can be created
+        if (path.startsWith('/internal/esql/get_timefield')) {
+          return Promise.resolve({ timeField: '@timestamp' });
+        }
+        return Promise.resolve('');
+      }),
     },
     dataViewEditor: {
       openEditor: jest.fn(),
@@ -266,7 +273,9 @@ export function createDiscoverServicesMock(): DiscoverServices {
       addDanger: jest.fn(),
       addSuccess: jest.fn(),
     },
-    notifications: notificationServiceMock.createStartContract(),
+    notifications: {
+      toasts: notificationServiceMock.createStartContract().toasts,
+    },
     expressions: expressionsPlugin,
     savedObjectsTagging: {
       ui: {
@@ -297,18 +306,24 @@ export function createDiscoverServicesMock(): DiscoverServices {
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     ebtManager: new DiscoverEBTManager(),
+    cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),
     discoverShared: discoverSharedPluginMock.createStartContract(),
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: jest.fn(() => false),
       getIsEsqlDefault: jest.fn(() => false),
+      getEmbeddableTransformsEnabled: jest.fn(() => true),
     },
     embeddableEditor: {
       isByValueEditor: jest.fn(() => false),
       isEmbeddedEditor: jest.fn(() => false),
+      canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
       getByValueInput: jest.fn(),
       clearEditorState: jest.fn(),
+    },
+    alertingVTwo: {
+      DynamicRuleFormFlyout: jest.fn(() => null),
     },
     trackUiMetric: jest.fn(),
   } as unknown as DiscoverServices;

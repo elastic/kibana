@@ -845,6 +845,30 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
   });
 
   describe('Meta information extraction', () => {
+    beforeEach(() => {
+      z.globalRegistry.clear();
+    });
+
+    it('does not preserve meta by default', () => {
+      const jsonSchema = {
+        type: 'object',
+        properties: {
+          browseUrl: {
+            type: 'string',
+            label: 'Browse URL',
+          },
+        },
+      };
+
+      const zodSchema = fromJSONSchema(jsonSchema);
+      expect(zodSchema).toBeDefined();
+
+      const schemaWithShape = zodSchema as unknown as { shape?: Record<string, ZodType> };
+      const browseUrl = schemaWithShape.shape!.browseUrl;
+      expect(z.globalRegistry.has(browseUrl)).toBe(false);
+      expect(getMeta(browseUrl)).toEqual({});
+    });
+
     it('preserves meta on single-option discriminated union and its fields', () => {
       const jsonSchema = {
         anyOf: [
@@ -867,7 +891,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         label: 'Authentication',
       };
 
-      const zodSchema = fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema, { preserveMeta: true });
       expect(zodSchema).toBeDefined();
       expect(zodSchema).toBeInstanceOf(z.ZodDiscriminatedUnion);
 
@@ -900,7 +924,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
 
       const jsonSchema = z.toJSONSchema(originalSchema);
 
-      const restoredSchema = fromJSONSchema(jsonSchema);
+      const restoredSchema = fromJSONSchema(jsonSchema, { preserveMeta: true });
       expect(restoredSchema).toBeDefined();
 
       const schemaWithShape = restoredSchema as unknown as { shape?: Record<string, ZodType> };
@@ -929,7 +953,7 @@ describe('JSON Schema to Zod parser - Unit tests', () => {
         },
       };
 
-      const zodSchema = fromJSONSchema(jsonSchema);
+      const zodSchema = fromJSONSchema(jsonSchema, { preserveMeta: true });
       expect(zodSchema).toBeDefined();
 
       const schemaWithShape = zodSchema as unknown as { shape?: Record<string, ZodType> };

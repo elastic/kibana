@@ -42,7 +42,7 @@ export function FeedbackButton({ disabled }: Props) {
       aria-label={feedbackButtonLabel}
       href={feedbackUrl}
       size="s"
-      iconType="popout"
+      iconType="external"
       iconSide="right"
       target="_blank"
       color="primary"

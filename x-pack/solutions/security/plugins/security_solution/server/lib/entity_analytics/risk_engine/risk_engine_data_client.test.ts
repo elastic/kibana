@@ -208,15 +208,20 @@ describe('RiskEngineDataClient', () => {
     describe('init', () => {
       let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
       let initRiskScore: jest.SpyInstance;
+      let initLegacyTransforms: jest.SpyInstance;
       let enableRiskEngineMock: jest.SpyInstance;
 
       beforeEach(() => {
         initRiskScore = jest.spyOn(RiskScoreDataClient.prototype, 'init');
+        initLegacyTransforms = jest.spyOn(RiskScoreDataClient.prototype, 'initLegacyTransforms');
         enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
 
         mockTaskManagerStart = taskManagerMock.createStart();
 
         initRiskScore.mockImplementation(() => {
+          return Promise.resolve();
+        });
+        initLegacyTransforms.mockImplementation(() => {
           return Promise.resolve();
         });
 
@@ -231,6 +236,7 @@ describe('RiskEngineDataClient', () => {
 
       afterEach(() => {
         initRiskScore.mockReset();
+        initLegacyTransforms.mockReset();
         enableRiskEngineMock.mockReset();
       });
 

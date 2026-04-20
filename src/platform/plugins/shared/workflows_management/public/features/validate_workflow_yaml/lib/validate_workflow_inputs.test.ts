@@ -18,6 +18,7 @@ import type {
   WorkflowLookup,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import { buildWorkflowLookup } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { createStepInfo } from '../../../shared/test_utils';
 
 const mockLineCounter: LineCounter = {
   linePos: (offset: number) => ({ line: offset + 1, col: 1 }),
@@ -79,14 +80,7 @@ function createWorkflowExecuteStep(
     inputOffset += 20;
   }
 
-  return {
-    stepId,
-    stepType,
-    stepYamlNode: {} as any,
-    lineStart: 1,
-    lineEnd: 10,
-    propInfos,
-  };
+  return createStepInfo({ stepId, stepType, propInfos });
 }
 
 function createWorkflowsResponse(

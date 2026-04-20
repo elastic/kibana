@@ -5,11 +5,15 @@
  * 2.0.
  */
 import { z } from '@kbn/zod/v4';
-import { BaseStream } from '../base';
+import type { BaseStream } from '../base';
+import {
+  baseStreamDefinitionSchema,
+  baseStreamGetResponseSchema,
+  baseStreamUpsertDefinitionSchema,
+  baseStreamUpsertRequestSchema,
+} from '../base';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import type { ModelValidation } from '../validation/model_validation';
-import { modelValidation } from '../validation/model_validation';
 import type { InheritedFieldDefinition } from '../../fields';
 import { inheritedFieldDefinitionSchema } from '../../fields';
 
@@ -50,7 +54,9 @@ export namespace QueryStream {
   }
 
   export interface Definition extends BaseStream.Definition {
+    type: 'query';
     query: QueryWithEsql;
+    field_descriptions?: Record<string, string>;
   }
 
   export type Source = BaseStream.Source<QueryStream.Definition>;
@@ -67,25 +73,54 @@ export namespace QueryStream {
   }
 }
 
-export const QueryStream: ModelValidation<BaseStream.Model, QueryStream.Model> = modelValidation(
-  BaseStream,
-  {
-    Source: z.object({}),
-    Definition: z.object({
+const queryStreamDefinitionSchema = baseStreamDefinitionSchema
+  .extend({
+    type: z.literal('query'),
+    query: QueryWithEsql.right,
+    field_descriptions: z.record(z.string(), z.string()).optional(),
+  })
+  .meta({ id: 'QueryStreamDefinition' });
+
+const queryStreamGetResponseSchema = baseStreamGetResponseSchema
+  .extend({
+    stream: queryStreamDefinitionSchema,
+    inherited_fields: inheritedFieldDefinitionSchema,
+  })
+  .meta({ id: 'QueryStreamGetResponse' });
+
+const queryStreamUpsertRequestSchema = baseStreamUpsertRequestSchema
+  .extend({
+    stream: baseStreamUpsertDefinitionSchema.extend({
+      type: z.literal('query'),
       query: QueryWithEsql.right,
+      field_descriptions: z.record(z.string(), z.string()).optional(),
     }),
-    GetResponse: z.object({
-      inherited_fields: inheritedFieldDefinitionSchema,
-    }),
-    UpsertRequest: z.object({
-      stream: z
-        .object({
-          query: QueryWithEsql.right,
-        })
-        .passthrough(),
-    }),
-  }
-);
+  })
+  .meta({ id: 'QueryStreamUpsertRequest' });
+
+export const QueryStream: {
+  Definition: Validation<BaseStream.Model['Definition'], QueryStream.Definition>;
+  Source: Validation<BaseStream.Model['Definition'], QueryStream.Source>;
+  GetResponse: Validation<BaseStream.Model['GetResponse'], QueryStream.GetResponse>;
+  UpsertRequest: Validation<BaseStream.Model['UpsertRequest'], QueryStream.UpsertRequest>;
+} = {
+  Definition: validation(
+    queryStreamDefinitionSchema as z.Schema<BaseStream.Model['Definition']>,
+    queryStreamDefinitionSchema
+  ),
+  Source: validation(
+    queryStreamDefinitionSchema as z.Schema<BaseStream.Model['Definition']>,
+    queryStreamDefinitionSchema
+  ),
+  GetResponse: validation(
+    queryStreamGetResponseSchema as z.Schema<BaseStream.Model['GetResponse']>,
+    queryStreamGetResponseSchema
+  ),
+  UpsertRequest: validation(
+    queryStreamUpsertRequestSchema as z.Schema<BaseStream.Model['UpsertRequest']>,
+    queryStreamUpsertRequestSchema
+  ),
+};
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 QueryStream.Definition.is = (

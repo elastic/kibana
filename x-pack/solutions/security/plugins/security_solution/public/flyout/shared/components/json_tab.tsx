@@ -75,7 +75,7 @@ export const JsonTab = memo(
               <EuiCopy textToCopy={jsonValue}>
                 {(copy) => (
                   <EuiButtonEmpty
-                    iconType={'copyClipboard'}
+                    iconType={'copy'}
                     size={'xs'}
                     aria-label={i18n.translate(
                       'xpack.securitySolution.flyout.shared.jsonTab.copyToClipboardButtonAriaLabel',

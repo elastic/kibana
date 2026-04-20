@@ -144,6 +144,76 @@ describe('processEnum', () => {
         nullable: true,
       },
     },
+    {
+      name: 'preserves nullable output when the non-null branch has no explicit type',
+      input: {
+        anyOf: [
+          {
+            oneOf: [
+              {
+                type: 'string',
+              },
+              {
+                type: 'number',
+              },
+            ],
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        oneOf: [
+          {
+            type: 'string',
+          },
+          {
+            type: 'number',
+          },
+        ],
+        nullable: true,
+      },
+    },
+    {
+      name: 'replaces the internal nullable placeholder in larger unions',
+      input: {
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            type: 'number',
+          },
+          {
+            enum: [],
+            nullable: true,
+            type: undefined,
+          },
+          {
+            type: 'boolean',
+          },
+        ],
+      } as OpenAPIV3.SchemaObject,
+      expected: {
+        anyOf: [
+          {
+            type: 'string',
+          },
+          {
+            type: 'number',
+          },
+          {
+            enum: [null],
+          },
+          {
+            type: 'boolean',
+          },
+        ],
+      },
+    },
   ])('$name', ({ input, expected }) => {
     processEnum(input);
     expect(input).toEqual(expected);

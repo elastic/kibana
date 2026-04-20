@@ -168,6 +168,7 @@ const getInputTextFullValue = (
 /**
  * Finds the console in the Render Result and enters the command provided
  * @param renderResult
+ * @param user
  * @param cmd
  * @param inputOnly
  * @param useKeyboard

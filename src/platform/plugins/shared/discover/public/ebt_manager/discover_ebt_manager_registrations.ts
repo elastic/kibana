@@ -12,6 +12,7 @@ import { TabsEventDataKeys } from '@kbn/unified-tabs';
 import type { BehaviorSubject } from 'rxjs';
 import type { DiscoverStartPlugins } from '../types';
 import type { DiscoverEBTContextProps } from './types';
+import { cascadeEventType } from '../application/main/components/layout/cascaded_documents/telemetry/event_definition';
 
 /**
  * Field usage events i.e. when a field is selected in the data table, removed from the data table, or a filter is added
@@ -191,4 +192,6 @@ export const registerDiscoverEBTManagerAnalytics = (
       },
     },
   });
+
+  core.analytics.registerEventType(cascadeEventType);
 };

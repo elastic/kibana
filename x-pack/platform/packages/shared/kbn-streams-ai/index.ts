@@ -17,5 +17,28 @@ export {
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
 export { sumTokens } from './src/helpers/sum_tokens';
-export { identifyFeatures, type IdentifyFeaturesOptions } from './src/features/identify_features';
+export {
+  identifyFeatures,
+  type IdentifyFeaturesOptions,
+  type PreviouslyIdentifiedFeature,
+  type ExcludedFeatureSummary,
+  type IgnoredFeature,
+} from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
+
+export {
+  searchKnowledgeIndicators,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+} from './src/knowledge_indicators/search';
+export {
+  featureToKnowledgeIndicatorFeature,
+  queryLinkToKnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/mappers';
+export type {
+  SearchKnowledgeIndicatorsInput,
+  SearchKnowledgeIndicatorsKind,
+  SearchKnowledgeIndicatorsOutput,
+  KnowledgeIndicator,
+  KnowledgeIndicatorFeature,
+  KnowledgeIndicatorQuery,
+} from './src/knowledge_indicators/types';

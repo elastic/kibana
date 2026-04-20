@@ -8,11 +8,14 @@
  */
 
 export * from './auth_types/api_key_header';
+export * from './auth_types/aws_credentials';
 export * from './auth_types/bearer';
 export * from './auth_types/basic';
 export * from './auth_types/none';
 export * from './auth_types/oauth';
+export * from './auth_types/oauth_authorization_code';
 export { OAuthClientCertificate } from './auth_types/oauth_client_certificate';
+export { Ears } from './auth_types/ears';
 
 // Skipping PFX and CRT exports for now as they will require updates to
 // the formbuilder to support file upload fields.

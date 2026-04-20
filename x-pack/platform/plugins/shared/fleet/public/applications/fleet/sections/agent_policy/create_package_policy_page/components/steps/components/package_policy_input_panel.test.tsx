@@ -18,6 +18,12 @@ import type {
   RegistryInput,
   NewPackagePolicyInput,
 } from '../../../../../../types';
+import { ExperimentalFeaturesService } from '../../../../../../services';
+import {
+  OTEL_COLLECTOR_INPUT_TYPE,
+  DATA_STREAM_TYPE_VAR_NAME,
+  USE_APM_VAR_NAME,
+} from '../../../../../../../../../common/constants';
 
 import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_policy_input_panel';
 
@@ -26,6 +32,7 @@ jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
     useAgentless: jest.fn(),
   };
 });
+
 const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
 
 describe('shouldShowStreamsByDefault', () => {
@@ -1146,6 +1153,199 @@ describe('PackagePolicyInputPanel', () => {
 
       await waitFor(() => {
         expect(renderResult.getByText('Processors')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('applyUseAPMVar for OTel input', () => {
+    const otelPackageInfo = {
+      name: 'my_otel',
+      version: '1.0.0',
+      type: 'input',
+      title: 'My OTel Package',
+      description: 'OTel package',
+      format_version: '3.0.0',
+      owner: { github: 'elastic/integrations', type: 'elastic' },
+      categories: ['custom'],
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 'OTel Template',
+          description: 'OTel',
+          input: OTEL_COLLECTOR_INPUT_TYPE,
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: false,
+          vars: [],
+        },
+      ],
+      data_streams: [],
+      assets: { kibana: {} },
+      status: 'installed',
+      release: 'ga',
+      latestVersion: '1.0.0',
+      keepPoliciesUpToDate: false,
+      installationInfo: {},
+    } as unknown as PackageInfo;
+
+    const otelPackageInput: RegistryInput = {
+      type: OTEL_COLLECTOR_INPUT_TYPE,
+      title: 'OTel Collector',
+      vars: [],
+      description: 'Collect telemetry',
+    };
+
+    const otelPackageInputStreams: RegistryStreamWithDataStream[] = [
+      {
+        input: OTEL_COLLECTOR_INPUT_TYPE,
+        title: 'OTel stream',
+        vars: [
+          {
+            name: 'dataset',
+            type: 'text',
+            title: 'Dataset name',
+            show_user: true,
+            multi: false,
+            required: true,
+          },
+        ],
+        description: 'OTel stream',
+        data_stream: {
+          title: 'OTel Data',
+          release: 'ga',
+          type: 'logs',
+          package: 'my_otel',
+          dataset: 'my_otel.data',
+          path: 'data',
+          elasticsearch: {},
+          ingest_pipeline: 'default',
+          streams: [],
+        },
+      },
+    ];
+
+    const otelInputValidationResults = {
+      streams: { 'my_otel.data': { vars: {} } },
+    };
+
+    let mockUpdateOtelInput: jest.Mock;
+
+    beforeEach(() => {
+      jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableVarGroups: true,
+      } as any);
+      useAgentlessMock.mockReturnValue({
+        isAgentlessEnabled: false,
+        isAgentlessDefault: false,
+        isAgentlessAgentPolicy: jest.fn(),
+        getAgentlessStatusForPackage: jest
+          .fn()
+          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
+        isServerless: false,
+        isCloud: false,
+      });
+      mockUpdateOtelInput = jest.fn();
+    });
+
+    it('adds use_apm var by default when data_stream.type changes to traces', async () => {
+      const otelPolicyInput = {
+        id: 'input-1',
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        policy_template: 'otel_template',
+        enabled: true,
+        streams: [
+          {
+            id: 'otel-stream-1',
+            data_stream: { type: 'logs', dataset: 'my_otel.data' },
+            enabled: true,
+            vars: {
+              [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'logs' },
+            },
+          },
+        ],
+      } as NewPackagePolicyInput;
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={otelPackageInfo}
+          packageInput={otelPackageInput}
+          packageInputStreams={otelPackageInputStreams}
+          packagePolicyInput={otelPolicyInput}
+          updatePackagePolicyInput={mockUpdateOtelInput}
+          inputValidationResults={otelInputValidationResults}
+        />
+      );
+
+      const advancedToggle = await renderResult.findByTestId(
+        'advancedStreamOptionsToggle-otel-stream-1'
+      );
+      fireEvent.click(advancedToggle);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+
+      fireEvent.click(renderResult.getByRole('radio', { name: 'Traces' }));
+
+      await waitFor(() => {
+        expect(mockUpdateOtelInput).toHaveBeenCalledWith(
+          expect.objectContaining({
+            streams: expect.arrayContaining([
+              expect.objectContaining({
+                vars: expect.objectContaining({
+                  [USE_APM_VAR_NAME]: expect.objectContaining({ value: true }),
+                }),
+              }),
+            ]),
+          })
+        );
+      });
+    });
+
+    it('removes use_apm var when data_stream.type changes away from traces', async () => {
+      const otelPolicyInputWithTraces = {
+        id: 'input-1',
+        type: OTEL_COLLECTOR_INPUT_TYPE,
+        policy_template: 'otel_template',
+        enabled: true,
+        streams: [
+          {
+            id: 'otel-stream-1',
+            data_stream: { type: 'traces', dataset: 'my_otel.data' },
+            enabled: true,
+            vars: {
+              [DATA_STREAM_TYPE_VAR_NAME]: { type: 'string', value: 'traces' },
+              [USE_APM_VAR_NAME]: { type: 'bool', value: true },
+            },
+          },
+        ],
+      } as NewPackagePolicyInput;
+
+      renderResult = testRenderer.render(
+        <PackagePolicyInputPanel
+          packageInfo={otelPackageInfo}
+          packageInput={otelPackageInput}
+          packageInputStreams={otelPackageInputStreams}
+          packagePolicyInput={otelPolicyInputWithTraces}
+          updatePackagePolicyInput={mockUpdateOtelInput}
+          inputValidationResults={otelInputValidationResults}
+        />
+      );
+
+      const advancedToggle = await renderResult.findByTestId(
+        'advancedStreamOptionsToggle-otel-stream-1'
+      );
+      fireEvent.click(advancedToggle);
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('packagePolicyDataStreamType')).toBeInTheDocument();
+      });
+
+      fireEvent.click(renderResult.getByRole('radio', { name: 'Logs' }));
+
+      await waitFor(() => {
+        const lastCall = mockUpdateOtelInput.mock.lastCall?.[0];
+        expect(lastCall?.streams?.[0]?.vars).not.toHaveProperty(USE_APM_VAR_NAME);
       });
     });
   });

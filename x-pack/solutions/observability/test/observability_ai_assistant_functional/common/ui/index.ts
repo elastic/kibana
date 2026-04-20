@@ -45,8 +45,7 @@ const pages = {
     toastTitle: 'euiToastHeader__title',
   },
   conversations: {
-    setupGenAiConnectorsButtonSelector:
-      'observabilityAiAssistantInitialSetupPanelSetUpGenerativeAiConnectorButton',
+    setupGenAiConnectorsButtonSelector: 'observabilityAiAssistantInitialSetupPanelSetUpModelButton',
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     installKnowledgeBaseButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     settingUpKnowledgeBase: 'observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseText',

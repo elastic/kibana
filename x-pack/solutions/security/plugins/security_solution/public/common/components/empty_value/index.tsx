@@ -5,18 +5,17 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import { get, isString } from 'lodash/fp';
 import type { ReactNode } from 'react';
 import React from 'react';
-import styled from 'styled-components';
 
 import * as i18n from './translations';
 
-const EmptyWrapper = styled.span`
-  color: ${(props) => props.theme.eui.euiColorDarkShade};
-`;
-
-EmptyWrapper.displayName = 'EmptyWrapper';
+const EmptyWrapper = ({ children }: { children: ReactNode }) => {
+  const { euiTheme } = useEuiTheme();
+  return <span css={{ color: euiTheme.colors.textSubdued }}>{children}</span>;
+};
 
 export const getEmptyValue = () => '—';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;

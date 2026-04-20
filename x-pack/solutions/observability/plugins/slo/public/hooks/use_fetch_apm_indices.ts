@@ -6,37 +6,38 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-
 import { useKibana } from './use_kibana';
 
-type ApmIndex = string;
+interface ApmIndices {
+  metric: string;
+  transaction: string;
+  span: string;
+}
 
 export interface UseFetchApmIndex {
-  data: ApmIndex;
+  data: ApmIndices;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
 }
 
-export function useFetchApmIndex(): UseFetchApmIndex {
+const EMPTY_INDICES: ApmIndices = { metric: '', transaction: '', span: '' };
+
+export function useFetchApmIndex({ enabled = true }: { enabled?: boolean } = {}): UseFetchApmIndex {
   const { apmSourcesAccess } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['fetchApmIndices'],
     queryFn: async ({ signal }) => {
-      try {
-        const response = await apmSourcesAccess.getApmIndices({ signal });
-
-        return response.metric ?? '';
-      } catch (error) {
-        // ignore error
-      }
+      const { metric, transaction, span } = await apmSourcesAccess.getApmIndices({ signal });
+      return { metric, transaction, span };
     },
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   return {
-    data: isInitialLoading ? '' : data ?? '',
+    data: isInitialLoading ? EMPTY_INDICES : data ?? EMPTY_INDICES,
     isLoading: isInitialLoading || isLoading || isRefetching,
     isSuccess,
     isError,

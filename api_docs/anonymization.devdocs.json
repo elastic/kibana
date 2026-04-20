@@ -1,0 +1,1307 @@
+{
+  "id": "anonymization",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-server.AnonymizationPolicyService",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationPolicyService",
+        "description": [
+          "\nThe policy service contract exposed by the anonymization plugin.\nConsumed by the inference plugin as an optional dependency."
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationPolicyService.resolveEffectivePolicy",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveEffectivePolicy",
+            "description": [
+              "\nResolves the effective field-based policy for a target.\nFor data_view targets, computes union across data view + index pattern profiles."
+            ],
+            "signature": [
+              "(namespace: string, target: ",
+              {
+                "pluginId": "anonymization",
+                "scope": "server",
+                "docId": "kibAnonymizationPluginApi",
+                "section": "def-server.AnonymizationTarget",
+                "text": "AnonymizationTarget"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/anonymization-common",
+                "scope": "common",
+                "docId": "kibKbnAnonymizationCommonPluginApi",
+                "section": "def-common.EffectivePolicy",
+                "text": "EffectivePolicy"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.resolveEffectivePolicy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 58,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.resolveEffectivePolicy.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "target",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "anonymization",
+                    "scope": "server",
+                    "docId": "kibAnonymizationPluginApi",
+                    "section": "def-server.AnonymizationTarget",
+                    "text": "AnonymizationTarget"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 59,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationPolicyService.getProfile",
+            "type": "Function",
+            "tags": [],
+            "label": "getProfile",
+            "description": [
+              "\nRetrieves a single profile by ID."
+            ],
+            "signature": [
+              "(namespace: string, profileId: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.getProfile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 65,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.getProfile.$2",
+                "type": "string",
+                "tags": [],
+                "label": "profileId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 65,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationPolicyService.getGlobalProfile",
+            "type": "Function",
+            "tags": [],
+            "label": "getGlobalProfile",
+            "description": [
+              "\nRetrieves the global profile for a namespace."
+            ],
+            "signature": [
+              "(namespace: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.getGlobalProfile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 70,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationPolicyService.ensureGlobalProfile",
+            "type": "Function",
+            "tags": [],
+            "label": "ensureGlobalProfile",
+            "description": [
+              "\nEnsures the global profile exists for a namespace."
+            ],
+            "signature": [
+              "(namespace: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.ensureGlobalProfile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 75,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationPolicyService.getSalt",
+            "type": "Function",
+            "tags": [],
+            "label": "getSalt",
+            "description": [
+              "\nRetrieves the per-space salt material for deterministic tokenization."
+            ],
+            "signature": [
+              "(namespace: string) => Promise<string>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 77,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.getSalt.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 80,
+                "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationPolicyService.getReplacementsEncryptionKey",
+            "type": "Function",
+            "tags": [],
+            "label": "getReplacementsEncryptionKey",
+            "description": [
+              "\nRetrieves the per-space replacements encryption key material."
+            ],
+            "signature": [
+              "(namespace: string) => Promise<string>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationPolicyService.getReplacementsEncryptionKey.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 85,
+                "columnNumber": 34,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-server.AnonymizationProfileInitializer",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationProfileInitializer",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializer.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializer.shouldInitialize",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldInitialize",
+            "description": [],
+            "signature": [
+              "(params: { namespace: string; target: ",
+              {
+                "pluginId": "anonymization",
+                "scope": "server",
+                "docId": "kibAnonymizationPluginApi",
+                "section": "def-server.AnonymizationTarget",
+                "text": "AnonymizationTarget"
+              },
+              "; }) => boolean"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 44,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationProfileInitializer.shouldInitialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 44,
+                "columnNumber": 30,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "anonymization",
+                    "id": "def-server.AnonymizationProfileInitializer.shouldInitialize.$1.namespace",
+                    "type": "string",
+                    "tags": [],
+                    "label": "namespace",
+                    "description": [],
+                    "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                    "lineNumber": 44,
+                    "columnNumber": 32,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "anonymization",
+                    "id": "def-server.AnonymizationProfileInitializer.shouldInitialize.$1.target",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "target",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "anonymization",
+                        "scope": "server",
+                        "docId": "kibAnonymizationPluginApi",
+                        "section": "def-server.AnonymizationTarget",
+                        "text": "AnonymizationTarget"
+                      }
+                    ],
+                    "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                    "lineNumber": 44,
+                    "columnNumber": 51,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializer.initialize",
+            "type": "Function",
+            "tags": [],
+            "label": "initialize",
+            "description": [],
+            "signature": [
+              "(context: ",
+              {
+                "pluginId": "anonymization",
+                "scope": "server",
+                "docId": "kibAnonymizationPluginApi",
+                "section": "def-server.AnonymizationProfileInitializerContext",
+                "text": "AnonymizationProfileInitializerContext"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationProfileInitializer.initialize.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "context",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "anonymization",
+                    "scope": "server",
+                    "docId": "kibAnonymizationPluginApi",
+                    "section": "def-server.AnonymizationProfileInitializerContext",
+                    "text": "AnonymizationProfileInitializerContext"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 45,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-server.AnonymizationProfileInitializerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationProfileInitializerContext",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.target",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "anonymization",
+                "scope": "server",
+                "docId": "kibAnonymizationPluginApi",
+                "section": "def-server.AnonymizationTarget",
+                "text": "AnonymizationTarget"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.findProfileByTarget",
+            "type": "Function",
+            "tags": [],
+            "label": "findProfileByTarget",
+            "description": [],
+            "signature": [
+              "(targetType: \"index\" | \"data_view\" | \"index_pattern\", targetId: string) => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; } | null>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationProfileInitializerContext.findProfileByTarget.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "targetType",
+                "description": [],
+                "signature": [
+                  "\"index\" | \"data_view\" | \"index_pattern\""
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationProfileInitializerContext.findProfileByTarget.$2",
+                "type": "string",
+                "tags": [],
+                "label": "targetId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 35,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.createProfile",
+            "type": "Function",
+            "tags": [],
+            "label": "createProfile",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "anonymization",
+                "scope": "server",
+                "docId": "kibAnonymizationPluginApi",
+                "section": "def-server.CreateAnonymizationProfileParams",
+                "text": "CreateAnonymizationProfileParams"
+              },
+              ") => Promise<{ id: string; name: string; targetType: any; targetId: string; rules: { fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }; saltId: string; namespace: string; createdAt: string; updatedAt: string; createdBy: string; updatedBy: string; description?: string | undefined; }>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationProfileInitializerContext.createProfile.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "anonymization",
+                    "scope": "server",
+                    "docId": "kibAnonymizationPluginApi",
+                    "section": "def-server.CreateAnonymizationProfileParams",
+                    "text": "CreateAnonymizationProfileParams"
+                  }
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.ensureSalt",
+            "type": "Function",
+            "tags": [],
+            "label": "ensureSalt",
+            "description": [],
+            "signature": [
+              "() => Promise<string>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationProfileInitializerContext.checkDataViewExists",
+            "type": "Function",
+            "tags": [],
+            "label": "checkDataViewExists",
+            "description": [],
+            "signature": [
+              "(dataViewId: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "anonymization",
+                "id": "def-server.AnonymizationProfileInitializerContext.checkDataViewExists.$1",
+                "type": "string",
+                "tags": [],
+                "label": "dataViewId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+                "lineNumber": 39,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-server.AnonymizationTarget",
+        "type": "Interface",
+        "tags": [],
+        "label": "AnonymizationTarget",
+        "description": [
+          "\nDescribes a target for effective policy resolution."
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationTarget.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"index\" | \"data_view\" | \"index_pattern\""
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.AnonymizationTarget.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-server.CreateAnonymizationProfileParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateAnonymizationProfileParams",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.targetType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "targetType",
+            "description": [],
+            "signature": [
+              "\"index\" | \"data_view\" | \"index_pattern\""
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.targetId",
+            "type": "string",
+            "tags": [],
+            "label": "targetId",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.rules",
+            "type": "Object",
+            "tags": [],
+            "label": "rules",
+            "description": [],
+            "signature": [
+              "{ fieldRules: { field: string; allowed: boolean; anonymized: boolean; entityClass: any; }[]; regexRules: { id: string; type: any; entityClass: any; pattern: string; enabled: boolean; }[]; nerRules: { id: string; type: any; allowedEntityClasses: any[]; enabled: boolean; modelId?: string | undefined; }[]; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-server.CreateAnonymizationProfileParams.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "anonymization",
+      "id": "def-server.AnonymizationPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AnonymizationPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+      "lineNumber": 88,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "anonymization",
+          "id": "def-server.AnonymizationPluginSetup.isEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "isEnabled",
+          "description": [],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+          "lineNumber": 89,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "anonymization",
+          "id": "def-server.AnonymizationPluginSetup.registerProfileInitializer",
+          "type": "Function",
+          "tags": [],
+          "label": "registerProfileInitializer",
+          "description": [],
+          "signature": [
+            "(initializer: ",
+            {
+              "pluginId": "anonymization",
+              "scope": "server",
+              "docId": "kibAnonymizationPluginApi",
+              "section": "def-server.AnonymizationProfileInitializer",
+              "text": "AnonymizationProfileInitializer"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+          "lineNumber": 90,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "anonymization",
+              "id": "def-server.AnonymizationPluginSetup.registerProfileInitializer.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "initializer",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "anonymization",
+                  "scope": "server",
+                  "docId": "kibAnonymizationPluginApi",
+                  "section": "def-server.AnonymizationProfileInitializer",
+                  "text": "AnonymizationProfileInitializer"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+              "lineNumber": 90,
+              "columnNumber": 32,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "anonymization",
+      "id": "def-server.AnonymizationPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AnonymizationPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+      "lineNumber": 93,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "anonymization",
+          "id": "def-server.AnonymizationPluginStart.isEnabled",
+          "type": "Function",
+          "tags": [],
+          "label": "isEnabled",
+          "description": [
+            "\nReturns whether the new anonymization profile-based flow is enabled."
+          ],
+          "signature": [
+            "() => boolean"
+          ],
+          "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+          "lineNumber": 94,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "anonymization",
+          "id": "def-server.AnonymizationPluginStart.getPolicyService",
+          "type": "Function",
+          "tags": [],
+          "label": "getPolicyService",
+          "description": [
+            "\nReturns the policy service for resolving anonymization policy."
+          ],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "anonymization",
+              "scope": "server",
+              "docId": "kibAnonymizationPluginApi",
+              "section": "def-server.AnonymizationPolicyService",
+              "text": "AnonymizationPolicyService"
+            }
+          ],
+          "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+          "lineNumber": 99,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "anonymization",
+          "id": "def-server.AnonymizationPluginStart.registerProfileInitializer",
+          "type": "Function",
+          "tags": [],
+          "label": "registerProfileInitializer",
+          "description": [],
+          "signature": [
+            "(initializer: ",
+            {
+              "pluginId": "anonymization",
+              "scope": "server",
+              "docId": "kibAnonymizationPluginApi",
+              "section": "def-server.AnonymizationProfileInitializer",
+              "text": "AnonymizationProfileInitializer"
+            },
+            ") => void"
+          ],
+          "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+          "lineNumber": 103,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "anonymization",
+              "id": "def-server.AnonymizationPluginStart.registerProfileInitializer.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "initializer",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "anonymization",
+                  "scope": "server",
+                  "docId": "kibAnonymizationPluginApi",
+                  "section": "def-server.AnonymizationProfileInitializer",
+                  "text": "AnonymizationProfileInitializer"
+                }
+              ],
+              "path": "x-pack/platform/plugins/shared/anonymization/server/types.ts",
+              "lineNumber": 103,
+              "columnNumber": 32,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.toErrorMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "toErrorMessage",
+        "description": [
+          "Extracts a human-readable error message from an unknown error."
+        ],
+        "signature": [
+          "(err: unknown) => string"
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 39,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-common.toErrorMessage.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+            "lineNumber": 39,
+            "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.toStatusCode",
+        "type": "Function",
+        "tags": [],
+        "label": "toStatusCode",
+        "description": [
+          "Extracts an HTTP status code from an unknown error (Kibana SO or ES client shapes)."
+        ],
+        "signature": [
+          "(err: unknown) => number"
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "anonymization",
+            "id": "def-common.toStatusCode.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "err",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+            "lineNumber": 43,
+            "columnNumber": 30,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.ANONYMIZATION_API_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "ANONYMIZATION_API_VERSION",
+        "description": [
+          "Internal API version for all anonymization routes."
+        ],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.ANONYMIZATION_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ANONYMIZATION_FEATURE_ID",
+        "description": [
+          "Feature ID for Kibana feature privileges."
+        ],
+        "signature": [
+          "\"anonymization\""
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.ANONYMIZATION_PROFILES_API_BASE",
+        "type": "string",
+        "tags": [],
+        "label": "ANONYMIZATION_PROFILES_API_BASE",
+        "description": [
+          "Base path for all anonymization profile APIs."
+        ],
+        "signature": [
+          "\"/internal/anonymization/profiles\""
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.ANONYMIZATION_PROFILES_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ANONYMIZATION_PROFILES_INDEX",
+        "description": [
+          "\nSystem index name for anonymization profiles.\nUses `.kibana-` prefix so that `kibana_system` role has access."
+        ],
+        "signature": [
+          "\".kibana-anonymization-profiles\""
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"anonymization\""
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"Anonymization\""
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.apiPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "apiPrivileges",
+        "description": [
+          "API privilege tags used in feature registration and route authz."
+        ],
+        "signature": [
+          "{ readonly readAnonymization: \"read_anonymization\"; readonly manageAnonymization: \"manage_anonymization\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "anonymization",
+        "id": "def-common.uiPrivileges",
+        "type": "Object",
+        "tags": [],
+        "label": "uiPrivileges",
+        "description": [
+          "UI capability keys granted by feature privileges."
+        ],
+        "signature": [
+          "{ readonly show: \"show\"; readonly manage: \"manage\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/anonymization/common/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

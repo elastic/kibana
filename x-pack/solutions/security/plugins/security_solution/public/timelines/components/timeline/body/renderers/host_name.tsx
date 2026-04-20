@@ -23,6 +23,7 @@ interface Props {
   onClick?: () => void;
   value: string | number | undefined | null;
   title?: string;
+  entityId?: string;
 }
 
 const HostNameComponent: React.FC<Props> = ({
@@ -32,6 +33,7 @@ const HostNameComponent: React.FC<Props> = ({
   onClick,
   title,
   value,
+  entityId,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
 
@@ -39,8 +41,7 @@ const HostNameComponent: React.FC<Props> = ({
 
   const eventContext = useContext(StatefulEventContext);
   const hostName = `${value}`;
-  const isInTimelineContext =
-    hostName && eventContext?.enableHostDetailsFlyout && eventContext?.timelineID;
+  const isInTimelineContext = hostName && eventContext?.timelineID;
 
   const openHostDetailsSidePanel = useCallback(
     (e: React.SyntheticEvent<Element, Event>) => {
@@ -54,7 +55,7 @@ const HostNameComponent: React.FC<Props> = ({
        * if and only if renderer is running inside security solution app
        * we check for event and timeline context
        * */
-      if (!eventContext || !isInTimelineContext) {
+      if (!eventContext || !isInTimelineContext || !eventContext.enableHostDetailsFlyout) {
         return;
       }
 
@@ -64,13 +65,14 @@ const HostNameComponent: React.FC<Props> = ({
           id: HostPanelKey,
           params: {
             hostName,
+            entityId,
             contextID: contextId,
             scopeId: timelineID,
           },
         },
       });
     },
-    [contextId, eventContext, hostName, isInTimelineContext, onClick, openFlyout]
+    [onClick, eventContext, isInTimelineContext, hostName, entityId, openFlyout, contextId]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined
@@ -92,9 +94,9 @@ const HostNameComponent: React.FC<Props> = ({
       hostName,
       isButton,
       isInTimelineContext,
+      isInSecurityApp,
       openHostDetailsSidePanel,
       title,
-      isInSecurityApp,
     ]
   );
 

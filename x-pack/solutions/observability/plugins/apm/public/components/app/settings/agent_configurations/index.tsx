@@ -90,7 +90,7 @@ function CreateConfigurationButton() {
               data-test-subj="apmAgentConfigurationButtonCreateConfigurationButton"
               color="primary"
               fill
-              iconType="plusInCircle"
+              iconType="plusCircle"
               href={href}
               isDisabled={!canSave}
             >

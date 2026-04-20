@@ -20,10 +20,10 @@ import type { LensProps } from './types';
 import { OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
 
-function getOpenLensButton(attachmentId: string, props: LensProps) {
+function getOpenLensButton(savedObjectId: string, props: LensProps) {
   return (
     <OpenLensButton
-      attachmentId={attachmentId}
+      savedObjectId={savedObjectId}
       attributes={props.attributes}
       timeRange={props.timeRange}
       metadata={props.metadata}
@@ -31,10 +31,10 @@ function getOpenLensButton(attachmentId: string, props: LensProps) {
   );
 }
 
-const getVisualizationAttachmentActions = (attachmentId: string, props: LensProps) => [
+const getVisualizationAttachmentActions = (savedObjectId: string, props: LensProps) => [
   {
     type: AttachmentActionType.CUSTOM as const,
-    render: () => getOpenLensButton(attachmentId, props),
+    render: () => getOpenLensButton(savedObjectId, props),
     isPrimary: false,
   },
 ];
@@ -59,7 +59,7 @@ const LensAttachmentRendererLazyComponent = React.lazy(async () => {
 });
 
 const getVisualizationAttachmentViewObject = ({
-  attachmentId,
+  savedObjectId,
   persistableStateAttachmentState,
 }: PersistableStateAttachmentViewProps) => {
   const { attributes: lensAttributes, timeRange: lensTimeRange } =
@@ -69,7 +69,7 @@ const getVisualizationAttachmentViewObject = ({
     event: i18n.ADDED_VISUALIZATION,
     timelineAvatar: 'lensApp',
     getActions: () =>
-      getVisualizationAttachmentActions(attachmentId, {
+      getVisualizationAttachmentActions(savedObjectId, {
         attributes: lensAttributes,
         timeRange: lensTimeRange,
       }),

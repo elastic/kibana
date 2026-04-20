@@ -141,7 +141,7 @@ const GroupStatsComponent = <T,>({
               <EuiButtonEmpty
                 data-test-subj="take-action-button"
                 onClick={onButtonClick}
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
               >
                 {TAKE_ACTION}

@@ -14,24 +14,35 @@ import { EndpointExceptionsForm } from './components/endpoint_exceptions_form';
 import { EndpointExceptionsApiClient } from '../service/api_client';
 import { ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS } from '../constants';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS } from '../translations';
+import { usePerPolicyOptIn } from '../hooks/use_per_policy_opt_in';
 
 export const EndpointExceptions = memo(() => {
   const { canWriteEndpointExceptions } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const endpointExceptionsApiClient = EndpointExceptionsApiClient.getInstance(http);
 
+  const { perPolicyOptInCallout, perPolicyOptInModal, perPolicyOptInActionMenuItem } =
+    usePerPolicyOptIn();
+
   return (
-    <ArtifactListPage
-      apiClient={endpointExceptionsApiClient}
-      ArtifactFormComponent={EndpointExceptionsForm}
-      labels={ENDPOINT_EXCEPTIONS_PAGE_LABELS}
-      data-test-subj="endpointExceptionsListPage"
-      searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
-      flyoutSize="l"
-      allowCardCreateAction={canWriteEndpointExceptions}
-      allowCardEditAction={canWriteEndpointExceptions}
-      allowCardDeleteAction={canWriteEndpointExceptions}
-    />
+    <>
+      {perPolicyOptInModal}
+      <ArtifactListPage
+        apiClient={endpointExceptionsApiClient}
+        ArtifactFormComponent={EndpointExceptionsForm}
+        labels={ENDPOINT_EXCEPTIONS_PAGE_LABELS}
+        data-test-subj="endpointExceptionsListPage"
+        searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
+        flyoutSize="l"
+        allowCardCreateAction={canWriteEndpointExceptions}
+        allowCardEditAction={canWriteEndpointExceptions}
+        allowCardDeleteAction={canWriteEndpointExceptions}
+        callout={perPolicyOptInCallout}
+        additionalActions={
+          perPolicyOptInActionMenuItem ? [perPolicyOptInActionMenuItem] : undefined
+        }
+      />
+    </>
   );
 });
 

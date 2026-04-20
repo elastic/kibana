@@ -37,7 +37,6 @@ const lensPersistableState = {
     title: '',
     description: '',
     visualizationType: 'lnsXY',
-    type: 'lens',
     references: [
       {
         type: 'index-pattern',
@@ -579,6 +578,7 @@ export const mockCaseUnifiedAttachments: Array<SavedObject<UnifiedAttachmentAttr
     attributes: {
       type: 'comment',
       data: { content: 'test' },
+      owner: 'securitySolution',
       created_at: '2019-11-25T21:55:00.177Z',
       created_by: {
         full_name: 'elastic',

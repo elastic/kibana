@@ -46,13 +46,13 @@ interface UseSavedQueryFormProps {
 
 const deserializer = (payload: SavedQuerySOFormData): SavedQueryFormData => ({
   id: payload.id,
-  description: payload.description,
-  query: payload.query,
+  description: payload.description ?? '',
+  query: payload.query ?? '',
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
   timeout: payload.timeout ?? QUERY_TIMEOUT.DEFAULT,
   snapshot: payload.snapshot ?? true,
   removed: payload.removed ?? false,
-  platform: payload.platform,
+  platform: payload.platform ?? '',
   version: payload.version ? [payload.version] : [],
   ecs_mapping: !isEmpty(payload.ecs_mapping) ? payload.ecs_mapping : {},
 });

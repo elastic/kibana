@@ -8,6 +8,8 @@ import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { TopNodesRequestRT } from '../../../common/http_api/overview_api';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 import { createSearchClient } from '../../lib/create_search_client';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
+import { getPreferredSchema } from '../../lib/helpers/get_preferred_schema';
 import { queryTopNodes } from './lib/get_top_nodes';
 
 export const initOverviewRoute = (libs: InfraBackendLibs) => {
@@ -27,7 +29,22 @@ export const initOverviewRoute = (libs: InfraBackendLibs) => {
       const soClient = (await requestContext.core).savedObjects.client;
       const source = await libs.sources.getSourceConfiguration(soClient, options.sourceId);
 
-      const topNResponse = await queryTopNodes(options, client, source);
+      const infraMetricsClient = await getInfraMetricsClient({
+        request,
+        libs,
+        context: requestContext,
+      });
+
+      const { schemas } = await getPreferredSchema({
+        infraMetricsClient,
+        dataSource: 'host',
+        from: options.timerange.from,
+        to: options.timerange.to,
+      });
+
+      const activeSchemas = schemas.length > 0 ? schemas : ['ecs' as const];
+
+      const topNResponse = await queryTopNodes(options, client, source, activeSchemas);
 
       return response.ok({
         body: topNResponse,

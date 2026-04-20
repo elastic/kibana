@@ -6,19 +6,22 @@
  */
 
 import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
-import { DiscoverValidationPage } from './discover_validation.page';
 
 export class OtelKubernetesFlowPage {
   page: Page;
   context: BrowserContext;
 
   private readonly exploreLogsButton: Locator;
+  private readonly dataReceivedIndicator: Locator;
 
   constructor(page: Page, context: BrowserContext) {
     this.page = page;
     this.context = context;
 
     this.exploreLogsButton = this.page.getByText('Explore logs');
+    this.dataReceivedIndicator = this.page
+      .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
+      .getByText('We are monitoring your cluster');
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -83,16 +86,18 @@ export class OtelKubernetesFlowPage {
     }
   }
 
+  public async assertDataReceivedIndicator(): Promise<void> {
+    await expect(
+      this.dataReceivedIndicator,
+      'Data received indicator should be visible'
+    ).toBeVisible({ timeout: 5 * 60_000 });
+  }
+
   public async assertLogsExplorationButtonVisible() {
     await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
   }
 
   public async clickExploreLogsCTA() {
     await this.exploreLogsButton.click();
-  }
-
-  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
-    await this.exploreLogsButton.click();
-    return new DiscoverValidationPage(this.page);
   }
 }

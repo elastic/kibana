@@ -132,7 +132,7 @@ export const WorkflowInsightsIncompatibleAntivirusResult = ({
                 data-test-subj={`workflowInsightsResult-${index}-remediation`}
                 isDisabled={!canWriteTrustedApplications}
                 aria-label={ariaLabel}
-                iconType="plusInCircle"
+                iconType="plusCircle"
                 href={`${APP_PATH}${TRUSTED_APPS_PATH}?show=create`}
                 onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                   e.preventDefault();

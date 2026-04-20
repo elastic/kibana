@@ -19,7 +19,7 @@ export const WorkpadCreate = ({ canUserWrite, disabled, ...rest }: Props) => {
   return (
     <EuiButton
       {...{ ...rest }}
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       fill
       disabled={!canUserWrite && !disabled}
       data-test-subj="create-workpad-button"

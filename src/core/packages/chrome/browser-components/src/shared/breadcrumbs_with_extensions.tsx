@@ -8,18 +8,11 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React from 'react';
-import type { Observable } from 'rxjs';
-import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
-import useObservable from 'react-use/lib/useObservable';
+import React, { Suspense } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import classnames from 'classnames';
 import { css } from '@emotion/react';
-import { HeaderExtension } from './header_extension';
-
-export interface Props {
-  breadcrumbsAppendExtensions$: Observable<ChromeBreadcrumbsAppendExtension[]>;
-}
+import { useBreadcrumbsAppendExtensions } from './chrome_hooks';
 
 const styles = {
   breadcrumbsWithExtensionContainer: css`
@@ -40,11 +33,8 @@ const styles = {
   `,
 };
 
-export const BreadcrumbsWithExtensionsWrapper = ({
-  breadcrumbsAppendExtensions$,
-  children,
-}: PropsWithChildren<Props>) => {
-  const breadcrumbsAppendExtensions = useObservable(breadcrumbsAppendExtensions$, []);
+export const BreadcrumbsWithExtensionsWrapper = ({ children }: PropsWithChildren) => {
+  const breadcrumbsAppendExtensions = useBreadcrumbsAppendExtensions();
 
   return breadcrumbsAppendExtensions.length === 0 ? (
     <>{children}</>
@@ -60,13 +50,14 @@ export const BreadcrumbsWithExtensionsWrapper = ({
       {breadcrumbsAppendExtensions.map((breadcrumbsAppendExtension, index) => {
         const isLast = breadcrumbsAppendExtensions.length - 1 === index;
         return (
-          <HeaderExtension
+          <div
             key={index}
-            extension={breadcrumbsAppendExtension.content ?? breadcrumbsAppendExtension.mount}
-            containerClassName={classnames({
+            className={classnames({
               'header__breadcrumbsAppendExtension--last': isLast,
             })}
-          />
+          >
+            <Suspense fallback={null}>{breadcrumbsAppendExtension.content}</Suspense>
+          </div>
         );
       })}
     </EuiFlexGroup>

@@ -322,6 +322,53 @@ describe('validateModelResponse', () => {
     });
   });
 
+  describe('null/undefined model response', () => {
+    it('throws InvalidModelResponse when modelResponse is null', () => {
+      expect(() => {
+        validateModelResponse({
+          modelResponse: null,
+          expectedCategories: ['a'],
+          fallbackCategory: undefined,
+          responseMetadata: {},
+        });
+      }).toThrow(ExecutionError);
+
+      try {
+        validateModelResponse({
+          modelResponse: null,
+          expectedCategories: ['a'],
+          fallbackCategory: undefined,
+          responseMetadata: {},
+        });
+      } catch (error) {
+        expect((error as ExecutionError).type).toBe('InvalidModelResponse');
+        expect((error as ExecutionError).message).toBe('Model response is null or undefined.');
+      }
+    });
+
+    it('throws InvalidModelResponse when modelResponse is undefined', () => {
+      expect(() => {
+        validateModelResponse({
+          modelResponse: undefined,
+          expectedCategories: ['a'],
+          fallbackCategory: undefined,
+          responseMetadata: {},
+        });
+      }).toThrow(ExecutionError);
+
+      try {
+        validateModelResponse({
+          modelResponse: undefined,
+          expectedCategories: ['a'],
+          fallbackCategory: undefined,
+          responseMetadata: {},
+        });
+      } catch (error) {
+        expect((error as ExecutionError).type).toBe('InvalidModelResponse');
+      }
+    });
+  });
+
   describe('case sensitivity', () => {
     it('should treat category names as case-sensitive', () => {
       const modelResponse = {

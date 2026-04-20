@@ -18,10 +18,10 @@ import { getEsQueryConfig } from '@kbn/data-service';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {
-  GRAPH_ACTOR_ENTITY_FIELDS,
-  GRAPH_TARGET_ENTITY_FIELDS,
+  GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+  GRAPH_TARGET_EUID_SOURCE_FIELDS,
 } from '@kbn/cloud-security-posture-common/constants';
-import { Graph, isEntityNode, type NodeProps } from '../../..';
+import { Graph, isEntityNode } from '../../..';
 import { Callout } from '../callout/callout';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { useGraphCallout } from '../../hooks/use_graph_callout';
@@ -31,36 +31,35 @@ import { useCountryFlagsPopover } from '../node/country_flags/country_flags';
 import { useEventDetailsPopover } from '../popovers/details/use_event_details_popover';
 import type { DocumentAnalysisOutput } from '../node/label_node/analyze_documents';
 import { analyzeDocuments } from '../node/label_node/analyze_documents';
-import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
+import {
+  EVENT_ID,
+  GRAPH_NODES_LIMIT,
+  RELATED_ENTITY,
+  TOGGLE_SEARCH_BAR_STORAGE_KEY,
+} from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import {
   CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER,
   addFilter,
+  // TODO Replace `getFilterValues` with function that gets the current filter state
   getFilterValues,
-} from './search_filters';
+} from '../filters/search_filters';
 import { useEntityNodeExpandPopover } from '../popovers/node_expand/use_entity_node_expand_popover';
 import { useLabelNodeExpandPopover } from '../popovers/node_expand/use_label_node_expand_popover';
 import type { NodeViewModel } from '../types';
 import { isLabelNode, isRelationshipNode, showErrorToast } from '../utils';
 import { GRAPH_SCOPE_ID } from '../constants';
+import { useGraphFilters } from '../filters/use_graph_filters';
 
 const useGraphPopovers = ({
-  dataViewId,
-  searchFilters,
-  setSearchFilters,
-  nodeDetailsClickHandler,
+  scopeId,
+  onOpenEventPreview,
   onOpenNetworkPreview,
-  expandedEntityIds,
-  onToggleEntityRelationships,
 }: {
-  dataViewId: string;
-  searchFilters: Filter[];
-  setSearchFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
-  nodeDetailsClickHandler?: (node: NodeProps) => void;
+  scopeId: string;
+  onOpenEventPreview?: (node: NodeViewModel) => void;
   onOpenNetworkPreview?: (ip: string, scopeId: string) => void;
-  expandedEntityIds: Set<string>;
-  onToggleEntityRelationships: (node: NodeProps, action: 'show' | 'hide') => void;
 }) => {
   const [currentIps, setCurrentIps] = useState<string[]>([]);
   const [currentCountryCodes, setCurrentCountryCodes] = useState<string[]>([]);
@@ -68,20 +67,8 @@ const useGraphPopovers = ({
     null
   );
   const [currentEventText, setCurrentEventText] = useState<string>('');
-  const nodeExpandPopover = useEntityNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler,
-    expandedEntityIds,
-    onToggleEntityRelationships
-  );
-  const labelExpandPopover = useLabelNodeExpandPopover(
-    setSearchFilters,
-    dataViewId,
-    searchFilters,
-    nodeDetailsClickHandler
-  );
+  const nodeExpandPopover = useEntityNodeExpandPopover(scopeId, onOpenEventPreview);
+  const labelExpandPopover = useLabelNodeExpandPopover(scopeId, onOpenEventPreview);
   const ipPopover = useIpPopover(currentIps, GRAPH_SCOPE_ID);
   const countryFlagsPopover = useCountryFlagsPopover(currentCountryCodes);
   const eventPopover = useEventDetailsPopover(currentEventAnalysis, currentEventText);
@@ -161,6 +148,12 @@ const NEGATED_FILTER_SEARCH_WARNING_MESSAGE = {
 };
 
 export interface GraphInvestigationProps {
+  /**
+   * Unique identifier for this graph instance, used to scope filter state.
+   * When multiple graphs are open simultaneously, each should have a distinct scopeId.
+   */
+  scopeId: string;
+
   /**
    * The initial state to use for the graph investigation view.
    */
@@ -252,6 +245,7 @@ type EsQuery = UseFetchGraphDataParams['req']['query']['esQuery'];
  */
 export const GraphInvestigation = memo<GraphInvestigationProps>(
   ({
+    scopeId,
     initialState: {
       indexPatterns,
       dataView,
@@ -265,7 +259,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     onOpenEventPreview,
     onOpenNetworkPreview,
   }: GraphInvestigationProps) => {
-    const [searchFilters, setSearchFilters] = useState<Filter[]>(() => []);
+    const emptyEntityIds = useMemo(() => [], []);
+    const { searchFilters, setSearchFilters, entityIdsForApi } = useGraphFilters(
+      scopeId,
+      entityIds ?? emptyEntityIds,
+      dataView?.id ?? ''
+    );
     const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
     const [searchToggled, setSearchToggled] = useSessionStorage(
       TOGGLE_SEARCH_BAR_STORAGE_KEY,
@@ -273,32 +272,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     );
     const lastValidEsQuery = useRef<EsQuery | undefined>();
     const [kquery, setKQuery] = useState<Query>(EMPTY_QUERY);
-
-    // Track which entities have their relationships expanded
-    const [expandedEntityIds, setExpandedEntityIds] = useState<Set<string>>(() => new Set());
-
-    // Convert expandedEntityIds Set to API format
-    const entityIdsForApi = useMemo(() => {
-      if (expandedEntityIds.size === 0) return undefined;
-
-      return Array.from(expandedEntityIds).map((id) => ({
-        id,
-        isOrigin: false, // User-expanded entities are not the graph origin
-      }));
-    }, [expandedEntityIds]);
-
-    // Toggle handler for entity relationships
-    const onToggleEntityRelationships = useCallback((node: NodeProps, action: 'show' | 'hide') => {
-      setExpandedEntityIds((prev) => {
-        const next = new Set(prev);
-        if (action === 'show') {
-          next.add(node.id);
-        } else {
-          next.delete(node.id);
-        }
-        return next;
-      });
-    }, []);
 
     const onInvestigateInTimelineCallback = useCallback(() => {
       const query = { ...kquery };
@@ -348,10 +321,12 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [dataView, kquery, notifications, searchFilters, uiSettings]);
 
     const pinnedIds = useMemo(() => {
-      return getFilterValues(searchFilters, [
-        ...GRAPH_ACTOR_ENTITY_FIELDS,
-        ...GRAPH_TARGET_ENTITY_FIELDS,
+      const filterValues = getFilterValues(searchFilters, [
+        ...GRAPH_ACTOR_EUID_SOURCE_FIELDS,
+        ...GRAPH_TARGET_EUID_SOURCE_FIELDS,
+        RELATED_ENTITY,
       ]).map(String);
+      return filterValues;
     }, [searchFilters]);
 
     const { data, refresh, isFetching, isError, error } = useFetchGraphData({
@@ -380,13 +355,6 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       }
     }, [error, isError, notifications]);
 
-    const nodeDetailsClickHandler = useCallback(
-      (node: NodeProps) => {
-        onOpenEventPreview?.(node.data);
-      },
-      [onOpenEventPreview]
-    );
-
     const {
       nodeExpandPopover,
       labelExpandPopover,
@@ -398,13 +366,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       createCountryClickHandler,
       createEventClickHandler,
     } = useGraphPopovers({
-      dataViewId: dataView?.id ?? '',
-      searchFilters,
-      setSearchFilters,
-      nodeDetailsClickHandler: onOpenEventPreview ? nodeDetailsClickHandler : undefined,
+      scopeId,
+      onOpenEventPreview,
       onOpenNetworkPreview,
-      expandedEntityIds,
-      onToggleEntityRelationships,
     });
 
     const nodeExpandButtonClickHandler = (...args: unknown[]) =>

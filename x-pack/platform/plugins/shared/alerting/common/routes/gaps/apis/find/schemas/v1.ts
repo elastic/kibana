@@ -6,6 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { gapsResponseSchemaV1 } from '../../../response';
+import { optionalExcludedGapReasonsSchema } from '../../../../../schemas';
 
 export const findGapsBodySchema = schema.object(
   {
@@ -31,6 +32,7 @@ export const findGapsBodySchema = schema.object(
         ])
       )
     ),
+    excluded_reasons: optionalExcludedGapReasonsSchema,
   },
   {
     validate({ start, end }) {

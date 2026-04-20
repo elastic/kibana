@@ -16,7 +16,6 @@ export interface ESQLEditorRestorableState {
   isHistoryOpen: boolean;
   historySelectedTabId: HistoryTabId;
   isVisorOpen: boolean;
-  hasOpenedVisorOnMount: boolean;
 }
 
 export const { withRestorableState, useRestorableState, useRestorableRef } =

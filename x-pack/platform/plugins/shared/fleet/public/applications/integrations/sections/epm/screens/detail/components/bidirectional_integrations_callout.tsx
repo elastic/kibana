@@ -71,7 +71,7 @@ export const BidirectionalIntegrationsBanner = memo<BidirectionalIntegrationsBan
       <>
         <AccentCallout
           title={bannerTitle}
-          iconType="cheer"
+          iconType="popper"
           onDismiss={onDismissHandler}
           data-test-subj={'bidirectionalIntegrationsCallout'}
         >

@@ -12,6 +12,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { render as rtlRender, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import React from 'react';
 import { coreServices, dataViewsService } from '../../../services/kibana_services';
 import { getMockedFinalizeApi } from '../../mocks/control_mocks';
@@ -76,6 +77,7 @@ describe('Options List Control Api', () => {
         await factory.buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
           initialState: {
+            ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
           },
@@ -99,6 +101,7 @@ describe('Options List Control Api', () => {
         await factory.buildEmbeddable({
           initializeDrilldownsManager: jest.fn(),
           initialState: {
+            ...DEFAULT_DSL_OPTIONS_LIST_STATE,
             data_view_id: 'myDataViewId',
             field_name: 'myFieldName',
             selected_options: ['cool', 'test'],
@@ -131,6 +134,7 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
         },
@@ -145,6 +149,7 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           selected_options: ['cool', 'test'],
@@ -187,6 +192,7 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           exists_selected: true,
@@ -215,6 +221,7 @@ describe('Options List Control Api', () => {
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           exists_selected: true,
@@ -260,6 +267,7 @@ describe('Options List Control Api', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           exists_selected: true,
@@ -290,6 +298,7 @@ describe('Options List Control Api', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           exists_selected: true,
@@ -320,6 +329,7 @@ describe('Options List Control Api', () => {
       const { Component } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           selected_options: ['woof', 'bark'],
@@ -355,6 +365,7 @@ describe('Options List Control Api', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           selected_options: ['woof', 'bark'],
@@ -399,6 +410,7 @@ describe('Options List Control Api', () => {
       const { Component, api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: jest.fn(),
         initialState: {
+          ...DEFAULT_DSL_OPTIONS_LIST_STATE,
           data_view_id: 'myDataViewId',
           field_name: 'myFieldName',
           single_select: true,

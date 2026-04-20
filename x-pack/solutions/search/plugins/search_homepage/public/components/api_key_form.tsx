@@ -49,7 +49,7 @@ const ApiKeyFormContent = ({
       actions={[
         <EuiButtonIcon
           size="s"
-          iconType={status === Status.showPreviewKey ? 'eyeClosed' : 'eye'}
+          iconType={status === Status.showPreviewKey ? 'eyeSlash' : 'eye'}
           color="text"
           display="empty"
           onClick={toggleApiKeyVisibility}

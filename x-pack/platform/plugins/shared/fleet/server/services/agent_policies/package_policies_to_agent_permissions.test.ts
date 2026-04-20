@@ -7,7 +7,8 @@
 
 jest.mock('../epm/packages');
 
-import type { PackagePolicy, RegistryDataStream } from '../../types';
+import type { PackagePolicy } from '../../types';
+import { PackagePolicyValidationError } from '../../errors';
 
 import type { DataStreamMeta } from './package_policies_to_agent_permissions';
 import {
@@ -381,6 +382,30 @@ packageInfoCache.set('elastic_connectors-1.0.0', {
       ml_model: [],
     },
   },
+});
+
+packageInfoCache.set('non_dynamic_pkg-1.0.0', {
+  format_version: '2.7.0',
+  name: 'non_dynamic_pkg',
+  title: 'Non Dynamic Package',
+  version: '1.0.0',
+  type: 'integration',
+  release: 'ga',
+  policy_templates: [],
+  data_streams: [
+    {
+      type: 'logs',
+      dataset: 'non_dynamic_pkg.logs',
+      title: 'Logs',
+      release: 'ga',
+      package: 'non_dynamic_pkg',
+      path: 'logs',
+      streams: [],
+    },
+  ],
+  latestVersion: '1.0.0',
+  status: 'not_installed',
+  assets: { kibana: {}, elasticsearch: {} },
 });
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
@@ -1218,11 +1243,282 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       });
     });
   });
+
+  describe('data_stream.type undefined handling', () => {
+    it('throws for non-dynamic package stream with undefined data_stream.type', () => {
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'policy-undefined-type',
+          name: 'non-dynamic-policy',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'non_dynamic_pkg', version: '1.0.0', title: 'Non Dynamic Package' },
+          inputs: [
+            {
+              type: 'logfile',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: { dataset: 'non_dynamic_pkg.logs' },
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const invoke = () =>
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies);
+      expect(invoke).toThrow(PackagePolicyValidationError);
+      expect(invoke).toThrow(
+        '[data_stream.type]: unexpected undefined stream type for non-dynamic package "non_dynamic_pkg"'
+      );
+    });
+
+    it('does not throw for dynamic_signal_types package stream with undefined data_stream.type', () => {
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'policy-dynamic-no-type',
+          name: 'dynamic-no-type-policy',
+          namespace: 'default',
+          enabled: true,
+          package: { name: 'input_otel', version: '1.0.0', title: 'Input OTel' },
+          inputs: [
+            {
+              type: 'otelcol',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: { dataset: 'otel.dataset' },
+                  vars: {},
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      // dynamic_signal_types packages are handled separately and do not reach the DataStreamMeta guard
+      expect(() =>
+        storedPackagePoliciesToAgentPermissions(packageInfoCache, 'default', packagePolicies)
+      ).not.toThrow();
+    });
+
+    it('grants normal data-stream permissions for a non-dynamic input even when another template in the same package has dynamic_signal_types', () => {
+      // Package has two policy templates: 'otel_policy' (dynamic) and 'logfile_policy' (non-dynamic).
+      // A package policy using 'logfile_policy' should get regular per-data-stream permissions,
+      // not the wildcard dynamic permissions that belong to the otelcol template.
+      const mixedPkgKey = 'mixed_multi_template_pkg-1.0.0';
+      packageInfoCache.set(mixedPkgKey, {
+        format_version: '2.7.0',
+        name: 'mixed_multi_template_pkg',
+        title: 'Mixed Multi Template Pkg',
+        version: '1.0.0',
+        type: 'integration',
+        release: 'ga',
+        policy_templates: [
+          {
+            name: 'otel_policy',
+            title: 'OTel',
+            description: 'OTel inputs',
+            inputs: [
+              {
+                type: 'otelcol',
+                title: 'OTel',
+                description: 'OTel',
+                dynamic_signal_types: true,
+              },
+            ],
+          },
+          {
+            name: 'logfile_policy',
+            title: 'Logfile',
+            description: 'Logfile inputs',
+            inputs: [{ type: 'logfile', title: 'Logfile', description: 'Logfile' }],
+          },
+        ],
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'mixed_multi_template_pkg.app',
+            title: 'App Logs',
+            release: 'ga',
+            package: 'mixed_multi_template_pkg',
+            path: 'app',
+            streams: [],
+          },
+        ],
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        assets: { kibana: {}, elasticsearch: {} },
+      } as any);
+
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'policy-logfile',
+          name: 'logfile-policy',
+          namespace: 'default',
+          enabled: true,
+          package: {
+            name: 'mixed_multi_template_pkg',
+            version: '1.0.0',
+            title: 'Mixed Multi Template Pkg',
+          },
+          inputs: [
+            {
+              type: 'logfile',
+              policy_template: 'logfile_policy',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: {
+                    type: 'logs',
+                    dataset: 'mixed_multi_template_pkg.app',
+                  },
+                  vars: {},
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const permissions = storedPackagePoliciesToAgentPermissions(
+        packageInfoCache,
+        'default',
+        packagePolicies
+      );
+
+      // The logfile input is non-dynamic — should get a concrete data stream permission,
+      // NOT the wildcard logs-*-* / metrics-*-* / traces-*-* from the otelcol template.
+      expect(permissions?.['policy-logfile']?.indices).toHaveLength(1);
+      expect(permissions?.['policy-logfile']?.indices?.[0].names).toEqual([
+        'logs-mixed_multi_template_pkg.app-default',
+      ]);
+    });
+
+    it('grants normal data-stream permissions for a non-dynamic input when the same template also has a different dynamic input type', () => {
+      // Single template 'combined_policy' with two inputs:
+      //   - 'logfile'  — no dynamic_signal_types
+      //   - 'otelcol'  — dynamic_signal_types: true
+      // A package policy using only the 'logfile' input should get concrete stream permissions.
+      const combinedPkgKey = 'combined_inputs_pkg-1.0.0';
+      packageInfoCache.set(combinedPkgKey, {
+        format_version: '2.7.0',
+        name: 'combined_inputs_pkg',
+        title: 'Combined Inputs Pkg',
+        version: '1.0.0',
+        type: 'integration',
+        release: 'ga',
+        policy_templates: [
+          {
+            name: 'combined_policy',
+            title: 'Combined',
+            description: 'Combined inputs',
+            inputs: [
+              { type: 'logfile', title: 'Logfile', description: 'Logfile' },
+              { type: 'otelcol', title: 'OTel', description: 'OTel', dynamic_signal_types: true },
+            ],
+          },
+        ],
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'combined_inputs_pkg.app',
+            title: 'App Logs',
+            release: 'ga',
+            package: 'combined_inputs_pkg',
+            path: 'app',
+            streams: [],
+          },
+        ],
+        latestVersion: '1.0.0',
+        status: 'not_installed',
+        assets: { kibana: {}, elasticsearch: {} },
+      } as any);
+
+      const packagePolicies: PackagePolicy[] = [
+        {
+          id: 'policy-combined-logfile',
+          name: 'combined-logfile-policy',
+          namespace: 'default',
+          enabled: true,
+          package: {
+            name: 'combined_inputs_pkg',
+            version: '1.0.0',
+            title: 'Combined Inputs Pkg',
+          },
+          inputs: [
+            {
+              type: 'logfile',
+              policy_template: 'combined_policy',
+              enabled: true,
+              streams: [
+                {
+                  id: 'stream-1',
+                  enabled: true,
+                  data_stream: { type: 'logs', dataset: 'combined_inputs_pkg.app' },
+                  vars: {},
+                } as any,
+              ],
+            },
+          ],
+          created_at: '',
+          updated_at: '',
+          created_by: '',
+          updated_by: '',
+          revision: 1,
+          policy_id: '',
+          policy_ids: [''],
+        },
+      ];
+
+      const permissions = storedPackagePoliciesToAgentPermissions(
+        packageInfoCache,
+        'default',
+        packagePolicies
+      );
+
+      // Only the logfile input is enabled — should get one concrete stream permission,
+      // NOT wildcard dynamic permissions from the sibling otelcol input definition.
+      expect(permissions?.['policy-combined-logfile']?.indices).toHaveLength(1);
+      expect(permissions?.['policy-combined-logfile']?.indices?.[0].names).toEqual([
+        'logs-combined_inputs_pkg.app-default',
+      ]);
+    });
+  });
 });
 
 describe('getDataStreamPrivileges()', () => {
   it('returns defaults for a datastream with no privileges', () => {
-    const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
+    const dataStream = { type: 'logs', dataset: 'test' } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream);
 
     expect(privileges).toMatchObject({
@@ -1232,7 +1528,7 @@ describe('getDataStreamPrivileges()', () => {
   });
 
   it('adds the namespace to the index name', () => {
-    const dataStream = { type: 'logs', dataset: 'test' } as RegistryDataStream;
+    const dataStream = { type: 'logs', dataset: 'test' } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toMatchObject({
@@ -1246,7 +1542,7 @@ describe('getDataStreamPrivileges()', () => {
       type: 'logs',
       dataset: 'test',
       dataset_is_prefix: true,
-    } as RegistryDataStream;
+    } as DataStreamMeta;
     const privileges = getDataStreamPrivileges(dataStream, 'namespace');
 
     expect(privileges).toMatchObject({

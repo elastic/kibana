@@ -18,7 +18,7 @@
         "label": "SavedObjectConfig",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-        "lineNumber": 95,
+        "lineNumber": 96,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -31,7 +31,7 @@
             "label": "maxImportPayloadBytes",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 96,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -44,7 +44,7 @@
             "label": "maxImportExportSize",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 97,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -57,7 +57,7 @@
             "label": "allowHttpApiAccess",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 99,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -89,7 +89,7 @@
               "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 100,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -102,7 +102,7 @@
             "label": "enableAccessControl",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -118,7 +118,7 @@
               "any"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 103,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -142,7 +142,7 @@
                   "; maxImportExportSize: number; allowHttpApiAccess: boolean; enableAccessControl: boolean; }>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-                "lineNumber": 104,
+                "lineNumber": 105,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -175,7 +175,7 @@
                   "; scrollDuration: string; retryAttempts: number; useCumulativeLogger: boolean; }>"
                 ],
                 "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-                "lineNumber": 105,
+                "lineNumber": 106,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2071,7 +2071,7 @@
           "; readonly maxImportExportSize: number; readonly allowHttpApiAccess: boolean; readonly enableAccessControl: boolean; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-        "lineNumber": 88,
+        "lineNumber": 89,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2104,7 +2104,7 @@
           "; readonly scrollDuration: string; readonly retryAttempts: number; readonly useCumulativeLogger: boolean; }"
         ],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-        "lineNumber": 67,
+        "lineNumber": 68,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3650,7 +3650,7 @@
         "label": "savedObjectsConfig",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3663,7 +3663,7 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3726,7 +3726,7 @@
               "<boolean>; }>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 92,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3742,7 +3742,7 @@
         "label": "savedObjectsMigrationConfig",
         "description": [],
         "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-        "lineNumber": 69,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3755,7 +3755,7 @@
             "label": "path",
             "description": [],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
@@ -3906,7 +3906,7 @@
               "<boolean>; }>"
             ],
             "path": "src/core/packages/saved-objects/base-server-internal/src/saved_objects_config.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false

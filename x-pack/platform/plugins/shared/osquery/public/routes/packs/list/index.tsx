@@ -9,62 +9,77 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSkeletonText } from '@elastic/eu
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { WithHeaderLayout } from '../../../components/layouts';
-import { PacksTable } from '../../../packs/packs_table';
+import { WithHeaderLayout, fullWidthContentCss } from '../../../components/layouts';
+import { PacksTable as PacksTableLegacy } from '../../../packs/packs_table';
 import { AddPackButton } from '../../../packs/add_pack_button';
 import { LoadIntegrationAssetsButton } from './load_integration_assets';
 import { PacksTableEmptyState } from './empty_state';
 import { useAssetsStatus } from '../../../assets/use_assets_status';
 import { usePacks } from '../../../packs/use_packs';
+import { useIsExperimentalFeatureEnabled } from '../../../common/experimental_features_context';
+import { PacksTable } from './packs_table';
 
 const PacksPageComponent = () => {
+  const queryHistoryRework = useIsExperimentalFeatureEnabled('queryHistoryRework');
   const { data: assetsData, isLoading: isLoadingAssetsStatus } = useAssetsStatus();
-  const { data: packsData, isLoading: isLoadingPacks } = usePacks({});
+  const { data: packsData, isLoading: isLoadingPacks } = usePacks({
+    skip: queryHistoryRework,
+  });
   const showEmptyState = useMemo(
     () => !packsData?.total && assetsData?.install?.length,
     [assetsData?.install?.length, packsData?.total]
   );
 
-  const LeftColumn = useMemo(
-    () => (
-      <EuiFlexGroup direction="column" gutterSize="m">
-        <EuiFlexItem>
-          <EuiText>
-            <h1>
-              <FormattedMessage id="xpack.osquery.packList.pageTitle" defaultMessage="Packs" />
-            </h1>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.osquery.packList.pageSubtitle"
-                defaultMessage="Create packs to organize sets of queries and to schedule queries for agent policies."
-              />
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    []
+  if (queryHistoryRework) {
+    if (isLoadingAssetsStatus) {
+      return (
+        <div css={fullWidthContentCss}>
+          <EuiSkeletonText lines={10} />
+        </div>
+      );
+    }
+
+    return (
+      <div css={fullWidthContentCss}>
+        <PacksTable hasAssetsToInstall={!!assetsData?.install?.length} />
+      </div>
+    );
+  }
+
+  const LeftColumn = (
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem>
+        <EuiText>
+          <h1>
+            <FormattedMessage id="xpack.osquery.packList.pageTitle" defaultMessage="Packs" />
+          </h1>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText color="subdued">
+          <p>
+            <FormattedMessage
+              id="xpack.osquery.packList.pageSubtitle"
+              defaultMessage="Create packs to organize sets of queries and to schedule queries for agent policies."
+            />
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
-  const RightColumn = useMemo(
-    () => (
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <EuiFlexItem>
-          <LoadIntegrationAssetsButton fill={!!showEmptyState} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <AddPackButton fill={!showEmptyState} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-    [showEmptyState]
+  const RightColumn = (
+    <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexItem>
+        <LoadIntegrationAssetsButton fill={!!showEmptyState} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <AddPackButton fill={!showEmptyState} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
-  const Content = useMemo(() => {
+  const Content = (() => {
     if (isLoadingAssetsStatus || isLoadingPacks) {
       return <EuiSkeletonText lines={10} />;
     }
@@ -73,8 +88,8 @@ const PacksPageComponent = () => {
       return <PacksTableEmptyState />;
     }
 
-    return <PacksTable />;
-  }, [isLoadingAssetsStatus, isLoadingPacks, showEmptyState]);
+    return <PacksTableLegacy />;
+  })();
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>

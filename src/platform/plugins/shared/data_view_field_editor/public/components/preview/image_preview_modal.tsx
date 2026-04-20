@@ -10,6 +10,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiModal, EuiModalBody, type UseEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 /**
@@ -35,7 +36,12 @@ export const ImagePreviewModal = ({ imgHTML, closeModal }: Props) => {
   const styles = useMemoCss(componentStyles);
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal
+      aria-label={i18n.translate('indexPatternFieldEditor.imagePreviewModal.ariaLabel', {
+        defaultMessage: 'Image preview',
+      })}
+      onClose={closeModal}
+    >
       <EuiModalBody>
         <div
           css={styles.previewImageModal}

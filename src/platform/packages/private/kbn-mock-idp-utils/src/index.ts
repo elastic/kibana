@@ -35,7 +35,9 @@ export {
   MOCK_IDP_UIAM_SHARED_SECRET,
   MOCK_IDP_UIAM_ORG_ADMIN_API_KEY,
   MOCK_IDP_UIAM_ORGANIZATION_ID,
+  MOCK_IDP_UIAM_CLOUD_ID,
   MOCK_IDP_UIAM_PROJECT_ID,
+  MOCK_IDP_UIAM_PROJECT_ID2,
 } from './constants';
 
 export {
@@ -45,4 +47,6 @@ export {
   generateCosmosDBApiRequestHeaders,
   getSAMLRequestId,
   createUiamSessionTokens,
+  createUiamOAuthAccessToken,
+  projectTypeToAlias,
 } from './utils';

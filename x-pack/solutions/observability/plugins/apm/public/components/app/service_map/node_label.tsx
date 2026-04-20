@@ -18,10 +18,10 @@ export const NodeLabel = memo(({ label, selected = false }: NodeLabelProps) => {
   const { euiTheme } = useEuiTheme();
 
   const labelStyles = css`
-    font-size: ${euiTheme.size.s};
+    font-size: ${euiTheme.size.m};
     color: ${selected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
     font-family: ${euiTheme.font.family};
-    max-width: 200px;
+    max-width: 220px;
     text-align: center;
     overflow: hidden;
     text-overflow: ellipsis;

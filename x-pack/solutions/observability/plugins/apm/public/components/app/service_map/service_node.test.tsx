@@ -29,6 +29,18 @@ jest.mock('@kbn/custom-icons', () => ({
   getAgentIcon: jest.fn(() => 'mock-icon-url.svg'),
 }));
 
+jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
+  useApmPluginContext: () => ({
+    core: {
+      application: {
+        capabilities: {
+          slo: { read: true },
+        },
+      },
+    },
+  }),
+}));
+
 // Mock getServiceHealthStatusColor
 jest.mock('../../../../common/service_health_status', () => ({
   ...jest.requireActual('../../../../common/service_health_status'),
@@ -143,5 +155,59 @@ describe('ServiceNode', () => {
       renderServiceNode(data);
       expect(screen.getByText('Test Service')).toBeInTheDocument();
     });
+  });
+
+  describe('SLO badge (service map only)', () => {
+    it('does not render SLO badge when status is noSLOs', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'noSLOs', sloCount: 0 }));
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+      expect(screen.queryByText('No SLOs')).not.toBeInTheDocument();
+    });
+
+    it('does not render SLO badge for healthy status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'healthy', sloCount: 2 }));
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+    });
+
+    it('does not render SLO badge for noData status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'noData', sloCount: 1 }));
+      expect(screen.queryByTestId('apmSloBadge')).not.toBeInTheDocument();
+    });
+
+    it('renders SLO badge for violated status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'violated', sloCount: 2 }));
+      expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'violated');
+    });
+
+    it('renders SLO badge for degrading status', () => {
+      renderServiceNode(createServiceNodeData({ sloStatus: 'degrading', sloCount: 1 }));
+      expect(screen.getByTestId('apmSloBadge')).toBeInTheDocument();
+      expect(screen.getByTestId('apmSloBadge')).toHaveAttribute('data-slo-status', 'degrading');
+    });
+  });
+
+  describe('alert badge', () => {
+    it('renders alerts badge with count when alertsCount is greater than zero', () => {
+      renderServiceNode(createServiceNodeData({ alertsCount: 4 }));
+      const badge = screen.getByTestId('serviceMapNodeAlertsBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('4');
+    });
+
+    it('does not render alerts badge when alertsCount is zero', () => {
+      renderServiceNode(createServiceNodeData({ alertsCount: 0 }));
+      expect(screen.queryByTestId('serviceMapNodeAlertsBadge')).not.toBeInTheDocument();
+    });
+
+    it('does not render alerts badge when alertsCount is undefined', () => {
+      renderServiceNode();
+      expect(screen.queryByTestId('serviceMapNodeAlertsBadge')).not.toBeInTheDocument();
+    });
+  });
+
+  it('exposes a stable test subject on the service circle for e2e', () => {
+    renderServiceNode();
+    expect(screen.getByTestId('serviceMapNodeServiceCircle')).toBeInTheDocument();
   });
 });

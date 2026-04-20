@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-presentation-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/apm-plugin'
+  title: '@kbn/apm-plugin'
   description: Moon project for @kbn/apm-plugin
   channel: ''
   owner: '@elastic/obs-presentation-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/apm
+  sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'
@@ -129,6 +128,7 @@ dependsOn:
   - '@kbn/saved-search-component'
   - '@kbn/saved-search-plugin'
   - '@kbn/charts-theme'
+  - '@kbn/apm-utils'
   - '@kbn/response-ops-rule-params'
   - '@kbn/core-http-server-utils'
   - '@kbn/key-value-metadata-table'
@@ -143,9 +143,7 @@ dependsOn:
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/react-kibana-mount'
   - '@kbn/licensing-types'
-  - '@kbn/esql-composer'
   - '@kbn/discover-shared-plugin'
-  - '@kbn/core-chrome-browser'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/controls-constants'
@@ -154,6 +152,7 @@ dependsOn:
   - '@kbn/kql'
   - '@kbn/slo-plugin'
   - '@kbn/slo-schema'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod
@@ -170,16 +169,6 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

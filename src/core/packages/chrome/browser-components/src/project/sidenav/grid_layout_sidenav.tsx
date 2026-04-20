@@ -7,41 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import useObservable from 'react-use/lib/useObservable';
-import { useLayoutUpdate } from '@kbn/core-chrome-layout-components';
 import React, { useCallback } from 'react';
-import type { Observable } from 'rxjs';
 import { css, Global } from '@emotion/react';
+import { useSideNavCollapsed, useSidebarWidth } from '@kbn/core-chrome-browser-hooks';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { Navigation } from './navigation';
-import type { NavigationProps } from './types';
+import { useAutoCollapse } from './use_auto_collapse';
 
-export interface Props {
-  isCollapsed$: Observable<boolean>;
-  initialIsCollapsed: boolean;
-  navProps: NavigationProps;
+function useSideNavSetWidth(): (width: number) => void {
+  const chrome = useChromeService();
+  return useCallback((width: number) => chrome.sideNav.setWidth(width), [chrome]);
 }
 
-export const GridLayoutProjectSideNav = ({ isCollapsed$, initialIsCollapsed, navProps }: Props) => {
-  const isCollapsed = useObservable(isCollapsed$, initialIsCollapsed);
-  const updateLayout = useLayoutUpdate();
-  const setWidth = useCallback(
-    (width: number) => {
-      updateLayout({ navigationWidth: width });
-    },
-    [updateLayout]
-  );
+export const GridLayoutProjectSideNav = () => {
+  const { isCollapsed, setIsCollapsed: onToggleCollapsed } = useSideNavCollapsed();
+  const setWidth = useSideNavSetWidth();
+  const sidebarWidth = useSidebarWidth();
+  const isAutoCollapsed = useAutoCollapse(sidebarWidth);
 
   return (
     <>
       <Global
         styles={css`
           :root {
-            // have to provide this fallback to avoid bugs when EuiCollapsibleNavBeta is missing
             --euiCollapsibleNavOffset: 0px;
           }
         `}
       />
-      <Navigation isCollapsed={isCollapsed} setWidth={setWidth} {...navProps} />
+      <Navigation
+        isCollapsed={isCollapsed || isAutoCollapsed}
+        setWidth={setWidth}
+        // Hide the toggle button when the viewport forces collapse — the user
+        // cannot override it, so showing an unresponsive "expand" button would
+        // be confusing. Navigation omits the button when this prop is undefined.
+        onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}
+      />
     </>
   );
 };

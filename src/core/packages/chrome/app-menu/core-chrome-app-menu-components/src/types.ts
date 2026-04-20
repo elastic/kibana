@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonColor, EuiButtonProps, EuiHideForProps, IconType } from '@elastic/eui';
+import type { EuiButtonColor, EuiHideForProps, IconType } from '@elastic/eui';
 import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
 
 /**
@@ -230,6 +230,11 @@ export type AppMenuPopoverItem = Omit<AppMenuItemType, 'iconType' | 'hidden' | '
    * Adds a separator line above or below the item in the popover menu.
    */
   separator?: 'above' | 'below';
+  /**
+   * Optional badge text displayed after the label (e.g. "New").
+   * Rendered as an inline EuiBadge next to the item name.
+   */
+  labelBadgeText?: string;
 };
 
 type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
@@ -237,20 +242,6 @@ type AppMenuActionButton = Omit<AppMenuItemCommon, 'order'> & {
    * The color of the button.
    */
   color?: EuiButtonColor;
-};
-
-/**
- * Secondary action button type. Can't be a split button.
- */
-export type AppMenuSecondaryActionItem = AppMenuActionButton & {
-  /**
-   * Whether the button should be filled.
-   */
-  isFilled?: boolean;
-  /**
-   * Equal to EUI `minWidth` property.
-   */
-  minWidth?: EuiButtonProps['minWidth'];
 };
 
 /**
@@ -269,18 +260,18 @@ export type AppMenuPrimaryActionItem =
 
 /**
  * Configuration object for the AppMenu component.
+ * The maximum number of items that can be visible at once before overflowing into the "More"
+ * popover is determined by the APP_MENU_ITEM_LIMIT constant - currently 5 but it will
+ * be reduced to 3 in a future release.
  */
 export interface AppMenuConfig {
   /**
    * List of menu items to display in the app menu.
+
    */
   items?: AppMenuItemType[];
   /**
    * Primary action button to display in the app menu.
    */
   primaryActionItem?: AppMenuPrimaryActionItem;
-  /**
-   * Secondary action button to display in the app menu.
-   */
-  secondaryActionItem?: AppMenuSecondaryActionItem;
 }

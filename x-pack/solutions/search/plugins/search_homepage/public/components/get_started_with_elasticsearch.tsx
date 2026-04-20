@@ -6,7 +6,6 @@
  */
 import { consoleTutorials } from '@kbn/search-code-examples';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { SEARCH_INDICES, SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import {
   EuiBadge,
   EuiCard,
@@ -100,28 +99,18 @@ const GettingStartedCards: React.FC<GettingStartedCardsProps> = ({
 };
 
 export const GetStartedWithElasticsearch = () => {
-  const {
-    application,
-    share,
-    console: consolePlugin,
-    sampleDataIngest,
-    chrome,
-  } = useKibana().services;
+  const { application, share, console: consolePlugin, sampleDataIngest } = useKibana().services;
   const [hoveredCard, setHoveredCard] = React.useState<string | null>(null);
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
   }, [application]);
 
-  const onCreateIndex = useCallback(() => {
-    const createIndexUrl = chrome?.navLinks.get(
-      `${SEARCH_INDICES}:${SEARCH_INDICES_CREATE_INDEX}`
-    )?.url;
+  const indexManagementLocator = share?.url.locators.get('SEARCH_INDEX_MANAGEMENT_LOCATOR_ID');
 
-    if (createIndexUrl) {
-      application?.navigateToUrl(createIndexUrl);
-    }
-  }, [application, chrome]);
+  const onCreateIndex = useCallback(() => {
+    indexManagementLocator?.navigate({ page: 'index_list' });
+  }, [indexManagementLocator]);
 
   const {
     hasRequiredLicense,
@@ -198,7 +187,7 @@ export const GetStartedWithElasticsearch = () => {
           onClick={onCreateIndex}
           color="text"
           size="s"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           data-test-subj="createIndexButton"
         >
           {i18n.translate('xpack.searchHomepage.createIndexButton', {

@@ -44,7 +44,7 @@ export interface ColumnState {
   alignment?: 'left' | 'right' | 'center';
   palette?: PaletteOutput<CustomPaletteParams>;
   colorMapping?: ColorMapping.Config;
-  colorMode?: 'none' | 'cell' | 'text';
+  colorMode?: 'none' | 'cell' | 'text' | 'badge';
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
   collapseFn?: CollapseFunction;

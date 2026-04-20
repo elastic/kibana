@@ -8,11 +8,12 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionHistoryModel } from '@kbn/workflows';
 import { useGetFormattedDateTime } from './use_formatted_date';
-import type { WorkflowTrigger } from '../../../server/lib/schedule_utils';
+import type { WorkflowTrigger } from '../../../common/lib/trigger_types';
 import { getWorkflowNextExecutionTime } from '../../lib/next_execution_time';
 
 interface NextExecutionTimeProps {
@@ -36,6 +37,11 @@ export function NextExecutionTime({ triggers, history, children }: NextExecution
           },
         })
       }
+      anchorProps={{
+        css: css`
+          max-width: 100%;
+        `,
+      }}
     >
       {children}
     </EuiToolTip>

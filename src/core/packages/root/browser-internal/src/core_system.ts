@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/css';
-import { filter, firstValueFrom } from 'rxjs';
+import { type Subscription, filter, firstValueFrom, pairwise } from 'rxjs';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -117,6 +117,7 @@ export class CoreSystem {
   private readonly userProfile: UserProfileService;
   private readonly pricing: PricingService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
+  private overlayNavigationSubscription: Subscription | undefined;
 
   constructor(params: CoreSystemParams) {
     const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
@@ -357,6 +358,12 @@ export class CoreSystem {
         curApp$: application.currentAppId$,
       });
 
+      this.overlayNavigationSubscription = application.currentAppId$
+        .pipe(pairwise())
+        .subscribe(() => {
+          this.overlay.closeAllFlyouts();
+        });
+
       const featureFlags = await this.featureFlags.start();
 
       // Temp hack: https://github.com/elastic/kibana/issues/247820
@@ -457,7 +464,15 @@ export class CoreSystem {
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
       this.rendering.renderCore(
-        { chrome, application, overlays, featureFlags },
+        {
+          chrome,
+          application,
+          overlays,
+          featureFlags,
+          http,
+          docLinks,
+          customBranding,
+        },
         coreUiTargetDomElement
       );
 
@@ -486,6 +501,7 @@ export class CoreSystem {
   }
 
   public stop() {
+    this.overlayNavigationSubscription?.unsubscribe();
     this.plugins.stop();
     this.coreApp.stop();
     this.notifications.stop();

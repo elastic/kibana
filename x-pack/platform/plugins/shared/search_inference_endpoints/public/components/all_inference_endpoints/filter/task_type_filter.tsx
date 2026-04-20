@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiFilterGroup } from '@elastic/eui';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { FilterOptions } from '../../../types';
-import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter } from './multi_select_filter';
+import type { MultiSelectFilterOption } from '../../filter/multi_select_filter';
+import { MultiSelectFilter } from '../../filter/multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
@@ -36,13 +37,16 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange, uniqueTa
   }, [uniqueTaskTypes]);
 
   return (
-    <MultiSelectFilter
-      buttonLabel={i18n.TASK_TYPE}
-      onChange={onSystemFilterChange}
-      options={filteredOptions}
-      renderOption={(option) => option.label}
-      selectedOptionKeys={optionKeys}
-      dataTestSubj="type-field-endpoints"
-    />
+    <EuiFilterGroup>
+      <MultiSelectFilter
+        buttonLabel={i18n.TASK_TYPE}
+        ariaLabel={i18n.TASK_TYPE_ARIA_LABEL}
+        onChange={onSystemFilterChange}
+        options={filteredOptions}
+        renderOption={(option) => option.label}
+        selectedOptionKeys={optionKeys}
+        dataTestSubj="type-field-endpoints"
+      />
+    </EuiFilterGroup>
   );
 };

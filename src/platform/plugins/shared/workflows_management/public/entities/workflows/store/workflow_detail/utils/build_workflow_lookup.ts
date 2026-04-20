@@ -11,6 +11,9 @@
 
 import type { LineCounter } from 'yaml';
 import YAML from 'yaml';
+import { isBuiltInStepProperty, type StepSelectionValues } from '@kbn/workflows';
+import { isRecord } from '../../../../../../common/lib/type_guards';
+
 export interface StepInfo {
   stepId: string;
   stepType: string;
@@ -24,15 +27,21 @@ export interface StepInfo {
 export interface StepPropInfo {
   path: string[];
   keyNode: YAML.Scalar<unknown>;
-  /** Value node: always a scalar (leaf property). Intermediate map nodes are not recorded in propInfos. */
+  /** Value node: typically a scalar, but can be a sequence (array) at runtime. Intermediate map nodes are not recorded in propInfos. */
   valueNode: YAML.Scalar<unknown>;
 }
 
 /**
- * Get plain JavaScript value from a step property value node (scalar).
+ * Get plain JavaScript value from a step property value node.
+ * Handles scalars (returns `.value`) and collection nodes like sequences
+ * (returns the JSON representation via `.toJSON()`).
  */
-export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unknown {
+export function getValueFromValueNode(
+  valueNode: YAML.Scalar<unknown> | YAML.YAMLSeq<unknown>
+): unknown {
   if (!valueNode) return undefined;
+  if (YAML.isScalar(valueNode)) return valueNode.value;
+  if ('toJSON' in valueNode && typeof valueNode.toJSON === 'function') return valueNode.toJSON();
   return (valueNode as { value?: unknown }).value;
 }
 
@@ -46,6 +55,8 @@ export function getValueFromValueNode(valueNode: StepPropInfo['valueNode']): unk
 export interface WorkflowLookup {
   /** Map of step IDs to their corresponding step information and metadata */
   steps: Record<string, StepInfo>;
+  /** Line number where the triggers section starts in the YAML document */
+  triggersLineStart?: number;
 }
 
 /**
@@ -93,12 +104,19 @@ export function buildWorkflowLookup(
     );
   }
 
+  let triggersLineStart: number | undefined;
+  const triggersNode = (yamlDocument.contents as any).get('triggers');
+  if (triggersNode?.range) {
+    triggersLineStart = lineCounter.linePos(triggersNode.range[0]).line;
+  }
+
   return {
     steps,
+    triggersLineStart,
   };
 }
 
-const NESTED_STEP_KEYS = ['steps', 'else', 'fallback'];
+const NESTED_STEP_KEYS = ['steps', 'else', 'on-failure', 'iteration-on-failure', 'fallback'];
 
 export function inspectStep(
   node: any,
@@ -133,17 +151,17 @@ export function inspectStep(
       }
     });
 
-    // Second pass: handle nested step keys (steps, else, fallback) with stepId as parentStepId
-    if (stepId) {
-      node.items.forEach((item) => {
-        if (YAML.isPair(item) && YAML.isScalar(item.key)) {
-          const keyValue = item.key.value as string;
-          if (NESTED_STEP_KEYS.includes(keyValue)) {
-            Object.assign(result, inspectStep(item.value, lineCounter, stepId));
-          }
+    // Second pass: handle nested step keys with the closest enclosing step as parent.
+    // This also handles intermediate non-step maps like on-failure that contain
+    // fallback arrays — they have no stepId of their own, so parentStepId passes through.
+    node.items.forEach((item) => {
+      if (YAML.isPair(item) && YAML.isScalar(item.key)) {
+        const keyValue = item.key.value as string;
+        if (NESTED_STEP_KEYS.includes(keyValue)) {
+          Object.assign(result, inspectStep(item.value, lineCounter, stepId ?? parentStepId));
         }
-      });
-    }
+      }
+    });
   } else if (YAML.isSeq(node)) {
     node.items.forEach((subItem) => {
       Object.assign(result, inspectStep(subItem, lineCounter, parentStepId));
@@ -202,4 +220,39 @@ function visitStepProps(node: any, stack: string[] = []): Record<string, StepPro
   }
 
   return result;
+}
+
+function setNested(obj: Record<string, unknown>, segments: string[], value: unknown): void {
+  let current = obj;
+  for (let i = 0; i < segments.length - 1; i++) {
+    const seg = segments[i];
+    if (!isRecord(current[seg])) {
+      current[seg] = {};
+    }
+    current = current[seg] as Record<string, unknown>;
+  }
+  current[segments[segments.length - 1]] = value;
+}
+
+/**
+ * Builds structured config/input values from a step's scalar leaf properties.
+ * Properties under the `with` block are placed in `input`; all others in `config`.
+ */
+export function buildStepSelectionValues(step: StepInfo): StepSelectionValues {
+  const config: Record<string, unknown> = {};
+  const input: Record<string, unknown> = {};
+
+  for (const propInfo of Object.values(step.propInfos)) {
+    const rootKey = propInfo.path[0];
+    if (rootKey === 'with') {
+      const inputPath = propInfo.path.slice(1);
+      if (inputPath.length > 0) {
+        setNested(input, inputPath, getValueFromValueNode(propInfo.valueNode));
+      }
+    } else if (typeof rootKey !== 'string' || !isBuiltInStepProperty(rootKey)) {
+      setNested(config, propInfo.path, getValueFromValueNode(propInfo.valueNode));
+    }
+  }
+
+  return { config, input };
 }

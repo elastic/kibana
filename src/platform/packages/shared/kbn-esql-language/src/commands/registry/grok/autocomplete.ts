@@ -57,7 +57,6 @@ export async function autocomplete(
       i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
-      undefined,
       {
         advanceCursorAndOpenSuggestions: true,
       }
@@ -70,7 +69,6 @@ export async function autocomplete(
       i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
-      undefined,
       {
         advanceCursorAndOpenSuggestions: true,
       }

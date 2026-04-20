@@ -9,6 +9,7 @@
 
 import React, { useMemo, createContext, useContext, type ReactNode } from 'react';
 import { ContentManagementTagsProvider } from '@kbn/content-management-tags';
+import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
@@ -68,6 +69,10 @@ export type ContentListProviderProps = ContentListConfig & {
  * automatically wraps children with the tags service context, enabling tag display
  * and filtering in child components. The tags service's `parseSearchQuery` (if present)
  * is passed through to support extracting tag filters from the search bar query text.
+ *
+ * When `services.favorites` is provided (and `features.starred` is not `false`), the provider
+ * wraps children with `FavoritesContextProvider`, enabling star buttons and starred
+ * filtering in child components.
  */
 export const ContentListProvider = ({
   children,
@@ -84,10 +89,11 @@ export const ContentListProvider = ({
   // At least one of id or queryKeyScope is guaranteed by ContentListIdentity type.
   const queryKeyScope = queryKeyScopeProp ?? `${id}-listing`;
 
-  const { tags: tagsService } = services ?? {};
+  const { tags: tagsService, favorites: favoritesService } = services ?? {};
 
   // Service-dependent features: enabled by default when service exists, unless explicitly disabled.
   const supportsTags = features.tags !== false && !!tagsService;
+  const supportsStarred = features.starred !== false && !!favoritesService;
 
   // Resolve feature support flags.
   // Selection is disabled when explicitly set to `false` or when the list is read-only.
@@ -98,6 +104,7 @@ export const ContentListProvider = ({
       search: features.search !== false,
       selection: features.selection !== false && !isReadOnly,
       tags: supportsTags,
+      starred: supportsStarred,
     }),
     [
       features.sorting,
@@ -106,6 +113,7 @@ export const ContentListProvider = ({
       features.selection,
       isReadOnly,
       supportsTags,
+      supportsStarred,
     ]
   );
 
@@ -141,6 +149,15 @@ export const ContentListProvider = ({
       >
         {content}
       </ContentManagementTagsProvider>
+    );
+  }
+
+  // Wrap with favorites provider when favorites service is available.
+  if (supportsStarred && favoritesService) {
+    content = (
+      <FavoritesContextProvider favoritesClient={favoritesService}>
+        {content}
+      </FavoritesContextProvider>
     );
   }
 

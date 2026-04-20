@@ -111,7 +111,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
             <EuiButtonIcon
               aria-label={i18n.VIEW_APM_TRACE}
               color="primary"
-              iconType="apmTrace"
+              iconType="chartWaterfall"
               href={apmTraceLink}
               target={'_blank'}
             />
@@ -124,7 +124,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
             <EuiButtonIcon
               aria-label={i18n.ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE}
               color="primary"
-              iconType="editorComment"
+              iconType="comment"
               onClick={onAddNoteToTimeline}
             />
           </EuiToolTip>

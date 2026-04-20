@@ -8,7 +8,12 @@
  */
 
 export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
-export type { UnifiedDataTableProps, SortOrder } from './src/components/data_table';
+export type {
+  UnifiedDataTableProps,
+  SortOrder,
+  RenderDocumentViewCallback,
+  RenderDocumentViewMeta,
+} from './src/components/data_table';
 export {
   RowHeightSettings,
   type RowHeightSettingsProps,
