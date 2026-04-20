@@ -227,7 +227,7 @@
               "<TApplicationType>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-            "lineNumber": 635,
+            "lineNumber": 652,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -238,7 +238,59 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/storage-adapter",
+        "id": "def-server.getSchemaVersion",
+        "type": "Function",
+        "tags": [],
+        "label": "getSchemaVersion",
+        "description": [],
+        "signature": [
+          "(storage: ",
+          {
+            "pluginId": "@kbn/storage-adapter",
+            "scope": "server",
+            "docId": "kibKbnStorageAdapterPluginApi",
+            "section": "def-server.IndexStorageSettings",
+            "text": "IndexStorageSettings"
+          },
+          ") => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-storage-adapter/src/get_schema_version.ts",
+        "lineNumber": 14,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/storage-adapter",
+            "id": "def-server.getSchemaVersion.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "storage",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/storage-adapter",
+                "scope": "server",
+                "docId": "kibKbnStorageAdapterPluginApi",
+                "section": "def-server.IndexStorageSettings",
+                "text": "IndexStorageSettings"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-storage-adapter/src/get_schema_version.ts",
+            "lineNumber": 14,
+            "columnNumber": 34,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/storage-adapter",
@@ -297,7 +349,7 @@
           "<TDocumentType>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 145,
+        "lineNumber": 152,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -337,7 +389,7 @@
               "<TDocumentType, TSearchRequest>>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 146,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -354,7 +406,7 @@
                   "TSearchRequest"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 110,
+                "lineNumber": 117,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -377,7 +429,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 111,
+                "lineNumber": 118,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -413,7 +465,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 147,
+            "lineNumber": 154,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -447,7 +499,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 122,
+                "lineNumber": 129,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -470,7 +522,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 123,
+                "lineNumber": 130,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -506,7 +558,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 148,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -535,7 +587,7 @@
                   " | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 127,
+                "lineNumber": 134,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -558,7 +610,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 128,
+                "lineNumber": 135,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -600,7 +652,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 149,
+            "lineNumber": 156,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -627,7 +679,7 @@
                   " | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 132,
+                "lineNumber": 139,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -650,7 +702,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 133,
+                "lineNumber": 140,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -676,7 +728,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 150,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -718,7 +770,7 @@
               "<TDocumentType>>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 151,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -803,7 +855,7 @@
                   " | undefined; realtime?: boolean | undefined; }"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 139,
+                "lineNumber": 146,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -826,7 +878,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-                "lineNumber": 140,
+                "lineNumber": 147,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -844,7 +896,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 152,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -862,7 +914,7 @@
         "label": "StorageClientBulkOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 68,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -882,7 +934,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 69,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -898,7 +950,7 @@
         "label": "StorageClientCleanResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 92,
+        "lineNumber": 99,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -911,7 +963,7 @@
             "label": "acknowledged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 93,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -927,7 +979,7 @@
               "\"deleted\" | \"noop\""
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 94,
+            "lineNumber": 101,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -943,7 +995,7 @@
         "label": "StorageClientDeleteResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 87,
+        "lineNumber": 94,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -956,7 +1008,7 @@
             "label": "acknowledged",
             "description": [],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 88,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -972,7 +1024,7 @@
               "\"deleted\" | \"not_found\""
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 89,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1050,7 +1102,7 @@
           "> & TSchema[\"schema\"][\"properties\"])[key]> | undefined; } : object>>>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 172,
+        "lineNumber": 179,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1115,7 +1167,7 @@
           "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object>>>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 179,
+        "lineNumber": 186,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1152,7 +1204,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 114,
+        "lineNumber": 121,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1186,7 +1238,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 122,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1209,7 +1261,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 123,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1225,7 +1277,7 @@
         "label": "StorageClientBulkOperation",
         "description": [],
         "signature": [
-          "{ index: { document: Omit<TDocument, \"_id\">; _id?: string | undefined; }; } | { delete: { _id: string; }; }"
+          "{ index: { document: Omit<TDocument, \"_id\">; _id?: string | undefined; }; } | { create: { document: Omit<TDocument, \"_id\">; _id?: string | undefined; }; } | { delete: { _id: string; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
         "lineNumber": 62,
@@ -1262,7 +1314,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 77,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1279,7 +1331,7 @@
           "BulkResponse"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 83,
+        "lineNumber": 90,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1304,7 +1356,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 136,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1347,7 +1399,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 131,
+        "lineNumber": 138,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1374,7 +1426,7 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 132,
+            "lineNumber": 139,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1397,7 +1449,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 133,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1426,7 +1478,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 85,
+        "lineNumber": 92,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1443,7 +1495,7 @@
           "() => Promise<boolean>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 143,
+        "lineNumber": 150,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1486,7 +1538,7 @@
           "<TDocumentType>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 138,
+        "lineNumber": 145,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1571,7 +1623,7 @@
               " | undefined; realtime?: boolean | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 139,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1594,7 +1646,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 140,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1681,7 +1733,7 @@
           " | undefined; realtime?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 104,
+        "lineNumber": 111,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1699,7 +1751,7 @@
           "<TDocument>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 105,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1734,7 +1786,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 126,
+        "lineNumber": 133,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1763,7 +1815,7 @@
               " | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 127,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1786,7 +1838,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 128,
+            "lineNumber": 135,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1817,7 +1869,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 97,
+        "lineNumber": 104,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1834,7 +1886,7 @@
           "WriteResponseBase"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 102,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1875,7 +1927,7 @@
           "<TDocumentType, TSearchRequest>>"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 107,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1892,7 +1944,7 @@
               "TSearchRequest"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 110,
+            "lineNumber": 117,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1915,7 +1967,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-            "lineNumber": 111,
+            "lineNumber": 118,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1992,7 +2044,7 @@
           "> & TStorageSettings[\"schema\"][\"properties\"])[key]> | undefined; } : object)[P] | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-storage-adapter/index.ts",
-        "lineNumber": 184,
+        "lineNumber": 191,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
