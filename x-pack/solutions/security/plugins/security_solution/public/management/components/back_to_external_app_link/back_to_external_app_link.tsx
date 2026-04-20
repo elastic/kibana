@@ -8,33 +8,34 @@ import React, { memo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiLink } from '@elastic/eui';
 
 import type { ListPageRouteState } from '../../../../common/endpoint/types';
 
 import { useNavigateToAppEventHandler } from '../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 
-export type BackToExternalAppSecondaryButtonProps = CommonProps & ListPageRouteState;
-export const BackToExternalAppSecondaryButton = memo<BackToExternalAppSecondaryButtonProps>(
+export type BackToExternalAppLinkProps = CommonProps & ListPageRouteState;
+export const BackToExternalAppLink = memo<BackToExternalAppLinkProps>(
   ({ backButtonLabel, backButtonUrl, onBackButtonNavigateTo, ...commonProps }) => {
     const handleBackOnClick = useNavigateToAppEventHandler(...onBackButtonNavigateTo);
 
     return (
       // eslint-disable-next-line @elastic/eui/href-or-on-click
-      <EuiButtonEmpty
+      <EuiLink
         {...commonProps}
         data-test-subj="backToOrigin"
-        size="s"
         href={backButtonUrl}
         onClick={handleBackOnClick}
-        textProps={{ className: 'text' }}
       >
-        {backButtonLabel || (
-          <FormattedMessage id="xpack.securitySolution.list.backButton" defaultMessage="Back" />
-        )}
-      </EuiButtonEmpty>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+          <EuiIcon type="arrowLeft" size="s" aria-hidden={true} />
+          {backButtonLabel || (
+            <FormattedMessage id="xpack.securitySolution.list.backButton" defaultMessage="Back" />
+          )}
+        </EuiFlexGroup>
+      </EuiLink>
     );
   }
 );
 
-BackToExternalAppSecondaryButton.displayName = 'BackToExternalAppSecondaryButton';
+BackToExternalAppLink.displayName = 'BackToExternalAppLink';

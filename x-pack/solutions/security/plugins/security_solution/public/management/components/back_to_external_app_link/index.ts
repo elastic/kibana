@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { BackToExternalAppSecondaryButton } from './back_to_external_app_secondary_button';
+export { BackToExternalAppLink } from './back_to_external_app_link';
