@@ -568,6 +568,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('shards propagation', () => {
+      let shardPackId: string | undefined;
+
+      afterEach(async () => {
+        if (shardPackId) {
+          await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${shardPackId}`)).ok(
+            () => true
+          );
+          shardPackId = undefined;
+        }
+      });
+
       it('propagates pack shards to Fleet policy packs config', async () => {
         const shardPackName = `ShardPack-${Date.now()}`;
         const shardValue = 25;
@@ -583,7 +594,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        const shardPackId = createResponse.body.data.saved_object_id;
+        shardPackId = createResponse.body.data.saved_object_id;
         expect(shardPackId).to.be.ok();
 
         const readResponse = await withOsqueryHeaders(
@@ -605,8 +616,6 @@ export default function ({ getService }: FtrProviderContext) {
           'shard',
           shardValue
         );
-
-        await withOsqueryHeaders(supertest.delete(`/api/osquery/packs/${shardPackId}`)).expect(200);
       });
     });
 

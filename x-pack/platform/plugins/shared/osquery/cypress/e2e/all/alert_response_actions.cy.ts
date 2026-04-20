@@ -24,15 +24,11 @@ import {
   navigateToRule,
   submitQuery,
   takeOsqueryActionWithParams,
-  typeInECSFieldInput,
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
   OSQUERY_RESPONSE_ACTION_ADD_BUTTON,
-  RESPONSE_ACTIONS_ERRORS,
   RESPONSE_ACTIONS_ITEM_0,
-  RESPONSE_ACTIONS_ITEM_1,
-  RESPONSE_ACTIONS_ITEM_2,
 } from '../../tasks/response_actions';
 import {
   closeDateTabIfVisible,
@@ -50,7 +46,7 @@ describe(
       let ruleId: string;
       let ruleName: string;
 
-      beforeEach(() => {
+      before(() => {
         initializeDataViews();
         loadRule().then((data) => {
           ruleId = data.id;
@@ -59,7 +55,11 @@ describe(
         });
       });
 
-      afterEach(() => {
+      beforeEach(() => {
+        navigateToRule(ruleName);
+      });
+
+      after(() => {
         cleanupRule(ruleId);
       });
 
@@ -97,7 +97,7 @@ describe(
         // other enrolled-but-offline agents in CI, which makes the response action
         // wait indefinitely ("Some selected agents are offline or have unhealthy
         // Osquery components and may not respond to queries").
-        cy.contains('1 agent selected.');
+        cy.contains(/1 agent selected/);
         inputQueryInFlyout('select * from uptime;');
         submitQuery();
         checkResults();
@@ -115,7 +115,17 @@ describe(
       });
     });
 
-    describe('Response action form validation and persistence', () => {
+    // Pack response actions are the E2E-unique surface: the UI pack selection must
+    // serialize into `response_actions[0].params.queries` via the rule-save HTTP
+    // round-trip, and a pack swap must replace the full query set.
+    //
+    // Pure form validation (required fields, timeout min/max, ID uniqueness, ECS mapping
+    // pairing) and inline-custom-query persistence are Jest-covered:
+    //   - public/form/validations.test.ts
+    //   - public/packs/queries/validations.test.ts
+    //   - public/packs/queries/ecs_mapping_editor_field.test.ts
+    // so this test sticks to the pack path only.
+    describe('Pack response action persistence', () => {
       let multiQueryPackId: string;
       let multiQueryPackName: string;
       let ruleId: string;
@@ -127,9 +137,6 @@ describe(
 
       before(() => {
         initializeDataViews();
-      });
-
-      beforeEach(() => {
         loadPack(packData).then((data) => {
           packId = data.saved_object_id;
           packName = data.name;
@@ -144,122 +151,57 @@ describe(
         });
       });
 
-      afterEach(() => {
+      after(() => {
         cleanupPack(packId);
         cleanupPack(multiQueryPackId);
         cleanupRule(ruleId);
       });
 
-      it('adds response actions with proper validation and persists them across edits', () => {
-        cy.visit('/app/security/rules');
-        clickRuleName(ruleName);
+      const openRuleActionsTab = () => {
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.getBySel('editRuleSettingsLink').click();
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         closeDateTabIfVisible();
         cy.getBySel('edit-rule-actions-tab').click();
         cy.getBySel('globalLoadingIndicator').should('not.exist');
+      };
+
+      it('persists pack response actions across save/reopen and handles pack swap', () => {
+        cy.visit('/app/security/rules');
+        clickRuleName(ruleName);
+        openRuleActionsTab();
         cy.contains('Response actions are run on each rule execution.');
+
+        // Add a single-query pack as a response action.
         cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-
-        // Smoke check that the error ribbon surfaces required-field errors.
-        // Field-level validation (timeout min, required message appearance/removal on
-        // keystroke) is unit-covered by public/form/validations.test.ts and
-        // public/packs/queries/validations.test.ts.
-        cy.getBySel(RESPONSE_ACTIONS_ERRORS).within(() => {
-          cy.contains('Query is a required field');
-        });
-
         cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-          inputQuery('select * from uptime1');
-        });
-        cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
           cy.contains('Run a set of queries in a pack').click();
-        });
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-          cy.getBySel('comboBoxInput').click();
-          cy.getBySel('comboBoxInput').type(`${packName}`);
-          cy.contains(`doesn't match any options`).should('not.exist');
-          cy.getBySel('comboBoxInput').type('{downArrow}{enter}');
-        });
-
-        cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_2)
-          .within(() => {
-            inputQuery('select * from uptime');
-            cy.contains('Advanced').click();
-            typeInECSFieldInput('label{downArrow}{enter}');
-            cy.getBySel('osqueryColumnValueSelect').type('days{downArrow}{enter}');
-          })
-          .clickOutside();
-
-        cy.getBySel('ruleEditSubmitButton').click();
-        cy.contains(`${ruleName} was saved`).should('exist');
-        closeToastIfVisible();
-
-        cy.getBySel('globalLoadingIndicator').should('not.exist');
-        cy.getBySel('editRuleSettingsLink').click();
-        cy.getBySel('globalLoadingIndicator').should('not.exist');
-        cy.getBySel('edit-rule-actions-tab').click();
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-          cy.contains('select * from uptime1');
-        });
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
-          cy.contains('select * from uptime');
-          cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
-          cy.contains('Days of uptime');
-        });
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_1)
-          .within(() => {
-            cy.getBySel('comboBoxSearchInput').should('have.value', packName);
-            cy.getBySel('comboBoxInput').type('{selectall}{backspace}{enter}');
-          })
-          .clickOutside();
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-          cy.contains('select * from uptime1');
-          cy.getBySel('remove-response-action').click();
-        });
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
-          .within(() => {
-            cy.getBySel('comboBoxSearchInput').click();
-            cy.contains('Search for a pack to run');
-            cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
-            cy.contains(packName);
-          })
-          .clickOutside();
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
-          cy.contains('select * from uptime');
-          cy.contains('Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}');
-          cy.contains('Days of uptime');
+          cy.getBySel('comboBoxInput').click().type(`${packName}{downArrow}{enter}`);
         });
 
         cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
-
         cy.getBySel('ruleEditSubmitButton').click();
         cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
-          const oneQuery = [
+          expect(request.body.response_actions[0].params.queries).to.deep.equal([
             {
               interval: 3600,
               query: 'select * from uptime;',
               id: Object.keys(packData.queries)[0],
             },
-          ];
-          expect(request.body.response_actions[0].params.queries).to.deep.equal(oneQuery);
+          ]);
         });
-
         cy.contains(`${ruleName} was saved`).should('exist');
         closeToastIfVisible();
 
-        cy.getBySel('globalLoadingIndicator').should('not.exist');
-        cy.getBySel('editRuleSettingsLink').click();
-        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        // Reopen — pack selection must survive the round-trip.
+        openRuleActionsTab();
+        cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+          cy.getBySel('comboBoxSearchInput').should('have.value', packName);
+        });
 
-        cy.getBySel('edit-rule-actions-tab').click();
+        // Swap to the multi-query pack — save expands queries to 3.
         cy.getBySel(RESPONSE_ACTIONS_ITEM_0)
           .within(() => {
-            cy.getBySel('comboBoxSearchInput').should('have.value', packName);
             cy.getBySel('comboBoxInput').type(
               `{selectall}{backspace}${multiQueryPackName}{downArrow}{enter}`
             );
@@ -268,20 +210,10 @@ describe(
           })
           .clickOutside();
 
-        cy.getBySel(RESPONSE_ACTIONS_ITEM_1)
-          .within(() => {
-            cy.contains('select * from uptime');
-            cy.contains(
-              'Custom key/value pairs. e.g. {"application":"foo-bar","env":"production"}'
-            );
-            cy.contains('Days of uptime');
-          })
-          .clickOutside();
         cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
-
         cy.contains('Save changes').click();
         cy.wait('@saveRuleMultiQuery', { timeout: 15000 }).should(({ request }) => {
-          const threeQueries = [
+          expect(request.body.response_actions[0].params.queries).to.deep.equal([
             {
               interval: 3600,
               query: 'SELECT * FROM memory_info;',
@@ -298,8 +230,7 @@ describe(
               query: 'select opera_extensions.* from users join opera_extensions using (uid);',
               id: Object.keys(multiQueryPackData.queries)[2],
             },
-          ];
-          expect(request.body.response_actions[0].params.queries).to.deep.equal(threeQueries);
+          ]);
         });
       });
     });
@@ -355,7 +286,11 @@ describe(
           cy.getBySel('osquery-action-item').click();
           cy.contains(/^\d+ agen(t|ts) selected/);
           cy.getBySel('globalLoadingIndicator').should('not.exist');
-          cy.wait(1000);
+          // Wait until the flyout has fully rendered (default single-query editor
+          // present) before switching to pack mode — avoids a `cy.wait(1000)`
+          // band-aid that was masking the "radio clickable before it's interactable"
+          // race from the original alerts_cases spec.
+          cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('be.visible');
           cy.contains('Run a set of queries in a pack').click();
           cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
           cy.getBySel('globalLoadingIndicator').should('not.exist');

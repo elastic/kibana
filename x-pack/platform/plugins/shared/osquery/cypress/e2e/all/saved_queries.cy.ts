@@ -21,7 +21,7 @@ import {
 } from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
 import {
-  addToCase,
+  addToCaseFromResultsHeader,
   BIG_QUERY,
   checkResults,
   deleteAndConfirm,
@@ -248,7 +248,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       selectAllAgents();
       submitQuery();
       checkResults();
-      addToCase(caseId);
+      addToCaseFromResultsHeader(caseId);
       viewRecentCaseAndCheckResults();
     });
 
