@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, complexity */
-
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { SCHEDULED_INTERVAL_ERROR, SCHEDULED_INTERVAL_PATTERN } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { getPathAtOffset } from '../../../../common/lib/yaml';
-import { formatZodError } from '../../../../common/lib/zod';
+import { enrichErrorMessage } from '../../../../common/lib/zod';
 
+/**
+ * Formats Monaco YAML validation markers with enriched error messages.
+ * Uses schema-aware enrichment to provide helpful hints about expected values.
+ */
 export function formatMonacoYamlMarker(
   marker: monaco.editor.IMarkerData,
   editorModel: monaco.editor.ITextModel,
@@ -25,8 +27,9 @@ export function formatMonacoYamlMarker(
   const newMarker: monaco.editor.IMarkerData = {
     ...marker,
   };
-  if (marker.source && marker.source.startsWith('yaml-schema:')) {
-    // update the severity to error to make it more visible and match vs code behavior
+
+  // Update severity for yaml-schema errors to make them more visible
+  if (marker.source?.startsWith('yaml-schema:')) {
     newMarker.severity = monaco.MarkerSeverity.Error;
   }
 
@@ -40,71 +43,70 @@ export function formatMonacoYamlMarker(
     };
   }
 
-  // Check if this is a validation error that could benefit from dynamic formatting
-  const hasNumericEnumPattern =
-    // Patterns with quotes: Expected "0 | 1 | 2"
-    /Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
-    /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(marker.message || '') ||
-    // Patterns with escaped quotes: Expected \"0 | 1\"
-    /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(marker.message || '') ||
-    // Patterns without quotes: Expected 0 | 1
-    /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(marker.message || '') ||
-    // Additional patterns for different Monaco YAML error formats
-    /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(marker.message || '') ||
-    /Value must be one of: \d+(\s*,\s*\d+)*/.test(marker.message || '');
+  // Check if this is a validation error that could benefit from enrichment
+  if (!shouldEnrichMarker(marker.message)) {
+    return newMarker;
+  }
 
-  // Check for field type errors (like "Expected settings", "Expected connector", etc.)
-  const hasFieldTypeError =
-    /Incorrect type\. Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '') ||
-    /Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(marker.message || '');
+  try {
+    // Get the YAML path at this marker position
+    const yamlPath = yamlDocument
+      ? getPathAtOffset(
+          yamlDocument,
+          editorModel.getOffsetAt({
+            lineNumber: marker.startLineNumber,
+            column: marker.startColumn,
+          })
+        )
+      : [];
 
-  // Also check for the current message pattern we're seeing
-  const hasConnectorEnumPattern = marker.message?.includes('Expected ".none" | ".cases-webhook"');
-
-  // Process markers that match our patterns
-
-  if (hasNumericEnumPattern || hasConnectorEnumPattern || hasFieldTypeError) {
-    try {
-      // Get the YAML path at this marker position to determine context
-      let yamlPath: (string | number)[] = [];
-
-      if (yamlDocument) {
-        const markerPosition = editorModel.getOffsetAt({
-          lineNumber: marker.startLineNumber,
-          column: marker.startColumn,
-        });
-        yamlPath = getPathAtOffset(yamlDocument, markerPosition);
+    // Use enrichment directly (no mock ZodErrors)
+    const { message: enrichedMessage, enriched } = enrichErrorMessage(
+      yamlPath,
+      marker.message ?? '',
+      'unknown', // Monaco YAML errors don't have Zod error codes
+      {
+        schema: workflowYamlSchemaLoose,
+        yamlDocument: yamlDocument ?? undefined,
       }
+    );
 
-      // Create a mock Zod error with the path information
-      const mockZodError = {
-        issues: [
-          {
-            code: 'unknown' as const,
-            path: yamlPath,
-            message: marker.message,
-            received: 'unknown',
-          },
-        ],
-      };
-
-      // Use the dynamic formatValidationError with schema and YAML document
-      const { message: formattedMessage } = formatZodError(
-        mockZodError as any,
-        workflowYamlSchemaLoose,
-        yamlDocument ?? undefined
-      );
-
-      // Return the marker with the improved message
-
+    if (enriched) {
       return {
         ...newMarker,
-        message: formattedMessage,
+        message: enrichedMessage,
+        relatedInformation: [],
       };
-    } catch (error) {
-      // Fallback to original message if dynamic formatting fails
-      return newMarker;
     }
+  } catch {
+    // Fallback to original message if enrichment fails
   }
+
   return newMarker;
+}
+
+/**
+ * Determines if a marker message should be enriched.
+ */
+function shouldEnrichMarker(message: string | undefined): boolean {
+  if (!message) return false;
+
+  // Numeric enum patterns (e.g., "Expected 0 | 1 | 2")
+  const hasNumericEnumPattern =
+    /Expected "\d+(\s*\|\s*\d+)*"/.test(message) ||
+    /Incorrect type\. Expected "\d+(\s*\|\s*\d+)*"/.test(message) ||
+    /Expected \\\\"?\d+(\s*\|\s*\d+)*\\\\"?/.test(message) ||
+    /Expected \d+(\s*\|\s*\d+)*(?!\w)/.test(message) ||
+    /Invalid enum value\. Expected \d+(\s*\|\s*\d+)*/.test(message) ||
+    /Value must be one of: \d+(\s*,\s*\d+)*/.test(message);
+
+  // Field type errors (e.g., "Expected settings", "Expected connector")
+  const hasFieldTypeError =
+    /Incorrect type\. Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(message) ||
+    /Expected "[a-zA-Z_][a-zA-Z0-9_]*"/.test(message);
+
+  // Connector enum patterns
+  const hasConnectorEnumPattern = message.includes('Expected ".none" | ".cases-webhook"');
+
+  return hasNumericEnumPattern || hasFieldTypeError || hasConnectorEnumPattern;
 }
