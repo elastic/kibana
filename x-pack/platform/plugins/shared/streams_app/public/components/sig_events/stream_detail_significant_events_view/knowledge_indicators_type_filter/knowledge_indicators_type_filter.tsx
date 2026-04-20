@@ -18,10 +18,14 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
+import {
+  getKnowledgeIndicatorType,
+  MATCH_QUERY_TYPE,
+  STATS_QUERY_TYPE,
+} from '../utils/get_knowledge_indicator_type';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -62,11 +66,7 @@ export function KnowledgeIndicatorsTypeFilter({
       ) {
         return;
       }
-      if (ki.kind === 'feature') {
-        types.add(ki.feature.type);
-      } else {
-        types.add(ki.query.type === QUERY_TYPE_STATS ? 'stats_query' : 'match_query');
-      }
+      types.add(getKnowledgeIndicatorType(ki));
     });
 
     return Array.from(types).sort((left, right) => left.localeCompare(right));
@@ -87,12 +87,7 @@ export function KnowledgeIndicatorsTypeFilter({
         return;
       }
 
-      const type =
-        ki.kind === 'feature'
-          ? ki.feature.type
-          : ki.query.type === QUERY_TYPE_STATS
-          ? 'stats_query'
-          : 'match_query';
+      const type = getKnowledgeIndicatorType(ki);
       counts[type] = (counts[type] ?? 0) + 1;
     });
 
@@ -109,9 +104,9 @@ export function KnowledgeIndicatorsTypeFilter({
         key: type,
         checked: selectedTypes.includes(type) ? ('on' as const) : undefined,
         label:
-          type === 'match_query'
+          type === MATCH_QUERY_TYPE
             ? MATCH_QUERY_TYPE_LABEL
-            : type === 'stats_query'
+            : type === STATS_QUERY_TYPE
             ? STATS_QUERY_TYPE_LABEL
             : upperFirst(type),
         append: <EuiBadge>{typeCounts[type] ?? 0}</EuiBadge>,

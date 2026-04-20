@@ -22,16 +22,14 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
-import { useMutation, useQueryClient } from '@kbn/react-query';
+import { useMutation } from '@kbn/react-query';
 import React from 'react';
-import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries';
-import { DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY } from '../../../../../hooks/sig_events/use_fetch_discovery_queries_occurrences';
 import {
   HIGH_SEVERITY_THRESHOLD,
-  UNBACKED_QUERIES_COUNT_QUERY_KEY,
   useUnbackedQueriesCount,
 } from '../../../../../hooks/sig_events/use_unbacked_queries_count';
 import { useQueriesApi, type PromoteResult } from '../../../../../hooks/sig_events/use_queries_api';
+import { useInvalidatePromoteRelatedQueries } from '../../../../../hooks/sig_events/use_invalidate_promote_queries';
 import { getFormattedError } from '../../../../../util/errors';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
@@ -64,9 +62,9 @@ export function KnowledgeIndicatorsTable() {
       notifications: { toasts },
     },
   } = useKibana();
-  const queryClient = useQueryClient();
   const { count: unbackedCount } = useUnbackedQueriesCount();
   const { promoteAll } = useQueriesApi();
+  const invalidatePromoteRelatedQueries = useInvalidatePromoteRelatedQueries();
 
   const promoteAllMutation = useMutation<PromoteResult, Error>({
     mutationFn: () => promoteAll({ minSeverityScore: HIGH_SEVERITY_THRESHOLD }),
@@ -78,11 +76,7 @@ export function KnowledgeIndicatorsTable() {
       } else {
         toasts.addSuccess(toast.text);
       }
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: DISCOVERY_QUERIES_OCCURRENCES_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: UNBACKED_QUERIES_COUNT_QUERY_KEY }),
-      ]);
+      await invalidatePromoteRelatedQueries();
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), {
@@ -201,7 +195,7 @@ export function KnowledgeIndicatorsTable() {
         </EuiCallOut>
       )}
       <EuiSpacer size="m" />
-      <EuiPanel hasBorder={false} hasShadow={true}>
+      <EuiPanel hasBorder={false} hasShadow>
         <KnowledgeIndicatorsToolbar
           knowledgeIndicators={knowledgeIndicators}
           filteredCount={filteredKnowledgeIndicators.length}
