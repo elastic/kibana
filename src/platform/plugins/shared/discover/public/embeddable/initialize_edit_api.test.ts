@@ -309,7 +309,10 @@ describe('initialize edit api', () => {
         path: '/mock-url-for-onedit',
         state: {
           embeddableId: 'test',
-          valueInput: expectedValueInput,
+          valueInput: {
+            discoverSessionTab: expectedValueInput,
+            dashboardControlGroupState: controlsState,
+          },
           searchSessionId: undefined,
           originatingApp: 'dashboard',
           originatingPath: '/current-parent-path',

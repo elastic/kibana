@@ -19,6 +19,11 @@ import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { SearchEmbeddableByReferenceState } from '../../common/embeddable/types';
 import type { SearchEmbeddablePanelApiState } from '../embeddable/types';
 
+export interface DiscoverSessionByValueInput {
+  discoverSessionTab: DiscoverSessionTab | undefined;
+  dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+}
+
 /**
  * Specifies the action to be taken for navigating back to an editor.
  */
@@ -87,8 +92,8 @@ export class EmbeddableEditorService {
 
   public isEmbeddedEditor = (): boolean => Boolean(this.embeddableState);
 
-  public getByValueInput = (): DiscoverSessionTab | undefined =>
-    this.embeddableState?.valueInput as DiscoverSessionTab | undefined;
+  public getByValueTab = (): DiscoverSessionTab | undefined =>
+    this.getByValueInput().discoverSessionTab;
 
   /**
    * Resets the embeddable transfer state, ensuring it is cleared in storage and then dropped in memory.
@@ -169,5 +174,11 @@ export class EmbeddableEditorService {
     }
 
     return { serializedState: undefined, controlGroupState: {} };
+  }
+
+  private getByValueInput(): DiscoverSessionByValueInput {
+    return this.embeddableState?.valueInput
+      ? (this.embeddableState.valueInput as DiscoverSessionByValueInput)
+      : { discoverSessionTab: undefined, dashboardControlGroupState: undefined };
   }
 }

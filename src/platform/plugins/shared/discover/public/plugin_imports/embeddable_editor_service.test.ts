@@ -112,17 +112,20 @@ describe('EmbeddableEditorService', () => {
   });
 
   it('exposes the incoming by-value editor state and clears it once', () => {
-    const byValueInput = { id: 'tab-1' };
+    const byValueTab = { id: 'tab-1' };
     const incomingState = createIncomingState({
       originatingPath: '/app/dashboards',
       embeddableId: 'panel-1',
-      valueInput: byValueInput,
+      valueInput: {
+        discoverSessionTab: byValueTab,
+        dashboardControlGroupState: undefined,
+      },
     });
     const { service, embeddableStateTransfer } = createService({ incomingState });
 
     expect(service.isEmbeddedEditor()).toBe(true);
     expect(service.isByValueEditor()).toBe(true);
-    expect(service.getByValueInput()).toBe(byValueInput);
+    expect(service.getByValueTab()).toBe(byValueTab);
 
     service.clearEditorState();
     service.clearEditorState();

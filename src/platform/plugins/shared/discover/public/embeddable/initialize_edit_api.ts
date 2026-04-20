@@ -20,6 +20,7 @@ import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
+import type { DiscoverSessionByValueInput } from '../plugin_imports/embeddable_editor_service';
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
@@ -89,7 +90,7 @@ export function initializeEditApi({
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
       const locatorParams = getDiscoverLocatorParams({ ...partialApi, parentApi });
-      const valueInput = isByReference
+      const discoverSessionTab = isByReference
         ? undefined
         : fromSavedSearchToSavedObjectTab({
             tab: {
@@ -108,6 +109,13 @@ export function initializeEditApi({
             },
             services: discoverServices,
           });
+
+      const valueInput: DiscoverSessionByValueInput | undefined = discoverSessionTab
+        ? {
+            discoverSessionTab,
+            dashboardControlGroupState: locatorParams.esqlControls,
+          }
+        : undefined;
 
       let app: string;
       let path: string | undefined;

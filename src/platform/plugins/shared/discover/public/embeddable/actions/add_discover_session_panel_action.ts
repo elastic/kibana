@@ -22,6 +22,7 @@ import { ADD_PANEL_VISUALIZATION_GROUP, type EmbeddableStart } from '@kbn/embedd
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppLocator } from '../../../common';
 import { ACTION_ADD_DISCOVER_SESSION_PANEL } from '../constants';
+import type { DiscoverSessionByValueInput } from '../../plugin_imports/embeddable_editor_service';
 
 export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContext> {
   public id = ACTION_ADD_DISCOVER_SESSION_PANEL;
@@ -51,7 +52,7 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
     const { app, path } = await this.locator.getLocation({});
     const stateTransfer = this.embeddable.getStateTransfer();
 
-    const valueInput: DiscoverSessionTab = {
+    const discoverSessionTab: DiscoverSessionTab = {
       id: uuidv4(),
       label: i18n.translate('discover.savedSearchEmbeddable.action.addPanel.byValueTabName', {
         defaultMessage: 'New Discover session',
@@ -63,6 +64,11 @@ export class AddDiscoverSessionPanelAction implements Action<EmbeddableApiContex
       hideChart: false,
       hideTable: false,
       serializedSearchSource: {},
+    };
+
+    const valueInput: DiscoverSessionByValueInput = {
+      discoverSessionTab,
+      dashboardControlGroupState: undefined,
     };
 
     const appContext = apiHasAppContext(embeddableApi) ? embeddableApi.getAppContext() : undefined;
