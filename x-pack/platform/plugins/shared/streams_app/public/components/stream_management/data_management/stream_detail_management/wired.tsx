@@ -45,13 +45,7 @@ const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
-function isValidManagementSubTab(
-  value: string,
-  overviewPageEnabled: boolean
-): value is WiredStreamManagementSubTab {
-  if (value === 'overview' && !overviewPageEnabled) {
-    return false;
-  }
+function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
@@ -67,7 +61,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments, overviewPage },
+    features: { attachments },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -167,16 +161,12 @@ export function WiredStreamDetailManagement({
   }
 
   const tabs = {
-    ...(overviewPage.enabled
-      ? {
-          overview: {
-            content: <StreamOverview />,
-            label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-              defaultMessage: 'Overview',
-            }),
-          },
-        }
-      : {}),
+    overview: {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    },
     retention: {
       content: (
         <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
@@ -267,13 +257,7 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (tab === 'overview' && !overviewPage.enabled) {
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'retention' } }} />
-    );
-  }
-
-  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
+  if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
@@ -281,6 +265,5 @@ export function WiredStreamDetailManagement({
     return null;
   }
 
-  const defaultTab = overviewPage.enabled ? 'overview' : 'retention';
-  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

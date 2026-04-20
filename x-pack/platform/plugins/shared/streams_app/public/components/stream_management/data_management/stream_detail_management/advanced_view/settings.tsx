@@ -28,7 +28,6 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../util/errors';
 import { useStreamsAppRouter } from '../../../../../hooks/use_streams_app_router';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
-import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 import { Row, RowMetadata } from './row';
 import { parseDuration } from '../../../../../util/parse_duration';
 
@@ -396,11 +395,7 @@ const isInvalidInteger = (value: string) => {
 
 function LinkToStream({ name }: { name: string }) {
   const router = useStreamsAppRouter();
-  const {
-    features: { overviewPage },
-  } = useStreamsPrivileges();
-
-  const legacyTab = overviewPage.enabled ? 'overview' : 'retention';
+  const legacyTab = 'overview';
 
   return (
     <EuiLink
