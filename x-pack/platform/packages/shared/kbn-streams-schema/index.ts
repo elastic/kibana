@@ -80,6 +80,8 @@ export {
   hasStatsCommand,
   MS_PER_UNIT,
   normalizeEsqlQuery,
+  normalizeEsqlSafe,
+  hasSameEsql,
   replaceFromSources,
   rewriteFromSources,
 } from './src/helpers/esql_helpers';

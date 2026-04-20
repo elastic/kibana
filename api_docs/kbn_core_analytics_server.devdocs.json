@@ -714,6 +714,14 @@
                 "path": "x-pack/platform/plugins/shared/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/public/analytics/event_tracker.ts"
               },
@@ -740,14 +748,6 @@
               {
                 "plugin": "@kbn/esql-editor",
                 "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts"
-              },
-              {
-                "plugin": "actions",
-                "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/provisioning/uiam_api_key_provisioning_task.ts"
               },
               {
                 "plugin": "unifiedDocViewer",
@@ -952,6 +952,10 @@
               {
                 "plugin": "agentBuilder",
                 "path": "x-pack/platform/plugins/shared/agent_builder/server/telemetry/analytics_service.ts"
+              },
+              {
+                "plugin": "streams",
+                "path": "x-pack/platform/plugins/shared/streams/server/lib/telemetry/ebt/client.ts"
               },
               {
                 "plugin": "streams",
