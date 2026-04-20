@@ -18,7 +18,7 @@ import {
 import { useLoadConnectors } from '@kbn/inference-connectors';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useUiPrivileges } from '../../../../../hooks/use_ui_privileges';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { useSendMessage } from '../../../../../context/send_message/send_message_context';
@@ -154,6 +154,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
       selectConnector: onSelectConnector,
       selectedConnector: selectedConnectorId,
       defaultConnectorId,
+      defaultConnectorOnly,
     },
   } = useSendMessage();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -233,19 +234,55 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
 
+  // Track the last observed default so we can detect an admin-initiated change
+  // and propagate it to the chat's selected connector without a page refresh.
+  const previousDefaultRef = useRef<string | undefined>(defaultConnectorId);
+
   useEffect(() => {
-    if (!isLoading && initialConnectorId) {
-      // No user preference set
-      if (!selectedConnectorId) {
-        onSelectConnector(initialConnectorId);
+    if (isLoading || !initialConnectorId) return;
+
+    const previousDefault = previousDefaultRef.current;
+    previousDefaultRef.current = defaultConnectorId;
+
+    // Admin enforces "only allow the default model" — always follow the default.
+    if (defaultConnectorOnly && defaultConnectorId) {
+      if (selectedConnectorId !== defaultConnectorId) {
+        onSelectConnector(defaultConnectorId);
       }
-      // User preference is set but connector is not available in the list.
-      // Scenario: the connector was deleted or admin changed GenAI settings
-      else if (selectedConnectorId && !selectedConnector) {
-        onSelectConnector(initialConnectorId);
-      }
+      return;
     }
-  }, [selectedConnectorId, selectedConnector, isLoading, initialConnectorId, onSelectConnector]);
+
+    // No user preference set yet.
+    if (!selectedConnectorId) {
+      onSelectConnector(initialConnectorId);
+      return;
+    }
+
+    // Stored preference is no longer in the list (connector deleted or filtered out).
+    if (!selectedConnector) {
+      onSelectConnector(initialConnectorId);
+      return;
+    }
+
+    // Admin changed the default-model setting to a different, valid connector.
+    if (
+      defaultConnectorId &&
+      defaultConnectorId !== previousDefault &&
+      defaultConnectorId !== selectedConnectorId &&
+      connectors.some((c) => c.id === defaultConnectorId)
+    ) {
+      onSelectConnector(defaultConnectorId);
+    }
+  }, [
+    selectedConnectorId,
+    selectedConnector,
+    isLoading,
+    initialConnectorId,
+    defaultConnectorId,
+    defaultConnectorOnly,
+    connectors,
+    onSelectConnector,
+  ]);
 
   const selectorListStyles = useSelectorListStyles({ listId: connectorListId });
   const listItemsHeight = connectorOptions.length * CONNECTOR_OPTION_ROW_HEIGHT;
@@ -259,7 +296,7 @@ export const ConnectorSelector: React.FC<{}> = () => {
         <ConnectorPopoverButton
           isPopoverOpen={isPopoverOpen}
           onClick={togglePopover}
-          disabled={isLoading || connectors.length === 0}
+          disabled={isLoading || connectors.length === 0 || defaultConnectorOnly}
           selectedConnectorName={selectedConnector?.name}
         />
       }
