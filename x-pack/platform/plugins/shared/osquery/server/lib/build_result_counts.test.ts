@@ -115,7 +115,10 @@ describe('buildPackResultCounts', () => {
   it('ignores entries in the map that are not referenced by queryActionIds', () => {
     const map: ResultCountsMap = new Map([
       ['q-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
-      ['q-unreferenced', { totalRows: 100, respondedAgents: 50, successfulAgents: 50, errorAgents: 0 }],
+      [
+        'q-unreferenced',
+        { totalRows: 100, respondedAgents: 50, successfulAgents: 50, errorAgents: 0 },
+      ],
     ]);
 
     expect(buildPackResultCounts(['q-1'], map)).toEqual({

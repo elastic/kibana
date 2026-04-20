@@ -44,6 +44,7 @@ export const buildPackResultCounts = (
       if (counts.totalRows > 0) {
         queriesWithResults++;
       }
+
       if (counts.respondedAgents > maxRespondedAgents) {
         maxRespondedAgents = counts.respondedAgents;
         successfulAgents = counts.successfulAgents;

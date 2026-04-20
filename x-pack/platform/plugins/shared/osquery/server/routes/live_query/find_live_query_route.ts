@@ -28,10 +28,7 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
-import {
-  buildPackResultCounts,
-  buildSingleQueryResultCounts,
-} from '../../lib/build_result_counts';
+import { buildPackResultCounts, buildSingleQueryResultCounts } from '../../lib/build_result_counts';
 import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
@@ -96,7 +93,11 @@ export const findLiveQueryRoute = (
 
           let items = res.edges;
 
-          if (osqueryContext.experimentalFeatures.resultCountsEnabled && request.query.withResultCounts && items.length > 0) {
+          if (
+            osqueryContext.experimentalFeatures.resultCountsEnabled &&
+            request.query.withResultCounts &&
+            items.length > 0
+          ) {
             try {
               const [coreStartServices] = await osqueryContext.getStartServices();
               const esClient = coreStartServices.elasticsearch.client.asInternalUser;

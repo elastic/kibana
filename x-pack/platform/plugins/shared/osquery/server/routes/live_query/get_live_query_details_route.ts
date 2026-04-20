@@ -33,10 +33,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getLiveQueryDetailsResponseSchema } from './response_schemas';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
-import {
-  buildPackResultCounts,
-  buildSingleQueryResultCounts,
-} from '../../lib/build_result_counts';
+import { buildPackResultCounts, buildSingleQueryResultCounts } from '../../lib/build_result_counts';
 
 export const getLiveQueryDetailsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -115,9 +112,7 @@ export const getLiveQueryDetailsRoute = (
           const isCompleted = expired || (responseData && every(responseData, ['pending', 0]));
           const agentByActionIdStatusMap = mapKeys(responseData, 'action_id');
 
-          const queryActionIds = map(queries, 'action_id').filter(
-            (id): id is string => !!id
-          );
+          const queryActionIds = map(queries, 'action_id').filter((id): id is string => !!id);
           let resultCounts;
           if (osqueryContext.experimentalFeatures.resultCountsEnabled) {
             try {

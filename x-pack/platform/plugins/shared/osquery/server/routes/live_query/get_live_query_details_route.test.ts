@@ -93,9 +93,9 @@ describe('getLiveQueryDetailsRoute', () => {
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
       },
-      getStartServices: jest.fn().mockResolvedValue([
-        { elasticsearch: { client: { asInternalUser: {} } } },
-      ]),
+      getStartServices: jest
+        .fn()
+        .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: {} } } }]),
       logFactory: { get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
       experimentalFeatures: { resultCountsEnabled: true },
       ...overrides,
@@ -114,16 +114,18 @@ describe('getLiveQueryDetailsRoute', () => {
   };
 
   it('returns action details with completed status and result_counts', async () => {
-    const mockSearchFn = jest.fn().mockReturnValue(
-      of({ actionDetails: singleQueryActionDetails() })
-    );
+    const mockSearchFn = jest
+      .fn()
+      .mockReturnValue(of({ actionDetails: singleQueryActionDetails() }));
 
     (getActionResponses as jest.Mock).mockReturnValue(
       of({ action_id: 'query-1', pending: 0, responded: 1, successful: 1, failed: 0, docs: 1 })
     );
 
     (getResultCountsForActions as jest.Mock).mockResolvedValue(
-      new Map([['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }]])
+      new Map([
+        ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ])
     );
 
     setupRoute();
@@ -171,9 +173,9 @@ describe('getLiveQueryDetailsRoute', () => {
   });
 
   it('omits result_counts when resultCountsEnabled is false', async () => {
-    const mockSearchFn = jest.fn().mockReturnValue(
-      of({ actionDetails: singleQueryActionDetails() })
-    );
+    const mockSearchFn = jest
+      .fn()
+      .mockReturnValue(of({ actionDetails: singleQueryActionDetails() }));
 
     (getActionResponses as jest.Mock).mockReturnValue(
       of({ action_id: 'query-1', pending: 0, responded: 1, successful: 1, failed: 0, docs: 1 })
@@ -196,9 +198,7 @@ describe('getLiveQueryDetailsRoute', () => {
   });
 
   it('returns pack result_counts for pack queries', async () => {
-    const mockSearchFn = jest.fn().mockReturnValue(
-      of({ actionDetails: packActionDetails() })
-    );
+    const mockSearchFn = jest.fn().mockReturnValue(of({ actionDetails: packActionDetails() }));
 
     (getActionResponses as jest.Mock).mockImplementation((_search: any, actionId: string) =>
       of({ action_id: actionId, pending: 0, responded: 1, successful: 1, failed: 0, docs: 1 })
@@ -232,9 +232,9 @@ describe('getLiveQueryDetailsRoute', () => {
   });
 
   it('omits result_counts and logs warning when aggregation fails', async () => {
-    const mockSearchFn = jest.fn().mockReturnValue(
-      of({ actionDetails: singleQueryActionDetails() })
-    );
+    const mockSearchFn = jest
+      .fn()
+      .mockReturnValue(of({ actionDetails: singleQueryActionDetails() }));
 
     (getActionResponses as jest.Mock).mockReturnValue(
       of({ action_id: 'query-1', pending: 0, responded: 1, successful: 1, failed: 0, docs: 1 })
@@ -258,7 +258,8 @@ describe('getLiveQueryDetailsRoute', () => {
     const body = (mockResponse.ok.mock.calls[0][0] as any).body;
     expect(body.data).not.toHaveProperty('result_counts');
 
-    const mockLoggerWarn = (mockOsqueryContext.logFactory.get as jest.Mock).mock.results[0].value.warn;
+    const mockLoggerWarn = (mockOsqueryContext.logFactory.get as jest.Mock).mock.results[0].value
+      .warn;
     expect(mockLoggerWarn).toHaveBeenCalledWith(
       expect.stringContaining('index_not_found_exception')
     );
