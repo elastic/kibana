@@ -116,6 +116,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
+  'knowledge-indicators-management',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -131,6 +132,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // O11Y
   'observability.rca',
   'observability.investigation',
+  'observability.service-map',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

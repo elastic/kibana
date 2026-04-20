@@ -22,7 +22,7 @@ import {
   NODE_BORDER_WIDTH_SELECTED,
   SERVICE_NODE_CIRCLE_SIZE,
 } from '../../../../common/service_map/constants';
-import { NodeLabel } from './node_label';
+import { NodeLabel } from '../../shared/service_map/node_label';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { SloStatusBadge } from '../../shared/slo_status_badge';
 import { useServiceMapSloFlyout } from './service_map_slo_flyout_context';
