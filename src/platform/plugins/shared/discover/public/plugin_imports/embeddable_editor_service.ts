@@ -161,7 +161,10 @@ export class EmbeddableEditorService {
       const { state } = options as ByValueTransferOptions;
       return {
         serializedState: { attributes: state.byValueState },
-        controlGroupState: state.controlGroupState ?? {},
+        controlGroupState: reconcileControlGroupState({
+          controlGroupState: state.controlGroupState ?? {},
+          dashboardControlGroupState: this.getByValueInput().dashboardControlGroupState,
+        }),
       };
     }
 
@@ -182,3 +185,33 @@ export class EmbeddableEditorService {
       : { discoverSessionTab: undefined, dashboardControlGroupState: undefined };
   }
 }
+
+const reconcileControlGroupState = ({
+  controlGroupState,
+  dashboardControlGroupState,
+}: {
+  controlGroupState: ControlPanelsState<OptionsListESQLControlState>;
+  dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> | undefined;
+}): ControlPanelsState<OptionsListESQLControlState> => {
+  if (!dashboardControlGroupState) {
+    return controlGroupState;
+  }
+
+  const dashboardPanelIdsByVariable = Object.fromEntries(
+    Object.entries(dashboardControlGroupState).map(([dashboardPanelId, dashboardPanelState]) => [
+      dashboardPanelState.variable_name,
+      dashboardPanelId,
+    ])
+  );
+
+  return Object.entries(controlGroupState).reduce<ControlPanelsState<OptionsListESQLControlState>>(
+    (acc, [discoverPanelId, panelState]) => {
+      const nextPanelId = dashboardPanelIdsByVariable[panelState.variable_name] ?? discoverPanelId;
+
+      acc[nextPanelId] = panelState;
+
+      return acc;
+    },
+    {}
+  );
+};

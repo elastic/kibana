@@ -212,6 +212,91 @@ describe('EmbeddableEditorService', () => {
     );
   });
 
+  it('reuses dashboard panel ids for SaveByValue controls with duplicate variables', () => {
+    const byValueState = createByValueState();
+    const controlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
+      discoverControlA: {
+        ...mockControlState.panel1,
+        variable_name: 'host.name',
+        title: 'Updated host name',
+      },
+      discoverControlB: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Updated service name',
+      },
+      discoverControlC: {
+        ...mockControlState.panel1,
+        variable_name: 'cloud.region',
+        title: 'Cloud region',
+      },
+    };
+    const dashboardControlGroupState: ControlPanelsState<OptionsListESQLControlState> = {
+      dashboardHostPanel: {
+        ...mockControlState.panel1,
+        variable_name: 'host.name',
+        title: 'Original host name',
+      },
+      dashboardServicePanel: {
+        ...mockControlState.panel1,
+        variable_name: 'service.name',
+        title: 'Original service name',
+      },
+      dashboardOtherPanel: {
+        ...mockControlState.panel1,
+        variable_name: 'event.dataset',
+        title: 'Original event dataset',
+      },
+    };
+    const incomingState = createIncomingState({
+      originatingPath: '/app/dashboards#/edit',
+      embeddableId: 'panel-42',
+      valueInput: {
+        discoverSessionTab: { id: 'tab-1' },
+        dashboardControlGroupState,
+      },
+    });
+    const { service, embeddableStateTransfer } = createService({ incomingState });
+
+    service.transferBackToEditor(TransferAction.SaveByValue, {
+      state: {
+        byValueState,
+        controlGroupState,
+      },
+    });
+
+    expect(embeddableStateTransfer.navigateToWithEmbeddablePackages).toHaveBeenCalledWith(
+      'dashboard',
+      {
+        path: '/app/dashboards#/edit',
+        state: [
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverControlA,
+            embeddableId: 'dashboardHostPanel',
+          },
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverControlB,
+            embeddableId: 'dashboardServicePanel',
+          },
+          {
+            type: ESQL_CONTROL,
+            serializedState: controlGroupState.discoverControlC,
+            embeddableId: 'discoverControlC',
+          },
+          {
+            type: SEARCH_EMBEDDABLE_TYPE,
+            serializedState: {
+              attributes: byValueState,
+            },
+            embeddableId: 'panel-42',
+          },
+        ],
+      }
+    );
+  });
+
   it('serializes by-reference state and supports explicit app and path overrides', () => {
     const { service, embeddableStateTransfer } = createService();
 
