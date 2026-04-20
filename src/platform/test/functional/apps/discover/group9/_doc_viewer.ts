@@ -309,7 +309,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
       });
 
-      it('should disable the switch when no fields are selected', async function () {
+      it('should enable the switch when no fields are selected (ES|QL defaults to _source)', async function () {
         const testQuery = 'from logstash-* | sort @timestamp | limit 10';
         await monacoEditor.setCodeEditorValue(testQuery);
         await testSubjects.click('querySubmitButton');
@@ -321,7 +321,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const showOnlySelectedFieldsSwitch = await testSubjects.find(
           'unifiedDocViewerShowOnlySelectedFieldsSwitch'
         );
-        expect(await showOnlySelectedFieldsSwitch.getAttribute('disabled')).to.be('true');
+        expect(await showOnlySelectedFieldsSwitch.getAttribute('disabled')).to.be(null);
 
         const fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
         const fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
