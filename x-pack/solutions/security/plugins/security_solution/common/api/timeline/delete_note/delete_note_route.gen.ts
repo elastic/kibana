@@ -20,11 +20,17 @@ export type DeleteNoteRequestBody = z.infer<typeof DeleteNoteRequestBody>;
 export const DeleteNoteRequestBody = z.union([
   z
     .object({
+      /**
+       * Saved object id of the note to delete.
+       */
       noteId: z.string(),
     })
     .nullable(),
   z
     .object({
+      /**
+       * Saved object ids of the notes to delete.
+       */
       noteIds: z.array(z.string()).nullable(),
     })
     .nullable(),
