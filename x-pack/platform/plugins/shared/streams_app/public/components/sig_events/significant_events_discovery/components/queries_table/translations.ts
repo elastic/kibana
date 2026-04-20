@@ -280,3 +280,59 @@ export const DELETE_QUERY_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.streams.significantEventsDiscovery.queriesTable.deleteQueryErrorToastTitle',
   { defaultMessage: 'Failed to delete query' }
 );
+
+export const CLEAR_SELECTION_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.clearSelection',
+  { defaultMessage: 'Clear selection' }
+);
+
+export const DELETE_SELECTED_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.deleteSelected',
+  { defaultMessage: 'Delete selected' }
+);
+
+export const PROMOTE_SELECTED_LABEL = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.promoteSelected',
+  { defaultMessage: 'Promote selected' }
+);
+
+export const getSelectedCountLabel = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.selectedCount', {
+    defaultMessage: '{count} selected',
+    values: { count },
+  });
+
+export const DELETE_QUERIES_MODAL_TITLE = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.deleteModalTitle', {
+    defaultMessage:
+      'Are you sure you want to delete {count, plural, one {this rule} other {these rules}}?',
+    values: { count },
+  });
+
+export const BULK_DELETE_SUCCESS_MESSAGE = (count: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.bulkDeleteSuccess', {
+    defaultMessage: '{count, plural, one {# rule} other {# rules}} deleted successfully.',
+    values: { count },
+  });
+
+export const BULK_DELETE_ALL_FAILED_MESSAGE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.bulkDeleteAllFailed',
+  { defaultMessage: 'None of the selected rules could be deleted. Please try again.' }
+);
+
+export const BULK_DELETE_PARTIAL_MESSAGE = (succeeded: number, failed: number) =>
+  i18n.translate('xpack.streams.significantEventsDiscovery.queriesTable.bulkDeletePartial', {
+    defaultMessage:
+      '{succeeded, plural, one {# rule} other {# rules}} deleted. {failed, plural, one {# rule} other {# rules}} failed.',
+    values: { succeeded, failed },
+  });
+
+export const BULK_DELETE_ERROR_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.bulkDeleteError',
+  { defaultMessage: 'Failed to delete selected rules' }
+);
+
+export const BULK_PROMOTE_ERROR_TITLE = i18n.translate(
+  'xpack.streams.significantEventsDiscovery.queriesTable.bulkPromoteError',
+  { defaultMessage: 'Failed to promote selected rules' }
+);

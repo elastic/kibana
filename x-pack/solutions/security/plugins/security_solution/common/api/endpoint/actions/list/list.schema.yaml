@@ -63,7 +63,7 @@ paths:
             $ref: '../../model/schema/common.schema.yaml#/components/schemas/Types'
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -72,7 +72,52 @@ components:
   schemas:
     GetEndpointActionListResponse:
       type: object
-      properties: { }
+      properties:
+        page:
+          type: integer
+          description: The current page number.
+        pageSize:
+          type: integer
+          description: The number of items per page.
+        startDate:
+          type: string
+          description: The start date filter applied to the query.
+        endDate:
+          type: string
+          description: The end date filter applied to the query.
+        agentTypes:
+          type: array
+          description: The list of agent types the query was filtered by.
+          items:
+            type: string
+        elasticAgentIds:
+          type: array
+          description: The list of elastic agent IDs the query was filtered by.
+          items:
+            type: string
+        userIds:
+          type: array
+          description: The list of user IDs the query was filtered by.
+          items:
+            type: string
+        commands:
+          type: array
+          description: The list of commands the query was filtered by.
+          items:
+            type: string
+        statuses:
+          type: array
+          description: The list of statuses the query was filtered by.
+          items:
+            type: string
+        total:
+          type: integer
+          description: The total number of response actions matching the query.
+        data:
+          type: array
+          description: The list of response actions.
+          items:
+            $ref: '../../model/schema/common.schema.yaml#/components/schemas/ResponseActionDetails'
       example:
         page: 1
         pageSize: 10

@@ -2090,7 +2090,7 @@ export const labels = {
         defaultMessage: 'Custom instructions',
       }
     ),
-    customInstructionsOnboardingText: i18n.translate(
+    customInstructionsSubtitle: i18n.translate(
       'xpack.agentBuilder.overview.customizations.instructionsOnboardingText',
       {
         defaultMessage: 'Shape how the agent responds to questions and tasks.',

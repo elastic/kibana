@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import type { Document } from 'yaml';
 import { parseDocument, isMap, isSeq, isScalar } from 'yaml';
 import { load as parseYaml } from 'js-yaml';
 
-export type FieldDefaultValue = string | number | string[];
+import type { z } from '@kbn/zod/v4';
+import type { UserPickerDefaultSchema } from '../../../../common/types/domain/template/fields';
+
+export type FieldDefaultValue =
+  | string
+  | number
+  | string[]
+  | z.infer<typeof UserPickerDefaultSchema>;
 
 interface FieldDefinition {
   name: string;
@@ -20,6 +28,37 @@ interface FieldDefinition {
 interface ParsedDefinition {
   fields?: FieldDefinition[];
 }
+
+/**
+ * Tries to parse a JSON-encoded array string. Returns the parsed array if successful,
+ * or null if the value is not a JSON array string.
+ */
+const tryParseJsonArray = (value: string): unknown[] | null => {
+  if (!value.startsWith('[')) return null;
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Converts a JS value to a yaml-library AST node suitable for use as metadata.default.
+ * Arrays of objects are turned into proper YAML sequences; scalars stay as-is.
+ */
+const toYamlDefaultNode = (doc: Document, value: FieldDefaultValue): unknown => {
+  if (Array.isArray(value)) {
+    return doc.createNode(value);
+  }
+  if (typeof value === 'string') {
+    const parsed = tryParseJsonArray(value);
+    if (parsed !== null) {
+      return doc.createNode(parsed);
+    }
+  }
+  return value;
+};
 
 /**
  * Updates or adds `metadata.default` for a specific field in the YAML definition.
@@ -66,13 +105,14 @@ export const updateYamlFieldDefault = (
 
         if (name === fieldName) {
           const metadataNode = item.get('metadata', true);
+          const defaultNode = toYamlDefaultNode(doc, newValue);
 
           if (!isMap(metadataNode)) {
             // Create metadata if it doesn't exist
-            item.set('metadata', { default: newValue });
+            item.set('metadata', doc.createNode({ default: defaultNode }));
           } else {
             // Update or add default in existing metadata
-            metadataNode.set('default', newValue);
+            metadataNode.set('default', defaultNode);
           }
           break;
         }
@@ -88,6 +128,7 @@ export const updateYamlFieldDefault = (
 /**
  * Removes `metadata.default` for a specific field in the YAML definition.
  * Uses the `yaml` library's parseDocument to preserve comments and formatting.
+ * If metadata becomes empty after removal, the entire metadata key is also removed.
  */
 export const removeYamlFieldDefault = (yaml: string, fieldName: string): string => {
   if (!yaml || yaml.trim() === '') {
@@ -116,17 +157,18 @@ export const removeYamlFieldDefault = (yaml: string, fieldName: string): string 
       return yaml;
     }
 
-    for (const item of fieldsNode.items) {
-      if (isMap(item)) {
-        const nameNode = item.get('name', true);
-        const name = isScalar(nameNode) ? String(nameNode.value) : null;
+    const fieldItem = fieldsNode.items.find((item) => {
+      if (!isMap(item)) return false;
+      const nameNode = item.get('name', true);
+      return isScalar(nameNode) && String(nameNode.value) === fieldName;
+    });
 
-        if (name === fieldName) {
-          const metadataNode = item.get('metadata', true);
-          if (isMap(metadataNode)) {
-            metadataNode.delete('default');
-          }
-          break;
+    if (isMap(fieldItem)) {
+      const metadataNode = fieldItem.get('metadata', true);
+      if (isMap(metadataNode)) {
+        metadataNode.delete('default');
+        if (metadataNode.items.length === 0) {
+          fieldItem.delete('metadata');
         }
       }
     }
@@ -139,10 +181,6 @@ export const removeYamlFieldDefault = (yaml: string, fieldName: string): string 
 
 /**
  * Checks if a field has metadata.default defined in the YAML.
- *
- * @param yaml - The current YAML string
- * @param fieldName - The name of the field to check
- * @returns true if the field has metadata.default, false otherwise
  */
 export const hasFieldDefault = (yaml: string, fieldName: string): boolean => {
   if (!yaml || yaml.trim() === '') {

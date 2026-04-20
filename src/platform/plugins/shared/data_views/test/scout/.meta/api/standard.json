@@ -1,5 +1,5 @@
 {
-  "sha1": "4220c78acdca2441b47e8cb4b82ab30bdec2fbad",
+  "sha1": "50fd549a7fc08bebe6880bfc1c0969c81bc92630",
   "tests": [
     {
       "id": "6a1a7d28753a6bb-37b3571f127ad93",
@@ -1142,6 +1142,24 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/default_data_view.spec.ts",
         "line": 112,
+        "column": 12
+      }
+    },
+    {
+      "id": "066d64566374188-bb5289a9aee2035",
+      "title": "rollup data views - fields for wildcard returns 200 and best effort response despite lack of rollup support",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/rollup_data_views.spec.ts",
+        "line": 35,
         "column": 12
       }
     },
@@ -2572,6 +2590,24 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_get_errors.spec.ts",
         "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "fdc00415d051d30-c298478ad3950b5",
+      "title": "scripted fields disabled scripted fields are ignored when disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_disabled.spec.ts",
+        "line": 45,
         "column": 12
       }
     }

@@ -200,16 +200,8 @@ export const sharedAxisSchema = {
   ),
 };
 
-const yAxisAnchorSchema = schema.oneOf([schema.literal('start'), schema.literal('end')], {
-  meta: {
-    description:
-      'Position of the Y-axis relative to the chart orientation: start places it on the leading side (left in vertical charts), end on the trailing side (right in vertical charts).',
-  },
-});
-
 const yAxisSchema = schema.object(
   {
-    anchor: schema.maybe(yAxisAnchorSchema),
     ...sharedAxisSchema,
     scale: schema.maybe(yScaleSchema),
     domain: schema.maybe(yDomainSchema),
@@ -217,7 +209,7 @@ const yAxisSchema = schema.object(
   {
     meta: {
       description:
-        'Y-axis configuration with optional anchor, scale, and bounds. The anchor controls which side of the chart the axis renders on.',
+        'Y-axis configuration with scale and bounds. The axis position is determined by the key: y renders on the start side (left in vertical charts), y2 on the end side (right in vertical charts).',
     },
   }
 );
@@ -562,14 +554,14 @@ const xySharedSettings = {
       {
         x: schema.maybe(xAxisSchema),
         y: schema.maybe(yAxisSchema),
-        secondary_y: schema.maybe(yAxisSchema),
+        y2: schema.maybe(yAxisSchema),
       },
       {
         meta: {
           id: 'vis_api_xy_axis_config',
           title: 'Axis',
           description:
-            'Axis configuration for X, primary Y, and secondary Y axes. The primary Y axis defaults to the start (leading) side, and the secondary Y axis defaults to the end (trailing) side.',
+            'Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.',
         },
       }
     )
@@ -577,11 +569,11 @@ const xySharedSettings = {
   styling: schema.maybe(xyStylingSchema),
 };
 
-const yAxisIdReferenceSchema = schema.oneOf([schema.literal('y'), schema.literal('secondary_y')], {
+const yMetricOnAxisSchema = schema.oneOf([schema.literal('y'), schema.literal('y2')], {
   defaultValue: 'y',
   meta: {
     description:
-      'ID of the axis definition this Y metric is bound to; links the metric to the matching axis configuration in axis.y or axis.secondary_y. If omitted, the metric is bound to the primary Y axis.',
+      'The Y axis this metric is plotted on. Values match the root axis configuration keys (axis.y, axis.y2). If omitted, defaults to the Y axis start (leading) side.',
   },
 });
 /**
@@ -605,7 +597,7 @@ const xyDataLayerSchemaNoESQL = schema.object(
     ),
     y: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps({
-        axis_id: schema.maybe(yAxisIdReferenceSchema),
+        axis: schema.maybe(yMetricOnAxisSchema),
         color: schema.maybe(
           schema.oneOf([staticColorSchema, autoColorSchema], {
             defaultValue: AUTO_COLOR,
@@ -645,7 +637,7 @@ const xyDataLayerSchemaESQL = schema.object(
     y: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(
         {
-          axis_id: schema.maybe(yAxisIdReferenceSchema),
+          axis: schema.maybe(yMetricOnAxisSchema),
           color: schema.maybe(
             schema.oneOf([staticColorSchema, autoColorSchema], {
               defaultValue: AUTO_COLOR,
@@ -732,12 +724,12 @@ const referenceLineLayerShared = {
       meta: { description: 'Position of the icon and label relative to the reference line' },
     })
   ),
-  axis_id: schema.maybe(
-    schema.oneOf([schema.literal('x'), schema.literal('y'), schema.literal('secondary_y')], {
+  axis: schema.maybe(
+    schema.oneOf([schema.literal('x'), schema.literal('y'), schema.literal('y2')], {
       defaultValue: 'y',
       meta: {
         description:
-          'ID of the axis this reference line applies to. If omitted, the reference line is bound to the primary Y axis.',
+          'The axis this reference line is drawn on. Values match the root axis configuration keys. If omitted, defaults to the primary Y axis.',
       },
     })
   ),
