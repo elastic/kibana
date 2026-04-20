@@ -7,8 +7,8 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { streamsApiTest as apiTest } from '../fixtures';
-import { PUBLIC_API_HEADERS } from '../fixtures/constants';
+import { streamsApiTest as apiTest } from '../../fixtures';
+import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
 apiTest.describe(
   'Stream data routing - fork stream API (CRUD)',
