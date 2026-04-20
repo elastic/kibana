@@ -108,19 +108,36 @@ export class LogsRepository {
 
   private async searchDataStream(query: ClientSearchRequest): Promise<LogSearchResult> {
     const dataStreamClient = await initializeDataStreamClient(this.coreDataStreams);
+    const { space, ...queryProperties } = query;
+    if (space) {
+      const spaceResponse = await dataStreamClient.search({
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        size: 1000,
+        space,
+        ...queryProperties,
+      });
 
-    const response = await dataStreamClient.search({
-      sort: [{ '@timestamp': { order: 'desc' } }],
-      size: 1000,
-      ...query,
-    });
+      return {
+        total:
+          typeof spaceResponse.hits.total === 'number'
+            ? spaceResponse.hits.total
+            : spaceResponse.hits.total?.value || 0,
+        logs: spaceResponse.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
+      };
+    } else {
+      const response = await dataStreamClient.search({
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        size: 1000,
+        ...queryProperties,
+      });
 
-    return {
-      total:
-        typeof response.hits.total === 'number'
-          ? response.hits.total
-          : response.hits.total?.value || 0,
-      logs: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
-    };
+      return {
+        total:
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value || 0,
+        logs: response.hits.hits.flatMap((hit) => (hit._source ? [hit._source] : [])),
+      };
+    }
   }
 }
