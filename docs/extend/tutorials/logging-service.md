@@ -11,6 +11,8 @@ Allows a plugin to provide status and diagnostic information.
 The Logging service is only available server side.
 ::::
 
+For editorial guidance on what to log and what to avoid (sensitive data, noisy `info` messages, implementation details), see the [logging guidelines](../contributing/codebase/logging.md).
+
 
 ```typescript
 import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';

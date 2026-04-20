@@ -119,6 +119,10 @@ router.get({ path: '/api/foos', options: { access: 'public' } }, async () => {..
 
 See the principle regarding [commitment](#commitment) before making APIs public!
 
+### Do not access another plugin's REST API directly from plugin code
+
+Plugins should not attempt to directly access the REST APIs created by another plugin. The plugin author who registered the public REST API should provide access to it via functionality on the plugin lifecycle contract. Accessing functionality through a client side plugin contract provides more type-safety compared to calling the REST API directly. Never attempt to call a server-side REST API if you are already on the server-side. It will not work. This should also be avoided in any code provided within a common folder.
+
 ## Infrastructure-as-Code
 
 All public APIs should endeavour to be compatible with Infrastructure-as-Code (IaC) tools like Terraform. There may be merit in further optimizations for IaC use cases depending on your API.
@@ -583,6 +587,18 @@ Carefully choose the log level of any logs you emit. `info` level logs can gener
 
 For questions about APM and telemetry please reach out to the Core team.
 
+#### Telemetry
+###LG TODO check in on https://github.com/elastic/kibana/issues/112291#issuecomment-4238886978
+Every team should be collecting telemetry metrics on it's public API usage. This will be important for knowing when it's safe to make breaking changes. The Core team will be looking into ways to make this easier and an automatic part of registration (see [#112291](https://github.com/elastic/kibana/issues/112291)).
+
+#### APM
+
+{{kib}} server and client are instrumented with APM node and APM RUM clients respectively, tracking several types of transactions by default, such as `page-load`, `request`, etc.
+You may introduce custom transactions. Please refer to the [APM documentation](https://www.elastic.co/guide/en/apm/get-started/current/index.html) and follow these guidelines when doing so:
+
+- Use dashed syntax for transaction types and names: `my-transaction-type` and `my-transaction-name`
+- [Refrain from adding too many custom labels](https://www.elastic.co/guide/en/apm/get-started/current/metadata.html)
+
 ### Security
 
 User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../../key-concepts/security/api-authorization.md)). This depends on the actions your API performs.
@@ -617,11 +633,31 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 
 ## Documentation
 
+###LG TODO update this section to use OAS
+
 **Public HTTP APIs must have reference documentation**
 
 See our current reference documentation [here](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
 
 See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
+
+Every public API should be documented inside the [docs/api](https://github.com/elastic/kibana/tree/main/docs/api) folder in asciidoc (this content will eventually be migrated to mdx to support the new docs system). If a public REST API is undocumented, you should either document it, or make it internal.
+
+### Release tags
+
+###LG TODO link to OAS?
+
+Every public API should have a release tag specified at the top of its documentation page. Release tags are not applicable to internal APIs, as we make no guarantees on those.
+
+| Type | Description | Documentation | Asciidoc Tag |
+| -----| ------------| ------------- | ------------ |
+| Undocumented | Every public API should be documented, but if it isn't, we make no guarantees about it. These need to be eliminated and should become internal or documented. | | |
+| Experimental | A public API that may break or be removed at any time. | experimental[] | |
+| Beta | A public API that we make a best effort not to break or remove. However, there are no guarantees. | beta[] | |
+| Stable | No breaking changes outside of a Major | stable[] | |
+| Deprecated | Do not use, will be removed. | deprecated[] | |
+
+Every public API should have a release tag specified using the appropriate documentation release tag above. If you do this, the docs system will provide a pop up explaining the conditions. If an API is not marked, it should be considered experimental.
 
 ## Versioning
 
