@@ -154,6 +154,10 @@
     "@kbn/shared-ux-column-presets",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/zod",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-server",
   ],
   "exclude": ["target/**/*"]
 }

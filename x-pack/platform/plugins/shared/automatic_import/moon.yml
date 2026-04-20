@@ -63,6 +63,8 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/scout'
   - '@kbn/core-analytics-browser'
+  - '@kbn/inference-common'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

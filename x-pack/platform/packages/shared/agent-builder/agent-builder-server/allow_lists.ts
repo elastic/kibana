@@ -86,7 +86,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
-  `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
 ] as const;
@@ -117,6 +116,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform – Streams
   'streams-management',
   'significant-events-memory',
+  'knowledge-indicators-management',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -132,6 +132,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // O11Y
   'observability.rca',
   'observability.investigation',
+  'observability.service-map',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,

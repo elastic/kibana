@@ -136,7 +136,7 @@ describe('LogsExtractionClient', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
   let mockDataViewsService: jest.Mocked<DataViewsService>;
   let mockEngineDescriptorClient: jest.Mocked<
-    Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
+    Pick<EngineDescriptorClient, 'findOrThrow' | 'update' | 'updateWith'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
   let mockCcsLogsExtractionClient: ReturnType<typeof createMockCcsLogsExtractionClient>;
@@ -152,6 +152,7 @@ describe('LogsExtractionClient', () => {
     mockEngineDescriptorClient = {
       findOrThrow: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
+      updateWith: jest.fn().mockResolvedValue({}),
     };
     mockGlobalStateClient = createMockGlobalStateClient();
     mockCcsLogsExtractionClient = createMockCcsLogsExtractionClient();
@@ -168,6 +169,17 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('extractLogs', () => {
+    function applyLastUpdater(
+      entityType: EntityType = 'user',
+      descriptorOverrides?: Partial<Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>>
+    ) {
+      const [[, updater]] = mockEngineDescriptorClient.updateWith.mock.calls;
+      return updater({
+        ...createMockEngineDescriptor(entityType),
+        ...descriptorOverrides,
+      } as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>);
+    }
+
     it('should successfully extract logs and ingest entities', async () => {
       const lastTimestamp = '2024-01-02T12:00:00.000Z';
       const mockEsqlResponse: ESQLSearchResponse = {
@@ -229,20 +241,22 @@ describe('LogsExtractionClient', () => {
         abortController: undefined,
       });
 
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater()).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+        error: undefined,
+      });
     });
 
     it('should handle empty results from ESQL query', async () => {
@@ -266,20 +280,22 @@ describe('LogsExtractionClient', () => {
 
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
       expect(mockIngestEntities).toHaveBeenCalledTimes(0);
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater()).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+        error: undefined,
+      });
     });
 
     it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
@@ -538,7 +554,7 @@ describe('LogsExtractionClient', () => {
         esClient: mockEsClient,
         query: expect.stringContaining(toDate),
       });
-      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.updateWith).not.toHaveBeenCalled();
     });
 
     it('should not update engine descriptor when specificWindow is provided', async () => {
@@ -577,7 +593,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(2);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
-      expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      expect(mockEngineDescriptorClient.updateWith).not.toHaveBeenCalled();
     });
 
     it('should handle errors from executeEsqlQuery', async () => {
@@ -720,21 +736,48 @@ describe('LogsExtractionClient', () => {
       expect(mockIngestEntities).toHaveBeenCalledTimes(1);
 
       // CCS error is stored in the saved object
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'user',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-          error: { message: ccsError.message, action: 'extractLogs' },
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater()).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+        error: { message: ccsError.message, action: 'extractLogs' },
+      });
+    });
+
+    it('should clear a previous error after a successful extraction', async () => {
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      mockExecuteEsqlQuery.mockResolvedValue(mockLogPaginationCursorProbeEmpty());
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      await client.extractLogs('user');
+
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
+        'user',
+        expect.any(Function)
+      );
+      expect(
+        applyLastUpdater('user', { error: { message: 'previous error', action: 'extractLogs' } })
+          .error
+      ).toBeUndefined();
     });
 
     it('should fallback to logs-* when data view is not found', async () => {
@@ -787,20 +830,21 @@ describe('LogsExtractionClient', () => {
           targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
         })
       );
-      expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
+      expect(mockEngineDescriptorClient.updateWith).toHaveBeenCalledWith(
         'host',
-        expect.objectContaining({
-          logExtractionState: expect.objectContaining({
-            paginationTimestamp: undefined,
-            paginationId: undefined,
-            logsPageCursorStartTimestamp: undefined,
-            logsPageCursorStartId: undefined,
-            logsPageCursorEndTimestamp: undefined,
-            logsPageCursorEndId: undefined,
-            lastExecutionTimestamp: expect.any(String),
-          }),
-        })
+        expect.any(Function)
       );
+      expect(applyLastUpdater('host')).toMatchObject({
+        logExtractionState: expect.objectContaining({
+          paginationTimestamp: undefined,
+          paginationId: undefined,
+          logsPageCursorStartTimestamp: undefined,
+          logsPageCursorStartId: undefined,
+          logsPageCursorEndTimestamp: undefined,
+          logsPageCursorEndId: undefined,
+          lastExecutionTimestamp: expect.any(String),
+        }),
+      });
     });
 
     it('should return success false when engine is not started', async () => {
