@@ -90,6 +90,13 @@ docker images "docker.elastic.co/elasticsearch/elasticsearch"
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 echo 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | xargs -n1 bash -c 'docker save docker.elastic.co/elasticsearch/elasticsearch:${0} | gzip > ../es-build/elasticsearch-${0}-docker-image.tar.gz'
 
+ES_VERSION=$(docker images "docker.elastic.co/elasticsearch/elasticsearch" --format "{{.Tag}}" | grep SNAPSHOT | head -1)
+KIBANA_ES_DEFAULT_VERSION="$ES_VERSION-$ELASTICSEARCH_GIT_COMMIT"
+KIBANA_ES_DEFAULT_IMAGE="docker.elastic.co/kibana-ci/elasticsearch:$KIBANA_ES_DEFAULT_VERSION"
+echo $ES_VERSION $KIBANA_ES_DEFAULT_VERSION $KIBANA_ES_DEFAULT_IMAGE
+docker tag "docker.elastic.co/elasticsearch/elasticsearch:$ES_VERSION" "$KIBANA_ES_DEFAULT_IMAGE"
+docker_with_retry push "$KIBANA_ES_DEFAULT_IMAGE"
+
 echo "--- Create kibana-ci docker cloud image archives"
 ./gradlew :distribution:docker:cloud-ess-docker-export:assemble \
   -x :distribution:tools:server-launcher:nativeImageLinuxX64 \
