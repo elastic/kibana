@@ -71,7 +71,10 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
 
     return (
       <EuiPopover
-        aria-label={i18nTranslate.translate('xpack.maintenanceWindows.upcomingEventsPopover.ariaLabel', { defaultMessage: 'Upcoming events' })}
+        aria-label={i18nTranslate.translate(
+          'xpack.maintenanceWindows.upcomingEventsPopover.ariaLabel',
+          { defaultMessage: 'Upcoming events' }
+        )}
         button={
           <EuiButtonIcon
             data-test-subj="upcoming-events-icon-button"

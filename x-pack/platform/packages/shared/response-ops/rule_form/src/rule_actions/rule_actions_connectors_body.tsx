@@ -326,7 +326,10 @@ export const RuleActionsConnectorsBody = ({
     return (
       <EuiFilterGroup style={{ width: '100%' }}>
         <EuiPopover
-          aria-label={i18n.translate('responseOpsRuleForm.ruleForm.connectorTypeFilterPopoverAriaLabel', { defaultMessage: 'Filter by connector type' })}
+          aria-label={i18n.translate(
+            'responseOpsRuleForm.ruleForm.connectorTypeFilterPopoverAriaLabel',
+            { defaultMessage: 'Filter by connector type' }
+          )}
           button={button}
           closePopover={closeFilterPopover}
           isOpen={isConenctorFilterPopoverOpen}

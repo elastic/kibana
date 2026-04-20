@@ -107,7 +107,9 @@ export const IndexSelectPopover: React.FunctionComponent<Props> = ({
   return (
     <EuiPopover
       id="indexPopover"
-      aria-label={i18n.translate('xpack.stackAlerts.components.ui.indexSelectPopover.ariaLabel', { defaultMessage: 'Index' })}
+      aria-label={i18n.translate('xpack.stackAlerts.components.ui.indexSelectPopover.ariaLabel', {
+        defaultMessage: 'Index',
+      })}
       button={
         <EuiExpression
           display="columns"

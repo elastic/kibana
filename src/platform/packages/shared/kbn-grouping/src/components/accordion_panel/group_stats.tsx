@@ -138,7 +138,9 @@ const GroupStatsComponent = <T,>({
         <EuiFlexItem grow={false}>
           <EuiPopover
             anchorPosition="downLeft"
-            aria-label={i18n.translate('grouping.accordion.takeAction', { defaultMessage: 'Take action' })}
+            aria-label={i18n.translate('grouping.accordion.takeAction', {
+              defaultMessage: 'Take action',
+            })}
             button={
               <EuiButtonEmpty
                 data-test-subj="take-action-button"

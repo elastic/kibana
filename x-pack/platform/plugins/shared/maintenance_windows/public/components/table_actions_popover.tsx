@@ -276,7 +276,10 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiPopover
-              aria-label={i18nTranslate.translate('xpack.maintenanceWindows.tableActionsPopover.ariaLabel', { defaultMessage: 'Actions' })}
+              aria-label={i18nTranslate.translate(
+                'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',
+                { defaultMessage: 'Actions' }
+              )}
               button={button}
               isOpen={isPopoverOpen}
               closePopover={closePopover}

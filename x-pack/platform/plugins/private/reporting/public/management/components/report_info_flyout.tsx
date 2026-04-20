@@ -159,7 +159,10 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ config, onClose, jo
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   id="reportInfoFlyoutActionsPopover"
-                  aria-label={i18n.translate('xpack.reporting.listing.flyout.actionsPopoverAriaLabel', { defaultMessage: 'Report actions' })}
+                  aria-label={i18n.translate(
+                    'xpack.reporting.listing.flyout.actionsPopoverAriaLabel',
+                    { defaultMessage: 'Report actions' }
+                  )}
                   button={actionsButton}
                   isOpen={isActionsPopoverOpen}
                   closePopover={closePopover}
