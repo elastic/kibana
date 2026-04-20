@@ -12,6 +12,7 @@ import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
   PerformRuleInstallationRequestBody,
+  RuleVersionSpecifier,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -66,7 +67,7 @@ export const performRuleInstallationHandler = async (
       version: RuleVersion;
     }> = [];
     const ruleErrors = [];
-    const installedRules = [];
+    const installedRules: RuleVersionSpecifier[] = [];
     const skippedRules: SkippedRuleInstall[] = [];
 
     // Perform all the checks we can before we start the upgrade process
@@ -109,7 +110,13 @@ export const performRuleInstallationHandler = async (
         ruleAssets,
         logger
       );
-      installedRules.push(...results);
+
+      const batchInstalledRules = results.map(({ result: rule }) => ({
+        rule_id: rule.rule_id,
+        version: rule.version,
+      }));
+
+      installedRules.push(...batchInstalledRules);
       ruleErrors.push(...errors);
     }
 
@@ -133,7 +140,7 @@ export const performRuleInstallationHandler = async (
         failed: ruleErrors.length,
       },
       results: {
-        created: installedRules.map(({ result }) => result),
+        created: installedRules,
         skipped: skippedRules,
       },
       errors: allErrors,

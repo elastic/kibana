@@ -5,7 +5,6 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import type { RuleResponse } from '../../model';
 import type { AggregatedPrebuiltRuleError } from '../model';
 
 export const RuleVersionSpecifier = t.exact(
@@ -59,7 +58,7 @@ export interface PerformRuleInstallationResponseBody {
     failed: number;
   };
   results: {
-    created: RuleResponse[];
+    created: RuleVersionSpecifier[];
     skipped: SkippedRuleInstall[];
   };
   errors: AggregatedPrebuiltRuleError[];
