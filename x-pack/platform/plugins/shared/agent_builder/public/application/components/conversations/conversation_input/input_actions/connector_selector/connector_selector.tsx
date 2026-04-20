@@ -236,7 +236,10 @@ export const ConnectorSelector: React.FC<{}> = () => {
 
   // Track the last observed default so we can detect an admin-initiated change
   // and propagate it to the chat's selected connector without a page refresh.
-  const previousDefaultRef = useRef<string | undefined>(defaultConnectorId);
+  // Initialized to `undefined` — meaning "no settled value observed yet" — so the
+  // initial `undefined -> <value>` transition (when settings finish loading) is not
+  // mistaken for an admin change and does not overwrite the user's stored selection.
+  const previousDefaultRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (isLoading || !initialConnectorId) return;
@@ -265,8 +268,11 @@ export const ConnectorSelector: React.FC<{}> = () => {
     }
 
     // Admin changed the default-model setting to a different, valid connector.
+    // Require a prior non-undefined observation so the first `undefined -> <value>`
+    // transition on mount (settings finishing load) does not count as a change.
     if (
       defaultConnectorId &&
+      previousDefault !== undefined &&
       defaultConnectorId !== previousDefault &&
       defaultConnectorId !== selectedConnectorId &&
       connectors.some((c) => c.id === defaultConnectorId)
