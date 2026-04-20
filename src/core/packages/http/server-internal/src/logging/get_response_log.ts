@@ -40,10 +40,7 @@ function cloneAndFilterHeaders(headers?: HapiHeaders) {
     for (const key of Object.keys(headers)) {
       const value = headers[key];
       if (value !== undefined) {
-        result[key] = redactSensitiveHeaders(
-          key,
-          Array.isArray(value) ? [...value] : value
-        );
+        result[key] = redactSensitiveHeaders(key, Array.isArray(value) ? [...value] : value);
       }
     }
   }
