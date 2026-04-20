@@ -27,11 +27,13 @@ paths:
           description: If true, only timelines that are marked as favorites by the user are returned.
         - in: query
           name: timeline_type
+          description: Restrict results to `default` investigation timelines or `template` timeline templates.
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
             nullable: true
         - in: query
           name: sort_field
+          description: Field used to sort the list (`title`, `description`, `updated`, or `created`).
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/SortFieldTimeline'
         - in: query
@@ -62,6 +64,7 @@ paths:
             type: string
         - in: query
           name: status
+          description: Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
             nullable: true
@@ -102,20 +105,23 @@ paths:
                     type: number
                     description: The amount of custom Timeline templates in the results
                     example: 2
-              example:
-                timeline:
-                  - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                    version: WzE0LDFd
-                    title: Phishing investigation
-                    timelineType: default
-                    status: active
-                    updated: 1741344876825
-                totalCount: 1
-                defaultTimelineCount: 1
-                templateTimelineCount: 0
-                favoriteCount: 0
-                elasticTemplateTimelineCount: 0
-                customTemplateTimelineCount: 0
+              examples:
+                timelineList:
+                  summary: Example list response
+                  value:
+                    timeline:
+                      - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        version: WzE0LDFd
+                        title: Phishing investigation
+                        timelineType: default
+                        status: active
+                        updated: 1741344876825
+                    totalCount: 1
+                    defaultTimelineCount: 1
+                    templateTimelineCount: 0
+                    favoriteCount: 0
+                    elasticTemplateTimelineCount: 0
+                    customTemplateTimelineCount: 0
         '400':
           description: Bad Request response.
           content:
@@ -130,3 +136,9 @@ paths:
                   statusCode:
                     type: number
                     example: 405
+              examples:
+                badRequest:
+                  summary: Error response body
+                  value:
+                    body: get timeline error
+                    statusCode: 405

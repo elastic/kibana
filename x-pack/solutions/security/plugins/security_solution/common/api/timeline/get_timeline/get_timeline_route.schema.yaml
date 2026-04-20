@@ -33,12 +33,15 @@ paths:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/TimelineResponse'
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                version: WzE0LDFd
-                title: Phishing investigation
-                timelineType: default
-                status: active
-                description: User-reported suspicious email
-                noteIds: []
-                pinnedEventIds: []
+              examples:
+                timelineDetail:
+                  summary: Timeline detail
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE0LDFd
+                    title: Phishing investigation
+                    timelineType: default
+                    status: active
+                    description: User-reported suspicious email
+                    noteIds: []
+                    pinnedEventIds: []

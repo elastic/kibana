@@ -15,49 +15,59 @@ paths:
       parameters:
         - name: documentIds
           in: query
+          description: Elasticsearch document `_id` values (or serialized array) to fetch notes for.
           schema:
             $ref: '#/components/schemas/DocumentIds'
         - name: savedObjectIds
           in: query
+          description: Saved object ids (for example timeline `savedObjectId`) whose notes should be returned.
           schema:
             $ref: '#/components/schemas/SavedObjectIds'
         - name: page
           in: query
+          description: 1-based page index for pagination (string for compatibility with existing clients).
           schema:
             type: string
             nullable: true
         - name: perPage
           in: query
+          description: Page size as a string (for example `20`).
           schema:
             type: string
             nullable: true
         - name: search
           in: query
+          description: Free-text filter applied to note body content.
           schema:
             type: string
             nullable: true
         - name: sortField
           in: query
+          description: Field name to sort by (implementation-specific; commonly `updated` or `created`).
           schema:
             type: string
             nullable: true
         - name: sortOrder
           in: query
+          description: Sort direction (`asc` or `desc`).
           schema:
             type: string
             nullable: true
         - name: filter
           in: query
+          description: Advanced filter expression supported by the notes finder.
           schema:
             type: string
             nullable: true
         - in: query
           name: createdByFilter
+          description: Optional filter on author username or identifier.
           schema:
             nullable: true
             type: string
         - name: associatedFilter
           in: query
+          description: Restrict results based on how notes are linked to documents and saved objects.
           schema:
             $ref: '#/components/schemas/AssociatedFilterType'
       responses:
@@ -68,13 +78,16 @@ paths:
               schema:
                 $ref: '#/components/schemas/GetNotesResult'
               examples:
-                totalCount: 1
-                notes:
-                  - noteId: 709f99c6-89b6-4953-9160-35945c8e174e
-                    version: WzQ2LDFd
-                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                    note: Escalated to tier-2 analyst
-                    eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                notesPage:
+                  summary: Paged notes for a timeline
+                  value:
+                    totalCount: 1
+                    notes:
+                      - noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                        version: WzQ2LDFd
+                        timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        note: Escalated to tier-2 analyst
+                        eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
 
 components:
   schemas:

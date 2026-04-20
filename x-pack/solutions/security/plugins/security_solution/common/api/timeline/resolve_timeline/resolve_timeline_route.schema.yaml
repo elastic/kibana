@@ -33,6 +33,7 @@ paths:
                 $ref: '../model/components.schema.yaml#/components/schemas/ResolvedTimeline'
               examples:
                 exactMatch:
+                  summary: Exact match outcome
                   description: Timeline resolved without alias or conflict
                   value:
                     outcome: exactMatch
@@ -43,5 +44,23 @@ paths:
 
         '400':
           description: Bad Request response.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                badRequest:
+                  summary: Bad request
+                  value: {}
         '404':
           description: The (template) Timeline was not found
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                notFound:
+                  summary: Not found
+                  value: {}

@@ -50,6 +50,14 @@ paths:
                 version:
                   type: string
                   nullable: true
+            examples:
+              createDefault:
+                summary: Create a default timeline
+                value:
+                  timeline:
+                    title: Malware containment
+                    timelineType: default
+                    status: active
       responses:
         '200':
           description: Indicates a successful call.
@@ -57,12 +65,15 @@ paths:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                version: WzE0LDFd
-                title: Malware containment
-                timelineType: default
-                status: active
+              examples:
+                created:
+                  summary: Created timeline
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE0LDFd
+                    title: Malware containment
+                    timelineType: default
+                    status: active
         '405':
           description: Indicates that there was an error in the Timeline creation.
           content:
@@ -77,3 +88,9 @@ paths:
                   statusCode:
                     type: number
                     example: 405
+              examples:
+                error:
+                  summary: Error body
+                  value:
+                    body: update timeline error
+                    statusCode: 405

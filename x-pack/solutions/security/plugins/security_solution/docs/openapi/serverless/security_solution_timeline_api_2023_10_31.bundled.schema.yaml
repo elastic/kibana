@@ -20,6 +20,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteOne:
+                summary: Delete a single note by id
+                value:
+                  noteId: 709f99c6-89b6-4953-9160-35945c8e174e
             schema:
               oneOf:
                 - nullable: true
@@ -43,6 +48,15 @@ paths:
         required: true
       responses:
         '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Empty success payload
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
           description: Indicates a successful call.
       summary: Delete a note
       tags:
@@ -52,50 +66,70 @@ paths:
       description: Get all notes for a given document.
       operationId: GetNotes
       parameters:
-        - in: query
+        - description: >-
+            Elasticsearch document `_id` values (or serialized array) to fetch
+            notes for.
+          in: query
           name: documentIds
           schema:
             $ref: '#/components/schemas/DocumentIds'
-        - in: query
+        - description: >-
+            Saved object ids (for example timeline `savedObjectId`) whose notes
+            should be returned.
+          in: query
           name: savedObjectIds
           schema:
             $ref: '#/components/schemas/SavedObjectIds'
-        - in: query
+        - description: >-
+            1-based page index for pagination (string for compatibility with
+            existing clients).
+          in: query
           name: page
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Page size as a string (for example `20`).
+          in: query
           name: perPage
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Free-text filter applied to note body content.
+          in: query
           name: search
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: >-
+            Field name to sort by (implementation-specific; commonly `updated`
+            or `created`).
+          in: query
           name: sortField
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Sort direction (`asc` or `desc`).
+          in: query
           name: sortOrder
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Advanced filter expression supported by the notes finder.
+          in: query
           name: filter
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: Optional filter on author username or identifier.
+          in: query
           name: createdByFilter
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: >-
+            Restrict results based on how notes are linked to documents and
+            saved objects.
+          in: query
           name: associatedFilter
           schema:
             $ref: '#/components/schemas/AssociatedFilterType'
@@ -104,13 +138,16 @@ paths:
           content:
             application/json:
               examples:
-                notes:
-                  - eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
-                    note: Escalated to tier-2 analyst
-                    noteId: 709f99c6-89b6-4953-9160-35945c8e174e
-                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                    version: WzQ2LDFd
-                totalCount: 1
+                notesPage:
+                  summary: Paged notes for a timeline
+                  value:
+                    notes:
+                      - eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                        note: Escalated to tier-2 analyst
+                        noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                        timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        version: WzQ2LDFd
+                    totalCount: 1
               schema:
                 $ref: '#/components/schemas/GetNotesResult'
           description: Indicates a successful call.
@@ -124,6 +161,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              addNote:
+                summary: Add a note on an event
+                value:
+                  note:
+                    eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                    note: Escalated to tier-2 analyst
+                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -148,13 +193,16 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                note:
-                  eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
-                  note: Escalated to tier-2 analyst
-                  noteId: 709f99c6-89b6-4953-9160-35945c8e174e
-                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                  version: WzQ2LDFd
+              examples:
+                persisted:
+                  summary: Persisted note wrapper
+                  value:
+                    note:
+                      eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                      note: Escalated to tier-2 analyst
+                      noteId: 709f99c6-89b6-4953-9160-35945c8e174e
+                      timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                      version: WzQ2LDFd
               schema:
                 $ref: '#/components/schemas/ResponseNote'
           description: Indicates a successful call.
@@ -169,6 +217,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              pinEvent:
+                summary: Pin an event
+                value:
+                  eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -197,10 +251,17 @@ paths:
           content:
             application/json:
               examples:
-                eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
-                pinnedEventId: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
-                timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                version: WzQ2LDFe
+                pinnedSaved:
+                  summary: Pinned event saved object
+                  value:
+                    eventId: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
+                    pinnedEventId: 10r1929b-0af7-42bd-85a8-56e234f98h2f3
+                    timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzQ2LDFe
+                unpinned:
+                  summary: Unpin response
+                  value:
+                    unpinned: true
               schema:
                 $ref: '#/components/schemas/PersistPinnedEventResponse'
           description: Indicates a successful call.
@@ -215,6 +276,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              deleteByIds:
+                summary: Delete timelines by saved object id
+                value:
+                  savedObjectIds:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -222,8 +289,6 @@ paths:
                   description: >-
                     The list of IDs of the Timelines or Timeline templates to
                     delete
-                  example:
-                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   items:
                     type: string
                   maxItems: 100
@@ -232,9 +297,6 @@ paths:
                   description: >-
                     Saved search IDs that should be deleted alongside the
                     timelines
-                  example:
-                    - 23f3-43g34g322-e5g5hrh6h-45454
-                    - 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   items:
                     type: string
                   maxItems: 100
@@ -245,6 +307,15 @@ paths:
         required: true
       responses:
         '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Success
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
           description: Indicates a successful call.
       summary: Delete Timelines or Timeline templates
       tags:
@@ -268,15 +339,18 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                description: User-reported suspicious email
-                noteIds: []
-                pinnedEventIds: []
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                status: active
-                timelineType: default
-                title: Phishing investigation
-                version: WzE0LDFd
+              examples:
+                timelineDetail:
+                  summary: Timeline detail
+                  value:
+                    description: User-reported suspicious email
+                    noteIds: []
+                    pinnedEventIds: []
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Phishing investigation
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/TimelineResponse'
           description: Indicates a successful call.
@@ -293,6 +367,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              patchTitle:
+                summary: Update title
+                value:
+                  timeline:
+                    title: Escalated case review
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  version: WzE0LDFd
             schema:
               type: object
               properties:
@@ -325,18 +407,27 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                status: active
-                timelineType: default
-                title: Escalated case review
-                version: WzE1LDFd
+              examples:
+                patched:
+                  summary: Updated timeline
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Escalated case review
+                    version: WzE1LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
             application/json:
+              examples:
+                error:
+                  summary: Error body
+                  value:
+                    body: update timeline error
+                    statusCode: 405
               schema:
                 type: object
                 properties:
@@ -360,6 +451,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              createDefault:
+                summary: Create a default timeline
+                value:
+                  timeline:
+                    status: active
+                    timelineType: default
+                    title: Malware containment
             schema:
               type: object
               properties:
@@ -399,18 +498,27 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                status: active
-                timelineType: default
-                title: Malware containment
-                version: WzE0LDFd
+              examples:
+                created:
+                  summary: Created timeline
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: active
+                    timelineType: default
+                    title: Malware containment
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates a successful call.
         '405':
           content:
             application/json:
+              examples:
+                error:
+                  summary: Error body
+                  value:
+                    body: update timeline error
+                    statusCode: 405
               schema:
                 type: object
                 properties:
@@ -427,38 +535,57 @@ paths:
         - Security Timeline API
         - access:securitySolution
   /api/timeline/_copy:
-    get:
-      description: |
-        Copies and returns a timeline or timeline template.
+    post:
+      description: >
+        Create a new saved timeline (or template) by copying an existing one.
+        Pass the source timeline `savedObjectId` in `timelineIdToCopy` and
+        overrides in `timeline`.
       operationId: CopyTimeline
       requestBody:
         content:
           application/json:
+            examples:
+              copyWithTitle:
+                summary: Copy with a new title
+                value:
+                  timeline:
+                    timelineType: default
+                    title: Copy of investigation
+                  timelineIdToCopy: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
                 timeline:
                   $ref: '#/components/schemas/SavedTimeline'
                 timelineIdToCopy:
+                  description: >-
+                    The `savedObjectId` of the timeline or template to
+                    duplicate.
                   type: string
               required:
                 - timeline
                 - timelineIdToCopy
+        description: >-
+          Source timeline id to copy plus timeline fields for the new saved
+          object.
         required: true
       responses:
         '200':
           content:
             application/json:
-              example:
-                savedObjectId: 6ce1b592-84e3-4b4a-9552-f189d4b82075
-                status: active
-                timelineType: default
-                title: Copy of phishing investigation
-                version: WzE1LDFd
+              examples:
+                copied:
+                  summary: Newly saved timeline
+                  value:
+                    savedObjectId: 6ce1b592-84e3-4b4a-9552-f189d4b82075
+                    status: active
+                    timelineType: default
+                    title: Copy of investigation
+                    version: WzE1LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates a successful call.
-      summary: Copies timeline or timeline template
+      summary: Copy a timeline or timeline template
       tags:
         - Security Timeline API
         - access:securitySolution
@@ -470,7 +597,10 @@ paths:
         Timeline is returned.
       operationId: GetDraftTimelines
       parameters:
-        - in: query
+        - description: >-
+            Which draft to load (`default` investigation timeline or `template`
+            timeline template).
+          in: query
           name: timelineType
           required: true
           schema:
@@ -480,17 +610,26 @@ paths:
           content:
             application/json:
               examples:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                status: draft
-                timelineType: default
-                title: ''
-                version: WzE0LDFd
+                draftPayload:
+                  summary: Draft timeline payload
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: draft
+                    timelineType: default
+                    title: ''
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
               schema:
                 type: object
                 properties:
@@ -505,6 +644,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409
               schema:
                 type: object
                 properties:
@@ -532,6 +677,11 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              defaultDraft:
+                summary: Create a default draft timeline
+                value:
+                  timelineType: default
             schema:
               type: object
               properties:
@@ -547,20 +697,29 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                status: draft
-                templateTimelineId: null
-                templateTimelineVersion: null
-                timelineType: default
-                title: ''
-                version: WzE0LDFd
+              examples:
+                draftResponse:
+                  summary: Draft after reset or creation
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    status: draft
+                    templateTimelineId: null
+                    templateTimelineVersion: null
+                    timelineType: default
+                    title: ''
+                    version: WzE0LDFd
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  summary: Permission denied
+                  value:
+                    message: Forbidden
+                    status_code: 403
               schema:
                 type: object
                 properties:
@@ -574,6 +733,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  summary: Draft conflict
+                  value:
+                    message: Conflict
+                    status_code: 409
               schema:
                 type: object
                 properties:
@@ -602,6 +767,12 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              exportIds:
+                summary: Export by timeline ids
+                value:
+                  ids:
+                    - 15c1929b-0af7-42bd-85a8-56e234cc7c4e
             schema:
               type: object
               properties:
@@ -618,11 +789,11 @@ paths:
         '200':
           content:
             application/ndjson:
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                timelineType: default
-                title: Investigation
-                version: WzE0LDFd
+              examples:
+                ndjsonLine:
+                  summary: Single NDJSON line
+                  value: >-
+                    {"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd","title":"Investigation","timelineType":"default"}
               schema:
                 description: NDJSON of the exported Timelines
                 type: string
@@ -630,6 +801,12 @@ paths:
         '400':
           content:
             application/ndjson:
+              examples:
+                badRequest:
+                  summary: Export error
+                  value:
+                    body: Export limit exceeded
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -649,6 +826,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              favoriteDefault:
+                summary: Favorite a default timeline
+                value:
+                  templateTimelineId: null
+                  templateTimelineVersion: null
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  timelineType: default
             schema:
               type: object
               properties:
@@ -675,19 +860,28 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                favorite:
-                  - favoriteDate: 1741337636741
-                    userName: elastic
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                timelineType: default
-                version: WzE2LDFd
+              examples:
+                favoriteResponse:
+                  summary: Favorite metadata updated
+                  value:
+                    favorite:
+                      - favoriteDate: 1741337636741
+                        userName: elastic
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    timelineType: default
+                    version: WzE2LDFd
               schema:
                 $ref: '#/components/schemas/FavoriteTimelineResponse'
           description: Indicates a successful call.
         '403':
           content:
             application/json:
+              examples:
+                forbidden:
+                  summary: Forbidden
+                  value:
+                    body: Forbidden
+                    statusCode: 403
               schema:
                 type: object
                 properties:
@@ -709,6 +903,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              multipartPlaceholder:
+                summary: Request shape (file is a stream of NDJSON lines at runtime)
+                value:
+                  file: >-
+                    {"savedObjectId":"15c1929b-0af7-42bd-85a8-56e234cc7c4e","version":"WzE0LDFd"}\n
+                  isImmutable: 'false'
             schema:
               type: object
               properties:
@@ -727,18 +928,27 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                errors: []
-                success: true
-                success_count: 5
-                timelines_installed: 3
-                timelines_updated: 2
+              examples:
+                importSummary:
+                  summary: Import summary
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 5
+                    timelines_installed: 3
+                    timelines_updated: 2
               schema:
                 $ref: '#/components/schemas/ImportTimelineResult'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  summary: Invalid import
+                  value:
+                    body: Invalid file extension
+                    statusCode: 400
               schema:
                 type: object
                 properties:
@@ -753,6 +963,12 @@ paths:
         '404':
           content:
             application/json:
+              examples:
+                notFound:
+                  summary: Saved objects client missing
+                  value:
+                    body: Unable to find saved object client
+                    statusCode: 404
               schema:
                 type: object
                 properties:
@@ -769,6 +985,12 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                conflict:
+                  summary: Import conflict
+                  value:
+                    body: Could not import timelines
+                    statusCode: 409
               schema:
                 type: object
                 properties:
@@ -791,6 +1013,13 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              emptyArrays:
+                summary: Installer payload shape
+                value:
+                  prepackagedTimelines: []
+                  timelinesToInstall: []
+                  timelinesToUpdate: []
             schema:
               type: object
               properties:
@@ -819,18 +1048,27 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                errors: []
-                success: true
-                success_count: 10
-                timelines_installed: 8
-                timelines_updated: 2
+              examples:
+                installResult:
+                  summary: Install result counts
+                  value:
+                    errors: []
+                    success: true
+                    success_count: 10
+                    timelines_installed: 8
+                    timelines_updated: 2
               schema:
                 $ref: '#/components/schemas/ImportTimelineResult'
           description: Indicates a successful call.
         '500':
           content:
             application/json:
+              examples:
+                serverError:
+                  summary: Server error
+                  value:
+                    body: Internal error
+                    statusCode: 500
               schema:
                 type: object
                 properties:
@@ -872,6 +1110,7 @@ paths:
               examples:
                 exactMatch:
                   description: Timeline resolved without alias or conflict
+                  summary: Exact match outcome
                   value:
                     outcome: exactMatch
                     timeline:
@@ -882,8 +1121,26 @@ paths:
                 $ref: '#/components/schemas/ResolvedTimeline'
           description: Indicates a successful call.
         '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  summary: Bad request
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
           description: Bad Request response.
         '404':
+          content:
+            application/json:
+              examples:
+                notFound:
+                  summary: Not found
+                  value: {}
+              schema:
+                additionalProperties: true
+                type: object
           description: The (template) Timeline was not found
       summary: Get an existing saved Timeline or Timeline template
       tags:
@@ -905,12 +1162,18 @@ paths:
               - 'false'
             nullable: true
             type: string
-        - in: query
+        - description: >-
+            Restrict results to `default` investigation timelines or `template`
+            timeline templates.
+          in: query
           name: timeline_type
           schema:
             $ref: '#/components/schemas/TimelineType'
             nullable: true
-        - in: query
+        - description: >-
+            Field used to sort the list (`title`, `description`, `updated`, or
+            `created`).
+          in: query
           name: sort_field
           schema:
             $ref: '#/components/schemas/SortFieldTimeline'
@@ -940,7 +1203,10 @@ paths:
           schema:
             nullable: true
             type: string
-        - in: query
+        - description: >-
+            Filter by timeline lifecycle state (`active`, `draft`, or
+            `immutable`).
+          in: query
           name: status
           schema:
             $ref: '#/components/schemas/TimelineStatus'
@@ -949,20 +1215,23 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                customTemplateTimelineCount: 0
-                defaultTimelineCount: 1
-                elasticTemplateTimelineCount: 0
-                favoriteCount: 0
-                templateTimelineCount: 0
-                timeline:
-                  - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                    status: active
-                    timelineType: default
-                    title: Phishing investigation
-                    updated: 1741344876825
-                    version: WzE0LDFd
-                totalCount: 1
+              examples:
+                timelineList:
+                  summary: Example list response
+                  value:
+                    customTemplateTimelineCount: 0
+                    defaultTimelineCount: 1
+                    elasticTemplateTimelineCount: 0
+                    favoriteCount: 0
+                    templateTimelineCount: 0
+                    timeline:
+                      - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        status: active
+                        timelineType: default
+                        title: Phishing investigation
+                        updated: 1741344876825
+                        version: WzE0LDFd
+                    totalCount: 1
               schema:
                 type: object
                 properties:
@@ -1001,6 +1270,12 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                badRequest:
+                  summary: Error response body
+                  value:
+                    body: get timeline error
+                    statusCode: 405
               schema:
                 type: object
                 properties:

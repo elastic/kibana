@@ -34,6 +34,14 @@ paths:
                 timeline:
                   $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
                   description: The timeline object of the Timeline or Timeline template that you’re updating.
+            examples:
+              patchTitle:
+                summary: Update title
+                value:
+                  timelineId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                  version: WzE0LDFd
+                  timeline:
+                    title: Escalated case review
       responses:
         '200':
           description: Indicates a successful call.
@@ -41,12 +49,15 @@ paths:
             application/json:
               schema:
                 $ref: '../model/components.schema.yaml#/components/schemas/PersistTimelineResponse'
-              example:
-                savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
-                version: WzE1LDFd
-                title: Escalated case review
-                timelineType: default
-                status: active
+              examples:
+                patched:
+                  summary: Updated timeline
+                  value:
+                    savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                    version: WzE1LDFd
+                    title: Escalated case review
+                    timelineType: default
+                    status: active
         '405':
           description: Indicates that the user does not have the required access to create a Timeline.
           content:
@@ -61,3 +72,9 @@ paths:
                   statusCode:
                     type: number
                     example: 405
+              examples:
+                error:
+                  summary: Error body
+                  value:
+                    body: update timeline error
+                    statusCode: 405
