@@ -7,14 +7,7 @@
 
 import type { ReactElement } from 'react';
 import React, { useCallback } from 'react';
-import {
-  EuiBetaBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
@@ -66,22 +59,11 @@ export const AIAgentTourCallout = ({
     <>
       <TourCallout
         title={
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.observabilityAiAssistant.agentTour.title', {
-                defaultMessage: 'Try the new AI Agent',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate('xpack.observabilityAiAssistant.agentTour.betaBadge', {
-                  defaultMessage: 'BETA',
-                })}
-                size="s"
-                color="hollow"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <span>
+            {i18n.translate('xpack.observabilityAiAssistant.agentTour.title', {
+              defaultMessage: 'Try the new AI Agent',
+            })}
+          </span>
         }
         content={
           <FormattedMessage
