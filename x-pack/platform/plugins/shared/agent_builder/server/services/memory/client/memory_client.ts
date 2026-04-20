@@ -256,6 +256,7 @@ class MemoryClientImpl implements MemoryClient {
       id: req.id,
       doc: partialDoc,
       refresh: 'wait_for',
+      retry_on_conflict: 3,
     });
 
     return this.get(req.id);
