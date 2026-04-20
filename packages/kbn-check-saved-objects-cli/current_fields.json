@@ -857,6 +857,7 @@
     "is_preconfigured",
     "key",
     "name",
+    "otel_disable_beatsauth",
     "otel_exporter_config_yaml",
     "output_id",
     "partition",
@@ -959,6 +960,11 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
+  "lead-generation-config": [
+    "connectorId",
+    "lastError",
+    "lastExecutionUuid"
+  ],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
