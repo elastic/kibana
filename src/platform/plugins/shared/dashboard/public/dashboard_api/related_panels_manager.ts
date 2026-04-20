@@ -70,7 +70,7 @@ export const initializeRelatedPanelsManager = (
         // Group all panels by section ID based on whether or not they apply filters
         const layoutPanel = getDashboardPanelFromId(child.uuid);
 
-        const sectionId = layoutPanel.grid.sectionId ?? GLOBAL;
+        const sectionId = layoutPanel.grid?.sectionId ?? GLOBAL;
         const nextSectionEntry =
           childrenBySectionAndFilterApplication.get(sectionId) ?? getBlankSectionFilterEntry();
 

@@ -15,10 +15,9 @@ import {
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import React, { useState } from 'react';
 import _ from 'lodash';
-import { EMPTY_FILTER_MESSAGE } from '../../../common/translations';
 import { optionCountStyles } from './styles';
 
 export interface MultiSelectFilterOption {
@@ -89,7 +88,9 @@ export const MultiSelectFilter: React.FC<UseFilterParams> = ({
         searchProps={{
           placeholder: buttonLabel,
         }}
-        emptyMessage={EMPTY_FILTER_MESSAGE}
+        emptyMessage={i18n.translate('xpack.searchInferenceEndpoints.filter.emptyMessage', {
+          defaultMessage: 'No options',
+        })}
         onChange={onChange}
         singleSelection={false}
         renderOption={renderOption}
