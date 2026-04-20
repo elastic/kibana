@@ -8,6 +8,7 @@
 import {
   evaluate as base,
   createQuantitativeCorrectnessEvaluators,
+  createSkillInvocationEvaluator,
   createSpanLatencyEvaluator,
   createToolCallsEvaluator,
   createTrajectoryEvaluator,
@@ -28,6 +29,9 @@ interface ElasticAgentBuilderEvalExample extends Example {
     criteria?: string[];
     expected?: string;
     expectedTools?: string[];
+  };
+  metadata?: {
+    expectedSkill?: string;
   };
 }
 
@@ -64,6 +68,16 @@ export const evaluate = base.extend<
           Boolean(example.output.expectedTools?.length)
         );
 
+        const includeCriteria = examples.some((example) =>
+          Boolean(example.output.criteria?.length)
+        );
+
+        const expectedSkills = [
+          ...new Set(
+            examples.map((example) => example.metadata?.expectedSkill).filter(Boolean) as string[]
+          ),
+        ];
+
         await executorClient.runExperiment(
           {
             dataset: { name, description, examples } satisfies EvaluationDataset,
@@ -98,7 +112,7 @@ export const evaluate = base.extend<
             },
           },
           [
-            createCriteriaEvaluator({ evaluators }),
+            ...(includeCriteria ? [createCriteriaEvaluator({ evaluators })] : []),
             ...(includeQuantitativeCorrectness ? createQuantitativeCorrectnessEvaluators() : []),
             ...(includeToolCoverage
               ? [
@@ -118,6 +132,9 @@ export const evaluate = base.extend<
                 ]
               : []),
             createToolCallsEvaluator({ traceEsClient, log }),
+            ...expectedSkills.map((skillName) =>
+              createSkillInvocationEvaluator({ traceEsClient, log, skillName })
+            ),
             evaluators.traceBasedEvaluators.inputTokens,
             evaluators.traceBasedEvaluators.outputTokens,
             evaluators.traceBasedEvaluators.cachedTokens,

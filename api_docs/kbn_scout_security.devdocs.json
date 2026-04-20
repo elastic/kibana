@@ -4356,6 +4356,38 @@
       },
       {
         "parentPluginId": "@kbn/scout-security",
+        "id": "def-common.ApiServicesFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiServicesFixture",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/logstash/test/scout/api/fixtures/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 3,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ApiServicesFixture.logstash",
+            "type": "Object",
+            "tags": [],
+            "label": "logstash",
+            "description": [],
+            "signature": [
+              "LogstashApiService"
+            ],
+            "path": "x-pack/platform/plugins/private/logstash/test/scout/api/fixtures/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 5,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-security",
         "id": "def-common.BrowserAuthFixture",
         "type": "Interface",
         "tags": [],
