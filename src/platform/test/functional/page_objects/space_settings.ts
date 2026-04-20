@@ -40,6 +40,10 @@ export class SpaceSettingsPageObject extends FtrService {
     };
 
     await this.navigateTo(spaceName);
+<<<<<<< HEAD
+=======
+    // ensure the edit form is fully rendered before interacting  with it
+>>>>>>> 7a4a3d4a761e (wait for reload in switchSpaceSolutionType to prevent renderer timeout)
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('spaces-view-page');
 
@@ -48,6 +52,9 @@ export class SpaceSettingsPageObject extends FtrService {
     await this.testSubjects.click('save-space-button');
     await this.common.clickConfirmOnModal();
     await this.header.waitUntilLoadingHasFinished();
+<<<<<<< HEAD
     await this.testSubjects.existOrFail('spaces-grid-page');
+=======
+>>>>>>> 7a4a3d4a761e (wait for reload in switchSpaceSolutionType to prevent renderer timeout)
   }
 }
