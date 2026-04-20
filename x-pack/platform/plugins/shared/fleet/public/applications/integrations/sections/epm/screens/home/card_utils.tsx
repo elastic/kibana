@@ -142,13 +142,26 @@ export const mapToCard = ({
   }
 
   const integration = 'integration' in item ? item.integration || '' : '';
-  const packageItem = 'policy_templates' in item ? item : undefined;
+  const installationInfo = 'installationInfo' in item ? item.installationInfo : undefined;
+
+  // When a newer version is available, prefer the installed version's stored deployment info
+  // so the agentless release badge reflects the installed package's maturity.
+  const packageItemForRelease =
+    isUpdateAvailable && installationInfo?.policy_templates_deployment_info
+      ? {
+          policy_templates: installationInfo.policy_templates_deployment_info,
+          version: installationInfo.version,
+        }
+      : {
+          policy_templates: 'policy_templates' in item ? item.policy_templates : undefined,
+          version,
+        };
 
   // Resolve the effective release: agentless override when relevant, semver otherwise.
   const release: IntegrationCardReleaseLabel = resolveEffectiveRelease(
-    packageItem,
-    packageItem?.integration,
-    { isAgentlessContext: filterState?.onlyAgentless, version }
+    packageItemForRelease,
+    integration,
+    { isAgentlessContext: filterState?.onlyAgentless }
   );
 
   let extraLabelsBadges: React.ReactNode[] | undefined;

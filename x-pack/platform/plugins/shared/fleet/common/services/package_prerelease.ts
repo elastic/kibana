@@ -62,23 +62,14 @@ export function getAgentlessReleaseOverride(
 /**
  * Resolves the full effective release label for a package, incorporating an agentless-specific
  * override when relevant and falling back to the semver-derived release otherwise.
- *
- * `options.version` overrides the semver source used for the fallback label. Pass it when the
- * displayed version (e.g. the installed version) differs from `packageInfo.version` (the latest
- * registry version).
- *
- * TODO: the agentless override always derives from `packageInfo.policy_templates`, which reflects
- * the latest registry version regardless of what is installed. For packages where the installed
- * version differs from the registry version, this can misrepresent the agentless maturity of the
- * installed version. The list endpoint does not include policy_templates for the installed version.
  */
 export function resolveEffectiveRelease(
   packageInfo?: PackageWithDeploymentInfo & { version?: string },
   integrationToEnable?: string,
-  options?: { isAgentlessContext?: boolean; version?: string }
+  options?: { isAgentlessContext?: boolean }
 ): IntegrationCardReleaseLabel {
-  if (!packageInfo && !options?.version) return 'ga';
+  if (!packageInfo) return 'ga';
   const override = getAgentlessReleaseOverride(packageInfo, integrationToEnable, options);
   if (override !== undefined) return override;
-  return getPackageReleaseLabel(options?.version ?? packageInfo?.version ?? '');
+  return getPackageReleaseLabel(packageInfo.version ?? '');
 }
