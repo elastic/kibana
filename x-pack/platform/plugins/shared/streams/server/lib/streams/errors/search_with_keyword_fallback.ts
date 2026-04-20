@@ -31,7 +31,9 @@ export async function searchWithKeywordFallback<T>(
     if (effectiveMode !== 'keyword' && !opts.searchMode) {
       const { message } = parseError(error);
       logger.warn(
-        `${opts.label} search mode "${effectiveMode}" failed for streams [${opts.streamNames.join(', ')}], falling back to keyword: ${message}`
+        `${opts.label} search mode "${effectiveMode}" failed for streams [${opts.streamNames.join(
+          ', '
+        )}], falling back to keyword: ${message}`
       );
       return await execute('keyword');
     }

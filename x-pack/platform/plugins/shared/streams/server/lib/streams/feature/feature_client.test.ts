@@ -212,11 +212,14 @@ describe('FeatureClient', () => {
       await client.getFeatures('logs.test', { type: ['service', 'host'] });
 
       const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      const typeFilter = filter.find(
-        (f: any) =>
-          f?.bool?.should?.some((s: any) => s?.term?.[FEATURE_TYPE]?.value !== undefined) ||
-          f?.bool?.should?.some((s: any) => s?.term?.[FEATURE_TYPE] !== undefined)
-      );
+      const typeFilter = filter.find((f: Record<string, unknown>) => {
+        const should = (f?.bool as Record<string, unknown>)?.should as
+          | Array<Record<string, unknown>>
+          | undefined;
+        return should?.some(
+          (s) => (s?.term as Record<string, unknown>)?.[FEATURE_TYPE] !== undefined
+        );
+      });
       expect(typeFilter).toBeDefined();
     });
 
@@ -234,11 +237,15 @@ describe('FeatureClient', () => {
 
       const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
       const excludedFilter = filter.find(
-        (f: any) => f?.bool?.must_not?.exists?.field === FEATURE_EXCLUDED_AT
+        (f: Record<string, unknown>) =>
+          (f?.bool as Record<string, Record<string, Record<string, string>>>)?.must_not?.exists
+            ?.field === FEATURE_EXCLUDED_AT
       );
       expect(excludedFilter).toBeDefined();
       // Expiry filter is a bool.should clause referencing FEATURE_EXPIRES_AT
-      const expiredFilter = filter.find((f: any) => JSON.stringify(f).includes(FEATURE_EXPIRES_AT));
+      const expiredFilter = filter.find((f: Record<string, unknown>) =>
+        JSON.stringify(f).includes(FEATURE_EXPIRES_AT)
+      );
       expect(expiredFilter).toBeDefined();
     });
 
@@ -247,7 +254,9 @@ describe('FeatureClient', () => {
       await client.getFeatures('logs.test', { includeExpired: true });
 
       const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      const expiredFilter = filter.find((f: any) => JSON.stringify(f).includes(FEATURE_EXPIRES_AT));
+      const expiredFilter = filter.find((f: Record<string, unknown>) =>
+        JSON.stringify(f).includes(FEATURE_EXPIRES_AT)
+      );
       expect(expiredFilter).toBeUndefined();
     });
 
@@ -257,7 +266,9 @@ describe('FeatureClient', () => {
 
       const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
       const excludedFilter = filter.find(
-        (f: any) => f?.bool?.must_not?.exists?.field === FEATURE_EXCLUDED_AT
+        (f: Record<string, unknown>) =>
+          (f?.bool as Record<string, Record<string, Record<string, string>>>)?.must_not?.exists
+            ?.field === FEATURE_EXCLUDED_AT
       );
       expect(excludedFilter).toBeUndefined();
     });
@@ -335,7 +346,7 @@ describe('FeatureClient', () => {
           {
             index: {
               feature: createFeature({
-                filter: { field: 'host.name', operator: 'eq' } as any,
+                filter: { field: 'host.name', operator: 'eq' } as unknown as Feature['filter'],
               }),
             },
           },
@@ -465,7 +476,11 @@ describe('FeatureClient', () => {
       await client.deleteFeatures('logs.test');
 
       const searchArgs = storageClient.search.mock.calls[0][0];
-      expect(searchArgs.query.bool.filter.find((f: any) => f?.bool?.must_not)).toBeUndefined();
+      expect(
+        searchArgs.query.bool.filter.find(
+          (f: Record<string, unknown>) => (f?.bool as Record<string, unknown>)?.must_not
+        )
+      ).toBeUndefined();
 
       expect(storageClient.bulk).toHaveBeenCalledWith({
         operations: [{ delete: { _id: 'uuid-a' } }, { delete: { _id: 'uuid-b' } }],
@@ -557,9 +572,7 @@ describe('FeatureClient', () => {
       await client.findFeatures('logs.test', 'http');
 
       expect(storageClient.search).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('falling back to keyword')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
       const fallbackArgs = storageClient.search.mock.calls[1][0];
       expect(fallbackArgs.query).toBeDefined();
       expect(fallbackArgs.retriever).toBeUndefined();

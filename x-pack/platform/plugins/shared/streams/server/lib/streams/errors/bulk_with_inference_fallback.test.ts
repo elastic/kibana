@@ -285,10 +285,7 @@ describe('bulkWithInferenceFallback', () => {
       inferenceErrorResponse('Unable to find model deployment task [elser-endpoint]')
     );
     const logger = createLogger();
-    const attempt = jest
-      .fn()
-      .mockRejectedValueOnce(bulkError)
-      .mockResolvedValueOnce('retried');
+    const attempt = jest.fn().mockRejectedValueOnce(bulkError).mockResolvedValueOnce('retried');
 
     const result = await bulkWithInferenceFallback(logger, attempt);
 
@@ -305,16 +302,17 @@ describe('bulkWithInferenceFallback', () => {
   it('propagates the retry error when the second attempt also fails', async () => {
     const firstError = new BulkOperationError(
       'first failure',
-      inferenceErrorResponse('Error in inference process: [inference canceled as process is stopping]')
+      inferenceErrorResponse(
+        'Error in inference process: [inference canceled as process is stopping]'
+      )
     );
     const secondError = new BulkOperationError(
       'second failure',
-      inferenceErrorResponse('Error in inference process: [inference canceled as process is stopping]')
+      inferenceErrorResponse(
+        'Error in inference process: [inference canceled as process is stopping]'
+      )
     );
-    const attempt = jest
-      .fn()
-      .mockRejectedValueOnce(firstError)
-      .mockRejectedValueOnce(secondError);
+    const attempt = jest.fn().mockRejectedValueOnce(firstError).mockRejectedValueOnce(secondError);
 
     await expect(bulkWithInferenceFallback(createLogger(), attempt)).rejects.toBe(secondError);
     expect(attempt).toHaveBeenCalledTimes(2);

@@ -463,9 +463,7 @@ describe('QueryClient backward compatibility', () => {
 
       expect(storageClient.search).toHaveBeenCalledTimes(2);
       expect(results).toEqual([]);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('falling back to keyword')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
     });
 
     it('propagates the error when an explicit searchMode fails', async () => {
