@@ -12,8 +12,9 @@ import { BehaviorSubject, of } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE, HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { Capabilities } from '@kbn/core/public';
 
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
@@ -37,6 +38,7 @@ function buildServices({
   userProfileEnabled = true,
   agentBuilderSeenJson,
   chatExperienceCapabilities = capabilitiesAllowRevert,
+  chatExperience = AIChatExperience.Agent,
 }: {
   hideAnnouncements?: boolean;
   announcementSeenInProfile?: boolean;
@@ -45,6 +47,7 @@ function buildServices({
   /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
   agentBuilderSeenJson?: string;
   chatExperienceCapabilities?: Capabilities;
+  chatExperience?: AIChatExperience;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
@@ -70,7 +73,9 @@ function buildServices({
     settings: {
       client: {
         get: jest.fn(),
-        get$: jest.fn(),
+        get$: jest.fn((key: string) =>
+          key === AI_CHAT_EXPERIENCE_TYPE ? of(chatExperience) : of(undefined)
+        ),
         set: jest.fn(),
       },
       globalClient: {
@@ -152,6 +157,17 @@ describe('AgentBuilderAnnouncementModalController', () => {
 
   it('does not render the modal when user profiles are disabled', async () => {
     const { services } = buildServices({ userProfileEnabled: false });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it('does not render the modal when the chat experience is set to classic', async () => {
+    const { services } = buildServices({ chatExperience: AIChatExperience.Classic });
     renderController(services);
 
     await waitFor(() => {
