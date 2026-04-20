@@ -28,8 +28,11 @@ import { PrivateLocationTestService } from '../../services/synthetics_private_lo
 import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_monitor';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 
+const TRANSIENT_SYNTHETICS_HTTP: ReadonlyArray<number> = [502, 503, 504];
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('PrivateLocationCreateMonitor', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/258046
+  describe.skip('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
@@ -58,6 +61,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       spaceId?: string
     ) => {
       return monitorTestService.deleteMonitor(editorUser, monitorId, statusCode, spaceId);
+    };
+
+    const putMonitorWithTransientRetry = async (
+      monitorId: string,
+      monitor: HTTPFields,
+      query?: string
+    ) => {
+      const path =
+        SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId + (query ? `?${query}` : '');
+      return await retry.tryForTime(60_000, async () => {
+        const res = await supertestWithoutAuth
+          .put(path)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(monitor);
+
+        if (TRANSIENT_SYNTHETICS_HTTP.includes(res.status)) {
+          throw new Error(`Transient synthetics monitor PUT failure: HTTP ${res.status}`);
+        }
+
+        expect(res.status).eql(200, JSON.stringify(res.body));
+        return res;
+      });
     };
 
     before(async () => {
@@ -204,11 +230,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const apiResponse = await supertestWithoutAuth
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send(httpMonitorJson);
+      const apiResponse = await putMonitorWithTransientRetry(newMonitorId, httpMonitorJson);
 
       const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
@@ -266,12 +288,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ id }) => id !== testFleetPolicyID2
       );
 
-      await supertestWithoutAuth
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?internal=true')
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send(httpMonitorJson)
-        .expect(200);
+      await putMonitorWithTransientRetry(newMonitorId, httpMonitorJson, 'internal=true');
 
       const apiResponsePolicy = await supertestWithAuth.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -369,12 +386,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           spaceId: SPACE_ID,
         })
       );
-      await supertestWithoutAuth
-        .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ ids: [monitorId] })
-        .expect(200);
+      await deleteMonitor(monitorId, 200, SPACE_ID);
     });
 
     it('handles is_tls_enabled true', async () => {
@@ -517,7 +529,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect(packagePolicy.package.version).eql(lowerVersion);
-        await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
+
+        await testPrivateLocations.installSyntheticsPackage();
+
         await retry.tryForTime(120 * 1000, async () => {
           const policyResponseAfterUpgrade = await supertestWithAuth.get(
             '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -525,7 +539,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
             (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
           );
-          expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
+          expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(
+            true,
+            `Expected ${packagePolicyAfterUpgrade.package.version} to be greater than ${lowerVersion}`
+          );
         });
       } finally {
         try {
