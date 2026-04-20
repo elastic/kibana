@@ -116,6 +116,7 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/inference-connectors'
+  - '@kbn/safer-lodash-set'
 tags:
   - plugin
   - prod

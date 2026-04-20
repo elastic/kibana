@@ -67,7 +67,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue ??
     chatExperienceField?.savedValue ??
     chatExperienceField?.defaultValue ??
-    AIChatExperience.Classic;
+    AIChatExperience.Agent;
   const isAgentExperience = currentChatExperience === AIChatExperience.Agent;
   const hasAgentBuilderPrivileges = application.capabilities.agentBuilder?.manageAgents === true;
 
@@ -117,13 +117,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     )
       ? (unsavedChanges[AI_CHAT_EXPERIENCE_TYPE]?.unsavedValue as AIChatExperience)
       : undefined;
-    const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Classic;
+    const normalizedSavedChatExperience = savedChatExperience ?? AIChatExperience.Agent;
 
     // Telemetry should compare the effective "before" and "after" values.
     // - "before" should include the default if there is no saved value.
     // - "after" should reflect the unsaved change, or fall back to "before" if unchanged.
     const telemetryBeforeChatExperience =
-      savedChatExperience ?? defaultChatExperience ?? AIChatExperience.Classic;
+      savedChatExperience ?? defaultChatExperience ?? AIChatExperience.Agent;
     const telemetryAfterChatExperience = unsavedChatExperience ?? telemetryBeforeChatExperience;
     const shouldTrackOptInConfirmed =
       telemetryBeforeChatExperience !== AIChatExperience.Agent &&
