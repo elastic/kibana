@@ -114,6 +114,21 @@ export async function indexDocument(
   return response;
 }
 
+export async function executeEsql(
+  esClient: Client,
+  query: string
+): Promise<{ columns: Array<{ name: string; type: string }>; values: unknown[][] }> {
+  const response = await esClient.transport.request<{
+    columns: Array<{ name: string; type: string }>;
+    values: unknown[][];
+  }>({
+    method: 'POST',
+    path: '/_query',
+    body: { query },
+  });
+  return response;
+}
+
 export async function indexAndAssertTargetStream(
   esClient: Client,
   target: string,

@@ -19,7 +19,6 @@ import {
   getEsqlViewName,
   getWiredStreamViewQuery,
   isDraftStream,
-  definitionToESQLQuery,
 } from '@kbn/streams-schema';
 import {
   getAncestors,
@@ -900,81 +899,6 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     }
 
     return actions;
-  }
-
-  protected async determineDraftCreateActions(desiredState: State): Promise<ElasticsearchAction[]> {
-    const routingCondition = this.getRoutingConditionFromParent(desiredState);
-    return [
-      { type: 'upsert_dot_streams_document', request: this._definition },
-      {
-        type: 'upsert_esql_view',
-        request: {
-          name: getEsqlViewName(this._definition.name),
-          query: await definitionToESQLQuery({
-            definition: this._definition,
-            routingCondition,
-          }),
-        },
-      },
-    ];
-  }
-
-  protected async determineDraftUpdateActions(
-    desiredState: State,
-    startingStateStream: WiredStream
-  ): Promise<ElasticsearchAction[]> {
-    const actions: ElasticsearchAction[] = [];
-
-    const routingCondition = this.getRoutingConditionFromParent(desiredState);
-    actions.push({
-      type: 'upsert_esql_view',
-      request: {
-        name: getEsqlViewName(this._definition.name),
-        query: await definitionToESQLQuery({
-          definition: this._definition,
-          routingCondition,
-        }),
-      },
-    });
-
-    const definitionChanged = !_.isEqual(startingStateStream.definition, this._definition);
-    if (definitionChanged) {
-      actions.push({
-        type: 'upsert_dot_streams_document',
-        request: this._definition,
-      });
-    }
-
-    return actions;
-  }
-
-  protected determineDraftDeleteActions(): ElasticsearchAction[] {
-    return [
-      { type: 'delete_dot_streams_document', request: { name: this._definition.name } },
-      { type: 'delete_esql_view', request: { name: getEsqlViewName(this._definition.name) } },
-      { type: 'delete_queries', request: { definition: this._definition } },
-      { type: 'unlink_assets', request: { name: this._definition.name } },
-      { type: 'unlink_systems', request: { name: this._definition.name } },
-      { type: 'unlink_features', request: { name: this._definition.name } },
-    ];
-  }
-
-  protected getRoutingConditionFromParent(desiredState: State) {
-    const parentId = getParentId(this._definition.name);
-    if (!parentId) {
-      throw new Error(`Draft stream "${this._definition.name}" must have a parent stream`);
-    }
-    const parent = desiredState.get(parentId);
-    if (!parent || !Streams.WiredStream.Definition.is(parent.definition)) {
-      throw new Error(`Parent stream "${parentId}" not found or not a wired stream`);
-    }
-    const routingEntry = parent.definition.ingest.wired.routing.find(
-      (r) => r.destination === this._definition.name
-    );
-    if (!routingEntry) {
-      throw new Error(`No routing entry for "${this._definition.name}" in parent "${parentId}"`);
-    }
-    return routingEntry.where;
   }
 
   private getNonDraftDestinations(): string[] {

@@ -21,6 +21,7 @@ import {
   deleteStream,
   enableStreams,
   esqlViewExists,
+  executeEsql,
   forkStream,
   getEsqlView,
   getStream,
@@ -239,6 +240,102 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const viewAfter = await getEsqlView(esClient, getEsqlViewName(DRAFT_CHILD));
         expect(viewAfter.query).to.contain('"apache"');
         expect(viewAfter.query).to.not.contain('"nginx"');
+      });
+    });
+
+    describe('End-to-end: querying draft view returns correct data', () => {
+      const E2E_DRAFT = `${PARENT}.e2e-draft`;
+      const MATCHING_TARGET = 'draft-match';
+      const OTHER_TARGET = 'draft-other';
+      const SET_UNMAPPED = 'SET unmapped_fields="LOAD";\n';
+
+      before(async () => {
+        // Top-level fields are normalized by the `normalize_for_stream` processor:
+        //   `message`     → `body.text`
+        //   `test.draft`  → `attributes.test.draft`  (matches ROOT→PARENT routing)
+        //   `test.target` → `attributes.test.target`  (used for draft routing)
+        await indexDocument(esClient, ROOT, {
+          '@timestamp': new Date().toISOString(),
+          message: 'doc-alpha',
+          ['test.draft']: 'true',
+          ['test.target']: MATCHING_TARGET,
+        });
+        await indexDocument(esClient, ROOT, {
+          '@timestamp': new Date().toISOString(),
+          message: 'doc-beta',
+          ['test.draft']: 'true',
+          ['test.target']: MATCHING_TARGET,
+        });
+        await indexDocument(esClient, ROOT, {
+          '@timestamp': new Date().toISOString(),
+          message: 'doc-gamma',
+          ['test.draft']: 'true',
+          ['test.target']: OTHER_TARGET,
+        });
+
+        await forkStream(apiClient, PARENT, {
+          stream: { name: E2E_DRAFT },
+          where: { field: 'attributes.test.target', eq: MATCHING_TARGET },
+          draft: true,
+        });
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, E2E_DRAFT).catch(() => {});
+      });
+
+      it('returns only documents matching the draft routing condition', async () => {
+        const viewName = getEsqlViewName(E2E_DRAFT);
+        const result = await executeEsql(
+          esClient,
+          `${SET_UNMAPPED}FROM ${viewName} | KEEP \`body.text\`, \`attributes.test.target\` | SORT \`body.text\``
+        );
+
+        const bodyCol = result.columns.findIndex((c) => c.name === 'body.text');
+        const targetCol = result.columns.findIndex((c) => c.name === 'attributes.test.target');
+
+        expect(result.values.length).to.eql(2);
+        expect(result.values[0][bodyCol]).to.eql('doc-alpha');
+        expect(result.values[1][bodyCol]).to.eql('doc-beta');
+        result.values.forEach((row) => {
+          expect(row[targetCol]).to.eql(MATCHING_TARGET);
+        });
+      });
+
+      it('updates the view results when the routing condition changes', async () => {
+        const parentDef = Streams.WiredStream.GetResponse.parse(await getStream(apiClient, PARENT));
+        const { updated_at: _, ...processing } = parentDef.stream.ingest.processing;
+        const updatedRouting = parentDef.stream.ingest.wired.routing.map((r) => {
+          if (r.destination === E2E_DRAFT) {
+            return { ...r, where: { field: 'attributes.test.target', eq: OTHER_TARGET } };
+          }
+          return r;
+        });
+
+        await putStream(apiClient, PARENT, {
+          ...emptyAssets,
+          stream: {
+            type: parentDef.stream.type,
+            description: parentDef.stream.description,
+            ingest: {
+              ...parentDef.stream.ingest,
+              processing,
+              wired: { ...parentDef.stream.ingest.wired, routing: updatedRouting },
+            },
+          },
+        });
+
+        const viewName = getEsqlViewName(E2E_DRAFT);
+        const result = await executeEsql(
+          esClient,
+          `${SET_UNMAPPED}FROM ${viewName} | KEEP \`body.text\`, \`attributes.test.target\` | SORT \`body.text\``
+        );
+
+        expect(result.values.length).to.eql(1);
+        const bodyCol = result.columns.findIndex((c) => c.name === 'body.text');
+        const targetCol = result.columns.findIndex((c) => c.name === 'attributes.test.target');
+        expect(result.values[0][bodyCol]).to.eql('doc-gamma');
+        expect(result.values[0][targetCol]).to.eql(OTHER_TARGET);
       });
     });
 
