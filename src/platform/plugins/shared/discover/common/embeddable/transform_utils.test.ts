@@ -978,7 +978,12 @@ describe('search embeddable transform utils', () => {
           searchSourceJSON: JSON.stringify({
             query: { language: 'kuery', query: '' },
             index: 'data-view-1',
-            filter: [],
+            filter: [
+              {
+                meta: { index: 'data-view-1', alias: null, negate: false, disabled: false },
+                query: { match_phrase: { 'log.level': 'error' } },
+              },
+            ],
           }),
         },
       };
@@ -1004,6 +1009,7 @@ describe('search embeddable transform utils', () => {
         ref_id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('filters' in result && result.filters).toHaveLength(1);
       expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
     });
 
@@ -1044,8 +1050,19 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 'auto',
         row_height: 'auto',
+        filters: [
+          {
+            type: ASCODE_FILTER_TYPE.CONDITION,
+            condition: {
+              field: 'log.level',
+              operator: ASCODE_FILTER_OPERATOR.IS,
+              value: 'error',
+            },
+            disabled: false,
+            negate: false,
+          },
+        ],
         query: { language: 'kql', expression: '' },
-        filters: [],
         rows_per_page: 100,
         sample_size: 500,
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
@@ -1067,7 +1084,42 @@ describe('search embeddable transform utils', () => {
       expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
-      expect(searchSource.filter).toEqual([]);
+      expect(searchSource.filter).toHaveLength(1);
+    });
+
+    it('round-trips all fields through toStoredTab → fromStoredTab', () => {
+      const references: SavedObjectReference[] = [
+        { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
+      ];
+      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+        column_order: [],
+        sort: [],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        density: DataGridDensity.COMPACT,
+        header_row_height: 3,
+        row_height: 3,
+        query: { language: 'kql', expression: '' },
+        filters: [
+          {
+            type: ASCODE_FILTER_TYPE.CONDITION,
+            condition: { field: 'log.level', operator: ASCODE_FILTER_OPERATOR.IS, value: 'error' },
+            disabled: false,
+            negate: false,
+          },
+        ],
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'dv-1' },
+      };
+
+      const { state } = toStoredTab(apiTab);
+      const result = fromStoredTab(state, references);
+
+      expect('data_source' in result && result.data_source).toEqual({
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'dv-1',
+      });
+      expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
+      expect('filters' in result && result.filters).toHaveLength(1);
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {
