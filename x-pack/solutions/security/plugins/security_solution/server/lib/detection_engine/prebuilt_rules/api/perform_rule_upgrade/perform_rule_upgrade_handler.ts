@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
@@ -13,9 +15,9 @@ import type {
   PerformRuleUpgradeRequestBody,
   PerformRuleUpgradeResponseBody,
   RuleUpgradeSpecifier,
-  RuleVersionSpecifier,
   SkippedRuleUpgrade,
   ThreeWayDiff,
+  UpgradedRuleBasicInfo,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import {
   ModeEnum,
@@ -79,7 +81,7 @@ export const performRuleUpgradeHandler = async (
     const filter = mode === ModeEnum.ALL_RULES ? request.body.filter : undefined;
 
     const skippedRules: SkippedRuleUpgrade[] = [];
-    const updatedRules: RuleVersionSpecifier[] = [];
+    const updatedRules: UpgradedRuleBasicInfo[] = [];
     const ruleErrors: Array<PromisePoolError<{ rule_id: string }>> = [];
     const allErrors: PerformRuleUpgradeResponseBody['errors'] = [];
     const ruleUpgradeContextsMap = new Map<string, RuleUpgradeContext>();
@@ -213,6 +215,7 @@ export const performRuleUpgradeHandler = async (
       if (isDryRun) {
         updatedRules.push(
           ...modifiedPrebuiltRuleAssets.map((rule) => ({
+            id: uuidv4(),
             rule_id: rule.rule_id,
             version: rule.version,
           }))
@@ -225,10 +228,7 @@ export const performRuleUpgradeHandler = async (
         );
         ruleErrors.push(...installationErrors);
         updatedRules.push(
-          ...upgradeResults.map(({ result: rule }) => ({
-            rule_id: rule.rule_id,
-            version: rule.version,
-          }))
+          ...upgradeResults.map(({ result: rule }) => pick(rule, ['id', 'rule_id', 'version']))
         );
       }
     }

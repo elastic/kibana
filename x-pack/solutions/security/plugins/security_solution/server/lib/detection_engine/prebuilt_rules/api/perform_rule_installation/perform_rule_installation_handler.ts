@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { SkipRuleInstallReason } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -12,7 +13,7 @@ import type {
   PerformRuleInstallationResponseBody,
   SkippedRuleInstall,
   PerformRuleInstallationRequestBody,
-  RuleVersionSpecifier,
+  InstalledRuleBasicInfo,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -67,7 +68,7 @@ export const performRuleInstallationHandler = async (
       version: RuleVersion;
     }> = [];
     const ruleErrors = [];
-    const installedRules: RuleVersionSpecifier[] = [];
+    const installedRules: InstalledRuleBasicInfo[] = [];
     const skippedRules: SkippedRuleInstall[] = [];
 
     // Perform all the checks we can before we start the upgrade process
@@ -111,10 +112,9 @@ export const performRuleInstallationHandler = async (
         logger
       );
 
-      const batchInstalledRules = results.map(({ result: rule }) => ({
-        rule_id: rule.rule_id,
-        version: rule.version,
-      }));
+      const batchInstalledRules = results.map(({ result: rule }) =>
+        pick(rule, ['id', 'rule_id', 'version'])
+      );
 
       installedRules.push(...batchInstalledRules);
       ruleErrors.push(...errors);
