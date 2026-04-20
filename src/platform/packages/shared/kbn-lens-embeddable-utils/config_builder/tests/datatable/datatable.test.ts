@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { datatableStateSchema } from '../../schema';
+import type { DatatableState } from '../../schema';
+import { AUTO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
 import { validateAPIConverter, validateConverter } from '../validate';
 import {
   singleMetricDatatableAttributes,
@@ -142,6 +146,81 @@ describe('Datatable', () => {
 
     it('should convert an ESQL datatable chart sorted by a row column', () => {
       validateAPIConverter(sortedByRowColumnESQLDatatable, datatableStateSchema);
+    });
+  });
+
+  describe('color default application', () => {
+    const baseDatatable = {
+      type: 'data_table',
+      title: 'Color default test',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'test-index',
+        time_field: '@timestamp',
+      },
+      sampling: 1,
+      ignore_global_filters: false,
+    } as const;
+
+    it('should apply AUTO_COLOR on a metric with apply_color_to', () => {
+      const config = {
+        ...baseDatatable,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: false,
+            apply_color_to: 'value',
+          },
+        ],
+      } satisfies DatatableState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
+
+      expect(apiOutput.metrics?.[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metrics?.[0].apply_color_to).toBe('value');
+    });
+
+    it('should apply AUTO_COLOR on a row with apply_color_to', () => {
+      const config = {
+        ...baseDatatable,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        rows: [
+          {
+            operation: 'terms',
+            fields: ['agent.keyword'],
+            limit: 5,
+            apply_color_to: 'background',
+          },
+        ],
+      } satisfies DatatableState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
+
+      expect(apiOutput.rows?.[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.rows?.[0].apply_color_to).toBe('background');
+    });
+
+    it('should not apply a color on a metric when apply_color_to is not specified', () => {
+      const config = {
+        ...baseDatatable,
+        metrics: [
+          {
+            operation: 'count',
+            empty_as_null: false,
+          },
+        ],
+      } satisfies DatatableState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as DatatableState;
+
+      expect(apiOutput.metrics?.[0].color).not.toBeDefined();
+      expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();
     });
   });
 });

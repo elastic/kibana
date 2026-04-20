@@ -79,6 +79,7 @@ import {
   getColorAssignments,
   getLayerPaletteName,
 } from './color_assignment';
+import { getDefaultPalette } from './default_palette';
 import {
   getAnnotationLayerErrors,
   isHorizontalChart,
@@ -495,7 +496,9 @@ export const getXyVisualization = ({
         })
         .unsubscribe();
     } else {
-      const palette = paletteService.get(dataLayer.palette?.name || 'default');
+      const palette = paletteService.get(
+        dataLayer.palette?.name || getDefaultPalette(dataLayer.seriesType)
+      );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
     const dateHistogramEmptyRowsPolicy = getDateHistogramEmptyRowsPolicyForVisualizationState(

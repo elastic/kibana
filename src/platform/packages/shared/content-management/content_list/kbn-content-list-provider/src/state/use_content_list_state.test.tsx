@@ -67,10 +67,9 @@ describe('useContentListState', () => {
 
     const { state } = result.current;
 
-    // Client state.
-    expect(state).toHaveProperty('search');
-    expect(state.search).toHaveProperty('queryText');
-    expect(state).toHaveProperty('filters');
+    // Client state — queryText is a plain string.
+    expect(state).toHaveProperty('queryText');
+    expect(typeof state.queryText).toBe('string');
     expect(state).toHaveProperty('sort');
     expect(state.sort).toHaveProperty('field');
     expect(state.sort).toHaveProperty('direction');
@@ -82,20 +81,21 @@ describe('useContentListState', () => {
     expect(state).toHaveProperty('isFetching');
   });
 
-  it('dispatch updates search query text and filters atomically', () => {
+  it('dispatch updates queryText via SET_QUERY', () => {
     const { result } = renderHook(() => useContentListState(), {
       wrapper: createWrapper(),
     });
 
     act(() => {
       result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_SEARCH,
-        payload: { queryText: 'test query', filters: { search: 'test query' } },
+        type: CONTENT_LIST_ACTIONS.SET_QUERY,
+        payload: {
+          queryText: 'test query',
+        },
       });
     });
 
-    expect(result.current.state.search.queryText).toBe('test query');
-    expect(result.current.state.filters).toEqual({ search: 'test query' });
+    expect(result.current.state.queryText).toBe('test query');
   });
 
   it('provides dispatch as a function', () => {

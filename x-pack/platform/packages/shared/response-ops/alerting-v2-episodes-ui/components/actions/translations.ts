@@ -37,6 +37,14 @@ export const ACTIONS_VIEW_DETAILS_LABEL = i18n.translate(
   }
 );
 
+/** --- Open in Discover action --- */
+export const ACTIONS_OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.openInDiscoverLabel',
+  {
+    defaultMessage: 'Open in Discover',
+  }
+);
+
 /** --- Resolve action --- */
 export const RESOLVE_ACTION_ACTIVATE = i18n.translate(
   'xpack.alertingV2.episodesUi.resolveAction.activate',

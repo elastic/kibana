@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
+  - '@kbn/i18n'
+  - '@kbn/i18n-react'
 tags:
   - shared-common
   - package

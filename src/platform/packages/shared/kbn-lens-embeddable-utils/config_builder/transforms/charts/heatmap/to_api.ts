@@ -24,7 +24,7 @@ import {
   stripUndefined,
 } from '../utils';
 import type { HeatmapState } from '../../../schema';
-import { fromColorByValueLensStateToAPI } from '../../coloring';
+import { AUTO_COLOR, fromColorByValueLensStateToAPI } from '../../coloring';
 import { type LensAttributes } from '../../../types';
 import {
   buildDataSourceStateESQL,
@@ -53,7 +53,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig'],
   xAxisScale?: XScaleSchemaType
-): HeatmapState['axes'] {
+): HeatmapState['axis'] {
   return {
     x: {
       labels: {
@@ -104,16 +104,18 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
-    cells: {
-      labels: { visible: visualization.gridConfig.isCellLabelVisible },
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
+    styling: {
+      cells: {
+        labels: { visible: visualization.gridConfig.isCellLabelVisible },
+      },
     },
   } satisfies Partial<HeatmapState>;
 
   const paletteProps = {
-    ...(visualization.palette && {
-      color: fromColorByValueLensStateToAPI(visualization.palette),
-    }),
+    color: visualization.palette
+      ? fromColorByValueLensStateToAPI(visualization.palette)
+      : AUTO_COLOR,
   } satisfies Partial<HeatmapState['metric']>;
 
   if (isTextBasedLayer(layer)) {

@@ -113,12 +113,11 @@ evaluate.describe('KI feature extraction', { tag: tags.serverless.observability.
           await executorClient.runExperiment(
             {
               dataset: {
-                name: `sigevents: KI feature extraction: ${scenario.input.scenario_id} (${dataset.id})`,
-                description: `[${dataset.id}] KI feature extraction from ${
-                  scenario.metadata.failure_domain
-                }${scenario.metadata.failure_mode ? ` / ${scenario.metadata.failure_mode}` : ''}`,
+                name: `sigevents: KI feature extraction (${dataset.id})`,
+                description: `[${dataset.id}] KI feature extraction across scenarios`,
                 examples: [
                   {
+                    id: scenario.input.scenario_id,
                     input: { sample_documents: sampleDocuments },
                     output: {
                       ...scenario.output,

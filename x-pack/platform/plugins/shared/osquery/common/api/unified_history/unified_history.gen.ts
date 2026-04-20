@@ -22,12 +22,33 @@ export type OsqueryGetUnifiedHistoryRequestQuery = z.infer<
   typeof OsqueryGetUnifiedHistoryRequestQuery
 >;
 export const OsqueryGetUnifiedHistoryRequestQuery = z.object({
+  /**
+   * The number of results to return per page.
+   */
   pageSize: z.coerce.number().int().min(1).max(100).optional().default(20),
+  /**
+   * A base64-encoded cursor for pagination. Use the value from the previous response to fetch the next page.
+   */
   nextPage: z.string().optional(),
+  /**
+   * A search string to filter history entries by pack name, query text, or query ID.
+   */
   kuery: z.string().optional(),
+  /**
+   * Comma-separated list of user IDs to filter live query history.
+   */
   userIds: z.string().optional(),
+  /**
+   * Comma-separated list of source types to include. Valid values are `live`, `rule`, and `scheduled`.
+   */
   sourceFilters: z.string().optional(),
+  /**
+   * The start of the time range filter (ISO 8601).
+   */
   startDate: z.string().optional(),
+  /**
+   * The end of the time range filter (ISO 8601).
+   */
   endDate: z.string().optional(),
 });
 export type OsqueryGetUnifiedHistoryRequestQueryInput = z.input<

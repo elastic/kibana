@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { ArrayFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -21,16 +22,44 @@ const entityTypeSchema = z.enum(['user', 'host', 'service', 'generic']);
 
 const querySchema = z
   .object({
-    filter: z.string().optional(),
-    size: z.coerce.number().int().positive().optional(),
-    searchAfter: z.string().optional(),
-    source: z.array(z.string()).optional(),
-    sort_field: z.string().optional(),
-    sort_order: z.enum(['asc', 'desc']).optional(),
-    page: z.coerce.number().int().min(1).optional(),
-    per_page: z.coerce.number().int().min(1).max(10_000).optional(),
-    filterQuery: z.string().optional(),
-    entity_types: ArrayFromString(entityTypeSchema).optional(),
+    filter: z
+      .string()
+      .optional()
+      .describe('A Kibana Query Language (KQL) filter for the search-after mode.'),
+    size: z.coerce
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe('Number of entities to return in search-after mode.'),
+    searchAfter: z
+      .string()
+      .optional()
+      .describe('JSON-encoded search_after value for cursor-based pagination.'),
+    source: z.array(z.string()).optional().describe('Fields to include in the response source.'),
+    fields: ArrayFromString(z.string()).optional().describe('Fields to include in the response.'),
+    sort_field: z.string().optional().describe('Field to sort results by in page mode.'),
+    sort_order: z.enum(['asc', 'desc']).optional().describe('Sort order in page mode.'),
+    page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe('Page number to return (1-indexed) in page mode.'),
+    per_page: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(10_000)
+      .optional()
+      .describe('Number of entities per page in page mode.'),
+    filterQuery: z
+      .string()
+      .optional()
+      .describe('An Elasticsearch query string to filter entities in page mode.'),
+    entity_types: ArrayFromString(entityTypeSchema)
+      .optional()
+      .describe('Entity types to include in the results.'),
   })
   .superRefine((data, ctx) => {
     const usesPagePagination = data.page !== undefined || data.per_page !== undefined;
@@ -85,6 +114,12 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
     .get({
       path: ENTITY_STORE_ROUTES.public.CRUD_GET,
       access: 'public',
+      summary: 'List entities',
+      description:
+        'List entity records from the Entity Store with paging, sorting, and filtering. Supports two modes: page-based pagination (page/per_page) and cursor-based pagination (searchAfter). The two modes cannot be combined.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -97,6 +132,9 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
           request: {
             query: buildRouteValidationWithZod(querySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_list.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
@@ -144,10 +182,13 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
               'searchAfter'
             ),
             source: req.query.source,
+            fields: req.query.fields,
           };
 
-          const { entities, nextSearchAfter } = await crudClient.listEntities(listParams);
-          return res.ok({ body: { entities, nextSearchAfter } });
+          const { entities, nextSearchAfter, fields } = await crudClient.listEntities(listParams);
+          return res.ok({
+            body: { entities, nextSearchAfter, ...(fields ? { fields } : {}) },
+          });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           if (message.startsWith('Invalid filterQuery')) {
