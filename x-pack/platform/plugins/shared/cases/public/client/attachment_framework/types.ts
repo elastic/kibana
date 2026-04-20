@@ -117,6 +117,7 @@ export interface AttachmentType<Props> {
   getAttachmentTabViewObject?: (
     props?: CommonAttachmentTabViewProps
   ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
+  schemaValidator?: (data: unknown) => void;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;
