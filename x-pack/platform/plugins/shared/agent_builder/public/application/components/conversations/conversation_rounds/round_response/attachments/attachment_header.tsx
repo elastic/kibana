@@ -35,7 +35,7 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate('xpack.agentBuilder.attachmentHea
   defaultMessage: 'Close',
 });
 
-const HEADER_HEIGHT = 72;
+export const HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
   title: string;
