@@ -47,6 +47,7 @@ describe('Config.getScoutTestConfig', () => {
 
     const expectedConfig = {
       serverless: false,
+      http2: false,
       projectType: undefined,
       isCloud: false,
       license: 'trial',
@@ -105,6 +106,7 @@ describe('Config.getScoutTestConfig', () => {
     const scoutConfig = config.getScoutTestConfig();
     const expectedConfig = {
       serverless: true,
+      http2: false,
       projectType: 'es',
       isCloud: false,
       license: 'trial',

@@ -7,23 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServerlessProjectType } from '@kbn/es';
+import type { ScoutServerConfig } from '../../../../../types';
+import { servers as defaultServers } from '../../default/serverless/security_essentials.serverless.config';
 
-export interface ScoutTestConfig {
-  serverless: boolean;
-  http2: boolean;
-  projectType?: ServerlessProjectType;
-  isCloud: boolean;
-  cloudHostName?: string;
-  cloudUsersFilePath: string;
-  license: string;
-  hosts: {
-    kibana: string;
-    elasticsearch: string;
-  };
-  auth: {
-    username: string;
-    password: string;
-  };
-  metadata?: any;
-}
+export const servers: ScoutServerConfig = {
+  ...defaultServers,
+  http2: true,
+};
