@@ -10,9 +10,9 @@ import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import type { AnalyticsServiceStart, ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
-import { canUserChangeSpaceChatExperience } from '@kbn/ai-assistant-common';
+import { AIChatExperience, canUserChangeSpaceChatExperience } from '@kbn/ai-assistant-common';
 import { useGlobalUiSetting, useKibana } from '@kbn/kibana-react-plugin/public';
-import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE, HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AgentBuilderAnnouncementModal } from '@kbn/agent-builder-browser';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -34,14 +34,20 @@ export function AgentBuilderAnnouncementModalController() {
   const spacesService = services.spaces;
   const activeSpace$ = useMemo(() => spacesService?.getActiveSpace$() ?? EMPTY, [spacesService]);
   const space = useObservable(activeSpace$);
+  const chatExperience = useObservable(
+    useMemo(
+      () => services.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
+      [services.settings.client]
+    )
+  );
   const { isSeen, isReady, markSeen } = useAgentBuilderAnnouncementModalSeenState(
-    services.userProfile,
-    space?.id
+    services.userProfile
   );
   const [isDismissed, setIsDismissed] = useState(false);
 
   if (!space) return null;
   if (hideAnnouncements || isDismissed || navigator.webdriver) return null;
+  if (chatExperience === AIChatExperience.Classic) return null;
   if (!isReady) return null;
   if (isSeen) return null;
 
