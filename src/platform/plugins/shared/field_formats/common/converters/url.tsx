@@ -8,13 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { escape, memoize } from 'lodash';
+import { memoize } from 'lodash';
+import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { getHighlightHtml } from '../utils';
+import { getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
+  ReactContextTypeSingleConvert,
   TextContextTypeConvert,
-  HtmlContextTypeConvert,
   FieldFormatMetaParams,
   FieldFormatParams,
 } from '../types';
@@ -78,24 +79,26 @@ export class UrlFormat extends FieldFormat {
     };
   }
 
-  private formatLabel(value: string, url?: string): string {
+  private formatLabel(value: string | number, url?: string): string {
+    const strValue = String(value);
     const template = this.param('labelTemplate');
-    if (url == null) url = this.formatUrl(value);
+    if (url == null) url = this.formatUrl(strValue);
     if (!template) return url;
 
     return this.compileTemplate(template)({
-      value,
+      value: strValue,
       url,
       rawValue: value,
     });
   }
 
-  private formatUrl(value: string): string {
+  private formatUrl(value: string | number): string {
+    const strValue = String(value);
     const template = this.param('urlTemplate');
-    if (!template) return value;
+    if (!template) return strValue;
 
     return this.compileTemplate(template)({
-      value: encodeURIComponent(value),
+      value: encodeURIComponent(strValue),
       rawValue: value,
     });
   }
@@ -104,7 +107,7 @@ export class UrlFormat extends FieldFormat {
     // trim all the odd bits, the variable names
     const parts = template.split(templateMatchRE).map((part, i) => (i % 2 ? part.trim() : part));
 
-    return function (locals: Record<string, string>): string {
+    return function (locals: Record<string, string | number>): string {
       // replace all the odd bits with their local var
       let output = '';
       let i = -1;
@@ -123,18 +126,7 @@ export class UrlFormat extends FieldFormat {
     };
   }
 
-  private generateImgHtml(url: string, imageLabel: string): string {
-    const parsedWidth = parseInt(this.param('width'), 10);
-    const parsedHeight = parseInt(this.param('height'), 10);
-    const isValidWidth = !isNaN(parsedWidth);
-    const isValidHeight = !isNaN(parsedHeight);
-    const maxWidth = isValidWidth ? `${parsedWidth}px` : 'none';
-    const maxHeight = isValidHeight ? `${parsedHeight}px` : 'none';
-
-    return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
-  }
-
-  textConvert: TextContextTypeConvert = (value: string) => {
+  textConvert: TextContextTypeConvert = (value: string | number) => {
     const missing = this.checkForMissingValueText(value);
     if (missing) {
       return missing;
@@ -143,31 +135,52 @@ export class UrlFormat extends FieldFormat {
     return this.formatLabel(value);
   };
 
-  htmlConvert: HtmlContextTypeConvert = (rawValue: string, options = {}) => {
-    const missing = this.checkForMissingValueHtml(rawValue);
-    if (missing) {
-      return missing;
-    }
+  reactConvertSingle: ReactContextTypeSingleConvert = (rawValue, options = {}) => {
+    const missing = this.checkForMissingValueReact(rawValue);
+    if (missing) return missing;
+
+    // After the missing value check, rawValue is guaranteed to be a valid string or number
+    const value = rawValue as string | number;
 
     const { field, hit } = options;
     const { parsedUrl } = this._params;
     const { basePath, pathname, origin } = parsedUrl || {};
 
-    const url = escape(this.formatUrl(rawValue));
-    const label = escape(this.formatLabel(rawValue, url));
+    const url = this.formatUrl(value);
+    const label = this.formatLabel(value, url);
 
     switch (this.param('type')) {
       case 'audio':
-        return `<audio controls preload="none" src="${url}">`;
+        // eslint-disable-next-line jsx-a11y/media-has-caption
+        return <audio controls preload="none" src={url} />;
 
-      case 'img':
+      case 'img': {
         // If the URL hasn't been formatted to become a meaningful label then the best we can do
         // is tell screen readers where the image comes from.
         const imageLabel =
-          label === url ? `A dynamically-specified image located at ${url}` : label;
+          label === url
+            ? i18n.translate('fieldFormats.url.dynamicImageAltText', {
+                defaultMessage: 'A dynamically-specified image located at {url}',
+                values: { url },
+              })
+            : label;
+        const parsedWidth = parseInt(this.param('width'), 10);
+        const parsedHeight = parseInt(this.param('height'), 10);
+        return (
+          <img
+            src={url}
+            alt={imageLabel}
+            style={{
+              width: 'auto',
+              height: 'auto',
+              maxWidth: !isNaN(parsedWidth) ? `${parsedWidth}px` : 'none',
+              maxHeight: !isNaN(parsedHeight) ? `${parsedHeight}px` : 'none',
+            }}
+          />
+        );
+      }
 
-        return this.generateImgHtml(url, imageLabel);
-      default:
+      default: {
         const allowed = allowedUrlSchemes.some((scheme) => url.indexOf(scheme) === 0);
         if (!allowed && !parsedUrl) {
           return url;
@@ -197,22 +210,23 @@ export class UrlFormat extends FieldFormat {
           // Handle urls like: `../app/kibana`
           else {
             const prefixEnd = url[0] === '/' ? '' : '/';
-
             prefix = `${origin}${basePath || ''}/app${prefixEnd}`;
           }
         }
 
-        let linkLabel;
-
-        if (hit && hit.highlight && hit.highlight[field?.name!]) {
-          linkLabel = getHighlightHtml(label, hit.highlight[field!.name]);
-        } else {
-          linkLabel = label;
-        }
-
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
+        const fieldName = field?.name;
+        const linkContent =
+          fieldName && hit?.highlight?.[fieldName]
+            ? getHighlightReact(label, hit.highlight[fieldName])
+            : label;
 
-        return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
+        return (
+          <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">
+            {linkContent}
+          </a>
+        );
+      }
     }
   };
 }

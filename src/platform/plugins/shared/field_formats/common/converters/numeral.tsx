@@ -11,11 +11,11 @@
 import numeral from '@elastic/numeral';
 // @ts-ignore
 import numeralLanguages from '@elastic/numeral/languages';
-import { escape } from 'lodash';
+import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { MISSING_TOKEN, NAN_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { FieldFormat } from '../field_format';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
 
@@ -76,14 +76,14 @@ export abstract class NumeralFormat extends FieldFormat {
     return formatted;
   }
 
-  htmlConvert: HtmlContextTypeConvert = (val) => {
+  reactConvertSingle: ReactContextTypeSingleConvert = (val) => {
     if (val == null || val === MISSING_TOKEN) {
-      return `<span class="ffString__emptyValue">${NULL_LABEL}</span>`;
+      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
     }
     if (typeof val === 'object' && !Array.isArray(val)) {
-      return escape(asPrettyString(val));
+      return asPrettyString(val);
     }
-    return escape(this.getConvertedValue(val));
+    return this.getConvertedValue(val);
   };
 
   textConvert: TextContextTypeConvert = (val) => {

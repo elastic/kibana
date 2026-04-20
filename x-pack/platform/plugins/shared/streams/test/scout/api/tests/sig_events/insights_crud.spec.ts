@@ -13,8 +13,8 @@ import {
 } from '@kbn/streams-schema/src/insights';
 import { v4 as uuidv4 } from 'uuid';
 import { tags } from '@kbn/scout';
-import { streamsApiTest as apiTest } from '../fixtures';
-import { COMMON_API_HEADERS } from '../fixtures/constants';
+import { streamsApiTest as apiTest } from '../../fixtures';
+import { COMMON_API_HEADERS } from '../../fixtures/constants';
 
 apiTest.describe(
   'Insights CRUD API',

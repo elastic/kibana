@@ -8,10 +8,10 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { v4 as uuidv4 } from 'uuid';
-import { streamsApiTest as apiTest } from '../fixtures';
-import { PUBLIC_API_HEADERS } from '../fixtures/constants';
-import { featureStorageSettings } from '../../../../server/lib/streams/feature/storage_settings';
-import { queryStorageSettings } from '../../../../server/lib/streams/assets/storage_settings';
+import { streamsApiTest as apiTest } from '../../fixtures';
+import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
+import { featureStorageSettings } from '../../../../../server/lib/streams/feature/storage_settings';
+import { queryStorageSettings } from '../../../../../server/lib/streams/assets/storage_settings';
 import {
   FEATURE_CONFIDENCE,
   FEATURE_DESCRIPTION,
@@ -22,7 +22,7 @@ import {
   FEATURE_TYPE,
   FEATURE_UUID,
   STREAM_NAME as FEATURE_STREAM_NAME,
-} from '../../../../server/lib/streams/feature/fields';
+} from '../../../../../server/lib/streams/feature/fields';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -35,8 +35,8 @@ import {
   RULE_BACKED,
   RULE_ID,
   STREAM_NAME as QUERY_STREAM_NAME,
-} from '../../../../server/lib/streams/assets/fields';
-import { getQueryLinkUuid } from '../../../../server/lib/streams/assets/query/query_client';
+} from '../../../../../server/lib/streams/assets/fields';
+import { getQueryLinkUuid } from '../../../../../server/lib/streams/assets/query/query_client';
 
 const TOOL_ID = 'platform.streams.sig_events.search_kis';
 

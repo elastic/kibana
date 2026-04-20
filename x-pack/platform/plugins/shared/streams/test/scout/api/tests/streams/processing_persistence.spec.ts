@@ -7,18 +7,18 @@
 
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import { streamsApiTest as apiTest } from '../fixtures';
-import { PUBLIC_API_HEADERS } from '../fixtures/constants';
+import { streamsApiTest as apiTest } from '../../fixtures';
+import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
 
 apiTest.describe(
-  'Stream schema - field mapping persistence API (CRUD)',
+  'Stream data processing - persistence API (CRUD)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     // Use logs.otel as it's guaranteed to exist after enableStreams() in fresh installs
     // Stream names must be exactly one level deep when forking from 'logs.otel'
     // Format: logs.otel.<name> where name uses hyphens, not dots
     const rootStream = 'logs.otel';
-    const streamNamePrefix = `${rootStream}.sp`;
+    const streamNamePrefix = `${rootStream}.pp`;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type ApiClient = any;
@@ -82,30 +82,33 @@ apiTest.describe(
       await apiServices.streamsTest.cleanupTestStreams(streamNamePrefix);
     });
 
-    // Test: Map a single field with keyword type
-    apiTest('should map a single field with keyword type', async ({ apiClient, samlAuth }) => {
+    // Test: Create a single grok processor
+    apiTest('should create a single grok processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-keyword`;
+      const testStream = `${streamNamePrefix}-grok`;
 
       const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
         field: 'service.name',
-        eq: 'keyword-test',
+        eq: 'grok-test',
       });
       expect(createResult.success, createResult.error).toBe(true);
 
       const ingest = getWriteableIngest(createResult.stream!);
 
-      // Add a field mapping
+      // Add a grok processor
       const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         body: {
           ingest: {
             ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.custom_id': { type: 'keyword' },
-              },
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'body.text',
+                  patterns: ['%{WORD:attributes.method} %{URIPATH:attributes.path}'],
+                },
+              ],
             },
           },
         },
@@ -114,25 +117,26 @@ apiTest.describe(
 
       expect(updateResponse.statusCode).toBe(200);
 
-      // Verify the field was mapped
+      // Verify the processor was saved
       const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
         headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
         responseType: 'json',
       });
 
       expect(verifyResponse.statusCode).toBe(200);
-      expect(verifyResponse.body.ingest.wired.fields['attributes.custom_id']).toBeDefined();
-      expect(verifyResponse.body.ingest.wired.fields['attributes.custom_id'].type).toBe('keyword');
+      expect(verifyResponse.body.ingest.processing.steps).toHaveLength(1);
+      expect(verifyResponse.body.ingest.processing.steps[0].action).toBe('grok');
+      expect(verifyResponse.body.ingest.processing.steps[0].from).toBe('body.text');
     });
 
-    // Test: Map a field with long type
-    apiTest('should map a field with long type', async ({ apiClient, samlAuth }) => {
+    // Test: Create a dissect processor
+    apiTest('should create a dissect processor', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-long`;
+      const testStream = `${streamNamePrefix}-dissect`;
 
       const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
         field: 'service.name',
-        eq: 'long-test',
+        eq: 'dissect-test',
       });
       expect(createResult.success, createResult.error).toBe(true);
 
@@ -143,11 +147,14 @@ apiTest.describe(
         body: {
           ingest: {
             ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.response_code': { type: 'long' },
-              },
+            processing: {
+              steps: [
+                {
+                  action: 'dissect',
+                  from: 'body.text',
+                  pattern: '%{attributes.user} %{attributes.action}',
+                },
+              ],
             },
           },
         },
@@ -161,167 +168,12 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      expect(verifyResponse.body.ingest.wired.fields['attributes.response_code'].type).toBe('long');
+      expect(verifyResponse.statusCode).toBe(200);
+      expect(verifyResponse.body.ingest.processing.steps[0].action).toBe('dissect');
     });
 
-    // Test: Map a field with double type
-    apiTest('should map a field with double type', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-double`;
-
-      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-        field: 'service.name',
-        eq: 'double-test',
-      });
-      expect(createResult.success, createResult.error).toBe(true);
-
-      const ingest = getWriteableIngest(createResult.stream!);
-
-      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.cpu_percent': { type: 'double' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(verifyResponse.body.ingest.wired.fields['attributes.cpu_percent'].type).toBe('double');
-    });
-
-    // Test: Map a field with boolean type
-    apiTest('should map a field with boolean type', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-boolean`;
-
-      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-        field: 'service.name',
-        eq: 'boolean-test',
-      });
-      expect(createResult.success, createResult.error).toBe(true);
-
-      const ingest = getWriteableIngest(createResult.stream!);
-
-      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.is_active': { type: 'boolean' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(verifyResponse.body.ingest.wired.fields['attributes.is_active'].type).toBe('boolean');
-    });
-
-    // Test: Map a field with ip type
-    apiTest('should map a field with ip type', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-ip`;
-
-      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-        field: 'service.name',
-        eq: 'ip-test',
-      });
-      expect(createResult.success, createResult.error).toBe(true);
-
-      const ingest = getWriteableIngest(createResult.stream!);
-
-      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.client_ip': { type: 'ip' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(verifyResponse.body.ingest.wired.fields['attributes.client_ip'].type).toBe('ip');
-    });
-
-    // Test: Map a field with date type
-    apiTest('should map a field with date type', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-date`;
-
-      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-        field: 'service.name',
-        eq: 'date-test',
-      });
-      expect(createResult.success, createResult.error).toBe(true);
-
-      const ingest = getWriteableIngest(createResult.stream!);
-
-      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.event_time': { type: 'date' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(verifyResponse.body.ingest.wired.fields['attributes.event_time'].type).toBe('date');
-    });
-
-    // Test: Map multiple fields at once
-    apiTest('should map multiple fields at once', async ({ apiClient, samlAuth }) => {
+    // Test: Create multiple processors in sequence
+    apiTest('should create multiple processors in sequence', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const testStream = `${streamNamePrefix}-multi`;
 
@@ -338,240 +190,233 @@ apiTest.describe(
         body: {
           ingest: {
             ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.user_id': { type: 'keyword' },
-                'attributes.request_count': { type: 'long' },
-                'attributes.response_time': { type: 'double' },
-                'attributes.success': { type: 'boolean' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      const fields = verifyResponse.body.ingest.wired.fields;
-      expect(fields['attributes.user_id'].type).toBe('keyword');
-      expect(fields['attributes.request_count'].type).toBe('long');
-      expect(fields['attributes.response_time'].type).toBe('double');
-      expect(fields['attributes.success'].type).toBe('boolean');
-    });
-
-    // Test: Unmap a field
-    apiTest('should unmap a field', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-unmap`;
-
-      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-        field: 'service.name',
-        eq: 'unmap-test',
-      });
-      expect(createResult.success, createResult.error).toBe(true);
-
-      let ingest = getWriteableIngest(createResult.stream!);
-
-      // First, map a field
-      await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.to_remove': { type: 'keyword' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      // Verify it was mapped
-      let verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      expect(verifyResponse.body.ingest.wired.fields['attributes.to_remove']).toBeDefined();
-
-      // Get updated stream
-      const getResponse = await apiClient.get(`api/streams/${testStream}`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      ingest = getWriteableIngest(getResponse.body);
-
-      // Now unmap the field by removing it from fields
-      const { 'attributes.to_remove': _, ...remainingFields } = ingest.wired.fields;
-
-      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: remainingFields,
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      // Verify the field was unmapped
-      verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(verifyResponse.body.ingest.wired.fields['attributes.to_remove']).toBeUndefined();
-    });
-
-    // Test: Update field type (if supported)
-    apiTest('should add a new field and keep existing ones', async ({ apiClient, samlAuth }) => {
-      const { cookieHeader } = await samlAuth.asStreamsAdmin();
-      const testStream = `${streamNamePrefix}-addfield`;
-
-      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-        field: 'service.name',
-        eq: 'addfield-test',
-      });
-      expect(createResult.success, createResult.error).toBe(true);
-
-      let ingest = getWriteableIngest(createResult.stream!);
-
-      // Map first field
-      await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.field1': { type: 'keyword' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      // Get updated stream
-      const getResponse = await apiClient.get(`api/streams/${testStream}`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-      ingest = getWriteableIngest(getResponse.body);
-
-      // Add a second field while keeping the first
-      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        body: {
-          ingest: {
-            ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                ...ingest.wired.fields,
-                'attributes.field2': { type: 'long' },
-              },
-            },
-          },
-        },
-        responseType: 'json',
-      });
-
-      expect(updateResponse.statusCode).toBe(200);
-
-      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-        responseType: 'json',
-      });
-
-      expect(verifyResponse.body.ingest.wired.fields['attributes.field1'].type).toBe('keyword');
-      expect(verifyResponse.body.ingest.wired.fields['attributes.field2'].type).toBe('long');
-    });
-
-    // Test: Field mapping should not affect processing settings
-    apiTest(
-      'should not affect processing when updating field mappings',
-      async ({ apiClient, samlAuth }) => {
-        const { cookieHeader } = await samlAuth.asStreamsAdmin();
-        const testStream = `${streamNamePrefix}-isolated`;
-
-        const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
-          field: 'service.name',
-          eq: 'isolated-test',
-        });
-        expect(createResult.success, createResult.error).toBe(true);
-
-        let ingest = getWriteableIngest(createResult.stream!);
-
-        // Set up processing first
-        await apiClient.put(`api/streams/${testStream}/_ingest`, {
-          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-          body: {
-            ingest: {
-              ...ingest,
-              processing: {
-                steps: [{ action: 'set', to: 'attributes.test', value: 'value' }],
-              },
-            },
-          },
-          responseType: 'json',
-        });
-
-        // Get updated stream
-        const getResponse = await apiClient.get(`api/streams/${testStream}`, {
-          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        });
-        ingest = getWriteableIngest(getResponse.body);
-
-        // Now update field mappings
-        await apiClient.put(`api/streams/${testStream}/_ingest`, {
-          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-          body: {
-            ingest: {
-              ...ingest,
-              wired: {
-                ...ingest.wired,
-                fields: {
-                  ...ingest.wired.fields,
-                  'attributes.new_field': { type: 'keyword' },
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'body.text',
+                  patterns: ['%{IP:attributes.client_ip} %{WORD:attributes.method}'],
                 },
-              },
+                {
+                  action: 'uppercase',
+                  from: 'attributes.method',
+                },
+                {
+                  action: 'set',
+                  to: 'attributes.processed',
+                  value: 'true',
+                },
+              ],
             },
           },
-          responseType: 'json',
-        });
+        },
+        responseType: 'json',
+      });
 
-        // Verify processing is unchanged
-        const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
-          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
-          responseType: 'json',
-        });
+      expect(updateResponse.statusCode).toBe(200);
 
-        expect(verifyResponse.body.ingest.processing.steps).toHaveLength(1);
-        expect(verifyResponse.body.ingest.processing.steps[0].action).toBe('set');
-        expect(verifyResponse.body.ingest.wired.fields['attributes.new_field']).toBeDefined();
-      }
-    );
+      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
 
-    // Test: Map deeply nested field
-    apiTest('should map deeply nested field', async ({ apiClient, samlAuth }) => {
+      expect(verifyResponse.statusCode).toBe(200);
+      expect(verifyResponse.body.ingest.processing.steps).toHaveLength(3);
+      expect(verifyResponse.body.ingest.processing.steps[0].action).toBe('grok');
+      expect(verifyResponse.body.ingest.processing.steps[1].action).toBe('uppercase');
+      expect(verifyResponse.body.ingest.processing.steps[2].action).toBe('set');
+    });
+
+    // Test: Update an existing processor
+    apiTest('should update an existing processor', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const testStream = `${streamNamePrefix}-update`;
+
+      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
+        field: 'service.name',
+        eq: 'update-test',
+      });
+      expect(createResult.success, createResult.error).toBe(true);
+
+      let ingest = getWriteableIngest(createResult.stream!);
+
+      // Create initial processor
+      await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'body.text',
+                  patterns: ['%{WORD:attributes.method}'],
+                },
+              ],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      // Get the updated stream
+      const getResponse = await apiClient.get(`api/streams/${testStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      ingest = getWriteableIngest(getResponse.body);
+
+      // Update the processor with a new pattern
+      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'body.text',
+                  patterns: ['%{WORD:attributes.hostname}'],
+                },
+              ],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(verifyResponse.body.ingest.processing.steps[0].patterns[0]).toBe(
+        '%{WORD:attributes.hostname}'
+      );
+    });
+
+    // Test: Remove all processors
+    apiTest('should remove all processors', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const testStream = `${streamNamePrefix}-remove`;
+
+      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
+        field: 'service.name',
+        eq: 'remove-test',
+      });
+      expect(createResult.success, createResult.error).toBe(true);
+
+      let ingest = getWriteableIngest(createResult.stream!);
+
+      // Create a processor first
+      await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [
+                {
+                  action: 'grok',
+                  from: 'body.text',
+                  patterns: ['%{WORD:attributes.method}'],
+                },
+              ],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      // Get the updated stream
+      const getResponse = await apiClient.get(`api/streams/${testStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      ingest = getWriteableIngest(getResponse.body);
+
+      // Remove all processors
+      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(verifyResponse.body.ingest.processing.steps).toHaveLength(0);
+    });
+
+    // Test: Create processor with conditional step
+    apiTest('should create processor with conditional step', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const testStream = `${streamNamePrefix}-conditional`;
+
+      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
+        field: 'service.name',
+        eq: 'conditional-test',
+      });
+      expect(createResult.success, createResult.error).toBe(true);
+
+      const ingest = getWriteableIngest(createResult.stream!);
+
+      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [
+                {
+                  condition: {
+                    field: 'log.level',
+                    eq: 'error',
+                    steps: [
+                      {
+                        action: 'set',
+                        to: 'attributes.severity',
+                        value: 'high',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      expect(verifyResponse.body.ingest.processing.steps).toHaveLength(1);
+      expect(verifyResponse.body.ingest.processing.steps[0].condition).toBeDefined();
+      expect(verifyResponse.body.ingest.processing.steps[0].condition.steps).toHaveLength(1);
+    });
+
+    // Test: Create nested conditional steps
+    apiTest('should create nested conditional steps', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const testStream = `${streamNamePrefix}-nested`;
 
@@ -588,12 +433,35 @@ apiTest.describe(
         body: {
           ingest: {
             ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'body.structured.http.request.method': { type: 'keyword' },
-                'body.structured.http.response.status_code': { type: 'long' },
-              },
+            processing: {
+              steps: [
+                {
+                  condition: {
+                    field: 'environment',
+                    eq: 'production',
+                    steps: [
+                      {
+                        action: 'grok',
+                        from: 'body.text',
+                        patterns: ['%{IP:attributes.client_ip}'],
+                      },
+                      {
+                        condition: {
+                          field: 'log.level',
+                          eq: 'error',
+                          steps: [
+                            {
+                              action: 'set',
+                              to: 'attributes.alert',
+                              value: 'true',
+                            },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             },
           },
         },
@@ -607,13 +475,143 @@ apiTest.describe(
         responseType: 'json',
       });
 
-      const fields = verifyResponse.body.ingest.wired.fields;
-      expect(fields['body.structured.http.request.method'].type).toBe('keyword');
-      expect(fields['body.structured.http.response.status_code'].type).toBe('long');
+      const steps = verifyResponse.body.ingest.processing.steps;
+      expect(steps).toHaveLength(1);
+      expect(steps[0].condition.steps).toHaveLength(2);
+      expect(steps[0].condition.steps[0].action).toBe('grok');
+      expect(steps[0].condition.steps[1].condition).toBeDefined();
     });
 
-    // Test: Return error for invalid field type
-    apiTest('should return 400 for invalid field type', async ({ apiClient, samlAuth }) => {
+    // Test: Reorder processors
+    apiTest('should reorder processors', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asStreamsAdmin();
+      const testStream = `${streamNamePrefix}-reorder`;
+
+      const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
+        field: 'service.name',
+        eq: 'reorder-test',
+      });
+      expect(createResult.success, createResult.error).toBe(true);
+
+      let ingest = getWriteableIngest(createResult.stream!);
+
+      // Create initial processors
+      await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [
+                { action: 'set', to: 'attributes.step1', value: '1' },
+                { action: 'set', to: 'attributes.step2', value: '2' },
+                { action: 'set', to: 'attributes.step3', value: '3' },
+              ],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      // Get updated stream
+      const getResponse = await apiClient.get(`api/streams/${testStream}`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      ingest = getWriteableIngest(getResponse.body);
+
+      // Reorder processors (move step3 to first position)
+      const updateResponse = await apiClient.put(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        body: {
+          ingest: {
+            ...ingest,
+            processing: {
+              steps: [
+                { action: 'set', to: 'attributes.step3', value: '3' },
+                { action: 'set', to: 'attributes.step1', value: '1' },
+                { action: 'set', to: 'attributes.step2', value: '2' },
+              ],
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(updateResponse.statusCode).toBe(200);
+
+      const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
+        headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+
+      const steps = verifyResponse.body.ingest.processing.steps;
+      expect(steps[0].to).toBe('attributes.step3');
+      expect(steps[1].to).toBe('attributes.step1');
+      expect(steps[2].to).toBe('attributes.step2');
+    });
+
+    // Test: Processing update should not affect other ingest settings
+    apiTest(
+      'should not affect lifecycle when updating processing',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asStreamsAdmin();
+        const testStream = `${streamNamePrefix}-isolated`;
+
+        const createResult = await createAndGetStream(apiClient, cookieHeader, testStream, {
+          field: 'service.name',
+          eq: 'isolated-test',
+        });
+        expect(createResult.success, createResult.error).toBe(true);
+
+        let ingest = getWriteableIngest(createResult.stream!);
+
+        // Set a custom lifecycle first
+        await apiClient.put(`api/streams/${testStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...ingest,
+              lifecycle: { dsl: { data_retention: '30d' } },
+            },
+          },
+          responseType: 'json',
+        });
+
+        // Get updated stream
+        const getResponse = await apiClient.get(`api/streams/${testStream}`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+        ingest = getWriteableIngest(getResponse.body);
+
+        // Now update processing
+        await apiClient.put(`api/streams/${testStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          body: {
+            ingest: {
+              ...ingest,
+              processing: {
+                steps: [{ action: 'set', to: 'attributes.test', value: 'value' }],
+              },
+            },
+          },
+          responseType: 'json',
+        });
+
+        // Verify lifecycle is unchanged
+        const verifyResponse = await apiClient.get(`api/streams/${testStream}/_ingest`, {
+          headers: { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          responseType: 'json',
+        });
+
+        expect(verifyResponse.body.ingest.lifecycle.dsl.data_retention).toBe('30d');
+        expect(verifyResponse.body.ingest.processing.steps).toHaveLength(1);
+      }
+    );
+
+    // Test: Return error for invalid processor action
+    apiTest('should return 400 for invalid processor action', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asStreamsAdmin();
       const testStream = `${streamNamePrefix}-invalid`;
 
@@ -630,11 +628,13 @@ apiTest.describe(
         body: {
           ingest: {
             ...ingest,
-            wired: {
-              ...ingest.wired,
-              fields: {
-                'attributes.invalid': { type: 'invalid_type' },
-              },
+            processing: {
+              steps: [
+                {
+                  action: 'invalid_action',
+                  from: 'message',
+                },
+              ],
             },
           },
         },
@@ -656,10 +656,7 @@ apiTest.describe(
             ingest: {
               processing: { steps: [] },
               lifecycle: { inherit: {} },
-              wired: {
-                fields: { 'attributes.test': { type: 'keyword' } },
-                routing: [],
-              },
+              wired: { fields: {}, routing: [] },
             },
           },
           responseType: 'json',

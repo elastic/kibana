@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transform, size, cloneDeep, get, defaults } from 'lodash';
+import type { ReactNode } from 'react';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { escape, transform, size, cloneDeep, get, defaults } from 'lodash';
 import { EMPTY_LABEL, MISSING_TOKEN, NULL_LABEL } from '@kbn/field-formats-common';
 import { createCustomFieldFormat } from './converters/custom';
-import { checkForMissingValueHtml } from './utils';
+import { checkForMissingValueHtml, formatReactArray } from './utils';
 import type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
@@ -23,7 +26,13 @@ import type {
   FieldFormatParams,
 } from './types';
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import type { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import { getHighlightReact } from './utils/highlight';
+import type {
+  HtmlContextTypeConvert,
+  ReactContextTypeConvert,
+  ReactContextTypeSingleConvert,
+  TextContextTypeConvert,
+} from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
@@ -72,8 +81,54 @@ export abstract class FieldFormat {
    * @protected
    * have to remove the protected because of
    * https://github.com/Microsoft/TypeScript/issues/17293
+   * @deprecated Use reactConvert instead
    */
   htmlConvert: HtmlContextTypeConvert | undefined;
+
+  /**
+   * Single-value React converter. Override this in subclasses to customize React rendering
+   * for individual (non-array) values. The public `reactConvert` method handles array
+   * wrapping automatically and delegates here for scalar values.
+   *
+   * @property {reactConvertSingle}
+   * @protected
+   */
+  reactConvertSingle: ReactContextTypeSingleConvert | undefined;
+
+  /**
+   * React-based converter. Handles arrays and delegates single values to `reactConvertSingle`
+   * (if overridden) or the default text/highlight logic.
+   *
+   * Do NOT override this method in subclasses — override `reactConvertSingle` instead so that
+   * array handling is always applied correctly.
+   *
+   * @property {reactConvert}
+   * @protected
+   */
+  reactConvert: ReactContextTypeConvert = (val, options) => {
+    // Arrays: mirror the html_content_type bracket/comma rendering but with React nodes.
+    // Single-element arrays and empty arrays are passed through without brackets.
+    if (Array.isArray(val)) {
+      return formatReactArray(val, (v) => this.reactConvert(v, options));
+    }
+
+    if (this.reactConvertSingle) {
+      return this.reactConvertSingle(val, options);
+    }
+
+    const missing = this.checkForMissingValueReact(val);
+    if (missing) return missing;
+
+    const formatted = this.textConvert
+      ? this.textConvert(val, options)
+      : this.convert(val, 'text', options);
+    const fieldName = options?.field?.name;
+    const highlights = fieldName ? options?.hit?.highlight?.[fieldName] : undefined;
+    // getHighlightReact expects a string; guard against edge cases where convert() returns non-string
+    return highlights && typeof formatted === 'string'
+      ? getHighlightReact(formatted, highlights)
+      : formatted;
+  };
 
   /**
    * @property {textConvert}
@@ -208,9 +263,29 @@ export abstract class FieldFormat {
   }
 
   setupContentType(): FieldFormatConvert {
+    // Bridge: if no explicit htmlConvert, derive the HTML converter from reactConvert via
+    // renderToStaticMarkup so legacy consumers keep working unchanged.
+    let htmlConverter = this.htmlConvert;
+    if (!htmlConverter) {
+      const reactConvert = this.reactConvert.bind(this);
+      htmlConverter = (value, options) => {
+        // Let reactConvert handle missing value detection so formatters can customize behavior
+        // (e.g., StaticLookupFormat mapping '' to a custom label).
+        const node = reactConvert(value, options);
+        if (node == null) return '';
+        if (typeof node === 'string' || typeof node === 'number' || typeof node === 'boolean') {
+          // Plain scalars must be HTML-escaped since the result is injected as raw HTML
+          return escape(String(node));
+        }
+        // Wrap in fragment to safely handle arrays and other non-element ReactNodes
+        const element = React.isValidElement(node) ? node : <>{node}</>;
+        return renderToStaticMarkup(element);
+      };
+    }
+
     return {
       text: textContentTypeSetup(this, this.textConvert),
-      html: htmlContentTypeSetup(this, this.htmlConvert),
+      html: htmlContentTypeSetup(this, htmlConverter),
     };
   }
 
@@ -227,6 +302,19 @@ export abstract class FieldFormat {
     }
   }
 
+  protected checkForMissingValueReact(val: unknown): ReactNode | void {
+    if (val === '') {
+      return <span className="ffString__emptyValue">{EMPTY_LABEL}</span>;
+    }
+    if (val == null || val === MISSING_TOKEN) {
+      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
+    }
+  }
+
+  /**
+   * @deprecated Use checkForMissingValueReact() instead. This method exists only for
+   * backward compatibility with custom formatters that may override it.
+   */
   protected checkForMissingValueHtml(val: unknown): string | void {
     return checkForMissingValueHtml(val);
   }

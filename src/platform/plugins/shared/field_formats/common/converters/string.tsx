@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { escape } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { asPrettyString, getHighlightHtml, shortenDottedString } from '../utils';
+import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
 import { FieldFormat } from '../field_format';
-import type { TextContextTypeConvert, HtmlContextTypeConvert } from '../types';
+import type { ReactContextTypeSingleConvert, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 const TRANSFORM_OPTIONS = [
@@ -131,14 +130,15 @@ export class StringFormat extends FieldFormat {
     }
   };
 
-  htmlConvert: HtmlContextTypeConvert = (val, { hit, field } = {}) => {
-    const missing = this.checkForMissingValueHtml(val);
-    if (missing) {
-      return missing;
+  reactConvertSingle: ReactContextTypeSingleConvert = (val, { hit, field } = {}) => {
+    const missing = this.checkForMissingValueReact(val);
+    if (missing) return missing;
+
+    const fieldName = field?.name;
+    if (fieldName && hit?.highlight?.[fieldName]) {
+      return getHighlightReact(this.textConvert(val), hit.highlight[fieldName]);
     }
 
-    return hit?.highlight?.[field?.name!]
-      ? getHighlightHtml(escape(val), hit.highlight[field!.name])
-      : escape(this.textConvert(val));
+    return this.textConvert(val);
   };
 }

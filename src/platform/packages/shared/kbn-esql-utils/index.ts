@@ -9,6 +9,7 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLTimeFieldFromQuery,
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
