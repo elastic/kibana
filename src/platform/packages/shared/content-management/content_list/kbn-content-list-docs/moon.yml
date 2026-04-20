@@ -23,6 +23,8 @@ dependsOn:
   - '@kbn/content-list-footer'
   - '@kbn/content-list-mock-data'
   - '@kbn/content-management-favorites-public'
+  - '@kbn/content-management-table-list-view-common'
+  - '@kbn/content-management-tags'
 tags:
   - shared-browser
   - package
