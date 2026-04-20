@@ -1,6 +1,6 @@
 ## Table of Contents
 
-  - [Embeddable overview](#overview)
+  - [Embeddable overview](#embeddable-overview)
   - [Public](#public)
     - [Guiding principles](#guiding-principles)
     - [Embeddable public overview](#embeddable-public-overview)
