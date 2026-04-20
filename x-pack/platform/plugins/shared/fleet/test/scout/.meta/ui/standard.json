@@ -1,5 +1,5 @@
 {
-  "sha1": "954c1d3b6a8af5216a04f9825ff4b405194dc38e",
+  "sha1": "e8d885375d079a3b7154daa3b970be6b94f520de",
   "tests": [
     {
       "id": "0ab9aa6583f6769-b18346ef7c3b1d3",
@@ -184,8 +184,7 @@
       "title": "When the user has Viewer built-in role Fleet is accessible but user cannot perform any write actions on agent tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
@@ -198,8 +197,7 @@
       "title": "When the user has Viewer built-in role Fleet is accessible but user cannot perform any write actions on agent policies tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
@@ -212,8 +210,7 @@
       "title": "When the user has Viewer built-in role Fleet is accessible but user cannot perform any write actions on settings tabs",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
@@ -226,8 +223,7 @@
       "title": "When the user has Viewer built-in role Integrations are visible but cannot be added",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/privileges_viewer_role.spec.ts",
