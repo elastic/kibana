@@ -1,5 +1,5 @@
 {
-  "sha1": "d3054ea95405f7c6fa84436aa5d192af03905fa4",
+  "sha1": "5fcfcb0715b27283bded3cce369b453b80599e8d",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -882,6 +882,22 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
         "line": 45,
+        "column": 9
+      }
+    },
+    {
+      "id": "431bbf1927933f1-306551b6afaacbe",
+      "title": "Service map options panel: find in page, filter placeholders, and Ctrl+K focus",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
+        "line": 57,
         "column": 9
       }
     },
