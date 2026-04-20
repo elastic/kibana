@@ -37,15 +37,17 @@ export const useDeprecatedRulesTableCallout = () => {
 
   const hasReportedShown = useRef(false);
   const rulesCount = data?.rules.length ?? 0;
+  const isCalloutVisible =
+    isFeatureEnabled && !isDismissed && !isLoading && rulesCount > 0;
 
   useEffect(() => {
-    if (rulesCount > 0 && !hasReportedShown.current) {
+    if (isCalloutVisible && !hasReportedShown.current) {
       hasReportedShown.current = true;
       telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesCalloutShown, {
         count: rulesCount,
       });
     }
-  }, [rulesCount, telemetry]);
+  }, [isCalloutVisible, rulesCount, telemetry]);
 
   const handleDismiss = useCallback(() => {
     telemetry.reportEvent(RuleDeprecationEventTypes.DeprecatedRulesCalloutDismissed, {
