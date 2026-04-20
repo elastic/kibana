@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import { BasicPrettyPrinter, Builder, Parser, walk, type WalkerAstNode } from '@elastic/esql';
+import {
+  BasicPrettyPrinter,
+  Builder,
+  isBinaryExpression,
+  Parser,
+  walk,
+  type WalkerAstNode,
+} from '@elastic/esql';
 import type {
   ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLBinaryExpression,
   ESQLCommand,
   ESQLFunction,
   ESQLSingleAstItem,
@@ -174,6 +183,138 @@ export function ensureMetadata(esql: string): string {
 export function normalizeEsqlQuery(esql: string): string {
   const { root } = Parser.parse(esql);
   return BasicPrettyPrinter.print(root);
+}
+
+// ---------------------------------------------------------------------------
+// Commutative normalization — sorts AND/OR operands so that
+// `WHERE a AND b` and `WHERE b AND a` produce the same canonical string.
+// ---------------------------------------------------------------------------
+
+function printItem(item: ESQLAstItem): string {
+  if (Array.isArray(item)) {
+    return item.length === 1 ? printItem(item[0]) : item.map(printItem).join(', ');
+  }
+  return BasicPrettyPrinter.expression(item);
+}
+
+function isCommutativeOp(node: unknown): node is ESQLBinaryExpression<'and' | 'or'> {
+  return isBinaryExpression(node) && (node.name === 'and' || node.name === 'or');
+}
+
+/**
+ * Flattens a left-associative AND/OR chain into its leaf operands.
+ * E.g. `AND(AND(a, b), c)` → `[a, b, c]`.
+ */
+function flattenCommutativeChain(
+  node: ESQLBinaryExpression<'and' | 'or'>,
+  opName: string
+): ESQLAstItem[] {
+  const operands: ESQLAstItem[] = [];
+  for (const arg of node.args) {
+    const item = Array.isArray(arg) ? arg[0] : arg;
+    if (isCommutativeOp(item) && item.name === opName) {
+      operands.push(...flattenCommutativeChain(item, opName));
+    } else {
+      operands.push(arg);
+    }
+  }
+  return operands;
+}
+
+/**
+ * Collects all binary-expression nodes in a commutative AND/OR tree
+ * so they can be re-wired with sorted operands. Walks both children
+ * to handle right-nested trees (e.g. `AND(a, AND(b, c))`) in addition
+ * to the default left-associative parse trees.
+ */
+function collectChainSpine(
+  node: ESQLBinaryExpression<'and' | 'or'>,
+  opName: string
+): ESQLBinaryExpression<'and' | 'or'>[] {
+  const spine: ESQLBinaryExpression<'and' | 'or'>[] = [node];
+  for (const arg of node.args) {
+    const child = Array.isArray(arg) ? arg[0] : arg;
+    if (isCommutativeOp(child) && child.name === opName) {
+      spine.push(...collectChainSpine(child, opName));
+    }
+  }
+  return spine;
+}
+
+/**
+ * Sorts the operands of a commutative AND/OR chain in-place.
+ * After sorting, the existing AST spine nodes are re-wired so that
+ * `BasicPrettyPrinter.print` produces a deterministic operand order.
+ */
+function sortChainInPlace(node: ESQLBinaryExpression<'and' | 'or'>): void {
+  const opName = node.name;
+  const operands = flattenCommutativeChain(node, opName);
+  if (operands.length <= 1) return;
+
+  operands.sort((a, b) => {
+    return printItem(a).localeCompare(printItem(b));
+  });
+
+  const spine = collectChainSpine(node, opName);
+  // spine is [outermost, …, innermost]; reverse so index 0 is innermost
+  spine.reverse();
+
+  // Innermost node gets the first two operands
+  spine[0].args = [operands[0], operands[1]];
+  // Each subsequent node gets [previous spine node, next operand]
+  for (let i = 1; i < spine.length; i++) {
+    spine[i].args = [spine[i - 1], operands[i + 1]];
+  }
+}
+
+/**
+ * Bottom-up walk of an AST item: recurse into children first, then
+ * sort commutative ops at the current level. This ensures inner
+ * AND/OR expressions are canonicalized before being used as sort
+ * keys for outer expressions.
+ */
+function sortCommutativeItem(item: ESQLAstItem): void {
+  if (Array.isArray(item)) {
+    item.forEach(sortCommutativeItem);
+    return;
+  }
+  if ('args' in item && Array.isArray(item.args)) {
+    item.args.forEach(sortCommutativeItem);
+  }
+  if (isCommutativeOp(item)) {
+    sortChainInPlace(item);
+  }
+}
+
+function sortCommutativeOps(root: ESQLAstQueryExpression): void {
+  for (const cmd of root.commands) {
+    cmd.args.forEach(sortCommutativeItem);
+  }
+}
+
+/**
+ * Like {@link normalizeEsqlQuery} but never throws and additionally
+ * sorts commutative AND/OR operands so that `WHERE a AND b` and
+ * `WHERE b AND a` produce the same canonical string. Falls back to
+ * whitespace normalization when the parser cannot handle the input.
+ */
+export function normalizeEsqlSafe(esql: string): string {
+  try {
+    const { root } = Parser.parse(esql);
+    sortCommutativeOps(root);
+    return BasicPrettyPrinter.print(root);
+  } catch {
+    return esql.replace(/\s+/g, ' ').trim();
+  }
+}
+
+/**
+ * Returns `true` when two ES|QL query strings are semantically
+ * equivalent after deep AST-based normalization (including
+ * commutative AND/OR operand ordering).
+ */
+export function hasSameEsql(a: string, b: string): boolean {
+  return normalizeEsqlSafe(a) === normalizeEsqlSafe(b);
 }
 
 /**
