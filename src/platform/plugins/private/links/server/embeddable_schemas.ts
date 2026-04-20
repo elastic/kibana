@@ -27,7 +27,7 @@ const linksByReferenceStateSchema = schema.object({
   ref_id: schema.string({
     meta: {
       title: 'Reference ID',
-      description: 'The ID of the Links embeddable linked from the libray',
+      description: 'The unique identifier of the Links library item',
     },
   }),
 });
