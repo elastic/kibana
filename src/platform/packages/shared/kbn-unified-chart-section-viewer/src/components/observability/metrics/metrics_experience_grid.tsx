@@ -49,6 +49,7 @@ export const MetricsExperienceGrid = ({
   const {
     metricItems,
     allDimensions,
+    activeDimensions,
     loading: isDiscoverLoading,
     error: metricsInfoError,
   } = useFetchMetricsData({
@@ -155,6 +156,7 @@ export const MetricsExperienceGrid = ({
     >
       <MetricsExperienceGridContent
         metricItems={filteredMetricItems}
+        activeDimensions={activeDimensions}
         services={services}
         discoverFetch$={discoverFetch$}
         fetchParams={fetchParams}

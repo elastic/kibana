@@ -65,12 +65,11 @@ export const getFilteredLinks = async (
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    AIChatExperience.Agent
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
 
-  const isClassicNavUpdateEnabled = experimentalFeatures?.securityClassicNavUpdate ?? false;
   return Object.freeze([
     dashboardsLinks,
     core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
@@ -88,10 +87,7 @@ export const getFilteredLinks = async (
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,
-    onboardingLinks,
     managementFilteredLinks,
-    siemReadinessLinks,
-    aiValueLinks,
-    ...(isClassicNavUpdateEnabled ? [launchPadLinks] : []),
+    launchPadLinks,
   ]);
 };

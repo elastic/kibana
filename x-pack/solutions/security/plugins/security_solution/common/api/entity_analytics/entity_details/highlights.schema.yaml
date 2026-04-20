@@ -9,7 +9,7 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: EntityDetailsHighlights
-      summary: Initialize the Entity Store
+      summary: Generate AI summary for entity
 
       requestBody:
         description: Schema for the entity details highlights
@@ -33,7 +33,7 @@ paths:
                   description: The 'from' date.
                 to:
                   type: number
-                  description: The 'to' date.      
+                  description: The 'to' date.
                 connectorId:
                   type: string
                   description: The connector id.
@@ -42,8 +42,8 @@ paths:
                 - entityIdentifier
                 - anonymizationFields
                 - from
-                - to      
-                - connectorId  
+                - to
+                - connectorId
       responses:
         '200':
           description: Successful response
