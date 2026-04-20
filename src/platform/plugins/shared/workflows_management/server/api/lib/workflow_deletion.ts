@@ -13,10 +13,10 @@ import type { WorkflowExecutionListDto } from '@kbn/workflows';
 
 import { partitionBulkResults } from './bulk_response_helpers';
 import { workflowSpaceFilter } from './workflow_query_filters';
-import { unscheduleWorkflowTasks } from './workflow_scheduler_sync';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../../common';
 import { WorkflowConflictError } from '../../../common/lib/errors';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
+import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 import type { DeleteWorkflowsResponse } from '../workflows_management_api';
 import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';

@@ -11,9 +11,9 @@ import type { Logger } from '@kbn/core/server';
 
 import { partitionBulkResults } from './bulk_response_helpers';
 import { paginateWithSearchAfter } from './paginate_with_search_after';
-import { unscheduleWorkflowTasks } from './workflow_scheduler_sync';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
 import type { WorkflowProperties, WorkflowStorage } from '../../storage/workflow_storage';
+import { unscheduleWorkflowTasks } from '../../task_defs/unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../../tasks/workflow_task_scheduler';
 
 /**

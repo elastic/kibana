@@ -1,0 +1,452 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { KibanaRequest } from '@kbn/core/server';
+import type {
+  CreateWorkflowCommand,
+  EsWorkflow,
+  UpdatedWorkflowResponseDto,
+  WorkflowDetailDto,
+  WorkflowYaml,
+} from '@kbn/workflows';
+import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
+
+import type { WorkflowCrudDeps } from './types';
+import { WorkflowConflictError } from '../../common/lib/errors';
+import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
+import { transformStorageDocumentToWorkflowDto } from '../api/lib/workflow_dto_transform';
+import {
+  applyFieldUpdates,
+  applyYamlUpdate,
+  getTriggerTypesFromDefinition,
+  prepareWorkflowDocument,
+  workflowYamlDeclaresTopLevelEnabled,
+} from '../api/lib/workflow_prepare';
+import { workflowSpaceFilter } from '../api/lib/workflow_query_filters';
+import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
+import {
+  deduplicateUserIds,
+  partitionByIdSource,
+  removeConflictingIds,
+} from '../lib/bulk_id_helpers';
+import { getAuthenticatedUser } from '../lib/get_user';
+import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
+import type { WorkflowProperties } from '../storage/workflow_storage';
+import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
+import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
+
+export class WorkflowCrudService {
+  constructor(private readonly deps: WorkflowCrudDeps) {}
+
+  async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+    try {
+      const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+      must.push({ ids: { values: [id] } });
+      const response = await this.deps.workflowStorage.getClient().search({
+        query: { bool: { must } },
+        size: 1,
+        track_total_hits: false,
+      });
+
+      if (response.hits.hits.length === 0) {
+        return null;
+      }
+
+      const document = response.hits.hits[0];
+      return transformStorageDocumentToWorkflowDto(document._id, document._source);
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
+    if (!this.deps.workflowStorage || ids.length === 0) {
+      return [];
+    }
+
+    const { must, must_not } = workflowSpaceFilter(spaceId);
+    must.push({ ids: { values: ids } });
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits.map((hit) =>
+      transformStorageDocumentToWorkflowDto(hit._id, hit._source)
+    );
+  }
+
+  async getWorkflowsSourceByIds(
+    ids: string[],
+    spaceId: string,
+    source?: string[]
+  ): Promise<WorkflowPartialDetailDto[]> {
+    if (!this.deps.workflowStorage || ids.length === 0) {
+      return [];
+    }
+
+    const { must, must_not } = workflowSpaceFilter(spaceId);
+    must.push({ ids: { values: ids } });
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      _source: source ?? true,
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return response.hits.hits.map((hit) =>
+      transformStorageDocumentToWorkflowDto(hit._id, hit._source)
+    );
+  }
+
+  async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    if (workflow.id) {
+      validateWorkflowId(workflow.id);
+    }
+
+    const zodSchema = await this.deps.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
+    const now = new Date();
+    const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+
+    const {
+      id: baseId,
+      workflowData,
+      definition,
+    } = prepareWorkflowDocument({
+      workflow,
+      zodSchema,
+      authenticatedUser,
+      now,
+      spaceId,
+      triggerDefinitions,
+    });
+
+    let id = baseId;
+    if (workflow.id) {
+      const existingWorkflow = await this.getWorkflow(workflow.id, spaceId);
+      if (existingWorkflow) {
+        throw new WorkflowConflictError(
+          `Workflow with id '${workflow.id}' already exists`,
+          workflow.id
+        );
+      }
+    } else {
+      [id] = await resolveUniqueWorkflowIds([baseId], new Set(), (candidateIds) =>
+        this.checkExistingIds(candidateIds, spaceId)
+      );
+    }
+
+    await this.deps.workflowStorage.getClient().index({
+      id,
+      document: workflowData,
+      refresh: true,
+    });
+
+    await scheduleWorkflowTriggers({
+      workflowId: id,
+      definition,
+      spaceId,
+      request,
+      taskScheduler: this.deps.getTaskScheduler(),
+      logger: this.deps.logger,
+    });
+
+    return transformStorageDocumentToWorkflowDto(id, workflowData);
+  }
+
+  async bulkCreateWorkflows(
+    workflows: CreateWorkflowCommand[],
+    spaceId: string,
+    request: KibanaRequest,
+    options?: { overwrite?: boolean }
+  ): Promise<{ created: WorkflowDetailDto[]; failed: BulkFailureEntry[] }> {
+    const zodSchema = await this.deps.getWorkflowZodSchema({ loose: false }, spaceId, request);
+    const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
+    const now = new Date();
+    const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+
+    const created: WorkflowDetailDto[] = [];
+    const failed: BulkFailureEntry[] = [];
+    const validWorkflows: BulkWorkflowEntry[] = [];
+
+    for (let i = 0; i < workflows.length; i++) {
+      try {
+        const customId = workflows[i].id;
+        if (customId) {
+          validateWorkflowId(customId);
+        }
+        const prepared = prepareWorkflowDocument({
+          workflow: workflows[i],
+          zodSchema,
+          authenticatedUser,
+          now,
+          spaceId,
+          triggerDefinitions,
+        });
+
+        validWorkflows.push({
+          idx: i,
+          id: prepared.id,
+          idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
+          workflowData: prepared.workflowData,
+          definition: prepared.definition,
+        });
+      } catch (error) {
+        failed.push({
+          index: i,
+          id: workflows[i].id ?? `unknown-${i}`,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    const overwrite = options?.overwrite ?? false;
+    const { resolvedWorkflows, failures } = await this.resolveAndDeduplicateBulkIds(
+      validWorkflows,
+      overwrite,
+      spaceId
+    );
+    failed.push(...failures);
+
+    const bulkOperations = resolvedWorkflows.map((vw) =>
+      overwrite
+        ? { index: { _id: vw.id, document: vw.workflowData } }
+        : { create: { _id: vw.id, document: vw.workflowData } }
+    );
+
+    if (bulkOperations.length > 0) {
+      const bulkResponse = await this.deps.workflowStorage.getClient().bulk({
+        operations: bulkOperations,
+        refresh: 'wait_for',
+      });
+
+      for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
+        const item = bulkResponse.items[itemIndex];
+        const operation = item.index ?? item.create;
+        const resolvedWorkflow = resolvedWorkflows[itemIndex];
+
+        if (operation?.error) {
+          failed.push({
+            index: resolvedWorkflow.idx,
+            id: resolvedWorkflow.id,
+            error: extractBulkItemError(operation.error),
+          });
+        } else {
+          created.push(
+            transformStorageDocumentToWorkflowDto(
+              resolvedWorkflow.id,
+              resolvedWorkflow.workflowData
+            )
+          );
+        }
+      }
+    }
+
+    const createdIds = new Set(created.map((w) => w.id));
+    const workflowsToSchedule = resolvedWorkflows.filter(
+      (vw) => createdIds.has(vw.id) && vw.definition?.triggers?.some((t) => t.type === 'scheduled')
+    );
+
+    const taskScheduler = this.deps.getTaskScheduler();
+    await Promise.allSettled(
+      workflowsToSchedule.map((vw) =>
+        scheduleWorkflowTriggers({
+          workflowId: vw.id,
+          definition: vw.definition,
+          spaceId,
+          request,
+          taskScheduler,
+          logger: this.deps.logger,
+        })
+      )
+    );
+
+    return { created, failed };
+  }
+
+  async updateWorkflow(
+    id: string,
+    workflow: Partial<EsWorkflow>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto> {
+    try {
+      const { source: existingSource } = await this.getExistingWorkflowDocument(id, spaceId);
+      const authenticatedUser = getAuthenticatedUser(request, this.deps.getSecurity());
+      const now = new Date();
+      const validationErrors: string[] = [];
+      let updatedData: Partial<WorkflowProperties> = {
+        lastUpdatedBy: authenticatedUser,
+        updated_at: now.toISOString(),
+      };
+
+      let shouldUpdateScheduler =
+        workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
+
+      if (workflow.yaml) {
+        const zodSchema = await this.deps.getWorkflowZodSchema({ loose: false }, spaceId, request);
+        const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+        const yamlResult = applyYamlUpdate({
+          workflowYaml: workflow.yaml,
+          zodSchema,
+          triggerDefinitions,
+        });
+        updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
+        validationErrors.push(...yamlResult.validationErrors);
+        shouldUpdateScheduler = shouldUpdateScheduler || yamlResult.shouldUpdateScheduler;
+
+        if (
+          yamlResult.validationErrors.length === 0 &&
+          yamlResult.updatedDataPatch.valid &&
+          updatedData.definition &&
+          !workflowYamlDeclaresTopLevelEnabled(workflow.yaml)
+        ) {
+          const resolvedEnabled =
+            workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
+          updatedData.enabled = resolvedEnabled;
+          updatedData.definition = {
+            ...updatedData.definition,
+            enabled: resolvedEnabled,
+          } as WorkflowYaml;
+        }
+      } else {
+        updatedData = { ...updatedData, ...applyFieldUpdates(workflow, existingSource) };
+      }
+
+      const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
+      if (finalData.triggerTypes === undefined) {
+        finalData.triggerTypes = getTriggerTypesFromDefinition(finalData.definition) ?? [];
+      }
+
+      await this.deps.workflowStorage.getClient().index({
+        id,
+        document: finalData,
+        refresh: true,
+      });
+
+      const taskScheduler = this.deps.getTaskScheduler();
+      if (shouldUpdateScheduler && taskScheduler) {
+        await syncSchedulerAfterSave({
+          workflowId: id,
+          spaceId,
+          request,
+          finalData,
+          taskScheduler,
+          logger: this.deps.logger,
+          getWorkflow: (wId, sp) => this.getWorkflow(wId, sp),
+        });
+      }
+
+      return {
+        id,
+        lastUpdatedAt: finalData.updated_at,
+        lastUpdatedBy: finalData.lastUpdatedBy,
+        enabled: finalData.enabled,
+        validationErrors,
+        valid: finalData.valid,
+      };
+    } catch (error) {
+      if ((error as { statusCode?: number }).statusCode === 404) {
+        throw new Error(`Workflow with id ${id} not found`);
+      }
+      throw error;
+    }
+  }
+
+  private async getExistingWorkflowDocument(
+    id: string,
+    spaceId: string
+  ): Promise<{ source: WorkflowProperties }> {
+    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+    must.push({ ids: { values: [id] } });
+    const searchResponse = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must } },
+      size: 1,
+      track_total_hits: false,
+    });
+
+    if (searchResponse.hits.hits.length === 0) {
+      throw new Error(`Workflow with id ${id} not found in space ${spaceId}`);
+    }
+
+    const hit = searchResponse.hits.hits[0];
+    if (!hit._source) {
+      throw new Error(`Workflow with id ${id} not found`);
+    }
+    return { source: hit._source as WorkflowProperties };
+  }
+
+  private async resolveAndDeduplicateBulkIds(
+    validWorkflows: readonly BulkWorkflowEntry[],
+    overwrite: boolean,
+    spaceId: string
+  ): Promise<{ resolvedWorkflows: BulkWorkflowEntry[]; failures: BulkFailureEntry[] }> {
+    const failures: BulkFailureEntry[] = [];
+
+    const { serverGenerated, userSupplied } = partitionByIdSource(validWorkflows);
+    const seenIds = new Set<string>(userSupplied.map((wf) => wf.id));
+
+    let resolvedServerGen = serverGenerated;
+    if (serverGenerated.length > 0) {
+      const resolvedIds = await resolveUniqueWorkflowIds(
+        serverGenerated.map((wf) => wf.id),
+        seenIds,
+        (candidateIds) => this.checkExistingIds(candidateIds, spaceId)
+      );
+      resolvedServerGen = serverGenerated.map((wf, i) => ({ ...wf, id: resolvedIds[i] }));
+    }
+
+    const resolvedById = new Map(resolvedServerGen.map((wf, i) => [serverGenerated[i], wf]));
+    let workflows: BulkWorkflowEntry[] = validWorkflows.map((wf) => resolvedById.get(wf) ?? wf);
+
+    if (!overwrite && userSupplied.length > 0) {
+      const existingUserIds = await this.checkExistingIds(
+        userSupplied.map((wf) => wf.id),
+        spaceId
+      );
+      const conflictResult = removeConflictingIds(workflows, existingUserIds);
+      workflows = conflictResult.kept;
+      failures.push(...conflictResult.removed);
+    }
+
+    const dedupResult = deduplicateUserIds(workflows);
+    workflows = dedupResult.kept;
+    failures.push(...dedupResult.removed);
+
+    return { resolvedWorkflows: workflows, failures };
+  }
+
+  private async checkExistingIds(ids: string[], spaceId: string): Promise<Set<string>> {
+    if (ids.length === 0) {
+      return new Set();
+    }
+
+    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+    must.push({ ids: { values: ids } });
+
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must } },
+      size: ids.length,
+      track_total_hits: false,
+    });
+
+    return new Set(response.hits.hits.map((hit) => hit._id).filter((id): id is string => !!id));
+  }
+}
