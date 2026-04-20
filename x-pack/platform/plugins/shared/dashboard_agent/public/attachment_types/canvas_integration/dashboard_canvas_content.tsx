@@ -37,7 +37,7 @@ const dashboardCanvasContentStyles = {
         display: 'none !important',
       },
       '.controlGroup': {
-        flexGrow: `0 !important`,
+        flexGrow: `0 !important` as unknown as number,
         padding: `${euiTheme.size.s} !important`,
         borderBottom: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
       },
