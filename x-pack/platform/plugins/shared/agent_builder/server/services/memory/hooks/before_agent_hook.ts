@@ -134,7 +134,7 @@ export interface RegisterMemoryBeforeAgentHookDeps {
  */
 const MEMORY_INSTRUCTIONS =
   'You can explore these memories further:\n' +
-  '- Read full memory: remember(memory_id)\n' +
+  '- Read full memory (only useful when +N chars is shown): remember(memory_id, full=true)\n' +
   '- Search memories by keyword: remember(query="keyword")\n' +
   '- Search around a specific memory: remember(query="keyword", around_id="memory_id", hops=10)\n' +
   '- Browse nearby memories without search: remember(around_id="memory_id", hops=10)';
@@ -149,7 +149,9 @@ export const formatMemoryInjection = (nodes: ScoredMemoryNode[]): string => {
     const timestamp = node.created_at
       ? new Date(node.created_at).toISOString().slice(0, 16).replace('T', ' ')
       : '';
-    lines.push(`[${node.id}] (${node.type}) ${timestamp} — ${node.summary}`);
+    const extraChars = (node.full?.length ?? 0) - (node.summary?.length ?? 0);
+    const fullIndicator = extraChars > 10 ? ` [+${extraChars} chars]` : '';
+    lines.push(`[${node.id}] (${node.type}) ${timestamp} — ${node.summary}${fullIndicator}`);
   }
 
   lines.push('');
@@ -186,20 +188,19 @@ export const injectMemoryIntoMessage = (message: string, memoryBundle: string): 
 const scoreAndBudgetNodes = (
   nodes: MemoryNode[],
   maxScore: number,
-  logger: Logger
+  logger: Logger,
+  opts: { minRelevanceScore?: number } = {}
 ): ScoredMemoryNode[] => {
   const stage = 'round_start';
   const tokenBudget = getTokenBudgetForStage(stage);
   const now = Date.now();
+  const minScore = opts.minRelevanceScore ?? 0;
 
   const selectedSummaries: string[] = [];
   const result: ScoredMemoryNode[] = [];
   let usedTokens = 0;
 
-  // Score all nodes first (using BM25 relevance as a proxy — we don't have raw scores here,
-  // so we use uniform relevance = 0.5 as BM25 score normalization is done inside MemoryClient)
   const scored = nodes.map((node, idx) => {
-    // Use position-based relevance proxy: earlier results have higher relevance
     const positionRelevance = maxScore > 0 ? Math.max(0, 1 - idx * 0.05) : 0.5;
     return scoreMemoryNode({
       node,
@@ -214,7 +215,12 @@ const scoreAndBudgetNodes = (
   // Sort by composite score descending
   scored.sort((a, b) => b.score - a.score);
 
+  let rejected = 0;
   for (const scoredNode of scored) {
+    if (minScore > 0 && scoredNode.score < minScore) {
+      rejected++;
+      continue;
+    }
     const tokens = ActiveMemorySet.estimateTokens(scoredNode.node.summary);
     if (usedTokens + tokens > tokenBudget) {
       continue;
@@ -225,7 +231,8 @@ const scoreAndBudgetNodes = (
   }
 
   logger.debug(
-    `memory.beforeAgent: ${result.length}/${nodes.length} memories fit token budget=${tokenBudget}, used=${usedTokens} tokens`
+    `memory.beforeAgent: ${result.length}/${nodes.length} memories fit token budget=${tokenBudget}, used=${usedTokens} tokens` +
+    (rejected > 0 ? `, rejected ${rejected} below minRelevanceScore=${minScore}` : '')
   );
 
   return result;
@@ -342,8 +349,9 @@ export const runMemoryBeforeAgentHook = async (
     );
   }
 
-  // Score and apply token budget
-  const scoredNodes = scoreAndBudgetNodes(retrievedNodes, 1.0, logger);
+  // Score and apply token budget + minimum relevance threshold
+  const minRelevanceScore = deps.config.memory.retrieval.postRetrieval.minRelevanceScore ?? 0;
+  const scoredNodes = scoreAndBudgetNodes(retrievedNodes, 1.0, logger, { minRelevanceScore });
 
   if (scoredNodes.length === 0) {
     logger.info('memory.beforeAgent: all memories exceeded token budget, skipping injection');

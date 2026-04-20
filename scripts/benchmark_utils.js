@@ -90,6 +90,10 @@ function createApiClient(kibanaUrl, username, password, connectorId) {
     async getConversation(conversationId) {
       return req('GET', `${basePath}/internal/agent_builder/conversations/${conversationId}`);
     },
+
+    async triggerConsolidation() {
+      return req('POST', `${basePath}/internal/agent_builder/memory/consolidate`);
+    },
   };
 }
 

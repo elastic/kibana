@@ -99,8 +99,8 @@ export class ChunkingExtractor {
     );
 
     return {
-      semantic: candidates,
-      episodic: [],
+      semantic: [],
+      episodic: candidates,
       procedural: [],
     };
   }

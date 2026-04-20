@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Long-Term Memory in LLMs — Paper Index</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0f1117 100%);
+      border-bottom: 1px solid #2d3748;
+      padding: 2rem 2rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+    }
+    .header-top {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.25rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #63b3ed, #9f7aea);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header-arxiv-link {
+      color: #63b3ed;
+      font-size: 0.85rem;
+      text-decoration: none;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .header-arxiv-link:hover { opacity: 1; text-decoration: underline; }
+    header p { margin: 0; color: #718096; font-size: 0.9rem; }
+    .count-badge {
+      display: inline-block;
+      background: #2d3748;
+      color: #63b3ed;
+      border-radius: 20px;
+      padding: 0.1rem 0.6rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+    }
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover { border-color: #4a5568; }
+    .card.expanded { box-shadow: 0 4px 24px rgba(0,0,0,0.4); border-color: #4a5568; }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.1rem 1.25rem;
+      background: #1e2436;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .card-header:hover { background: #232940; }
+    .card-header:focus { outline: 2px solid #63b3ed; outline-offset: -2px; }
+    .paper-number {
+      flex-shrink: 0;
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #4a5568;
+      margin-top: 0.3rem;
+      min-width: 1.8rem;
+      text-align: right;
+    }
+    .card-meta { flex: 1; min-width: 0; }
+    .paper-title {
+      margin: 0 0 0.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      line-height: 1.4;
+    }
+    .paper-info {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.3rem;
+    }
+    .year-badge {
+      background: linear-gradient(135deg, #2b4c7e, #1a365d);
+      color: #90cdf4;
+      border: 1px solid #2c5282;
+      border-radius: 6px;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .authors {
+      color: #718096;
+      font-size: 0.8rem;
+      font-style: italic;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .paper-file {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .paper-file code {
+      font-size: 0.71rem;
+      color: #4a5568;
+      background: #12151f;
+      padding: 0.12rem 0.35rem;
+      border-radius: 4px;
+    }
+    .pdf-link, .arxiv-link {
+      font-size: 0.75rem;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .pdf-link { color: #9f7aea; }
+    .arxiv-link { color: #63b3ed; }
+    .pdf-link:hover, .arxiv-link:hover { opacity: 1; text-decoration: underline; }
+    .toggle-icon {
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      color: #4a5568;
+      margin-top: 0.3rem;
+      transition: transform 0.2s;
+    }
+    .card.expanded .toggle-icon { transform: rotate(90deg); }
+    .card-description {
+      padding: 0.75rem 1.25rem 0.75rem calc(1.25rem + 1.8rem + 1rem);
+      border-top: 1px solid #2d3748;
+    }
+    .card-description p.description {
+      margin: 0;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      color: #a0aec0;
+      font-style: italic;
+    }
+    .card-description p.no-desc {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #4a5568;
+    }
+    .card-body {
+      padding: 1rem 1.25rem 1.25rem calc(1.25rem + 1.8rem + 1rem);
+      border-top: 1px solid #2d3748;
+    }
+    .card-body p {
+      margin: 0 0 0.75rem;
+      font-size: 0.87rem;
+      line-height: 1.7;
+      color: #cbd5e0;
+    }
+    .card-body p:last-child { margin-bottom: 0; }
+    .card-body b { color: #90cdf4; font-weight: 600; }
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #4a5568;
+      font-size: 0.8rem;
+      border-top: 1px solid #1a1f2e;
+    }
+    @media (max-width: 600px) {
+      header { padding: 1.1rem 1rem 1rem; }
+      main { padding: 1rem; gap: 0.75rem; }
+      .card-header { padding: 0.9rem 1rem; }
+      .card-description, .card-body { padding: 0.75rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <h1>Long-Term Memory in LLMs <span class="count-badge">31 papers</span></h1>
+    </div>
+    <p>Research paper index — arXiv collection 2024–2026 &mdash; click any paper to expand</p>
+  </header>
+  <main>
+    <article class="card" id="paper-1">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#1</span>
+        <div class="card-meta">
+          <h2 class="paper-title">HippoRAG: Neurobiologically Inspired Long-Term Memory for Large Language Models</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Bernal Jiménez Gutiérrez (The Ohio State University), Yiheng Shu (The Ohio State University), Yu Gu (The Ohio State University), Michihiro Yasunaga (Stanford University), Yu Su (The Ohio State University)</span>
+          </div>
+          <div class="paper-file">
+            <code>2405.14831v3.pdf</code>
+            <a class="pdf-link" href="2405.14831v3.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2405.14831v3" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">HippoRAG is a retrieval-augmented generation framework inspired by the hippocampal indexing theory of human long-term memory that enables LLMs to integrate knowledge across passage boundaries. It synergistically combines LLMs, knowledge graphs, and the Personalized PageRank algorithm to mimic the roles of the neocortex, parahippocampal regions, and hippocampus. HippoRAG outperforms state-of-the-art RAG methods by up to 20% on multi-hop QA benchmarks while being 10-30 times cheaper and 6-13 times faster than iterative retrieval methods.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Current retrieval-augmented generation (RAG) methods fail at tasks requiring knowledge integration across multiple passages because each passage is encoded in isolation. Multi-hop question answering, scientific literature review, legal case briefing, and medical diagnosis all require connecting information spread across disparate documents. Iterative multi-step retrieval approaches can partially address this but are expensive, slow, and still fail on harder "path-finding" queries where many possible reasoning paths exist. A deeper challenge is that no existing RAG system can efficiently associate disparate facts the way human memory does, leaving a significant capability gap for real-world knowledge integration tasks.</p>
+<p><b>Approach:</b> HippoRAG is inspired by the hippocampal memory indexing theory, which explains how the human brain achieves pattern separation and pattern completion through interactions between the neocortex, parahippocampal regions (PHR), and hippocampus. The key insight is to map these biological components onto computational counterparts: an LLM serves as the neocortex to extract knowledge, dense retrieval encoders serve as PHR to detect synonymy, and a schemaless knowledge graph indexed with Personalized PageRank (PPR) serves as the hippocampal index. PPR biased toward query-derived seed nodes allows multi-hop associations to be traversed in a single retrieval step, rather than requiring iterative LLM calls.</p>
+<p><b>Methodology:</b> During offline indexing, an instruction-tuned LLM extracts open knowledge graph (KG) triples from each passage via OpenIE, building a schemaless hippocampal index. Dense retrieval encoders add synonymy edges between semantically similar noun phrases above a cosine similarity threshold. During online retrieval, the LLM extracts named entities from the query, which are linked to KG nodes via the encoder. Personalized PageRank is then run on the KG with those nodes as seeds, and the resulting node probability distribution is aggregated over passages for ranking. A node specificity score (inverse of how many passages a node appears in) further refines the seed weights as a neurobiologically plausible IDF signal.</p>
+<p><b>Results:</b> On MuSiQue and 2WikiMultiHopQA benchmarks, HippoRAG improves single-step retrieval R@2 by approximately 3% and 20% respectively over the strongest baselines, and the all-recall metric (all supporting passages retrieved) improves even more dramatically, by up to 38 points on 2WikiMultiHopQA. Single-step HippoRAG matches or exceeds iterative IRCoT retrieval while being 10-30 times cheaper and 6-13 times faster. Combining HippoRAG with IRCoT yields further complementary gains of up to 4% and 18% on MuSiQue and 2WikiMultiHopQA. QA F1 scores improve by up to 17 points on 2WikiMultiHopQA, and HippoRAG is the only tested method capable of handling path-finding multi-hop questions that require associating information across many possible entity paths.</p>
+<p><b>TL;DR:</b> HippoRAG models human hippocampal memory using LLM-extracted knowledge graphs and Personalized PageRank to enable single-step multi-hop retrieval, dramatically outperforming existing RAG methods on knowledge integration tasks while being far cheaper and faster than iterative alternatives.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-2">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#2</span>
+        <div class="card-meta">
+          <h2 class="paper-title">M+: Extending MemoryLLM with Scalable Long-Term Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Yu Wang (UC San Diego), Dmitry Krotov (MIT-IBM Watson Lab, IBM Research), Yuanzhe Hu (UC San Diego), Yifan Gao (Amazon), Wangchunshu Zhou (OPPO), Julian McAuley (UC San Diego), Dan Gutfreund (MIT-IBM Watson Lab, IBM Research), Rogerio Feris (MIT-IBM Watson Lab, IBM Research), Zexue He (UC San Diego, IBM Research)</span>
+          </div>
+          <div class="paper-file">
+            <code>2502.00592v2.pdf</code>
+            <a class="pdf-link" href="2502.00592v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2502.00592v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">M+ addresses the limited long-term retention of latent-space memory models by extending MemoryLLM with a scalable long-term memory mechanism paired with a co-trained retriever. The approach stores dropped memory tokens on CPU rather than discarding them, then retrieves relevant ones at generation time using a learned projector-based retriever. M+ extends effective knowledge retention from under 20k to over 160k tokens while maintaining a lower or comparable GPU memory footprint versus strong baselines.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models augmented with latent-space memory can extend their effective context window without excessive GPU overhead, but existing methods struggle to retain information from the distant past. MemoryLLM, a representative latent-space memory model, compresses past information into hidden states forming a 1B-parameter memory pool, yet can only reliably retain knowledge for up to about 20k tokens. Tokens that are dropped from the short-term memory pool during updates are permanently discarded, creating an irrecoverable loss of earlier context. Token-level (text-based) memory alternatives are less compressed and harder to train end-to-end, so a better latent-space solution is needed for truly long-horizon tasks.</p>
+<p><b>Approach:</b> M+ augments MemoryLLM with a long-term memory (LTM) store that captures tokens dropped from the short-term memory pool instead of discarding them. A lightweight co-trained retriever, consisting of query and key projectors (two-layer MLPs projecting to d/20 dimensions), dynamically fetches the most relevant LTM tokens during generation using dot-product similarity in hidden-state space. Because retrieval happens once per layer for all query heads rather than per-head per-layer as in KV-cache methods, the added latency is modest. The LTM is kept on CPU and only loaded to GPU as needed, so GPU memory overhead is not increased relative to the baseline MemoryLLM.</p>
+<p><b>Methodology:</b> M+ is built on Llama-3.1-8B and trained in three curriculum stages: Stage 1 continually trains the short-term memory model on fineweb-edu (1.2M steps) to handle short documents; Stage 2 adds long-document training using SlimPajama excerpts of 4k-64k tokens to improve long-context modeling; Stage 3 introduces the long-term memory and co-trains the retriever on further long-document examples. A multi-LoRA design uses separate LoRA weights for the update (write) and generation (read) passes. The model uses 10,240 short-term memory tokens per layer and retrieves 2,560 tokens from LTM per layer at inference, keeping total effective memory constant at 12,800 tokens. The LTM is capped at 150k tokens and evicts the oldest entries when full.</p>
+<p><b>Results:</b> On LongBook-QA (avg. 192k-token books) and the newly introduced LongBook-Event-QA benchmark, M+ outperforms all baselines including Llama-3.1-8B with BM25 retrieval, SnapKV, and the smaller Llama-3.2-3B-128k model, despite processing fewer tokens. On knowledge retention benchmarks (SQuAD, NaturalQA), M+ retains accurate recall beyond 160k injected tokens, compared to roughly 20k for MemoryLLM-7B and roughly 30k for Llama-3.1-8B-SnapKV given a 48k context. GPU memory usage for M+ (with CPU offloading) is lower than all non-offloaded baselines at 17,973 MB. On shorter-context LongBench tasks, M+ matches Llama-3.1-8B on 4 of 6 datasets, with minor degradation on multi-hop tasks attributable to the random dropping mechanism.</p>
+<p><b>TL;DR:</b> M+ extends MemoryLLM by saving dropped latent memory tokens to CPU-based long-term storage and retrieving them with a co-trained projector-based retriever, pushing reliable knowledge retention from 20k to over 160k tokens at no additional GPU memory cost.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-3">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#3</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Prateek Chhikara (mem0.ai), Dev Khant (mem0.ai), Saket Aryan (mem0.ai), Taranjeet Singh (mem0.ai), Deshraj Yadav (mem0.ai)</span>
+          </div>
+          <div class="paper-file">
+            <code>2504.19413v1.pdf</code>
+            <a class="pdf-link" href="2504.19413v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2504.19413v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">LLMs are fundamentally limited by fixed context windows that prevent coherent long-term interactions across sessions. This paper introduces Mem0, a scalable memory architecture that dynamically extracts, consolidates, and retrieves salient information from conversations, with an enhanced graph-based variant for relational reasoning. Evaluated on the LOCOMO benchmark, Mem0 outperforms all baselines while achieving 91% lower p95 latency and over 90% token cost reduction compared to full-context approaches.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models reset their knowledge at each session boundary because they rely on fixed context windows, making them unable to maintain coherent, personalized interactions over extended multi-session dialogues. Even models with large context windows (e.g., 200K tokens) face two compounding issues: conversation history eventually exceeds any finite limit, and thematically discontinuous exchanges bury critical facts among irrelevant tokens. Attention mechanisms also degrade over distant tokens, further eroding recall quality. This forces AI agents to forget user preferences, repeat questions, and contradict previously established facts, fundamentally undermining user trust in high-stakes domains like healthcare and enterprise support.</p>
+<p><b>Approach:</b> The paper introduces Mem0, a memory-centric architecture that continuously extracts salient facts from ongoing conversations, consolidates them into a compact knowledge base, and retrieves only relevant memories at query time. An enhanced variant, Mem0g, augments the natural language memory store with a directed labeled knowledge graph where entities are nodes and relationships are labeled edges, enabling richer relational and temporal reasoning. Rather than storing raw conversation chunks, both systems distill conversations into concise, structured representations that dramatically reduce token consumption while preserving the information needed to answer complex questions.</p>
+<p><b>Methodology:</b> Mem0 processes incoming message pairs through two sequential phases: an extraction phase that uses an LLM to identify salient facts from the new exchange given a rolling conversation summary and recent message window, and an update phase that compares each candidate fact to semantically similar existing memories and issues one of four operations (ADD, UPDATE, DELETE, NOOP) via LLM function-calling. Mem0g adds a two-stage graph pipeline that extracts entity-type pairs and relationship triplets using GPT-4o-mini, stores them in Neo4j, and employs a dual retrieval strategy combining entity-centric subgraph traversal with semantic triplet matching. Both systems were evaluated on the LOCOMO benchmark, which contains 10 extended conversations averaging 600 dialogues and 26,000 tokens each, with around 200 questions per conversation spanning single-hop, multi-hop, temporal, and open-domain categories. Six baseline categories were tested, including RAG with varying chunk sizes, full-context processing, OpenAI's memory feature, Zep, LangMem, and prior LOCOMO benchmarks.</p>
+<p><b>Results:</b> Mem0 achieves state-of-the-art LLM-as-a-Judge scores across most question types, delivering 5%, 11%, and 7% relative improvements in single-hop, temporal, and multi-hop categories over the best-performing prior methods. Mem0g further improves temporal and open-domain performance, surpassing the base variant by roughly 2% overall. Compared to the full-context baseline, Mem0 reduces p95 latency by 91% (from 17 seconds to 1.44 seconds) and cuts token consumption by over 90%, using only 7k tokens per conversation versus 26k for full-context. Mem0 also delivers a 26% relative improvement in LLM-as-a-Judge score over OpenAI's memory feature and outperforms all RAG configurations by roughly 10% relative on the overall quality metric.</p>
+<p><b>TL;DR:</b> Mem0 introduces a scalable, production-ready long-term memory system for LLM agents that extracts and consolidates conversational facts into compact representations, achieving state-of-the-art accuracy on the LOCOMO benchmark while cutting latency and token costs by over 90% compared to full-context approaches.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-4">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#4</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Seeing, Listening, Remembering, and Reasoning: A Multimodal Agent with Long-Term Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Lin Long (ByteDance Seed, Zhejiang University), Yichen He (ByteDance Seed), Wentao Ye (ByteDance Seed, Zhejiang University), Yiyuan Pan (ByteDance Seed, Shanghai Jiao Tong University), Yuan Lin (ByteDance Seed), Hang Li (ByteDance Seed), Junbo Zhao (Zhejiang University), Wei Li (ByteDance Seed)</span>
+          </div>
+          <div class="paper-file">
+            <code>2508.09736v4.pdf</code>
+            <a class="pdf-link" href="2508.09736v4.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2508.09736v4" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper presents M3-Agent, a multimodal agent framework with long-term memory that continuously processes real-time video and audio streams to build episodic and semantic memories organized in an entity-centric graph. The approach enables agents to accumulate world knowledge and perform multi-turn reasoning over memory to complete complex tasks. Trained via reinforcement learning, M3-Agent outperforms the strongest prompting-based baseline by 6.7%, 7.7%, and 5.3% on three benchmarks including a newly introduced evaluation suite.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Existing multimodal agents lack the ability to form and reason over long-term memory in the way humans do, limiting their usefulness in real-world settings such as household robots. Current approaches either extend context windows for finite offline videos or compress visual tokens, neither of which scales to arbitrarily long streams. Language-based memory descriptions also suffer from inconsistency and ambiguity when tracking entities such as characters across long time spans. There is also no suitable benchmark to evaluate higher-level cognitive capabilities such as person understanding, general knowledge extraction, and cross-modal reasoning over long-term memory.</p>
+<p><b>Approach:</b> The authors propose M3-Agent, a framework with two parallel processes: memorization and control. During memorization, the agent processes a continuous video stream clip-by-clip, generating episodic memory (concrete observed events) and semantic memory (general world knowledge such as character identities and attributes). Entity consistency is maintained through facial recognition and speaker diarization tools that assign persistent identifiers to characters, anchoring all textual descriptions to stable multimodal nodes in a graph. During control, the agent uses reinforcement learning to perform multi-turn, iterative memory retrieval rather than single-turn RAG, enabling more flexible and accurate task completion.</p>
+<p><b>Methodology:</b> Long-term memory is stored as an entity-centric multimodal graph where nodes represent text, image, or audio memory items linked by edges that encode relationships. The memorization model is initialized from Qwen2.5-Omni-7b and trained via imitation learning on synthetic memory demonstrations generated by a combination of Gemini-1.5-Pro and GPT-4o. The control model is initialized from Qwen3-32b and trained using the DAPO reinforcement learning algorithm, receiving binary rewards from a GPT-4o evaluator. To evaluate the framework, the authors introduce M3-Bench, consisting of 100 robot-perspective videos and 920 web-sourced YouTube videos with 4,490 manually annotated open-ended QA pairs across five question types.</p>
+<p><b>Results:</b> M3-Agent achieves accuracy of 30.7%, 48.9%, and 61.8% on M3-Bench-robot, M3-Bench-web, and VideoMME-long respectively, surpassing the strongest baseline (Gemini-GPT4o-Hybrid) by 6.7%, 7.7%, and 5.3%. Ablation studies show that removing semantic memory degrades accuracy by 17.1%, 19.2%, and 13.1% across the three benchmarks, and removing RL training reduces accuracy by 10.0%, 8.0%, and 9.3%. Inter-turn instruction and reasoning mode are also both shown to be critical components. The SFT memorization model (memory-7b-sft) outperforms even the prompted Gemini-1.5-Pro baseline for memory generation on most benchmarks.</p>
+<p><b>TL;DR:</b> M3-Agent is a multimodal agent that builds entity-centric, episodic and semantic long-term memory from continuous video and audio streams, then uses reinforcement-learning-trained multi-turn reasoning to answer questions, consistently outperforming strong prompted commercial model baselines across three long-video benchmarks.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-5">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#5</span>
+        <div class="card-meta">
+          <h2 class="paper-title">A Multi-Memory Segment System for Generating High-Quality Long-Term Memory Content in Agents</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Gaoke Zhang (Tianjin University), Bo Wang (Tianjin University), Yunlong Ma (Tianjin University), Dongming Zhao (China Mobile Communication Group Tianjin Co., Ltd), Zifei Yu (Huizhi Xingyuan Information Technology Co., Ltd)</span>
+          </div>
+          <div class="paper-file">
+            <code>2508.15294v3.pdf</code>
+            <a class="pdf-link" href="2508.15294v3.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2508.15294v3" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">Existing LLM agent memory systems store only simple summaries of dialogues, producing low-quality memory content that degrades retrieval and response performance. This paper proposes a Multi-Memory Segment system (MMS) grounded in cognitive psychology that converts short-term memory into multiple typed long-term memory segments, then builds separate retrieval and contextual memory units from them. Experiments on the LoCoMo dataset show MMS substantially outperforms prior methods in both recall and answer quality while being faster and more token-efficient than A-MEM.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Agent memory systems for LLMs have focused heavily on retrieval mechanisms while largely neglecting the quality of the stored memory content itself. Prevailing approaches such as A-MEM and MemoryBank reduce dialogue history to simple summaries and keyword lists, which creates a semantic gap between the user's query and the stored memory. This gap limits retrieval recall and degrades the quality of generated responses. Human long-term memory formation is inherently multi-dimensional, involving episodic, semantic, and conceptual components, but no prior agent memory system exploits this richness in a principled way.</p>
+<p><b>Approach:</b> The authors draw on three cognitive psychology theories: Tulving's multiple memory systems theory (episodic and semantic memory), the levels-of-processing theory (deeper encoding leads to stronger memory), and the encoding specificity principle (retrieval is most effective when encoding context matches query context). These theories motivate extracting four distinct memory segments from each short-term memory chunk: keywords, multiple cognitive perspectives, episodic memory (event-based), and semantic memory (factual knowledge points). Two separate memory unit types are then constructed: retrieval memory units optimized for query matching, and contextual memory units optimized for knowledge-enriched response generation.</p>
+<p><b>Methodology:</b> Given a round of dialogue as short-term memory, an LLM prompt extracts keywords, multiple cognitive perspectives, episodic memory (situations), and semantic memory (knowledge points) as structured JSON. Retrieval memory units combine keywords, the original short-term memory, cognitive perspectives, and episodic memory, and are embedded using all-MiniLM-L6-v2 for cosine-similarity-based retrieval. Contextual memory units substitute semantic memory for episodic memory, as semantic knowledge points better enrich generation without introducing redundancy. The top-k retrieved contextual units are provided as context at inference time. Experiments used GPT-4o, Qwen2.5-14B, and Gemini-2.5-pro-preview on the LoCoMo dataset, evaluating Recall@1/3/5, F1, and BLEU-1 across five question types, along with ablation, robustness, and overhead analyses.</p>
+<p><b>Results:</b> MMS outperforms NaiveRAG, MemoryBank, and A-MEM in the majority of tasks and metrics across all three base models. The most pronounced gains appear in multi-hop reasoning, where GPT-4o and Gemini improve recall by 8 to 11 points over A-MEM, and in open-domain and temporal tasks. Ablation studies confirm that each memory segment contributes positively, with combined removal of cognitive perspectives and episodic memory causing the largest drops. Despite producing substantially richer memory content, MMS achieves lower average latency (1.31 s) and fewer tokens (744) per query than A-MEM (3.93 s, 1429 tokens), demonstrating practical efficiency alongside quality gains.</p>
+<p><b>TL;DR:</b> MMS improves LLM agent long-term memory by replacing simple dialogue summaries with cognitively grounded multi-segment memory units, yielding significantly better retrieval recall and answer quality at lower computational cost than prior methods.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-6">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#6</span>
+        <div class="card-meta">
+          <h2 class="paper-title">SGMem: Sentence Graph Memory for Long Term Conversational Agents</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Yaxiong Wu (Huawei Technologies Co., Ltd), Yongyue Zhang (Huawei Technologies Co., Ltd), Sheng Liang (Huawei Technologies Co., Ltd), Yong Liu (Huawei Technologies Co., Ltd)</span>
+          </div>
+          <div class="paper-file">
+            <code>2509.21212v1.pdf</code>
+            <a class="pdf-link" href="2509.21212v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2509.21212v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">Long-term conversational agents struggle to retrieve relevant information across multi-session dialogue histories due to memory fragmentation. SGMem addresses this by organizing dialogue as sentence-level graphs that link raw dialogue to generated memory, enabling coherent multi-hop retrieval. The approach consistently outperforms strong baselines on the LongMemEval and LoCoMo benchmarks.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Long-term conversational agents must manage dialogue histories that exceed LLM context windows, requiring external memory systems. Existing methods based on fact extraction, summarization, and reflection reduce redundancy but fragment information across raw dialogue and derived snippets at coarse granularities such as turns, rounds, or sessions. This memory fragmentation makes it difficult to retrieve coherent and relevant context for answering questions, especially those requiring multi-session or temporal reasoning. Graph-based RAG methods relying on entity-relation extraction partially address structure but are computationally expensive and still lose contextual richness. There is a need for a lightweight, fine-grained memory organization that bridges raw dialogue and generated memory.</p>
+<p><b>Approach:</b> SGMem (Sentence Graph Memory) structures dialogue at the sentence level, treating each sentence as a node in a graph within chunked dialogue units such as turns, rounds, or sessions. Sentences within and across chunks are connected via membership edges and k-nearest-neighbor similarity edges computed from dense embeddings, enabling explicit modeling of semantic associations without LLM-based entity extraction. During retrieval, candidate sentences are expanded via n-hop graph traversal, mapped back to their parent chunks, and ranked by aggregate similarity scores. Retrieved chunks are then combined with generated memory including summaries, facts, and insights to form a coherent context for response generation. This design requires only standard sentence segmentation tools such as NLTK, making it lightweight and practical.</p>
+<p><b>Methodology:</b> SGMem construction involves decomposing sessions into rounds, turns, and sentences using NLTK, then having an LLM generate summaries, facts, and insights. All memory units are embedded with Sentence-BERT (all-MiniLM-L6-v2) and indexed in seven vector index tables stored in Elasticsearch, while the sentence graph is stored in Neo4j. The KNN graph connecting sentences is built using BM25-based similarity for fair comparison. At inference time, a query retrieves top-K sentences and generated memory via cosine similarity, expands sentence sets via graph traversal, and ranks parent chunks by aggregated sentence scores. Experiments used Qwen2.5-32B-Instruct as the LLM and evaluated on 500-question samples from LongMemEval and LoCoMo with LLM-as-a-Judge accuracy scoring.</p>
+<p><b>Results:</b> SGMem consistently outperformed all baselines on both benchmarks. SGMem-SMFI achieved 0.700 and 0.730 accuracy at Top-5 and Top-10 on LongMemEval, compared to the best RAG baseline RAG-SMFI at 0.676 and 0.680. On LoCoMo, SGMem-SF reached 0.522 and 0.542 versus 0.510 and 0.528 for RAG-SMFI. Graph-based RAG methods such as LightRAG, MiniRAG, and KG-Retriever underperformed due to misalignment with conversational granularity, while sentence-level graph expansion proved particularly effective for temporal reasoning and multi-session question types. Case studies confirmed that multi-hop traversal in SGMem enables retrieval of distant but relevant sessions that flat RAG misses.</p>
+<p><b>TL;DR:</b> SGMem organizes conversational memory as sentence-level graphs to overcome fragmentation and enable coherent retrieval across raw dialogue and generated memory, achieving state-of-the-art accuracy on long-term conversational QA benchmarks without requiring costly LLM-based extraction.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-7">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#7</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Beyond a Million Tokens: Benchmarking and Enhancing Long-Term Memory in LLMs</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Mohammad Tavakoli (University of Alberta), Alireza Salemi (University of Massachusetts Amherst), Carrie Ye (University of Alberta), Mohamed Abdalla (University of Alberta), Hamed Zamani (University of Massachusetts Amherst), J. Ross Mitchell (University of Alberta)</span>
+          </div>
+          <div class="paper-file">
+            <code>2510.27246v2.pdf</code>
+            <a class="pdf-link" href="2510.27246v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2510.27246v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper tackles the lack of realistic, large-scale benchmarks for evaluating long-term conversational memory in LLMs by introducing BEAM, a benchmark of 100 coherent dialogues up to 10M tokens with 2,000 probing questions across ten memory abilities. The authors also propose LIGHT, a cognitive-science-inspired framework combining episodic, working, and scratchpad memories to improve model performance. LIGHT achieves 3.5%–12.69% average improvement over the strongest baselines depending on the backbone model.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Existing benchmarks for evaluating long-term memory in conversational LLMs have critical limitations: they construct long dialogues by artificially concatenating short sessions from different users, resulting in abrupt topic shifts and weak narrative coherence that simplify the evaluation. They also cover narrow domains (typically personal-life scenarios) and focus primarily on simple recall tasks, ignoring abilities such as contradiction resolution, event ordering, and sustained instruction following. As LLMs with context windows up to 1M tokens are deployed in multi-session conversational settings, there is an urgent need for benchmarks that test genuine long-range reasoning across diverse, coherent dialogues.</p>
+<p><b>Approach:</b> The paper introduces two complementary contributions. First, BEAM is a new benchmark built from a scalable generation pipeline that creates narratively coherent user-assistant conversations up to 10M tokens across diverse domains, accompanied by probing questions targeting ten distinct memory abilities. Second, LIGHT is a memory-enhancement framework inspired by human cognitive science that equips LLMs with three complementary memory systems: a long-term episodic memory index for retrieval, a short-term working memory of recent turns, and a scratchpad that accumulates salient facts incrementally throughout the conversation. At inference, the LLM draws on all three sources jointly to answer probing questions.</p>
+<p><b>Methodology:</b> BEAM conversations are generated in stages: a structured conversation plan with sub-plans is created from seed information including domain, user profile, and narrative arcs; user utterances are synthesized in batches from sub-plans; and assistant responses are generated with interactive follow-up and clarification loops. Probing questions are automatically produced targeting ten memory abilities and then human-validated, yielding 20 questions per conversation. Evaluation uses nugget-based scoring where atomic answer criteria are judged by an LLM, except for event ordering which uses Kendall tau-b. LIGHT indexes each dialogue turn as key-value pairs embedded in a vector database, maintains a scratchpad compressed when it exceeds 30K tokens, and filters the scratchpad at inference using semantic chunking and binary relevance labels.</p>
+<p><b>Results:</b> Experiments on BEAM show that all tested LLMs (GPT-4.1-nano, Gemini-2.0-flash, Qwen2.5-32B, Llama-4-Maverick) degrade substantially as conversation length grows from 100K to 10M tokens, with RAG providing limited relief at extreme lengths. LIGHT consistently outperforms both long-context and RAG baselines across all models and lengths, with gains of +49.1% for Llama-4-Maverick and +44.3% for GPT-4.1-nano at 100K tokens, rising to +155.7% and +107.3% respectively at 10M tokens. The largest improvements are in summarization (+160.6%), preference following (+76.5%), and temporal reasoning (+56.3%). An ablation study confirms that each component contributes increasingly as context length grows, with all four components essential at 10M tokens.</p>
+<p><b>TL;DR:</b> The authors present BEAM, a benchmark of multi-million-token coherent conversations, and LIGHT, a cognitively inspired three-memory framework, showing that standard LLMs fail at long-range conversational memory while LIGHT yields consistent and large improvements across all tested models and lengths.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-8">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#8</span>
+        <div class="card-meta">
+          <h2 class="paper-title">LiCoMemory: Lightweight and Cognitive Agentic Memory for Efficient Long-Term Reasoning</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Zhengjun Huang (HKUST), Zhoujin Tian (HKUST), Qintian Guo (HKUST), Fangyuan Zhang (Huawei Hong Kong Research Center), Yingli Zhou (CUHK Shenzhen), Di Jiang (WeBank), Zeying Xie (WeBank), Xiaofang Zhou (HKUST)</span>
+          </div>
+          <div class="paper-file">
+            <code>2511.01448v2.pdf</code>
+            <a class="pdf-link" href="2511.01448v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2511.01448v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">LLM agents lack persistent memory across long conversations due to finite context windows, and existing graph-based memory systems are heavy, redundant, and slow. LiCoMemory introduces CogniGraph, a lightweight hierarchical graph that acts as a semantic index rather than a knowledge repository, paired with temporally aware retrieval and reranking. The system achieves up to 23% accuracy improvement over the best baseline on long-term dialogue benchmarks while dramatically reducing update latency and token consumption.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language model agents are constrained by finite context windows, meaning information from earlier conversations cannot be reliably recalled in long-term or multi-session interactions. Existing external memory approaches, particularly graph-based RAG systems, address this by storing conversational history in knowledge graphs, but they intertwine semantic content with relational topology in flat, entangled structures. This design leads to heavy and redundant representations, unstructured retrieval that returns fragmented or contextually inconsistent information, and prohibitively slow update and inference times. For example, systems like GraphRAG can require over 20 minutes for graph construction per dialogue and more than 2 minutes of query latency. These limitations make existing frameworks unsuitable for real-time, interactive agent deployment.</p>
+<p><b>Approach:</b> LiCoMemory proposes treating the knowledge graph as a lightweight semantic indexing layer rather than a content-heavy repository. The central innovation, CogniGraph, is a three-layer hierarchical graph comprising a session summary level, an entity-relation triple level, and a raw dialogue chunk level, connected by cross-layer hyperlinks. By storing only essential identifiers in graph nodes and edges and linking them back to original text, the graph remains compact and incrementally updatable. At inference time, the system performs top-down hierarchical retrieval guided by entity extraction from user queries, then reranks candidates using a unified score combining session-level similarity, triple-level similarity, and a Weibull-based temporal decay function. This design ensures that semantically relevant but temporally recent knowledge is prioritized without discarding older, still-relevant information.</p>
+<p><b>Methodology:</b> After each dialogue turn, the chunk with its timestamp and session ID is sent to LiCoMemory for incremental processing: session summaries are created or updated, entity-relation triples are extracted and deduplicated via type-aware and semantic similarity matching, and cross-layer hyperlinks are established. During retrieval, salient entities are extracted from the user query and matched against session summary keywords to identify relevant sessions, followed by entity-anchored traversal of the triple layer and mapping back to raw chunks. The unified reranking score is the product of the harmonic mean of session- and triple-level semantic similarities and a Weibull decay term that adapts its scale to the median temporal gap of retrieved triples. Experiments used Llama-3-8B-Instruct for memory construction, BGE-M3 for embeddings, and Llama-3.1-70B-Instruct-Turbo and GPT-4o-mini for answer generation, evaluated on LongMemEval (500 questions, 6 categories) and LoCoMo (1,986 questions, 5 categories).</p>
+<p><b>Results:</b> LiCoMemory consistently outperforms all baselines across both benchmarks and both generation models. On LongMemEval it surpasses the second-best baseline by 9.0% in accuracy and 9.3% in recall with Llama-3.1-70B; on LoCoMo it exceeds the next best by 7.5% accuracy and 5.2% recall. The largest gains appear in temporal reasoning (+19.2% on LoCoMo) and multi-session subsets (+26.6% on LongMemEval). In real-time interactive evaluation, LiCoMemory achieves 66.4% accuracy compared to 55.82% for the next best method, while reducing graph construction token cost by more than 3x and construction latency by over an order of magnitude (21 seconds versus 1,772 seconds for Mem0). Ablation studies confirm that structured hierarchical retrieval, temporal awareness, and session-level summaries each contribute substantially to overall performance.</p>
+<p><b>TL;DR:</b> LiCoMemory introduces CogniGraph, a three-layer hierarchical graph that separates semantic indexing from content storage, enabling real-time long-term memory for LLM agents that outperforms all baselines in accuracy and recall while being dramatically faster and more token-efficient.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-9">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#9</span>
+        <div class="card-meta">
+          <h2 class="paper-title">MemoriesDB: A Temporal-Semantic-Relational Database for Long-Term Agent Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Joel &quot;val&quot; Ward (CircleClick Labs, Austin TX)</span>
+          </div>
+          <div class="paper-file">
+            <code>2511.06179v1.pdf</code>
+            <a class="pdf-link" href="2511.06179v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2511.06179v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">LLM agents suffer from context decoherence over long horizons because existing storage systems capture only one dimension of memory. MemoriesDB unifies time, semantic embeddings, and relational graph structure in a single append-only database built on PostgreSQL with pgvector, allowing agents to retrieve coherent, contextually grounded memories across extended timelines. A working prototype demonstrates scalable recall with sub-second interactive latency on datasets of tens of millions of records.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models lose coherence over extended interactions because their underlying storage mechanisms do not preserve the temporal, semantic, and relational structure of experience simultaneously. Sliding-window, RAG, and episodic-cache approaches mitigate token limits but do not provide a persistent substrate that encodes how knowledge evolves over time. Vector databases lack temporal ordering; time-series databases lack semantic representation; graph databases lack an embedded metric of similarity. Without a unified substrate, continuity must be reconstructed ad hoc from raw text, making long-horizon planning and self-referential reasoning unreliable.</p>
+<p><b>Approach:</b> MemoriesDB treats each memory as a first-class data entity that simultaneously encodes when an event occurred, what it means, and how it relates to other events — a triality of time, semantics, and relation. Every record is a vertex labeled by its microsecond timestamp, accompanied by normalized low- and high-dimensional embeddings, and connected to other vertices via labeled, weighted directed edges. The global structure forms a time-indexed stack of temporal-semantic surfaces, where edges project meaning across planes, enabling coherent traversal of long-horizon experience. A coherence metric derived from pairwise embedding distances tracks semantic drift and guides retrieval prioritization.</p>
+<p><b>Methodology:</b> The prototype is implemented on PostgreSQL 16 with the pgvector extension using an append-only relational schema with vector columns for embeddings and JSONB for metadata. Queries combine a B-tree temporal range filter, approximate nearest-neighbor vector search, optional graph expansion via outgoing edges, and a combined re-ranking score blending semantic similarity, temporal decay, and relation strength. Background daemons handle Matryoshka embedding generation, vector normalization, edge pruning, and coherence sampling. The system is designed for future migration to columnar Parquet backends and GPU-accelerated similarity kernels.</p>
+<p><b>Results:</b> On a 32-core workstation with 128 GB RAM, single-record inserts achieve approximately 2 ms latency and batch inserts sustain roughly 8,000-10,000 records per second, with throughput scaling linearly with CPU cores until I/O saturation. Hybrid temporal-plus-vector queries operate at sub-second interactive latency on datasets in the tens of millions. Qualitative evaluation shows that semantically related memories cluster naturally and retrievals preserve contextual continuity across extended timelines, confirming the architectural viability of coherence as a first-class database property. No formal quantitative benchmarks against competing systems are yet reported, and the authors note this as a direction for future work.</p>
+<p><b>TL;DR:</b> MemoriesDB is a unified append-only database that fuses temporal indexing, semantic vector search, and labeled graph edges to give LLM agents persistent, coherent long-term memory without requiring separate storage systems for each dimension of experience.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-10">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#10</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Does Memory Need Graphs? A Unified Framework and Empirical Analysis for Long-Term Dialog Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Sen Hu (Peking University), Yuxiang Wei (Georgia Tech), Jiaxin Ran (Peking University), Zhiyuan Yao (ZJU), Xueran Han (MBZUAI), Huacan Wang (UCAS), Ronghao Chen (Peking University), Lei Zou (Peking University)</span>
+          </div>
+          <div class="paper-file">
+            <code>2601.01280v3.pdf</code>
+            <a class="pdf-link" href="2601.01280v3.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2601.01280v3" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper investigates whether graph structures genuinely improve long-term dialog memory systems by proposing a unified analytical framework that decomposes memory systems into comparable components. Through controlled experiments on two benchmarks, the authors show that foundational implementation details have a substantial impact on performance, and that graph-based memory only outperforms flat-index approaches under specific configurations.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Long-term dialog memory systems increasingly adopt graph structures inspired by their success in retrieval-augmented generation, yet empirical results across prior work are inconsistent and difficult to reconcile. Some studies report that graph-based memory yields performance gains while others find that simpler non-graph approaches achieve comparable or better results. The lack of a unified analytical framework makes it unclear whether performance differences stem from graph structures themselves or from other implementation choices such as memory representation, indexing, or retrieval strategies. Without controlled comparisons under aligned settings, practitioners cannot determine which design choices actually matter.</p>
+<p><b>Approach:</b> The authors adopt a system-oriented, experimental perspective rather than proposing a new method. They formalize dialog memory as a six-tuple covering keys, values, queries, index structures, retrieval methods, and answering, decomposing the pipeline into four stages: memory extraction, memory indexing, memory retrieval, and question answering. This framework accommodates both graph-based and non-graph approaches, enabling controlled stage-wise comparisons where individual design choices are varied while other components are held constant. The goal is to identify stable strong baselines that can serve as fair reference points for future research.</p>
+<p><b>Methodology:</b> Experiments are conducted on LongMemEval (focusing on retrieval and reasoning over long dialog histories) and HaluMem (focusing on memory extraction, updating, and consistency). By default, LLaMA-3.1-8B serves as both the extraction and answering model, Contriever as the embedding model, and GPT-4o as the judge. The authors systematically vary key design choices including memory unit types (summaries, factual statements, keywords, entities), key organization strategies (merge-by-type versus merge-by-value), memory maintenance operations (add, update, noop), graph construction paradigms (similarity-based, knowledge-graph, description-enriched), and retrieval mechanisms (entity activation versus triple activation, with and without graph expansion).</p>
+<p><b>Results:</b> Foundational settings such as key organization strategy and embedding model have a larger impact on performance than the choice between flat and graph indices. The description-enriched graph (DescGraph), which augments entities with natural language descriptions encoding both semantic and episodic memory, consistently outperforms both similarity-based and standard knowledge-graph approaches. Under the value-equals-session setting, graph-based retrieval outperforms flat indexing with the advantage growing as dataset scale increases, but under the value-equals-key setting, flat indices perform comparably or better because aggregated key representations (summaries, facts, keywords) carry more information per retrieved unit. Update and Noop memory maintenance operations improve end-to-end QA accuracy despite reducing memory precision, confirming their practical value.</p>
+<p><b>TL;DR:</b> Graph-based memory can outperform flat-index memory for long-term dialog, but only when constructed and retrieved appropriately; implementation details often matter more than the choice of graph versus no graph, and strong flat-index baselines are competitive across many settings.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-11">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#11</span>
+        <div class="card-meta">
+          <h2 class="paper-title">TeleMem: Building Long-Term and Multimodal Memory for Agentic AI</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Chunliang Chen, Ming Guan, Xiao Lin, Luxi Lin, Jiaxu Li, Qiyi Wang, Xiangyu Chen, Jixiang Luo, Changzhi Sun, Dell Zhang, Xuelong Li (Institute of Artificial Intelligence, TeleAI, China Telecom)</span>
+          </div>
+          <div class="paper-file">
+            <code>2601.06037v4.pdf</code>
+            <a class="pdf-link" href="2601.06037v4.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2601.06037v4" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">LLMs suffer from degraded long-horizon reasoning due to finite context windows and fragmented retrieval-augmented generation pipelines. TeleMem addresses this by organizing memory as a structured directed acyclic graph with narrative-driven extraction, batched consolidation, and closure-based retrieval. On the ZH-4O benchmark TeleMem outperforms the Mem0 baseline by 19% in accuracy while reducing token usage by 43% and achieving a 2.1x speedup.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models are fundamentally limited in long-term interactive settings because their finite context windows cause degraded recall as interaction histories grow. Retrieval-augmented generation alleviates storage constraints but treats memories as independent, unordered fragments with no principled mechanisms for consolidation, update, or causal organization. This leads to fragmented context, missing prerequisite information, and unstable long-horizon reasoning. Existing structured memory systems either hallucinate attributes through rigid schemas, incur high per-turn write costs, or remain text-centric and unable to reason over multimodal content.</p>
+<p><b>Approach:</b> TeleMem organizes long-term memory as a threaded directed acyclic graph (DAG) where nodes represent stabilized semantic states and edges encode causal dependencies, enabling dependency-aware retrieval that reconstructs coherent causal context. Memory extraction relies on dialogue-grounded narrative units rather than predefined schemas, preventing hallucinated profile attributes. A structured batched writing pipeline amortizes LLM invocation costs through summarization, retrieval alignment, semantic clustering, and consolidation before committing to storage. A multimodal memory module paired with a ReAct-style reasoning loop extends the system to video content via iterative observe-think-act cycles.</p>
+<p><b>Methodology:</b> The memory graph is formally defined as a DAG with a virtual root node ensuring global connectivity and a minimal causal skeleton maintained via transitive-reduction pruning. Two graph operators, Insert and ReInsert, handle both offline batch construction and online incremental updates while preserving temporal constraints. Offline processing applies a four-stage pipeline: parallel summarization, retrieval alignment, global semantic clustering, and LLM-based consolidation that assigns add, update, delete, or no-op actions to each cluster. Retrieval uses closure-based expansion from top-k seed nodes backward along dependency edges, with nodes serialized chronologically into the LLM prompt. Experiments use Qwen3-8B as the backbone LLM on two benchmarks: ZH-4O (28 Chinese role-playing sessions, 1,068 multiple-choice questions) and LoCoMo (10 English sessions, 1,540 QA pairs covering single-hop, multi-hop, open-domain, and temporal reasoning).</p>
+<p><b>Results:</b> On ZH-4O, TeleMem achieves 86.33% QA accuracy, surpassing the strongest prior system Memobase (76.78%) and the long-context LLM baseline (84.92%), while reducing token usage by 43% and delivering a 2.1x speedup over Mem0. A read-write scaling law analysis shows that performance improves monotonically as either the write or read LLM scales, with the best results achieved by scaling both jointly. On LoCoMo, TeleMem scores 61.49% overall and is particularly strong on temporal reasoning (78.47%), approaching the long-context LLM ceiling, though multi-hop reasoning (20.56%) remains a gap relative to Memobase (66.04%). These results confirm that coordinated structured read-write memory outperforms both unstructured retrieval and raw long-context accumulation across most reasoning categories.</p>
+<p><b>TL;DR:</b> TeleMem introduces a DAG-based long-term memory system that uses narrative extraction, batched consolidation, and closure-based retrieval to give LLM agents coherent, efficient, and multimodal long-horizon memory, achieving state-of-the-art accuracy on Chinese and English conversational benchmarks.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-12">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#12</span>
+        <div class="card-meta">
+          <h2 class="paper-title">HiMem: Hierarchical Long-Term Memory for LLM Long-Horizon Agents</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Ningning Zhang (Macau University of Science and Technology), Xingxing Yang (Macau University of Science and Technology), Zhizhong Tan (Macau University of Science and Technology), Weiping Deng (Macau University of Science and Technology), Wenyong Wang (Macau University of Science and Technology)</span>
+          </div>
+          <div class="paper-file">
+            <code>2601.06377v1.pdf</code>
+            <a class="pdf-link" href="2601.06377v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2601.06377v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the inability of LLM-based agents to reliably preserve and utilize information across long multi-session dialogues. The authors propose HiMem, a hierarchical long-term memory framework that organizes memory into two cognitively-inspired layers — episodic interaction records and abstracted knowledge notes — with conflict-aware self-evolution. HiMem consistently outperforms baseline systems on the LoCoMo long-horizon dialogue benchmark across accuracy, consistency, and long-term reasoning tasks.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> LLM-based conversational agents face a fundamental bottleneck when operating over long time horizons: relevant information is scattered across many dialogue turns and sessions, and existing memory systems fail to reliably preserve, organize, and update this information. Three recurring challenges undermine current approaches: semantic misalignment between extracted memories and their original dialogue context; monolithic or insufficiently hierarchical memory structures that force a trade-off between information fidelity and retrieval efficiency; and static or similarity-driven memory updates that degrade long-term consistency when new information contradicts or extends stored knowledge.</p>
+<p><b>Approach:</b> Inspired by cognitive theories of human memory, HiMem organizes memory into two semantically linked layers. Episode Memory preserves fine-grained, temporally grounded interaction segments, while Note Memory consolidates stable knowledge such as facts, user preferences, and user profiles. The two layers form a hierarchy that bridges concrete experiences and abstract knowledge, enabling efficient retrieval without sacrificing information fidelity. A conflict-aware Memory Reconsolidation mechanism closes the feedback loop between retrieval failures and targeted knowledge updates, allowing the system to self-correct and evolve during sustained use.</p>
+<p><b>Methodology:</b> Episode Memory is constructed using a Topic-Aware Event-Surprise Dual-Channel Segmentation strategy, where a boundary is introduced when either a topical shift or a cognitively salient discontinuity is detected, producing compact and self-contained episodes in a single LLM pass. Note Memory is built through a three-stage extraction pipeline that first extracts factual units, then identifies implicit user preferences and profiles, and finally performs deduplication, coreference resolution, and temporal normalization. During retrieval, HiMem supports hybrid retrieval (both layers queried) and best-effort retrieval (Note Memory first, falling back to Episode Memory only if evidence is insufficient), with an LLM judge assessing evidence sufficiency. Memory Reconsolidation is triggered when Note Memory is insufficient but Episode Memory provides adequate evidence, applying typed ADD, UPDATE, or DELETE operations to revise stored knowledge.</p>
+<p><b>Results:</b> HiMem was evaluated on LoCoMo, a benchmark of multi-session dialogues averaging 600 turns across up to 32 interaction stages. It achieved an overall GPT-Score of 80.71% compared to 69.03% for SeCom, 68.74% for Mem0, and 51.88% for A-MEM, with particularly large gains on Multi-Hop (70.92% vs. 59.10% second-best) and Temporal Reasoning (74.77% vs. 68.54% second-best) tasks. Ablation studies confirmed that both Episode Memory and Note Memory contribute complementary roles, and that Knowledge Alignment is especially critical for Note Memory. Enabling Memory Self-Evolution improved Note Memory performance by approximately 5.85%, demonstrating that conflict-aware reconsolidation is an effective self-correction mechanism.</p>
+<p><b>TL;DR:</b> HiMem is a hierarchical long-term memory framework for LLM agents that pairs fine-grained episodic records with abstracted knowledge notes and a conflict-aware update mechanism, achieving state-of-the-art performance on long-horizon dialogue benchmarks while maintaining favorable efficiency.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-13">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#13</span>
+        <div class="card-meta">
+          <h2 class="paper-title">ES-Mem: Event Segmentation-Based Memory for Long-Term Dialogue Agents</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Huhai Zou (Chongqing University), Tianhao Sun (Chongqing University), Chuanjiang He (Chongqing University), Yu Tian (Tsinghua University), Zhenyang Li (HKUST), Li Jin (Chinese Academy of Sciences), Nayu Liu (Tiangong University), Jiang Zhong (Chongqing University), Kaiwen Wei (Chongqing University)</span>
+          </div>
+          <div class="paper-file">
+            <code>2601.07582v2.pdf</code>
+            <a class="pdf-link" href="2601.07582v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2601.07582v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper proposes ES-Mem, a memory framework for long-term dialogue agents that addresses semantic fragmentation and poor retrieval precision by applying cognitive Event Segmentation Theory. The framework dynamically partitions dialogue history into coherent events and uses a hierarchical, boundary-anchored retrieval mechanism. Experiments on two benchmarks show consistent improvements over baseline memory methods.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Long-term dialogue agents must handle conversations that far exceed the context window of large language models, requiring an external memory module. Existing memory mechanisms suffer from two primary limitations: rigid, fixed-granularity storage (e.g., per-turn) that severs semantic continuity and produces fragmented memory units, and flat retrieval paradigms that compare queries only by surface-level semantic similarity. These shortcomings mean agents often retrieve inaccurate or incomplete episodic context, degrading response coherence and factual accuracy over extended interactions.</p>
+<p><b>Approach:</b> Inspired by Event Segmentation Theory (EST) from cognitive psychology, which describes how humans parse continuous experience into discrete, meaningful events delimited by boundaries, ES-Mem shifts memory granularity from rigid turns to dynamically identified semantic events. The key insight is that event boundaries act as cognitive anchors that compress sequential information into structured indices for efficient long-term memory. ES-Mem exploits these boundaries both during storage and retrieval, replacing flat vector search with a structure-aware, coarse-to-fine process that scans boundary anchors before unpacking raw details.</p>
+<p><b>Methodology:</b> ES-Mem comprises two main components. The Dynamic Event Segmentation module uses a two-stage process: first, it extracts per-turn topic representations, computes mutual information between adjacent turns using a Gaussian assumption, and identifies candidate boundaries where topical coherence drops below a quantile threshold; second, an LLM verifies each candidate via intent-recognition labels and confidence scores. The Hierarchical Memory Architecture stores three levels per event: a refined boundary description capturing the state transition between events, an event summary of core topics and keywords, and the raw dialogue context. Retrieval is a three-phase coarse-to-fine process: boundary scanning to retrieve top-k anchor events, interval expansion to activate neighboring events within a window, and summary reranking fusing boundary and content similarity scores before returning raw context to the LLM.</p>
+<p><b>Results:</b> On the LoCoMo benchmark, ES-Mem achieves the best overall score across all three LLM backbones (Qwen2.5-3B, Llama3.2-3B, GPT-4o-mini), with the largest gains on smaller models, suggesting the framework reduces the cognitive load of context selection. On LongMemEval-S it reaches the top overall accuracy of 72.40, outperforming strong competitors including LightMem and Mem0. Ablation studies confirm all three memory levels and the event segmentation module each contribute significantly. ES-Mem also demonstrates robust performance on three dialogue segmentation datasets (DialSeg711, SuperDialSeg, TIAGE) with a lightweight small-model backbone, and achieves a favorable efficiency trade-off with moderate token use (2,925) and low latency (1.423s).</p>
+<p><b>TL;DR:</b> ES-Mem applies cognitive Event Segmentation Theory to long-term dialogue memory by dynamically grouping turns into coherent events and using event boundaries as retrieval anchors, consistently outperforming existing memory baselines on two benchmarks while remaining computationally efficient.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-14">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#14</span>
+        <div class="card-meta">
+          <h2 class="paper-title">PersistBench: When Should Long-Term Memories Be Forgotten by LLMs?</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Sidharth Pulipaka (SPAR), Oliver Chen (SPAR), Manas Sharma (SPAR), Taaha S Bajwa (SPAR), Vyas Raina (University of Cambridge), Ivaxi Sheth (CISPA Helmholtz Center for Information Security)</span>
+          </div>
+          <div class="paper-file">
+            <code>2602.01146v1.pdf</code>
+            <a class="pdf-link" href="2602.01146v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2602.01146v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper identifies and benchmarks two safety risks introduced by long-term memory in conversational LLMs: cross-domain leakage and memory-induced sycophancy. The authors introduce PersistBench, a 500-sample human-validated benchmark, and evaluate 18 frontier and open-source models, finding median failure rates of 53% for cross-domain leakage and 97% for sycophancy.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Conversational assistants such as ChatGPT, Gemini, and Claude increasingly store user-specific information across sessions as long-term memory to enable personalization. While this improves continuity, it introduces largely overlooked safety risks. Specifically, memories from one domain can inappropriately influence responses in unrelated conversations (cross-domain leakage), and stored user beliefs can cause models to reinforce user biases rather than providing objective answers (memory-induced sycophancy). Prior benchmarks focused on recall accuracy or privacy violations, leaving these behavioral failure modes unmeasured. There was no existing benchmark that evaluated both harmful and beneficial memory use simultaneously to capture the safety-utility tradeoff.</p>
+<p><b>Approach:</b> The authors introduce PersistBench, the first benchmark specifically targeting memory-induced safety failures in long-term-memory-augmented LLMs. The benchmark covers three evaluation categories: cross-domain leakage (200 samples), memory-induced sycophancy (200 samples), and beneficial memory use (100 control samples). Each sample consists of a user memory set and a query, mirroring the system-prompt injection paradigm used in deployed assistants. A third beneficial memory category is included to ensure that safety mitigations do not simply suppress all memory usage. LLM-as-a-judge evaluation using Likert-scale scoring is used to assess failure severity across all subsets.</p>
+<p><b>Methodology:</b> Samples are generated using Monte Carlo Tree Search (MCTS), with Gemini-2.5-Pro as the generator LLM and Kimi-K2-Thinking as the judge providing reward signals during search. Seed scenarios define themes such as domain pairings or belief types, and the MCTS iteratively refines memory-query pairs to maximize failure elicitation across target models. After search, top-ranked samples are validated against a held-out set of models not seen during generation, and memory sets are expanded by an LLM to realistic sizes of 4 to 16 items per sample. Finally, all 500 samples are reviewed by human annotators for coherence, naturalness, and correct instantiation of the target failure mode. Eighteen frontier and open-weight models are evaluated, with failure rates computed over three independent inferences per sample for the safety subsets.</p>
+<p><b>Results:</b> Cross-domain leakage failure rates range from 4% (GPT-5.2) to 91% (Qwen3-235B-A22B-Thinking), with a median of 53% across models, and the majority of models exceed 40% failure. Memory-induced sycophancy failure rates are near-ceiling for most models, with a median of 97.7%, 14 of 18 models exceeding 95%, and 4 models reaching 100%. Beneficial memory performance is only weakly correlated with safety performance, indicating that memory misuse and memory under-utilization are distinct failure modes. Defensive prompt strategies (permissive, restrictive, rubric-informed, and GEPA-optimized) show that GEPA-optimized prompts achieve the best Pareto-efficient tradeoff between safety and utility, but no approach fully resolves the failures. Increasing model size alone does not reliably reduce safety failures within evaluated model families.</p>
+<p><b>TL;DR:</b> PersistBench reveals that long-term memory in LLMs causes widespread safety failures across 18 models, with over half of responses showing cross-domain leakage and nearly all exhibiting sycophancy, demonstrating that knowing when to forget is as important as what to remember.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-15">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#15</span>
+        <div class="card-meta">
+          <h2 class="paper-title">M2A: Multimodal Memory Agent with Dual-Layer Hybrid Memory for Long-Term Personalized Interactions</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Junyu Feng (Xi&#x27;an Jiaotong University), Binxiao Xu (Peking University), Jiayi Chen (The Chinese University of Hong Kong), Mengyu Dai (Nankai University), Cenyang Wu (Peking University), Haodong Li (South China University of Technology), Bohan Zeng (Peking University), Yunliu Xie (Peking University), Hao Liang (Peking University), Ming Lu (Intel), Wentao Zhang (Peking University)</span>
+          </div>
+          <div class="paper-file">
+            <code>2602.07624v1.pdf</code>
+            <a class="pdf-link" href="2602.07624v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2602.07624v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the challenge of personalized question answering when conversational history spans weeks or months and exceeds the context window of vision-language models. The authors propose M2A, an agentic dual-layer hybrid memory system that maintains evolving multimodal user profiles through online updates during interaction. Experiments on a newly constructed multimodal long-conversation benchmark show M2A substantially outperforms all baselines across text-based and visual-centric question categories.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large vision-language models are trained for generic users and lack mechanisms to capture individual concepts, naming conventions, or stylistic preferences. Existing personalization methods are predominantly static: concept internalization approaches fix user representations at initialization and cannot evolve, while retrieval-augmented approaches store a static profile without write-back during ongoing interactions. When conversations span weeks or months, they exceed context windows, making external memory necessary, yet existing memory systems mostly handle text only and do not support fine-grained updates or multimodal concepts. The result is that models fail to absorb and leverage users' incrementally disclosed preferences and concepts across long multi-session dialogues.</p>
+<p><b>Approach:</b> The authors propose M2A, an agentic framework that formalizes long-term personalized interaction as a Partially Observable Markov Decision Process (POMDP) where a dual-layer memory bank serves as the belief state approximating the latent user state. Two specialized cooperating agents are introduced: ChatAgent, which manages user-facing dialogue and autonomously decides when to query or update memory via a ReAct-style workflow, and MemoryManager, which holds exclusive read-write access and performs iterative reasoning-driven retrieval and updates. The key insight is to transform personalization from a one-shot static configuration into a co-evolving memory mechanism that accumulates, refines, and corrects user-specific knowledge during interaction.</p>
+<p><b>Methodology:</b> The dual-layer memory consists of an immutable RawMessageStore logging all conversational turns and a SemanticMemoryStore holding high-level semantic observations linked back to raw evidence via evidence IDs, enabling progressive narrowing from coarse to fine retrieval. Retrieval combines three parallel paths fused via Reciprocal Rank Fusion: dense text embeddings, BM25 sparse keyword matching, and cross-modal image embeddings using SigLIP, allowing text queries to surface image-centric memories through automatically generated captions. A data synthesis pipeline injects concept-grounded multimodal sessions from Yo'LLaVA and MC-LLaVA into the LoCoMo long-conversation benchmark with strict temporal interpolation, producing a richer evaluation set including a new Visual-Centric question category. Ablations on the Qwen3-VL-8B model confirm that removing the dual-layer structure costs 13.31 points, removing iterative retrieval costs 16.02 points, and removing the tri-path strategy costs 4.10 points.</p>
+<p><b>Results:</b> On the enhanced LoCoMo benchmark, M2A with GPT-4o-mini achieves 44.64% average accuracy compared to 33.27% for the RAG baseline, 34.73% for Mem0, and 36.26% for A-MEM. With Qwen3-VL-8B as the backbone, M2A reaches 54.69% average accuracy versus 43.95% for the strongest baseline. Gains are most pronounced on Single-Hop questions (44.71% baseline to 56.48% for M2A) and on the new Visual-Centric category (30.69% RAG to 43.27% M2A), validating the effectiveness of multimodal memory with image captions and cross-modal retrieval. Results are consistent across three different backbone models, demonstrating robustness of the approach.</p>
+<p><b>TL;DR:</b> M2A is an agentic two-agent system with a dual-layer multimodal memory bank that continuously updates user-specific concepts and preferences during long conversations, substantially outperforming static personalization and text-only memory baselines on a new multimodal long-conversation benchmark.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-16">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#16</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Mnemis: Dual-Route Retrieval on Hierarchical Graphs for Long-Term LLM Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Zihao Tang, Xin Yu (Microsoft), Ziyu Xiao (Microsoft), Zengxuan Wen (Microsoft), Zelin Li (Microsoft), Jiaxi Zhou (Microsoft), Hualei Wang (Microsoft), Haohua Wang (Microsoft), Haizhen Huang (Microsoft), Denvy Deng (Microsoft), Feng Sun (Microsoft), Qi Zhang (Microsoft)</span>
+          </div>
+          <div class="paper-file">
+            <code>2602.15313v2.pdf</code>
+            <a class="pdf-link" href="2602.15313v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2602.15313v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the limitations of similarity-only memory retrieval in LLMs by proposing Mnemis, a framework combining fast similarity search with structured top-down traversal over a hierarchical memory graph. Mnemis introduces a dual-route mechanism inspired by dual-process theory, pairing System-1 similarity retrieval with a System-2 global selection route over a hierarchically organized memory. The framework achieves state-of-the-art results on two long-term memory benchmarks, scoring 93.9 on LoCoMo and 91.6 on LongMemEval-S with GPT-4.1-mini.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models increasingly need persistent long-term memory to support multi-session interactions, but existing retrieval-augmented generation (RAG) and Graph-RAG approaches rely almost exclusively on similarity-based mechanisms. These System-1-style retrievals are effective for local semantic matches but fail when queries require global coverage or multi-hop reasoning across the entire memory. For example, a query asking which cities a user visited in a year may miss entries that have weak surface-level similarity to the query but are structurally relevant. Sub-query expansion approaches attempt to mitigate this but still lack a global view of memory, making comprehensive enumeration difficult.</p>
+<p><b>Approach:</b> Mnemis draws on dual-process theory to combine two complementary retrieval mechanisms: System-1 similarity search over a base graph and System-2 global selection over a hierarchical graph. The hierarchical graph is constructed bottom-up by prompting an LLM to organize entities into progressively abstract categories, governed by three principles: Minimum Concept Abstraction (categories remain specific yet generalizable), Many-to-Many Mapping (nodes can belong to multiple categories), and Compression Efficiency Constraint (enforcing progressive abstraction and minimum category size). During retrieval, global selection traverses the hierarchy top-down, selecting relevant branches layer by layer, then collecting all connected entities, edges, and episodes at the leaf level.</p>
+<p><b>Methodology:</b> Mnemis maintains a base graph containing Episodes (raw conversation turns), Entities (persons, places, concepts), Edges (relationships), and Episodic Edges, all with associated embeddings for cosine and BM25 search fused via Reciprocal Rank Fusion. The hierarchical graph is built incrementally and rebuilt periodically as the base graph updates. During retrieval, System-1 produces a ranked list of top-k items while System-2 performs unconstrained LLM-guided traversal of the hierarchy. Results from both routes are merged and re-ranked using a neural re-ranker (Qwen3-Reranker-8B in main experiments) before being formatted as context for the answer model. Experiments were conducted on LoCoMo (16K token average, 2000 questions) and LongMemEval-S (115K token average, 500 sessions) using GPT-4o-mini and GPT-4.1-mini as backend LLMs.</p>
+<p><b>Results:</b> Mnemis outperforms all compared baselines across both benchmarks, achieving 93.9 on LoCoMo and 91.6 on LongMemEval-S with GPT-4.1-mini, compared to the next best methods scoring 92.3 and 84.9 respectively. Ablation studies confirm that combining System-1 and System-2 routes yields consistent gains over either route alone, with particularly large improvements on multi-hop, open-domain, and temporal reasoning question types. The hierarchical graph construction and re-ranking together are responsible for the primary gains, not the re-ranker alone. The framework is robust to smaller re-ranker and embedding models with only minor regressions, and performance scales predictably with the retrieval budget (top-k).</p>
+<p><b>TL;DR:</b> Mnemis is a long-term LLM memory framework that pairs fast similarity search with deliberate top-down traversal of a hierarchical semantic graph, achieving state-of-the-art performance on standard memory benchmarks by capturing both locally similar and globally relevant information.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-17">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#17</span>
+        <div class="card-meta">
+          <h2 class="paper-title">HIMM: Human-Inspired Long-Term Memory Modeling for Embodied Exploration and Question Answering</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Ji Li (University of Hong Kong), Bo Wang (University of Hong Kong), Jing Xia (University of Hong Kong), Mingyi Li (Beijing Institute of Technology), Shiyan Hu (University of Hong Kong)</span>
+          </div>
+          <div class="paper-file">
+            <code>2602.15513v2.pdf</code>
+            <a class="pdf-link" href="2602.15513v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2602.15513v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper proposes HIMM, a memory framework for embodied agents that explicitly models episodic and semantic memory inspired by human cognition. The approach enables cross-episode recall via visual reasoning and distills structured reusable rules from past experiences, outperforming prior methods on A-EQA and GOAT-Bench benchmarks.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Deploying Multimodal Large Language Models as the core of embodied agents is challenging because long-horizon observations exceed manageable context lengths. Existing memory-augmented methods compress observations into textual summaries, discarding fine-grained spatial and visual cues. Most approaches also use a single memory representation for all memory types, failing to capture the distinct functions of episodic versus semantic memory as understood in cognitive psychology. Additionally, rigid geometric map fusion across episodes breaks down in dynamic real-world environments with noise and environmental changes. The result is agents that cannot effectively leverage accumulated cross-episode experience for exploration or complex reasoning.</p>
+<p><b>Approach:</b> HIMM draws inspiration from human memory systems by explicitly separating episodic memory and semantic memory with distinct construction and retrieval strategies for each. Episodic memory preserves fine-grained, per-step observations and is recalled through semantic similarity followed by visual reasoning on exploration maps, avoiding rigid geometric alignment. Semantic memory extracts high-level, transferable decision rules from past experiences using a program-style pseudocode mechanism combined with decision deviation detection, enabling cross-environment generalization. A meta memory layer governs transitions between discrete cognitive states such as exploration, target verification, and readiness to answer. This dual-system design mirrors how humans associate past experiences and apply abstract knowledge to new situations.</p>
+<p><b>Methodology:</b> At each step the agent builds a hierarchical embedding-based scene graph using SAM and CLIP, storing global and regional embeddings, 3D bounding boxes, and raw images indexed by camera pose in a semantic space, alongside a lightweight 2D occupancy exploration map as the physical space. For episodic recall, the top-K visually similar past observations are retrieved, verified for spatial correspondence by an MLLM comparing exploration map layouts, and used to prune frontier exploration points via visual reasoning without geometric fusion. Semantic memory is constructed offline by prompting an MLLM to extract pseudocode workflows from training trajectories, using deviation detection to identify and annotate critical decision points, and abstracting them into structured if-then or situation-suggestion rules. At test time, question-similarity-based retrieval via Sentence-Transformers loads relevant semantic rules into the system prompt to constrain the agent's reasoning. The framework was evaluated on A-EQA (built on Habitat) and GOAT-Bench using GPT-4o and Qwen2.5-VL backbones.</p>
+<p><b>Results:</b> On A-EQA with GPT-4o, HIMM achieves an overall LLM-Match of 65.6% versus the prior best of 58.3%, a gain of 7.3%, and LLM-Match times SPL of 48.7% versus 37.3%, a gain of 11.4%, reflecting both higher answer accuracy and improved exploration efficiency. On GOAT-Bench, the method reaches a success rate of 72.8% and SPL of 56.1%, compared to 68.9% and 48.9% for the strongest baseline 3D-Mem with GPT-4o, gains of 3.9% and 7.2% respectively. Ablation studies confirm complementary roles: removing episodic memory degrades exploration efficiency and SPL most, while removing semantic memory primarily hurts accuracy on reasoning-intensive questions. The framework scales positively with stronger MLLM backbones, unlike some baselines that degrade on certain categories.</p>
+<p><b>TL;DR:</b> HIMM is a non-parametric, human-inspired memory framework that separates episodic and semantic memory for embodied agents, using visual-reasoning-based recall and program-style rule extraction to achieve state-of-the-art results on embodied exploration and question answering benchmarks.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-18">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#18</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Revolutionizing Long-Term Memory in AI: New Horizons with High-Capacity and High-Speed Storage</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Hiroaki Yamanaka, Daisuke Miyashita, Takashi Toi, Asuka Maki, Taiga Ikeda, Jun Deguchi (AI &amp; System Research Center, Kioxia Corporation, Yokohama, Japan)</span>
+          </div>
+          <div class="paper-file">
+            <code>2602.16192v1.pdf</code>
+            <a class="pdf-link" href="2602.16192v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2602.16192v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper identifies three underexplored paradigms for improving long-term memory in self-evolving AI agents: storing raw experiences for on-demand extraction (STONE), discovering deeper statistical insights from multiple experiences, and sharing experiences across multiple agents. Simple experiments confirm the effectiveness of each approach, and the paper discusses key technical challenges and future research directions.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> The dominant paradigm for AI agent memory, termed "extract then store," selectively filters experiences at acquisition time and discards information not immediately useful for the current task. This leads to irreversible information loss, preventing agents from reusing experiences across different tasks in the future. Additionally, most methods rely on single-experience replay in stochastic environments, causing inter-context conflicts when information is inconsistent. Experience collection is also siloed within individual agents, requiring costly and redundant trial-and-error to accumulate sufficient knowledge.</p>
+<p><b>Approach:</b> The paper advocates for three complementary paradigms. First, Store Then ON-demand Extract (STONE) stores raw experiences in their entirety and defers task-specific extraction to retrieval time, preserving all potentially useful information. Second, deeper insight discovery aggregates information from multiple relevant experiences using statistical processes, rather than relying on a single retrieved experience, enabling more reliable decision-making in probabilistic settings. Third, experience memory sharing allows multiple agents to contribute to a shared memory pool, amortizing the cost of trial-and-error across agents.</p>
+<p><b>Methodology:</b> The STONE paradigm is evaluated on a company-regulation question-answering task where an agent has a limited retrieval budget; STONE stores whole documents while the baseline discards non-essential content per query. Deeper insight discovery is demonstrated on a multi-armed bandit problem, comparing an epsilon-greedy policy (statistical aggregation) against simple experience replay. Memory sharing is evaluated by extending the ExpeL agent framework to a multi-agent setting on HotpotQA, comparing ten memory-sharing agents processing 50 questions each against a single agent processing 500 questions. Each experiment measures accuracy or reward as a function of questions answered or steps taken.</p>
+<p><b>Results:</b> STONE agents preserve their retrieval budget significantly longer than extract-then-store agents, enabling continued correct answers after the budget is exhausted by the baseline. The epsilon-greedy deeper insight approach achieves substantially higher cumulative rewards than naive single-experience replay in the bandit task. Memory-sharing agents reached a success rate of 0.62 after only 50 questions per agent, while the single ExpeL agent required 500 questions to reach the same rate, confirming a 10x reduction in per-agent trial-and-error cost. The paper also identifies remaining challenges including storage capacity, inference latency, comprehensive recall, machine learning for insight discovery, infrastructure for sharing platforms, and security and privacy.</p>
+<p><b>TL;DR:</b> Storing raw AI experiences and extracting information on demand, aggregating insights statistically across many experiences, and sharing memory across multiple agents are all underexplored but demonstrably effective directions for advancing self-evolving AI agents toward artificial superintelligence.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-19">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#19</span>
+        <div class="card-meta">
+          <h2 class="paper-title">According to Me: Long-Term Personalized Referential Memory QA</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Jingbiao Mei (University of Cambridge), Jinghong Chen (University of Cambridge), Guangyu Yang (University of Cambridge), Xinyu Hou (University of Cambridge), Margaret Li (Independent Researcher), Bill Byrne (University of Cambridge)</span>
+          </div>
+          <div class="paper-file">
+            <code>2603.01990v1.pdf</code>
+            <a class="pdf-link" href="2603.01990v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2603.01990v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the lack of realistic benchmarks for personalized AI assistants that must recall and reason over long-term, multimodal, multi-source memory. The authors introduce ATM-Bench, the first benchmark covering approximately four years of personal memory data across images, videos, and emails, along with Schema-Guided Memory (SGM) to structure heterogeneous memory items. Experiments with five state-of-the-art systems reveal that current methods achieve under 20% accuracy on the hardest queries, exposing a significant gap in the field.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Personalized AI assistants need to recall and reason over a user's long-term memory, which spans multiple modalities and sources such as photos, videos, and emails. Existing long-term memory benchmarks focus almost exclusively on dialogue histories, failing to capture the realistic complexity of lived personal experience. Real-world queries are often personalized and referential, requiring systems to resolve implicit personal cues distributed across heterogeneous sources. No prior benchmark combined multimodal data, explicit temporal and location grounding, memory updates over time, multi-evidence composition, and abstention in a single evaluation framework.</p>
+<p><b>Approach:</b> The authors introduce ATM-Bench, a benchmark built from approximately four years of real, privacy-preserving personal data including emails, images, and videos collected across multiple countries. Over 1,000 question-answer pairs are fully human-annotated with ground-truth memory evidence, covering personal reference resolution, conflicting evidence, temporal-visual grounding, and unanswerable queries. They also propose Schema-Guided Memory (SGM), a structured key-value representation for memory items that preserves source-specific metadata such as timestamps, GPS coordinates, entities, and OCR text, contrasting with the unstructured descriptive-text format used in prior work.</p>
+<p><b>Methodology:</b> The Memory QA task is formalized into three stages: Memory Ingestion (preprocessing raw data into a normalized memory store via descriptive or schema-guided representations, optionally organized as piled or linked graph structures), Retrieval (embedding-based similarity search selecting top-k evidence items), and Answer Generation (single-pass or agentic iterative reasoning). Five state-of-the-art memory systems are implemented and evaluated: A-Mem, Mem0, HippoRAG2, Self-RAG, and a standard ATM-RAG baseline, with variants using DM versus SGM representations and piled versus linked memory organization. A type-aware evaluation metric, Question Type Score, handles numerical, list-recall, and open-ended answers with appropriate scoring functions.</p>
+<p><b>Results:</b> Across all evaluated systems, accuracy on the hard set (ATM-Bench-Hard) remains below 20%, demonstrating that current memory systems are substantially insufficient for realistic long-term personalized memory QA. SGM consistently outperforms Descriptive Memory, yielding up to a 20% improvement in the Oracle setting on ATM-Bench-Hard and improving retrieval performance across all system variants. Piled memory organization performs comparably to linked graph organization while reducing encoding time by an order of magnitude, suggesting that graph linking provides limited benefit in this setting. Even frontier models such as GPT-5 and Claude Opus 4.5, given gold evidence, achieve only 74.7 and 86.0 QS respectively, with substantial drops on the hard set where multi-evidence aggregation and conflict resolution are required.</p>
+<p><b>TL;DR:</b> ATM-Bench is the first multimodal, multi-source personalized memory QA benchmark built from real personal data, and experiments show that current memory systems fail badly on its hard queries, while the proposed Schema-Guided Memory representation provides consistent improvements over prior descriptive formats.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-20">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#20</span>
+        <div class="card-meta">
+          <h2 class="paper-title">TA-Mem: Tool-Augmented Autonomous Memory Retrieval for LLM in Long-Term Conversational QA</h2>
+          <div class="paper-info">
+            <span class="year-badge">2025</span>
+            <span class="authors">Mengwei Yuan (Independent Researcher, Milpitas USA), Jianan Liu (Independent Researcher, Austin USA), Jing Yang (Washington University in St. Louis), Xianyou Li (New York University), Weiran Yan (Independent Researcher, Milpitas USA), Yichao Wu (Northeastern University), Penghao Liang (Northeastern University)</span>
+          </div>
+          <div class="paper-file">
+            <code>2603.09297v1.pdf</code>
+            <a class="pdf-link" href="2603.09297v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2603.09297v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper presents TA-Mem, a tool-augmented autonomous memory framework for LLMs that addresses inflexible memory retrieval in long-term conversational QA. The system combines an agentic memory extractor, a multi-indexed database, and a retrieval agent that autonomously selects tools to fetch relevant context. Evaluated on the LoCoMo dataset, TA-Mem achieves significant performance improvements over existing baselines while maintaining competitive token efficiency.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models are constrained by fixed context window sizes, which limits their ability to perform long-range inference over extended conversational histories. Existing memory systems address this by storing context externally and retrieving relevant portions at query time, but retrieval methods remain rigid. Most approaches rely either on static top-k similarity search over embeddings or predefined fixed traversal workflows, making them unable to adapt retrieval strategy to the type of question being asked. This inflexibility leads to information redundancy, wasted token budget, and degraded answer quality on diverse question categories such as temporal, multi-hop, and open-domain queries.</p>
+<p><b>Approach:</b> TA-Mem introduces a tool-augmented retrieval agent that autonomously explores a structured memory database by selecting from a set of query tools rather than following a fixed retrieval pipeline. The core insight is that different question types require different memory access patterns, and an LLM agent can learn to choose the right tool for each query. The framework is built in three parts: an agentic memory constructor that segments and extracts episodic information in a single LLM call, a multi-indexed database that supports both key-based lookups and vector similarity queries, and an iterative retrieval agent that reasons over fetched results and decides whether to continue querying or finalize the answer.</p>
+<p><b>Methodology:</b> The memory extraction agent uses one-shot multi-task prompting to detect topic shifts in conversation history, segment input into semantically coherent chunks with overlap, and extract structured notes containing summaries, keywords, people, facts, events with temporal references, and semantic tags. These notes are stored in a database indexed by person names, tags, keywords, and vector embeddings of events and facts. The retrieval agent operates in an agentic loop capped at 7 iterations, selecting from tools including string-based key lookups, top-k cosine similarity queries over events or facts, and person profile queries. A session-level cache prevents duplicate memory pages from being re-fetched. The full system uses GPT-4o-mini for both extraction and retrieval, with all-MiniLM-L6-v2 for embeddings, and is evaluated using F1 and BLEU-1 scores on the LoCoMo benchmark.</p>
+<p><b>Results:</b> TA-Mem achieves the highest scores on temporal questions (F1: 55.95, BLEU-1: 51.47) and the highest BLEU-1 on multi-hop and open-domain questions across all compared baselines including MemoryBank, ReadAgent, MemGPT, Mem0, A-Mem, and MemoryOS. It performs competitively on single-hop questions. Average token usage per question is 3755, lower than the LoCoMo and MemGPT baselines despite the agentic loop design. Ablation studies show performance converges after approximately 4 iterations, and LLM-based semantic chunking outperforms fixed-length and percentile-based semantic chunking alternatives. Tool usage distributions differ markedly across question types, confirming the system's adaptability.</p>
+<p><b>TL;DR:</b> TA-Mem replaces static similarity-based memory retrieval with an LLM agent that autonomously selects from structured query tools, achieving state-of-the-art performance on long-term conversational QA while remaining token-efficient.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-21">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#21</span>
+        <div class="card-meta">
+          <h2 class="paper-title">MemX: A Local-First Long-Term Memory System for AI Assistants</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Lizheng Sun (affiliation not specified)</span>
+          </div>
+          <div class="paper-file">
+            <code>2603.16171v1.pdf</code>
+            <a class="pdf-link" href="2603.16171v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2603.16171v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">MemX is a local-first long-term memory system for AI assistants built in Rust on libSQL, using hybrid retrieval with vector search, FTS5 keyword search, Reciprocal Rank Fusion, and four-factor re-ranking. The system introduces a low-confidence rejection rule to suppress spurious recalls when no relevant memory exists. Evaluated on custom Chinese-language benchmarks and LongMemEval, MemX achieves Hit@1 of 91-100% on small scenarios and Hit@5 of 51.6% at fact-level granularity on 220k records with end-to-end latency under 90 ms.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large language models are stateless across sessions, meaning an AI assistant cannot reliably retain user preferences, project conventions, or domain-specific knowledge accumulated over time. Existing memory-augmented systems mostly target cloud-hosted deployments and evaluate end-to-end agent task completion rather than retrieval quality in isolation. A key unsolved challenge for local AI assistants is balancing recall of relevant memories against the risk of returning spurious results when no relevant memory exists in the store. The local-first deployment setting adds constraints around privacy, offline capability, and latency that cloud-centric systems do not adequately address.</p>
+<p><b>Approach:</b> MemX is designed around four principles: local-first deployment, structural simplicity, real-embedding evaluation, and stability-over-recall. The system stores all data in a single libSQL file on the user's machine and exposes retrieval through a deterministic pipeline rather than a learned end-to-end model. A conjunctive low-confidence rejection rule suppresses returns when both keyword recall is empty and the top vector similarity falls below an empirically tuned threshold, trading a small amount of recall for a meaningful reduction in false positives on unanswerable queries. Access and retrieval tracking are explicitly separated so that administrative reads do not inflate ranking signals.</p>
+<p><b>Methodology:</b> The retrieval pipeline embeds queries using Qwen3-Embedding-0.6B, runs parallel vector recall via DiskANN and keyword recall via FTS5 full-text search, fuses the two candidate sets with Reciprocal Rank Fusion (k=60), and re-ranks using a four-factor composite score combining semantic similarity, recency, frequency, and importance with z-score normalization and sigmoid transformation. Evaluation uses two custom Chinese-language benchmark scenarios (43 queries, up to 1,014 records) and the external LongMemEval benchmark (500 queries, up to 220,349 records at three storage granularities: session, round, and fact). Ablation studies isolate the contribution of each pipeline component, and a threshold sweep determines the recommended rejection threshold of tau=0.50.</p>
+<p><b>Results:</b> On the two custom scenarios, the system achieves Hit@1 of 91.3% and MRR of 0.935 (default) and Hit@1 of 100% (high-confusion), with conservative miss-query suppression. On LongMemEval, fact-level storage doubles Hit@5 and MRR relative to session-level storage, reaching Hit@5=51.6% and MRR=0.380, while temporal reasoning and multi-session reasoning remain at 43.6% Hit@5 at best. Replacing LIKE-based keyword search with FTS5 indexing yields a 1,100x latency reduction at 100k records, keeping end-to-end search under 90 ms at 220k records. The ablation confirms the rejection rule is the sole contributor to miss suppression, and that deduplication helps tagged template data but harms recall on tag-free atomic facts.</p>
+<p><b>TL;DR:</b> MemX is a Rust-based, local-first long-term memory system for AI assistants that combines hybrid vector and keyword retrieval with a stability-oriented rejection rule, achieving strong single-topic recall with low false positives and sub-90 ms latency at 220k records.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-22">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#22</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Chronos: Temporal-Aware Conversational Agents with Structured Event Retrieval for Long-Term Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Sahil Sen (PricewaterhouseCoopers), Elias Lumer (PricewaterhouseCoopers), Anmol Gulati (PricewaterhouseCoopers), Vamse Kumar Subbiah (PricewaterhouseCoopers)</span>
+          </div>
+          <div class="paper-file">
+            <code>2603.16862v1.pdf</code>
+            <a class="pdf-link" href="2603.16862v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2603.16862v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">Chronos is a memory framework for conversational AI agents that addresses the failure of existing systems to reason over temporally grounded facts across long dialogue histories. It introduces dual calendar indexing of raw turns and extracted temporal events, paired with dynamic per-query retrieval guidance. On the LongMemEvalS benchmark, Chronos achieves 92.60% accuracy with GPT-4o and 95.60% with Claude Opus 4.6, setting a new state of the art.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Conversational AI agents deployed over weeks or months of interaction need to recall, track, and reason over temporally grounded information across many sessions. Existing memory systems either over-structure by building comprehensive knowledge graphs at ingestion time, introducing irrelevant context at query time, or under-structure by relying on plain turn-level retrieval that cannot handle time-sensitive queries such as relative date calculations or cross-session event aggregation. No prior approach achieved query-conditioned selective extraction that structures only the temporal information needed to answer a specific question while still preserving full conversational context for semantic understanding.</p>
+<p><b>Approach:</b> Chronos takes a middle path between comprehensive knowledge graphs and pure turn-level retrieval by selectively extracting only temporally grounded subject-verb-object event tuples and indexing them alongside raw conversation turns in two complementary calendars. At query time, a dynamic prompting module analyzes each question and generates tailored retrieval guidance that directs the agent on what to retrieve, which time ranges to filter, and how to perform multi-hop reasoning. The agent then executes an iterative tool-calling loop over both calendars using vector search and exact-match grep tools, progressively gathering evidence before producing an answer.</p>
+<p><b>Methodology:</b> During ingestion, an LLM-powered extractor processes conversation turns in batches of up to 25 with 5-turn overlap, identifying timestamped events and converting natural language time expressions into ISO 8601 datetime ranges using multi-resolution temporal normalization. Each event also receives 2-4 lexical aliases to improve keyword recall. At query time, initial retrieval fetches the top-100 turns by cosine similarity, reranks them with Cohere Rerank v3, and expands the top-15 with surrounding context. A dynamic prompting step using Gemini Flash generates per-question retrieval guidance, and the Chronos Agent follows a ReAct reasoning pattern with vector and grep tools over both calendars. The system is evaluated on the 500-question LongMemEvalS benchmark across six categories using an LLM judge.</p>
+<p><b>Results:</b> Chronos Low (GPT-4o) achieves 92.60% overall accuracy, a 7.67% relative improvement over the previous best practical system (EmergenceMem Internal at 86%). Chronos High (Claude Opus 4.6) reaches 95.60%, the highest reported score on the benchmark, a 3.02% relative improvement over the prior record. The event calendar is the single most important component: removing it drops accuracy by 34.5 points in the low configuration, accounting for a 58.9% gain over the baseline. Gains are especially large on multi-session aggregation (91.73%) and temporal reasoning (90.23%), categories where prior systems struggle most.</p>
+<p><b>TL;DR:</b> Chronos achieves state-of-the-art long-term conversational memory by selectively indexing timestamped events alongside raw dialogue turns and using per-query dynamic prompting to guide an iterative retrieval agent, reaching 92.60% and 95.60% accuracy on LongMemEvalS with GPT-4o and Claude Opus 4.6 respectively.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-23">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#23</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Multi-Layered Memory Architectures for LLM Agents: An Experimental Evaluation of Long-Term Context Retention</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Payal Fofadiya (Fulloop, payal@fulloop.ai), Sunil Tiwari (Fulloop, sunil@fulloop.ai)</span>
+          </div>
+          <div class="paper-file">
+            <code>2603.29194v1.pdf</code>
+            <a class="pdf-link" href="2603.29194v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2603.29194v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the problem of semantic drift and unstable memory retention in long-horizon LLM dialogue systems. The authors propose a Multi-Layer Memory Framework (MLMF) that decomposes dialogue history into working, episodic, and semantic layers with adaptive retrieval gating and retention regularization. Experiments on LOCOMO, LOCCO, and LoCoMo benchmarks show improved retention, F1, and reduced false memory rate compared to prior approaches.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large Language Models suffer from degraded memory retention across extended multi-session dialogues due to fixed context windows and uncontrolled memory accumulation. As conversations grow, earlier signals are compressed or lost, causing persona drift, entity inconsistency, and factual instability. Long-horizon benchmarks such as LOCOMO and LOCCO expose this limitation clearly, with model performance declining as sessions progress. Naive concatenation of dialogue history incurs quadratic context growth and memory interference. Existing approaches either improve efficiency without stabilizing retention or improve recall without constraining semantic drift, leaving a gap for structured cross-session memory management.</p>
+<p><b>Approach:</b> The authors introduce a Multi-Layer Memory Framework (MLMF) that separates dialogue history into three hierarchical layers: working memory for recent utterances within a bounded window, episodic memory for compact recursive session summaries, and semantic memory for stable entity-level and persona abstractions encoded as graphs. An adaptive layer-weighting gating mechanism dynamically prioritizes retrieval from the appropriate memory layer based on query relevance. A retention regularization objective penalizes abrupt shifts in semantic memory embeddings across sessions, preventing catastrophic forgetting while jointly optimizing response generation quality and long-term stability.</p>
+<p><b>Methodology:</b> Working memory is updated via bounded token-level encoding; episodic memory evolves through a decay-controlled recursive accumulation of session summaries; semantic memory is derived by mapping episodic summaries to entity-event graphs with conflict resolution. Adaptive softmax-weighted gating computes layer importance scores, and the integrated memory representation is fused with current input via cross-attention. The retention regularization term constrains L2 distance between consecutive semantic memory entity embeddings, and total loss combines generation loss with this regularization weighted by lambda. Experiments were run on LOCOMO (588.2 turns, 27.2 sessions average), LOCCO (3080 dialogues, 100 users, six temporal periods), and LoCoMo (1,986 QA pairs across five reasoning categories), with hyperparameters tuned on validation splits and results averaged over five runs.</p>
+<p><b>Results:</b> MLMF achieved a Success Rate of 46.85 on LOCOMO compared to 42.00 for the best prior hierarchical working memory baseline. Overall F1 reached 0.618 and multi-hop F1 reached 0.594, improving over the 0.583 and 0.550 reported by the strongest prior multi-layer memory system. Six-period retention on LOCCO improved to 56.90% from 48.25%, and false memory rate dropped to 5.1% from 6.8%. Context usage was reduced to 58.40% versus 64.98% for the working memory baseline, and decoding throughput reached 10.4x speedup. Ablation experiments confirmed that each component (semantic layer, episodic consolidation, retention regularization, adaptive gating) contributes independently to the overall gains.</p>
+<p><b>TL;DR:</b> MLMF decomposes LLM dialogue memory into working, episodic, and semantic layers with adaptive gating and retention regularization, achieving better long-term retention, lower false memory rates, and reduced context usage than prior approaches on standard long-horizon benchmarks.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-24">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#24</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Lightweight LLM Agent Memory with Small Language Models</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Jiaquan Zhang (UESTC), Chaoning Zhang (UESTC), Shuxu Chen (Kyung Hee University), Zhenzhen Huang (UESTC), Pengcheng Zheng (UESTC), Zhicheng Wang (UESTC), Ping Guo (City University of Hong Kong), Fan Mo (University of Oxford), Sung-Ho Bae (Kyung Hee University), Jie Zou (UESTC), Jiwei Wei (UESTC), Yang Yang (UESTC)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.07798v1.pdf</code>
+            <a class="pdf-link" href="2604.07798v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.07798v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">LLM agents need long-term memory to maintain cross-turn consistency, but existing systems either suffer from noisy retrieval or incur high latency from repeated large-model calls. LightMem addresses this by using Small Language Models (SLMs) to handle lightweight online memory operations while deferring heavy consolidation to an offline LLM. The system achieves an average F1 improvement of ~2.5 on LoCoMo with retrieval latency of only 83 ms.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> LLM agents operating in long-horizon multi-turn interactions need external memory to maintain consistency beyond their context windows, but existing approaches face an efficiency-effectiveness trade-off. Retrieval-based systems are fast but produce noisy, unstable results due to limited query construction and candidate filtering. LLM-driven memory systems improve accuracy by repeatedly invoking large models for memory operations, but this accumulates significant latency over long interactions. No existing system effectively separates lightweight, high-frequency online memory decisions from the heavier abstraction and consolidation work that can be done asynchronously.</p>
+<p><b>Approach:</b> LightMem proposes a lightweight memory system collaboratively driven by specialized Small Language Models (SLMs), separating online memory operations from offline consolidation. Three SLMs handle distinct roles: SLM-1 acts as a retrieval controller that rewrites user input into hypothetical queries and routes them to appropriate memory stores; SLM-2 performs semantic consistency re-ranking over coarse vector retrieval candidates; and SLM-3 summarizes interactions into compact mid-term memory entries. An offline LLM handles long-term consolidation asynchronously without affecting real-time latency. Memory is organized into three tiers: short-term memory (STM) as the live context window, mid-term memory (MTM) for episodic user-specific summaries, and long-term memory (LTM) as a de-identified graph-structured knowledge base.</p>
+<p><b>Methodology:</b> The online retrieval pipeline uses a two-stage procedure: first, metadata-constrained coarse vector retrieval fetches 2K candidates across MTM and LTM using multiple hypothetical queries, then SLM-2 applies semantic consistency checking to compress this to the final top-K memories. After each turn, SLM-3 writes compressed interaction summaries to MTM with capacity-bounded eviction to prevent noise accumulation. Offline, a large-context LLM periodically processes incremental batches of MTM items, abstracting episodic content into privacy-preserving knowledge candidates and integrating them into the graph-structured LTM with confidence decay for natural forgetting. Experiments used LoCoMo (logical reasoning over long dialogues) and DialSim (multi-party TV-show dialogue simulations) benchmarks, evaluated across GPT-4o, GPT-4o-mini, Qwen2.5 (1.5B, 3B), and Llama-3.2 (1B, 3B) backbones.</p>
+<p><b>Results:</b> LightMem achieves best overall performance on LoCoMo with an average F1 improvement of approximately 2.5 over the next-best baseline (A-MEM), with particularly strong gains on multi-hop and temporal reasoning questions. On DialSim it improves SBERT semantic similarity from 19.51 (A-MEM) to 23.40, showing that gains reflect genuine semantic consistency rather than surface-level lexical matching. Latency measurements show a median retrieval latency of 83 ms (P95: 167 ms) and end-to-end latency of 581 ms (P95: 1325 ms), dramatically lower than A-MEM which has a retrieval P50 of 856 ms. Ablation studies confirm that each component contributes: removing semantic re-ranking, HQ-based routing, MTM, offline consolidation, or graph structure each degrades performance, with MTM removal causing the largest drop.</p>
+<p><b>TL;DR:</b> LightMem uses specialized Small Language Models to handle online agent memory cheaply and accurately, decoupling retrieval and writing from offline LLM consolidation, achieving state-of-the-art performance on long-horizon dialogue benchmarks at low latency.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-25">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#25</span>
+        <div class="card-meta">
+          <h2 class="paper-title">MemReader: From Passive to Active Extraction for Long-Term Agent Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Jingyi Kang (MemTensor), Chunyu Li (MemTensor), Ding Chen (China Telecom Research Institute), Bo Tang (MemTensor), Feiyu Xiong (MemTensor), Zhiyu Li (MemTensor)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.07877v2.pdf</code>
+            <a class="pdf-link" href="2604.07877v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.07877v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">Existing long-term memory systems for agents treat memory extraction as passive one-shot transcription, which leads to noisy, inconsistent, and low-value memory stores. MemReader reframes extraction as active memory management using a ReAct-style paradigm with explicit reasoning and tool use. The resulting models outperform all baselines on LOCOMO, LongMemEval, and HaluMem benchmarks, especially on knowledge updating, temporal reasoning, and hallucination reduction.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Long-term memory is essential for personalized and autonomous agents, yet how memory is populated remains a critical bottleneck. Existing systems such as Mem0, Zep, and MemOS treat memory extraction as a passive, one-shot task: given a dialogue or document, a language model directly generates structured memory entries. This design fails in realistic multi-turn settings because it lacks value judgment (storing low-value chatter), handles incomplete or ambiguous references poorly, and weakly supports knowledge updates as user state evolves over time. The result is memory pollution, redundant writes, and entries that are inconsistent or unresolvable during later retrieval.</p>
+<p><b>Approach:</b> The paper reframes memory extraction as active memory management, treating it as an explicit state-maintenance problem rather than a structured generation task. MemReader proposes two complementary models: MemReader-0.6B, a compact and cost-efficient passive extractor distilled for accurate schema-consistent structured outputs, and MemReader-4B, an active memory manager that operates under a ReAct (Reasoning + Acting) paradigm. Before deciding what to do with incoming information, MemReader-4B explicitly reasons about three questions: whether the information has long-term value, whether it contains ambiguous references requiring historical context, and whether it is complete enough to write now. Based on this reasoning, it selects from four specialized memory tools: add_memory, buffer_memory, search_memory, or ignore_memory.</p>
+<p><b>Methodology:</b> MemReader-4B is built on Qwen3-4B and trained through a three-stage pipeline: SFT warm-start on 7k ReAct trajectory samples generated by a teacher model (Gemini-3-Flash-Preview) covering all four decision paths, a DPO alignment attempt (abandoned due to training instability), and GRPO reinforcement learning using a multi-dimensional reward composed of format validity, hierarchical action-alignment, LLM-as-a-judge content quality, and an efficiency reward penalizing overly long outputs. MemReader-0.6B is built on Qwen3-0.6B and trained via supervised fine-tuning on bilingual structured extraction data with JSON validation and field-completeness checks. Evaluation is performed on three public benchmarks: LOCOMO (long-dialogue QA), LongMemEval (six memory dimensions including knowledge update and temporal reasoning), and HaluMem-Medium (hallucination-focused extraction and update metrics).</p>
+<p><b>Results:</b> MemReader-4B-GRPO achieves state-of-the-art or best overall scores across all three benchmarks, with particularly strong gains on knowledge updating (91.03% on LongMemEval vs. 89.74% for the next best), temporal reasoning, and hallucination reduction (update hallucination rate of 5.12%, the lowest among all systems). MemReader-0.6B matches or exceeds GPT-4o-mini-based baselines despite its much smaller size, achieving the best F1 on LOCOMO and leading on multi-session tasks in LongMemEval. On HaluMem-Medium, MemReader-4B-GRPO achieves 96.57% recall, 98.21% F1, and the best update correctness (94.55%), confirming that higher-quality extraction propagates benefits through the entire memory pipeline.</p>
+<p><b>TL;DR:</b> MemReader replaces passive one-shot memory extraction with an active ReAct-based decision process that reasons about value, ambiguity, and completeness before writing, buffering, retrieving, or ignoring information, yielding state-of-the-art long-term memory quality across multiple benchmarks.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-26">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#26</span>
+        <div class="card-meta">
+          <h2 class="paper-title">PASK: Toward Intent-Aware Proactive Agents with Long-Term Memory</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Zhifei Xie (NTU), Zongzheng Hu (NTU), Fangda Ye (NUS), Xin Zhang (NTU), Haobo Chai (NTU), Zihang Liu (NUS), Pengcheng Wu (NTU), Guibin Zhang (NUS), Yue Liao (NUS), Xiaobin Hu (NUS), Deheng Ye (NTU), Chunyan Miao (NTU), Shuicheng Yan (NUS)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.08000v1.pdf</code>
+            <a class="pdf-link" href="2604.08000v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.08000v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the gap between passive query-response AI and genuinely proactive AI that can anticipate user needs in real time. The authors propose DD-MM-PAS, a paradigm combining demand detection, long-term hierarchical memory, and an always-on agent system, instantiated in Pask with the IntentFlow model. Experiments show IntentFlow matches leading closed-source models under strict latency constraints while maintaining stable performance over long multi-turn interactions.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Current AI systems operate in a reactive "you ask, I answer" mode, which fails in real-world scenarios where users cannot pause to query a system, where invoking AI is socially disruptive, or where formulating explicit prompts requires effort most users do not naturally apply. Prior work on proactive agents remains confined to narrow, controlled laboratory settings and does not address interaction depth, real-time responsiveness, or the accumulation of long-term user understanding across sessions. There is no unified paradigm that jointly addresses demand detection, personalized user memory, and robust system execution for proactive AI. This leaves a clear gap between what existing systems can do and what genuinely useful proactive intelligence requires.</p>
+<p><b>Approach:</b> The authors propose DD-MM-PAS, a three-component paradigm for proactive AI: Demand Detection (DD) continuously infers latent user needs from streaming context without waiting for explicit queries; Memory Modeling (MM) maintains an evolving, hierarchical representation of the user across sessions; and the Proactive Agent System (PAS) provides the always-on execution loop that converts inferred demand into concrete assistance. They instantiate this paradigm in Pask, which uses the IntentFlow streaming model for demand detection and a three-tier hybrid memory system. The key insight is that proactivity requires tight coordination of all three components under strict latency constraints, rather than improving any single component in isolation.</p>
+<p><b>Methodology:</b> IntentFlow is built on a dual-model architecture using Qwen3-30B-A3B as the Demand Detector and Qwen3-4B as the MemLoader, trained in two stages: supervised fine-tuning on LatentNeeds-100k (a 102k-sample synthetic dataset across meeting, learning, and daily-life domains) followed by reinforcement learning on LatentNeeds-2K (2,000 real user sessions collected with consent from 143 users). The RL stage uses DAPO with rule-based rewards for output format and intervention timing, and an LLM-as-judge reward for alignment, reasonableness, and necessity of the generated demand. The memory system is organized as User Memory (a KV-cache-injected user profile), Workspace Memory (session-level context window), and Global Memory (a bounded tree-structured RAG store updated offline after each session with lazy merging and time-decayed Bayesian conflict resolution).</p>
+<p><b>Results:</b> On LatentNeeds-Bench (100 real sessions, 3,936 turns across 10 subcategories), IntentFlow achieves a balanced accuracy of 84.2, outperforming GPT-5-Mini by 7.0 points, GPT-5-Nano by 12.7 points, and closely matching Gemini-3-Flash (83.3 overall average), while operating at roughly 1.3-1.5 seconds per-turn latency, the fastest among all evaluated models. In multi-turn analysis over 60 turns, IntentFlow's balanced accuracy declines by only 5.0% compared to -19.0% for GPT-5-Mini and -17.3% for Gemini-3-Flash, demonstrating that Pask-MM substantially stabilizes long-horizon performance. A small user study found that participants using Pask during a 5-minute learning task improved quiz scores by approximately +1 to +1.5 points on average compared to participants without Pask.</p>
+<p><b>TL;DR:</b> Pask is a proactive AI system that detects latent user needs in real time from streaming context, maintains evolving long-term user memory, and delivers assistance without waiting to be asked, with its IntentFlow model matching closed-source frontier models in accuracy while being the fastest evaluated system at around 1.4 seconds per turn.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-27">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#27</span>
+        <div class="card-meta">
+          <h2 class="paper-title">MemCoT: Test-Time Scaling through Memory-Driven Chain-of-Thought</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Haodong Lei (Southeast University, Shanghai AI Lab), Junming Liu (Shanghai AI Lab), Yirong Chen (Shanghai AI Lab), Ding Wang (Shanghai AI Lab), Hongsong Wang (Southeast University)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.08216v2.pdf</code>
+            <a class="pdf-link" href="2604.08216v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.08216v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">LLMs fail at long-context multi-hop reasoning because existing retrieval treats memory as static single-step matching, causing semantic dilution and contextual fragmentation. MemCoT reframes memory as a reasoning engine by coupling iterative retrieval with a chain-of-thought loop that evolves short-term state across search cycles. On the LoCoMo and LongMemEval-S benchmarks, MemCoT achieves state-of-the-art F1 and LLM-as-a-Judge scores across all sub-tasks.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Large Language Models still hallucinate and forget critical details when reasoning over long, fragmented interaction histories, even as context windows grow to millions of tokens. The core failure is not context length but the inability to coherently search, organize, and use temporally distributed information. Existing memory mechanisms treat retrieval as a one-shot passive matching step that must commit to what information is relevant before reasoning begins. This causes either overly broad retrieval that floods the model with noise, or overly narrow retrieval that omits essential causal context needed for multi-hop reasoning chains.</p>
+<p><b>Approach:</b> MemCoT proposes that memory should not merely assist reasoning but fundamentally define the reasoning process, enabling a paradigm shift from passive retrieval to active stateful search. The framework introduces a recurrent memory-reasoning loop in which each iteration retrieves evidence, updates a dynamic short-term memory state, judges whether the accumulated evidence is sufficient, and either generates an answer or refines the query for the next cycle. This transforms long-context reasoning into an iterative Markov process where prior search outcomes condition every subsequent retrieval step, enabling both single-hop and multi-hop scenarios to be handled within one unified mathematical framework.</p>
+<p><b>Methodology:</b> MemCoT consists of three interlocking components. First, a multi-view long-term memory perception module combines fine-grained zoom-in focal retrieval that pinpoints precise top-K chunks with a zoom-out context expansion that widens the view by retrieving an adjacent window of chunks around the focal hits, and a panoramic visual grounding module that handles multi-modal memories via OCR-based image-text fusion. Second, a task-conditioned dual short-term memory system stores semantic memory distilled from each retrieval round alongside an episodic trajectory memory recording failed query paths, preventing redundant searches. Third, a judge agent evaluates sufficiency at each step and a modifying query agent either decomposes the remaining intent into atomic sub-queries or prunes already-resolved sub-goals. The framework is training-free and plug-and-play, built on top of LightRAG with Top-K set to 10 and a maximum of 8 evolutionary iterations.</p>
+<p><b>Results:</b> On the LoCoMo benchmark, MemCoT with GPT-4o-mini achieves an overall F1 of 58.03, outperforming the previous best system CompassMem at 52.18 across all four sub-tasks including single-hop (64.81), multi-hop (40.43), temporal (60.31), and open-domain (42.67). With Qwen2.5-14B it reaches 57.06 F1, and even the compact Qwen2.5-7B reaches 52.01, a 57.3% improvement over the prior best for that model size. On LongMemEval-S, MemCoT scores 88.0 overall with a perfect 100.0 on single-session-assistant tracking. Ablation studies confirm that the zoom-out expansion module contributes the largest individual gain, and hyperparameter analyses show optimal performance with a window size of 4 to 8 and 6 or more maximum iterations.</p>
+<p><b>TL;DR:</b> MemCoT replaces static one-shot retrieval with an iterative memory-reasoning loop that dynamically zooms in for precision and zooms out for context, achieving state-of-the-art long-context multi-hop reasoning without any fine-tuning.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-28">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#28</span>
+        <div class="card-meta">
+          <h2 class="paper-title">HyperMem: Hypergraph Memory for Long-Term Conversations</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Juwei Yue (Institute of Information Engineering, Chinese Academy of Sciences; EverMind AI), Chuanrui Hu (EverMind AI), Jiawei Sheng (Institute of Information Engineering, Chinese Academy of Sciences), Zuyi Zhou (EverMind AI), Wenyuan Zhang (Institute of Information Engineering, Chinese Academy of Sciences), Tingwen Liu (Institute of Information Engineering, Chinese Academy of Sciences), Li Guo (Institute of Information Engineering, Chinese Academy of Sciences), Yafeng Deng (EverMind AI)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.08256v2.pdf</code>
+            <a class="pdf-link" href="2604.08256v2.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.08256v2" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">HyperMem is a hypergraph-based hierarchical memory architecture for long-term conversational agents that models high-order associations among topics, episodes, and facts using hyperedges. It addresses the inability of existing RAG and graph-based methods to capture joint dependencies among multiple dialogue elements. On the LoCoMo benchmark it achieves state-of-the-art 92.73% LLM-as-a-judge accuracy, outperforming the best prior method by over 7 percentage points.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Conversational agents increasingly need to maintain coherent, personalized interactions across extended multi-session dialogues, but their fixed context windows make historical experiences inaccessible as conversations grow. Existing approaches such as RAG and graph-based memory rely fundamentally on pairwise relations, which cannot capture high-order associations, meaning joint dependencies among three or more related elements. This limitation causes fragmented retrieval, where semantically related content scattered across time is never unified into coherent units. For example, multiple episodes about the same topic spanning weeks may share important relationships that pairwise edges simply cannot represent.</p>
+<p><b>Approach:</b> HyperMem models long-term conversational memory as a hypergraph, exploiting hyperedges that can connect arbitrary sets of nodes rather than just pairs. Memory is organized into three hierarchical levels: topic nodes representing recurring conversation themes, episode nodes capturing temporally contiguous dialogue segments, and fact nodes encoding atomic assertions extracted from episodes. Hyperedges explicitly group all episodes that share a topic and all facts that belong to the same episode, allowing scattered but semantically related content to be unified into coherent retrieval units. This structure is paired with a hybrid lexical-semantic index and a coarse-to-fine retrieval strategy that progressively narrows from topics to episodes to facts.</p>
+<p><b>Methodology:</b> HyperMem construction proceeds in three stages driven by an LLM. First, an incremental streaming boundary detector segments the raw dialogue into semantically complete episode nodes. Second, a topic aggregation mechanism groups related episodes under shared topic nodes, using hyperedges with LLM-assigned importance weights. Third, salient atomic facts are extracted from each episode and linked via fact hyperedges. For indexing, each node is encoded with both a BM25 sparse index and a dense embedding via Qwen3-Embedding-4B; a lightweight hypergraph embedding propagation step then enriches node representations by aggregating embeddings from incident hyperedges. At query time, retrieval uses Reciprocal Rank Fusion combined with a Qwen3-Reranker-4B reranker, traversing topic, episode, and fact levels in a coarse-to-fine manner. Answer generation uses GPT-4.1-mini with chain-of-thought prompting on the retrieved fact and episode context.</p>
+<p><b>Results:</b> On the LoCoMo benchmark, HyperMem achieves 92.73% overall LLM-as-a-judge accuracy, surpassing the strongest RAG baseline HyperGraphRAG by 6.24% and the best memory system MIRIX by 7.35%. Category-wise, it reaches 96.08% on single-hop questions, 93.62% on multi-hop questions, and 89.72% on temporal reasoning, with multi-hop gains attributed directly to hyperedges binding topically scattered episodes. An efficiency analysis shows HyperMem attains its best accuracy at only 7.5x token usage relative to Mem0, compared to GraphRAG which uses 35.3x tokens for far lower accuracy. Ablation studies confirm that episode context is the most critical component and that the hierarchical retrieval structure provides complementary gains.</p>
+<p><b>TL;DR:</b> HyperMem replaces pairwise graph edges with hyperedges to explicitly group related topics, episodes, and facts in a three-level memory hierarchy, enabling more complete retrieval over long conversations and achieving state-of-the-art accuracy on the LoCoMo benchmark.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-29">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#29</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Learning to Forget – Hierarchical Episodic Memory for Lifelong Robot Deployment</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Leonard Bärmann (KIT), Joana Plewnia (KIT), Alex Waibel (KIT), Tamim Asfour (KIT)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.11306v1.pdf</code>
+            <a class="pdf-link" href="2604.11306v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.11306v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper addresses the challenge of lifelong episodic memory for robots, where continuous multimodal perception quickly exceeds storage and compute limits. The authors propose H2-Emv, a framework that builds a hierarchical memory tree online, selectively forgets irrelevant memories using LLM-based relevance estimation, and learns user-specific relevance rules from feedback. Evaluations on simulated and 20.5-hour real-world robot recordings show 45% memory reduction, 35% compute savings, and a 70% accuracy improvement in second-round queries after feedback.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Robots engaged in long-term deployment must be able to answer natural language questions about their past experiences, such as where an object was placed or why a task failed. Storing all continuous multimodal perceptual data indefinitely is impractical and exceeds both storage and real-time query compute limits. Existing episodic memory verbalization systems either grow unboundedly or use fixed retrieval strategies, without adapting to individual users' definitions of relevance. There is no universal notion of what details are worth remembering, making it essential for a system to learn these preferences incrementally from user interaction and feedback.</p>
+<p><b>Approach:</b> The authors introduce H2-Emv, which extends a prior hierarchical tree-based episodic memory system (H-Emv) with three key contributions: online incremental memory construction, decay-based forgetting with LLM-driven relevance estimation, and feedback-based learning of natural-language relevance rules. Rather than building the memory tree retrospectively at question time, the system updates it continuously as new observations arrive. Nodes in the tree are assigned lifetimes; expired nodes are evaluated by an LLM conditioned on learned relevance rules to decide whether to extend or delete them. When a user's query reveals that relevant information was forgotten, the system uses the feedback to refine its relevance rules, improving future forgetting and summarization.</p>
+<p><b>Methodology:</b> The history tree organizes observations into scene graph instants, event summaries, goal summaries, and higher-level summaries through recursive LLM-based grouping and summarization. A time-aware incremental algorithm clusters nodes by temporal proximity to prevent merging temporally distant observations and introduces recency bias. Relevance-based forgetting inspects the tree top-down, using an LLM prompted with current relevance rules to score expired nodes. Feedback-based relevance learning updates these natural-language rules when a user signals that forgotten information was needed, improving both forgetting and summarization going forward. Experiments used simulated household task recordings from the TEACh dataset and 20.5 hours of real-world multimodal recordings from the humanoid robot Armar-7.</p>
+<p><b>Results:</b> H2-Emv reduces final memory tree size by 45% and question-time compute by 35% compared to a non-forgetting baseline, while maintaining competitive question-answering accuracy. The system is the only evaluated approach that improves QA accuracy from the first to the second query round, achieving a 70% increase due to feedback-based relevance learning. Without relevance learning, systems stagnate or degrade over time as the volume of stored experiences grows. In real-world Armar-7 experiments, H2-Emv was the only system showing clear round-two improvement, while non-forgetting systems declined due to increasing retrieval difficulty. Online deployment over multiple weeks showed manageable processing delays averaging 47 seconds during active periods.</p>
+<p><b>TL;DR:</b> H2-Emv enables robots to maintain scalable, personalized long-term episodic memory by learning what to forget from user feedback, achieving large reductions in storage and compute while improving question-answering accuracy over time.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-30">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#30</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Synthius-Mem: Brain-Inspired Hallucination-Resistant Persona Memory Achieving 94.4% Memory Accuracy and 99.6% Adversarial Robustness on LoCoMo</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Artem Gadzhiev (Synthius.ai), Andrew Kislov (Synthius.ai)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.11563v1.pdf</code>
+            <a class="pdf-link" href="2604.11563v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.11563v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">The paper addresses unreliable long-term memory and hallucination in LLM-based AI agents by proposing Synthius-Mem, a brain-inspired structured persona memory system that organizes information into six cognitive domains with active consolidation and domain-targeted retrieval. The system achieves 94.37% accuracy on the LoCoMo benchmark, surpassing all published systems and human performance, while reaching 99.55% adversarial robustness and reducing token consumption by approximately 5x compared to full-context replay.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Current LLM agent memory approaches — sliding windows, summarization, embedding-based RAG, and flat fact extraction — all reduce token cost but introduce catastrophic information loss, semantic drift, or uncontrolled hallucination about users. Every published memory system on the LoCoMo benchmark treats conversation as a retrieval problem over raw or lightly summarized dialogue segments, retrieving "what was said" rather than "what is known about this person." None of these systems reports adversarial robustness, meaning their tendency to hallucinate facts never disclosed by the user remains unassessed. Deployed persona agents require the combination of high accuracy, low token cost, and hallucination resistance that no prior system has achieved.</p>
+<p><b>Approach:</b> Synthius-Mem draws its organizational principles from neuroscience, recognizing that the human brain organizes memory across functionally specialized subsystems — episodic, semantic, social cognition, evaluative — each with distinct neural substrates, encoding mechanisms, and retrieval pathways. Rather than storing raw conversation, the system extracts structured persona knowledge decomposed into six typed cognitive domains: Biography, Experiences, Preferences, Social Circle, Work, and Psychometrics. Each domain has its own JSON schema, extraction module, consolidation logic, and retrieval tool, enabling domain-targeted retrieval at query time called CategoryRAG. The key insight is that performing cognitively demanding inference — fact parsing, temporal resolution, deduplication — once during extraction, rather than at every query, increases signal-to-noise ratio and enables near-perfect adversarial robustness.</p>
+<p><b>Methodology:</b> The extraction pipeline processes conversation through input parsing, token-bounded chunking with overlap, parallel LLM-based extraction into all six domains using structured output schemas, and per-category consolidation performing deduplication, conflict resolution, and hierarchical restructuring. At chat time, a planner LLM selects which domains to query and domain-specific retrieval tools perform field-level matching against the structured JSON memory store. Memory evolves continuously through a reversible diff engine supporting add, edit, and delete operations. Evaluation was conducted on the full LoCoMo benchmark (ACL 2024, 10 conversations, 20 participants, 1,813 questions) using GPT-4.1-mini as an LLM-as-Judge with binary scoring, chosen over token-overlap F1 because F1 penalizes semantically correct paraphrased answers. Controlled baselines using the same judge compared against full-context replay, sliding window, summarization, and embedding RAG.</p>
+<p><b>Results:</b> Synthius-Mem achieves 94.37% overall accuracy on LoCoMo, exceeding all published systems including MemMachine (91.69%, adversarial not reported) and human performance (87.9 F1). Core memory fact accuracy reaches 98.64% and adversarial robustness reaches 99.55%, with only 2 of 442 false-premise questions answered incorrectly. The system surpasses full-context replay by 8.91 percentage points despite full context having access to all information, because structured extraction eliminates the "lost in the middle" effect. Token consumption is approximately 5.2x lower than full-context replay at 500 messages (5,040 vs. 26,200 tokens per message) while achieving higher accuracy, and CategoryRAG retrieval operates at 21.79 ms mean latency.</p>
+<p><b>TL;DR:</b> Synthius-Mem organizes AI agent persona memory into six brain-inspired cognitive domains with active consolidation and structured retrieval, achieving state-of-the-art 94.37% accuracy and 99.55% adversarial robustness on LoCoMo while using 5x fewer tokens than full-context replay.</p>
+      </div>
+    </article>
+    <article class="card" id="paper-31">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#31</span>
+        <div class="card-meta">
+          <h2 class="paper-title">Back to Basics: Let Conversational Agents Remember with Just Retrieval and Generation</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Yuqian Wu (HKUST-GZ), Wei Chen (HKUST-GZ), Zhengjun Huang (HKUST), Junle Chen (HKUST), Qingxiang Liu (HKUST-GZ), Kai Wang (NUS), Xiaofang Zhou (HKUST), Yuxuan Liang (HKUST-GZ)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.11628v1.pdf</code>
+            <a class="pdf-link" href="2604.11628v1.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.11628v1" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">This paper identifies the Signal Sparsity Effect as the core bottleneck in long-term conversational memory, not memory architecture complexity. The authors propose Nano-Memory, a minimalist framework using Turn Isolation Retrieval and Query-Driven Pruning to localize sparse evidence and eliminate redundant context. Nano-Memory consistently outperforms complex baselines across four benchmarks while reducing token consumption by 3-5x and total execution time by 48%.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Existing conversational memory systems for LLM-based agents rely on increasingly complex mechanisms such as hierarchical summarization, graph-based memory structures, and reinforcement learning to manage long-term dialogue history. Despite this engineering complexity, these systems remain vulnerable to context dilution as conversations grow longer. The fundamental question of what constitutes decisive evidence for retrieval and generation in conversational memory has remained underexplored. As session lengths increase, useful signals become increasingly sparse and isolated amid large volumes of irrelevant conversational content, causing aggregation-based retrieval methods to degrade sharply.</p>
+<p><b>Approach:</b> The authors reframe the problem through the lens of Signal Sparsity Effect: rather than improving memory architecture, the key is accurately localizing sparse decisive evidence and eliminating redundant context. They identify two phenomena through controlled experiments: Decisive Evidence Sparsity, where relevant signals become geographically isolated in longer sessions making aggregation-based retrieval fail, and Dual-Level Redundancy, where both inter-session interference and intra-session conversational filler dilute useful information during generation. Based on these findings, they propose Nano-Memory, a minimalist framework that stores raw unstructured dialogue history and focuses entirely on the retrieval and generation stages.</p>
+<p><b>Methodology:</b> Nano-Memory uses Turn Isolation Retrieval (TIR), which replaces mean-pooling aggregation with a max-activation strategy: the session relevance score is defined as the maximum similarity between the query and any individual turn within that session, effectively anchoring retrieval to the most decisive signal regardless of session length. Query-Driven Pruning (QDP) addresses dual-level redundancy at generation time by prompting a filtering language model to extract only the query-relevant fragments from the top-k retrieved sessions, purging both irrelevant sessions and intra-session conversational filler. The system requires no offline memory construction or structural maintenance, operating directly on raw dialogue history. Experiments were conducted on four benchmarks (LoCoMo, Long-MT-Bench+, LongMemEval-s, LongMemEval-m) against ten baselines including HippoRAG 2, SeCom, MemGAS, RAPTOR, and A-Mem.</p>
+<p><b>Results:</b> Nano-Memory achieves a 28.3% improvement in F1 score over the strongest baseline on LoCoMo and a 22.05% improvement in Recall@3 for retrieval. Ablation confirms both TIR and QDP contribute independently, with TIR raising F1 from 15.76 to 19.62 and QDP further boosting it to 22.66 while halving token consumption. Nano-Memory reduces total end-to-end execution time by 48.05% compared to the strongest baseline and reduces token consumption by 3-5x. Performance gains are consistent across different LLM backbones (GPT-4o-mini, Llama 3.1-8B, Gemini-2.5-Flash), different retrievers (Contriever, MPNet, MiniLM), and different query types, with the largest relative gain of 39.7% on temporal queries.</p>
+<p><b>TL;DR:</b> Nano-Memory demonstrates that simple, well-designed retrieval and generation with turn-level max-activation and query-driven context pruning outperforms complex hierarchical memory architectures for long-term conversational agents, while being substantially faster and more token-efficient.</p>
+      </div>
+    </article>
+  </main>
+  <footer>Generated from PDF summaries &mdash; 31 papers</footer>
+  <script>
+    function toggleCard(header) {
+      const card = header.closest('.card');
+      const body = card.querySelector('.card-body');
+      const expanded = card.classList.toggle('expanded');
+      body.hidden = !expanded;
+      header.setAttribute('aria-expanded', expanded);
+    }
+    document.querySelectorAll('.card-header').forEach(h => {
+      h.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCard(h); }
+      });
+    });
+  </script>
+</body>
+</html>

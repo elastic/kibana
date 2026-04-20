@@ -21,9 +21,11 @@
  *   --delay            Delay between API calls in ms (default: 2000)
  *   --max-sessions     Max sessions per question (default: all)
  *   --output           Output file (default: longmemeval_results_<timestamp>.json)
- *   --concurrency      Parallel extract requests (default: 10, use 1 for sequential)
+ *   --concurrency      Parallel extract requests (default: 1, use 10 for parallel)
  *   --skip-feeding     Skip feeding, go straight to questions
  *   --no-cleanup       Don't wipe memories between questions
+ *   --consolidate      Run consolidation task after feeding, before questioning
+ *   --consolidate-wait Seconds to wait for consolidation (default: 30)
  */
 
 const fs = require('fs');
@@ -51,6 +53,8 @@ const OUTPUT_FILE = getArg(args, 'output', `longmemeval_results_${new Date().toI
 const CONCURRENCY = parseInt(getArg(args, 'concurrency', '1'), 10);
 const SKIP_FEEDING = hasFlag(args, 'skip-feeding');
 const NO_CLEANUP = hasFlag(args, 'no-cleanup');
+const CONSOLIDATE = hasFlag(args, 'consolidate');
+const CONSOLIDATE_WAIT = parseInt(getArg(args, 'consolidate-wait', '30'), 10);
 
 async function downloadJson(url) {
   return new Promise((resolve, reject) => {
@@ -153,12 +157,26 @@ async function main() {
       await new Promise((r) => setTimeout(r, 2000));
     }
 
+    // Step 2.5: Optionally trigger consolidation and wait for it to complete
+    if (CONSOLIDATE && !SKIP_FEEDING) {
+      try {
+        console.log(`  Triggering consolidation (waiting ${CONSOLIDATE_WAIT}s)...`);
+        await api.triggerConsolidation();
+        await new Promise((r) => setTimeout(r, CONSOLIDATE_WAIT * 1000));
+        console.log(`  Consolidation wait complete`);
+      } catch (err) {
+        console.log(`  ✗ Consolidation error: ${err.message?.slice(0, 80)}`);
+      }
+    }
+
     // Step 3: Ask question in a fresh conversation
     let predicted = '';
     let toolCallCount = 0;
     let memoryToolCalls = 0;
+    let toolCallDetails = [];
     let injectedMemoryCount = 0;
     let injectedMemoryTokens = 0;
+    let injectedMemoriesList = [];
     let retrievalMs = 0;
     let inputTokens = 0;
     let outputTokens = 0;
@@ -171,15 +189,22 @@ async function main() {
       const result = await api.converse(questionWithDate, null);
       predicted = result.response?.message || '';
 
-      // Count tool calls from steps
+      // Count tool calls from steps and capture memory tool details
       const steps = result.steps || [];
       toolCallCount = steps.filter((s) => s.type === 'tool_call').length;
       memoryToolCalls = steps.filter((s) => s.type === 'tool_call' && s.tool_id?.startsWith('memory.')).length;
+      toolCallDetails = steps
+        .filter((s) => s.type === 'tool_call')
+        .map((s) => ({
+          tool_id: s.tool_id,
+          params: s.params,
+          results: s.results,
+        }));
 
-      // Injected memories from beforeAgent hook
-      const memories = result.injected_memories || [];
-      injectedMemoryCount = memories.length;
-      injectedMemoryTokens = memories.reduce((sum, m) => sum + Math.ceil((m.summary || '').length / 4), 0);
+      // Injected memories from all sources (round-start, auto-retrieval, remember tool)
+      injectedMemoriesList = result.injected_memories || [];
+      injectedMemoryCount = injectedMemoriesList.length;
+      injectedMemoryTokens = injectedMemoriesList.reduce((sum, m) => sum + Math.ceil((m.summary || '').length / 4), 0);
       retrievalMs = result.memory_retrieval_duration_ms || 0;
 
       // Extract model usage stats
@@ -211,36 +236,40 @@ async function main() {
       question: item.question, gold_answer: item.answer,
       predicted_answer: predicted, score,
       sessions_fed: sessionsToFeed.length,
-      injected_memories: injectedMemoryCount,
+      injected_memory_count: injectedMemoryCount,
       injected_memory_tokens: injectedMemoryTokens,
+      injected_memories: injectedMemoriesList,
       memory_retrieval_ms: retrievalMs,
       tool_calls: toolCallCount,
       memory_tool_calls: memoryToolCalls,
+      tool_call_details: toolCallDetails,
       input_tokens: inputTokens,
       output_tokens: outputTokens,
       llm_calls: llmCalls,
     });
 
+    // Write intermediate results after each question
+    const accuracy = total > 0 ? ((correct + partial * 0.5) / total * 100).toFixed(1) : 0;
+    const intermediateReport = {
+      timestamp: new Date().toISOString(), benchmark: 'LongMemEval_S',
+      extraction_method: EXTRACTION_METHOD ?? '(config)',
+      feed_mode: FEED_MODE,
+      total_questions: total, correct, partial, accuracy: parseFloat(accuracy),
+      category_scores: categoryScores, results,
+    };
+    fs.writeFileSync(OUTPUT_FILE, JSON.stringify(intermediateReport, null, 2));
+
     await new Promise((r) => setTimeout(r, DELAY_MS));
   }
 
-  // Report
-  const accuracy = total > 0 ? ((correct + partial * 0.5) / total * 100).toFixed(1) : 0;
+  // Final report
+  const finalAccuracy = total > 0 ? ((correct + partial * 0.5) / total * 100).toFixed(1) : 0;
   console.log(`\n\n=== Results ===`);
-  console.log(`Overall: ${correct}/${total} correct, ${partial} partial (${accuracy}%)`);
+  console.log(`Overall: ${correct}/${total} correct, ${partial} partial (${finalAccuracy}%)`);
   for (const [cat, s] of Object.entries(categoryScores)) {
     const a = s.total > 0 ? ((s.correct + s.partial * 0.5) / s.total * 100).toFixed(1) : 0;
     console.log(`  ${cat}: ${s.correct}/${s.total} (${a}%)`);
   }
-
-  const report = {
-    timestamp: new Date().toISOString(), benchmark: 'LongMemEval_S',
-    extraction_method: EXTRACTION_METHOD ?? '(config)',
-    feed_mode: FEED_MODE,
-    total_questions: total, correct, partial, accuracy: parseFloat(accuracy),
-    category_scores: categoryScores, results,
-  };
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(report, null, 2));
   console.log(`\nSaved to ${OUTPUT_FILE}`);
 }
 

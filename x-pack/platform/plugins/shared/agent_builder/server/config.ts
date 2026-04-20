@@ -41,6 +41,7 @@ export const configSchema = schema.object({
           enabled: schema.boolean({ defaultValue: false }),
           threshold: schema.number({ defaultValue: 0.5, min: 0, max: 1 }),
         }),
+        minRelevanceScore: schema.number({ defaultValue: 0, min: 0, max: 1 }),
       }),
       graphClosure: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
