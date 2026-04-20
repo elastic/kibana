@@ -36,7 +36,6 @@ export function Actions() {
       closePopover={closePopover}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EditMonitorContextItem key="edit-monitor" />,
           <RefreshContextItem key="refresh-monitor" />,

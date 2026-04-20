@@ -398,7 +398,7 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
                     panelPaddingSize="none"
                     anchorPosition="downLeft"
                   >
-                    <EuiContextMenuPanel size="s" items={items} />
+                    <EuiContextMenuPanel items={items} />
                   </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>

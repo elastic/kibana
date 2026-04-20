@@ -150,7 +150,7 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
                       panelPaddingSize="none"
                       anchorPosition="downLeft"
                     >
-                      <EuiContextMenuPanel items={items} size="s" />
+                      <EuiContextMenuPanel items={items} />
                     </EuiPopover>
                   </EuiThemeProvider>
                 </EuiFlexItem>

@@ -129,7 +129,6 @@ const InContextMenuActions = (props: LayerActionsProps) => {
         }}
       >
         <EuiContextMenuPanel
-          size="s"
           items={props.actions.map((i) => (
             <EuiContextMenuItem
               key={i.displayName}

@@ -142,7 +142,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
             <EuiContextMenuPanel>
               <EuiContextMenuItem
                 icon="link"
-                size="s"
                 data-telemetry-id={'entSearch-analytics-overview-toolbar-integrate-tracker-link'}
                 onClick={() =>
                   navigateToUrl(
@@ -160,7 +159,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               <EuiContextMenuItem
                 icon="database"
-                size="s"
                 href={manageDatastreamUrl}
                 data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-datastream-link'}
               >
@@ -174,7 +172,6 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
                 <EuiContextMenuItem
                   icon="chartArea"
                   href={discoverLink}
-                  size="s"
                   data-telemetry-id={'entSearch-analytics-overview-toolbar-manage-discover-link'}
                 >
                   <FormattedMessage

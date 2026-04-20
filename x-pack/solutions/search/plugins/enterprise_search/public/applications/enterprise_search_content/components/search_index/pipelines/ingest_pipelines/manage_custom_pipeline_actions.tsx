@@ -56,7 +56,6 @@ export const ManageCustomPipelineActions: React.FC<ManageCustomPipelineProps> = 
       anchorPosition="downRight"
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem onClick={onRevertClick} icon="trash" css={revertContextMenuItemCSS}>
             {i18n.translate(

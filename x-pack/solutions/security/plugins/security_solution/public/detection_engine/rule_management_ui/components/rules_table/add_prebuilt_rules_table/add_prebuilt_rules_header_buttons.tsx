@@ -98,7 +98,7 @@ export const AddPrebuiltRulesHeaderButtons = () => {
               panelPaddingSize="s"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel size="s" items={overflowItems} />
+              <EuiContextMenuPanel items={overflowItems} />
             </EuiPopover>
           </EuiFlexItem>
         </>

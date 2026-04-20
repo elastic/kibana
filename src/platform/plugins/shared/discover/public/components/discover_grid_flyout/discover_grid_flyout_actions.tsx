@@ -209,7 +209,6 @@ function FlyoutActionsPopover({
       anchorPosition="downLeft"
     >
       <EuiContextMenuPanel
-        size="s"
         items={flyoutActions.map((action) => (
           <EuiContextMenuItem
             key={action.id}

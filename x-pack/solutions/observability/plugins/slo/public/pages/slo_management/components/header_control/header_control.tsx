@@ -55,7 +55,6 @@ export function HeaderControl() {
       closePopover={closePopover}
     >
       <EuiContextMenuPanel
-        size="m"
         items={[
           <EuiContextMenuItem
             key="healthScan"

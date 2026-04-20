@@ -176,7 +176,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -188,7 +187,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="full-screen"
             icon="fullScreen"
-            size="s"
             data-test-subj="agentBuilderFullScreenMenuItem"
             onClick={handleOpenFullScreen}
           >
@@ -216,7 +214,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -260,7 +257,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         anchorPosition="downCenter"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
         <EuiSpacer size="s" />
       </EuiPopover>
       <DeleteConversationModal

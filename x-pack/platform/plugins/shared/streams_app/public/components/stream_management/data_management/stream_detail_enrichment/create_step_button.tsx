@@ -146,7 +146,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

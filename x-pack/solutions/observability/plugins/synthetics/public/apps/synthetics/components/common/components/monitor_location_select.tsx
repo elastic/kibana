@@ -110,7 +110,6 @@ export const MonitorLocationSelect = ({
         >
           <EuiContextMenuPanel
             items={menuItems}
-            size="s"
             title={i18n.translate(
               'xpack.synthetics.monitorLocation.locationContextMenuTitleLabel',
               { defaultMessage: 'Go to location' }

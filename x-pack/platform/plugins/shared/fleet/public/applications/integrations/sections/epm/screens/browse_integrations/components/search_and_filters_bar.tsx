@@ -603,7 +603,7 @@ export const SearchAndFiltersBar: React.FC<SearchAndFiltersBarProps> = ({
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
                 >
-                  <EuiContextMenuPanel size="s" items={hiddenSubCategoriesItems} />
+                  <EuiContextMenuPanel items={hiddenSubCategoriesItems} />
                 </EuiPopover>
               </EuiFlexItem>
             )}

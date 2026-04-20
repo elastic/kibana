@@ -254,13 +254,11 @@ export function Assignments({
                 ownFocus
               >
                 <EuiContextMenuPanel
-                  size="s"
                   items={[
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-addAllAssignments"
                       key="item-1"
                       icon="plusCircle"
-                      size="s"
                       onClick={() => {
                         setShowOtherActions(false);
                         requestAnimationFrame(() => {
@@ -289,7 +287,6 @@ export function Assignments({
                     </EuiContextMenuItem>,
                     <EuiContextMenuItem
                       data-test-subj="lns-colorMapping-clearAllAssignments"
-                      size="s"
                       icon={<EuiIcon type="eraser" size="m" color="danger" />}
                       onClick={() => {
                         setShowOtherActions(false);

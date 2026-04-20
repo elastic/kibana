@@ -350,7 +350,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             }
             closePopover={closePopover}
           >
-            <EuiContextMenuPanel items={actions} size="s" />
+            <EuiContextMenuPanel items={actions} />
           </EuiPopover>
         );
       },

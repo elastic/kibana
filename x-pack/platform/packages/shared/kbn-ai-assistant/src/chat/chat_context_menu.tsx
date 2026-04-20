@@ -173,7 +173,7 @@ export function ChatContextMenu({
         anchorPosition="downCenter"
         panelPaddingSize="xs"
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {confirmDeleteElement}
     </>

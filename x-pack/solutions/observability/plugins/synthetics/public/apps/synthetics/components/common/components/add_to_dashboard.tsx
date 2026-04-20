@@ -154,7 +154,6 @@ export const AddToDashboard = ({
           closePopover={closePopover}
         >
           <EuiContextMenuPanel
-            size="s"
             items={[
               <EuiContextMenuItem
                 key="share"

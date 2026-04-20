@@ -54,7 +54,6 @@ const ContextMenuContent = ({ items, closePopover }: ContextMenuProps) => {
             <EuiContextMenuItem
               key={i}
               icon={item.icon}
-              size="s"
               href={item.href}
               onClick={item.onClick}
               data-test-subj={item['data-test-subj']}

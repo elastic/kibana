@@ -359,7 +359,6 @@ export const EntityHighlightsSettings: React.FC<EntityHighlightsSettingsProps> =
           width: 280px;
         `}
         initialPanelId={0}
-        size="m"
         panels={panels}
       />
       {isAnonymizationModalVisible && (

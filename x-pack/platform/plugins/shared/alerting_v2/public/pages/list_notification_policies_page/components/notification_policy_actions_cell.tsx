@@ -233,7 +233,7 @@ export const NotificationPolicyActionsCell = ({
           anchorPosition="downRight"
           panelPaddingSize="s"
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+          <EuiContextMenu initialPanelId={0} panels={panels} />
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -390,12 +390,10 @@ export const SpaceAssignedRolesTable = ({
                       }
                     >
                       <EuiContextMenu
-                        size="s"
                         initialPanelId={0}
                         panels={[
                           {
                             id: 0,
-                            size: 's',
                             width: 180,
                             items: [
                               {

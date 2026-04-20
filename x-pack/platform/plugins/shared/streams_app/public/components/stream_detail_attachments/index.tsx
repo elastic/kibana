@@ -317,7 +317,6 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                     anchorPosition="downLeft"
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           key="unlink"

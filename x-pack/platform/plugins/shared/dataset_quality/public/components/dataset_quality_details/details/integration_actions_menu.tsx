@@ -202,7 +202,7 @@ export function IntegrationActionsMenu({
       isOpen={isOpen}
       closePopover={handleCloseMenu}
     >
-      <EuiContextMenu size="s" panels={panelItems} initialPanelId={0} />
+      <EuiContextMenu panels={panelItems} initialPanelId={0} />
     </EuiPopover>
   );
 }

@@ -244,5 +244,5 @@ export function AttacksGroupTakeActionItems({
     [isRemoteDocument, runWorkflowPanels, workflowPanels, assignPanels, defaultPanel, tagsPanels]
   );
 
-  return <EuiContextMenu size={size} initialPanelId={defaultPanel.id} panels={panels} />;
+  return <EuiContextMenu initialPanelId={defaultPanel.id} panels={panels} />;
 }
