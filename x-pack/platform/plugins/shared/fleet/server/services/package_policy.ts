@@ -255,6 +255,15 @@ export async function getPackagePolicySavedObjectType() {
     : LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE;
 }
 
+/**
+ * Returns a kuery string that excludes package policies with latest_revision:false,
+ * optionally AND-ing with an additional kuery clause.
+ */
+export function buildCurrentRevisionFilter(savedObjectType: string, kuery?: string): string {
+  const base = `NOT ${savedObjectType}.attributes.latest_revision:false`;
+  return kuery ? `${base} AND (${kuery})` : base;
+}
+
 export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
   if (savedObjectType === LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE) {
     return normalizeKuery(
@@ -1020,9 +1029,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packagePolicySO = await soClient
       .find<PackagePolicySOAttributes>({
         type: savedObjectType,
-        filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
-          agentPolicyId
-        )} AND ${savedObjectType}.attributes.latest_revision:true`,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)}`
+        ),
         perPage: SO_SEARCH_LIMIT,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
@@ -1144,9 +1154,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     const packagePolicies = await soClient
@@ -1166,7 +1174,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
+        name: packagePolicy.attributes?.name,
         savedObjectType,
       });
     }
@@ -1205,9 +1213,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     const packagePolicies = await soClient
@@ -1227,7 +1233,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
+        name: packagePolicy.attributes?.name,
         savedObjectType,
       });
     }
@@ -2730,9 +2736,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     return createSoFindIterable<{}>({
@@ -2778,9 +2782,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     return createSoFindIterable<PackagePolicySOAttributes>({
