@@ -117,7 +117,7 @@ These are capabilities that interact with or are prerequisites for managed workf
 | **Sync Workflow Execution** | — | Some consumers (Security AB) need sync invocation from code. The engine supports async today. |
 | **Workflow-Defined Priority** | — | Should managed workflows have execution priority over user workflows? No stakeholder request yet — flagging for consideration. |
 | **Parallel Execution of Sub-Workflows** | — | O11y (miltonhultgren) needs parallel onboarding tasks across streams. Not supported today. |
-| **Scheduling** | — | Entity Analytics (#15382) needs periodic execution (every 10 min / hourly / daily). The epic does not address scheduling of managed workflows. |
+| **Workflow Versioning** | #15776 | First-class versioning for workflow definitions. Managed workflows currently use a SHA-256 hash for change detection (see [Lifecycle](#4-lifecycle-provisioning-updates-cleanup)); once versioning lands, managed workflows should adopt it. |
 
 ---
 
