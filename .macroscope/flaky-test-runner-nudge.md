@@ -93,6 +93,8 @@ Post one comment on the PR with a single `/flaky` command. Include tokens only f
 
 **Recommended before merge**: run the flaky test runner against this PR to catch flakiness early.
 
+<!-- optional: one-sentence rationale, see "Rationale line" below -->
+
 Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigger_flaky_test_runner) or post this comment on the PR:
 
 ```
@@ -101,6 +103,26 @@ Trigger a run with the [Flaky Test Runner UI](https://ci-stats.kibana.dev/trigge
 
 This check is experimental. Share your feedback in the #appex-qa channel.
 ````
+
+### Rationale line
+
+Include a one-sentence rationale immediately below the recommendation line whenever the mapping from changed files → config(s) is not self-evident. Keep it to a single sentence; do not list every file.
+
+**Include a rationale when any of these hold:**
+
+- More than one config is listed.
+- The changed file is a shared fixture and the comment picks a canonical leaf.
+- The non-determinism signal is subtle (e.g., a new timing-sensitive fixture shared across many specs, an `unskip`, a parallelism/config change).
+- The changed file lives outside a `test/**` path (prod code that a specific config exercises).
+
+**Skip the rationale when** a single changed spec file maps to a single obvious config under the same directory — the path already tells the story.
+
+Rationale examples (pick the shape that fits):
+
+- `Covers the new Scout spec at <path> added in this PR.`
+- `<path> is a shared fixture loaded by <base config>; this leaf is the canonical vanilla config exercising the same runtime path.`
+- `<path> is referenced by both configs below via loadTestFile.`
+- `This PR unskips a previously-flaky test in <config>, so re-running it 30× validates stability.`
 
 Examples:
 
