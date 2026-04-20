@@ -222,7 +222,6 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                                   options={headerTypeOptions}
                                   valueOfSelected={headerTypeValue}
                                   onChange={(val) => typeField.setValue(val)}
-                                  hasDividers
                                   fullWidth
                                   data-test-subj="webhookHeaderTypeSelect"
                                 />

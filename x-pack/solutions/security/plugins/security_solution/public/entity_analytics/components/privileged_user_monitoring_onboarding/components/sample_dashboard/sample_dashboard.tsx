@@ -67,7 +67,6 @@ const PrivilegedUserMonitoringSampleDashboardComponent = () => {
           prepend={stackByLabel}
           aria-label={stackByLabel}
           valueOfSelected={selectedStackByOption}
-          hasDividers={true}
           itemLayoutAlign="top"
         />
       </HeaderSection>

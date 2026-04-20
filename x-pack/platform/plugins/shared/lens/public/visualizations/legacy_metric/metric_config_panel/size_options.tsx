@@ -101,7 +101,6 @@ export const SizeOptions: React.FC<TitlePositionProps> = ({ state, setState }) =
         setState({ ...state, size: value });
       }}
       itemLayoutAlign="top"
-      hasDividers
       fullWidth
       aria-label={i18n.translate('xpack.lens.legacyMetric.sizeOptions.titleSizeAriaLabel', {
         defaultMessage: 'Title size',

@@ -224,7 +224,6 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
                   valueOfSelected={currentSnapshot.snapshot_id}
                   onChange={onSnapshotChange}
                   itemLayoutAlign="top"
-                  hasDividers
                 />
               </EuiFormRow>
               <EuiHorizontalRule margin="m" />

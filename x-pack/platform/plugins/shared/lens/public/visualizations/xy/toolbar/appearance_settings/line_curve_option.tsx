@@ -49,7 +49,6 @@ export const LineCurveOption: React.FC<LineCurveOptionProps> = ({
         valueOfSelected={value}
         onChange={onChange}
         itemLayoutAlign="top"
-        hasDividers
       />
     </EuiFormRow>
   ) : null;

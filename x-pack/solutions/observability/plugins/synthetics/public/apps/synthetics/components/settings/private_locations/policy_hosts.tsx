@@ -137,7 +137,6 @@ export const PolicyHostsField = ({
               valueOfSelected={field.value}
               itemLayoutAlign="top"
               popoverProps={{ repositionOnScroll: true }}
-              hasDividers
               isInvalid={showFieldInvalid}
               options={policyHostsOptions ?? []}
               {...field}

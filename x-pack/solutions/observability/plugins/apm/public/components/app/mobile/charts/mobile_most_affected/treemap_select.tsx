@@ -96,7 +96,6 @@ export function TreemapSelect({
             valueOfSelected={selectedTreemap}
             onChange={onChange}
             itemLayoutAlign="top"
-            hasDividers
             aria-label={i18n.translate(
               'xpack.apm.mobile.errorOverview.treemap.dropdown.ariaLabel',
               {

@@ -202,7 +202,6 @@ export const EndpointRunscriptScriptSelector = memo<EndpointRunscriptScriptSelec
         data-test-subj={getTestId()}
         valueOfSelected={selectedScript}
         itemLayoutAlign="top"
-        hasDividers
         fullWidth
         isLoading={isFetching}
         placeholder={displayError ? displayError : SELECT_INPUT_PLACEHOLDER}
