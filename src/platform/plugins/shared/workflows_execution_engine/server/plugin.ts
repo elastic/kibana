@@ -19,6 +19,7 @@ import type {
 } from '@kbn/core/server';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
+  BulkScheduleWorkflowResult,
   ConcurrencySettings,
   EsWorkflowExecution,
   WorkflowExecutionEngineModel,
@@ -49,6 +50,7 @@ import { initializeLogsRepositoryDataStream } from './repositories/logs_reposito
 import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import type {
+  BulkScheduleWorkflow,
   CancelAllActiveWorkflowExecutions,
   CancelWorkflowExecution,
   ExecuteWorkflow,
@@ -630,28 +632,16 @@ export class WorkflowsExecutionEnginePlugin
       }
     };
 
-    // Helper function to create and persist a workflow execution
-    const createAndPersistWorkflowExecution = async (
+    // Builds an execution document without persisting it. Shared by the
+    // single-item persist helper and the bulk scheduling path.
+    const buildWorkflowExecutionDocument = (
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, unknown>,
       defaultTriggeredBy: string,
-      request: KibanaRequest,
-      options: { refresh: boolean | 'wait_for' } = { refresh: false }
-    ): Promise<{
-      workflowExecution: Partial<EsWorkflowExecution>;
-      repository: WorkflowExecutionRepository;
-    }> => {
-      await this.initialize(coreStart);
-
-      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
-
-      const workflowCreatedAt = new Date();
+      authenticatedUser: string,
+      now: Date
+    ): Partial<EsWorkflowExecution> => {
       const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-      const executedBy = await getAuthenticatedUser(
-        request,
-        coreStart.security,
-        coreStart.elasticsearch.client
-      );
       const spaceId = (context.spaceId as string | undefined) || 'default';
       const metadata = context.metadata as Record<string, unknown> | undefined;
       const dispatchEventId =
@@ -665,8 +655,8 @@ export class WorkflowsExecutionEnginePlugin
         yaml: workflow.yaml,
         context,
         status: ExecutionStatus.PENDING,
-        createdAt: workflowCreatedAt.toISOString(),
-        executedBy,
+        createdAt: now.toISOString(),
+        executedBy: authenticatedUser,
         triggeredBy,
         ...(metadata ? { metadata } : {}),
         ...(dispatchEventId ? { dispatchEventId } : {}),
@@ -682,16 +672,62 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
       }
 
+      return workflowExecution;
+    };
+
+    const createAndPersistWorkflowExecution = async (
+      workflow: WorkflowExecutionEngineModel,
+      context: Record<string, unknown>,
+      defaultTriggeredBy: string,
+      request: KibanaRequest,
+      options: { refresh: boolean | 'wait_for' } = { refresh: false }
+    ): Promise<{
+      workflowExecution: Partial<EsWorkflowExecution>;
+      repository: WorkflowExecutionRepository;
+    }> => {
+      await this.initialize(coreStart);
+
+      await ensureWorkflowEnabled(workflow, (context.spaceId as string | undefined) || 'default');
+
+      const authenticatedUser = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+
+      const workflowExecution = buildWorkflowExecutionDocument(
+        workflow,
+        context,
+        defaultTriggeredBy,
+        authenticatedUser,
+        new Date()
+      );
+
       // Only pay the refresh cost when the concurrency check will actually run.
       // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
       // When a check will run, the caller dictates the strategy: manual/UI paths use
       // refresh:true (immediate, no latency for the user); async paths use refresh:'wait_for'
       // (piggybacks on the scheduled cycle, lower cluster cost).
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
-        refresh: concurrencyGroupKey ? options.refresh : false,
+        refresh: workflowExecution.concurrencyGroupKey ? options.refresh : false,
       });
 
       return { workflowExecution, repository: workflowExecutionRepository };
+    };
+
+    const toItemError = (err: unknown): BulkScheduleWorkflowResult[number] => {
+      const message = err instanceof Error ? err.message : String(err);
+      const code =
+        err && typeof err === 'object' && 'code' in err
+          ? (err as { code?: string }).code
+          : undefined;
+      return {
+        status: 'error',
+        error: {
+          message,
+          ...(code !== undefined ? { code } : {}),
+        },
+      };
     };
 
     // Helper function to create a task instance
@@ -852,6 +888,133 @@ export class WorkflowsExecutionEnginePlugin
       return {
         workflowExecutionId: workflowExecution.id as string,
       };
+    };
+
+    const bulkScheduleWorkflow: BulkScheduleWorkflow = async (items, request) => {
+      if (items.length === 0) {
+        return [];
+      }
+
+      await checkLicense(plugins.licensing);
+      await this.initialize(coreStart);
+
+      const authenticatedUser = await getAuthenticatedUser(
+        request,
+        coreStart.security,
+        coreStart.elasticsearch.client
+      );
+      const now = new Date();
+
+      const results: BulkScheduleWorkflowResult = new Array(items.length);
+
+      const enabledCache = new Map<string, Promise<void>>();
+      const checkEnabled = (workflow: WorkflowExecutionEngineModel, spaceId: string) => {
+        const key = `${spaceId}:${workflow.id}`;
+        let promise = enabledCache.get(key);
+        if (!promise) {
+          promise = ensureWorkflowEnabled(workflow, spaceId);
+          enabledCache.set(key, promise);
+        }
+        return promise;
+      };
+
+      interface PreparedItem {
+        idx: number;
+        workflowExecution: Partial<EsWorkflowExecution>;
+      }
+      const prepared: PreparedItem[] = [];
+
+      await Promise.all(
+        items.map(async (item, idx) => {
+          try {
+            const spaceId = (item.context.spaceId as string | undefined) || 'default';
+            await checkEnabled(item.workflow, spaceId);
+            const workflowExecution = buildWorkflowExecutionDocument(
+              item.workflow,
+              item.context,
+              'alert',
+              authenticatedUser,
+              now
+            );
+            prepared.push({ idx, workflowExecution });
+          } catch (err) {
+            results[idx] = toItemError(err);
+          }
+        })
+      );
+
+      if (prepared.length === 0) {
+        return results;
+      }
+
+      // Bulk write all prepared executions in a single _bulk call.
+      // `refresh: 'wait_for'` matches the single-item scheduleWorkflow path
+      // so downstream concurrency checks see the freshly-written docs.
+      const bulkWriteResults = await workflowExecutionRepository.bulkCreateWorkflowExecutions(
+        prepared.map((p) => p.workflowExecution),
+        { refresh: 'wait_for' }
+      );
+
+      // Phase 4: Map per-doc bulk errors back to results; keep succeeded.
+      const succeeded: PreparedItem[] = [];
+      for (let i = 0; i < prepared.length; i++) {
+        const p = prepared[i];
+        const writeResult = bulkWriteResults[i];
+        if ('error' in writeResult) {
+          results[p.idx] = {
+            status: 'error',
+            error: { message: writeResult.error },
+          };
+        } else {
+          succeeded.push(p);
+        }
+      }
+
+      if (succeeded.length === 0) {
+        return results;
+      }
+
+      // Phase 5: Concurrency check. Dropped executions still return success
+      // with their id (matching the single-item scheduleWorkflow contract).
+      const concurrencyResults = await Promise.all(
+        succeeded.map((p) => this.checkConcurrencyIfNeeded(p.workflowExecution))
+      );
+
+      const toSchedule: PreparedItem[] = [];
+      for (let i = 0; i < succeeded.length; i++) {
+        const p = succeeded[i];
+        if (!concurrencyResults[i]) {
+          results[p.idx] = {
+            status: 'scheduled',
+            workflowExecutionId: p.workflowExecution.id as string,
+          };
+        } else {
+          toSchedule.push(p);
+        }
+      }
+
+      if (toSchedule.length === 0) {
+        return results;
+      }
+
+      // Phase 6: Bulk-schedule tasks in a single call.
+      const taskInstances = toSchedule.map((p) =>
+        createTaskInstance(
+          p.workflowExecution,
+          generateExecutionTaskScope(p.workflowExecution as EsWorkflowExecution)
+        )
+      );
+
+      await plugins.taskManager.bulkSchedule(taskInstances, { request });
+      for (const p of toSchedule) {
+        results[p.idx] = {
+          status: 'scheduled',
+          workflowExecutionId: p.workflowExecution.id as string,
+        };
+      }
+      this.logger.debug(`Bulk-scheduled ${toSchedule.length} workflow task(s) with user context`);
+
+      return results;
     };
 
     const executeWorkflowStep: ExecuteWorkflowStep = async (
@@ -1061,6 +1224,7 @@ export class WorkflowsExecutionEnginePlugin
       executeWorkflow,
       executeWorkflowStep,
       scheduleWorkflow,
+      bulkScheduleWorkflow,
       cancelWorkflowExecution,
       cancelAllActiveWorkflowExecutions,
       resumeWorkflowExecution,

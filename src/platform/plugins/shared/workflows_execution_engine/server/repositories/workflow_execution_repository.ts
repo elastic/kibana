@@ -84,6 +84,49 @@ export class WorkflowExecutionRepository {
   }
 
   /**
+   * Bulk creates multiple workflow execution documents in a single Elasticsearch request.
+   * Per-doc errors are reported per item in input order instead of throwing.
+   *
+   * @param executions - Array of partial workflow execution objects. Each must include the `id` property.
+   * @param options.refresh - Same semantics as `createWorkflowExecution`.
+   * @throws {Error} If any execution ID is missing.
+   * @returns Per-item results in the same order as `executions`.
+   */
+  public async bulkCreateWorkflowExecutions(
+    executions: Array<Partial<EsWorkflowExecution>>,
+    options: { refresh?: boolean | 'wait_for' } = {}
+  ): Promise<Array<{ id: string } | { id: string; error: string }>> {
+    if (executions.length === 0) {
+      return [];
+    }
+
+    executions.forEach((execution) => {
+      if (!execution.id) {
+        throw new Error('Workflow execution ID is required for bulk create');
+      }
+    });
+
+    const bulkResponse = await this.esClient.bulk({
+      refresh: options.refresh ?? false,
+      index: this.indexName,
+      operations: executions.flatMap((execution) => [{ index: { _id: execution.id } }, execution]),
+    });
+
+    return bulkResponse.items.map((item, idx) => {
+      const op = item.index ?? item.create;
+      const id = executions[idx].id as string;
+      if (op?.error) {
+        const reason =
+          typeof op.error === 'object' && 'reason' in op.error
+            ? op.error.reason ?? JSON.stringify(op.error)
+            : JSON.stringify(op.error);
+        return { id, error: reason };
+      }
+      return { id };
+    });
+  }
+
+  /**
    * Partially updates an existing workflow execution in Elasticsearch.
    *
    * This method requires the `id` property to be present in the `workflowExecution` object.

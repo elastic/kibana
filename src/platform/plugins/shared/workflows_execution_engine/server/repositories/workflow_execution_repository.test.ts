@@ -54,6 +54,91 @@ describe('WorkflowExecutionRepository', () => {
         'Workflow execution ID is required for creation'
       );
     });
+  });
+
+  describe('bulkCreateWorkflowExecutions', () => {
+    it('returns an empty array and skips ES when no executions are provided', async () => {
+      const result = await repository.bulkCreateWorkflowExecutions([]);
+      expect(result).toEqual([]);
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('issues a single _bulk index call with provided docs and refresh option', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'e1', status: 201 } }, { index: { _id: 'e2', status: 201 } }],
+      });
+
+      const executions = [
+        { id: 'e1', workflowId: 'wf-a', spaceId: 'default' },
+        { id: 'e2', workflowId: 'wf-b', spaceId: 'default' },
+      ];
+
+      const result = await repository.bulkCreateWorkflowExecutions(executions, {
+        refresh: 'wait_for',
+      });
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        refresh: 'wait_for',
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        operations: [
+          { index: { _id: 'e1' } },
+          executions[0],
+          { index: { _id: 'e2' } },
+          executions[1],
+        ],
+      });
+
+      expect(result).toEqual([{ id: 'e1' }, { id: 'e2' }]);
+    });
+
+    it('defaults refresh to false when not provided', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ index: { _id: 'e1', status: 201 } }],
+      });
+
+      await repository.bulkCreateWorkflowExecutions([{ id: 'e1' }]);
+
+      expect(esClient.bulk).toHaveBeenCalledWith(expect.objectContaining({ refresh: false }));
+    });
+
+    it('maps per-doc bulk errors back to per-item results in input order', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { index: { _id: 'e1', status: 201 } },
+          {
+            index: {
+              _id: 'e2',
+              status: 409,
+              error: { type: 'version_conflict', reason: 'doc already exists' },
+            },
+          },
+          { index: { _id: 'e3', status: 201 } },
+        ],
+      });
+
+      const result = await repository.bulkCreateWorkflowExecutions([
+        { id: 'e1' },
+        { id: 'e2' },
+        { id: 'e3' },
+      ]);
+
+      expect(result).toEqual([
+        { id: 'e1' },
+        { id: 'e2', error: 'doc already exists' },
+        { id: 'e3' },
+      ]);
+    });
+
+    it('throws when any execution is missing an id and does not call ES', async () => {
+      await expect(repository.bulkCreateWorkflowExecutions([{ id: 'e1' }, {}])).rejects.toThrow(
+        'Workflow execution ID is required for bulk create'
+      );
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
 
     it('should respect space isolation when getting workflow execution by ID', async () => {
       const workflowExecution = { id: '1', workflowId: 'test-workflow', spaceId: 'space1' };

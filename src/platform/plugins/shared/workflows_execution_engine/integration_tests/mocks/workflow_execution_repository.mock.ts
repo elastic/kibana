@@ -34,6 +34,27 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return Promise.resolve();
   }
 
+  public async bulkCreateWorkflowExecutions(
+    executions: Array<Partial<EsWorkflowExecution>>,
+    _options: { refresh?: boolean | 'wait_for' } = {}
+  ): Promise<Array<{ id: string } | { id: string; error: string }>> {
+    if (executions.length === 0) {
+      return [];
+    }
+
+    executions.forEach((execution) => {
+      if (!execution.id) {
+        throw new Error('Workflow execution ID is required for bulk create');
+      }
+    });
+
+    return executions.map((execution) => {
+      const id = execution.id as string;
+      this.workflowExecutions.set(id, execution as EsWorkflowExecution);
+      return { id };
+    });
+  }
+
   public updateWorkflowExecution(workflowExecution: Partial<EsWorkflowExecution>): Promise<void> {
     if (!workflowExecution.id) {
       throw new Error('Workflow execution ID is required for update');
