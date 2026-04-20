@@ -53,7 +53,7 @@ export async function withTempSuperuser<T>(
     log.debug(`withTempSuperuser: removed stale temp user "${TEMP_USER}" from previous run`);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    if (!msg.includes('not_found') && !msg.includes('404')) {
+    if (err.meta?.statusCode === 404) {
       log.debug(`withTempSuperuser: pre-flight deleteUser failed: ${msg}`);
     }
   }

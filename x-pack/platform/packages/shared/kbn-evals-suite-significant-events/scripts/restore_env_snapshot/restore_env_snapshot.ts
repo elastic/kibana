@@ -203,7 +203,7 @@ export const restoreEnvSnapshot = async ({
       enabledStreamsSet.has(index) || enabledStreams.some((s) => index.startsWith(`${s}.`));
 
     const dataIndexPatterns = [logsIndex, ...alertIndices];
-    let replayResult: LoadResult | undefined;
+    let replayResult: LoadResult;
 
     try {
       log.info('');
