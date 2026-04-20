@@ -182,7 +182,7 @@ export class CircuitBreaker {
       this.logger.warn(
         `[CircuitBreaker] Circuit breaker rejected execution for agent: ${agentName}`,
         {
-          agent: agentName,
+          agent: { name: agentName },
           state: circuit.state,
         }
       );
@@ -200,7 +200,7 @@ export class CircuitBreaker {
       return result;
     } catch (error: any) {
       this.logger.debug(`[CircuitBreaker] Agent execution failed: ${agentName}`, {
-        agent: agentName,
+        agent: { name: agentName },
         error: error?.message,
       });
       this.recordFailure(agentName, error);
@@ -450,7 +450,7 @@ export class CircuitBreaker {
     this.executionSummary.circuitBreakerTrips++;
 
     this.logger.warn(`[CircuitBreaker] Circuit breaker OPEN for agent: ${circuit.agentId}`, {
-      agent: circuit.agentId,
+      agent: { name: circuit.agentId },
       failures: circuit.consecutiveFailures,
       failureThreshold: this.options.failureThreshold,
       recentErrors: circuit.failureHistory.slice(-3).map((f) => f.error),
@@ -467,7 +467,7 @@ export class CircuitBreaker {
     circuit.openedAt = undefined;
 
     this.logger.info(`[CircuitBreaker] Circuit breaker CLOSED for agent: ${circuit.agentId}`, {
-      agent: circuit.agentId,
+      agent: { name: circuit.agentId },
     });
   }
 

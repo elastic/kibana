@@ -8,6 +8,7 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import {
   API_VERSIONS,
@@ -17,6 +18,7 @@ import {
   EVALS_DATASET_EXAMPLE_SPLITS_URL,
   EVALS_DATASET_IMPORT_URL,
 } from '@kbn/evals-common';
+import type { RouteDependencies } from '../register_routes';
 import { registerVersionDatasetRoute } from './version_dataset';
 import { registerGetDatasetVersionsRoute } from './get_dataset_versions';
 import { registerGetDatasetStatsRoute } from './get_dataset_stats';
@@ -28,16 +30,27 @@ const buildRouteSetup = ({
   method,
   path,
 }: {
-  registerRoute: (deps: {
-    router: ReturnType<typeof httpServiceMock.createRouter>;
-    logger: any;
-  }) => void;
+  registerRoute: (deps: RouteDependencies) => void;
   method: 'get' | 'post' | 'put' | 'delete';
   path: string;
 }) => {
   const router = httpServiceMock.createRouter();
   const logger = loggingSystemMock.createLogger();
-  registerRoute({ router, logger });
+  const getEncryptedSavedObjectsStart = jest.fn().mockResolvedValue({
+    getClient: jest.fn(),
+    isEncryptionError: jest.fn(),
+  });
+  const getInternalRemoteConfigsSoClient = jest
+    .fn()
+    .mockResolvedValue(savedObjectsClientMock.create());
+  registerRoute({
+    router: router as unknown as RouteDependencies['router'],
+    logger,
+    canEncrypt: true,
+    getEncryptedSavedObjectsStart:
+      getEncryptedSavedObjectsStart as unknown as RouteDependencies['getEncryptedSavedObjectsStart'],
+    getInternalRemoteConfigsSoClient,
+  });
 
   const versionedRouter = router.versioned as MockedVersionedRouter;
   const { handler } = versionedRouter.getRoute(method, path).versions[API_VERSIONS.internal.v1];

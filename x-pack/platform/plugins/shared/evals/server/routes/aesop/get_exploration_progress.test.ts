@@ -16,13 +16,10 @@ describe('GET /internal/aesop/exploration/{executionId}/progress', () => {
   });
 
   it('registers the route with correct path and version', () => {
-    let versionConfig: any;
     const mockRouter = {
       versioned: {
         get: jest.fn().mockReturnValue({
-          addVersion: jest.fn((_config: any) => {
-            versionConfig = _config;
-          }),
+          addVersion: jest.fn(),
         }),
       },
     } as any;

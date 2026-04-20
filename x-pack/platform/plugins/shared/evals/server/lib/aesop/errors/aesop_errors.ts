@@ -280,19 +280,6 @@ export class ConnectorNotConfiguredError extends AESOPError {
 // HELPER FUNCTIONS
 // ═══════════════════════════════════════════════════════════════
 
-/**
- * Default patterns for retryable errors (network/transient errors)
- */
-const DEFAULT_RETRYABLE_PATTERNS = [
-  'ECONNREFUSED',
-  'ETIMEDOUT',
-  'ENOTFOUND',
-  'socket hang up',
-  '429',
-  'rate limit',
-  'Rate limit',
-];
-
 interface WithRetryOptions {
   /** Maximum number of retry attempts (not counting the initial attempt) */
   maxRetries: number;

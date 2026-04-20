@@ -112,13 +112,13 @@ export const ExplorationDashboard = () => {
   const triggerExploration = useMutation({
     mutationFn: async () => {
       return await api.http.post('/internal/aesop/exploration/run', {
-        body: {
+        body: JSON.stringify({
           agent_role: agentRole,
           exploration_depth: explorationDepth,
           min_pattern_frequency: minPatternFrequency,
           mode: explorationMode,
           scoped_indices: scopedIndices.map((i) => i.label),
-        },
+        }),
         version: '1',
       });
     },
