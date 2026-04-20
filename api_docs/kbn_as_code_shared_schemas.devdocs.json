@@ -92,7 +92,7 @@
           "{ readonly language: \"kql\" | \"lucene\"; readonly expression: string; }"
         ],
         "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/query/schema.ts",
-        "lineNumber": 30,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
