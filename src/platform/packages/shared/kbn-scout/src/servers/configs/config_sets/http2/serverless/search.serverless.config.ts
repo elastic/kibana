@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { readConfigFile, loadRawServerConfig } from './read_config_file';
+import type { ScoutServerConfig } from '../../../../../types';
+import { servers as defaultServers } from '../../default/serverless/search.serverless.config';
+
+export const servers: ScoutServerConfig = {
+  ...defaultServers,
+  http2: true,
+};
