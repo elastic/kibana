@@ -900,9 +900,8 @@ export class DashboardApp {
   }
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
-  async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Custom visualization' | 'Maps' | 'Links') {
-    await this.addTopNavButton.click();
-    await expect(this.panelSelectionFlyout).toBeVisible();
+  async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Vega' | 'Maps' | 'Links') {
+    await this.openAddPanelFlyout();
     await this.page.testSubj.click(`create-action-${panelType}`);
     await expect(this.panelSelectionFlyout).toBeHidden();
   }
