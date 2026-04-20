@@ -76,6 +76,7 @@ const createMockEsClient = () => {
         template: { mappings: {} },
       }),
       putMapping: jest.fn().mockResolvedValue({}),
+      putSettings: jest.fn().mockResolvedValue({}),
     },
   } as unknown as jest.Mocked<ElasticsearchClient>;
   return client;
@@ -159,6 +160,24 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({ terminate_after: 1 }),
       transportOptions
+    );
+  });
+
+  it('includes settings in the index template', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({
+            auto_expand_replicas: '0-1',
+            number_of_shards: 1,
+          }),
+        }),
+      })
     );
   });
 
