@@ -212,100 +212,147 @@ describe('SecurityNavControl', () => {
           tabindex="-1"
         >
           <div
-            class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+            class="euiContextMenuPanelTitle euiContextMenuPanel__title emotion-euiContextMenuPanelTitle"
             data-test-subj="contextMenuPanelTitle"
           >
-            <span
-              class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+            <h2
+              class="euiContextMenuPanelTitle__text css-8u7lys-text"
+              id="euiContextMenuPanelTitle_generated-id"
             >
               full name
-            </span>
+            </h2>
           </div>
-          <div>
+          <div
+            aria-labelledby="euiContextMenuPanelTitle_generated-id"
+            class="euiContextMenuPanel__list"
+          >
             <div
               class="euiContextMenuPanel emotion-euiContextMenuPanel"
               tabindex="-1"
             >
-              <div>
+              <div
+                aria-labelledby="euiContextMenuPanelTitle_generated-id"
+                class="euiContextMenuPanel__list"
+              >
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="profileLink"
                   href="edit-profile-link"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="user"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    Edit profile
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="user"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      Edit profile
+                    </span>
                   </span>
                 </a>
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="userMenuLink__link1"
                   href="path-to-link-1"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="empty"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    link1
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      link1
+                    </span>
                   </span>
                 </a>
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="userMenuLink__link2"
                   href="path-to-link-2"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="empty"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    link2
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      link2
+                    </span>
                   </span>
                 </a>
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="userMenuLink__link3"
                   href="path-to-link-3"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="empty"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    link3
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      link3
+                    </span>
                   </span>
                 </a>
                 <div>
                   Dummy Component
                 </div>
                 <div
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="logoutLink"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="logOut"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    Log out
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="logOut"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      Log out
+                    </span>
                   </span>
                 </div>
               </div>
@@ -350,81 +397,120 @@ describe('SecurityNavControl', () => {
           tabindex="-1"
         >
           <div
-            class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+            class="euiContextMenuPanelTitle euiContextMenuPanel__title emotion-euiContextMenuPanelTitle"
             data-test-subj="contextMenuPanelTitle"
           >
-            <span
-              class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+            <h2
+              class="euiContextMenuPanelTitle__text css-8u7lys-text"
+              id="euiContextMenuPanelTitle_generated-id"
             >
               full name
-            </span>
+            </h2>
           </div>
-          <div>
+          <div
+            aria-labelledby="euiContextMenuPanelTitle_generated-id"
+            class="euiContextMenuPanel__list"
+          >
             <div
               class="euiContextMenuPanel emotion-euiContextMenuPanel"
               tabindex="-1"
             >
-              <div>
+              <div
+                aria-labelledby="euiContextMenuPanelTitle_generated-id"
+                class="euiContextMenuPanel__list"
+              >
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="userMenuLink__link1"
                   href="path-to-link-1"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="empty"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    link1
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      link1
+                    </span>
                   </span>
                 </a>
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="userMenuLink__link2"
                   href="path-to-link-2"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="empty"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    link2
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      link2
+                    </span>
                   </span>
                 </a>
                 <a
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="userMenuLink__link3"
                   href="path-to-link-3"
                   rel="noreferrer"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="empty"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    link3
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="empty"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      link3
+                    </span>
                   </span>
                 </a>
                 <div
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="logoutLink"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="logOut"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    Log out
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="logOut"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      Log out
+                    </span>
                   </span>
                 </div>
               </div>
@@ -466,33 +552,48 @@ describe('SecurityNavControl', () => {
           tabindex="-1"
         >
           <div
-            class="euiContextMenuItem euiContextMenuPanel__title emotion-euiContextMenuItem-m-center-euiContextMenuPanel__title"
+            class="euiContextMenuPanelTitle euiContextMenuPanel__title emotion-euiContextMenuPanelTitle"
             data-test-subj="contextMenuPanelTitle"
           >
-            <span
-              class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+            <h2
+              class="euiContextMenuPanelTitle__text css-8u7lys-text"
+              id="euiContextMenuPanelTitle_generated-id"
             >
               full name
-            </span>
+            </h2>
           </div>
-          <div>
+          <div
+            aria-labelledby="euiContextMenuPanelTitle_generated-id"
+            class="euiContextMenuPanel__list"
+          >
             <div
               class="euiContextMenuPanel emotion-euiContextMenuPanel"
               tabindex="-1"
             >
-              <div>
+              <div
+                aria-labelledby="euiContextMenuPanelTitle_generated-id"
+                class="euiContextMenuPanel__list"
+              >
                 <div
-                  class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
+                  class="euiListItemLayout euiContextMenuItem emotion-euiListItemLayout-isInteractive-euiContextMenuItem-center"
                   data-test-subj="logoutLink"
                 >
                   <span
-                    class="emotion-euiContextMenu__icon"
-                    data-euiicon-type="logOut"
-                  />
-                  <span
-                    class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
+                    class="euiListItemLayout__content emotion-euiListItemLayout__content"
                   >
-                    Log in
+                    <span
+                      class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
+                    >
+                      <span
+                        class="emotion-euiContextMenu__icon"
+                        data-euiicon-type="logOut"
+                      />
+                    </span>
+                    <span
+                      class="euiListItemLayout__text euiContextMenuItem__text emotion-euiListItemLayout__text-wrap-euiContextMenuItem__text"
+                    >
+                      Log in
+                    </span>
                   </span>
                 </div>
               </div>

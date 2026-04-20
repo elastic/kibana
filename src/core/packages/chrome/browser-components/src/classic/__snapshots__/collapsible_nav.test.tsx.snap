@@ -728,7 +728,7 @@ Array [
           class="euiCollapsibleNavGroup__children emotion-euiCollapsibleNavGroup__children"
         >
           <ul
-            class="euiListGroup emotion-euiListGroup-flush-maxWidthDefault"
+            class="euiListGroup emotion-euiListGroup-maxWidthDefault"
           >
             <li
               class="euiListItemLayout__wrapper emotion-euiListItemLayout__wrapper-isInteractive"
