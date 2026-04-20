@@ -28,6 +28,7 @@ export function registerReadRoute(
     path: `${basePath}/{id}`,
     summary: `Get a dashboard`,
     ...routeConfig,
+    description: 'Returns the complete state of a dashboard by ID.',
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -45,7 +46,7 @@ export function registerReadRoute(
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the dashboard.',
+                description: 'The dashboard ID, as returned by the create or search endpoints.',
               },
             }),
           }),
