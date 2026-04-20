@@ -110,7 +110,7 @@ export type SavedQueryDescriptionOrUndefined = z.infer<typeof SavedQueryDescript
 export const SavedQueryDescriptionOrUndefined = SavedQueryDescription.nullable();
 
 /**
- * The ID of the pack you want to run, retrieve, update, or delete.
+ * The ID of the pack.
  */
 export type PackId = z.infer<typeof PackId>;
 export const PackId = z.string();

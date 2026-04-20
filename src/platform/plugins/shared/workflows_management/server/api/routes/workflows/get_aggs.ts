@@ -16,6 +16,13 @@ import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 const MAX_AGG_FIELDS = 25;
+const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
+
+const fieldSchema = schema.string({
+  meta: { description: 'Field name to aggregate.' },
+  validate: (field) =>
+    !FIELDS_DENY_LIST.has(field) ? undefined : 'Field is not allowed for aggregation.',
+});
 
 export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -40,12 +47,15 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
         validate: {
           request: {
             query: schema.object({
-              fields: schema.arrayOf(
-                schema.string({ meta: { description: 'Field name to aggregate.' } }),
-                {
-                  maxSize: MAX_AGG_FIELDS,
-                  meta: { description: 'Fields to aggregate on.' },
-                }
+              fields: schema.oneOf(
+                [
+                  fieldSchema,
+                  schema.arrayOf(fieldSchema, {
+                    maxSize: MAX_AGG_FIELDS,
+                    meta: { description: 'Fields to aggregate on.' },
+                  }),
+                ],
+                { meta: { description: 'Field or fields to aggregate on.' } }
               ),
             }),
           },
@@ -53,7 +63,8 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
       },
       withLicenseCheck(async (context, request, response) => {
         try {
-          const { fields } = request.query;
+          const { fields: rawFields } = request.query;
+          const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
           const spaceId = spaces.getSpaceId(request);
           const aggs = await api.getWorkflowAggs(fields, spaceId);
           return response.ok({ body: aggs || {} });

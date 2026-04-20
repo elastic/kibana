@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { AnalyticsServiceStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 
 import type { LeadGenerationMode } from '../../../../common/entity_analytics/lead_generation/constants';
 import { LEAD_GENERATION_EXECUTION_EVENT } from '../../telemetry/event_based/events';
@@ -28,6 +29,7 @@ export interface RunPipelineParams {
   readonly executionId?: string;
   readonly sourceType: LeadGenerationMode;
   readonly analytics?: AnalyticsServiceStart;
+  readonly chatModel: InferenceChatModel;
 }
 
 export interface RunPipelineResult {
@@ -47,6 +49,7 @@ export const runLeadGenerationPipeline = async ({
   executionId: providedExecutionId,
   sourceType,
   analytics,
+  chatModel,
 }: RunPipelineParams): Promise<RunPipelineResult> => {
   const executionId = providedExecutionId ?? uuidv4();
   const pipelineStart = Date.now();
@@ -56,7 +59,7 @@ export const runLeadGenerationPipeline = async ({
   logger.info(
     `[LeadGeneration][Telemetry] Entity fetch: ${Date.now() - fetchStart}ms (${
       leadEntities.length
-    } records)`
+    } candidates)`
   );
 
   if (leadEntities.length === 0) {
@@ -78,7 +81,7 @@ export const runLeadGenerationPipeline = async ({
   );
 
   const generateStart = Date.now();
-  const leads = await engine.generateLeads(leadEntities);
+  const leads = await engine.generateLeads(leadEntities, { chatModel });
   logger.info(
     `[LeadGeneration][Telemetry] Engine pipeline: ${Date.now() - generateStart}ms (${
       leads.length
