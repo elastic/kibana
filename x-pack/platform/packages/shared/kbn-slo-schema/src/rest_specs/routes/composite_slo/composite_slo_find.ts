@@ -4,32 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { compositeSloDefinitionSchema } from '../../../schema/composite_slo';
+import { z } from '@kbn/zod';
+import { compositeSloDefinitionSchema, compositeStatusSchema } from '../../../schema/composite_slo';
 
-const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
-const sortBySchema = t.union([t.literal('name'), t.literal('createdAt'), t.literal('updatedAt')]);
+const compositeSortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
+const compositeSortBySchema = z.union([
+  z.literal('name'),
+  z.literal('createdAt'),
+  z.literal('updatedAt'),
+]);
 
-const findCompositeSLOParamsSchema = t.partial({
-  query: t.partial({
-    search: t.string,
-    page: t.string,
-    perPage: t.string,
-    sortBy: sortBySchema,
-    sortDirection: sortDirectionSchema,
-    tags: t.string,
-  }),
+const compositeStatusFilterSchema = z
+  .string()
+  .transform((raw) => raw.split(',').map((s) => s.trim()))
+  .pipe(z.array(compositeStatusSchema).min(1));
+
+const findCompositeSLOQuerySchema = z.object({
+  search: z.string().optional(),
+  page: z.string().optional(),
+  perPage: z.string().optional(),
+  sortBy: compositeSortBySchema.optional(),
+  sortDirection: compositeSortDirectionSchema.optional(),
+  tags: z.string().optional(),
+  status: compositeStatusFilterSchema.optional(),
 });
 
-const findCompositeSLOResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(compositeSloDefinitionSchema),
+const findCompositeSLOParamsSchema = z.object({
+  query: findCompositeSLOQuerySchema.optional(),
 });
 
-type FindCompositeSLOParams = t.TypeOf<typeof findCompositeSLOParamsSchema.props.query>;
-type FindCompositeSLOResponse = t.OutputOf<typeof findCompositeSLOResponseSchema>;
+const findCompositeSLOResponseSchema = z.object({
+  page: z.number(),
+  perPage: z.number(),
+  total: z.number(),
+  results: z.array(compositeSloDefinitionSchema),
+});
+
+type FindCompositeSLOParams = z.infer<typeof findCompositeSLOQuerySchema>;
+type FindCompositeSLOResponse = z.infer<typeof findCompositeSLOResponseSchema>;
 
 export { findCompositeSLOParamsSchema, findCompositeSLOResponseSchema };
 export type { FindCompositeSLOParams, FindCompositeSLOResponse };

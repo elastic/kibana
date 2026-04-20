@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Parser } from '@elastic/esql';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
 import { indexes, integrations, mockContext } from '../../../__tests__/commands/context_fixtures';
 import { METADATA_FIELDS } from '../options/metadata';
@@ -16,7 +15,7 @@ import {
 } from '../options/recommended_queries';
 import type { ICommandCallbacks } from '../types';
 import { autocomplete } from './autocomplete';
-import { correctQuerySyntax, findAstPosition } from '../../definitions/utils/ast';
+import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
 
 const metadataFields = [...METADATA_FIELDS].sort();
 
@@ -80,12 +79,8 @@ describe('FROM Autocomplete', () => {
       };
 
       const suggest = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
-
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
 
@@ -120,12 +115,8 @@ describe('FROM Autocomplete', () => {
 
     test('suggests comma or pipe after complete index name', async () => {
       const suggest = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
-
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
-
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, mockContext, cursorPosition);
       };
       const suggestions = (await suggest('from index')).map((s) => s.text);
@@ -176,10 +167,8 @@ describe('FROM Autocomplete', () => {
       );
       // View names appear when typing (fragment "my_")
       const getSuggestions = async (query: string) => {
-        const correctedQuery = correctQuerySyntax(query);
-        const { root } = Parser.parse(correctedQuery, { withFormatting: true });
         const cursorPosition = query.length;
-        const { command } = findAstPosition(root, cursorPosition);
+        const { command } = findAutocompleteAstPosition(query, cursorPosition);
         return autocomplete(query, command!, mockCallbacks, contextWithViews, cursorPosition);
       };
       const suggestions = (await getSuggestions('FROM my_')).map((s) => s.text);
