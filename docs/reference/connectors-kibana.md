@@ -137,7 +137,7 @@ Use the [action configuration settings](/reference/configuration-reference/alert
 
 To import and export connectors, use the [Saved Objects Management UI](docs-content://explore-analyze/find-and-organize/saved-objects.md).
 
-{applies_to}`stack: ga 9.4+` If you import a connector and use **Check for existing objects**, and its connector ID matches a [preconfigured connector](/reference/connectors-kibana/pre-configured-connectors.md), {{kib}} warns you that the preconfigured connector takes precedence. You can remove the imported copy if it's not needed. If you import with **Create new objects with random IDs**, {{kib}} keeps both objects and assigns a new id to the imported connector.
+{applies_to}`stack: ga 9.4+` If you import a connector and use **Check for existing objects**, and its connector ID matches a [preconfigured connector](/reference/connectors-kibana/pre-configured-connectors.md), {{kib}} warns you that the preconfigured connector takes precedence and removes the imported connector. If you import with **Create new objects with random IDs**, {{kib}} keeps both objects and assigns a new id to the imported connector.
 
 :::{image} images/connectors-import-banner.png
 :alt: Connectors import banner
