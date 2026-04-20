@@ -166,10 +166,7 @@ export const createEntitySourcesService = ({
    * Removes entities from orphaned sources (sources that no longer exist but
    * still have entities in the watchlist index). Skips CSV and active sources.
    */
-  const cleanupOrphanedEntities = async (
-    meta: WatchlistMeta,
-    activeSourceIds: string[] = []
-  ) => {
+  const cleanupOrphanedEntities = async (meta: WatchlistMeta, activeSourceIds: string[] = []) => {
     const aggResponse = await esClient.search({
       index: meta.index,
       size: 0,
