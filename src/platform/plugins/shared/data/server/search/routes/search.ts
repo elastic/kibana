@@ -35,6 +35,10 @@ export function registerSearchRoute(
           enabled: false,
           reason: 'This route is opted out from authorization',
         },
+        authc: {
+          enabled: 'minimal',
+          reason: 'This route is optimized for performant retrieval of data from Elasticsearch.',
+        },
       },
     })
     .addVersion(

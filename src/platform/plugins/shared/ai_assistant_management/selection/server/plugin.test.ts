@@ -135,7 +135,8 @@ describe('plugin', () => {
         { solution: 'es', expected: AIChatExperience.Agent },
         { solution: 'oblt', expected: AIChatExperience.Agent },
         { solution: 'security', expected: AIChatExperience.Agent },
-        { solution: 'classic', expected: AIChatExperience.Classic },
+        { solution: 'classic', expected: AIChatExperience.Agent },
+        { solution: 'workplaceai', expected: AIChatExperience.Classic },
       ])(
         'should return $expected when active space solution is "$solution"',
         async ({ solution, expected }) => {

@@ -116,7 +116,7 @@
           "{ name: string; content: string; }[]"
         ],
         "path": "packages/kbn-managed-vscode-config/src/managed_config_keys.ts",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
