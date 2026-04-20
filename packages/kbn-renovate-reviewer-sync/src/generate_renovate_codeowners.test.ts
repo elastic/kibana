@@ -16,6 +16,8 @@ import {
   getAllPackages,
   shouldScanFile,
   discoverFilesViaGitGrep,
+  formatRuleHeader,
+  diffTeamSets,
   generateRenovateCodeowners,
 } from './generate_renovate_codeowners';
 import type {
@@ -248,6 +250,72 @@ describe('shouldScanFile', () => {
     ['', false],
   ])('SHOULD return %p for %p', (input, expected) => {
     expect(shouldScanFile(input)).toEqual(expected);
+  });
+});
+
+describe('formatRuleHeader', () => {
+  it('SHOULD render just the quoted groupName when present, dropping the array index', () => {
+    expect(formatRuleHeader({ index: 72, groupName: 'babel' })).toEqual('"babel"');
+  });
+
+  it('SHOULD fall back to rule[N] when groupName is missing so the rule stays locatable', () => {
+    expect(formatRuleHeader({ index: 12 })).toEqual('rule[12]');
+  });
+
+  it('SHOULD preserve groupNames that contain spaces and special characters', () => {
+    expect(
+      formatRuleHeader({ index: 128, groupName: 'mapbox-gl-rtl-text (pinned until X)' })
+    ).toEqual('"mapbox-gl-rtl-text (pinned until X)"');
+  });
+});
+
+describe('diffTeamSets', () => {
+  it('SHOULD report teams added (in after but not in before)', () => {
+    expect(diffTeamSets(['team:a'], ['team:a', 'team:b', 'team:c'])).toEqual({
+      added: ['team:b', 'team:c'],
+      removed: [],
+      kept: ['team:a'],
+    });
+  });
+
+  it('SHOULD report teams removed (in before but not in after)', () => {
+    expect(diffTeamSets(['team:a', 'team:b'], ['team:a'])).toEqual({
+      added: [],
+      removed: ['team:b'],
+      kept: ['team:a'],
+    });
+  });
+
+  it('SHOULD report added, removed, and kept teams together', () => {
+    expect(diffTeamSets(['team:a', 'team:b'], ['team:b', 'team:c'])).toEqual({
+      added: ['team:c'],
+      removed: ['team:a'],
+      kept: ['team:b'],
+    });
+  });
+
+  it('SHOULD return all-kept when sets are identical', () => {
+    expect(diffTeamSets(['team:a', 'team:b'], ['team:a', 'team:b'])).toEqual({
+      added: [],
+      removed: [],
+      kept: ['team:a', 'team:b'],
+    });
+  });
+
+  it('SHOULD treat empty before as all-added with empty kept', () => {
+    expect(diffTeamSets([], ['team:a', 'team:b'])).toEqual({
+      added: ['team:a', 'team:b'],
+      removed: [],
+      kept: [],
+    });
+  });
+
+  it('SHOULD satisfy before.length === kept.length + removed.length and after.length === kept.length + added.length', () => {
+    const before = ['team:a', 'team:b', 'team:c'];
+    const after = ['team:b', 'team:c', 'team:d', 'team:e'];
+    const { added, removed, kept } = diffTeamSets(before, after);
+    expect(kept.length + removed.length).toEqual(before.length);
+    expect(kept.length + added.length).toEqual(after.length);
   });
 });
 
@@ -736,6 +804,184 @@ describe('generateRenovateCodeowners', () => {
         pool,
       });
       expect(pool.shutdownCalls).toEqual(1);
+    });
+  });
+
+  describe('WHEN printing the reviewer-sync report', () => {
+    it('SHOULD label rules with quoted groupName and show full added/removed team diffs for report-only drift', async () => {
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1', react: '1' } },
+        renovateConfig: {
+          packageRules: [
+            {
+              groupName: 'webpack',
+              matchDepNames: ['lodash'],
+              reviewers: ['team:old-owner'],
+            },
+            {
+              groupName: 'react testing',
+              matchDepNames: ['react'],
+              reviewers: ['team:keeps-this'],
+            },
+          ],
+        },
+      });
+      const pool = new FakeWorkerPool();
+      pool.results.set('src/a.ts', {
+        imports: ['lodash'],
+        teams: ['@elastic/kibana-core', '@elastic/kibana-presentation'],
+      });
+      pool.results.set('src/b.ts', {
+        imports: ['react'],
+        teams: ['@elastic/keeps-this', '@elastic/kibana-ui'],
+      });
+
+      const { log } = await runOrchestrator({
+        setup,
+        options: { mode: 'dry-run' },
+        files: ['src/a.ts', 'src/b.ts'],
+        pool,
+      });
+
+      const combined = log.infoLines.join('\n');
+      // Header uses the total count, not `first N`, now that we don't truncate.
+      expect(combined).toContain('🔧 Reviewer drift detected for report-only rules (2 rules):');
+      // Rule 0: old-owner fully replaced → +2 adds, -1 remove, 0 kept, all lists shown.
+      // Rule 0 header uses the groupName as identifier (no array index); the
+      // colored `+`/`-` lines below carry the added/removed detail, so the
+      // header omits the redundant `(+A -R =K)` arithmetic.
+      expect(combined).toContain('   🔸 "webpack" (1 pkgs): 1 -> 2 teams');
+      expect(combined).toContain('       + team:kibana-core, team:kibana-presentation');
+      expect(combined).toContain('       - team:old-owner');
+      // Rule 1: unchanged line uses a 2-space prefix (no marker) so content
+      // stays in the same column as `+ ` / `- ` lines (classic unified-diff
+      // alignment).
+      expect(combined).toContain('   🔸 "react testing" (1 pkgs): 1 -> 2 teams');
+      expect(combined).toContain('       + team:kibana-ui');
+      expect(combined).toContain('         team:keeps-this');
+      // Rule 1 has no removals, so no `- team:` line appears under it.
+      expect(combined).not.toMatch(/"react testing"[\s\S]*?\n\s+- team:/);
+    });
+
+    it('SHOULD label rules with quoted groupName in the no-computed-reviewers section', async () => {
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: {
+          packageRules: [
+            {
+              groupName: 'unused-pkg-group',
+              matchDepNames: ['lodash'],
+              reviewers: ['team:kept'],
+            },
+          ],
+        },
+      });
+      const pool = new FakeWorkerPool();
+      // No imports emitted → package has no teams → no computed reviewers.
+      pool.results.set('src/a.ts', { imports: [], teams: [] });
+
+      const { log } = await runOrchestrator({
+        setup,
+        options: { mode: 'dry-run' },
+        files: ['src/a.ts'],
+        pool,
+      });
+
+      const combined = log.infoLines.join('\n');
+      expect(combined).toContain(
+        '⚠️  Rules where reviewers could not be computed from usage/CODEOWNERS (1):'
+      );
+      expect(combined).toContain('   ❓ "unused-pkg-group" (report) (1 pkgs): lodash');
+    });
+
+    it('SHOULD prefix uncovered-package lines with 📦', async () => {
+      setup = setupRepo({
+        // lodash is in deps but no rule covers it → uncovered.
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: { packageRules: [] },
+      });
+      const pool = new FakeWorkerPool();
+      pool.results.set('src/a.ts', { imports: ['lodash'], teams: ['@elastic/kibana-core'] });
+
+      const { log } = await runOrchestrator({
+        setup,
+        options: { mode: 'dry-run' },
+        files: ['src/a.ts'],
+        pool,
+      });
+
+      const combined = log.infoLines.join('\n');
+      expect(combined).toContain(
+        '⚠️  Packages used in code but not covered by explicit package rules (1):'
+      );
+      expect(combined).toContain('   📦 lodash');
+    });
+
+    it('SHOULD reconcile the teams math: after.length == kept.length + added.length (user-reported bug: "1 -> 2 teams but outputs 1 team")', async () => {
+      // Reproduces the exact shape of the reported bug: one kept team + one
+      // added team. The header advertises `1 -> 2 teams`, so *two* teams must
+      // appear under it — one as a `+ team:` (added, green) line and one as a
+      // dim, 2-space-prefixed context line (unchanged) — otherwise the
+      // before/after counts don't reconcile.
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: {
+          packageRules: [
+            {
+              groupName: 'react-day-picker',
+              matchDepNames: ['lodash'],
+              reviewers: ['team:appex-sharedux'],
+            },
+          ],
+        },
+      });
+      const pool = new FakeWorkerPool();
+      pool.results.set('src/a.ts', {
+        imports: ['lodash'],
+        // Emits BOTH the previously-existing reviewer and a new team; the
+        // existing one must be reported as "kept", not silently dropped from
+        // the displayed totals.
+        teams: ['@elastic/appex-sharedux', '@elastic/kibana-core'],
+      });
+
+      const { log } = await runOrchestrator({
+        setup,
+        options: { mode: 'dry-run' },
+        files: ['src/a.ts'],
+        pool,
+      });
+
+      const combined = log.infoLines.join('\n');
+      expect(combined).toContain('   🔸 "react-day-picker" (1 pkgs): 1 -> 2 teams');
+      expect(combined).toContain('       + team:kibana-core');
+      expect(combined).toContain('         team:appex-sharedux');
+    });
+
+    it('SHOULD fall back to plain `rule[N]` when a drift rule has no groupName', async () => {
+      setup = setupRepo({
+        packageJson: { dependencies: { lodash: '1' } },
+        renovateConfig: {
+          packageRules: [
+            {
+              matchDepNames: ['lodash'],
+              reviewers: ['team:old'],
+            },
+          ],
+        },
+      });
+      const pool = new FakeWorkerPool();
+      pool.results.set('src/a.ts', { imports: ['lodash'], teams: ['@elastic/kibana-core'] });
+
+      const { log } = await runOrchestrator({
+        setup,
+        options: { mode: 'dry-run' },
+        files: ['src/a.ts'],
+        pool,
+      });
+
+      const combined = log.infoLines.join('\n');
+      expect(combined).toContain('   🔸 rule[0] (1 pkgs): 1 -> 1 teams');
+      expect(combined).not.toContain('rule[0] "');
     });
   });
 });

@@ -12,6 +12,8 @@ import { readFileSync, writeFileSync } from 'fs';
 import { resolve as pathResolve, join, extname } from 'path';
 import { cpus } from 'os';
 
+import chalk from 'chalk';
+
 import { REPO_ROOT } from '@kbn/repo-info';
 
 import type { RenovateConfig } from './reviewer_sync';
@@ -55,6 +57,40 @@ export function shouldScanFile(file: string): boolean {
   if (!file) return false;
   if (!SCAN_PREFIXES.some((prefix) => file.startsWith(prefix))) return false;
   return SCAN_EXTENSIONS.includes(extname(file));
+}
+
+/**
+ * Format the diagnostic header for a rule. When `groupName` is present we use
+ * it as the human-stable identifier and drop the array index — the name is
+ * what a reader greps for in `renovate.json` anyway, and indices shift as the
+ * file is edited. Falls back to `rule[N]` only when the rule has no name, so
+ * the entry remains locatable.
+ */
+export function formatRuleHeader(item: { index: number; groupName?: string }): string {
+  return item.groupName ? `"${item.groupName}"` : `rule[${item.index}]`;
+}
+
+/**
+ * Compute the symmetric difference between two reviewer team lists for drift
+ * diagnostics. Returns `added` (in `after` only), `removed` (in `before` only),
+ * and `kept` (in both) so callers can render a complete picture where
+ * `before.length === kept.length + removed.length` and `after.length === kept.length + added.length`.
+ *
+ * Returned arrays preserve the order from the source arrays so downstream print
+ * stays stable — `before`/`after` are already sorted+unique by
+ * `normalizeSortedUnique` in `reviewer_sync.ts`, so the result is sorted too.
+ */
+export function diffTeamSets(
+  before: readonly string[],
+  after: readonly string[]
+): { added: string[]; removed: string[]; kept: string[] } {
+  const beforeSet = new Set(before);
+  const afterSet = new Set(after);
+  return {
+    added: after.filter((t) => !beforeSet.has(t)),
+    removed: before.filter((t) => !afterSet.has(t)),
+    kept: after.filter((t) => beforeSet.has(t)),
+  };
 }
 
 /**
@@ -472,50 +508,47 @@ export async function generateRenovateCodeowners(
   );
 
   if (report.rulesWithNoComputedReviewersDetails.length > 0) {
-    const preview = report.rulesWithNoComputedReviewersDetails.slice(0, 25);
     log.info(
-      `⚠️  Rules where reviewers could not be computed from usage/CODEOWNERS (first ${preview.length}):`
+      `⚠️  Rules where reviewers could not be computed from usage/CODEOWNERS (${report.rulesWithNoComputedReviewersDetails.length}):`
     );
-    for (const item of preview) {
+    for (const item of report.rulesWithNoComputedReviewersDetails) {
       const packages = item.packages.join(', ');
       log.info(
-        `   - rule[${item.index}] (${item.mode}) (${item.packages.length} pkgs): ${packages}`
-      );
-    }
-    if (report.rulesWithNoComputedReviewersDetails.length > preview.length) {
-      log.info(
-        `   ... and ${report.rulesWithNoComputedReviewersDetails.length - preview.length} more`
+        `   ❓ ${formatRuleHeader(item)} (${item.mode}) (${item.packages.length} pkgs): ${packages}`
       );
     }
     log.write('\n');
   }
 
   if (missingCount > 0) {
-    const preview = report.packagesUsedButNotCovered.slice(0, 50);
     log.info(
-      `⚠️  Packages used in code but not covered by explicit package rules (first ${preview.length}):`
+      `⚠️  Packages used in code but not covered by explicit package rules (${missingCount}):`
     );
-    for (const pkg of preview) {
-      log.info(`   - ${pkg}`);
-    }
-    if (missingCount > preview.length) {
-      log.info(`   ... and ${missingCount - preview.length} more`);
+    for (const pkg of report.packagesUsedButNotCovered) {
+      log.info(`   📦 ${pkg}`);
     }
     log.write('\n');
   }
 
   if (reportOnlyDriftCount > 0) {
-    const preview = report.ruleDrift.slice(0, 25);
-    log.info(`🔧 Reviewer drift detected for report-only rules (first ${preview.length} rules):`);
-    for (const item of preview) {
+    log.info(`🔧 Reviewer drift detected for report-only rules (${reportOnlyDriftCount} rules):`);
+    for (const item of report.ruleDrift) {
+      const before = item.before ?? [];
+      const { added, removed, kept } = diffTeamSets(before, item.after);
       log.info(
-        `   - rule[${item.index}] (${item.packages.length} pkgs): ${item.before ?? []} -> ${
-          item.after
-        }`
+        `   🔸 ${formatRuleHeader(item)} (${item.packages.length} pkgs): ${before.length} -> ${
+          item.after.length
+        } teams`
       );
-    }
-    if (reportOnlyDriftCount > preview.length) {
-      log.info(`   ... and ${reportOnlyDriftCount - preview.length} more`);
+      if (added.length > 0) {
+        log.info(chalk.green(`       + ${added.join(', ')}`));
+      }
+      if (removed.length > 0) {
+        log.info(chalk.red(`       - ${removed.join(', ')}`));
+      }
+      if (kept.length > 0) {
+        log.info(chalk.dim(`         ${kept.join(', ')}`));
+      }
     }
     log.write('\n');
   }

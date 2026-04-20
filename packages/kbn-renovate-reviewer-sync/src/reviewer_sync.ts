@@ -53,6 +53,13 @@ export interface RenovatePackageRule {
   enabled?: boolean;
   description?: string;
 
+  /**
+   * Renovate's human-readable label for the rule. Used as a diagnostic hint so
+   * reports can refer to rules as e.g. `rule[72] "babel"` rather than by index
+   * alone.
+   */
+  groupName?: string;
+
   // allow unknown renovate fields without type assertions
   [key: string]: JsonValue | ReviewerSyncOverride | undefined;
 }
@@ -145,6 +152,7 @@ export interface ReviewerSyncReport {
    */
   rulesWithNoComputedReviewersDetails: Array<{
     index: number;
+    groupName?: string;
     mode: 'sync' | 'report';
     packages: string[];
     before: string[] | undefined;
@@ -156,6 +164,7 @@ export interface ReviewerSyncReport {
   // Detailed drift is only reported for report-only rules (no x_kbn_reviewer_sync).
   ruleDrift: Array<{
     index: number;
+    groupName?: string;
     packages: string[];
     before: string[] | undefined;
     after: string[];
@@ -165,6 +174,7 @@ export interface ReviewerSyncReport {
   // Useful for CI orchestration that wants to open a PR and route it to the computed reviewers.
   managedRuleDrift: Array<{
     index: number;
+    groupName?: string;
     packages: string[];
     before: string[] | undefined;
     after: string[];
@@ -182,6 +192,16 @@ function getEffectiveRuleMode(rule: RenovatePackageRule): EffectiveRuleMode {
   if (override.mode === 'fixed') return 'fixed';
   if (override.mode === 'sync') return 'sync';
   return 'report';
+}
+
+/**
+ * Return the rule's Renovate `groupName` when present and non-empty, so it can
+ * be surfaced in diagnostics. Returns `undefined` for rules without a label
+ * (caller prints `rule[N]` only in that case).
+ */
+function getRuleDisplayName(rule: RenovatePackageRule): string | undefined {
+  const name = rule.groupName;
+  return typeof name === 'string' && name.length > 0 ? name : undefined;
 }
 
 export function syncReviewersInConfig(params: {
@@ -240,6 +260,7 @@ export function syncReviewersInConfig(params: {
       // NOTE: `ruleMode` can't be `fixed` here (handled above), but we keep the mode for diagnostics.
       rulesWithNoComputedReviewersDetails.push({
         index: i,
+        groupName: getRuleDisplayName(rule),
         mode: ruleMode,
         packages,
         before: isStringArray(rule.reviewers) ? rule.reviewers : undefined,
@@ -263,6 +284,7 @@ export function syncReviewersInConfig(params: {
 
         managedRuleDrift.push({
           index: i,
+          groupName: getRuleDisplayName(rule),
           packages,
           before: isStringArray(rule.reviewers) ? rule.reviewers : undefined,
           after: computedReviewers,
@@ -277,6 +299,7 @@ export function syncReviewersInConfig(params: {
         reportOnlyRulesWithDrift++;
         ruleDrift.push({
           index: i,
+          groupName: getRuleDisplayName(rule),
           packages,
           before: isStringArray(rule.reviewers) ? rule.reviewers : undefined,
           after: computedReviewers,
