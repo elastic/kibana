@@ -272,6 +272,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
                 validationResults={validationResults}
                 submitAttempted={formState === 'INVALID'}
                 noAdvancedToggle={true}
+                agentPolicies={agentPolicy ? [agentPolicy] : undefined}
               />
             </ExpandableAdvancedSettings>
           )}
@@ -285,6 +286,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
     packagePolicy,
     updatePackagePolicy,
     validationResults,
+    agentPolicy,
   ]);
 
   if (!agentPolicy) {
