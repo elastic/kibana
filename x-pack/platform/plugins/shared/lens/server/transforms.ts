@@ -51,7 +51,7 @@ export function registerLensEmbeddableTransforms(
   embeddableSetup: EmbeddableSetup,
   builder: LensConfigBuilder
 ) {
-  embeddableSetup.registerTransforms(LENS_EMBEDDABLE_TYPE, {
+  embeddableSetup.registerEmbeddableServerDefinition(LENS_EMBEDDABLE_TYPE, {
     getTransforms: (drilldownTransforms) =>
       ({
         transformIn: getTransformIn(builder, drilldownTransforms.transformIn, false),

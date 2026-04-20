@@ -10,7 +10,7 @@
 import React from 'react';
 
 import {
-  registerReactEmbeddableFactory,
+  registerEmbeddablePublicDefinition,
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
@@ -63,7 +63,7 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
-    registerReactEmbeddableFactory('testControl', getTestEmbeddableFactory);
+    registerEmbeddablePublicDefinition('testControl', getTestEmbeddableFactory);
   });
 
   const mountControlGroupRenderer = async (

@@ -14,7 +14,7 @@ import { getTransforms } from '../../../common/embeddables/overview/transforms/t
  * Registers the schema and transforms for the SLO Overview embeddable
  */
 export const registerOverviewEmbeddableTransforms = (embeddable: EmbeddableSetup): void => {
-  embeddable.registerTransforms(SLO_OVERVIEW_EMBEDDABLE_ID, {
+  embeddable.registerEmbeddableServerDefinition(SLO_OVERVIEW_EMBEDDABLE_ID, {
     getSchema: getOverviewEmbeddableSchema,
     getTransforms,
   });

@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 import {
-  registerReactEmbeddableFactory,
+  registerEmbeddablePublicDefinition,
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Action } from '@kbn/ui-actions-plugin/public';
@@ -66,7 +66,7 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
 
 describe('render', () => {
   beforeAll(() => {
-    registerReactEmbeddableFactory(
+    registerEmbeddablePublicDefinition(
       'optionsListControl',
       jest.fn().mockResolvedValue(mockOptionsListFactory)
     );

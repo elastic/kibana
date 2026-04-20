@@ -49,7 +49,7 @@ export class LinksServerPlugin implements Plugin<object, object> {
 
     core.savedObjects.registerType<LinksState>(linksSavedObjectType);
 
-    plugins.embeddable.registerTransforms(LINKS_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(LINKS_EMBEDDABLE_TYPE, {
       getTransforms: () => transforms,
       // do not publish - not finalized
       // getSchema: () => linksEmbeddableSchema,

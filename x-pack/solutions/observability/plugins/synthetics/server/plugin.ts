@@ -115,13 +115,13 @@ export class Plugin implements PluginType {
     this.syncGlobalParamsTask.registerTaskDefinition(plugins.taskManager);
 
     // Register transforms and schema for SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE
-    plugins.embeddable.registerTransforms(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE, {
       getTransforms: getStatsTransforms,
       getSchema: getStatsOverviewEmbeddableSchema,
     });
 
     // Register transforms and schema for SYNTHETICS_MONITORS_EMBEDDABLE
-    plugins.embeddable.registerTransforms(SYNTHETICS_MONITORS_EMBEDDABLE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(SYNTHETICS_MONITORS_EMBEDDABLE, {
       getTransforms: getMonitorsTransforms,
       getSchema: () => syntheticsMonitorsEmbeddableSchema,
     });

@@ -13,6 +13,7 @@
 
 
 ## Public
+Register an embeddable with registerEmbeddablePublicDefinition
 
 ### Guiding principles
 
@@ -32,7 +33,7 @@ Embeddables are React components that manage their own state, can be serialized 
 
 Plugins register new embeddable types with the embeddable plugin.
 ```
-embeddablePublicSetup.registerReactEmbeddableFactory('my_embeddable_type', async () => {
+embeddablePublicSetup.registerEmbeddablePublicDefinition('my_embeddable_type', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
   return myEmbeddableFactory;
 });
@@ -317,7 +318,7 @@ Containers use schemas to
 - Validate embeddable state, failing REST API requests when schema validation fails.
 
 ```
-embeddableServerSetup.registerTransforms(
+embeddableServerSetup.registerEmbeddableServerDefinition(
   'my_embeddable_type',
   {
     getTransforms: (drilldownTransfroms) => ({

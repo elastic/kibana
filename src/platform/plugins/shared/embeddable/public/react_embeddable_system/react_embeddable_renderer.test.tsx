@@ -14,7 +14,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { registerReactEmbeddableFactory } from './react_embeddable_registry';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
 import type { EmbeddableFactory } from './types';
 
@@ -45,7 +45,7 @@ describe('embeddable renderer', () => {
   };
 
   beforeAll(() => {
-    registerReactEmbeddableFactory('test', getTestEmbeddableFactory);
+    registerEmbeddablePublicDefinition('test', getTestEmbeddableFactory);
     setupPresentationPanelServices();
   });
 
@@ -195,7 +195,7 @@ describe('embeddable renderer', () => {
         throw new Error('error in buildEmbeddable');
       },
     };
-    registerReactEmbeddableFactory('errorInBuildEmbeddable', () =>
+    registerEmbeddablePublicDefinition('errorInBuildEmbeddable', () =>
       Promise.resolve(errorInInitializeFactory)
     );
     setupPresentationPanelServices();
@@ -229,7 +229,7 @@ describe('embeddable renderer', () => {
         throw new Error('saved object not found');
       },
     };
-    registerReactEmbeddableFactory('errorRegistersApi', () => Promise.resolve(errorFactory));
+    registerEmbeddablePublicDefinition('errorRegistersApi', () => Promise.resolve(errorFactory));
     setupPresentationPanelServices();
 
     const onApiAvailable = jest.fn();
@@ -262,7 +262,7 @@ describe('embeddable renderer', () => {
         throw new Error('container parent error');
       },
     };
-    registerReactEmbeddableFactory('errorWithContainerParent', () => Promise.resolve(errorFactory));
+    registerEmbeddablePublicDefinition('errorWithContainerParent', () => Promise.resolve(errorFactory));
     setupPresentationPanelServices();
 
     const parentApi = {
@@ -296,7 +296,7 @@ describe('reactEmbeddable phase events', () => {
       ...testEmbeddableFactory,
       type: 'immediateLoad',
     };
-    registerReactEmbeddableFactory('immediateLoad', () =>
+    registerEmbeddablePublicDefinition('immediateLoad', () =>
       Promise.resolve(immediateLoadEmbeddableFactory)
     );
     setupPresentationPanelServices();
@@ -352,7 +352,7 @@ describe('reactEmbeddable phase events', () => {
         };
       },
     };
-    registerReactEmbeddableFactory('loadClicker', () =>
+    registerEmbeddablePublicDefinition('loadClicker', () =>
       Promise.resolve(dataLoadingEmbeddableFactory)
     );
     setupPresentationPanelServices();
