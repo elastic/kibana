@@ -193,7 +193,7 @@ export class PrivateLocationTestService {
         .post(
           `${
             spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : ``
-          }/api/fleet/agent_policies?sys_monitoring=true`
+          }/api/fleet/agent_policies`
         )
         .set('kbn-xsrf', 'true')
         .send({
