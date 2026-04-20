@@ -8,9 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { FindActionResult } from '@kbn/actions-plugin/server/types';
 import type {
   CoreStart,
   ElasticsearchClient,
@@ -19,9 +17,8 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ExecutionType, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import { ExecutionType } from '@kbn/workflows';
 import type {
-  ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
   EsWorkflowExecution,
@@ -40,7 +37,6 @@ import type {
 } from '@kbn/workflows';
 import type {
   ChildWorkflowExecutionItem,
-  ConnectorInstanceConfig,
   GetAvailableConnectorsResponse,
   WorkflowListItemDto,
   WorkflowPartialDetailDto,
@@ -56,13 +52,16 @@ import type {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
-import { extractBulkItemError, partitionBulkResults } from './lib/bulk_response_helpers';
+import { extractBulkItemError } from './lib/bulk_response_helpers';
 import { isIndexNotFoundError } from './lib/es_error_helpers';
 import { getChildWorkflowExecutions } from './lib/get_child_workflow_executions';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { paginateWithSearchAfter } from './lib/paginate_with_search_after';
 import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
+import { getAvailableConnectors } from './lib/workflow_connectors';
+import { deleteWorkflows } from './lib/workflow_deletion';
+import { disableAllWorkflows } from './lib/workflow_disable_all';
 import {
   applyFieldUpdates,
   applyYamlUpdate,
@@ -75,6 +74,7 @@ import {
   buildWorkflowTextSearchClause,
   workflowSpaceFilter,
 } from './lib/workflow_query_filters';
+import { scheduleWorkflowTriggers, syncSchedulerAfterSave } from './lib/workflow_scheduler_sync';
 
 import type {
   DeleteWorkflowsResponse,
@@ -83,11 +83,9 @@ import type {
   SearchStepExecutionsParams,
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
-import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError } from '../../common/lib/errors';
 
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
-import { updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -96,7 +94,6 @@ import {
   removeConflictingIds,
 } from '../lib/bulk_id_helpers';
 import { getAuthenticatedUser } from '../lib/get_user';
-import { hasScheduledTriggers } from '../lib/schedule_utils';
 import { resolveUniqueWorkflowIds, validateWorkflowId } from '../lib/workflow_id_resolver';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
@@ -104,8 +101,6 @@ import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
 
 const DEFAULT_PAGE_SIZE = 100;
-
-type WorkflowStorageClient = ReturnType<WorkflowStorage['getClient']>;
 
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
@@ -261,36 +256,6 @@ export class WorkflowsService {
    * When triggerDefinitions is provided, custom trigger on.condition values are validated
    * (valid KQL and only event schema properties).
    */
-  /**
-   * Schedules triggers for a workflow. Used by both createWorkflow and bulkCreateWorkflows.
-   */
-  private async scheduleWorkflowTriggers(
-    workflowId: string,
-    definition: WorkflowYaml | undefined,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<void> {
-    const { taskScheduler } = this;
-    if (!taskScheduler || !definition?.triggers) {
-      return;
-    }
-
-    const scheduledTriggers = definition.triggers.filter((t) => t.type === 'scheduled');
-    await Promise.allSettled(
-      scheduledTriggers.map((trigger) =>
-        taskScheduler.scheduleWorkflowTask(workflowId, spaceId, trigger, request)
-      )
-    ).then((results) => {
-      results.forEach((result, i) => {
-        if (result.status === 'rejected') {
-          this.logger.warn(
-            `Failed to schedule trigger for workflow ${workflowId}: ${result.reason}`
-          );
-        }
-      });
-    });
-  }
-
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
     spaceId: string,
@@ -343,7 +308,14 @@ export class WorkflowsService {
       refresh: true,
     });
 
-    await this.scheduleWorkflowTriggers(id, definition, spaceId, request);
+    await scheduleWorkflowTriggers({
+      workflowId: id,
+      definition,
+      spaceId,
+      request,
+      taskScheduler: this.taskScheduler,
+      logger: this.logger,
+    });
 
     return this.transformStorageDocumentToWorkflowDto(id, workflowData);
   }
@@ -461,7 +433,14 @@ export class WorkflowsService {
 
     await Promise.allSettled(
       workflowsToSchedule.map((vw) =>
-        this.scheduleWorkflowTriggers(vw.id, vw.definition, spaceId, request)
+        scheduleWorkflowTriggers({
+          workflowId: vw.id,
+          definition: vw.definition,
+          spaceId,
+          request,
+          taskScheduler: this.taskScheduler,
+          logger: this.logger,
+        })
       )
     );
 
@@ -492,50 +471,6 @@ export class WorkflowsService {
       throw new Error(`Workflow with id ${id} not found`);
     }
     return { source: hit._source as WorkflowProperties };
-  }
-
-  /**
-   * Updates or removes scheduled tasks after a workflow document is saved.
-   * Call only when shouldUpdateScheduler is true and taskScheduler is set.
-   */
-  private async updateSchedulerAfterWorkflowSave(
-    id: string,
-    spaceId: string,
-    request: KibanaRequest,
-    finalData: WorkflowProperties
-  ): Promise<void> {
-    if (!this.taskScheduler) return;
-
-    const workflowIsSchedulable = finalData.definition && finalData.valid && finalData.enabled;
-    if (!workflowIsSchedulable) {
-      await this.taskScheduler.unscheduleWorkflowTasks(id);
-      this.logger.debug(
-        `Removed all scheduled tasks for workflow ${id} (workflow disabled or invalid)`
-      );
-      return;
-    }
-
-    const triggers = finalData.definition?.triggers ?? [];
-    const workflowHasScheduledTriggers = hasScheduledTriggers(triggers);
-    if (!workflowHasScheduledTriggers) {
-      await this.taskScheduler.unscheduleWorkflowTasks(id);
-      this.logger.debug(`Removed scheduled tasks for workflow ${id} (no scheduled triggers)`);
-      return;
-    }
-
-    const updatedWorkflow = await this.getWorkflow(id, spaceId);
-    if (!updatedWorkflow?.definition) return;
-
-    const workflowForScheduler: EsWorkflow = {
-      ...updatedWorkflow,
-      definition: updatedWorkflow.definition,
-      tags: [],
-      deleted_at: null,
-      createdAt: new Date(updatedWorkflow.createdAt),
-      lastUpdatedAt: new Date(updatedWorkflow.lastUpdatedAt),
-    };
-    await this.taskScheduler.updateWorkflowTasks(workflowForScheduler, spaceId, request);
-    this.logger.debug(`Updated scheduled tasks for workflow ${id}`);
   }
 
   public async updateWorkflow(
@@ -603,7 +538,15 @@ export class WorkflowsService {
       });
 
       if (shouldUpdateScheduler && this.taskScheduler) {
-        await this.updateSchedulerAfterWorkflowSave(id, spaceId, request, finalData);
+        await syncSchedulerAfterSave({
+          workflowId: id,
+          spaceId,
+          request,
+          finalData,
+          taskScheduler: this.taskScheduler,
+          logger: this.logger,
+          getWorkflow: (wId, sp) => this.getWorkflow(wId, sp),
+        });
       }
 
       return {
@@ -628,368 +571,29 @@ export class WorkflowsService {
     options?: { force?: boolean }
   ): Promise<DeleteWorkflowsResponse> {
     await this.ensureInitialized();
-
-    const force = options?.force ?? false;
-    const failures: Array<{ id: string; error: string }> = [];
-    const client = this.workflowStorage.getClient();
-
-    // Bulk fetch all workflows in a single search call
-    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
-    must.push({ ids: { values: ids } });
-    const searchResponse = await client.search({
-      query: { bool: { must } },
-      size: ids.length,
-      track_total_hits: false,
+    return deleteWorkflows({
+      ids,
+      spaceId,
+      force: options?.force ?? false,
+      storage: this.workflowStorage,
+      esClient: this.esClient,
+      taskScheduler: this.taskScheduler,
+      logger: this.logger,
+      getWorkflowExecutions: (p, sp) => this.getWorkflowExecutions(p, sp),
     });
-
-    const hits = searchResponse.hits.hits;
-
-    if (force) {
-      return this.hardDeleteWorkflows(ids, hits, client, spaceId, failures);
-    }
-
-    return this.softDeleteWorkflows(ids, hits, client, failures);
   }
 
-  private async hardDeleteWorkflows(
-    ids: string[],
-    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
-    client: WorkflowStorageClient,
-    spaceId: string,
-    failures: Array<{ id: string; error: string }>
-  ): Promise<DeleteWorkflowsResponse> {
-    const foundIds = hits.map((hit) => hit._id).filter(Boolean) as string[];
-
-    // Phase 1: Disable enabled workflows to prevent new executions from being
-    // created between the running-execution check and the actual delete
-    // (closes the TOCTOU race window).
-    const disabledIds = await this.disableWorkflowsForDeletion(hits, client);
-
-    // Phase 2: Check for running executions
-    const runningIds: string[] = [];
-    for (const id of foundIds) {
-      const executions = await this.getWorkflowExecutions(
-        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-        spaceId
-      );
-      if (executions.total > 0) {
-        runningIds.push(id);
-      }
-    }
-    if (runningIds.length > 0) {
-      await this.restoreDisabledWorkflows(hits, disabledIds, client);
-      throw new WorkflowConflictError(
-        `Cannot force-delete workflows with running executions: [${runningIds.join(', ')}]`,
-        runningIds[0]
-      );
-    }
-
-    // Phase 3: Delete workflow documents
-    const successfulIds: string[] = [];
-    for (const id of foundIds) {
-      try {
-        await client.delete({ id });
-        successfulIds.push(id);
-      } catch (error) {
-        failures.push({
-          id,
-          error: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    // Phase 4: Cleanup
-    await this.unscheduleDeletedWorkflowTasks(successfulIds);
-    await this.purgeWorkflowRelatedData(successfulIds, spaceId);
-
-    return {
-      total: ids.length,
-      deleted: ids.length - failures.length,
-      failures,
-      successfulIds,
-    };
-  }
-
-  /**
-   * Disables enabled workflows before hard-deletion to prevent new executions
-   * from being accepted while the delete is in progress.
-   * Returns the IDs of workflows that were actually disabled (were previously enabled).
-   */
-  private async disableWorkflowsForDeletion(
-    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
-    client: WorkflowStorageClient
-  ): Promise<string[]> {
-    const disableOperations = hits
-      .filter(
-        (hit): hit is { _id: string; _source: WorkflowProperties } =>
-          Boolean(hit._id) && Boolean(hit._source) && hit._source?.enabled === true
-      )
-      .map((hit) => {
-        return {
-          index: {
-            _id: hit._id,
-            document: {
-              ...(hit._source satisfies WorkflowProperties),
-              enabled: false,
-            },
-          },
-        };
-      });
-
-    if (disableOperations.length > 0) {
-      const response = await client.bulk({ operations: disableOperations, refresh: true });
-      return disableOperations
-        .filter((_, i) => {
-          const status = response.items[i]?.index?.status ?? 0;
-          return status >= 200 && status < 300;
-        })
-        .map((op) => op.index._id);
-    }
-
-    return [];
-  }
-
-  /**
-   * Re-enables workflows that were disabled during a hard-delete attempt
-   * that was aborted due to running executions.
-   */
-  private async restoreDisabledWorkflows(
-    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
-    disabledIds: string[],
-    client: WorkflowStorageClient
-  ): Promise<void> {
-    if (disabledIds.length === 0) {
-      return;
-    }
-
-    const restoreOperations = hits
-      .filter(
-        (hit): hit is { _id: string; _source: WorkflowProperties } =>
-          Boolean(hit._id) && Boolean(hit._source) && disabledIds.includes(String(hit._id))
-      )
-      .map((hit) => ({
-        index: {
-          _id: hit._id,
-          document: hit._source satisfies WorkflowProperties,
-        },
-      }));
-
-    if (restoreOperations.length > 0) {
-      try {
-        await client.bulk({ operations: restoreOperations, refresh: true });
-      } catch (error) {
-        this.logger.warn(
-          `Failed to restore disabled workflows after hard-delete conflict: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
-    }
-  }
-
-  /**
-   * Permanently removes all execution history and step executions
-   * associated with the given workflow IDs within the specified space.
-   * Used during hard (force) delete so the workflow ID can be fully reused.
-   */
-  private async purgeWorkflowRelatedData(workflowIds: string[], spaceId: string): Promise<void> {
-    if (workflowIds.length === 0) {
-      return;
-    }
-
-    const query = {
-      bool: {
-        must: [{ terms: { workflowId: workflowIds } }, { term: { spaceId } }],
-      },
-    };
-
-    const deleteOps = [
-      this.esClient
-        .deleteByQuery({
-          index: WORKFLOWS_EXECUTIONS_INDEX,
-          query,
-          refresh: true,
-          conflicts: 'proceed',
-        })
-        .catch((error) => {
-          this.logger.warn(
-            `Failed to purge executions for workflows [${workflowIds.join(', ')}]: ${error.message}`
-          );
-        }),
-      this.esClient
-        .deleteByQuery({
-          index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-          query,
-          refresh: true,
-          conflicts: 'proceed',
-        })
-        .catch((error) => {
-          this.logger.warn(
-            `Failed to purge step executions for workflows [${workflowIds.join(', ')}]: ${
-              error.message
-            }`
-          );
-        }),
-    ];
-
-    await Promise.allSettled(deleteOps);
-  }
-
-  private async softDeleteWorkflows(
-    ids: string[],
-    hits: Array<{ _id?: string; _source?: WorkflowProperties }>,
-    client: WorkflowStorageClient,
-    failures: Array<{ id: string; error: string }>
-  ): Promise<DeleteWorkflowsResponse> {
-    const now = new Date();
-    const successfulIds: string[] = [];
-
-    const bulkOperations = hits.map((hit) => ({
-      index: {
-        _id: hit._id,
-        document: {
-          ...(hit._source as WorkflowProperties),
-          deleted_at: now,
-          enabled: false,
-        },
-      },
-    }));
-
-    if (bulkOperations.length > 0) {
-      try {
-        const bulkResponse = await client.bulk({
-          operations: bulkOperations,
-          refresh: true,
-        });
-
-        const { successIds, failures: bulkFailures } = partitionBulkResults(bulkResponse.items);
-        successfulIds.push(...successIds);
-        failures.push(...bulkFailures);
-
-        await this.unscheduleDeletedWorkflowTasks(successfulIds);
-      } catch (error) {
-        bulkOperations.forEach((op) => {
-          failures.push({
-            id: op.index._id ?? 'unknown',
-            error: error instanceof Error ? error.message : String(error),
-          });
-        });
-      }
-    }
-
-    return {
-      total: ids.length,
-      deleted: ids.length - failures.length,
-      failures,
-      successfulIds,
-    };
-  }
-
-  private async unscheduleDeletedWorkflowTasks(successfulIds: string[]): Promise<void> {
-    if (this.taskScheduler && successfulIds.length > 0) {
-      const results = await Promise.allSettled(
-        successfulIds.map((workflowId) => this.taskScheduler?.unscheduleWorkflowTasks(workflowId))
-      );
-      results.forEach((result, i) => {
-        if (result.status === 'rejected') {
-          this.logger.warn(
-            `Failed to unschedule tasks for deleted workflow ${successfulIds[i]}: ${result.reason}`
-          );
-        }
-      });
-    }
-  }
-
-  /**
-   * Disables all enabled workflows across all spaces. Sets `enabled: false`,
-   * patches YAML accordingly, and unschedules any scheduled tasks.
-   * Used when a user opts out of workflows by toggling the global UI setting off.
-   */
   public async disableAllWorkflows(): Promise<{
     total: number;
     disabled: number;
     failures: Array<{ id: string; error: string }>;
   }> {
     await this.ensureInitialized();
-
-    const client = this.workflowStorage.getClient();
-    const pageSize = 1000;
-    const failures: Array<{ id: string; error: string }> = [];
-    const disabledIds: string[] = [];
-
-    const query = {
-      bool: {
-        must: [{ term: { enabled: true } }],
-        must_not: [{ exists: { field: 'deleted_at' } }],
-      },
-    };
-    const sort = [{ updated_at: { order: 'desc' as const } }, '_shard_doc'];
-
-    const { totalProcessed } = await paginateWithSearchAfter<WorkflowProperties>(
-      {
-        search: (searchAfter) =>
-          client.search({
-            query,
-            size: pageSize,
-            sort,
-            _source: true,
-            track_total_hits: false,
-            ...(searchAfter ? { search_after: searchAfter } : {}),
-          }),
-        pageSize,
-        logger: this.logger,
-        operationName: 'disableAllWorkflows',
-      },
-      async (hits) => {
-        const bulkOperations = hits.map((hit) => {
-          const updatedYaml = updateWorkflowYamlFields(hit._source.yaml, { enabled: false }, false);
-          return {
-            index: {
-              _id: hit._id,
-              document: {
-                ...hit._source,
-                enabled: false,
-                yaml: updatedYaml,
-              },
-            },
-          };
-        });
-
-        try {
-          const bulkResponse = await client.bulk({
-            operations: bulkOperations,
-            refresh: true,
-          });
-
-          const { successIds: pageDisabledIds, failures: bulkFailures } = partitionBulkResults(
-            bulkResponse.items
-          );
-          failures.push(...bulkFailures);
-
-          if (pageDisabledIds.length > 0) {
-            disabledIds.push(...pageDisabledIds);
-            await this.unscheduleDeletedWorkflowTasks(pageDisabledIds);
-          }
-        } catch (error) {
-          bulkOperations.forEach((op) => {
-            failures.push({
-              id: op.index._id ?? 'unknown',
-              error: error instanceof Error ? error.message : String(error),
-            });
-          });
-        }
-      }
-    );
-
-    this.logger.info(
-      `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
-    );
-
-    return {
-      total: totalProcessed,
-      disabled: disabledIds.length,
-      failures,
-    };
+    return disableAllWorkflows({
+      storage: this.workflowStorage,
+      taskScheduler: this.taskScheduler,
+      logger: this.logger,
+    });
   }
 
   /**
@@ -1721,61 +1325,12 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<GetAvailableConnectorsResponse> {
-    const actionsClient = await this.getActionsClient();
-    const actionsClientWithRequest = await this.getActionsClientWithRequest(request);
-
-    // Get both connectors and action types
-    const [connectors, actionTypes] = await Promise.all([
-      actionsClient.getAll(spaceId),
-      actionsClientWithRequest.listTypes({
-        featureId: WorkflowsConnectorFeatureId,
-        includeSystemActionTypes: false,
-      }),
-    ]);
-
-    // Initialize connectorTypes with ALL available action types
-    const connectorTypes: Record<string, ConnectorTypeInfo> = {};
-
-    // First, add all action types (even those without instances), excluding filtered types
-    actionTypes.forEach((actionType) => {
-      // Get sub-actions from our static mapping
-      const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
-
-      connectorTypes[actionType.id] = {
-        actionTypeId: actionType.id,
-        displayName: actionType.name,
-        instances: [],
-        enabled: actionType.enabled,
-        enabledInConfig: actionType.enabledInConfig,
-        enabledInLicense: actionType.enabledInLicense,
-        minimumLicenseRequired: actionType.minimumLicenseRequired,
-        ...(subActions && { subActions }),
-      };
+    return getAvailableConnectors({
+      getActionsClient: this.getActionsClient,
+      getActionsClientWithRequest: this.getActionsClientWithRequest,
+      spaceId,
+      request,
     });
-
-    // Then, populate instances for action types that have connectors
-    connectors.forEach((connector: FindActionResult) => {
-      if (connectorTypes[connector.actionTypeId]) {
-        connectorTypes[connector.actionTypeId].instances.push({
-          id: connector.id,
-          name: connector.name,
-          isPreconfigured: connector.isPreconfigured,
-          isDeprecated: connector.isDeprecated,
-          ...this.getConnectorInstanceConfig(connector),
-        });
-      }
-    });
-
-    return { connectorTypes, totalConnectors: connectors.length };
-  }
-
-  private getConnectorInstanceConfig(
-    connector: FindActionResult
-  ): { config: ConnectorInstanceConfig } | undefined {
-    if (connector.actionTypeId === '.inference') {
-      return { config: { taskType: connector.config?.taskType } };
-    }
-    return undefined;
   }
 
   public async validateWorkflow(
