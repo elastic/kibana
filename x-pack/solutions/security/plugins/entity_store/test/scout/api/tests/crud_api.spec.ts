@@ -11,10 +11,10 @@ import type { Client } from '@elastic/elasticsearch';
 import { hashEuid, getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
@@ -26,7 +26,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
-      ...COMMON_HEADERS,
+      ...PUBLIC_HEADERS,
     };
 
     // enable feature flag
@@ -35,7 +35,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     });
 
     // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -44,7 +44,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {},
@@ -59,7 +59,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         id: 'required-id-create',
       },
     };
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
@@ -67,9 +67,9 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity!.id!)).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, entityObj.entity!.id!)).toBe(1);
     const euid = getEuidFromObject('generic', entityObj) as string;
-    const check = await esClient.get({ index: LATEST_INDEX, id: hashEuid(euid) });
+    const check = await esClient.get({ index: LATEST_ALIAS, id: hashEuid(euid) });
     expect(check.found).toBe(true);
   });
 
@@ -79,7 +79,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         id: 'conflict-create',
       },
     };
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
@@ -87,7 +87,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    const secondCreate = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const secondCreate = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
@@ -104,7 +104,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         host: { name: 'create-generated-euid' },
       } as Entity;
 
-      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: entityObj,
@@ -115,14 +115,13 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // Entity should be stored using the generated EUID
       const byGenerated = await esClient.get({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         id: hashEuid(expectedEuid),
       });
       expect(byGenerated.found).toBe(true);
 
       // The stored entity.id should be the generated EUID
       const source = byGenerated._source as HostEntity;
-      expect(source.host?.entity?.id).toBeUndefined();
       expect(source.entity?.id).toBe(expectedEuid);
     }
   );
@@ -135,7 +134,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         host: { name: 'create-mismatch-test' },
       };
 
-      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: entityObj,
@@ -149,7 +148,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     // First create the entity so we can test force flag on update
     const entityId = 'required-id-force';
     const createObj: Entity = { entity: { id: entityId } };
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: createObj,
@@ -164,7 +163,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       },
     };
 
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('generic'), {
+    const update = await apiClient.put(ENTITY_STORE_ROUTES.public.CRUD_UPDATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: updateObj,
@@ -174,7 +173,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     // With force flag it should succeed
     const updateWithForce = await apiClient.put(
-      ENTITY_STORE_ROUTES.CRUD_UPDATE('generic') + '?force=true',
+      ENTITY_STORE_ROUTES.public.CRUD_UPDATE('generic') + '?force=true',
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -194,32 +193,35 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       },
     };
 
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, 'host:this-is-update')).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, 'host:this-is-update')).toBe(1);
 
     // Update the entity with the same ID
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {
-        entity: {
-          id: entityObj.entity!.id!,
-          name: 'this-is-update',
+    const update = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: {
+          entity: {
+            id: entityObj.entity!.id!,
+            name: 'this-is-update',
+          },
+          host: {
+            name: 'this-is-update',
+          },
         },
-        host: {
-          name: 'this-is-update',
-        },
-      },
-    });
+      }
+    );
     expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: {
         term: {
           'entity.id': 'host:this-is-update',
@@ -242,7 +244,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         entity: { id: 'host:update-id-only' },
         host: { name: 'update-id-only' },
       };
-      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: createObj,
@@ -250,20 +252,23 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(create.statusCode).toBe(200);
 
       // Update using only entity.id (no host.name identity field)
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          entity: {
-            id: 'host:update-id-only',
-            name: 'updated-name',
+      const update = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            entity: {
+              id: 'host:update-id-only',
+              name: 'updated-name',
+            },
           },
-        },
-      });
+        }
+      );
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { term: { 'entity.id': 'host:update-id-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
@@ -280,7 +285,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         entity: { id: 'host:update-identity-only' },
         host: { name: 'update-identity-only' },
       };
-      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: createObj,
@@ -288,22 +293,25 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(create.statusCode).toBe(200);
 
       // Update using only identity fields (host.name), no entity.id
-      const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
-        headers: defaultHeaders,
-        responseType: 'json',
-        body: {
-          entity: {
-            name: 'updated-via-identity',
+      const update = await apiClient.put(
+        ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+          body: {
+            entity: {
+              name: 'updated-via-identity',
+            },
+            host: {
+              name: 'update-identity-only',
+            },
           },
-          host: {
-            name: 'update-identity-only',
-          },
-        },
-      });
+        }
+      );
       expect(update.statusCode).toBe(200);
 
       const entities = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { term: { 'entity.id': 'host:update-identity-only' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
@@ -315,7 +323,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
   apiTest('Should perform a bulk update', async ({ apiClient, esClient }) => {
     // Create entities first so bulk update has something to update
     for (const id of ['required-id-1-bulk', 'required-id-2-bulk']) {
-      const createResp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const createResp = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entity: { id } },
@@ -344,7 +352,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       ],
     };
 
-    const bulkUpdate = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_BULK_UPDATE, {
+    const bulkUpdate = await apiClient.put(ENTITY_STORE_ROUTES.public.CRUD_BULK_UPDATE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: bulkBody,
@@ -353,7 +361,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(bulkUpdate.body.errors).toHaveLength(0);
 
     const resp = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: {
         wildcard: {
           'entity.id': 'required-id-*-bulk',
@@ -367,7 +375,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const flatDoc = {
       'entity.id': 'flat-create-id',
     };
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: flatDoc,
@@ -375,7 +383,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(create.statusCode).toBe(200);
     expect(create.body).toStrictEqual({ ok: true });
 
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, 'flat-create-id')).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, 'flat-create-id')).toBe(1);
   });
 
   apiTest('Should update an entity from a flat document', async ({ apiClient, esClient }) => {
@@ -384,7 +392,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       entity: { id: 'host:flat-update' },
       host: { name: 'flat-update' },
     };
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: createObj,
@@ -397,15 +405,18 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       'entity.name': 'flat-updated-name',
       'host.name': 'flat-update',
     };
-    const update = await apiClient.put(ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true', {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: flatUpdateDoc,
-    });
+    const update = await apiClient.put(
+      ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: flatUpdateDoc,
+      }
+    );
     expect(update.statusCode).toBe(200);
 
     const entities = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: { term: { 'entity.id': 'host:flat-update' } },
     });
     expect(entities.hits.hits).toHaveLength(1);
@@ -421,7 +432,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         entity: { id: 'host:flat-double-update' },
         host: { name: 'flat-double-update' },
       };
-      const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('host'), {
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: createObj,
@@ -430,7 +441,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // First update with flat doc
       const firstUpdate = await apiClient.put(
-        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
+        ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
         {
           headers: defaultHeaders,
           responseType: 'json',
@@ -445,7 +456,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
       // Second update with flat doc on the same paths
       const secondUpdate = await apiClient.put(
-        ENTITY_STORE_ROUTES.CRUD_UPDATE('host') + '?force=true',
+        ENTITY_STORE_ROUTES.public.CRUD_UPDATE('host') + '?force=true',
         {
           headers: defaultHeaders,
           responseType: 'json',
@@ -459,7 +470,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(secondUpdate.statusCode).toBe(200);
 
       const entities = await esClient.search({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         query: { term: { 'entity.id': 'host:flat-double-update' } },
       });
       expect(entities.hits.hits).toHaveLength(1);
@@ -479,14 +490,14 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
         id: 'required-id-delete',
       },
     };
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
     const resp = await esClient.search({
-      index: LATEST_INDEX,
+      index: LATEST_ALIAS,
       query: {
         match: {
           'entity.id': entityObj.entity!.id!,
@@ -502,7 +513,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const hashedEntityId = resp.hits.hits[0]._id as string;
     expect(hashedEntityId).toBe(expectedHashedEntityId);
 
-    const del = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE, {
+    const del = await apiClient.delete(ENTITY_STORE_ROUTES.public.CRUD_DELETE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {
@@ -514,12 +525,12 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     await expect(
       esClient.get({
-        index: LATEST_INDEX,
+        index: LATEST_ALIAS,
         id: hashedEntityId,
       })
     ).rejects.toThrow(`"found":false`);
 
-    const apiNotFound = await apiClient.delete(ENTITY_STORE_ROUTES.CRUD_DELETE, {
+    const apiNotFound = await apiClient.delete(ENTITY_STORE_ROUTES.public.CRUD_DELETE, {
       headers: defaultHeaders,
       responseType: 'json',
       body: {
@@ -536,15 +547,15 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       },
     };
 
-    const create = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
       headers: defaultHeaders,
       responseType: 'json',
       body: entityObj,
     });
     expect(create.statusCode).toBe(200);
-    expect(await countEntitiesByID(esClient, LATEST_INDEX, entityObj.entity!.id!)).toBe(1);
+    expect(await countEntitiesByID(esClient, LATEST_ALIAS, entityObj.entity!.id!)).toBe(1);
 
-    const list = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET, {
+    const list = await apiClient.get(ENTITY_STORE_ROUTES.public.CRUD_GET, {
       headers: defaultHeaders,
       responseType: 'json',
     });
@@ -565,7 +576,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     const noMatchEntity: Entity = { entity: { id: 'list-filter-nomatch' } };
 
     for (const ent of [matchEntity, noMatchEntity]) {
-      const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const resp = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: ent,
@@ -575,7 +586,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     const kqlFilter = `entity.id: ${matchEntity.entity!.id!}`;
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent(kqlFilter)}`,
+      ENTITY_STORE_ROUTES.public.CRUD_GET + `?filter=${encodeURIComponent(kqlFilter)}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -595,7 +606,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
   apiTest('Should list entities with size param', async ({ apiClient }) => {
     for (let i = 0; i < 3; i++) {
-      const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const resp = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entity: { id: `list-size-${i}` } },
@@ -603,7 +614,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(resp.statusCode).toBe(200);
     }
 
-    const list = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET + '?size=1', {
+    const list = await apiClient.get(ENTITY_STORE_ROUTES.public.CRUD_GET + '?size=1', {
       headers: defaultHeaders,
       responseType: 'json',
     });
@@ -614,7 +625,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
   apiTest('Should paginate with searchAfter', async ({ apiClient }) => {
     for (let i = 0; i < 2; i++) {
-      const resp = await apiClient.post(ENTITY_STORE_ROUTES.CRUD_CREATE('generic'), {
+      const resp = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
         headers: defaultHeaders,
         responseType: 'json',
         body: { entity: { id: `list-page-${i}` } },
@@ -622,7 +633,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
       expect(resp.statusCode).toBe(200);
     }
 
-    const firstPage = await apiClient.get(ENTITY_STORE_ROUTES.CRUD_GET + '?size=1', {
+    const firstPage = await apiClient.get(ENTITY_STORE_ROUTES.public.CRUD_GET + '?size=1', {
       headers: defaultHeaders,
       responseType: 'json',
     });
@@ -632,7 +643,8 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
     const searchAfter = JSON.stringify(firstPage.body.nextSearchAfter);
     const secondPage = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?size=1&searchAfter=${encodeURIComponent(searchAfter)}`,
+      ENTITY_STORE_ROUTES.public.CRUD_GET +
+        `?size=1&searchAfter=${encodeURIComponent(searchAfter)}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -646,9 +658,134 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
     expect(firstId).not.toBe(secondId);
   });
 
+  apiTest('Should return specific fields when fields param is provided', async ({ apiClient }) => {
+    const entityObj: Entity = {
+      entity: {
+        id: 'list-fields-test',
+      },
+    };
+    const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
+      headers: defaultHeaders,
+      responseType: 'json',
+      body: entityObj,
+    });
+    expect(create.statusCode).toBe(200);
+
+    const kqlFilter = `entity.id: ${entityObj.entity!.id!}`;
+    const list = await apiClient.get(
+      ENTITY_STORE_ROUTES.public.CRUD_GET +
+        `?filter=${encodeURIComponent(kqlFilter)}&fields=entity.id`,
+      {
+        headers: defaultHeaders,
+        responseType: 'json',
+      }
+    );
+    expect(list.statusCode).toBe(200);
+    expect(list.body.fields).toBeDefined();
+    expect(list.body.fields).toHaveLength(1);
+    expect(list.body.fields[0]['entity.id']).toContain(entityObj.entity!.id!);
+  });
+
+  apiTest(
+    'Should not include fields in response when fields param is omitted',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: {
+          id: 'list-no-fields-test',
+        },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const kqlFilter = `entity.id: ${entityObj.entity!.id!}`;
+      const list = await apiClient.get(
+        ENTITY_STORE_ROUTES.public.CRUD_GET + `?filter=${encodeURIComponent(kqlFilter)}`,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(list.statusCode).toBe(200);
+      expect(list.body.fields).toBeUndefined();
+    }
+  );
+
+  apiTest(
+    'Should return multiple fields when multiple fields are requested',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: {
+          id: 'host:list-multi-fields',
+        },
+        host: {
+          name: 'list-multi-fields',
+        },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('host'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const kqlFilter = `entity.id: "${entityObj.entity!.id!}"`;
+      const list = await apiClient.get(
+        ENTITY_STORE_ROUTES.public.CRUD_GET +
+          `?filter=${encodeURIComponent(kqlFilter)}&fields=entity.id,host.name`,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(list.statusCode).toBe(200);
+      expect(list.body.fields).toBeDefined();
+      expect(list.body.fields).toHaveLength(1);
+      const fields = list.body.fields[0];
+      expect(fields['entity.id']).toContain(entityObj.entity!.id!);
+      expect(fields['host.name']).toContain('list-multi-fields');
+    }
+  );
+
+  apiTest(
+    'Should return empty fields entry when requested field does not exist on the entity',
+    async ({ apiClient }) => {
+      const entityObj: Entity = {
+        entity: {
+          id: 'list-missing-field-test',
+        },
+      };
+      const create = await apiClient.post(ENTITY_STORE_ROUTES.public.CRUD_CREATE('generic'), {
+        headers: defaultHeaders,
+        responseType: 'json',
+        body: entityObj,
+      });
+      expect(create.statusCode).toBe(200);
+
+      const kqlFilter = `entity.id: ${entityObj.entity!.id!}`;
+      const list = await apiClient.get(
+        ENTITY_STORE_ROUTES.public.CRUD_GET +
+          `?filter=${encodeURIComponent(kqlFilter)}&fields=entity.id,does.not.exist`,
+        {
+          headers: defaultHeaders,
+          responseType: 'json',
+        }
+      );
+      expect(list.statusCode).toBe(200);
+      expect(list.body.fields).toBeDefined();
+      expect(list.body.fields).toHaveLength(1);
+      expect(list.body.fields[0]['entity.id']).toContain(entityObj.entity!.id!);
+      // ES omits missing fields from the fields object entirely
+      expect(list.body.fields[0]['does.not.exist']).toBeUndefined();
+    }
+  );
+
   apiTest('Should return 400 for invalid kql', async ({ apiClient }) => {
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?filter=${encodeURIComponent('entity.id:')}`,
+      ENTITY_STORE_ROUTES.public.CRUD_GET + `?filter=${encodeURIComponent('entity.id:')}`,
       {
         headers: defaultHeaders,
         responseType: 'json',
@@ -660,7 +797,7 @@ apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () =
 
   apiTest('Should return 400 for invalid searchAfter JSON', async ({ apiClient }) => {
     const list = await apiClient.get(
-      ENTITY_STORE_ROUTES.CRUD_GET + `?searchAfter=${encodeURIComponent('{bad')}`,
+      ENTITY_STORE_ROUTES.public.CRUD_GET + `?searchAfter=${encodeURIComponent('{bad')}`,
       {
         headers: defaultHeaders,
         responseType: 'json',

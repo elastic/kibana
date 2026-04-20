@@ -14,6 +14,8 @@ import type {
   RegistryDataStream,
 } from '../types';
 
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
+
 import type { NewPackagePolicy } from '../types';
 
 import {
@@ -26,6 +28,8 @@ import {
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
   packagePolicyInputAllowsUndefinedDataStreamType,
+  hasDynamicSignalTypes,
+  shouldIncludeUseAPMVar,
 } from './policy_template';
 
 describe('isInputOnlyPolicyTemplate', () => {
@@ -168,6 +172,29 @@ describe('getNormalizedInputs', () => {
         description: 'myFoo',
       },
     ]);
+  });
+});
+
+describe('shouldIncludeUseAPMVar', () => {
+  const otelcol = OTEL_COLLECTOR_INPUT_TYPE;
+
+  it('returns true for OTel input with traces type', () => {
+    expect(shouldIncludeUseAPMVar(otelcol, 'traces', false)).toBe(true);
+  });
+
+  it('returns true for OTel input with dynamic_signal_types regardless of stream type', () => {
+    expect(shouldIncludeUseAPMVar(otelcol, 'logs', true)).toBe(true);
+    expect(shouldIncludeUseAPMVar(otelcol, 'metrics', true)).toBe(true);
+  });
+
+  it('returns false for OTel input with non-traces type and no dynamic_signal_types', () => {
+    expect(shouldIncludeUseAPMVar(otelcol, 'logs', false)).toBe(false);
+    expect(shouldIncludeUseAPMVar(otelcol, 'metrics', false)).toBe(false);
+  });
+
+  it('returns false for non-OTel input type regardless of stream type', () => {
+    expect(shouldIncludeUseAPMVar('logfile', 'traces', false)).toBe(false);
+    expect(shouldIncludeUseAPMVar('logfile', 'traces', true)).toBe(false);
   });
 });
 
@@ -441,6 +468,35 @@ describe('getNormalizedDataStreams', () => {
     const useApmVar = result[0].streams![0].vars?.find((v) => v.name === 'use_apm');
     expect(useApmVar).toBeDefined();
     expect(useApmVar?.default).toEqual(true);
+  });
+
+  it('should derive default dataset from packageName.templateName regardless of dynamic_signal_types', () => {
+    const makePkg = (name: string, dynamicSignalTypes?: boolean) =>
+      getNormalizedDataStreams({
+        ...integrationPkg,
+        type: 'input',
+        policy_templates: [
+          {
+            input: 'otelcol',
+            name,
+            template_path: 'some/path.hbl',
+            title: name,
+            description: name,
+            ...(dynamicSignalTypes !== undefined
+              ? { dynamic_signal_types: dynamicSignalTypes }
+              : {}),
+            vars: [],
+          },
+        ],
+      });
+
+    // dynamic_signal_types: true — same createDefaultDatasetName behaviour as non-dynamic
+    expect(makePkg('otlpreceiver', true)[0].dataset).toEqual('nginx.otlpreceiver');
+    expect(makePkg('otlpreceiver', true)[0].path).toEqual('nginx.otlpreceiver');
+
+    // dynamic_signal_types: false / absent — same behaviour
+    expect(makePkg('mysqlreceiver', false)[0].dataset).toEqual('nginx.mysqlreceiver');
+    expect(makePkg('mysqlreceiver')[0].dataset).toEqual('nginx.mysqlreceiver');
   });
 });
 
@@ -940,5 +996,160 @@ describe('hasMultipleEnabledPolicyTemplates', () => {
       { type: 'httpjson', policy_template: 'template_b', enabled: false },
     ]);
     expect(hasMultipleEnabledPolicyTemplates(packagePolicy)).toBe(false);
+  });
+});
+
+describe('hasDynamicSignalTypes', () => {
+  it('should return true when OTel input has dynamic_signal_types: true', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 't',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(true);
+  });
+
+  it('should return false when OTel input has dynamic_signal_types: false', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 't',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: false,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+  });
+
+  it('should return false when OTel input has no dynamic_signal_types property', () => {
+    const pkg = {
+      policy_templates: [
+        { name: 't', title: 't', input: 'otelcol', type: 'logs', template_path: 'input.yml.hbs' },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(false);
+  });
+
+  it('should return false when policyTemplateName does not match any template', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'other_template' })).toBe(false);
+  });
+
+  it('should return true when scoped to the matching policyTemplateName', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'otel_template' })).toBe(true);
+  });
+
+  it('should return false when packageInfo is undefined', () => {
+    expect(hasDynamicSignalTypes(undefined)).toBe(false);
+  });
+
+  it('should return true for a composable template where any input has dynamic_signal_types', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'my_template',
+          title: 't',
+          inputs: [
+            { type: 'otelcol', title: 't', dynamic_signal_types: true },
+            { type: 'logfile', title: 't' },
+          ],
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg)).toBe(true);
+  });
+
+  it('should return true for a composable template scoped by inputType to the dynamic input', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'my_template',
+          title: 't',
+          inputs: [
+            { type: 'otelcol', title: 't', dynamic_signal_types: true },
+            { type: 'logfile', title: 't' },
+          ],
+        },
+      ],
+    } as any as PackageInfo;
+    expect(
+      hasDynamicSignalTypes(pkg, { policyTemplateName: 'my_template', inputType: 'otelcol' })
+    ).toBe(true);
+  });
+
+  it('should return false for a composable template scoped by inputType to a non-dynamic input', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'my_template',
+          title: 't',
+          inputs: [
+            { type: 'otelcol', title: 't', dynamic_signal_types: true },
+            { type: 'logfile', title: 't' },
+          ],
+        },
+      ],
+    } as any as PackageInfo;
+    expect(
+      hasDynamicSignalTypes(pkg, { policyTemplateName: 'my_template', inputType: 'logfile' })
+    ).toBe(false);
+  });
+
+  it('should scope to the correct template in a multi-template package', () => {
+    const pkg = {
+      policy_templates: [
+        {
+          name: 'otel_template',
+          title: 't',
+          input: 'otelcol',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+          dynamic_signal_types: true,
+        },
+        {
+          name: 'logfile_template',
+          title: 't',
+          input: 'logfile',
+          type: 'logs',
+          template_path: 'input.yml.hbs',
+        },
+      ],
+    } as any as PackageInfo;
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'otel_template' })).toBe(true);
+    expect(hasDynamicSignalTypes(pkg, { policyTemplateName: 'logfile_template' })).toBe(false);
   });
 });

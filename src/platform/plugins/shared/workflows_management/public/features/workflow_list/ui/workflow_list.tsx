@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
-import { useWorkflows } from '@kbn/workflows-ui';
+import { useWorkflows, useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { ExportReferencesModal } from './export_references_modal';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';
 import { useExportWithReferences } from './use_export_with_references';
@@ -46,6 +46,14 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
+  const {
+    canCreateWorkflow,
+    canReadWorkflow,
+    canReadWorkflowExecution,
+    canExecuteWorkflow,
+    canUpdateWorkflow,
+    canDeleteWorkflow,
+  } = useWorkflowsCapabilities();
 
   const searchParams = useMemo(() => {
     if (search.enabled != null) {
@@ -110,11 +118,6 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
       ) ?? false,
     [workflows?.results]
   );
-
-  const canCreateWorkflow = application.capabilities.workflowsManagement.createWorkflow;
-  const canExecuteWorkflow = application.capabilities.workflowsManagement.executeWorkflow;
-  const canUpdateWorkflow = application.capabilities.workflowsManagement.updateWorkflow;
-  const canDeleteWorkflow = application.capabilities.workflowsManagement.deleteWorkflow;
 
   const deselectWorkflows = useCallback(() => {
     setSelectedItems([]);
@@ -270,7 +273,7 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         <EuiFlexItem grow={false}>
           <WorkflowsEmptyState
             onCreateWorkflow={onCreateWorkflow}
-            canCreateWorkflow={!!canCreateWorkflow}
+            canCreateWorkflow={canCreateWorkflow}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -329,6 +332,8 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onRequestRun={setExecuteWorkflow}
         getEditHref={getEditHref}
         canCreateWorkflow={!!canCreateWorkflow}
+        canReadWorkflow={!!canReadWorkflow}
+        canReadWorkflowExecution={!!canReadWorkflowExecution}
         canUpdateWorkflow={!!canUpdateWorkflow}
         canDeleteWorkflow={!!canDeleteWorkflow}
         canExecuteWorkflow={!!canExecuteWorkflow}

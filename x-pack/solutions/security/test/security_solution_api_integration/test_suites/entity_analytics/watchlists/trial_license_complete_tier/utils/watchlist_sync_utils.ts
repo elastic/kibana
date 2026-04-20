@@ -83,7 +83,7 @@ export const WatchlistSyncUtils = (
   };
 
   const queryWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
-    const indexName = `.entity-analytics.watchlists.${watchlistName}-${namespace}`;
+    const indexName = `.entity_analytics.watchlists.${watchlistName}-${namespace}`;
 
     const response = await es.search({
       index: indexName,
@@ -104,7 +104,7 @@ export const WatchlistSyncUtils = (
     });
 
   const deleteWatchlistIndex = async (watchlistName: string, namespace: string = 'default') => {
-    const indexName = `.entity-analytics.watchlists.${watchlistName}-${namespace}`;
+    const indexName = `.entity_analytics.watchlists.${watchlistName}-${namespace}`;
     await es.indices.delete({ index: indexName }, { ignore: [404] }).catch((err) => {
       log.error(`Error deleting watchlist index ${indexName}: ${err}`);
     });

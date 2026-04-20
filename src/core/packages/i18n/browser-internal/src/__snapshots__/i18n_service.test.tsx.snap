@@ -34,6 +34,7 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiCollapsibleNavKibanaSolution.switcherAriaLabel\\": \\"- click to switch to another solution\\",
     \\"euiCollapsibleNavKibanaSolution.groupLabel\\": \\"Navigate to solution\\",
     \\"euiColorPicker.alphaLabel\\": \\"Alpha channel (opacity) value\\",
+    \\"euiColorPicker.ariaLabel\\": \\"Select a color\\",
     \\"euiColorPicker.colorLabel\\": \\"Color value\\",
     \\"euiColorPicker.colorErrorMessage\\": \\"Invalid color value\\",
     \\"euiColorPicker.transparent\\": \\"Transparent\\",

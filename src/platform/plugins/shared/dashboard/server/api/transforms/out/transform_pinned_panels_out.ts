@@ -106,7 +106,7 @@ export function transformPinnedPanelProperties(
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ id, type, grow, width, ...rest }) => {
       return {
-        uid: id,
+        id,
         type: transformType(type),
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
@@ -130,7 +130,7 @@ function injectPinnedPanelReferences(
       try {
         transformedControls.push({
           ...rest,
-          config: transforms.transformOut(config, [], containerReferences, control.uid),
+          config: transforms.transformOut(config, [], containerReferences, control.id),
         } as DashboardControlsState[number]);
       } catch (transformOutError) {
         // do not prevent read on transformOutError

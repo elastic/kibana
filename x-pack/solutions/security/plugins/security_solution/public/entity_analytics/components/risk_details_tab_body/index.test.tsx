@@ -72,6 +72,54 @@ describe.each([EntityType.host, EntityType.user])('Risk Tab Body entityType: %s'
     });
   });
 
+  it('uses identityScopedFilterQuery when provided', () => {
+    const scoped = JSON.stringify({ term: { 'host.hostname': { value: 'h1' } } });
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody {...defaultProps} identityScopedFilterQuery={scoped} />
+      </TestProviders>
+    );
+    expect(mockUseRiskScore).toBeCalledWith(
+      expect.objectContaining({
+        filterQuery: scoped,
+      })
+    );
+  });
+
+  it('uses identityFields as bool filter when identityScopedFilterQuery is absent', () => {
+    render(
+      <TestProviders>
+        <RiskDetailsTabBody
+          {...defaultProps}
+          identityFields={{
+            'host.name': 'n1',
+            'host.hostname': 'h1',
+          }}
+        />
+      </TestProviders>
+    );
+    expect(mockUseRiskScore).toBeCalledWith(
+      expect.objectContaining({
+        filterQuery: {
+          bool: {
+            filter: [
+              {
+                match: {
+                  'host.name': { query: 'n1', type: 'phrase' },
+                },
+              },
+              {
+                match: {
+                  'host.hostname': { query: 'h1', type: 'phrase' },
+                },
+              },
+            ],
+          },
+        },
+      })
+    );
+  });
+
   it("doesn't skip when both toggleStatus are true", () => {
     render(
       <TestProviders>

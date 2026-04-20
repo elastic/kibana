@@ -20,6 +20,7 @@ function createEncryptedSavedObjectsServiceMock() {
     encryptAttributesSync: jest.fn(),
     decryptAttributesSync: jest.fn(),
     stripOrDecryptAttributesSync: jest.fn(),
+    getEncryptedAttributes: jest.fn(),
   } as unknown as jest.Mocked<EncryptedSavedObjectsService>;
 }
 

@@ -44,7 +44,6 @@ components:
       description: Identifier for an initialization flow.
       enum:
         - create-list-indices
-        # TODO: the implementation of this flow is in a follow up PR
         - security-data-views
 
     InitializationFlowsResult:
@@ -60,8 +59,7 @@ components:
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
         security-data-views:
           oneOf:
-            # TODO: replace with SecurityDataViewsReadyResult in a follow up PR
-            - $ref: '#/components/schemas/InitializationFlowReadyResult'
+            - $ref: '#/components/schemas/SecurityDataViewsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
 
     CreateListIndicesReadyResult:
@@ -74,11 +72,24 @@ components:
           enum:
             - ready
 
-    InitializationFlowReadyResult:
+    DataViewPayload:
       type: object
-      description: >-
-        Generic ready result used as a placeholder for flows whose payload
-        schema has not yet been defined.
+      required:
+        - id
+        - title
+        - patternList
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        patternList:
+          type: array
+          items:
+            type: string
+
+    SecurityDataViewsReadyResult:
+      type: object
       required:
         - status
         - payload
@@ -87,7 +98,26 @@ components:
           type: string
           enum:
             - ready
-        payload: {}
+        payload:
+          type: object
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+          properties:
+            defaultDataView:
+              $ref: '#/components/schemas/DataViewPayload'
+            alertDataView:
+              $ref: '#/components/schemas/DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/DataViewPayload'
+            kibanaDataViews:
+              type: array
+              items:
+                $ref: '#/components/schemas/DataViewPayload'
+            signalIndexName:
+              type: string
 
     InitializationFlowErrorResult:
       type: object

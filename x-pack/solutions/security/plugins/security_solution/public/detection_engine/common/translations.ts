@@ -762,6 +762,13 @@ export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
   }
 );
 
+export const MANUAL_RULE_RUN_PERMISSIONS_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunPermissionsTooltip',
+  {
+    defaultMessage: 'You need access to the "Manual rule run" privilege',
+  }
+);
+
 export const COLUMN_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.ruleTitle',
   {
@@ -1004,6 +1011,13 @@ export const GAP_FILL_STATUS_FILLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.filled',
   {
     defaultMessage: 'Filled',
+  }
+);
+
+export const GAP_FILL_STATUS_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.filters.gapStatus.error',
+  {
+    defaultMessage: 'Error',
   }
 );
 

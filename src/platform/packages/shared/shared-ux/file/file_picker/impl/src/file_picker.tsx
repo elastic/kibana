@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
@@ -77,6 +78,7 @@ type InnerProps = Required<Pick<Props, 'onClose' | 'onDone' | 'onUpload' | 'mult
 const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, multiple }) => {
   const { state, kind } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
+  const modalTitleId = useGeneratedHtmlId({ prefix: 'filePicker' });
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
   const hasQuery = useBehaviorSubject(state.hasQuery$);
@@ -94,6 +96,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       data-test-subj="filePickerModal"
       maxWidth="75vw"
       onClose={onClose}
+      aria-labelledby={modalTitleId}
       css={css`
         @media screen and (min-width: ${euiTheme.breakpoint.l}px) {
           width: 75vw;
@@ -106,7 +109,7 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
       `}
     >
       <EuiModalHeader>
-        <Title multiple={multiple} />
+        <Title multiple={multiple} id={modalTitleId} />
         <SearchField />
       </EuiModalHeader>
       {isLoading ? (

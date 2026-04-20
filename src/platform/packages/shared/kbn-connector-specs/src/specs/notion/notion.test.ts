@@ -25,6 +25,28 @@ describe('NotionConnector', () => {
     jest.clearAllMocks();
   });
 
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(NotionConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct Notion defaults', () => {
+      const oauthType = (
+        NotionConnector.auth?.types as Array<
+          string | { type: string; defaults?: Record<string, unknown> }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_authorization_code');
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://api.notion.com/v1/oauth/authorize',
+          tokenUrl: 'https://api.notion.com/v1/oauth/token',
+        },
+      });
+    });
+  });
+
   describe('searchPageOrDSByTitle action', () => {
     it('should search for pages with required parameters', async () => {
       const mockResponse = {

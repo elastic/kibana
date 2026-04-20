@@ -7,10 +7,14 @@
 
 import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { NotesDetails } from '../../../../flyout_v2/notes';
+import { useSelector } from 'react-redux';
+import { EuiPanel } from '@elastic/eui';
+import type { State } from '../../../../common/store';
+import { timelineSelectors } from '../../../../timelines/store';
+import { TimelineId } from '../../../../../common/types';
+import { useTimelineConfig } from '../../../../flyout_v2/notes/hooks/use_timeline_config';
+import { NotesDetailsContent } from '../../../../flyout_v2/notes/components/notes_details_content';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
-import { Flyouts } from '../../shared/constants/flyouts';
 
 /**
  * Notes view displayed in the document details expandable flyout left section
@@ -18,9 +22,18 @@ import { Flyouts } from '../../shared/constants/flyouts';
 export const NotesTab = memo(() => {
   const { searchHit } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as unknown as EsHitRecord), [searchHit]);
-  const isTimelineFlyout = useWhichFlyout() === Flyouts.timeline;
+  const eventId = hit.raw._id ?? '';
 
-  return <NotesDetails hit={hit} isTimelineFlyout={isTimelineFlyout} />;
+  const isTimelineOpen = useSelector(
+    (state: State) => timelineSelectors.selectTimelineById(state, TimelineId.active)?.show ?? false
+  );
+  const timelineConfig = useTimelineConfig(eventId, isTimelineOpen);
+
+  return (
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      <NotesDetailsContent hit={hit} timelineConfig={timelineConfig} hideTimelineIcon={false} />
+    </EuiPanel>
+  );
 });
 
 NotesTab.displayName = 'NotesTab';

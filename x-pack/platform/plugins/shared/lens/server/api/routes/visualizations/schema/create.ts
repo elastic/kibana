@@ -6,19 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { lensApiStateSchema } from '@kbn/lens-embeddable-utils/config_builder';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import { lensApiStateSchemaNoESQL } from '@kbn/lens-embeddable-utils/config_builder';
 
 import { lensCMCreateOptionsSchema } from '../../../../content_management';
 import { pickFromObjectSchema } from '../../../../utils';
 import { lensResponseItemSchema } from './common';
-
-export const lensCreateRequestParamsSchema = schema.object(
-  {
-    id: asCodeIdSchema,
-  },
-  { unknowns: 'forbid' }
-);
 
 export const lensCreateRequestQuerySchema = schema.object(
   {
@@ -27,6 +19,6 @@ export const lensCreateRequestQuerySchema = schema.object(
   { unknowns: 'forbid' }
 );
 
-export const lensCreateRequestBodySchema = lensApiStateSchema;
+export const lensCreateRequestBodySchema = lensApiStateSchemaNoESQL;
 
 export const lensCreateResponseBodySchema = lensResponseItemSchema;

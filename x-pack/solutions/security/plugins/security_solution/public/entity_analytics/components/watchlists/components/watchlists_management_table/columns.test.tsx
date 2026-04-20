@@ -50,8 +50,8 @@ describe('buildWatchlistsManagementTableColumns', () => {
     expect(column.name).toBeTruthy();
   });
 
-  it('renders number of users column', () => {
-    const column = getColumnByField('users.length');
+  it('renders number of entities column', () => {
+    const column = getColumnByField('entityCount');
     expect(column).toBeTruthy();
     expect(column.name).toBeTruthy();
   });
@@ -78,12 +78,6 @@ describe('buildWatchlistsManagementTableColumns', () => {
     const column = getActionsColumn();
     expect(column).toBeTruthy();
     expect(column.name).toBeTruthy();
-  });
-
-  it('renders empty tag for missing number of users', () => {
-    const column = getRenderableColumnByField('users.length');
-    const rendered = column.render?.(undefined, {} as WatchlistTableItemType);
-    expect(rendered).toEqual(getEmptyTagValue());
   });
 
   it('renders risk score weighting value when provided', () => {

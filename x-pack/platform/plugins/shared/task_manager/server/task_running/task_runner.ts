@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { withSpan } from '@kbn/apm-utils';
+import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type {
   ExecutionContextStart,
@@ -74,6 +74,7 @@ import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
+import { millisToNanos } from '../lib/millis_to_nanos';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -382,6 +383,8 @@ export class TaskManagerRunner implements TaskRunner {
           'transaction.type': TASK_MANAGER_RUN_TRANSACTION_TYPE,
           'kibana.task.type': this.taskType,
         },
+        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+        root: true,
       },
       async () => {
         const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
@@ -558,13 +561,17 @@ export class TaskManagerRunner implements TaskRunner {
 
     return withActiveSpan(
       'mark-task-as-running',
-      { attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE } },
+      {
+        attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
+        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+        root: true,
+      },
       async () => {
         const apmTrans = apm.startTransaction(
           TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
           TASK_MANAGER_TRANSACTION_TYPE
         );
-        apmTrans.addLabels({ entityId: this.taskType });
+        addSpanLabels({ entityId: this.taskType });
 
         const now = new Date();
         try {
@@ -1092,10 +1099,10 @@ export class TaskManagerRunner implements TaskRunner {
     message: string,
     error?: Error | DecoratedError
   ): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
-    const scheduleDelayMs =
+    const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
+    const scheduleDelayNs =
       task.startedAt && task.scheduledAt
-        ? task.startedAt.getTime() - task.scheduledAt.getTime()
+        ? millisToNanos(task.startedAt.getTime() - task.scheduledAt.getTime())
         : undefined;
     const errorDetails = error
       ? {
@@ -1107,7 +1114,7 @@ export class TaskManagerRunner implements TaskRunner {
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,
         outcome,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
         ...(error && this.isCancelled ? { reason: `Task "${this.id}" was cancelled.` } : {}),
@@ -1117,7 +1124,7 @@ export class TaskManagerRunner implements TaskRunner {
           id: this.id,
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
-          ...(scheduleDelayMs != null ? { schedule_delay: scheduleDelayMs } : {}),
+          ...(scheduleDelayNs != null ? { schedule_delay: scheduleDelayNs } : {}),
         },
       },
       message,
@@ -1126,11 +1133,11 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   private logTaskCancelEvent(task: ConcreteTaskInstance, taskTiming: TaskTiming): void {
-    const runDurationMs = taskTiming.stop - taskTiming.start;
+    const runDurationNs = millisToNanos(taskTiming.stop - taskTiming.start);
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskCancel,
-        duration: runDurationMs,
+        duration: runDurationNs,
         start: new Date(taskTiming.start).toISOString(),
         end: new Date(taskTiming.stop).toISOString(),
       },

@@ -222,6 +222,32 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'Service badge in full-screen waterfall navigates to the APM service overview',
+      async ({ browserAuth, page, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open trace timeline', async () => {
+          await browserAuth.loginAsViewer();
+          await openTraceTimeline(pageObjects);
+        });
+
+        await spaceTest.step('Click the service badge on the transaction row', async () => {
+          const { serviceBadge } = flyout.waterfallFlyout.getWaterfallItem(
+            RICH_TRACE.TRANSACTION_NAME
+          );
+          await expect(serviceBadge).toBeVisible();
+          await serviceBadge.click();
+        });
+
+        await spaceTest.step('Verify navigation to the APM service overview', async () => {
+          await expect(page).toHaveURL(
+            new RegExp(`/app/apm/services/${RICH_TRACE.SERVICE_NAME}/overview`)
+          );
+        });
+      }
+    );
+
+    spaceTest(
       'Open in Discover from child flyout sections navigates to the correct data',
       async ({ browserAuth, pageObjects }) => {
         const { flyout } = pageObjects.tracesExperience;

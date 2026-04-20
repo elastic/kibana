@@ -85,6 +85,12 @@ paths:
             type: array
             items:
               $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/GapFillStatus'
+        - name: gap_auto_fill_scheduler_id
+          in: query
+          description: Gap auto fill scheduler ID used to determine gap fill status for rules
+          required: false
+          schema:
+            type: string
       x-codeSamples:
         - lang: cURL
           source: |

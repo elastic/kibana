@@ -15,9 +15,9 @@ import type { RuleMigrationIntegration } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 const INTEGRATION_WEIGHTS = [
-  // Elastic Defend should be heavily boosted so that even if it is slighly relevant to the keywords, it should be available for LLM to make a correct choice. Since Defend is a general puporse integration,
-  // LLM chooses it for rules implementing broad detection logic
+  // These integrations should be boosted because in many cases they are used as fallback.
   { ids: ['endpoint'], weight: 10 },
+  { ids: ['network_traffic'], weight: 10 },
 ];
 
 const PATH_PATTERNS_TO_INCLUDE_IN_KB = ['sample_event', 'knowledge_base'];

@@ -22,6 +22,8 @@ const createPolicy = (
     enabled: true,
     matcher: null,
     groupBy: null,
+    tags: null,
+    groupingMode: null,
     throttle: null,
     snoozedUntil: null,
     destinations: [],

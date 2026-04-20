@@ -15,21 +15,15 @@ describe('Datatable ES|QL column ordering', () => {
     it('should order visualization columns as rows, split_metrics_by, then metrics', () => {
       const config: DatatableState = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM test | LIMIT 10',
         },
         sampling: 1,
         ignore_global_filters: false,
-        metrics: [
-          { operation: 'value', column: 'bytes' },
-          { operation: 'value', column: 'memory' },
-        ],
-        rows: [
-          { operation: 'value', column: 'agent' },
-          { operation: 'value', column: 'host' },
-        ],
-        split_metrics_by: [{ operation: 'value', column: 'geo.src' }],
+        metrics: [{ column: 'bytes' }, { column: 'memory' }],
+        rows: [{ column: 'agent' }, { column: 'host' }],
+        split_metrics_by: [{ column: 'geo.src' }],
       };
 
       const result = buildVisualizationState(config);
@@ -47,14 +41,14 @@ describe('Datatable ES|QL column ordering', () => {
     it('should mark row columns as isMetric: false and metric columns as isMetric: true', () => {
       const config: DatatableState = {
         type: 'data_table',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'FROM test | LIMIT 10',
         },
         sampling: 1,
         ignore_global_filters: false,
-        metrics: [{ operation: 'value', column: 'bytes' }],
-        rows: [{ operation: 'value', column: 'agent' }],
+        metrics: [{ column: 'bytes' }],
+        rows: [{ column: 'agent' }],
       };
 
       const result = buildVisualizationState(config);
@@ -71,12 +65,9 @@ describe('Datatable ES|QL column ordering', () => {
     test('returns value columns for rows, split_metrics_by, and metrics', () => {
       const config = {
         type: 'data_table',
-        metrics: [
-          { operation: 'value', column: 'bytes' },
-          { operation: 'value', column: 'requests' },
-        ],
-        rows: [{ operation: 'value', column: 'host' }],
-        split_metrics_by: [{ operation: 'value', column: 'region' }],
+        metrics: [{ column: 'bytes' }, { column: 'requests' }],
+        rows: [{ column: 'host' }],
+        split_metrics_by: [{ column: 'region' }],
       } as unknown as DatatableStateESQL;
 
       const result = getValueColumns(config);

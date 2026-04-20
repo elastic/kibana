@@ -52,21 +52,21 @@ describe('resolveSmlAttachItems', () => {
     jest.clearAllMocks();
   });
 
-  it('calls checkItemsAccess with chunk_id mapped to id and attachment_type to type', async () => {
+  it('calls checkItemsAccess with unique chunk ids', async () => {
     mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', false]]));
     await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
+      chunkIds: ['chunk-1'],
     });
     expect(mockCheckItemsAccess).toHaveBeenCalledWith({
-      items: [{ id: 'chunk-1', type: 'visualization' }],
+      ids: ['chunk-1'],
       spaceId: 'default',
       esClient: baseParams.esClient,
       request: baseParams.request,
     });
   });
 
-  it('calls getDocuments only for chunk ids that passed access check', async () => {
+  it('calls getDocuments with all unique chunk ids', async () => {
     mockCheckItemsAccess.mockResolvedValue(
       new Map([
         ['a', true],
@@ -76,13 +76,30 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map());
     await resolveSmlAttachItems({
       ...baseParams,
-      items: [
-        { chunk_id: 'a', attachment_id: 'o-a', attachment_type: 'visualization' },
-        { chunk_id: 'b', attachment_id: 'o-b', attachment_type: 'visualization' },
-      ],
+      chunkIds: ['a', 'b'],
     });
     expect(mockGetDocuments).toHaveBeenCalledWith({
-      ids: ['a'],
+      ids: ['a', 'b'],
+      spaceId: 'default',
+      esClient: baseParams.esClient,
+    });
+  });
+
+  it('dedupes chunk ids before access and document fetch', async () => {
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map());
+    await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1', 'chunk-1'],
+    });
+    expect(mockCheckItemsAccess).toHaveBeenCalledWith({
+      ids: ['chunk-1'],
+      spaceId: 'default',
+      esClient: baseParams.esClient,
+      request: baseParams.request,
+    });
+    expect(mockGetDocuments).toHaveBeenCalledWith({
+      ids: ['chunk-1'],
       spaceId: 'default',
       esClient: baseParams.esClient,
     });
@@ -93,7 +110,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map());
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
+      chunkIds: ['chunk-1'],
     });
     expect(results).toHaveLength(1);
     expect(results[0].success).toBe(false);
@@ -109,41 +126,11 @@ describe('resolveSmlAttachItems', () => {
     mockGetDocuments.mockResolvedValue(new Map());
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
+      chunkIds: ['chunk-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
       expect(results[0].message).toContain('not found in the index');
-    }
-    expect(mockGetTypeDefinition).not.toHaveBeenCalled();
-  });
-
-  it('returns error when attachment_id does not match document origin_id', async () => {
-    const smlDoc = createSmlDoc({ origin_id: 'expected' });
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
-    const results = await resolveSmlAttachItems({
-      ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'wrong', attachment_type: 'visualization' }],
-    });
-    expect(results[0].success).toBe(false);
-    if (!results[0].success) {
-      expect(results[0].message).toContain('do not match');
-    }
-    expect(mockGetTypeDefinition).not.toHaveBeenCalled();
-  });
-
-  it('returns error when attachment_type does not match document type', async () => {
-    const smlDoc = createSmlDoc({ type: 'visualization' });
-    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
-    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
-    const results = await resolveSmlAttachItems({
-      ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'dashboard' }],
-    });
-    expect(results[0].success).toBe(false);
-    if (!results[0].success) {
-      expect(results[0].message).toContain('do not match');
     }
     expect(mockGetTypeDefinition).not.toHaveBeenCalled();
   });
@@ -155,7 +142,7 @@ describe('resolveSmlAttachItems', () => {
     mockGetTypeDefinition.mockReturnValue(undefined);
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'orphan-type' }],
+      chunkIds: ['chunk-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
@@ -176,7 +163,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
+      chunkIds: ['chunk-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
@@ -200,7 +187,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
+      chunkIds: ['chunk-1'],
     });
     expect(results[0].success).toBe(true);
     if (results[0].success) {
@@ -208,8 +195,65 @@ describe('resolveSmlAttachItems', () => {
         type: 'visualization',
         data: { layers: [] },
         origin: 'custom-origin',
+        description: 'visualization/Test Viz',
       });
       expect(results[0].chunk_id).toBe('chunk-1');
+    }
+  });
+
+  it('uses toAttachment description when provided', async () => {
+    const smlDoc = createSmlDoc({ origin_id: 'so-1' });
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'visualization',
+      list: jest.fn(),
+      getSmlData: jest.fn(),
+      toAttachment: jest.fn().mockResolvedValue({
+        type: 'visualization',
+        data: { x: 1 },
+        description: 'My asset',
+      }),
+    });
+    const results = await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1'],
+    });
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment).toEqual({
+        type: 'visualization',
+        data: { x: 1 },
+        origin: 'so-1',
+        description: 'My asset',
+      });
+    }
+  });
+
+  it('falls back to smlDoc type/title when toAttachment omits description', async () => {
+    const smlDoc = createSmlDoc({
+      type: 'connector',
+      title: 'My Drive',
+      origin_id: 'so-1',
+    });
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'connector',
+      list: jest.fn(),
+      getSmlData: jest.fn(),
+      toAttachment: jest.fn().mockResolvedValue({
+        type: 'connector',
+        data: { connector_id: 'c1' },
+      }),
+    });
+    const results = await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1'],
+    });
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment.description).toBe('connector/My Drive');
     }
   });
 
@@ -225,13 +269,12 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [
-        { chunk_id: 'chunk-1', attachment_id: 'fallback-origin', attachment_type: 'visualization' },
-      ],
+      chunkIds: ['chunk-1'],
     });
     expect(results[0].success).toBe(true);
     if (results[0].success) {
       expect(results[0].attachment.origin).toBe('fallback-origin');
+      expect(results[0].attachment.description).toBe('visualization/Test Viz');
     }
   });
 
@@ -247,7 +290,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [{ chunk_id: 'chunk-1', attachment_id: 'ref-1', attachment_type: 'visualization' }],
+      chunkIds: ['chunk-1'],
     });
     expect(results[0].success).toBe(false);
     if (!results[0].success) {
@@ -256,7 +299,7 @@ describe('resolveSmlAttachItems', () => {
     expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('boom'));
   });
 
-  it('processes multiple items independently', async () => {
+  it('processes multiple chunk ids independently', async () => {
     const docOk = createSmlDoc({ id: 'chunk-ok', origin_id: 'r-ok' });
     mockCheckItemsAccess.mockResolvedValue(
       new Map([
@@ -273,10 +316,7 @@ describe('resolveSmlAttachItems', () => {
     });
     const results = await resolveSmlAttachItems({
       ...baseParams,
-      items: [
-        { chunk_id: 'chunk-denied', attachment_id: 'x', attachment_type: 'visualization' },
-        { chunk_id: 'chunk-ok', attachment_id: 'r-ok', attachment_type: 'visualization' },
-      ],
+      chunkIds: ['chunk-denied', 'chunk-ok'],
     });
     expect(results).toHaveLength(2);
     expect(results[0].success).toBe(false);
@@ -286,6 +326,7 @@ describe('resolveSmlAttachItems', () => {
         type: 'visualization',
         data: {},
         origin: 'r-ok',
+        description: 'visualization/Test Viz',
       });
     }
   });

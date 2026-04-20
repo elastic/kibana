@@ -8,7 +8,7 @@
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import { significantEventsPrompt } from '@kbn/streams-ai/src/significant_events/prompt';
 import { tags } from '@kbn/scout';
-import kbnDatemath from '@kbn/datemath';
+
 import { getCurrentTraceId, createSpanLatencyEvaluator } from '@kbn/evals';
 import type { Feature, Streams } from '@kbn/streams-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
@@ -145,12 +145,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
           await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
 
-          const query = extractionScenario?.input.log_query_filter ?? { match_all: {} };
-
+          const query = extractionScenario?.input.log_query_filter ?? [{ match_all: {} }];
           const searchResult = await esClient.search<Record<string, unknown>>({
             index: MANAGED_STREAM_SEARCH_PATTERN,
             size: SAMPLE_DOCS_SIZE,
-            query,
+            query: { bool: { filter: query } },
             sort: [{ '@timestamp': { order: 'desc' } }],
           });
 
@@ -198,10 +197,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: KI query generation: ${scenario.input.scenario_id} (${dataset.id}) (${kiSource})`,
-                  description: `[${dataset.id}] ${scenario.input.stream_description}`,
+                  name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
+                  description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
                   examples: [
                     {
+                      id: scenario.input.scenario_id,
                       input: {
                         ...scenario.input,
                         features: kis,
@@ -241,8 +241,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                   const { queries, toolUsage } = await generateSignificantEvents({
                     stream,
                     esClient,
-                    start: kbnDatemath.parse('now-24h')!.valueOf(),
-                    end: kbnDatemath.parse('now')!.valueOf(),
                     inferenceClient,
                     logger,
                     signal: new AbortController().signal,
@@ -254,7 +252,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                     `[DEBUG] Tool usage: get_stream_features calls=${toolUsage.get_stream_features.calls}, failures=${toolUsage.get_stream_features.failures}; add_queries calls=${toolUsage.add_queries.calls}, failures=${toolUsage.add_queries.failures}; generated_queries=${queries.length}`
                   );
 
-                  return { queries, traceId: getCurrentTraceId() };
+                  return { queries, toolUsage, traceId: getCurrentTraceId() };
                 },
               },
               [
@@ -269,6 +267,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 evaluators.traceBasedEvaluators.inputTokens,
                 evaluators.traceBasedEvaluators.outputTokens,
                 evaluators.traceBasedEvaluators.cachedTokens,
+                evaluators.traceBasedEvaluators.toolCalls,
                 createSpanLatencyEvaluator({ traceEsClient, log, spanName: 'ChatComplete' }),
               ]
             );
@@ -322,8 +321,6 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
               const { queries } = await generateSignificantEvents({
                 stream: streamFromApi as Streams.all.Definition,
                 esClient,
-                start: kbnDatemath.parse('now-24h')!.valueOf(),
-                end: kbnDatemath.parse('now')!.valueOf(),
                 inferenceClient,
                 logger,
                 signal: new AbortController().signal,

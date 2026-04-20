@@ -17,11 +17,19 @@ export const notificationPolicyMappings: SavedObjectsTypeMappingDefinition = {
     description: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
     enabled: { type: 'boolean' },
     groupBy: { type: 'keyword' },
+    tags: { type: 'keyword' },
+    groupingMode: { type: 'keyword' },
     destinations: {
       type: 'object',
       properties: {
         type: { type: 'keyword' },
         id: { type: 'keyword' },
+      },
+    },
+    throttle: {
+      type: 'object',
+      properties: {
+        strategy: { type: 'keyword' },
       },
     },
     snoozedUntil: { type: 'date' },

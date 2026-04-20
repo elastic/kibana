@@ -18,7 +18,10 @@ const columnEventOutcomeFailure = `column-event-outcome-failure-id-${uuidv4()}`;
 const columnTimestampSuccess = `column-timestamp-success-id-${uuidv4()}`;
 const columnEventOutcomeSuccess = `column-event-outcome-success-id-${uuidv4()}`;
 
-export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme }) =>
+export const getAuthenticationLensAttributes: GetLensAttributes = ({
+  euiTheme,
+  extraOptions = {},
+}) =>
   ({
     title: 'Authentication',
     description: '',
@@ -105,6 +108,7 @@ export const getAuthenticationLensAttributes: GetLensAttributes = ({ euiTheme })
             },
           },
         },
+        ...(extraOptions.filters ?? []),
       ],
       datasourceStates: {
         formBased: {

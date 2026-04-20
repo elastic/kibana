@@ -100,7 +100,7 @@ export const useCasesColumnsConfiguration = (
     status: {
       field: 'status',
       name: i18n.STATUS,
-      canDisplay: canDisplayDefault && !isSelectorView,
+      canDisplay: canDisplayDefault,
       isCheckedDefault: true,
     },
     severity: {

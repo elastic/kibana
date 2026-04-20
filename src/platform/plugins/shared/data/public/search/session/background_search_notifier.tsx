@@ -54,9 +54,11 @@ export class BackgroundSearchNotifier {
             map((loadedStatuses) => ({ loadedStatuses, existingIds })),
             catchError(() =>
               of({
-                loadedStatuses: { statuses: {}, sessions: {} } as {
-                  statuses: Record<string, SearchSessionStatusResponse>;
-                  sessions: SearchSessionStatusesResponse['sessions'];
+                loadedStatuses: {
+                  statuses: Object.fromEntries(
+                    existingIds.map((id) => [id, { status: SearchSessionStatus.IN_PROGRESS }])
+                  ) satisfies Record<string, SearchSessionStatusResponse>,
+                  sessions: {} satisfies SearchSessionStatusesResponse['sessions'],
                 },
                 existingIds,
               })
@@ -87,12 +89,27 @@ export class BackgroundSearchNotifier {
 
     for (const existingId of existingIds) {
       const sessionStatus = loadedStatuses[existingId];
-      if (!sessionStatus || sessionStatus.status === SearchSessionStatus.IN_PROGRESS)
+      if (!sessionStatus) continue;
+      else if (sessionStatus.status === SearchSessionStatus.IN_PROGRESS)
         inProgressIds.push(existingId);
       else if (sessionStatus.status === SearchSessionStatus.COMPLETE)
         completedSessions.push(this.buildNotificationInfo(existingId, loadedSessions[existingId]));
       else failedSessions.push(this.buildNotificationInfo(existingId, loadedSessions[existingId]));
     }
+
+    // It's possible that while the polling is running new sessions are added to the list. For example:
+    //
+    // 1. Timer fires → getInProgressSessionIds() snapshots ['session-A'] as existingIds
+    // 2. sessionsClient.status(['session-A']) goes out (async, potentially slow)
+    // 3. New session session-B is added to localStorage
+    // 4. Response comes back → groupSessions only processes existingIds (['session-A'])
+    // 5. setInProgressSessionIds(['session-A']) overwrites localStorage, silently dropping session-B
+    //
+    // To prevent this from happening, we need to check for new sessions that were added while the polling was running.
+    const currentSessions = getInProgressSessionIds();
+    const polledIds = new Set(existingIds);
+    const newSessionIds = currentSessions.filter((id) => !polledIds.has(id));
+    inProgressIds.push(...newSessionIds);
 
     return { inProgressIds, completedSessions, failedSessions };
   }

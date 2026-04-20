@@ -1,4 +1,4 @@
-title: Field map objects in the get rule types response 
+title: Field map objects in the get rule types response
 type: object
 properties:
   array:
@@ -20,7 +20,7 @@ properties:
     description: Indicates whether field values are indexed.
   path:
     type: string
-    description: TBD
+    description: Indicates the path to the field.
   properties:
     type: object
     description: >
@@ -31,7 +31,7 @@ properties:
       properties:
         type:
           type: string
-          description: The data type for each object property. 
+          description: The data type for each object property.
   required:
     type: boolean
     description: Indicates whether the field is required.
@@ -40,7 +40,7 @@ properties:
     description: >
       The scaling factor to use when encoding values.
       This property is applicable when `type` is `scaled_float`.
-      Values will be multiplied by this factor at index time and rounded to the closest long value. 
+      Values will be multiplied by this factor at index time and rounded to the closest long value.
   type:
     type: string
     description: Specifies the data type for the field.

@@ -23,6 +23,8 @@ import { useRuleWithFallback } from '../../../detection_engine/rule_management/l
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { getColumns } from '../../prevalence/utils/get_columns';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { alertFlyoutHistoryKey } from '../constants/flyout_history';
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -88,6 +90,7 @@ const nonAlertMockHit = createMockHit({
   'event.kind': 'event',
   'signal.rule.id': 'rule-2',
 });
+const onAlertUpdated = jest.fn();
 
 describe('InsightsSection', () => {
   const mockUseExpandSection = jest.mocked(useExpandSection);
@@ -104,7 +107,7 @@ describe('InsightsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <InsightsSection hit={hit} />
+            <InsightsSection hit={hit} onAlertUpdated={onAlertUpdated} />
           </Router>
         </Provider>
       </IntlProvider>
@@ -170,7 +173,7 @@ describe('InsightsSection', () => {
       <IntlProvider locale="en">
         <Provider store={store}>
           <Router history={history}>
-            <InsightsSection hit={nonAlertMockHit} />
+            <InsightsSection hit={nonAlertMockHit} onAlertUpdated={onAlertUpdated} />
           </Router>
         </Provider>
       </IntlProvider>
@@ -185,6 +188,13 @@ describe('InsightsSection', () => {
     fireEvent.click(getByTestId('correlationsOverviewMock'));
 
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: alertFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
   });
 
   it('opens prevalence flyout and uses timeline-enabled columns in Security Solution', () => {
@@ -203,5 +213,12 @@ describe('InsightsSection', () => {
     fireEvent.click(getByTestId('prevalenceOverviewMock'));
 
     expect(mockGetColumns).toHaveBeenCalledWith(expect.any(Function), false, '');
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
+        session: 'start',
+      })
+    );
   });
 });

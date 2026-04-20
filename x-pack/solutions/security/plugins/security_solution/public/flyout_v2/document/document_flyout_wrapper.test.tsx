@@ -37,13 +37,17 @@ const mockDataView = {
   getIndexPattern: () => 'logs-*',
 };
 
-const renderDocumentFlyoutWrapper = () =>
+const renderDocumentFlyoutWrapper = (
+  props: Partial<React.ComponentProps<typeof DocumentFlyoutWrapper>> = {}
+) =>
   render(
     <TestProviders>
       <DocumentFlyoutWrapper
         documentId="doc-id"
         indexName="my-index"
         renderCellActions={jest.fn()}
+        onAlertUpdated={jest.fn()}
+        {...props}
       />
     </TestProviders>
   );
@@ -119,16 +123,32 @@ describe('DocumentFlyoutWrapper', () => {
 
   it('renders DocumentFlyout when document is found', () => {
     const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
-    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, hit, jest.fn()]);
+    const refetchDocument = jest.fn();
+    const onAlertUpdated = jest.fn();
+    (useEsDocSearch as jest.Mock).mockReturnValue([
+      ElasticRequestState.Found,
+      hit,
+      refetchDocument,
+    ]);
 
-    const { getByTestId } = renderDocumentFlyoutWrapper();
+    const { getByTestId } = renderDocumentFlyoutWrapper({ onAlertUpdated });
 
     expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
     expect(mockDocumentFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
         hit,
+        onAlertUpdated: expect.any(Function),
       })
     );
+
+    const latestProps = mockDocumentFlyout.mock.calls.at(-1)?.[0] as {
+      onAlertUpdated: () => void;
+    };
+
+    latestProps.onAlertUpdated();
+
+    expect(onAlertUpdated).toHaveBeenCalledTimes(1);
+    expect(refetchDocument).toHaveBeenCalledTimes(1);
   });
 
   it('renders not-found state when no document matches', () => {
@@ -145,6 +165,36 @@ describe('DocumentFlyoutWrapper', () => {
     const { getByTestId } = renderDocumentFlyoutWrapper();
 
     expect(getByTestId('document-overview-fetch-error')).toBeInTheDocument();
+  });
+
+  it('renders data view error when the data view has no matched indices', () => {
+    (useDataView as jest.Mock).mockReturnValue({
+      status: 'ready',
+      dataView: {
+        ...mockDataView,
+        hasMatchedIndices: () => false,
+      },
+    });
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.NotFound, null, jest.fn()]);
+
+    const { getByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('document-overview-wrapper-data-view-error')).toBeInTheDocument();
+    expect(useEsDocSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skip: true,
+      })
+    );
+  });
+
+  it('renders nothing when the document request returns found without a hit', () => {
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, null, jest.fn()]);
+
+    const { queryByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
+    expect(queryByTestId('document-overview-fetch-error')).not.toBeInTheDocument();
+    expect(queryByTestId('document-overview-wrapper-not-found')).not.toBeInTheDocument();
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {

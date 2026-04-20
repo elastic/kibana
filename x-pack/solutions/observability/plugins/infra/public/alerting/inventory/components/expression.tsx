@@ -45,6 +45,7 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { Query } from '@kbn/es-query';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { schemaTranslationMap } from '../../../components/schema_selector';
 import { UnifiedSearchBar } from '../../../components/shared/unified_search_bar';
 import type { SnapshotCustomMetricInput } from '../../../../common/http_api';
@@ -326,7 +327,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
             <div css={NonCollapsibleExpressionCss}>
               <ExpressionDropDown
                 options={schemaOptions}
-                value={ruleParams.schema ?? 'ecs'}
+                value={ruleParams.schema ?? DEFAULT_SCHEMA}
                 onChange={updateSchema}
                 description={i18n.translate(
                   'xpack.infra.metrics.alertFlyout.expression.schema.descriptionLabel',
@@ -401,7 +402,7 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
           color="primary"
           iconSide="left"
           flush="left"
-          iconType="plusInCircleFilled"
+          iconType="plusCircle"
           onClick={addExpression}
         >
           <FormattedMessage
@@ -633,7 +634,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="infraExpressionRowButton"
-            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
             onClick={toggle}
             aria-label={i18n.translate('xpack.infra.metrics.alertFlyout.expandRowLabel', {
               defaultMessage: 'Expand row.',
@@ -693,7 +694,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   )}
                   iconSize="s"
                   color="text"
-                  iconType="minusInCircleFilled"
+                  iconType="minusCircle"
                   onClick={toggleWarningThreshold}
                 />
               </EuiFlexGroup>
@@ -713,7 +714,7 @@ export const ExpressionRow = (props: PropsWithChildren<ExpressionRowProps>) => {
                   color="primary"
                   flush="left"
                   size="xs"
-                  iconType="plusInCircleFilled"
+                  iconType="plusCircle"
                   onClick={toggleWarningThreshold}
                 >
                   <FormattedMessage

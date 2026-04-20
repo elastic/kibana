@@ -31,8 +31,9 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
     path: `${LENS_INTERNAL_VIS_API_PATH}/{id}`,
     access: 'internal',
     enableQueryVersion: true,
-    summary: 'Update Lens visualization',
-    description: 'Update an existing Lens visualization.',
+    summary: 'Create or update Lens visualization',
+    description:
+      'Create or update a Lens visualization with the given id. When no visualization exists for the id, one is created.',
     options: {
       tags: ['oas-tag:Lens'],
       availability: {
@@ -61,6 +62,10 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
             body: () => lensUpdateResponseBodySchema,
             description: 'Ok',
           },
+          201: {
+            body: () => lensUpdateResponseBodySchema,
+            description: 'Created',
+          },
           400: {
             description: 'Malformed request',
           },
@@ -69,9 +74,6 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
           },
           403: {
             description: 'Forbidden',
-          },
-          404: {
-            description: 'Resource not found',
           },
           500: {
             description: 'Internal Server Error',
@@ -94,6 +96,15 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
       const { references, ...data } = getLensInternalRequestConfig(builder, req.body);
       const options: LensUpdateIn['options'] = { ...req.query, references };
 
+      let createdNew = false;
+      try {
+        await client.get(req.params.id);
+      } catch (error) {
+        if (isBoom(error) && error.output.statusCode === 404) {
+          createdNew = true;
+        }
+      }
+
       try {
         const { result } = await client.update(req.params.id, data, options);
 
@@ -102,21 +113,19 @@ export const registerLensInternalVisualizationsUpdateAPIRoute: RegisterAPIRouteF
         }
 
         const responseItem = getLensInternalResponseItem(builder, result.item);
+
+        if (createdNew) {
+          return res.created<LensUpdateResponseBody>({
+            body: responseItem,
+          });
+        }
+
         return res.ok<LensUpdateResponseBody>({
           body: responseItem,
         });
       } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A Lens visualization with id [${req.params.id}] was not found.`,
-              },
-            });
-          }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
+        if (isBoom(error) && error.output.statusCode === 403) {
+          return res.forbidden();
         }
 
         return boomify(error); // forward unknown error

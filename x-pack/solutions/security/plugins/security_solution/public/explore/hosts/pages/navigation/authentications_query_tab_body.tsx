@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import type { HostsComponentsQueryProps } from './types';
+
 import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 import { AuthenticationsHostTable } from '../../../components/authentication/authentications_host_table';
 import { histogramConfigs } from '../../../components/authentication/helpers';
+import type { HostsComponentsQueryProps } from './types';
 
 const HISTOGRAM_QUERY_ID = 'authenticationsHistogramQuery';
 
@@ -17,17 +18,20 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
   deleteQuery,
   endDate,
   filterQuery,
+  identityScopedFilterQuery,
   indexNames,
   skip,
   setQuery,
   startDate,
   type,
 }) => {
+  const effectiveFilterQuery = identityScopedFilterQuery ?? filterQuery;
+
   return (
     <>
       <MatrixHistogram
         endDate={endDate}
-        filterQuery={filterQuery}
+        filterQuery={effectiveFilterQuery}
         id={HISTOGRAM_QUERY_ID}
         startDate={startDate}
         {...histogramConfigs}
@@ -35,7 +39,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
 
       <AuthenticationsHostTable
         endDate={endDate}
-        filterQuery={filterQuery}
+        filterQuery={effectiveFilterQuery}
         indexNames={indexNames}
         setQuery={setQuery}
         deleteQuery={deleteQuery}

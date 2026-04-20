@@ -10,7 +10,6 @@ import type { Logger } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { compositeSloDefinitionSchema, storedCompositeSloDefinitionSchema } from '@kbn/slo-schema';
-import { isLeft } from 'fp-ts/Either';
 import type { CompositeSLODefinition, StoredCompositeSLODefinition } from '../domain/models';
 import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_COMPOSITE_TYPE } from '../saved_objects';
@@ -27,6 +26,7 @@ export interface CompositeSLORepository {
   create(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition>;
   update(compositeSlo: CompositeSLODefinition): Promise<CompositeSLODefinition>;
   findById(id: string): Promise<CompositeSLODefinition>;
+  findAllByIds(ids: string[]): Promise<CompositeSLODefinition[]>;
   deleteById(id: string): Promise<void>;
   search(params: SearchParams): Promise<Paginated<CompositeSLODefinition>>;
 }
@@ -45,11 +45,8 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
       throw new SLOIdConflict(`Composite SLO [${compositeSlo.id}] already exists`);
     }
 
-    const storedAttributes = storedCompositeSloDefinitionSchema.encode(compositeSlo);
-    await this.soClient.create<StoredCompositeSLODefinition>(
-      SO_SLO_COMPOSITE_TYPE,
-      storedAttributes
-    );
+    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore);
 
     return compositeSlo;
   }
@@ -66,12 +63,11 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     }
 
     const existingSavedObjectId = findResponse.saved_objects[0].id;
-    const storedAttributes = storedCompositeSloDefinitionSchema.encode(compositeSlo);
-    await this.soClient.create<StoredCompositeSLODefinition>(
-      SO_SLO_COMPOSITE_TYPE,
-      storedAttributes,
-      { id: existingSavedObjectId, overwrite: true }
-    );
+    const toStore = storedCompositeSloDefinitionSchema.parse(compositeSlo);
+    await this.soClient.create<StoredCompositeSLODefinition>(SO_SLO_COMPOSITE_TYPE, toStore, {
+      id: existingSavedObjectId,
+      overwrite: true,
+    });
 
     return compositeSlo;
   }
@@ -94,6 +90,23 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
     }
 
     return compositeSlo;
+  }
+
+  async findAllByIds(ids: string[]): Promise<CompositeSLODefinition[]> {
+    if (ids.length === 0) return [];
+
+    const response = await this.soClient.find<StoredCompositeSLODefinition>({
+      type: SO_SLO_COMPOSITE_TYPE,
+      page: 1,
+      perPage: ids.length,
+      filter: `${SO_SLO_COMPOSITE_TYPE}.attributes.id:(${ids
+        .map((id) => escapeKuery(id))
+        .join(' or ')})`,
+    });
+
+    return response.saved_objects
+      .map((so) => this.toCompositeSLO(so.attributes))
+      .filter(this.isCompositeSLO);
   }
 
   async deleteById(id: string): Promise<void> {
@@ -138,25 +151,27 @@ export class DefaultCompositeSLORepository implements CompositeSLORepository {
       sortOrder: sortDirection,
     });
 
+    const results = response.saved_objects
+      .map((so) => this.toCompositeSLO(so.attributes))
+      .filter(this.isCompositeSLO);
+
     return {
-      total: response.total,
+      total: response.total - (response.saved_objects.length - results.length),
       perPage: response.per_page,
       page: response.page,
-      results: response.saved_objects
-        .map((so) => this.toCompositeSLO(so.attributes))
-        .filter(this.isCompositeSLO),
+      results,
     };
   }
 
   private toCompositeSLO(stored: StoredCompositeSLODefinition): CompositeSLODefinition | undefined {
-    const result = compositeSloDefinitionSchema.decode(stored);
+    const result = compositeSloDefinitionSchema.safeParse(stored);
 
-    if (isLeft(result)) {
+    if (!result.success) {
       this.logger.debug(`Invalid stored composite SLO with id [${stored.id}]`);
       return undefined;
     }
 
-    return result.right;
+    return result.data;
   }
 
   private isCompositeSLO(slo: CompositeSLODefinition | undefined): slo is CompositeSLODefinition {

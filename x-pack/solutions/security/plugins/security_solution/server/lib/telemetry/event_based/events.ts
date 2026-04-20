@@ -314,6 +314,171 @@ export const RISK_SCORE_EXECUTION_CANCELLATION_EVENT: EventTypeOpts<{
   },
 };
 
+export type RiskScoreMaintainerStatus = 'success' | 'error' | 'skipped' | 'aborted';
+export type RiskScoreMaintainerSkipReason =
+  | 'license_insufficient'
+  | 'feature_disabled'
+  | 'risk_engine_disabled'
+  | 'reset_to_zero_disabled'
+  | 'lookup_empty'
+  | 'resolution_disabled'
+  | 'phase_not_available';
+export type RiskScoreMaintainerErrorKind =
+  | 'esql_query_failed'
+  | 'bulk_write_failed'
+  | 'entity_store_write_failed'
+  | 'entity_fetch_failed'
+  | 'unexpected';
+export type RiskScoreMaintainerStage =
+  | 'phase1_base_scoring'
+  | 'phase1_lookup_sync'
+  | 'phase2_resolution_scoring'
+  | 'reset_to_zero';
+
+export const RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT: EventTypeOpts<{
+  namespace: string;
+  entityType: string;
+  status: RiskScoreMaintainerStatus;
+  skipReason?: RiskScoreMaintainerSkipReason;
+  errorKind?: RiskScoreMaintainerErrorKind;
+  durationMs: number;
+  scoresWrittenTotal: number;
+  scoresWrittenBase: number;
+  scoresWrittenResolution: number;
+  scoresWrittenResetToZero: number;
+  pagesProcessed: number;
+  deferToPhase2Count: number;
+  notInStoreCount: number;
+  lookupDocsUpserted: number;
+  lookupDocsDeleted: number;
+  lookupPrunedDocs: number;
+  idBasedRiskScoringEnabled: boolean;
+}> = {
+  eventType: 'risk_score_maintainer_run_summary',
+  schema: {
+    namespace: { type: 'keyword', _meta: { description: 'Kibana space where scoring ran' } },
+    entityType: { type: 'keyword', _meta: { description: 'Entity type scored (e.g. host, user)' } },
+    status: { type: 'keyword', _meta: { description: 'Run outcome status' } },
+    skipReason: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Bounded reason when status is skipped' },
+    },
+    errorKind: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Bounded error category when status is error' },
+    },
+    durationMs: { type: 'long', _meta: { description: 'Run duration in milliseconds' } },
+    scoresWrittenTotal: { type: 'long', _meta: { description: 'Total risk score docs written' } },
+    scoresWrittenBase: {
+      type: 'long',
+      _meta: { description: 'Risk score docs written during base scoring stage' },
+    },
+    scoresWrittenResolution: {
+      type: 'long',
+      _meta: { description: 'Risk score docs written during resolution scoring stage' },
+    },
+    scoresWrittenResetToZero: {
+      type: 'long',
+      _meta: { description: 'Risk score docs written during reset-to-zero stage' },
+    },
+    pagesProcessed: {
+      type: 'long',
+      _meta: { description: 'Number of base-scoring pages processed' },
+    },
+    deferToPhase2Count: {
+      type: 'long',
+      _meta: { description: 'Entities classified as defer_to_phase_2' },
+    },
+    notInStoreCount: {
+      type: 'long',
+      _meta: { description: 'Entities classified as not_in_store' },
+    },
+    lookupDocsUpserted: {
+      type: 'long',
+      _meta: { description: 'Lookup docs upserted during phase-1 lookup synchronization' },
+    },
+    lookupDocsDeleted: {
+      type: 'long',
+      _meta: { description: 'Lookup docs deleted during phase-1 lookup synchronization' },
+    },
+    lookupPrunedDocs: {
+      type: 'long',
+      _meta: { description: 'Lookup docs pruned after reset-to-zero cleanup' },
+    },
+    idBasedRiskScoringEnabled: {
+      type: 'boolean',
+      _meta: { description: 'Whether Entity Store dual-write was enabled' },
+    },
+  },
+};
+
+export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<{
+  namespace: string;
+  entityType: string;
+  stage: RiskScoreMaintainerStage;
+  status: RiskScoreMaintainerStatus;
+  skipReason?: RiskScoreMaintainerSkipReason;
+  errorKind?: RiskScoreMaintainerErrorKind;
+  durationMs: number;
+  pagesProcessed?: number;
+  scoresWritten?: number;
+  deferToPhase2Count?: number;
+  notInStoreCount?: number;
+  lookupDocsUpserted?: number;
+  lookupDocsDeleted?: number;
+  resetBatchLimitHit?: boolean;
+  idBasedRiskScoringEnabled: boolean;
+}> = {
+  eventType: 'risk_score_maintainer_stage_summary',
+  schema: {
+    namespace: { type: 'keyword', _meta: { description: 'Kibana space where scoring ran' } },
+    entityType: { type: 'keyword', _meta: { description: 'Entity type scored (e.g. host, user)' } },
+    stage: { type: 'keyword', _meta: { description: 'Maintainer stage identifier' } },
+    status: { type: 'keyword', _meta: { description: 'Stage outcome status' } },
+    skipReason: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Bounded reason when status is skipped' },
+    },
+    errorKind: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Bounded error category when status is error' },
+    },
+    durationMs: { type: 'long', _meta: { description: 'Stage duration in milliseconds' } },
+    pagesProcessed: {
+      type: 'long',
+      _meta: { optional: true, description: 'Number of pages processed in this stage' },
+    },
+    scoresWritten: {
+      type: 'long',
+      _meta: { optional: true, description: 'Risk score docs written in this stage' },
+    },
+    deferToPhase2Count: {
+      type: 'long',
+      _meta: { optional: true, description: 'Entities classified as defer_to_phase_2' },
+    },
+    notInStoreCount: {
+      type: 'long',
+      _meta: { optional: true, description: 'Entities classified as not_in_store' },
+    },
+    lookupDocsUpserted: {
+      type: 'long',
+      _meta: { optional: true, description: 'Lookup docs upserted in this stage' },
+    },
+    lookupDocsDeleted: {
+      type: 'long',
+      _meta: { optional: true, description: 'Lookup docs deleted in this stage' },
+    },
+    resetBatchLimitHit: {
+      type: 'boolean',
+      _meta: { optional: true, description: 'Whether reset-to-zero hit per-run batch limit' },
+    },
+    idBasedRiskScoringEnabled: {
+      type: 'boolean',
+      _meta: { description: 'Whether Entity Store dual-write was enabled' },
+    },
+  },
+};
+
 interface AssetCriticalitySystemProcessedAssignmentFileEvent {
   processing: {
     startTime: string;
@@ -471,119 +636,6 @@ export const ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT: EventTypeOpts<{
   },
 };
 
-export const ENTITY_STORE_HEALTH_REPORT_EVENT: EventTypeOpts<{
-  engines: Array<{
-    type: string;
-    status: string;
-    delay: string;
-    frequency: string;
-    docsPerSecond: number;
-    lookbackPeriod: string;
-    fieldHistoryLength: number;
-    indexPattern: string;
-    filter: string;
-    timestampField: string;
-    components: Array<{
-      id: string;
-      resource: string;
-      installed: boolean;
-      health?: string;
-    }>;
-  }>;
-}> = {
-  eventType: 'entity_store_health_report',
-  schema: {
-    engines: {
-      type: 'array',
-      items: {
-        properties: {
-          type: {
-            type: 'keyword',
-            _meta: { description: 'Engine type (e.g "host" or "generic")' },
-          },
-          status: {
-            type: 'keyword',
-            _meta: {
-              description: 'Overall engine status',
-            },
-          },
-          delay: {
-            type: 'keyword',
-            _meta: {
-              description: 'Initial data processing delay (human readable, e.g., "5s")',
-            },
-          },
-          frequency: {
-            type: 'keyword',
-            _meta: { description: 'Run frequency (e.g., "1m", "15m")' },
-          },
-          docsPerSecond: {
-            type: 'double',
-            _meta: { description: 'Indexing rate in documents per second' },
-          },
-          lookbackPeriod: {
-            type: 'keyword',
-            _meta: {
-              description: 'Lookback period used by the engine (e.g., "7d")',
-            },
-          },
-          fieldHistoryLength: {
-            type: 'long',
-            _meta: {
-              description: 'Number of historical field entries retained',
-            },
-          },
-          indexPattern: {
-            type: 'keyword',
-            _meta: { description: 'Additional index pattern ingested by the transform' },
-          },
-          filter: {
-            type: 'keyword',
-            _meta: {
-              description: 'Optional filter applied to ingested documents',
-            },
-          },
-          timestampField: {
-            type: 'keyword',
-            _meta: {
-              description:
-                'Name of the timestamp field used for all operations (e.g. "@timestamp")',
-            },
-          },
-          components: {
-            type: 'array',
-            items: {
-              properties: {
-                id: {
-                  type: 'keyword',
-                  _meta: { description: 'Component identifier' },
-                },
-                resource: {
-                  type: 'keyword',
-                  _meta: {
-                    description: 'Type of the component (e.g. "index" or "transform")',
-                  },
-                },
-                installed: {
-                  type: 'boolean',
-                  _meta: { description: 'Whether the component is installed' },
-                },
-                health: {
-                  type: 'keyword',
-                  _meta: {
-                    optional: true,
-                    description: 'Reported component health; Present for transforms',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  },
-};
-
 export const ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT: EventTypeOpts<{
   error: string;
 }> = {
@@ -726,34 +778,6 @@ export const ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT: EventTypeOpts<{
       _meta: {
         optional: true,
         description: 'Contains the error message in case the tool usage was not successful',
-      },
-    },
-  },
-};
-
-export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
-  storeSize: number;
-  entityType: string;
-  namespace: string;
-}> = {
-  eventType: 'entity_store_usage',
-  schema: {
-    storeSize: {
-      type: 'long',
-      _meta: {
-        description: 'Number of entities stored in the entity store by type and namespace',
-      },
-    },
-    entityType: {
-      type: 'keyword',
-      _meta: {
-        description: 'Type of entities stored (e.g. "host")',
-      },
-    },
-    namespace: {
-      type: 'keyword',
-      _meta: {
-        description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
   },
@@ -1543,6 +1567,49 @@ export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<Health
           description: 'Circuit breaker metrics such as execution time and memory usage.',
         },
       },
+      descriptorVersion: {
+        type: 'integer',
+        _meta: {
+          description: 'Version of the query descriptor that produced this event.',
+        },
+      },
+      status: {
+        type: 'keyword',
+        _meta: {
+          description: "Execution status: 'success', 'failed', or 'skipped'.",
+        },
+      },
+      skipReason: {
+        type: 'keyword',
+        _meta: {
+          optional: true,
+          description:
+            "Reason for skipping: 'datastreams_not_matched', 'integration_not_installed' or 'unknown_version'.",
+        },
+      },
+      integration: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Name of the matched integration.' },
+          },
+          version: {
+            type: 'keyword',
+            _meta: { description: 'Version of the matched integration.' },
+          },
+          indices: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Index patterns for this integration after type filtering.' },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Integration resolution metadata. Present only for v2 query descriptors.',
+        },
+      },
     },
   };
 
@@ -1798,6 +1865,8 @@ export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
   RISK_SCORE_EXECUTION_CANCELLATION_EVENT,
+  RISK_SCORE_MAINTAINER_RUN_SUMMARY_EVENT,
+  RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT,
   ASSET_CRITICALITY_SYSTEM_PROCESSED_ASSIGNMENT_FILE_EVENT,
   ALERT_SUPPRESSION_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
@@ -1807,12 +1876,10 @@ export const events = [
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_STORE_SNAPSHOT_TASK_EXECUTION_EVENT,
-  ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_STORE_API_CALL_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   ENTITY_ENGINE_INITIALIZATION_EVENT,
   ENTITY_ENGINE_DELETION_EVENT,
-  ENTITY_STORE_USAGE_EVENT,
   ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT,
   ENTITY_HIGHLIGHTS_USAGE_EVENT,
   PRIVMON_ENGINE_INITIALIZATION_EVENT,

@@ -9,7 +9,6 @@ import React from 'react';
 import { matchPath } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { RouteDisplay } from './components/common/route_display';
 import { AgentBuilderConversationsPage } from './pages/conversations';
 import { AgentBuilderAgentsPage } from './pages/agents';
 import { AgentBuilderAgentsCreate } from './pages/agent_create';
@@ -28,20 +27,20 @@ import { AgentBuilderSkillDetailsPage } from './pages/skill_details';
 import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
+import { agentBuilderViewIds } from './agent_builder_view_ids';
 
 export type SidebarView = 'conversation' | 'manage';
 
 export interface FeatureFlags {
   experimental: boolean;
-  connectors: boolean;
 }
 
 export interface RouteDefinition {
   path: string;
+  viewId: string;
   element: React.ReactNode;
   sidebarView: SidebarView;
   isExperimental?: boolean;
-  isConnectors?: boolean;
   navLabel?: string;
   navIcon?: string;
 }
@@ -71,38 +70,35 @@ const navLabels = {
 export const agentRoutes: RouteDefinition[] = [
   {
     path: '/agents/:agentId/conversations/:conversationId',
+    viewId: agentBuilderViewIds.agentConversation,
     sidebarView: 'conversation',
     element: <AgentBuilderConversationsPage />,
   },
   {
     path: '/agents/:agentId/overview',
+    viewId: agentBuilderViewIds.agentOverview,
     sidebarView: 'conversation',
     navLabel: navLabels.overview,
     element: <AgentBuilderAgentOverviewPage />,
   },
   {
     path: '/agents/:agentId/skills',
+    viewId: agentBuilderViewIds.agentSkills,
     sidebarView: 'conversation',
-    isExperimental: true,
     navLabel: navLabels.skills,
     element: <AgentBuilderAgentSkillsPage />,
   },
   {
     path: '/agents/:agentId/plugins',
+    viewId: agentBuilderViewIds.agentPlugins,
     sidebarView: 'conversation',
     isExperimental: true,
     navLabel: navLabels.plugins,
     element: <AgentBuilderAgentPluginsPage />,
   },
   {
-    path: '/agents/:agentId/connectors',
-    sidebarView: 'conversation',
-    navLabel: navLabels.connectors,
-    isConnectors: true,
-    element: <RouteDisplay />,
-  },
-  {
     path: '/agents/:agentId/tools',
+    viewId: agentBuilderViewIds.agentTools,
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
     element: <AgentBuilderAgentToolsPage />,
@@ -110,6 +106,7 @@ export const agentRoutes: RouteDefinition[] = [
   // Catch-all for agent root - must be last
   {
     path: '/agents/:agentId',
+    viewId: agentBuilderViewIds.agentRoot,
     sidebarView: 'conversation',
     element: <AgentBuilderConversationsPage />,
   },
@@ -118,41 +115,45 @@ export const agentRoutes: RouteDefinition[] = [
 export const manageRoutes: RouteDefinition[] = [
   {
     path: '/manage/agents',
+    viewId: agentBuilderViewIds.manageAgents,
     sidebarView: 'manage',
     navLabel: navLabels.agents,
     element: <AgentBuilderAgentsPage />,
   },
   {
     path: '/manage/agents/new',
+    viewId: agentBuilderViewIds.manageAgentCreate,
     sidebarView: 'manage',
     element: <AgentBuilderAgentsCreate />,
   },
   {
     path: '/manage/agents/:agentId',
+    viewId: agentBuilderViewIds.manageAgentEdit,
     sidebarView: 'manage',
     element: <AgentBuilderAgentsEdit />,
   },
   {
     path: '/manage/skills',
+    viewId: agentBuilderViewIds.manageSkills,
     sidebarView: 'manage',
     navLabel: navLabels.skills,
-    isExperimental: true,
     element: <AgentBuilderSkillsPage />,
   },
   {
     path: '/manage/skills/new',
+    viewId: agentBuilderViewIds.manageSkillCreate,
     sidebarView: 'manage',
-    isExperimental: true,
     element: <AgentBuilderSkillCreatePage />,
   },
   {
     path: '/manage/skills/:skillId',
+    viewId: agentBuilderViewIds.manageSkillDetails,
     sidebarView: 'manage',
-    isExperimental: true,
     element: <AgentBuilderSkillDetailsPage />,
   },
   {
     path: '/manage/plugins',
+    viewId: agentBuilderViewIds.managePlugins,
     sidebarView: 'manage',
     isExperimental: true,
     navLabel: navLabels.plugins,
@@ -160,35 +161,41 @@ export const manageRoutes: RouteDefinition[] = [
   },
   {
     path: '/manage/plugins/:pluginId',
+    viewId: agentBuilderViewIds.managePluginDetails,
     sidebarView: 'manage',
     isExperimental: true,
     element: <AgentBuilderPluginDetailsPage />,
   },
   {
     path: '/manage/connectors',
+    viewId: agentBuilderViewIds.manageConnectors,
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
-    isConnectors: true,
+    isExperimental: true,
     element: <AgentBuilderConnectorsPage />,
   },
   {
     path: '/manage/tools',
+    viewId: agentBuilderViewIds.manageTools,
     sidebarView: 'manage',
     navLabel: navLabels.tools,
     element: <AgentBuilderToolsPage />,
   },
   {
     path: '/manage/tools/new',
+    viewId: agentBuilderViewIds.manageToolCreate,
     sidebarView: 'manage',
     element: <AgentBuilderToolCreatePage />,
   },
   {
     path: '/manage/tools/bulk_import_mcp',
+    viewId: agentBuilderViewIds.manageToolBulkImportMcp,
     sidebarView: 'manage',
     element: <AgentBuilderBulkImportMcpToolsPage />,
   },
   {
     path: '/manage/tools/:toolId',
+    viewId: agentBuilderViewIds.manageToolDetails,
     sidebarView: 'manage',
     element: <AgentBuilderToolDetailsPage />,
   },
@@ -204,6 +211,12 @@ export const getSidebarViewForRoute = (pathname: string): SidebarView => {
   }
   return 'conversation';
 };
+
+export const getViewIdForPathname = (
+  pathname: string,
+  enabledRoutes: RouteDefinition[]
+): string | undefined =>
+  enabledRoutes.find((route) => matchPath(pathname, { path: route.path, exact: true }))?.viewId;
 
 export const getAgentIdFromPath = (pathname: string): string | undefined => {
   const match = pathname.match(/^\/agents\/([^/]+)/);
@@ -223,7 +236,6 @@ export interface SidebarNavItem {
 
 const isRouteEnabled = (route: RouteDefinition, flags: FeatureFlags): boolean => {
   if (route.isExperimental && !flags.experimental) return false;
-  if (route.isConnectors && !flags.connectors) return false;
   return true;
 };
 

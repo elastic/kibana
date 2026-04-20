@@ -431,7 +431,7 @@ export class CreateSpacePage extends Component<Props, State> {
       id,
       description,
       initials: avatarType !== 'image' ? initials : '',
-      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
+      color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : undefined, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
       solution,

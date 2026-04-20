@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { v4 as uuidv4 } from 'uuid';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { deleteAllAlerts, deleteAllRules, createRule } from '@kbn/detections-response-ftr-services';
 import {
   dataGeneratorFactory,
@@ -22,12 +22,12 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const { indexListOfDocuments: indexThreatIndicatorDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-ti_1',
+    index: 'ti_test_1',
     log,
   });
   const { indexListOfDocuments: indexListOfSourceDocuments } = dataGeneratorFactory({
     es,
-    index: 'logs-1',
+    index: 'test-data-1',
     log,
   });
 
@@ -35,27 +35,168 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
+
+      await es.indices.delete({
+        index: 'ti_test_1,ti_test_2,test-data-1,test-data-2',
+        ignore_unavailable: true,
+      });
+
+      const mappings: MappingTypeMapping = {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          id: {
+            type: 'keyword',
+          },
+          host: {
+            properties: {
+              name: {
+                type: 'keyword',
+              },
+            },
+          },
+        },
+      };
+      await es.indices.create({
+        index: 'ti_test_1',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'ti_test_2',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'test-data-1',
+        mappings,
+      });
+      await es.indices.create({
+        index: 'test-data-2',
+        mappings,
+      });
     });
 
     describe('metrics collection', () => {
-      describe('alerts_candidate_count', () => {
-        it('records alerts_candidate_count value', async () => {
-          const id = uuidv4();
+      describe('matched_indices_count', () => {
+        it('records matched_indices_count for one matching source index pattern', async () => {
           const timestamp = new Date().toISOString();
           const threatIndicatorDocument = {
             '@timestamp': timestamp,
             host: { name: 'test-1' },
           };
           const document = {
-            id,
             '@timestamp': timestamp,
             host: { name: 'test-1' },
           };
           const rule = getThreatMatchRuleParams({
             threat_query: '*:*',
-            threat_index: ['logs-ti_1'],
-            query: `id : "${id}"`,
-            index: ['logs-1'],
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-data-1'],
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexThreatIndicatorDocuments([threatIndicatorDocument]);
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(1);
+        });
+
+        it('records matched_indices_count for a single index pattern with wildcard', async () => {
+          const timestamp = new Date().toISOString();
+          const threatIndicatorDocument = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getThreatMatchRuleParams({
+            threat_query: '*:*',
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-data-*'],
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexThreatIndicatorDocuments([threatIndicatorDocument]);
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+
+        it('records matched_indices_count for multiple matching source index patterns', async () => {
+          const timestamp = new Date().toISOString();
+          const threatIndicatorDocument = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getThreatMatchRuleParams({
+            threat_query: '*:*',
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-da*', 'test-data-1', 'test-data-2'],
+            from: 'now-35m',
+            interval: '30m',
+            enabled: true,
+          });
+
+          await indexThreatIndicatorDocuments([threatIndicatorDocument]);
+          await indexListOfSourceDocuments([document]);
+
+          const createdRule = await createRule(supertest, log, rule);
+
+          const { matched_indices_count } = await getLatestSecurityRuleExecutionMetricsFromEventLog(
+            es,
+            log,
+            createdRule.id
+          );
+
+          expect(matched_indices_count).toBe(2);
+        });
+      });
+
+      describe('alerts_candidate_count', () => {
+        it('records alerts_candidate_count value', async () => {
+          const timestamp = new Date().toISOString();
+          const threatIndicatorDocument = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const document = {
+            '@timestamp': timestamp,
+            host: { name: 'test-1' },
+          };
+          const rule = getThreatMatchRuleParams({
+            threat_query: '*:*',
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-data-1'],
             from: 'now-35m',
             interval: '30m',
             enabled: true,
@@ -73,22 +214,20 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('records alerts_candidate_count higher than the number of suppressed alerts', async () => {
-          const id = uuidv4();
           const timestamp = new Date().toISOString();
           const threatIndicatorDocument = {
             '@timestamp': timestamp,
             host: { name: 'test-1' },
           };
           const document = {
-            id,
             '@timestamp': timestamp,
             host: { name: 'test-1' },
           };
           const rule = getThreatMatchRuleParams({
             threat_query: '*:*',
-            threat_index: ['logs-ti_1'],
-            query: `id : "${id}"`,
-            index: ['logs-1'],
+            threat_index: ['ti_test_1'],
+            query: '*:*',
+            index: ['test-data-1'],
             from: 'now-35m',
             interval: '30m',
             alert_suppression: {

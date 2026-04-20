@@ -8,7 +8,11 @@
 import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { IndexSearchToolConfig } from '@kbn/agent-builder-common/tools';
+import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { ToolTypeDefinition } from '../definitions';
 import { validateConfig } from './validate_configuration';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
@@ -19,22 +23,46 @@ const searchSchema = z.object({
 
 type SearchSchemaType = typeof searchSchema;
 
-export const getIndexSearchToolType = (): ToolTypeDefinition<
-  ToolType.index_search,
-  IndexSearchToolConfig,
-  SearchSchemaType
-> => {
+export interface IndexSearchToolTypeDeps {
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
+  topSnippetsDefaults: TopSnippetsConfig;
+}
+
+export const getIndexSearchToolType = (
+  deps: IndexSearchToolTypeDeps
+): ToolTypeDefinition<ToolType.index_search, IndexSearchToolConfig, SearchSchemaType> => {
   return {
     toolType: ToolType.index_search,
     getDynamicProps: (config) => {
       return {
         getHandler: () => {
-          return async ({ nlQuery }, { esClient, modelProvider, logger, events }) => {
+          return async ({ nlQuery }, { esClient, modelProvider, logger, events, request }) => {
             const {
               pattern,
               row_limit: rowLimit,
               custom_instructions: customInstructions,
             } = config;
+
+            // Resolve top snippets config from UI settings
+            let topSnippetsConfig: TopSnippetsConfig | undefined;
+            try {
+              const soClient = deps.savedObjects.getScopedClient(request);
+              const uiSettingsClient = deps.uiSettings.asScopedToClient(soClient);
+              const isEnabled = await uiSettingsClient.get<boolean>(
+                AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+              );
+              if (isEnabled) {
+                topSnippetsConfig = deps.topSnippetsDefaults;
+              }
+            } catch (error) {
+              logger.debug(
+                `Failed to read experimentalFeatures setting, falling back to highlighting: ${
+                  error instanceof Error ? error.message : String(error)
+                }`
+              );
+            }
+
             const results = await runSearchTool({
               nlQuery,
               index: pattern,
@@ -44,6 +72,7 @@ export const getIndexSearchToolType = (): ToolTypeDefinition<
               model: await modelProvider.getDefaultModel(),
               events,
               logger,
+              topSnippetsConfig,
             });
             return { results };
           };

@@ -17,6 +17,7 @@ export {
 } from './definition';
 export { VISIBILITY_ICON, VISIBILITY_BADGE_COLOR, AgentVisibility } from './visibility';
 export {
+  canCurrentUserEditAgent,
   isAgentOwner,
   canChangeAgentVisibility,
   hasAgentReadAccess,
@@ -30,6 +31,7 @@ export {
 } from './capabilities';
 export { AgentExecutionErrorCode } from './execution_errors';
 export {
+  type ConfirmPromptColor,
   type ConfirmPromptDefinition,
   type ConfirmationPrompt,
   type ConfirmationPromptResponse,

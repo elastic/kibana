@@ -7,7 +7,8 @@
     "__mocks__/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/scout_inference_test/**/*"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -27,7 +28,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/features-plugin",
     "@kbn/ui-theme",
-    "@kbn/deeplinks-search",
     "@kbn/deeplinks-management",
     "@kbn/management-plugin",
     "@kbn/serverless",
@@ -37,7 +37,6 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
     "@kbn/react-query",
-    "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
     "@kbn/core-http-router-server-mocks",
     "@kbn/logging-mocks",
@@ -45,7 +44,9 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-security-server",
     "@kbn/inference-common",
-    "@kbn/inference-plugin"
+    "@kbn/inference-plugin",
+    "@kbn/management-settings-ids",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*"

@@ -37,6 +37,8 @@ import {
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '@kbn/ml-anomaly-utils';
 
+import { getCustomRuleEditorOpenedEventName } from '../../../../common/util/usage_collection';
+
 import { DetectorDescriptionList } from './components/detector_description_list';
 import { ActionsSection } from './actions_section';
 import { checkPermission } from '../../capabilities/check_capabilities';
@@ -60,6 +62,7 @@ class RuleEditorFlyoutUI extends Component {
   static propTypes = {
     setShowFunction: PropTypes.func.isRequired,
     unsetShowFunction: PropTypes.func.isRequired,
+    telemetrySource: PropTypes.string.isRequired,
   };
 
   constructor(props) {
@@ -149,6 +152,10 @@ class RuleEditorFlyoutUI extends Component {
       isFlyoutVisible: true,
       focusTrapProps,
     });
+
+    this.props.kibana.services.mlServices.mlUsageCollection?.count(
+      getCustomRuleEditorOpenedEventName(this.props.telemetrySource)
+    );
 
     if (this.partitioningFieldNames.length > 0 && this.canGetFilters) {
       // Load the current list of filters. These are used for configuring rule scope.

@@ -18,7 +18,9 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
-  throttle: { interval: '5m' },
+  tags: ['production'],
+  groupingMode: 'per_field',
+  throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
   destinations: [{ type: 'workflow', id: 'workflow-2' }],
   createdBy: 'elastic',
@@ -79,6 +81,8 @@ describe('useNotificationPolicyForm', () => {
       expect(onSubmitCreate).toHaveBeenCalledWith({
         name: 'My policy',
         description: 'A description',
+        groupingMode: 'per_episode',
+        throttle: { strategy: 'on_status_change' },
         destinations: [],
       });
     });
@@ -106,7 +110,8 @@ describe('useNotificationPolicyForm', () => {
       const payload = onSubmitCreate.mock.calls[0][0];
       expect(payload).not.toHaveProperty('matcher');
       expect(payload).not.toHaveProperty('groupBy');
-      expect(payload).not.toHaveProperty('throttle');
+      expect(payload.groupingMode).toBe('per_episode');
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change' });
     });
   });
 
@@ -135,16 +140,20 @@ describe('useNotificationPolicyForm', () => {
       expect(result.current.methods.getValues()).toEqual({
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
+        tags: ['production'],
         matcher: 'data.severity : "critical"',
+        groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
-        frequency: { type: 'throttle', interval: '5m' },
+        throttleStrategy: 'time_interval',
+        throttleInterval: '5m',
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
       });
     });
 
-    it('maps immediate frequency when no throttle is present', () => {
+    it('maps default strategy when no throttle is present', () => {
       const policyWithoutThrottle: NotificationPolicyResponse = {
         ...EXISTING_POLICY,
+        groupingMode: null,
         throttle: null,
       };
       const { result } = renderHook(() =>
@@ -155,7 +164,8 @@ describe('useNotificationPolicyForm', () => {
         })
       );
 
-      expect(result.current.methods.getValues().frequency).toEqual({ type: 'immediate' });
+      expect(result.current.methods.getValues().groupingMode).toBe('per_episode');
+      expect(result.current.methods.getValues().throttleStrategy).toBe('on_status_change');
     });
 
     it('calls onSubmitUpdate with id, payload, and version on submit', async () => {
@@ -177,9 +187,11 @@ describe('useNotificationPolicyForm', () => {
         version: 'WzEsMV0=',
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
+        groupingMode: 'per_field',
+        tags: ['production'],
         matcher: 'data.severity : "critical"',
         groupBy: ['host.name', 'service.name'],
-        throttle: { interval: '5m' },
+        throttle: { strategy: 'time_interval', interval: '5m' },
         destinations: [{ type: 'workflow', id: 'workflow-2' }],
       });
     });

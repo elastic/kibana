@@ -182,11 +182,22 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
             border-top: ${euiTheme.colors.borderBasePlain};
             border-bottom: ${euiTheme.colors.borderBasePlain};
             .euiModalBody__overflow {
+              flex: 1;
+              min-height: 0;
+              display: flex;
+              flex-direction: column;
               padding-inline: 0;
+              overflow: hidden;
             }
           `}
         >
-          <EuiFlexGroup direction="column" gutterSize="m" css={{ height: '100%' }}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            css={css`
+              min-height: 0;
+            `}
+          >
             <EuiFlexItem
               grow={false}
               css={css`
@@ -240,6 +251,7 @@ export const StepExecuteModal = React.memo<StepExecuteModalProps>(
 
             <EuiFlexItem
               css={css`
+                overflow: hidden;
                 background-color: ${euiTheme.colors.backgroundBaseSubdued};
                 padding: ${euiTheme.size.m} ${euiTheme.size.l};
               `}

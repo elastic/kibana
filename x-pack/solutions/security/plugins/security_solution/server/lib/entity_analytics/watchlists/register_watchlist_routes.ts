@@ -16,8 +16,14 @@ import {
 } from './management/routes';
 import { registerEntitySourceRoutes } from './management/routes/entity_sources';
 import { syncWatchlistRoute } from './management/routes/sync';
+import { csvUploadRoute } from './management/routes/csv_upload';
+import { registerManualEntityRoutes } from './management/routes/entities';
 
-export const registerWatchlistRoutes = ({ router, logger }: EntityAnalyticsRoutesDeps) => {
+export const registerWatchlistRoutes = ({
+  router,
+  logger,
+  getStartServices,
+}: EntityAnalyticsRoutesDeps) => {
   createWatchlistRoute(router, logger);
   deleteWatchlistRoute(router, logger);
   getWatchlistRoute(router, logger);
@@ -26,4 +32,6 @@ export const registerWatchlistRoutes = ({ router, logger }: EntityAnalyticsRoute
   updateWatchlistRoute(router, logger);
   registerEntitySourceRoutes(router, logger);
   syncWatchlistRoute(router, logger);
+  csvUploadRoute({ router, logger, getStartServices });
+  registerManualEntityRoutes(router, logger);
 };

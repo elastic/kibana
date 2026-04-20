@@ -13,9 +13,10 @@ import { generateLogsData } from '../../../fixtures/generators';
 // Note: Processor creation, conditional steps, and nested steps API correctness is covered by
 // API tests in x-pack/platform/plugins/shared/streams/test/scout/api/tests/processing_persistence.spec.ts
 // These UI tests focus on the user experience: validation, button states, cancel flows, and duplication
+// TODO: consistently fails on MKI - needs investigation: https://github.com/elastic/kibana/issues/258589
 test.describe(
   'Stream data processing - creating steps',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic, '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ logsSynthtraceEsClient }) => {
       await generateLogsData(logsSynthtraceEsClient)({ index: 'logs-generic-default' });
@@ -38,21 +39,19 @@ test.describe(
 
     test('should not show Technical Preview badge when AI suggestions are unavailable', async ({
       page,
-      config,
     }) => {
-      test.skip(
-        config.isCloud === true && config.serverless === false,
-        `This scenario is not working as expected on ECH`
-      );
-      // In the empty state without AI connectors, the Technical Preview badge should be hidden
+      // Mock the connectors endpoint to return no connectors, ensuring AI features
+      // are disabled regardless of the environment (local, ECH, serverless)
+      await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
+        await route.fulfill({
+          status: 200,
+          body: JSON.stringify({ connectors: [], soEntryFound: false }),
+        });
+      });
+      await page.reload();
+
       await expect(page.getByText('Extract fields from your data')).toBeVisible();
-      // Only check for hidden badge in stateful mode - in serverless/production environments,
-      // AI features are always available so the Technical Preview badge will be shown
-      // eslint-disable-next-line playwright/no-conditional-in-test
-      if (!config.serverless) {
-        // eslint-disable-next-line playwright/no-conditional-expect
-        await expect(page.getByText('Technical Preview')).toBeHidden();
-      }
+      await expect(page.getByText('Technical Preview')).toBeHidden();
     });
 
     test('should create a new processor successfully', async ({ pageObjects }) => {

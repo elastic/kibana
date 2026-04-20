@@ -23,6 +23,7 @@ export {
   getESQLQueryVariables,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
+  getSparklineColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
   getKqlSearchQueries,

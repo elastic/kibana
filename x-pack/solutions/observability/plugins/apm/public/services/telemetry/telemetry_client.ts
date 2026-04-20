@@ -9,6 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type {
   ITelemetryClient,
   SearchQuerySubmittedParams,
+  ServiceMapDagreLayoutFallbackParams,
   SloOverviewFlyoutSearchQueriedParams,
   SloOverviewFlyoutStatusFilteredParams,
 } from './types';
@@ -37,5 +38,11 @@ export class TelemetryClient implements ITelemetryClient {
 
   public reportSloInfoShown = (): void => {
     this.analytics.reportEvent(TelemetryEventTypes.SLO_INFO_SHOWN, {});
+  };
+
+  public reportServiceMapDagreLayoutFallback = (
+    params: ServiceMapDagreLayoutFallbackParams
+  ): void => {
+    this.analytics.reportEvent(TelemetryEventTypes.SERVICE_MAP_DAGRE_LAYOUT_FALLBACK, params);
   };
 }

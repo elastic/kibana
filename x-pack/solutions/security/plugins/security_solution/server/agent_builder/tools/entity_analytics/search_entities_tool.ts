@@ -12,7 +12,8 @@ import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import {
   getHistorySnapshotIndexPattern,
-  getLatestEntitiesIndexName,
+  getEntitiesAlias,
+  ENTITY_LATEST,
 } from '@kbn/entity-store/server';
 import type { Logger } from '@kbn/logging';
 import {
@@ -396,7 +397,7 @@ export const searchEntitiesTool = (
             const esClient = coreStart.elasticsearch.client.asInternalUser;
 
             const indexExists = await esClient.indices.exists({
-              index: getLatestEntitiesIndexName(spaceId),
+              index: getEntitiesAlias(ENTITY_LATEST, spaceId),
             });
 
             if (!indexExists) {
@@ -429,7 +430,7 @@ export const searchEntitiesTool = (
 
       try {
         const client = esClient.asCurrentUser;
-        const entityIndex = getLatestEntitiesIndexName(spaceId);
+        const entityIndex = getEntitiesAlias(ENTITY_LATEST, spaceId);
         const entitySnapshotIndex = getHistorySnapshotIndexPattern(spaceId);
         const query = buildQuery(entityIndex, entitySnapshotIndex, params);
 

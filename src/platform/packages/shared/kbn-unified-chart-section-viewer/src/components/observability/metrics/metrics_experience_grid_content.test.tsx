@@ -29,6 +29,16 @@ jest.mock('../../chart', () => ({
   Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
 }));
 
+jest.mock('./metrics_grid', () => ({
+  MetricsGrid: jest.fn((props: { metricItems: any[] }) =>
+    props.metricItems.length === 0 ? (
+      <div data-test-subj="metricsExperienceNoData" />
+    ) : (
+      <div data-test-subj="unifiedMetricsExperienceGrid" />
+    )
+  ),
+}));
+
 /**
  * Mock EuiDelayRender to render immediately in tests.
  */
@@ -89,6 +99,7 @@ describe('MetricsExperienceGridContent', () => {
 
     defaultProps = {
       metricItems,
+      activeDimensions: [],
       services: {} as any,
       discoverFetch$: fetch$,
       fetchParams,
@@ -197,15 +208,6 @@ describe('MetricsExperienceGridContent', () => {
     expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument();
   });
 
-  it('renders the technical preview badge', () => {
-    const { getByText, getByTestId } = render(<MetricsExperienceGridContent {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceTechnicalPreviewBadge')).toBeInTheDocument();
-    expect(getByText('Technical preview')).toBeInTheDocument();
-  });
-
   it('renders the loading state when Discover is reloading', () => {
     const { getByTestId } = render(
       <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />,
@@ -215,5 +217,18 @@ describe('MetricsExperienceGridContent', () => {
     );
 
     expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
+  });
+
+  it('passes activeDimensions prop to MetricsGrid', () => {
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+
+    render(<MetricsExperienceGridContent {...defaultProps} activeDimensions={[dimensions[0]]} />, {
+      wrapper: IntlProvider,
+    });
+
+    const lastCall = (MetricsGrid as jest.Mock).mock.calls[
+      (MetricsGrid as jest.Mock).mock.calls.length - 1
+    ][0];
+    expect(lastCall.dimensions).toEqual([dimensions[0]]);
   });
 });

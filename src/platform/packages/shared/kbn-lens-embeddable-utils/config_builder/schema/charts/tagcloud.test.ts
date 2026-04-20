@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from '../../transforms/columns/utils';
 import { tagcloudStateSchema } from './tagcloud';
 
 describe('Tagcloud Schema', () => {
   const baseTagcloudConfig = {
     type: 'tag_cloud',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
   };
 
@@ -43,7 +44,7 @@ describe('Tagcloud Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        tag_by: { ...input.tag_by, size: 5 },
+        tag_by: { ...input.tag_by, limit: 5 },
       });
     });
 
@@ -56,7 +57,9 @@ describe('Tagcloud Schema', () => {
           label: 'Sum of price',
           empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
         },
-        caption: { visible: true },
+        styling: {
+          caption: { visible: true },
+        },
         tag_by: {
           operation: 'terms',
           fields: ['category'],
@@ -67,7 +70,7 @@ describe('Tagcloud Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        tag_by: { ...input.tag_by, size: 5 },
+        tag_by: { ...input.tag_by, limit: 5 },
       });
     });
 
@@ -100,7 +103,7 @@ describe('Tagcloud Schema', () => {
       expect(validated).toEqual({
         ...defaultValues,
         ...input,
-        tag_by: { ...input.tag_by, size: 5 },
+        tag_by: { ...input.tag_by, limit: 5 },
       });
     });
 
@@ -113,19 +116,21 @@ describe('Tagcloud Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'horizontal',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'horizontal',
         };
 
         const validated = tagcloudStateSchema.validate(input);
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
@@ -137,19 +142,21 @@ describe('Tagcloud Schema', () => {
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'vertical',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'vertical',
         };
 
         const validated = tagcloudStateSchema.validate(input);
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
@@ -161,19 +168,21 @@ describe('Tagcloud Schema', () => {
             field: 'sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'angled',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'angled',
         };
 
         const validated = tagcloudStateSchema.validate(input);
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
     });
@@ -187,10 +196,12 @@ describe('Tagcloud Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
-          font_size: {
-            min: 10,
-            max: 80,
+          styling: {
+            caption: { visible: false },
+            font_size: {
+              min: 10,
+              max: 80,
+            },
           },
           tag_by: {
             operation: 'terms',
@@ -202,7 +213,7 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
@@ -214,20 +225,25 @@ describe('Tagcloud Schema', () => {
             field: 'test_field',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            font_size: {},
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          font_size: {},
         };
 
         const validated = tagcloudStateSchema.validate(input);
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          font_size: { min: 18, max: 72 },
-          tag_by: { ...input.tag_by, size: 5 },
+          styling: {
+            ...input.styling,
+            font_size: { min: 18, max: 72 },
+          },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
     });
@@ -267,12 +283,14 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'invalid',
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
           },
-          orientation: 'invalid',
         };
 
         expect(() => tagcloudStateSchema.validate(input)).toThrow();
@@ -285,14 +303,16 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            font_size: {
+              min: 0,
+              max: 72,
+            },
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-          },
-          font_size: {
-            min: 0,
-            max: 72,
           },
         };
 
@@ -306,13 +326,15 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
           },
+          styling: {
+            font_size: {
+              min: 14,
+              max: 150,
+            },
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-          },
-          font_size: {
-            min: 14,
-            max: 150,
           },
         };
 
@@ -322,18 +344,17 @@ describe('Tagcloud Schema', () => {
       it('throw when missing DSL and esql operation in a configuration', () => {
         const input = {
           type: 'tag_cloud',
-          dataset: {
+          data_source: {
             type: 'esql',
             query: 'FROM my-index | LIMIT 100',
           },
           metric: {
-            operation: 'value',
             column: 'count',
           },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            size: 5,
+            limit: 5,
           },
         };
         expect(() => tagcloudStateSchema.validate(input)).toThrow();
@@ -347,7 +368,9 @@ describe('Tagcloud Schema', () => {
             field: 'revenue',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+          },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -368,10 +391,13 @@ describe('Tagcloud Schema', () => {
           ...baseTagcloudConfig,
           title: 'Sales Tagcloud',
           description: 'Sales metrics visualization by category',
-          orientation: 'horizontal',
-          font_size: {
-            min: 12,
-            max: 60,
+          styling: {
+            orientation: 'horizontal',
+            font_size: {
+              min: 12,
+              max: 60,
+            },
+            caption: { visible: true },
           },
           metric: {
             operation: 'sum',
@@ -379,7 +405,6 @@ describe('Tagcloud Schema', () => {
             label: 'Sum of sales',
             empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
           },
-          caption: { visible: true },
           tag_by: {
             operation: 'terms',
             fields: ['category'],
@@ -398,35 +423,35 @@ describe('Tagcloud Schema', () => {
         expect(validated).toEqual({
           ...defaultValues,
           ...input,
-          tag_by: { ...input.tag_by, size: 5 },
+          tag_by: { ...input.tag_by, limit: 5 },
         });
       });
 
       it('validates esql configuration', () => {
         const input = {
           type: 'tag_cloud',
-          dataset: {
+          data_source: {
             type: 'esql',
             query: 'FROM my-index | STATS count() BY category | LIMIT 100',
           },
           metric: {
-            operation: 'value',
             column: 'count',
             label: 'Count',
           },
-          caption: { visible: false },
+          styling: {
+            caption: { visible: false },
+            orientation: 'vertical',
+            font_size: {
+              min: 16,
+              max: 48,
+            },
+          },
           tag_by: {
-            operation: 'value',
             column: 'category',
             color: {
               mode: 'gradient',
               palette: 'kibana_palette',
             },
-          },
-          orientation: 'vertical',
-          font_size: {
-            min: 16,
-            max: 48,
           },
         };
 

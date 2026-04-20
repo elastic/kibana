@@ -17,6 +17,10 @@ export interface TriggerEventDispatchedTelemetryEvent {
   logEventsEnabled: boolean;
   /** Event-chain depth at dispatch time (0 when emit is not under a prior chain hop). */
   eventChainDepth: number;
+  /** UUID for this trigger dispatch; matches `.workflows-events` eventId, `context.metadata.eventId`, and execution `dispatchEventId`. */
+  eventId: string;
+  /** Workflow execution id of the hop that emitted into this chain, when present. */
+  sourceExecutionId?: string;
   /** True when execution is off but trigger-event audit logging still runs. */
   auditOnly: boolean;
   /** Time spent resolving/filtering subscribed workflows before scheduling decisions (ms). */
@@ -53,6 +57,21 @@ export const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedTele
     _meta: {
       description: 'Event-chain depth at this emit (from request chain context; 0 for root emits)',
       optional: false,
+    },
+  },
+  eventId: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'UUID for this trigger dispatch; correlates with trigger-events audit, context.metadata.eventId, and execution dispatchEventId',
+      optional: false,
+    },
+  },
+  sourceExecutionId: {
+    type: 'keyword',
+    _meta: {
+      description: 'Workflow execution id of the chain hop that emitted this event, when set',
+      optional: true,
     },
   },
   auditOnly: {

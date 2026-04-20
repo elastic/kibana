@@ -22,8 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
-import { hasAgentWriteAccess, type AgentDefinition } from '@kbn/agent-builder-common';
+import { canCurrentUserEditAgent, type AgentDefinition } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
@@ -37,7 +36,6 @@ import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_ma
 import { Labels } from '../../common/labels';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from './agent_visibility_badge';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -69,51 +67,12 @@ const actionLabels = {
   }),
 };
 
-const canCurrentUserEditAgent = ({
-  agent,
-  manageAgents,
-  experimentalFeaturesEnabled,
-  currentUser,
-  isAdmin,
-  isCurrentUserLoading,
-}: {
-  agent: AgentDefinition;
-  manageAgents: boolean;
-  experimentalFeaturesEnabled: boolean;
-  currentUser?: UserIdAndName | null;
-  isAdmin: boolean;
-  isCurrentUserLoading: boolean;
-}) => {
-  if (agent.readonly || !manageAgents) {
-    return false;
-  }
-
-  // When experimental visibility is off, ignore loading/visibility and allow edit (legacy behaviour).
-  if (!experimentalFeaturesEnabled) {
-    return true;
-  }
-
-  if (isCurrentUserLoading) {
-    return false;
-  }
-
-  return hasAgentWriteAccess({
-    visibility: agent.visibility,
-    owner: agent.created_by,
-    currentUser,
-    isAdmin,
-  });
-};
-
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
   const { manageAgents, isAdmin } = useUiPrivileges();
-  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser({
-    enabled: isExperimentalFeaturesEnabled,
-  });
+  const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
 
@@ -128,7 +87,6 @@ export const AgentsList: React.FC = () => {
       canCurrentUserEditAgent({
         agent,
         manageAgents,
-        experimentalFeaturesEnabled: isExperimentalFeaturesEnabled,
         currentUser,
         isAdmin,
         isCurrentUserLoading,
@@ -139,10 +97,9 @@ export const AgentsList: React.FC = () => {
       name: columnNames.name,
       render: (name: string, agent: AgentDefinition) => {
         const canEdit = canEditAgent(agent);
-        const showCheckingTooltip =
-          !canEdit && isExperimentalFeaturesEnabled && isCurrentUserLoading;
+        const showCheckingTooltip = !canEdit && isCurrentUserLoading;
         const nameContent = !canEdit ? (
-          <EuiText data-test-subj="agentBuilderAgentsListName" size="s">
+          <EuiText data-test-subj="agentBuilderAgentsListName" size="m">
             {name}
           </EuiText>
         ) : (
@@ -150,7 +107,7 @@ export const AgentsList: React.FC = () => {
             data-test-subj="agentBuilderAgentsListName"
             href={createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id }))}
           >
-            {name}
+            <EuiText size="m">{name}</EuiText>
           </EuiLink>
         );
         return (
@@ -165,7 +122,9 @@ export const AgentsList: React.FC = () => {
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiText size="s">{agent.description}</EuiText>
+              <EuiText color="subdued" size="s">
+                {agent.description}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -174,6 +133,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
+      width: '25%',
       field: 'labels',
       name: columnNames.labels,
       render: (labels?: string[]) => {
@@ -187,12 +147,14 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentVisibility: EuiTableComputedColumnType<AgentDefinition> = {
+      width: '135px',
       name: columnNames.visibility,
       render: (agent) => <AgentVisibilityBadge agent={agent} />,
       'data-test-subj': 'agentBuilderAgentsListVisibility',
     };
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
+      width: '120px',
       actions: [
         {
           type: 'icon',
@@ -253,9 +215,7 @@ export const AgentsList: React.FC = () => {
       ],
     };
 
-    return isExperimentalFeaturesEnabled
-      ? [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions]
-      : [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
+    return [agentAvatar, agentNameAndDescription, agentVisibility, agentLabels, agentActions];
   }, [
     createAgentBuilderUrl,
     currentUser,
@@ -263,7 +223,6 @@ export const AgentsList: React.FC = () => {
     isAdmin,
     isCurrentUserLoading,
     manageAgents,
-    isExperimentalFeaturesEnabled,
   ]);
 
   const errorMessage = useMemo(

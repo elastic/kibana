@@ -56,7 +56,7 @@ describe('pinned panels', () => {
 
   const transformedPinnedPanels = [
     {
-      uid: 'control1',
+      id: 'control1',
       type: OPTIONS_LIST_CONTROL,
       width: DEFAULT_PINNED_CONTROL_STATE.width,
       config: {
@@ -64,7 +64,7 @@ describe('pinned panels', () => {
       },
     },
     {
-      uid: 'control2',
+      id: 'control2',
       type: RANGE_SLIDER_CONTROL,
       width: 'small',
       config: {
@@ -72,7 +72,7 @@ describe('pinned panels', () => {
       },
     },
     {
-      uid: 'control3',
+      id: 'control3',
       type: ESQL_CONTROL,
       grow: true,
       config: {

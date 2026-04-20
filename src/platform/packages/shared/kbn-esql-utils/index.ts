@@ -44,6 +44,7 @@ export {
   fixESQLQueryWithVariables,
   replaceESQLQueryIndexPattern,
   getCategorizeColumns,
+  getSparklineColumns,
   extractCategorizeTokens,
   getArgsFromRenameFunction,
   getCategorizeField,

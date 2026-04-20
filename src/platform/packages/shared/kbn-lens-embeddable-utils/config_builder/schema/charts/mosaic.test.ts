@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './mosaic';
 import { mosaicStateSchema } from './mosaic';
 
 describe('Mosaic Schema', () => {
   const baseMosaicConfig: Pick<
     MosaicStateNoESQL,
-    'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+    'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
   > = {
     type: 'mosaic',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
     ignore_global_filters: false,
     sampling: 0,
@@ -35,7 +36,7 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -43,7 +44,7 @@ describe('Mosaic Schema', () => {
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.type).toBe('mosaic');
-      expect(validated.metric.operation).toBe('count');
+      expect(validated.metric).toHaveProperty('operation', 'count');
       expect(validated.group_by).toHaveLength(1);
     });
 
@@ -70,7 +71,7 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -86,7 +87,7 @@ describe('Mosaic Schema', () => {
       };
 
       const validated = mosaicStateSchema.validate(input);
-      expect(validated.metric.operation).toBe('sum');
+      expect(validated.metric).toHaveProperty('operation', 'sum');
       expect(validated.group_by).toHaveLength(1);
       expect(validated.group_breakdown_by).toHaveLength(1);
     });
@@ -101,13 +102,13 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['region'],
             collapse_by: 'sum',
           },
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -141,14 +142,14 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
         group_breakdown_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['subcategory'],
           },
         ],
@@ -156,17 +157,19 @@ describe('Mosaic Schema', () => {
           nested: true,
           truncate_after_lines: 5,
           visibility: 'visible',
-          size: 'small',
+          size: 's',
         },
-        values: {
-          visible: false,
+        styling: {
+          values: {
+            visible: false,
+          },
         },
       };
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.values?.visible).toBe(false);
+      expect(validated.styling?.values?.visible).toBe(false);
     });
 
     it('throws on empty group_by array', () => {
@@ -192,7 +195,7 @@ describe('Mosaic Schema', () => {
         group_by: [
           {
             operation: 'terms',
-            size: 5,
+            limit: 5,
             fields: ['category'],
           },
         ],
@@ -213,7 +216,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -232,19 +235,19 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               collapse_by: 'avg',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -263,12 +266,12 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
             },
           ],
@@ -289,18 +292,18 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -321,7 +324,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -349,7 +352,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -371,7 +374,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -390,7 +393,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -426,7 +429,7 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
             },
           ],
@@ -447,7 +450,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -497,7 +500,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -517,19 +520,19 @@ describe('Mosaic Schema', () => {
           group_by: [
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['region'],
               collapse_by: 'sum',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['category'],
               collapse_by: 'avg',
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['product'],
             },
           ],
@@ -551,7 +554,7 @@ describe('Mosaic Schema', () => {
             },
             {
               operation: 'terms',
-              size: 5,
+              limit: 5,
               fields: ['brand'],
             },
           ],
@@ -565,10 +568,10 @@ describe('Mosaic Schema', () => {
   describe('ES|QL Schema', () => {
     const baseESQLMosaicConfig: Pick<
       MosaicStateESQL,
-      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+      'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
     > = {
       type: 'mosaic',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM blah | KEEP foo, bar',
       },
@@ -580,7 +583,6 @@ describe('Mosaic Schema', () => {
       const input: MosaicState = {
         ...baseESQLMosaicConfig,
         metric: {
-          operation: 'value',
           column: 'foo',
         },
       };
@@ -594,22 +596,18 @@ describe('Mosaic Schema', () => {
       const input: MosaicState = {
         ...baseESQLMosaicConfig,
         metric: {
-          operation: 'value',
           column: 'foo',
         },
         group_breakdown_by: [
           {
-            operation: 'value',
             column: 'bar',
             collapse_by: 'sum',
           },
           {
-            operation: 'value',
             column: 'bar',
             collapse_by: 'sum',
           },
           {
-            operation: 'value',
             column: 'bar',
           },
         ],

@@ -70,7 +70,7 @@ export function transformDataControlOut<
   return {
     ...DEFAULT_DATA_CONTROL_STATE,
     title,
-    data_view_id: dataViewRef?.id ?? '', // get the data view ID from the reference
+    data_view_id: dataViewRef?.id ?? state.dataViewId ?? '', // get the data view ID from the reference, or fall back to an explicitly stored dataViewId
     ...(typeof use_global_filters === 'boolean' && { use_global_filters }),
     ...(typeof ignore_validations === 'boolean' && { ignore_validations }),
     field_name: field_name ?? '',

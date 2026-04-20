@@ -43,7 +43,9 @@ export const ENTITY_NAME_FIELD = 'entity.name';
 export const ENTITY_TYPE_FIELD = 'entity.type';
 export const TIMESTAMP_FIELD = '@timestamp';
 
-const METADATA_FIELDS = ['_index'];
+export const DOCUMENT_ID_FIELD = '_id';
+
+const METADATA_FIELDS = ['_index', '_id'];
 
 export interface PaginationParams {
   timestampCursor: string;
@@ -59,38 +61,86 @@ export interface PaginationFields {
   finalIdField: string;
 }
 
-export function buildExtractionSourceClause(params: {
+export interface LogPageProbeSourceClauseParams {
   indexPatterns: string[];
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
   recoveryId?: string;
-}): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId } = params;
-  return (
-    `FROM ${indexPatterns.join(', ')}
-    METADATA ${METADATA_FIELDS.join(', ')}` +
-    `
+  /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
+  logsPageCursorStart?: PaginationParams;
+}
+
+/** Bounded extraction: same as probe plus optional inclusive upper bound on (@timestamp, _id). */
+export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
+  logsPageCursorEnd?: PaginationParams;
+};
+
+export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
+  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
+  const baseWhere = `FROM ${indexPatterns.join(', ')}
+    METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE 
       ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
-      AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`
-  );
+      AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
+
+  if (!logsPageCursorStart) {
+    return baseWhere;
+  }
+
+  return `${baseWhere}
+      AND ${buildLogsPageStartFilter(logsPageCursorStart)}`;
+}
+
+export function buildExtractionSourceClause(
+  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: PaginationParams }
+): string {
+  if (params.logsPageCursorEnd) {
+    const { logsPageCursorEnd, ...probeParams } = params;
+    return (
+      buildLogPageProbeSourceClause(probeParams) +
+      `\n      AND ${buildLogsPageEndFilter(logsPageCursorEnd)}`
+    );
+  }
+  return buildLogPageProbeSourceClause(params);
+}
+
+function buildLogsPageStartFilter(cursor: PaginationParams): string {
+  const escapedId = escapeEsqlStringLiteral(cursor.idCursor);
+  return `(
+      ${TIMESTAMP_FIELD} > TO_DATETIME("${cursor.timestampCursor}")
+      OR (
+        ${TIMESTAMP_FIELD} == TO_DATETIME("${cursor.timestampCursor}")
+        AND \`${DOCUMENT_ID_FIELD}\` > "${escapedId}"
+      )
+    )`;
+}
+
+function buildLogsPageEndFilter(end: PaginationParams): string {
+  const escapedId = escapeEsqlStringLiteral(end.idCursor);
+  return `(
+      ${TIMESTAMP_FIELD} < TO_DATETIME("${end.timestampCursor}")
+      OR (
+        ${TIMESTAMP_FIELD} == TO_DATETIME("${end.timestampCursor}")
+        AND \`${DOCUMENT_ID_FIELD}\` <= "${escapedId}"
+      )
+    )`;
 }
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
   return fields
     .map((field) => {
-      const { retention, destination: dest, source } = field;
+      const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }

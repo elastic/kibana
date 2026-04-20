@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
-import { Request, Response } from '@kbn/core-di-server';
-import type { RouteSecurity } from '@kbn/core-http-server';
+import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
 import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
@@ -18,10 +16,12 @@ import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_clien
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import { BaseAlertingRoute } from '../base_alerting_route';
+import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
 
 @injectable()
-export class UpdateRuleRoute {
+export class UpdateRuleRoute extends BaseAlertingRoute {
   static method = 'patch' as const;
   static path = `${ALERTING_V2_RULE_API_PATH}/{id}`;
   static security: RouteSecurity = {
@@ -29,11 +29,8 @@ export class UpdateRuleRoute {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.write],
     },
   };
-  static options = {
-    access: 'public',
+  static routeOptions = {
     summary: 'Update a rule',
-    tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
   } as const;
   static validate = {
     request: {
@@ -54,31 +51,27 @@ export class UpdateRuleRoute {
     },
   };
 
+  protected readonly routeName = 'update rule';
+
   constructor(
+    @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
       UpdateRuleData
     >,
-    @inject(Response) private readonly response: KibanaResponseFactory,
     @inject(RulesClient) private readonly rulesClient: RulesClient
-  ) {}
+  ) {
+    super(ctx);
+  }
 
-  async handle() {
-    try {
-      const updated = await this.rulesClient.updateRule({
-        id: this.request.params.id,
-        data: this.request.body,
-      });
+  protected async execute() {
+    const updated = await this.rulesClient.updateRule({
+      id: this.request.params.id,
+      data: this.request.body,
+    });
 
-      return this.response.ok({ body: updated });
-    } catch (e) {
-      const boom = Boom.isBoom(e) ? e : Boom.boomify(e);
-      return this.response.customError({
-        statusCode: boom.output.statusCode,
-        body: boom.output.payload,
-      });
-    }
+    return this.ctx.response.ok({ body: updated });
   }
 }

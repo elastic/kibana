@@ -11,6 +11,7 @@ export { assertNever } from './src/assert_never';
 export type { Freezable } from './src/deep_freeze';
 export { deepFreeze } from './src/deep_freeze';
 export { get } from './src/get';
+export { getSafe } from './src/get_safe';
 export { mapToObject } from './src/map_to_object';
 export { merge } from './src/merge';
 export { pick } from './src/pick';
@@ -45,3 +46,5 @@ export {
 export { bytePartition } from './src/byte_partition/byte_partition';
 
 export { type FromExternalVariant, fromExternalVariant } from './src/from_external_variant';
+
+export { toSlugIdentifier, isValidSlugIdentifier } from './src/slug_identifier';

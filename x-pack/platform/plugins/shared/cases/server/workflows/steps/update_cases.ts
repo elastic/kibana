@@ -30,14 +30,14 @@ export const updateCasesStepDefinition = (
   createServerStepDefinition({
     ...updateCasesStepCommonDefinition,
     handler: async (context) => {
-      const input = updateCasesStepCommonDefinition.inputSchema.parse(context.input);
-      const caseIds = input.cases.map(({ case_id: caseId }) => caseId);
+      const { cases } = context.input;
+      const caseIds = cases.map(({ case_id: caseId }) => caseId);
 
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
 
         const normalizedCasePatches = await Promise.all(
-          input.cases.map(async (caseInput) => {
+          cases.map(async (caseInput) => {
             try {
               return await prepareCasePatch(casesClient, {
                 caseId: caseInput.case_id,

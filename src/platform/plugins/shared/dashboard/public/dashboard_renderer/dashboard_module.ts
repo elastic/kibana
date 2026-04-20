@@ -10,7 +10,6 @@
 export { DashboardRenderer } from './dashboard_renderer';
 export { DashboardTopNavWithContext } from '../dashboard_top_nav/dashboard_top_nav_with_context';
 export { DashboardListingTable } from '../dashboard_listing/dashboard_listing_table';
-export { DashboardNavigationOptionsEditor } from '../dashboard_navigation/options_editor';
 export { ClonePanelAction } from '../dashboard_actions/clone_panel_action';
 export { ExpandPanelAction } from '../dashboard_actions/expand_panel_action';
 export { FiltersNotificationAction } from '../dashboard_actions/filters_notification_action';
@@ -20,4 +19,5 @@ export { UnlinkFromLibraryAction } from '../dashboard_actions/library_unlink_act
 export { CopyToDashboardAction } from '../dashboard_actions/copy_to_dashboard_action';
 export { AddSectionAction } from '../dashboard_actions/add_section_action';
 export { dashboardDrilldown } from '../dashboard_drilldown/dashboard_drilldown';
+export { exportJsonConfig } from '../share/export_json_config';
 export { initializeDashboardApiServices } from '../services/dashboard_api_services';

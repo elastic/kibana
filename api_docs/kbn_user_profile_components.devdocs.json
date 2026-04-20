@@ -882,7 +882,7 @@
         "label": "UserProfileData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 43,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -905,7 +905,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -928,7 +928,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -944,7 +944,7 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1173,7 +1173,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"emptyMessage\" | \"noMatchesMessage\" | \"loadingMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"emptyMessage\" | \"noMatchesMessage\" | \"loadingMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "lineNumber": 35,
@@ -1707,6 +1707,24 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.agentBuilderAnnouncementModalSeenBySpaceJson",
+            "type": "string",
+            "tags": [],
+            "label": "agentBuilderAnnouncementModalSeenBySpaceJson",
+            "description": [
+              "\nStringified JSON map of space id → whether the Agent Builder announcement modal was dismissed\nfor that space (`true` = dismissed). Used for per-user, per-space dismissal."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1730,7 +1748,7 @@
           },
           " extends Omit<",
           "EuiToolTipProps",
-          ", \"content\" | \"title\">"
+          ", \"title\" | \"content\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_tooltip.tsx",
         "lineNumber": 20,

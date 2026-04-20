@@ -58,7 +58,7 @@ describe('Utils', () => {
 
     it('calls other_openai_utils sanitizeRequest when provider is Other OpenAi', () => {
       sanitizeRequest(OpenAiProviderType.Other, OPENAI_CHAT_URL, bodyString, DEFAULT_MODEL);
-      expect(mockOtherOpenAiSanitizeRequest).toHaveBeenCalledWith(bodyString);
+      expect(mockOtherOpenAiSanitizeRequest).toHaveBeenCalledWith(bodyString, DEFAULT_MODEL);
       expect(mockOpenAiSanitizeRequest).not.toHaveBeenCalled();
       expect(mockAzureAiSanitizeRequest).not.toHaveBeenCalled();
     });

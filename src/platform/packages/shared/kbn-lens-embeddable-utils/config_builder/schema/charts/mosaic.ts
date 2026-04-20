@@ -11,7 +11,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -19,12 +19,14 @@ import {
   legendTruncateAfterLinesSchema,
   sharedPanelInfoSchema,
 } from '../shared';
-import { legendNestedSchema, legendVisibilitySchema, valueDisplaySchema } from './partition_shared';
+import { legendNestedSchema, valueDisplaySchema } from './partition_shared';
 import {
   legendSizeSchema,
+  legendVisibilitySchemaWithAuto,
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 import { groupIsNotCollapsed } from '../../utils';
 
 const mosaicStateSharedSchema = {
@@ -33,7 +35,7 @@ const mosaicStateSharedSchema = {
       {
         nested: legendNestedSchema,
         truncate_after_lines: legendTruncateAfterLinesSchema,
-        visibility: legendVisibilitySchema,
+        visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
       },
       {
@@ -45,8 +47,20 @@ const mosaicStateSharedSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
 };
+
+const mosaicStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+  },
+  {
+    meta: {
+      id: 'mosaicStyling',
+      title: 'Mosaic styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 const partitionStatePrimaryMetricOptionsSchema = {};
 
@@ -96,10 +110,10 @@ export const mosaicStateSchemaNoESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...mosaicStateSharedSchema,
-    ...dslOnlyPanelInfoSchema,
+    styling: schema.maybe(mosaicStylingSchema),
     /**
      * Primary value configuration, must define operation. Supports field-based operations (count, unique count, metrics, sum, last value, percentile, percentile ranks), reference-based operations (differences, moving average, cumulative sum, counter rate), and formula-like operations (static value, formula).
      */
@@ -148,8 +162,9 @@ export const mosaicStateSchemaESQL = schema.object(
     type: schema.literal('mosaic'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...mosaicStateSharedSchema,
+    styling: schema.maybe(mosaicStylingSchema),
     /**
      * Primary value configuration, must define operation. In ES|QL mode, uses column-based configuration.
      */
@@ -188,7 +203,7 @@ export const mosaicStateSchemaESQL = schema.object(
   }
 );
 
-export const mosaicStateSchema = schema.oneOf([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
+export const mosaicStateSchema = objectUnion([mosaicStateSchemaNoESQL, mosaicStateSchemaESQL], {
   meta: {
     id: 'mosaicChart',
     title: 'Mosaic Chart',

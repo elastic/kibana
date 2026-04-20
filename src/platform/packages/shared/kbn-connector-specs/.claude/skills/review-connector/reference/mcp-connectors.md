@@ -10,12 +10,6 @@ Use this reference when the connector under review is **MCP-native** (uses `with
 - Action names correspond to actual MCP tool names. Tool names use **underscores** (e.g. `tavily_search`), not hyphens. Validate against the MCP server's `listTools` response or server docs.
 - Has a connection test handler that validates the MCP connection works.
 
-## Workflows (MCP-native)
-
-- Step `type` uses the connector's typed action (e.g. `github.searchCode`, `tavily.search`), NOT the generic `mcp.callTool`.
-- Only pass parameters that the MCP tool accepts. Check the tool's `inputSchema`; some params in third-party docs may be outdated or unavailable via MCP. Verify with `listTools` or the MCP server documentation.
-- Connector reference uses the spec's own template variable (e.g. `<%= tavily-stack-connector-id %>`), NOT `<%= mcp-stack-connector-id %>`.
-
 ## Thorough check (optional)
 
 Run when the user asks for **thorough** or **deep** validation:

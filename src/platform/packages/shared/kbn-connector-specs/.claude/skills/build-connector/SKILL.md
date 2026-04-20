@@ -21,7 +21,7 @@ If these skills are not available when needed (Tasks 6–7), the agent creation 
 
 Use `TaskCreate` to create all of the following tasks up front so the user can see the full plan. Set all tasks to `pending` initially.
 
-1. **Create the connector code** — "Generate connector spec, workflows, types, and documentation for $ARGUMENTS"
+1. **Create the connector code** — "Generate connector spec, types, and documentation for $ARGUMENTS"
 2. **Code review** — "Review generated connector files for correctness and completeness"
 3. **Edit based on review** — "Fix issues found during code review"
 4. **Wait for Kibana** — "Ask user to start Elasticsearch and Kibana"
@@ -53,7 +53,6 @@ Args: $ARGUMENTS
 
 This runs in a forked context and will generate:
 - A connector specification with actions, types, and icon (in `src/platform/packages/shared/kbn-connector-specs/src/specs/`)
-- Workflow YAML files alongside the spec
 - Documentation for the connector (in `docs/reference/connectors-kibana/`)
 
 When complete, mark task 1 as `completed`.
@@ -64,7 +63,7 @@ When complete, mark task 1 as `completed`.
 
 Mark task 2 as `in_progress`.
 
-Review the files generated in Task 1 using the **review-connector** skill. Apply its checklist to the connector spec, workflows, and docs.
+Review the files generated in Task 1 using the **review-connector** skill. Apply its checklist to the connector spec and docs.
 
 List all issues found. If no issues are found, note that the code looks good.
 
@@ -122,7 +121,7 @@ Skill: activate-connector
 Args: $ARGUMENTS
 ```
 
-This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:connectorsEnabled` is true, workflows and tools are auto-created.
+This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
 
 Mark task 5 as `completed`.
 
@@ -178,17 +177,13 @@ Analyze the chat output from Task 7. Check each criterion:
 
 ### Failure Analysis
 If tools failed (tool results contain `"status":"failed"`):
-1. **Get the execution details** to see the actual error. Extract the `execution_id` from the tool result and call:
-   ```bash
-   source "$(git rev-parse --show-toplevel)/scripts/kibana_api_common.sh" && kibana_curl "$KIBANA_URL/api/workflowExecutions/<execution_id>" > /tmp/wf_exec.json
-   ```
-   Then read `/tmp/wf_exec.json` and check `error.message` and `stepExecutions[].error.message`.
+1. **Check the sub-action error** to see the actual error. Look at the `message` field in the tool result.
 2. **Common errors:**
-   - `Unknown tool: 'tool-name'` — MCP tool name is wrong (likely hyphens vs underscores). Verify via `listTools` sub-action on the connector.
-   - `Unexpected keyword argument` — the workflow passes a parameter the tool doesn't accept. Remove it from the workflow YAML.
-   - `Input should be 'X'` — a parameter value is invalid. Fix the workflow input constraints.
+   - `Unknown sub-action: 'name'` — the sub-action name is wrong. Verify via the connector spec's `actions` array.
+   - `Unexpected parameter` — the tool call passes a parameter the sub-action doesn't accept. Fix the action's Zod schema.
+   - `Input should be 'X'` — a parameter value is invalid. Fix the action's input constraints.
    - Auth/credential errors — note this but don't count as code failure. Ask user to re-provide credentials.
-3. If the error is a **workflow issue** (wrong tool name, invalid parameters, bad Liquid template) — this needs code fixes.
+3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 
 Mark task 8 as `completed` and note whether iteration is needed.
@@ -201,7 +196,7 @@ Mark task 9 as `in_progress`.
 
 If Task 8 found code issues:
 
-1. **Diagnose**: Identify which files need changes (connector spec, workflows, types)
+1. **Diagnose**: Identify which files need changes (connector spec, types)
 2. **Verify MCP tool names** (if MCP-native): Use the `listTools` action to discover actual tool names and schemas:
    ```bash
    source "$(git rev-parse --show-toplevel)/scripts/kibana_api_common.sh" && kibana_curl -X POST -H "Content-Type: application/json" \
@@ -209,7 +204,7 @@ If Task 8 found code issues:
      -d '{"params":{"subAction":"listTools","subActionParams":{}}}'
    ```
 3. **Fix**: Use `Edit` to fix the identified issues
-4. **Re-activate**: The connector may need to be deleted and re-created to pick up changed workflows. Wait ~60 seconds for Kibana to hot-reload server-side changes, then re-invoke `/activate-connector`.
+4. **Wait for hot-reload**: Wait ~60 seconds for Kibana to hot-reload server-side changes.
 5. **Re-test**: Run another chat test using `/chat-with-agent`
 6. **Re-verify**: Check tool call quality again
 
@@ -261,12 +256,10 @@ Tell the user something like the below template, listing the actual file paths t
 >
 > **Files created/modified:**
 > - Connector spec: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/...`
-> - Workflows: `src/platform/packages/shared/kbn-connector-specs/src/specs/<name>/workflows/...`
 > - Documentation: `docs/reference/connectors-kibana/<name>-action-type.md`
 >
 > **Kibana state:**
 > - Connector created with ID: `<id>`
-> - Workflows and tools auto-created via lifecycle handler
 > - Test agent created with ID: `<id>`
 > - Test conversations available in Agent Builder
 >

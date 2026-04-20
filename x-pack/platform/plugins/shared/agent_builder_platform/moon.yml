@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
-  - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
@@ -44,6 +43,7 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/connector-specs'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

@@ -53,6 +53,8 @@ export interface ObservationModuleConfig {
   readonly name: string;
   /** Execution order (higher = earlier) */
   readonly priority: number;
+  /** Optional weight for the weighted scoring engine (defaults in engine if omitted) */
+  readonly weight?: number;
 }
 
 /** The contract every pluggable observation module must satisfy. */
