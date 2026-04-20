@@ -76,6 +76,22 @@ export class EngineDescriptorClient {
     return attributes;
   }
 
+  async updateWith(
+    entityType: EntityType,
+    updater: (current: EngineDescriptor) => EngineDescriptor
+  ): Promise<EngineDescriptor> {
+    const current = await this.findOrThrow(entityType);
+    const updated = updater(current);
+    const id = this.getSavedObjectId(entityType);
+    const { attributes } = await this.soClient.update<EngineDescriptor>(
+      EngineDescriptorTypeName,
+      id,
+      updated,
+      { refresh: 'wait_for', mergeAttributes: false }
+    );
+    return attributes as EngineDescriptor;
+  }
+
   async update(
     entityType: EntityType,
     state: Partial<EngineDescriptor>,

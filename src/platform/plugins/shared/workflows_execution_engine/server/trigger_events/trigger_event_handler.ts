@@ -98,25 +98,23 @@ export class TriggerEventHandler {
   }
 
   async handleEvent(params: EmitEventParams): Promise<void> {
-    const timestamp = new Date().toISOString();
+    if (!this.config.enabled) {
+      this.logger.debug(
+        'Event-driven execution is disabled (config.eventDriven.enabled: false); skipping workflow scheduling.'
+      );
+      return;
+    }
+
     const { triggerId, payload, request } = params;
 
     const spaceId = this.spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
     this.validateTrigger(triggerId, spaceId, payload);
 
-    const eventChainContext = getEventChainContext(request);
-
-    if (!this.config.enabled && !this.config.enabled) {
-      this.logger.debug(
-        'Event-driven execution is disabled (eventDrivenExecutionEnabled: false); skipping workflow scheduling.'
-      );
-      return;
-    }
-
+    const timestamp = new Date().toISOString();
+    const resolutionStartMs = Date.now();
     const eventId = generateUuid();
 
-    const resolutionStartMs = Date.now();
     const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
       triggerId,
       spaceId,
@@ -129,6 +127,7 @@ export class TriggerEventHandler {
       )}`
     );
 
+    const eventChainContext = getEventChainContext(request);
     if (this.config.logEvents) {
       await this.writeTriggerEvents({
         timestamp,
@@ -143,8 +142,8 @@ export class TriggerEventHandler {
       });
     }
 
-    let scheduleStats = createEmptyTriggerScheduleStats();
-    if (this.config.enabled && workflows.length > 0) {
+    let scheduleStats: TriggerEventScheduleStats;
+    if (workflows.length > 0) {
       scheduleStats = await this.scheduleMatchingWorkflows(
         workflows,
         spaceId,
@@ -156,6 +155,8 @@ export class TriggerEventHandler {
           scheduleStats
         )}`
       );
+    } else {
+      scheduleStats = createEmptyTriggerScheduleStats();
     }
 
     this.telemetryClient.reportTriggerEventDispatched({
