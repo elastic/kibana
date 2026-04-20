@@ -29,8 +29,7 @@ const {
   connectorSelectorExists,
 } = workflowInsightsSelectors;
 
-// Failing: See https://github.com/elastic/kibana/issues/262661
-describe.skip(
+describe(
   'Workflow Insights (AB path)',
   {
     env: {
@@ -94,6 +93,10 @@ describe.skip(
 
       connectorSelectorExists();
       scanButtonShouldBe('enabled');
+
+      // Override pending stub to return running execution BEFORE clicking scan.
+      // Without this, the post-click poll immediately gets [] and completes the scan.
+      fetchRunningWorkflowInsights();
       clickScanButton();
 
       cy.wait('@createWorkflowInsights', { timeout: 30 * 1000 });

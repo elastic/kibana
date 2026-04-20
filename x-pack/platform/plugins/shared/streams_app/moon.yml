@@ -110,11 +110,13 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/streams-ai'
   - '@kbn/cps'
+  - '@kbn/evals-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/deeplinks-management'
   - '@kbn/core-http-browser'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/inference-connectors'
+  - '@kbn/safer-lodash-set'
 tags:
   - plugin
   - prod

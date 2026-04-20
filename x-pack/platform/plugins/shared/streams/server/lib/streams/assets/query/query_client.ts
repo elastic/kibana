@@ -14,13 +14,13 @@ import type {
   StorageClientSearchRequest,
   StorageClientSearchResponse,
 } from '@kbn/storage-adapter';
+import { deriveQueryType } from '@kbn/streams-schema/src/helpers/esql_helpers';
+import type { Streams } from '@kbn/streams-schema/src/models/streams';
 import {
   type QueryType,
   type StreamQuery,
-  type Streams,
   QUERY_TYPE_STATS,
-  deriveQueryType,
-} from '@kbn/streams-schema';
+} from '@kbn/streams-schema/src/queries';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import {
@@ -73,6 +73,7 @@ const LEGACY_RUNTIME_MAPPINGS = {
 export interface QueryLinkFilters {
   ruleUnbacked?: RuleUnbackedFilter;
   queryIds?: string[];
+  minSeverityScore?: number;
 }
 
 interface TermQueryOpts {
@@ -124,6 +125,11 @@ function termsQuery<T extends string>(
   const filteredValues = values.filter((value) => value !== undefined) as TermQueryFieldValue[];
 
   return [{ terms: { [field]: filteredValues } }];
+}
+
+function rangeGteQuery(field: string, value?: number): QueryDslQueryContainer[] {
+  if (value === undefined) return [];
+  return [{ range: { [field]: { gte: value } } }];
 }
 
 function escapeWildcard(input: string): string {
@@ -202,14 +208,14 @@ export type StoredQueryLink = QueryLinkStorageFields & {
   [STREAM_NAME]: string;
 };
 
-interface QueryBulkIndexOperation {
+interface QueryStorageBulkIndexOperation {
   index: { asset: QueryLinkRequest };
 }
-interface QueryBulkDeleteOperation {
+interface QueryStorageBulkDeleteOperation {
   delete: { asset: QueryUnlinkRequest };
 }
 
-export type QueryBulkOperation = QueryBulkIndexOperation | QueryBulkDeleteOperation;
+type QueryStorageBulkOperation = QueryStorageBulkIndexOperation | QueryStorageBulkDeleteOperation;
 
 function fromStorage(link: StoredQueryLink): QueryLink {
   const esql = link[QUERY_ESQL_QUERY];
@@ -320,6 +326,16 @@ function toQueryLinkFromQuery({
   };
 }
 
+/** Operations accepted by {@link QueryClient.bulk} (stream queries + id deletes). */
+export interface QueryClientBulkOperation {
+  index?: StreamQuery;
+  delete?: { id: string };
+}
+/** Index-only bulk operation for {@link QueryClient.bulk}. */
+export interface QueryClientBulkIndexOperation {
+  index: StreamQuery;
+}
+
 export class QueryClient {
   constructor(
     private readonly dependencies: {
@@ -366,7 +382,7 @@ export class QueryClient {
     const nextIds = new Set(nextQueryLinks.map((link) => link[ASSET_UUID]));
     const queryLinksDeleted = existingQueryLinks.filter((link) => !nextIds.has(link[ASSET_UUID]));
 
-    const operations: QueryBulkOperation[] = [
+    const operations: QueryStorageBulkOperation[] = [
       ...queryLinksDeleted.map((asset) => ({ delete: { asset } })),
       ...nextQueryLinks.map((asset) => ({ index: { asset } })),
     ];
@@ -439,6 +455,7 @@ export class QueryClient {
       ...termQuery(ASSET_TYPE, 'query'),
       ...termsQuery(ASSET_ID, filters?.queryIds),
       ...ruleUnbackedFilter(filters?.ruleUnbacked),
+      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
     ];
 
     const queriesResponse = await this.dependencies.storageClient.search({
@@ -470,8 +487,12 @@ export class QueryClient {
    * introduced alongside the type field, so any doc without it is a match query.
    * syncQueries backfills the type for all docs it touches.
    */
-  async getUnbackedQueriesCount(): Promise<number> {
-    const filter = [...termQuery(ASSET_TYPE, 'query'), ...termQuery(RULE_BACKED, false)];
+  async getUnbackedQueriesCount(filters?: { minSeverityScore?: number }): Promise<number> {
+    const filter = [
+      ...termQuery(ASSET_TYPE, 'query'),
+      ...termQuery(RULE_BACKED, false),
+      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
+    ];
 
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 0,
@@ -491,8 +512,11 @@ export class QueryClient {
   /**
    * Returns all query links across streams that do not have a backing Kibana rule.
    */
-  async getAllUnbackedQueries(): Promise<QueryLink[]> {
-    return this.getQueryLinks([], { ruleUnbacked: 'only' });
+  async getAllUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<QueryLink[]> {
+    return this.getQueryLinks([], {
+      ruleUnbacked: 'only',
+      minSeverityScore: filters?.minSeverityScore,
+    });
   }
 
   async bulkGetByIds(name: string, ids: string[]) {
@@ -656,7 +680,10 @@ export class QueryClient {
     return mapSearchHits(assetsResponse);
   }
 
-  private async bulkStorage(definition: Streams.all.Definition, operations: QueryBulkOperation[]) {
+  private async bulkStorage(
+    definition: Streams.all.Definition,
+    operations: QueryStorageBulkOperation[]
+  ) {
     return await this.dependencies.storageClient.bulk({
       operations: operations.map((operation) => {
         if ('index' in operation) {
@@ -862,7 +889,7 @@ export class QueryClient {
 
   public async bulk(
     definition: Streams.all.Definition,
-    operations: Array<{ index?: StreamQuery; delete?: { id: string } }>,
+    operations: QueryClientBulkOperation[],
     options?: { createRules?: boolean }
   ) {
     const stream = definition.name;
