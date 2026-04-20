@@ -154,6 +154,18 @@ components:
               description: 'Global status of the live query (completed, running).'
               type: string
               enum: [completed, running]
+            result_counts:
+              type: object
+              description: 'Aggregated result count statistics for the query (present when resultCountsEnabled experimental feature is on).'
+              properties:
+                total_rows:
+                  type: integer
+                responded_agents:
+                  type: integer
+                successful_agents:
+                  type: integer
+                error_agents:
+                  type: integer
             queries:
               description: 'The queries with their execution status.'
               type: array
@@ -201,6 +213,11 @@ components:
           agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
           user_id: "elastic"
           status: "completed"
+          result_counts:
+            total_rows: 42
+            responded_agents: 1
+            successful_agents: 1
+            error_agents: 0
           queries:
             - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
               id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"

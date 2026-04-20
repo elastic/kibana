@@ -33,7 +33,25 @@ export interface PackQueriesQuery {
   saved_query_id?: string;
   expiration?: string;
   timeout?: number;
+  interval?: number | string;
 }
+
+export interface SingleQueryResultCounts {
+  total_rows: number;
+  responded_agents: number;
+  successful_agents: number;
+  error_agents: number;
+}
+
+export interface PackResultCounts {
+  total_rows: number;
+  queries_with_results: number;
+  queries_total: number;
+  successful_agents: number;
+  error_agents: number;
+}
+
+export type ResultCounts = SingleQueryResultCounts | PackResultCounts;
 
 export interface LiveQueryDetailsItem {
   action_id: string;
@@ -45,12 +63,14 @@ export interface LiveQueryDetailsItem {
   agent_policy_ids: string[];
   agents?: string[];
   user_id?: string;
+  user_profile_uid?: string;
   pack_id?: string;
   pack_name?: string;
   pack_prebuilt?: boolean;
   tags?: string[];
   status?: string;
   queries?: PackQueriesQuery[];
+  result_counts?: ResultCounts;
 }
 
 export const useLiveQueryDetails = ({

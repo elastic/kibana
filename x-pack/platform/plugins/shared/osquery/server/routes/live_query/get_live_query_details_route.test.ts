@@ -18,6 +18,16 @@ jest.mock('./utils', () => ({
   getActionResponses: jest.fn(),
 }));
 
+jest.mock('../../lib/get_result_counts_for_actions', () => ({
+  getResultCountsForActions: jest.fn().mockResolvedValue(
+    new Map([['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }]])
+  ),
+}));
+
+jest.mock('../../utils/ccs_utils', () => ({
+  hasConnectedRemoteClusters: jest.fn().mockResolvedValue(false),
+}));
+
 describe('getLiveQueryDetailsRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
@@ -85,6 +95,11 @@ describe('getLiveQueryDetailsRoute', () => {
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'space-a' }),
       },
+      getStartServices: jest.fn().mockResolvedValue([
+        { elasticsearch: { client: { asInternalUser: {} } } },
+      ]),
+      logFactory: { get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
+      experimentalFeatures: { resultCountsEnabled: true },
     } as unknown as OsqueryAppContext;
 
     const mockRouter = createMockRouter();
@@ -122,6 +137,12 @@ describe('getLiveQueryDetailsRoute', () => {
           user_id: 'test-user',
           user_profile_uid: 'u_test-profile-uid',
           status: 'completed',
+          result_counts: {
+            total_rows: 5,
+            responded_agents: 1,
+            successful_agents: 1,
+            error_agents: 0,
+          },
           queries: [
             expect.objectContaining({
               action_id: 'query-1',

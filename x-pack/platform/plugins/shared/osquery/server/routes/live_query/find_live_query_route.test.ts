@@ -60,6 +60,7 @@ describe('findLiveQueryRoute', () => {
       getStartServices: jest
         .fn()
         .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: mockEsClient } } }]),
+      experimentalFeatures: { resultCountsEnabled: true },
     } as unknown as OsqueryAppContext;
   });
 
