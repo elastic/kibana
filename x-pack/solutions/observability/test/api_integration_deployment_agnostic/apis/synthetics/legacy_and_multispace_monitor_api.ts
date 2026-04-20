@@ -440,9 +440,7 @@ const runTests = (
         validationPrivateLocation
       );
       const resp = await supertestEditorWithApiKey
-        .post(
-          `/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`
-        )
+        .post(`/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`)
         .send(monitorData);
 
       expect(resp.status).to.be(400);

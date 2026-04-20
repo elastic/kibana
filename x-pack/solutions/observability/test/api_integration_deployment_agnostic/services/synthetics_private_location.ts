@@ -190,11 +190,7 @@ export class PrivateLocationTestService {
   async addFleetPolicy(name: string, spaceIds = ['default']) {
     return await this.retry.try(async () => {
       const response = await this.supertestWithAuth
-        .post(
-          `${
-            spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : ``
-          }/api/fleet/agent_policies`
-        )
+        .post(`${spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : ``}/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'true')
         .send({
           name,
