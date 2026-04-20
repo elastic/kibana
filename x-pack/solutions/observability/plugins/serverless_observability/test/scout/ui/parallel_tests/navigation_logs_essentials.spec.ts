@@ -5,26 +5,83 @@
  * 2.0.
  */
 
+/* eslint-disable playwright/expect-expect -- `nav.expectNavItemNavigatesTo` is our assertion helper. */
+
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 
+/**
+ * The logs_essentials tier disables a large slice of the observability
+ * feature set via `config/serverless.oblt.logs_essentials.yml` (cases, SLO,
+ * APM, infra, ML, AI Assistant, synthetics…). The body nav therefore shrinks
+ * to a short list that fits in the primary column and we assert both the
+ * presence of the core items and the explicit absence of the disabled ones.
+ */
 test.describe(
-  'Serverless Observability Navigation - Logs Essentials tier',
+  'Serverless Observability Navigation - Logs Essentials tier body',
   { tag: [...tags.serverless.observability.logs_essentials] },
   () => {
-    test('does not show complete-tier-only navigation items', async ({
-      browserAuth,
-      pageObjects,
-    }) => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.serverlessNav.goto();
+      await pageObjects.observabilityNavigation.goto();
+      await pageObjects.observabilityNavigation.waitForLoad();
+    });
 
-      await test.step('Machine Learning panel is not visible in More menu', async () => {
-        await pageObjects.collapsibleNav.openMoreMenu();
-        await expect(
-          pageObjects.collapsibleNav.getNavItemById('machine_learning-landing')
-        ).toBeHidden();
+    test('renders expected body nav items with working links', async ({ pageObjects }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await test.step('primary body items are visible and linked', async () => {
+        const primaryDeepLinks = [
+          'discover',
+          'dashboards',
+          'workflows',
+          'observability-overview:alerts',
+        ];
+        for (const deepLinkId of primaryDeepLinks) {
+          const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
+          await expect(item).toBeVisible();
+          await nav.expectNavItemHasHref(item);
+        }
+      });
+
+      await test.step('complete-tier features are not present', async () => {
+        const disabledDeepLinks = ['observability-overview:cases', 'slo'];
+        for (const deepLinkId of disabledDeepLinks) {
+          await expect(nav.navItemInBodyByDeepLinkId(deepLinkId)).toBeHidden();
+        }
+
+        const disabledIds = ['applications', 'metrics', 'machine_learning-landing'];
+        for (const id of disabledIds) {
+          await expect(nav.navItemInBodyById(id)).toBeHidden();
+        }
+      });
+    });
+
+    test('clicking body nav items navigates to the correct apps', async ({ pageObjects, page }) => {
+      const nav = pageObjects.observabilityNavigation;
+
+      await test.step('Discover', async () => {
+        await nav.expectNavItemNavigatesTo(
+          nav.navItemInPrimaryByDeepLinkId('discover'),
+          nav.pageOrNoData('dscPage')
+        );
+      });
+
+      await test.step('Dashboards', async () => {
+        await nav.goto();
+        await nav.expectNavItemNavigatesTo(
+          nav.navItemInPrimaryByDeepLinkId('dashboards'),
+          nav.pageOrNoData('dashboardLandingPage')
+        );
+      });
+
+      await test.step('Alerts', async () => {
+        await nav.goto();
+        await nav.expectNavItemNavigatesTo(
+          nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts'),
+          page.testSubj.locator('alertsPageWithData')
+        );
       });
     });
   }

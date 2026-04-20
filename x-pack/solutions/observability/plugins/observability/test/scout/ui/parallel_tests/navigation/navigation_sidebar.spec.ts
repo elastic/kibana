@@ -7,12 +7,19 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { test } from '../fixtures';
+import { spaceTest as test } from '../../fixtures';
 
+// The new chrome navigation is only rendered in stateful when the space uses
+// the 'oblt' solution view. We use `spaceTest` to get an isolated space per
+// worker and flip it to 'oblt' before any test runs.
 test.describe(
-  'Serverless Observability Navigation - Complete tier body',
-  { tag: [...tags.serverless.observability.complete] },
+  'Stateful Observability Navigation - Sidebar',
+  { tag: [...tags.stateful.classic, ...tags.stateful.observability] },
   () => {
+    test.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.setSolutionView('oblt');
+    });
+
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
@@ -50,11 +57,17 @@ test.describe(
         }
       });
 
-      await test.step('More panel-opener items are visible (complete tier)', async () => {
+      await test.step('More panel-opener items are visible', async () => {
         const morePanelIds = ['applications', 'metrics', 'machine_learning-landing', 'otherTools'];
         for (const id of morePanelIds) {
           await expect(nav.navItemInMoreById(id)).toBeVisible();
         }
+      });
+
+      await test.step('AI Assistant or Agent Builder entry is present in More', async () => {
+        const aiAssistant = nav.navItemInMoreByDeepLinkId('observabilityAIAssistant');
+        const agentBuilder = nav.navItemInMoreByDeepLinkId('agent_builder');
+        await expect(aiAssistant.or(agentBuilder)).toBeVisible();
       });
     });
 
@@ -104,15 +117,13 @@ test.describe(
         );
       });
 
-      await test.step('Machine Learning opens its nested panel inside the More menu', async () => {
+      await test.step('Infrastructure opens its nested panel inside the More menu', async () => {
         await nav.goto();
         await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
         await expect(nav.morePopover).toBeVisible();
-        await nav.navItemInMoreById('machine_learning-landing').click();
+        await nav.navItemInMoreById('metrics').click();
         await expect(
-          nav.morePopover.locator(
-            '[data-test-subj="kbnChromeNav-nestedPanel-machine_learning-landing"]'
-          )
+          nav.morePopover.locator('[data-test-subj="kbnChromeNav-nestedPanel-metrics"]')
         ).toBeVisible();
       });
     });
