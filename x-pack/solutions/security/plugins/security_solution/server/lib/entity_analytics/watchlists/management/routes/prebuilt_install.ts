@@ -8,12 +8,12 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
-import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
-import { ENTITY_STORE_WATCHLISTS_INSTALL_URL } from '../../../../../common/entity_analytics/entity_store/constants';
-import { getRequestSavedObjectClient } from '../../watchlists/shared/utils';
-import { WatchlistConfigClient } from '../../watchlists/management/watchlist_config';
-import { ensurePrebuiltWatchlists } from '../../watchlists/migrations/install_prebuilt_watchlists';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../../../../common/entity_analytics/watchlists/constants';
+import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { getRequestSavedObjectClient } from '../../shared/utils';
+import { WatchlistConfigClient } from '../watchlist_config';
+import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
 
 export const installPrebuiltWatchlistsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -22,7 +22,7 @@ export const installPrebuiltWatchlistsRoute = (
   router.versioned
     .post({
       access: 'public',
-      path: ENTITY_STORE_WATCHLISTS_INSTALL_URL,
+      path: WATCHLISTS_PREBUILT_INSTALL_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

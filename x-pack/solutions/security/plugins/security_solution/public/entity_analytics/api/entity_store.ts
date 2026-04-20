@@ -20,7 +20,7 @@ import type {
   StopEntityEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
-import { ENTITY_STORE_WATCHLISTS_INSTALL_URL } from '../../../common/entity_analytics/entity_store/constants';
+import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../common/entity_analytics/watchlists/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 import * as entityAnalyticsI18n from '../translations';
 
@@ -32,7 +32,7 @@ export const useEntityStoreRoutes = () => {
 
   return useMemo(() => {
     const installPrebuiltWatchlists = async () =>
-      http.fetch<{ acknowledged: boolean }>(ENTITY_STORE_WATCHLISTS_INSTALL_URL, {
+      http.fetch<{ acknowledged: boolean }>(WATCHLISTS_PREBUILT_INSTALL_URL, {
         method: 'POST',
         version: API_VERSIONS.public.v1,
       });
