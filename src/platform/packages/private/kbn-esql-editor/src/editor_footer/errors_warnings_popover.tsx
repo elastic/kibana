@@ -62,12 +62,10 @@ function ErrorsWarningsContent({
   items,
   type,
   onErrorClick,
-  onQuickFixClick,
 }: {
   items: MonacoMessage[];
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
-  onQuickFixClick: (error: MonacoMessage) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   const { color } = getConstsByType(type, items.length);
@@ -127,25 +125,6 @@ function ErrorsWarningsContent({
                 >
                   {item.message}
                 </div>
-                {item.quickFix ? (
-                  <EuiButtonEmpty
-                    size="xs"
-                    color="text"
-                    iconType="wrench"
-                    iconSize="s"
-                    data-test-subj="ESQLEditor-errors-warnings-content-quick-fix"
-                    aria-label={i18n.translate('esqlEditor.query.quickFix.ariaLabel', {
-                      defaultMessage: 'Quick fix: {title}',
-                      values: { title: item.quickFix.title },
-                    })}
-                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                      e.stopPropagation();
-                      onQuickFixClick(item);
-                    }}
-                  >
-                    {item.quickFix.title}
-                  </EuiButtonEmpty>
-                ) : null}
               </div>
             </EuiDescriptionListDescription>
           );
@@ -161,7 +140,6 @@ export function ErrorsWarningsFooterPopover({
   type,
   setIsPopoverOpen,
   onErrorClick,
-  onQuickFixClick,
   isSpaceReduced,
   dataErrorsControl,
 }: {
@@ -170,7 +148,6 @@ export function ErrorsWarningsFooterPopover({
   type: 'error' | 'warning';
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoMessage) => void;
-  onQuickFixClick: (error: MonacoMessage) => void;
   isSpaceReduced?: boolean;
   dataErrorsControl?: DataErrorsControl;
 }) {
@@ -214,12 +191,7 @@ export function ErrorsWarningsFooterPopover({
           closePopover={closePopover}
         >
           {visibleItems.length > 0 && (
-            <ErrorsWarningsContent
-              items={visibleItems}
-              type={type}
-              onErrorClick={onErrorClick}
-              onQuickFixClick={onQuickFixClick}
-            />
+            <ErrorsWarningsContent items={visibleItems} type={type} onErrorClick={onErrorClick} />
           )}
           {dataErrorsControl && (
             <DataErrorsSwitch dataErrorsControl={dataErrorsControl} closePopover={closePopover} />

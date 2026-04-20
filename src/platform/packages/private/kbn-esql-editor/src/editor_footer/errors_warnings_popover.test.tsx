@@ -11,7 +11,6 @@ import React from 'react';
 import '@testing-library/jest-dom';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
 
@@ -19,7 +18,6 @@ describe('ErrorsWarningsFooterPopover', () => {
   const defaultHandlers = {
     setIsPopoverOpen: jest.fn(),
     onErrorClick: jest.fn(),
-    onQuickFixClick: jest.fn(),
   };
 
   const errorMock = (overrides: Partial<MonacoMessage> = {}): MonacoMessage => ({
@@ -33,36 +31,7 @@ describe('ErrorsWarningsFooterPopover', () => {
     ...overrides,
   });
 
-  it('renders a quick fix control when an item includes quickFix', async () => {
-    const user = userEvent.setup();
-    const onQuickFixClick = jest.fn();
-    const item = errorMock({
-      quickFix: {
-        title: 'Load unmapped fields',
-        fixQuery: (q: string) => q,
-      },
-    });
-
-    renderWithI18n(
-      <ErrorsWarningsFooterPopover
-        isPopoverOpen
-        items={[item]}
-        type="error"
-        {...defaultHandlers}
-        onQuickFixClick={onQuickFixClick}
-      />
-    );
-
-    const quickFixButton = screen.getByTestId('ESQLEditor-errors-warnings-content-quick-fix');
-    expect(quickFixButton).toBeInTheDocument();
-    expect(quickFixButton).toHaveTextContent('Load unmapped fields');
-
-    await user.click(quickFixButton);
-    expect(onQuickFixClick).toHaveBeenCalledTimes(1);
-    expect(onQuickFixClick).toHaveBeenCalledWith(item);
-  });
-
-  it('does not render a quick fix control when quickFix is absent', () => {
+  it('renders error message text', () => {
     renderWithI18n(
       <ErrorsWarningsFooterPopover
         isPopoverOpen
@@ -72,8 +41,6 @@ describe('ErrorsWarningsFooterPopover', () => {
       />
     );
 
-    expect(
-      screen.queryByTestId('ESQLEditor-errors-warnings-content-quick-fix')
-    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Unknown column/)).toBeInTheDocument();
   });
 });

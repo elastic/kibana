@@ -540,31 +540,34 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
-  const { editorMessages, onLookupIndexCreate, onNewFieldsAddedToLookupIndex, onQuickFixClick } =
-    useQueryValidation({
-      core,
-      code,
-      codeWhenSubmitted,
-      editorRef,
-      editorModel,
-      esqlCallbacks,
-      serverErrors,
-      serverWarning,
-      mergeExternalMessages,
-      dataErrorsControl,
-      isLoading,
-      isQueryLoading,
-      dataSourcesCache,
-      esqlFieldsCache,
-      getJoinIndicesCallback,
-      onQueryUpdate,
-      pickerProjectRouting,
-      latencyTracking: {
-        trackValidationLatencyStart,
-        trackValidationLatencyEnd,
-        resetValidationTracking,
-      },
-    });
+  const {
+    editorMessages,
+    quickFixMessagesRef,
+    onLookupIndexCreate,
+    onNewFieldsAddedToLookupIndex,
+  } = useQueryValidation({
+    code,
+    codeWhenSubmitted,
+    editorRef,
+    editorModel,
+    esqlCallbacks,
+    serverErrors,
+    serverWarning,
+    mergeExternalMessages,
+    dataErrorsControl,
+    isLoading,
+    isQueryLoading,
+    dataSourcesCache,
+    esqlFieldsCache,
+    getJoinIndicesCallback,
+    onQueryUpdate,
+    pickerProjectRouting,
+    latencyTracking: {
+      trackValidationLatencyStart,
+      trackValidationLatencyEnd,
+      resetValidationTracking,
+    },
+  });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
@@ -579,6 +582,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     esqlDepsByModelUri,
     suggestionProvider,
+    codeActionsProvider,
     codeEditorHoverProvider,
     signatureProvider,
     inlineCompletionsProvider,
@@ -597,6 +601,7 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     setMeasuredEditorWidth,
     resetPendingTracking,
+    quickFixMessagesRef,
   });
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
@@ -678,6 +683,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 documentHighlightProvider={documentHighlightProvider}
+                codeActions={codeActionsProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -691,6 +697,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
+                      getQuickFixableMessages: () => quickFixMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
@@ -853,7 +860,6 @@ const ESQLEditorInternal = function ESQLEditor({
         queryStats={queryStats}
         {...editorMessages}
         onErrorClick={onErrorClick}
-        onQuickFixClick={onQuickFixClick}
       />
       {createPortal(
         Object.keys(popoverPosition).length > 0 && (

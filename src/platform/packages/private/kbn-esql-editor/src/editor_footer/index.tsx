@@ -36,7 +36,6 @@ interface EditorFooterProps {
   errors?: MonacoMessage[];
   warnings?: MonacoMessage[];
   onErrorClick: (error: MonacoMessage) => void;
-  onQuickFixClick: (error: MonacoMessage) => void;
   onUpdateAndSubmitQuery: (newQuery: string, querySource: QuerySource) => void;
   onPrettifyQuery: () => void;
   isHistoryOpen: boolean;
@@ -75,7 +74,6 @@ export const EditorFooter = memo(function EditorFooter({
   errors,
   warnings,
   onErrorClick,
-  onQuickFixClick,
   dataErrorsControl,
   starredQueriesService,
   queryStats,
@@ -123,7 +121,6 @@ export const EditorFooter = memo(function EditorFooter({
                     setIsErrorPopoverOpen(isOpen);
                   }}
                   onErrorClick={onErrorClick}
-                  onQuickFixClick={onQuickFixClick}
                   dataErrorsControl={dataErrorsControl}
                 />
               )}
@@ -139,7 +136,6 @@ export const EditorFooter = memo(function EditorFooter({
                     setIsWarningPopoverOpen(isOpen);
                   }}
                   onErrorClick={onErrorClick}
-                  onQuickFixClick={onQuickFixClick}
                 />
               )}
             </EuiFlexGroup>

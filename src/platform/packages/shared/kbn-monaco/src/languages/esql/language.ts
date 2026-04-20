@@ -52,13 +52,17 @@ export type ESQLDependencies = ESQLCallbacks &
   Partial<{
     telemetry: ESQLTelemetryCallbacks;
     /**
+     * Latest validation messages that still include a `quickFix` (for Monaco code actions).
+     */
+    getQuickFixableMessages?: () => MonacoMessage[];
+    /**
      * Optional resolver to provide model-specific dependencies.
      *
      * Monaco language providers are global per language, but Kibana can render multiple ES|QL
      * editors on the same page (e.g. Discover top bar + flyout). This allows the provider to
      * pick the correct callbacks for the specific editor model requesting suggestions.
      */
-    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLCallbacks | undefined;
+    getModelDependencies: (model: monaco.editor.ITextModel) => ESQLDependencies | undefined;
   }>;
 
 export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
@@ -107,6 +111,60 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
   },
+  getCodeActionProvider: (deps?: ESQLDependencies): monaco.languages.CodeActionProvider => ({
+    provideCodeActions(model, _range, context, _token) {
+      const resolved = deps?.getModelDependencies?.(model);
+      const messagesWithFix = resolved?.getQuickFixableMessages?.() ?? [];
+      if (!messagesWithFix.length || !context.markers.length) {
+        return { actions: [], dispose: () => {} };
+      }
+
+      const actions: monaco.languages.CodeAction[] = [];
+
+      for (const marker of context.markers) {
+        const message = messagesWithFix.find(
+          (m) =>
+            m.startLineNumber === marker.startLineNumber &&
+            m.startColumn === marker.startColumn &&
+            m.endLineNumber === marker.endLineNumber &&
+            m.endColumn === marker.endColumn &&
+            m.message === marker.message
+        );
+        const quickFix = message?.quickFix;
+        if (!quickFix?.fixQuery) {
+          continue;
+        }
+
+        let fixed: string;
+        try {
+          fixed = quickFix.fixQuery(model.getValue());
+        } catch {
+          continue;
+        }
+
+        actions.push({
+          title: quickFix.title,
+          kind: 'quickfix',
+          diagnostics: [marker],
+          isPreferred: true,
+          edit: {
+            edits: [
+              {
+                resource: model.uri,
+                versionId: model.getVersionId(),
+                textEdit: {
+                  range: model.getFullModelRange(),
+                  text: fixed,
+                },
+              },
+            ],
+          },
+        });
+      }
+
+      return { actions, dispose: () => {} };
+    },
+  }),
   getHoverProvider: (deps?: ESQLDependencies): monaco.languages.HoverProvider => {
     let lastHoveredWord: string;
 

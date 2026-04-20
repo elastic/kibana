@@ -12,8 +12,6 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { ESQLLang, monaco } from '@kbn/monaco';
 import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { MapCache } from 'lodash';
-import type { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import {
   filterDataErrors,
   filterDuplicatedWarnings,
@@ -34,7 +32,6 @@ interface ValidationLatencyTracking {
 }
 
 interface UseQueryValidationParams {
-  core: CoreStart;
   code: string;
   codeWhenSubmitted: string;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -55,7 +52,6 @@ interface UseQueryValidationParams {
 }
 
 export const useQueryValidation = ({
-  core,
   code,
   codeWhenSubmitted,
   editorRef,
@@ -85,6 +81,13 @@ export const useQueryValidation = ({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
+
+  const quickFixMessagesRef = useRef<MonacoMessage[]>([]);
+  useEffect(() => {
+    quickFixMessagesRef.current = [...editorMessages.errors, ...editorMessages.warnings].filter(
+      (m) => m.quickFix
+    );
+  }, [editorMessages]);
 
   const parseMessages = useCallback(
     async (options?: { invalidateColumnsCache?: boolean }) => {
@@ -294,33 +297,11 @@ export const useQueryValidation = ({
     [serverErrors, serverWarning, code, codeWhenSubmitted, queryValidation]
   );
 
-  const onQuickFixClick = useCallback(
-    ({ quickFix }: MonacoMessage) => {
-      try {
-        const editor = editorRef.current;
-        const model = editor?.getModel();
-        if (editor && model && quickFix?.fixQuery) {
-          const currentQuery = model.getValue();
-          const fixed = quickFix.fixQuery(currentQuery);
-          const fullRange = model.getFullModelRange();
-          editor.executeEdits('standaloneQuery', [{ range: fullRange, text: fixed }]);
-        }
-      } catch (error) {
-        core.notifications.toasts.addError(error, {
-          title: i18n.translate('esqlEditor.quickFix.genericError', {
-            defaultMessage: 'Failed to apply quick fix',
-          }),
-        });
-      }
-    },
-    [core.notifications.toasts, editorRef]
-  );
-
   return {
     editorMessages,
+    quickFixMessagesRef,
     queryValidation,
     onLookupIndexCreate,
     onNewFieldsAddedToLookupIndex,
-    onQuickFixClick,
   };
 };

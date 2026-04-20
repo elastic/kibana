@@ -25,6 +25,10 @@ const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
   getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
 });
 
+const sharedEsqlCodeActionProvider = ESQLLang.getCodeActionProvider?.({
+  getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
+});
+
 interface UseEditorConfigParams {
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: React.MutableRefObject<monaco.editor.ITextModel | undefined>;
@@ -38,6 +42,7 @@ interface UseEditorConfigParams {
   measuredEditorWidth: number;
   setMeasuredEditorWidth: (width: number) => void;
   resetPendingTracking: () => void;
+  quickFixMessagesRef: React.MutableRefObject<MonacoMessage[]>;
 }
 
 export const useEditorConfig = ({
@@ -51,15 +56,21 @@ export const useEditorConfig = ({
   measuredEditorWidth,
   setMeasuredEditorWidth,
   resetPendingTracking,
+  quickFixMessagesRef,
 }: UseEditorConfigParams) => {
   const suggestionProvider = sharedEsqlSuggestionProvider;
+  const codeActionsProvider = sharedEsqlCodeActionProvider;
 
   useEffect(() => {
     const modelUri = editorModelUriRef.current;
     if (modelUri) {
-      esqlDepsByModelUri.set(modelUri, { ...esqlCallbacks, telemetry: telemetryCallbacks });
+      esqlDepsByModelUri.set(modelUri, {
+        ...esqlCallbacks,
+        telemetry: telemetryCallbacks,
+        getQuickFixableMessages: () => quickFixMessagesRef.current,
+      });
     }
-  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef]);
+  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, quickFixMessagesRef]);
 
   const hoverProvider = useMemo(
     () =>
@@ -169,7 +180,7 @@ export const useEditorConfig = ({
       fontSize: 14,
       hideCursorInOverviewRuler: true,
       lightbulb: {
-        enabled: false,
+        enabled: true,
       },
       lineDecorationsWidth: 20,
       lineNumbers: 'on',
@@ -210,6 +221,7 @@ export const useEditorConfig = ({
   return {
     esqlDepsByModelUri,
     suggestionProvider,
+    codeActionsProvider,
     codeEditorHoverProvider,
     signatureProvider,
     inlineCompletionsProvider,
