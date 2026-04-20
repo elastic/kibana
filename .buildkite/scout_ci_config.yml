@@ -9,6 +9,7 @@ plugins:
     - exploratory_view
     - index_management
     - infra
+    - logstash
     - maps
     - observability
     - observability_onboarding
@@ -25,6 +26,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
     - kbn-streamlang-tests
   disabled:

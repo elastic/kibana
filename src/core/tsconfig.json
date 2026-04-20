@@ -2,13 +2,14 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "isolatedModules": true,
+    "isolatedModules": true
   },
   "include": [
     "public/**/*",
     "server/**/*",
     "types/**/*",
     "test_helpers/**/*",
+    "test/scout/**/*",
     "utils/**/*",
     "index.ts"
   ],
@@ -175,8 +176,7 @@
     "@kbn/core-pricing-common",
     "@kbn/lazy-object",
     "@kbn/migrator-test-kit",
+    "@kbn/scout"
   ],
-  "exclude": [
-    "target/**/*",
-  ],
+  "exclude": ["target/**/*"]
 }
