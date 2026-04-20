@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiComboBoxWrapper, type KibanaUrl, type ScoutPage, type Locator } from '@kbn/scout-oblt';
+import type { KibanaUrl, ScoutPage, Locator } from '@kbn/scout-oblt';
+import { EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import type { ServiceDetailsPageTabName } from './service_details_tab';
 import { ServiceDetailsTab } from './service_details_tab';
 import { EXTENDED_TIMEOUT } from '../../constants';
@@ -15,7 +16,7 @@ export class DashboardsTab extends ServiceDetailsTab {
   public readonly tab: Locator;
 
   public readonly addServiceDashboardButton: Locator;
-  private readonly dashboardComboBox: EuiComboBoxWrapper;
+  public readonly dashboardComboBox: EuiComboBoxWrapper;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
     super(page, kbnUrl, defaultServiceName);
