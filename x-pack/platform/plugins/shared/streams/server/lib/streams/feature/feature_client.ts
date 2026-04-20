@@ -38,7 +38,8 @@ import type { FeatureStorageSettings } from './storage_settings';
 import type { StoredFeature } from './stored_feature';
 import { StatusError } from '../errors/status_error';
 import { parseError } from '../errors/parse_error';
-import type { SearchMode } from '../../../../common/queries';
+import { bulkWithInferenceFallback } from '../errors/bulk_with_inference_fallback';
+import { resolveSearchMode, type SearchMode } from '../../../../common/queries';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
@@ -186,7 +187,6 @@ export class FeatureClient {
       storageClient: IStorageClient<FeatureStorageSettings, StoredFeature>;
       logger: Logger;
     },
-    private readonly inferenceAvailable: boolean = false,
     private readonly config: Pick<
       SigEventsTuningConfig,
       'feature_ttl_days' | 'semantic_min_score' | 'rrf_rank_constant'
@@ -210,22 +210,24 @@ export class FeatureClient {
 
     const resolvedOperations = await this.filterValidOperations(stream, operations);
 
-    return await this.clients.storageClient.bulk({
-      operations: resolvedOperations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(stream, operation.index.feature, this.inferenceAvailable);
-          return {
-            index: {
-              document,
-              _id: document[FEATURE_UUID],
-            },
-          };
-        }
+    return await bulkWithInferenceFallback(this.clients.logger, ({ includeEmbedding }) =>
+      this.clients.storageClient.bulk({
+        operations: resolvedOperations.map((operation) => {
+          if ('index' in operation) {
+            const document = toStorage(stream, operation.index.feature, includeEmbedding);
+            return {
+              index: {
+                document,
+                _id: document[FEATURE_UUID],
+              },
+            };
+          }
 
-        return { delete: { _id: operation.delete.id } };
-      }),
-      throwOnFail: true,
-    });
+          return { delete: { _id: operation.delete.id } };
+        }),
+        throwOnFail: true,
+      })
+    );
   }
 
   async getFeatures(
@@ -327,7 +329,7 @@ export class FeatureClient {
       limit?: number;
     }
   ): Promise<{ hits: Feature[]; total: number }> {
-    const effectiveMode = this.resolveSearchMode(options?.searchMode);
+    const effectiveMode = resolveSearchMode(options?.searchMode);
 
     try {
       return await this.executeFindFeatures(effectiveMode, streams, query, options);
@@ -336,27 +338,15 @@ export class FeatureClient {
       // searchMode from the caller). If the caller explicitly requested a
       // non-keyword mode, propagate the error so they know their request failed.
       if (effectiveMode !== 'keyword' && !options?.searchMode) {
+        const streamNames = Array.isArray(streams) ? streams : [streams];
         const { message } = parseError(error);
         this.clients.logger.warn(
-          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
+          `Feature search mode "${effectiveMode}" failed for streams [${streamNames.join(', ')}], falling back to keyword: ${message}`
         );
         return await this.executeFindFeatures('keyword', streams, query, options);
       }
       throw error;
     }
-  }
-
-  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
-    if (searchMode) {
-      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
-        this.clients.logger.debug(
-          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
-        );
-        return 'keyword';
-      }
-      return searchMode;
-    }
-    return this.inferenceAvailable ? 'hybrid' : 'keyword';
   }
 
   private async executeFindFeatures(
@@ -570,7 +560,7 @@ export class FeatureClient {
   }
 }
 
-function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean): StoredFeature {
+function toStorage(stream: string, feature: Feature, includeEmbedding: boolean): StoredFeature {
   const embeddingText = buildSearchEmbeddingText(feature, stream);
   return {
     [FEATURE_UUID]: feature.uuid,
@@ -591,7 +581,7 @@ function toStorage(stream: string, feature: Feature, inferenceAvailable: boolean
     [FEATURE_EXCLUDED_AT]: feature.excluded_at,
     [FEATURE_TITLE]: feature.title,
     [FEATURE_FILTER]: feature.filter,
-    ...(inferenceAvailable && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
+    ...(includeEmbedding && embeddingText ? { [FEATURE_SEARCH_EMBEDDING]: embeddingText } : {}),
   } as StoredFeature;
 }
 

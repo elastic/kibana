@@ -12,7 +12,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import {
   ensureMetadata,
@@ -35,10 +34,9 @@ import {
   RULE_BACKED,
   ASSET_UUID,
 } from '../fields';
-import { getQueryStorageSettings } from '../storage_settings';
+import { queryStorageSettings, type QueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
-import type { InferenceResolver } from './helpers/inference_availability';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
@@ -47,7 +45,6 @@ import {
 export class QueryService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly resolveInference: InferenceResolver,
     private readonly logger: Logger
   ) {}
 
@@ -68,14 +65,10 @@ export class QueryService {
     const isSignificantEventsEnabled =
       (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
 
-    const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
-
-    const settings = getQueryStorageSettings(inferenceId);
-
-    const adapter = new StorageIndexAdapter<IndexStorageSettings, StoredQueryLink>(
+    const adapter = new StorageIndexAdapter<QueryStorageSettings, StoredQueryLink>(
       esClient,
       this.logger.get('queries'),
-      settings,
+      queryStorageSettings,
       {
         migrateSource: (source) => {
           let migrated = source as Record<string, unknown>;
@@ -184,7 +177,6 @@ export class QueryService {
         logger: this.logger,
       },
       isSignificantEventsEnabled,
-      inferenceAvailable,
       config
     );
   }

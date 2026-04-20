@@ -75,7 +75,6 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
-import { createInferenceResolver } from './lib/streams/assets/query/helpers/inference_availability';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -149,14 +148,12 @@ export class StreamsPlugin
       this.logger.get('inference-features')
     );
 
-    const inferenceResolver = createInferenceResolver(this.logger);
-
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, inferenceResolver, this.logger);
+    const featureService = new FeatureService(core, this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
-    const queryService = new QueryService(core, inferenceResolver, this.logger);
+    const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
@@ -430,11 +427,7 @@ export class StreamsPlugin
             const attachmentClient = await attachmentService.getClient({ soClient, rulesClient });
 
             // featureClient and queryClient are not needed for enableStreams()
-            // and bulkUpsert() during preconfiguration. Avoid creating them here
-            // because their initialization probes ELSER inference endpoints via
-            // the inference API, which triggers lazy model deployment in
-            // Elasticsearch — an unwanted side effect during startup that can
-            // interfere with ML tests and waste cluster resources.
+            // and bulkUpsert() during preconfiguration, so we don't create them here.
             const streamsClient = await streamsService.getClient({
               attachmentClient,
               esClient,

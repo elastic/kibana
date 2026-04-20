@@ -29,6 +29,11 @@ import {
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
+// `semantic_text` without an explicit `inference_id` uses the cluster's default
+// inference endpoint at write time. Existing indices that already have a mapping
+// with an explicit `inference_id` keep it — ES merges additively on putMapping.
+// The bulk write path retries without the embedding field when inference-related
+// errors are detected (see `bulkWithInferenceFallback`).
 export const featureStorageSettings = {
   name: '.kibana_streams_features',
   schema: {
@@ -57,16 +62,3 @@ export const featureStorageSettings = {
 } satisfies IndexStorageSettings;
 
 export type FeatureStorageSettings = typeof featureStorageSettings;
-
-export const getFeatureStorageSettings = (inferenceId: string): IndexStorageSettings => ({
-  name: featureStorageSettings.name,
-  schema: {
-    properties: {
-      ...featureStorageSettings.schema.properties,
-      // The semantic_text field is always declared in the mapping regardless of
-      // inference availability — ES does not validate the inference_id at mapping
-      // time, so this is safe even when ML is disabled or ELSER is not deployed.
-      [FEATURE_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
-    },
-  },
-});

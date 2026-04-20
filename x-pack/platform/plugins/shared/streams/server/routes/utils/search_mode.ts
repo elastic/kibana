@@ -12,5 +12,5 @@ export const searchModeSchema = z
   .enum(SEARCH_MODES)
   .optional()
   .describe(
-    'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). Defaults to hybrid when inference is available.'
+    'Search mode: keyword (BM25), semantic (vector), or hybrid (RRF). When omitted, defaults to hybrid with a silent keyword fallback on failure. When set explicitly, failures propagate as errors.'
   );

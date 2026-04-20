@@ -27,6 +27,12 @@ import {
  * Storage settings for Significant Events queries.
  * Note: The index name ".kibana_streams_assets" is kept for backwards compatibility,
  * but this index is only used to store query assets (Significant Events queries linked to streams).
+ *
+ * `semantic_text` without an explicit `inference_id` uses the cluster's default
+ * inference endpoint at write time. Existing indices that already have a mapping
+ * with an explicit `inference_id` keep it — ES merges additively on putMapping.
+ * The bulk write path retries without the embedding field when inference-related
+ * errors are detected (see `bulkWithInferenceFallback`).
  */
 export const queryStorageSettings = {
   name: '.kibana_streams_assets',
@@ -44,22 +50,10 @@ export const queryStorageSettings = {
       [QUERY_TYPE]: types.keyword(),
       [RULE_BACKED]: types.boolean(),
       [RULE_ID]: types.keyword(),
+      [QUERY_SEARCH_EMBEDDING]: types.semantic_text(),
       experimental: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;
 
 export type QueryStorageSettings = typeof queryStorageSettings;
-
-export const getQueryStorageSettings = (inferenceId: string): IndexStorageSettings => ({
-  name: queryStorageSettings.name,
-  schema: {
-    properties: {
-      ...queryStorageSettings.schema.properties,
-      // The semantic_text field is always declared in the mapping regardless of
-      // inference availability — ES does not validate the inference_id at mapping
-      // time, so this is safe even when ML is disabled or ELSER is not deployed.
-      [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
-    },
-  },
-});
