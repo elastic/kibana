@@ -125,4 +125,5 @@ export const getDefaultQueryAnnotation = (
   },
   id,
   label: `${fieldName}: *`,
+  color: 'auto',
 });
