@@ -21,7 +21,10 @@ Only review files that are:
 
 Skip all other changed files entirely. If no matching files were changed in this PR, conclude with no comments.
 
-Do NOT post flaky test runner nudges. A separate agent handles this.
+IMPORTANT:
+
+- Do NOT review backport PRs (these usually merge changes into branches that aren't `main`)
+- Do NOT post flaky test runner nudges. A separate agent handles this.
 
 ## Review instructions
 
