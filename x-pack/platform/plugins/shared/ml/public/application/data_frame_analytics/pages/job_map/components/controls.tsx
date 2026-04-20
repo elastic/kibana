@@ -63,31 +63,29 @@ interface Props {
 
 function getListItemsFactory(showLicenseInfo: boolean) {
   return (details: Record<string, unknown>): EuiDescriptionListProps['listItems'] => {
-    if (showLicenseInfo === false) {
-      delete details.license_level;
-    }
+    return Object.entries(details)
+      .filter(([key]) => showLicenseInfo || key !== 'license_level')
+      .map(([key, value]) => {
+        let description: React.ReactNode;
+        if (key === 'create_time') {
+          description = formatHumanReadableDateTimeSeconds(
+            moment(value as moment.MomentInput).unix() * 1000
+          );
+        } else if (typeof value === 'object') {
+          description = (
+            <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+              {JSON.stringify(value, null, 2)}
+            </EuiCodeBlock>
+          );
+        } else {
+          description = String(value);
+        }
 
-    return Object.entries(details).map(([key, value]) => {
-      let description: React.ReactNode;
-      if (key === 'create_time') {
-        description = formatHumanReadableDateTimeSeconds(
-          moment(value as moment.MomentInput).unix() * 1000
-        );
-      } else if (typeof value === 'object') {
-        description = (
-          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-            {JSON.stringify(value, null, 2)}
-          </EuiCodeBlock>
-        );
-      } else {
-        description = String(value);
-      }
-
-      return {
-        title: key,
-        description,
-      };
-    });
+        return {
+          title: key,
+          description,
+        };
+      });
   };
 }
 
@@ -139,10 +137,6 @@ export const JobMapNodeFlyout: FC<Props> = React.memo(
     const navigateToPath = useNavigateToPath();
     const navigateToWizardWithClonedJob = useNavigateToWizardWithClonedJob();
 
-    const deselect = useCallback(() => {
-      onClearSelection();
-    }, [onClearSelection]);
-
     const closePopover = useCallback(() => {
       setPopover(false);
     }, []);
@@ -158,7 +152,7 @@ export const JobMapNodeFlyout: FC<Props> = React.memo(
           sectionId: 'ml',
           appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB}?index=${dataViewId}`,
         });
-      } else {
+      } else if (dataViewId === null) {
         toasts.addDanger(
           i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
             defaultMessage: 'To create a job from this index create a data view for {indexTitle}.',
@@ -206,7 +200,7 @@ export const JobMapNodeFlyout: FC<Props> = React.memo(
     }, [details, navigateToWizardWithClonedJob, selectedNodeData]);
 
     const onActionsButtonClick = () => {
-      setPopover(!isPopoverOpen);
+      setPopover((prev) => !prev);
     };
 
     useEffect(
@@ -353,7 +347,7 @@ export const JobMapNodeFlyout: FC<Props> = React.memo(
           aria-labelledby={flyoutTitleId}
           ownFocus
           size="m"
-          onClose={deselect}
+          onClose={onClearSelection}
           data-test-subj="mlAnalyticsJobMapFlyout"
         >
           <EuiFlyoutHeader>

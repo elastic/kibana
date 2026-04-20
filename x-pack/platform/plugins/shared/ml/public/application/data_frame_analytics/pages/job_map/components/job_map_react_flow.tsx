@@ -38,6 +38,7 @@ const nodeTypes: NodeTypes = {
 };
 
 const reactFlowProOptions = { hideAttribution: true } as const;
+const reactFlowStyle = { width: '100%', height: '100%' } as const;
 
 interface JobMapReactFlowInnerProps {
   elements: MapElements[];
@@ -143,7 +144,7 @@ const JobMapReactFlowInner: FC<JobMapReactFlowInnerProps> = ({
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}
         onPaneClick={onClearSelection}
-        style={{ width: '100%', height: '100%' }}
+        style={reactFlowStyle}
         minZoom={0.2}
         maxZoom={3}
         nodesConnectable={false}
