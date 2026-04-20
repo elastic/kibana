@@ -25,6 +25,7 @@ plugins:
     - infra
     - intercepts
     - lens
+    - logstash
     - maps
     - navigation
     - observability
@@ -54,6 +55,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
     - kbn-streamlang-tests
   disabled:
