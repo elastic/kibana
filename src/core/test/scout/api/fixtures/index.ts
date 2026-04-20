@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('core', () => {
-    loadTestFile(require.resolve('./translations'));
-    loadTestFile(require.resolve('./capabilities'));
-  });
-}
+export { COMMON_HEADERS, INTERNAL_HEADERS } from './constants';
