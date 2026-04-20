@@ -41,8 +41,7 @@ export function AgentBuilderAnnouncementModalController() {
     )
   );
   const { isSeen, isReady, markSeen } = useAgentBuilderAnnouncementModalSeenState(
-    services.userProfile,
-    space?.id
+    services.userProfile
   );
   const [isDismissed, setIsDismissed] = useState(false);
 

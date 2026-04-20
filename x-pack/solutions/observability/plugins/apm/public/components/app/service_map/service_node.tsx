@@ -234,6 +234,7 @@ export const ServiceNode = memo(
                     sloStatus={data.sloStatus}
                     sloCount={data.sloCount}
                     serviceName={data.label}
+                    compactLabelOnNarrowScreens
                     {...(onSloBadgeClick
                       ? {
                           onClick: (e) => {
