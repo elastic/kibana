@@ -61,14 +61,16 @@ export type DataTableColumnsMeta = Record<
   }
 >;
 
+import type { ReactNode } from 'react';
+
 type FormattedHitPair = readonly [
   fieldDisplayName: string,
-  formattedValue: string,
+  formattedValue: ReactNode,
   fieldName: string | null // `null` is when number of fields is limited and there is an extra pair about it
 ];
 
 /**
- * Pairs array for each field in the hit
+ * Pairs array for each field in the hit where values are ReactNodes
  */
 export type FormattedHit = FormattedHitPair[];
 
