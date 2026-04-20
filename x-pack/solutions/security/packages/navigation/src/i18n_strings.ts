@@ -185,6 +185,11 @@ export const i18nStrings = {
   entityStore: i18n.translate('securitySolutionPackages.navLinks.entityStore', {
     defaultMessage: 'Entity store',
   }),
+  entityAnalytics: {
+    title: i18n.translate('securitySolutionPackages.navLinks.entityAnalytics', {
+      defaultMessage: 'Entity analytics',
+    }),
+  },
   devTools: i18n.translate('securitySolutionPackages.navLinks.devTools', {
     defaultMessage: 'Developer tools',
   }),

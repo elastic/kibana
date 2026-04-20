@@ -12,6 +12,7 @@ import { withSecurityRoutePageWrapper } from '../common/components/security_rout
 import {
   ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
   ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
+  ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
@@ -20,6 +21,7 @@ import {
 } from '../../common/constants';
 import { EntityAnalyticsManagementPage } from './pages/entity_analytics_management_page';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+import { EntityAnalyticsLandingPage } from './pages/entity_analytics_landing';
 import { EntityAnalyticsPrivilegedUserMonitoringPage } from './pages/entity_analytics_privileged_user_monitoring_page';
 import { OverviewDashboard } from './pages/entity_analytics_overview_page';
 import { EntityAnalyticsHomePage } from './pages/entity_analytics_home_page';
@@ -94,6 +96,24 @@ const EntityAnalyticsEntityStoreRedirectContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsEntityStoreRedirectContainer.displayName =
   'EntityAnalyticsEntityStoreRedirectContainer';
+
+// ---- Landing routes ----
+const EntityAnalyticsLandingWrapper = () => (
+  <PluginTemplateWrapper>
+    <EntityAnalyticsLandingPage />
+  </PluginTemplateWrapper>
+);
+
+const EntityAnalyticsLandingContainer: React.FC = React.memo(() => {
+  return (
+    <Routes>
+      <Route path={ENTITY_ANALYTICS_LANDING_PATH} exact component={EntityAnalyticsLandingWrapper} />
+      <Route component={NotFoundPage} />
+    </Routes>
+  );
+});
+
+EntityAnalyticsLandingContainer.displayName = 'EntityAnalyticsLandingContainer';
 
 // ---- Privileged user monitoring routes ----
 const EntityAnalyticsPrivilegedUserMonitoringWrapper = () => (
@@ -192,6 +212,13 @@ export const routes = [
   {
     path: ENTITY_ANALYTICS_ENTITY_STORE_MANAGEMENT_PATH,
     component: EntityAnalyticsEntityStoreRedirectContainer,
+  },
+  {
+    path: ENTITY_ANALYTICS_LANDING_PATH,
+    component: withSecurityRoutePageWrapper(
+      EntityAnalyticsLandingContainer,
+      SecurityPageName.entityAnalyticsLanding
+    ),
   },
   {
     path: ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,

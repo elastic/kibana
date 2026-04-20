@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
+  ENTITY_ANALYTICS_LANDING_PATH,
   ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_PATH,
   ENTITY_ANALYTICS_OVERVIEW_PATH,
   ENTITY_ANALYTICS_HOME_PAGE_PATH,
@@ -35,7 +36,6 @@ const privMonLinks: LinkItem = {
       defaultMessage: 'Privileged user monitoring',
     }),
   ],
-  sideNavDisabled: true,
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
@@ -62,14 +62,56 @@ const eaOverviewLinks: LinkItem = {
       defaultMessage: 'Overview',
     }),
   ],
-  sideNavDisabled: true,
   hideTimeline: false,
   skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
+  hideWhenExperimentalKey: 'entityAnalyticsNewHomePageEnabled',
+};
+
+const homePageLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsHomePage,
+  title: i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage', {
+    defaultMessage: 'Entity Analytics',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.navigation.entityAnalytics.homePage.description',
+    {
+      defaultMessage:
+        'Entity analytics interface for analyzing entity risk scores, anomalies, and investigating potential security threats across users, hosts, and services.',
+    }
+  ),
+  path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.homePage.keywords', {
+      defaultMessage: 'entity analytics',
+    }),
+  ],
+  hideTimeline: false,
+  skipUrlState: false,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+  experimentalKey: 'entityAnalyticsNewHomePageEnabled',
 };
 
 export const entityAnalyticsLinks: LinkItem = {
+  id: SecurityPageName.entityAnalyticsLanding,
+  title: ENTITY_ANALYTICS,
+  path: ENTITY_ANALYTICS_LANDING_PATH,
+  globalNavPosition: 7,
+  globalSearchKeywords: [
+    i18n.translate('xpack.securitySolution.appLinks.entityAnalytics.landing', {
+      defaultMessage: 'Entity analytics',
+    }),
+  ],
+  links: [eaOverviewLinks, privMonLinks, homePageLinks],
+  hideTimeline: true,
+  skipUrlState: true,
+  capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
+  licenseType: 'platinum',
+};
+
+export const entityAnalyticsV2Links: LinkItem = {
   id: SecurityPageName.entityAnalyticsHomePage,
   title: ENTITY_ANALYTICS,
   path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
@@ -79,9 +121,8 @@ export const entityAnalyticsLinks: LinkItem = {
       defaultMessage: 'Entity analytics',
     }),
   ],
-  links: [eaOverviewLinks, privMonLinks],
-  hideTimeline: true,
-  skipUrlState: true,
+  hideTimeline: false,
+  skipUrlState: false,
   capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
   licenseType: 'platinum',
 };
