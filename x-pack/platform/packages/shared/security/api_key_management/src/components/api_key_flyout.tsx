@@ -186,7 +186,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
   isLoadingCurrentUser,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const isFullWidth = useIsWithinBreakpoints(['xs', 's']);
+  const isFullWidth = useIsWithinBreakpoints(['xs', 's', 'm']);
   const flyoutSize = isFullWidth ? 'full' : 'm';
   const {
     services: { http, docLinks },
