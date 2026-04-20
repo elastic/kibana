@@ -82,8 +82,6 @@ tags:
 fileGroups:
   src:
     - '**/*'
-    - api_integration/apis/logstash/pipeline/fixtures/*.json
-    - api_integration/apis/logstash/pipelines/fixtures/*.json
     - api_integration/apis/telemetry/fixtures/*.json
     - api_integration/apis/telemetry/fixtures/*.json
     - '!target/**/*'
