@@ -10,7 +10,15 @@ export { descriptionPrompt, overviewDescriptionPrompt } from './src/description/
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
+  mergeSeedParsingProcessorIntoSuggestedPipeline,
+  buildDocumentStructureOverviewForPipelinePrompt,
+  formatUpstreamSeedParsingContextForPromptMarkdown,
+  fetchMappedFieldsForStreamProcessingSuggestions,
+  getPipelineDefinitionJsonSchema,
+  pipelineDefinitionSchema,
+  postParsePipelineDefinitionSchema,
   type SuggestProcessingPipelineResult,
+  type SuggestPipelineAgentSchema,
 } from './workflows/suggest_processing_pipeline';
 export { generateSignificantEvents } from './src/significant_events/generate_significant_events';
 export {

@@ -20,6 +20,7 @@ import {
 } from '@kbn/workflows';
 import { checkAndSkipIfExistingScheduledExecution } from './execution_functions';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
+import { WORKFLOW_SCHEDULED_TASK_TYPE } from './workflow_task_manager/types';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../common';
 
 describe('checkAndSkipIfExistingScheduledExecution', () => {
@@ -36,7 +37,7 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
   ): ConcreteTaskInstance => {
     return {
       id: 'task-id',
-      taskType: 'workflow:scheduled',
+      taskType: WORKFLOW_SCHEDULED_TASK_TYPE,
       params: { workflowId: workflow.id, spaceId, triggerType: 'scheduled' },
       state: {},
       attempts: 1,
@@ -408,13 +409,49 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
             status: ExecutionStatus.FAILED,
             error: {
               type: 'TaskRecoveryError',
-              message: expect.stringContaining('recovery mechanism'),
+              message: expect.stringContaining('Execution abandoned'),
             },
           }),
         })
       );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Found stale execution'));
       expect(esClient.index).not.toHaveBeenCalled(); // No SKIPPED execution created
+    });
+
+    it('should skip without failing when stale execution is waiting_for_input', async () => {
+      const matchingRunAt = baseRunAt.toISOString();
+      const existingExecution = {
+        _source: {
+          id: 'existing-execution-id',
+          workflowId: workflow.id,
+          spaceId,
+          status: ExecutionStatus.WAITING_FOR_INPUT,
+          triggeredBy: 'scheduled',
+          taskRunAt: matchingRunAt,
+        },
+      };
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [existingExecution],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+      (esClient.indices?.exists as jest.Mock).mockResolvedValue(true);
+
+      const retryTaskInstance = createMockTaskInstance({ attempts: 2 });
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        retryTaskInstance,
+        logger
+      );
+
+      expect(result).toBe(true);
+      expect(esClient.update).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('waiting_for_input'));
     });
 
     it('should skip (not mark as failed) when taskRunAt matches BUT attempts = 1 (first attempt, execution from this run)', async () => {
