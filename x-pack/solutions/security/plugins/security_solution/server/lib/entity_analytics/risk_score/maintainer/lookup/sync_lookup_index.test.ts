@@ -275,85 +275,83 @@ describe('lookup index utilities', () => {
     ]);
   });
 
-  it('adds self-rows for confirmed resolution targets without resolved_to', () => {
-    const page: ScoredEntityPage = {
-      entityIds: ['user:target-silent'],
-      scores: [],
-      entities: new Map([
-        [
-          'user:target-silent',
-          {
-            entity: {
-              id: 'user:target-silent',
-              relationships: {
-                resolution: {},
+  it.each([
+    {
+      title: 'adds self-rows for confirmed resolution targets without resolved_to',
+      page: {
+        entityIds: ['user:target-silent'],
+        scores: [],
+        entities: new Map([
+          [
+            'user:target-silent',
+            {
+              entity: {
+                id: 'user:target-silent',
+                relationships: {
+                  resolution: {},
+                },
               },
             },
-          },
-        ],
-      ]),
-    };
-
-    const operations = buildLookupSyncOperationsForPage({
-      page,
-      now: '2026-01-01T00:00:00.000Z',
-      notInStoreEntityIds: [],
+          ],
+        ]),
+      } as ScoredEntityPage,
       resolutionTargetIds: ['user:target-silent'],
-    });
-
-    expect(operations.upserts).toEqual([
-      {
-        entity_id: 'user:target-silent',
-        resolution_target_id: 'user:target-silent',
-        propagation_target_id: null,
-        relationship_type: 'self',
-        '@timestamp': '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-  });
-
-  it('does not overwrite existing alias rows when target ids are injected', () => {
-    const page: ScoredEntityPage = {
-      entityIds: ['user:b'],
-      scores: [],
-      entities: new Map([
-        [
-          'user:b',
-          {
-            entity: {
-              id: 'user:b',
-              relationships: {
-                resolution: { resolved_to: 'user:c' },
+      expectedUpserts: [
+        {
+          entity_id: 'user:target-silent',
+          resolution_target_id: 'user:target-silent',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    },
+    {
+      title: 'does not overwrite existing alias rows when target ids are injected',
+      page: {
+        entityIds: ['user:b'],
+        scores: [],
+        entities: new Map([
+          [
+            'user:b',
+            {
+              entity: {
+                id: 'user:b',
+                relationships: {
+                  resolution: { resolved_to: 'user:c' },
+                },
               },
             },
-          },
-        ],
-      ]),
-    };
-
+          ],
+        ]),
+      } as ScoredEntityPage,
+      resolutionTargetIds: ['user:b'],
+      expectedUpserts: [
+        {
+          entity_id: 'user:b',
+          resolution_target_id: 'user:c',
+          propagation_target_id: null,
+          relationship_type: 'entity.relationships.resolution.resolved_to',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+        {
+          entity_id: 'user:c',
+          resolution_target_id: 'user:c',
+          propagation_target_id: null,
+          relationship_type: 'self',
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    },
+  ])('$title', ({ page, resolutionTargetIds, expectedUpserts }) => {
     const operations = buildLookupSyncOperationsForPage({
       page,
       now: '2026-01-01T00:00:00.000Z',
       notInStoreEntityIds: [],
-      resolutionTargetIds: ['user:b'],
+      resolutionTargetIds,
     });
 
-    expect(operations.upserts).toEqual([
-      {
-        entity_id: 'user:b',
-        resolution_target_id: 'user:c',
-        propagation_target_id: null,
-        relationship_type: 'entity.relationships.resolution.resolved_to',
-        '@timestamp': '2026-01-01T00:00:00.000Z',
-      },
-      {
-        entity_id: 'user:c',
-        resolution_target_id: 'user:c',
-        propagation_target_id: null,
-        relationship_type: 'self',
-        '@timestamp': '2026-01-01T00:00:00.000Z',
-      },
-    ]);
+    expect(operations.upserts).toEqual(expectedUpserts);
   });
 
   it('syncs a scored page using one helper call', async () => {
