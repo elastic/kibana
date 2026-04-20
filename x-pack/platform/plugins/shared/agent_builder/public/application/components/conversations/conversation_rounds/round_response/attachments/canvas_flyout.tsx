@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlyout, EuiFlyoutBody, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationId } from '../../../../../context/conversation/use_conversation_id';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
+import { useConversation } from '../../../../../hooks/use_conversation';
 import { AttachmentHeader } from './attachment_header';
-import { useCanvasContext } from './canvas_context';
+import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
 
 const FLYOUT_ARIA_LABEL = i18n.translate('xpack.agentBuilder.canvasFlyout.ariaLabel', {
   defaultMessage: 'Attachment preview',
@@ -33,8 +35,15 @@ interface CanvasFlyoutProps {
  */
 export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }) => {
   const { euiTheme } = useEuiTheme();
-  const { canvasState, closeCanvas, setCanvasAttachmentOrigin } = useCanvasContext();
+  const {
+    canvasState,
+    closeCanvas,
+    setCanvasAttachmentOrigin,
+    syncCanvasToVersion,
+    setPreviewedAttachmentKey,
+  } = useCanvasContext();
   const conversationId = useConversationId();
+  const { conversation } = useConversation();
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const { updatePersistedConversationId } = usePersistedConversationId({});
@@ -56,6 +65,32 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       prevConversationIdRef.current = conversationId;
     }
   }, [conversationId, closeCanvas]);
+
+  useLayoutEffect(() => {
+    if (!canvasState?.followsLatestVersion) {
+      return;
+    }
+
+    const versionedAttachment = conversation?.attachments?.find(
+      (attachment) => attachment.id === canvasState.attachment.id
+    );
+    const latestVersion = versionedAttachment ? getLatestVersion(versionedAttachment) : undefined;
+
+    if (!versionedAttachment || !latestVersion || latestVersion.version === canvasState.version) {
+      return;
+    }
+
+    syncCanvasToVersion(latestVersion.version, {
+      id: versionedAttachment.id,
+      type: versionedAttachment.type,
+      data: latestVersion.data,
+      hidden: versionedAttachment.hidden,
+      origin: versionedAttachment.origin,
+    });
+    setPreviewedAttachmentKey(
+      getAttachmentPreviewKey(versionedAttachment.id, latestVersion.version)
+    );
+  }, [canvasState, conversation?.attachments, syncCanvasToVersion, setPreviewedAttachmentKey]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -79,7 +114,6 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
       conversationActions,
     ]
   );
-
   const uiDefinition = canvasState
     ? attachmentsService.getAttachmentUiDefinition(canvasState.attachment.type)
     : null;
@@ -114,7 +148,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     return null;
   }
 
-  const { attachment, isSidebar } = canvasState;
+  const { attachment, version, isSidebar } = canvasState;
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   const flyoutStyles = !isSidebar
@@ -153,7 +187,7 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+        <React.Fragment key={`${attachment.id}:${version ?? 'latest'}`}>
           {uiDefinition.renderCanvasContent(
             {
               attachment,

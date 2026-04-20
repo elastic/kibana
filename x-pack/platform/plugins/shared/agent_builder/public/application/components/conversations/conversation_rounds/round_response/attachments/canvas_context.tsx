@@ -12,6 +12,7 @@ interface CanvasState {
   attachment: UnknownAttachment;
   isSidebar: boolean;
   version?: number;
+  followsLatestVersion: boolean;
 }
 
 export const getAttachmentPreviewKey = (attachmentId: string, version?: number) =>
@@ -20,8 +21,14 @@ export const getAttachmentPreviewKey = (attachmentId: string, version?: number) 
 interface CanvasContextValue {
   canvasState: CanvasState | null;
   previewedAttachmentKey: string | null;
-  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => void;
+  openCanvas: (
+    attachment: UnknownAttachment,
+    isSidebar: boolean,
+    version?: number,
+    followsLatestVersion?: boolean
+  ) => void;
   closeCanvas: () => void;
+  syncCanvasToVersion: (version: number, attachment: UnknownAttachment) => void;
   setCanvasAttachmentOrigin: (origin: string) => void;
   setPreviewedAttachmentKey: (attachmentKey: string | null) => void;
 }
@@ -37,8 +44,13 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   const [previewedAttachmentKey, setPreviewedAttachmentKey] = useState<string | null>(null);
 
   const openCanvas = useCallback(
-    (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => {
-      setCanvasState({ attachment, isSidebar, version });
+    (
+      attachment: UnknownAttachment,
+      isSidebar: boolean,
+      version?: number,
+      followsLatestVersion = false
+    ) => {
+      setCanvasState({ attachment, isSidebar, version, followsLatestVersion });
       setPreviewedAttachmentKey(getAttachmentPreviewKey(attachment.id, version));
     },
     []
@@ -46,16 +58,27 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
 
   const closeCanvas = useCallback(() => {
     if (canvasState) {
-      const canvasPreviewKey = getAttachmentPreviewKey(
-        canvasState.attachment.id,
-        canvasState.version
-      );
-      if (previewedAttachmentKey === canvasPreviewKey) {
+      const attachmentPreviewKeyPrefix = `${canvasState.attachment.id}:`;
+      if (previewedAttachmentKey?.startsWith(attachmentPreviewKeyPrefix)) {
         setPreviewedAttachmentKey(null);
       }
     }
     setCanvasState(null);
   }, [canvasState, previewedAttachmentKey]);
+
+  const syncCanvasToVersion = useCallback((version: number, attachment: UnknownAttachment) => {
+    setCanvasState((prev) => {
+      if (!prev || prev.attachment.id !== attachment.id || !prev.followsLatestVersion) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        version,
+        attachment,
+      };
+    });
+  }, []);
 
   const setCanvasAttachmentOrigin = useCallback((origin: string) => {
     setCanvasState((prev) => {
@@ -72,11 +95,19 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
       canvasState,
       openCanvas,
       closeCanvas,
+      syncCanvasToVersion,
       setCanvasAttachmentOrigin,
       previewedAttachmentKey,
       setPreviewedAttachmentKey,
     }),
-    [canvasState, previewedAttachmentKey, openCanvas, closeCanvas, setCanvasAttachmentOrigin]
+    [
+      canvasState,
+      previewedAttachmentKey,
+      openCanvas,
+      closeCanvas,
+      syncCanvasToVersion,
+      setCanvasAttachmentOrigin,
+    ]
   );
 
   return <CanvasContext.Provider value={value}>{children}</CanvasContext.Provider>;
