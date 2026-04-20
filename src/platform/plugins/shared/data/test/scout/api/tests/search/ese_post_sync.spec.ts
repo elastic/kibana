@@ -36,7 +36,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-      await esClient.indices.delete({ index: TEST_INDEX });
+      await esClient.indices.delete({ index: TEST_INDEX }).catch(() => {});
     });
 
     apiTest(

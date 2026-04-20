@@ -39,9 +39,9 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient }) => {
-    apiTest.afterAll(async ({ esClient }) => {
       await esClient.indices.delete({ index: TEST_INDEX }).catch(() => {});
     });
+
     apiTest('should return 404 when no search id provided', async ({ apiClient }) => {
       const response = await apiClient.delete(ESE_API_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
