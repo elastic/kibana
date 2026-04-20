@@ -53,52 +53,52 @@ export const PhaseTabsRow = ({
     [canSelectFrozen]
   );
 
-  const tabs = useMemo(() => {
-    return enabledPhases.map((phaseName) => (
-      <span
-        key={phaseName}
-        ref={(node) => {
-          tabRefs.current[phaseName] = node;
-          if (node && selectedPhase === phaseName) {
-            node.scrollIntoView?.({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'nearest',
-            });
-          }
-        }}
+  // Avoid memoizing tabs based on `tabHasErrors` identity. RHF can update `errors` by mutation, and
+  // we want each render to re-evaluate the current tab error state.
+  const tabs = enabledPhases.map((phaseName) => (
+    <span
+      key={phaseName}
+      ref={(node) => {
+        tabRefs.current[phaseName] = node;
+        if (node && selectedPhase === phaseName) {
+          node.scrollIntoView?.({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest',
+          });
+        }
+      }}
+    >
+      <EuiTab
+        onClick={() => setSelectedPhase(phaseName)}
+        isSelected={phaseName === selectedPhase}
+        className={tabHasErrors(phaseName) ? 'streamsIlmPhasesTab--hasErrors' : undefined}
+        data-test-subj={`${dataTestSubj}Tab-${phaseName}`}
+        prepend={
+          tabHasErrors(phaseName) ? (
+            <EuiIcon
+              type="warning"
+              color="danger"
+              size="m"
+              aria-label={i18n.translate(
+                'xpack.streams.editIlmPhasesFlyout.phaseTabHasErrorsIconAriaLabel',
+                {
+                  defaultMessage: '{phase} phase has errors',
+                  values: { phase: PHASE_LABELS[phaseName] },
+                }
+              )}
+            />
+          ) : undefined
+        }
       >
-        <EuiTab
-          onClick={() => setSelectedPhase(phaseName)}
-          isSelected={phaseName === selectedPhase}
-          className={tabHasErrors(phaseName) ? 'streamsIlmPhasesTab--hasErrors' : undefined}
-          data-test-subj={`${dataTestSubj}Tab-${phaseName}`}
-          prepend={
-            tabHasErrors(phaseName) ? (
-              <EuiIcon
-                type="warning"
-                color="danger"
-                size="m"
-                aria-label={i18n.translate(
-                  'xpack.streams.editIlmPhasesFlyout.phaseTabHasErrorsIconAriaLabel',
-                  {
-                    defaultMessage: '{phase} phase has errors',
-                    values: { phase: PHASE_LABELS[phaseName] },
-                  }
-                )}
-              />
-            ) : undefined
-          }
-        >
-          {tabHasErrors(phaseName) ? (
-            <EuiTextColor color="danger">{PHASE_LABELS[phaseName]}</EuiTextColor>
-          ) : (
-            PHASE_LABELS[phaseName]
-          )}
-        </EuiTab>
-      </span>
-    ));
-  }, [dataTestSubj, enabledPhases, selectedPhase, setSelectedPhase, tabHasErrors]);
+        {tabHasErrors(phaseName) ? (
+          <EuiTextColor color="danger">{PHASE_LABELS[phaseName]}</EuiTextColor>
+        ) : (
+          PHASE_LABELS[phaseName]
+        )}
+      </EuiTab>
+    </span>
+  ));
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">

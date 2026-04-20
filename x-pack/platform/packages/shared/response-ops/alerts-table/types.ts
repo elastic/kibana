@@ -24,7 +24,7 @@ import type {
   ALERT_MAINTENANCE_WINDOW_IDS,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
+import type { EsQuerySnapshot } from '@kbn/alerting-types';
 import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellAction,
@@ -163,18 +163,6 @@ type MergeProps<T, AP> = T extends (args: infer Props) => unknown
   : T extends ComponentClass<infer Props>
   ? ComponentClass<Props & AP>
   : never;
-
-export interface AlertWithLegacyFormats {
-  alert: Alert;
-  /**
-   * @deprecated
-   */
-  legacyAlert: LegacyField[];
-  /**
-   * @deprecated
-   */
-  ecsAlert: any;
-}
 
 export interface AlertsTableOnLoadedProps {
   alerts: Alert[];
@@ -317,7 +305,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderCellValue?: MergeProps<
     EuiDataGridProps['renderCellValue'],
-    RenderContext<AC> & AlertWithLegacyFormats
+    RenderContext<AC> & { alert: Alert }
   >;
   /**
    * Cell popover render function
@@ -331,8 +319,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    */
   renderActionsCell?: MergeProps<
     EuiDataGridControlColumn['rowCellRender'],
-    RenderContext<AC> &
-      AlertWithLegacyFormats & { setIsActionLoading?: (isLoading: boolean) => void }
+    RenderContext<AC> & { alert: Alert; setIsActionLoading?: (isLoading: boolean) => void }
   >;
   /**
    * Get the alert formatter for a specific rule type.
@@ -477,14 +464,6 @@ export type RenderContext<AC extends AdditionalContext> = {
 
   isLoadingAlerts: boolean;
   alerts: Alert[];
-  /**
-   * @deprecated
-   */
-  oldAlertsData: LegacyField[][];
-  /**
-   * @deprecated
-   */
-  ecsAlertsData: any[];
   alertsCount: number;
   browserFields: BrowserFields;
 

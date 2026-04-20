@@ -39,12 +39,11 @@ describe('AIAgentConfirmationModal', () => {
   });
 
   describe('Modal Rendering', () => {
-    it('renders modal with title and beta badge', () => {
+    it('renders modal with title', () => {
       renderComponent();
 
       expect(screen.getByRole('alertdialog')).toBeInTheDocument();
       expect(screen.getByText('Switch to AI Agent')).toBeInTheDocument();
-      expect(screen.getByText('Beta')).toBeInTheDocument();
     });
 
     it('displays warning about space-wide impact', () => {

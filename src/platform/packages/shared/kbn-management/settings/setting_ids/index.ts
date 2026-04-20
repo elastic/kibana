@@ -131,11 +131,10 @@ export const OBSERVABILITY_AI_ASSISTANT_SIMULATED_FUNCTION_CALLING =
   'observability:aiAssistantSimulatedFunctionCalling';
 export const OBSERVABILITY_AI_ASSISTANT_SEARCH_CONNECTOR_INDEX_PATTERN =
   'observability:aiAssistantSearchConnectorIndexPattern';
-export const OBSERVABILITY_REGISTER_OBSERVABILITY_AGENT_ID =
-  'observability:registerObservabilityAgent';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR = 'genAiSettings:defaultAIConnector';
 export const GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY =
   'genAiSettings:defaultAIConnectorOnly';
+export const GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING = 'genAiSettings:tokenUsageTracking';
 export const AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE = 'aiAssistant:preferredAIAssistantType';
 export const AI_CHAT_EXPERIENCE_TYPE = 'aiAssistant:preferredChatExperience';
 export const AI_ANONYMIZATION_SETTINGS = 'ai:anonymizationSettings';
@@ -215,6 +214,9 @@ export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE =
   'securitySolution:defaultValueReportRate' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE =
   'securitySolution:defaultValueReportTitle' as const;
+// Cases settings
+export const CASES_MAX_OPEN_CASES_PER_RULE_RUN_ID = 'cases:maxOpenCasesPerRuleRun' as const;
+
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';
 export const TIMELION_ES_TIME_FIELD_ID = 'timelion:es.timefield';
