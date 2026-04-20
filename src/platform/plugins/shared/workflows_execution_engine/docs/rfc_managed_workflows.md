@@ -42,7 +42,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | # | Requirement | Details |
 |---|-------------|---------|
 | **R1** | **Distinguish managed from user-defined** | The platform must be able to distinguish managed workflows from user-defined ones. The designation is not user-settable. How this is achieved (a flag on the same index, a separate index, or other mechanism) is discussed in the [Storage](#1-storage) section of the technical design. |
-| **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject changes to managed workflows. This includes the `enabled` toggle (enable/disable is an update). UI-only restrictions are insufficient — API callers can still mutate. Note: this conflicts with the force override (S5) — see the [Force Override](#21-force-override) section for the interaction model and options. |
+| **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject changes to managed workflows. This includes the `enabled` toggle (enable/disable is an update). UI-only restrictions are insufficient — API callers can still mutate. Note: this conflicts with the force override (S4) — see the [Force Override](#21-force-override) section for the interaction model and options. |
 | **R3** | **Active by default** | Registered managed workflows are immediately active and ready to execute. No separate activation step required. Note: Detection Engine needs workflows that are disabled by default and user-enabled — see [Open Questions > Mutability #5](#initial-enabled-state). |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
 | **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
@@ -79,8 +79,7 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **S1** | **Version/hash tracking** | Track a content hash so the platform can determine if updates are needed without fetching and string-comparing full YAML. Also drives the reconciliation lifecycle (create-if-absent, update-if-changed, skip-if-matching) — see [Versioning](#4-versioning). | Security (andrew-goldstein) |
 | **S2** | **Caller-provided execution ID** | Support a caller-specified unique execution ID for correlation and deduplication. | O11y (ruflin, cesco-f) |
 | **S3** | **Caller-provided execution metadata** | Allow callers to attach arbitrary metadata to an execution for debugging and correlation. | — |
-| **S4** | **`getWorkflowExecutionById` on start contract** | Expose execution lookup on the plugin start contract to avoid direct index reads by consuming plugins. | O11y (cesco-f) |
-| **S5** | **Force override** | A `--force` flag on mutation APIs to allow intentional override of read-only protection for testing, recovery, or urgent fixes. Not as restrictive as system indices. | O11y (ruflin) |
+| **S4** | **Force override** | A `--force` flag on mutation APIs to allow intentional override of read-only protection for testing, recovery, or urgent fixes. Not as restrictive as system indices. | O11y (ruflin) |
 
 ### Nice to Have / Deferred
 
@@ -152,9 +151,6 @@ These are capabilities that interact with or are prerequisites for managed workf
    - **Flag on every API call** — A parameter (e.g., `managed=true`) on each request to scope the lookup. Avoids ID collisions at query time, but adds friction to every API call and is easy to forget.
 
    The simplest approach is the reserved prefix — it keeps the API surface unchanged for users while guaranteeing no collisions. Human-readable, caller-provided custom IDs are already supported by the platform; managed workflows use this existing capability with the added prefix convention.
-
-4. **Should conditions gate registration?**
-   E.g., a workflow registers only if tier is Enterprise, deployment type is Serverless, or a feature flag is enabled. KDKHD proposed `shouldInstallWorkflow({ spaceId, ...ctx })` as a general-purpose hook.
 
 ### Mutability
 
