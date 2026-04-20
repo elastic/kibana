@@ -23,7 +23,7 @@ If you already know the high-level flow and want subsystem detail, jump to:
 | Rule execution pipeline, middleware, streaming steps | [`lib/rule_executor/README.md`](lib/rule_executor/README.md) |
 | Episode lifecycle and transition strategies | [`lib/director/README.md`](lib/director/README.md) |
 | Notification matching, grouping, throttling, dispatch | [`lib/dispatcher/README.md`](lib/dispatcher/README.md) |
-| Data streams, mappings, and ES|QL views | [`resources/README.md`](resources/README.md) |
+| Data streams, mappings, and ES\|QL views | [`resources/README.md`](resources/README.md) |
 
 ## The mental model
 
@@ -35,7 +35,7 @@ The plugin is easiest to understand as five cooperating layers:
 | Evaluation plane | Running rules and turning query results into rule events | `lib/rule_executor/` |
 | Lifecycle plane | Turning alert rule events into episode state transitions | `lib/director/` |
 | Delivery plane | Turning episodes into notification work and recording outcomes | `lib/dispatcher/` |
-| Persistence plane | Data streams and ES|QL views used by the other layers | `resources/` |
+| Persistence plane | Data streams and ES\|QL views used by the other layers | `resources/` |
 
 Those layers deliberately do different jobs:
 
@@ -258,7 +258,7 @@ The plugin uses Inversify-based dependency injection and startup hooks:
 | `lib/director/` | Alert episode state engine. |
 | `lib/dispatcher/` | Notification pipeline. |
 | `lib/services/` | Shared ES, storage, logging, retry, user, and saved object services. |
-| `resources/` | Datastreams and ES|QL views. |
+| `resources/` | Datastreams and ES\|QL views. |
 | `routes/` | HTTP API surface. |
 | `saved_objects/` | Rule and notification policy persistence models. |
 

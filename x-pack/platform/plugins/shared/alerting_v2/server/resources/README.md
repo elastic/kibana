@@ -14,7 +14,7 @@ If you change stored document shape, retention behavior, or ES|QL views, this fo
 | --- | --- |
 | Datastream definitions | `datastreams/alert_events.ts`, `datastreams/alert_actions.ts` |
 | Datastream registration | `datastreams/register.ts` |
-| ES|QL view definitions | `esql_views/` |
+| ES\|QL view definitions | `esql_views/` |
 | Startup initialization | `register_resources.ts` |
 
 `register_resources.ts` registers datastreams and ES|QL views, then asks `ResourceManager` to start initialization during plugin start.
@@ -44,7 +44,7 @@ This stream is the durable history of rule evaluation.
 | `rule.id` | `keyword` | Rule identifier. |
 | `rule.version` | `long` | Rule version at execution time. |
 | `group_hash` | `keyword` | Per-rule series identity. |
-| `data` | `flattened` | ES|QL row payload. |
+| `data` | `flattened` | ES\|QL row payload. |
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |
 | `source` | `keyword` | Origin marker. |
 | `type` | `keyword` | `signal` or `alert`. |

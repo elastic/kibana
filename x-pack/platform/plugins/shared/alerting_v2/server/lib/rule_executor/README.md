@@ -128,8 +128,8 @@ The persisted shape lives in `saved_objects/schemas/rule_saved_object_attributes
 | --- | --- | --- |
 | `input` | Pipeline / task runner | Rule id, space id, schedule, and execution context. |
 | `rule` | `FetchRuleStep` | Current rule document. |
-| `queryPayload` | `ExecuteRuleQueryStep` | ES|QL query/filter/params for the current run. |
-| `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES|QL rows. |
+| `queryPayload` | `ExecuteRuleQueryStep` | ES\|QL query/filter/params for the current run. |
+| `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES\|QL rows. |
 | `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
 
 ## Execution steps
@@ -141,7 +141,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
 | 2 | `FetchRuleStep` | Load the current rule saved object. |
 | 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
-| 4 | `ExecuteRuleQueryStep` | Build and run ES|QL, emitting streamed row batches. |
+| 4 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
 | 5 | `CreateAlertEventsStep` | Turn a row batch into breached rule events. |
 | 6 | `CreateRecoveryEventsStep` | Append recovery events for alert rules when configured. |
 | 7 | `DirectorStep` | Enrich alert-type events with episode state. |
