@@ -19,7 +19,7 @@ import { getIndexForWatchlist } from '../entities/utils';
 import { createIndexSyncService } from './sync/index_sync';
 import { applyBulkRemoveSource } from './bulk/soft_delete';
 import type { StaleEntity } from './bulk/soft_delete';
-import { CSV_SOURCE_ID } from './csv/constants';
+import { MANUAL_SOURCE_ID } from './manual/constants';
 
 interface WatchlistMeta {
   name: string;
@@ -176,7 +176,7 @@ export const createEntitySourcesService = ({
       },
     });
 
-    const excludedIds = new Set([CSV_SOURCE_ID, ...activeSourceIds]);
+    const excludedIds = new Set([MANUAL_SOURCE_ID, ...activeSourceIds]);
     const orphanedSourceIds: string[] = (
       (aggResponse.aggregations?.source_ids as { buckets: Array<{ key: string }> })?.buckets ?? []
     )
