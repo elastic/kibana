@@ -12,6 +12,7 @@ import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { alertFlyoutHistoryKey } from '../../../../flyout_v2/document/constants/flyout_history';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
@@ -32,6 +33,7 @@ import { DocumentEventTypes, NotesEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
 import { useUserPrivileges } from '../../user_privileges';
 import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { useDefaultDocumentFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -90,6 +92,7 @@ const RowActionComponent = ({
 
   const { openFlyout } = useExpandableFlyoutApi();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const columnValues = useMemo(
     () =>
@@ -133,10 +136,9 @@ const RowActionComponent = ({
           ),
         }),
         {
-          ownFocus: false,
-          resizable: true,
-          size: 's',
-          type: 'overlay',
+          ...defaultFlyoutProperties,
+          historyKey: alertFlyoutHistoryKey,
+          session: 'start',
         }
       );
     } else {
@@ -156,6 +158,7 @@ const RowActionComponent = ({
       });
     }
   }, [
+    defaultFlyoutProperties,
     newFlyoutSystemEnabled,
     hit,
     overlays,

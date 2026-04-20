@@ -7,17 +7,21 @@
 
 import type { Logger } from '@kbn/logging';
 import type { DashboardPluginStart, DashboardState } from '@kbn/dashboard-plugin/server';
-import type { DashboardAttachment, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE, attachmentToDashboardState } from '@kbn/dashboard-agent-common';
+import type { DashboardAttachmentData } from '@kbn/dashboard-agent-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  attachmentDataToDashboardState,
+} from '@kbn/dashboard-agent-common';
 import { createDashboardSmlType } from './dashboard';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 const dashboardAttachmentData: DashboardAttachmentData = {
   title: 'System Overview',
   description: 'Main dashboard for key metrics',
   panels: [
     {
-      type: 'lens',
-      uid: 'panel-1',
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'panel-1',
       grid: { x: 0, y: 0, w: 24, h: 15 },
       config: {
         attributes: {
@@ -34,14 +38,14 @@ const dashboardAttachmentData: DashboardAttachmentData = {
       },
     },
     {
-      uid: 'section-1',
+      id: 'section-1',
       title: 'Operations',
       collapsed: false,
       grid: { y: 20 },
       panels: [
         {
           type: 'markdown',
-          uid: 'panel-2',
+          id: 'panel-2',
           grid: { x: 24, y: 0, w: 24, h: 10 },
           config: {
             title: 'Summary',
@@ -58,8 +62,8 @@ const dashboardStateWithLensApi = {
   description: 'Dashboard with API-format lens panel',
   panels: [
     {
-      type: 'lens',
-      uid: 'panel-3',
+      type: LENS_EMBEDDABLE_TYPE,
+      id: 'panel-3',
       grid: { x: 0, y: 0, w: 24, h: 12 },
       config: {
         attributes: {
@@ -83,13 +87,7 @@ const createDashboardClient = ({
   ({
     read: jest.fn().mockResolvedValue({
       id,
-      data:
-        data ??
-        attachmentToDashboardState({
-          id,
-          type: DASHBOARD_ATTACHMENT_TYPE,
-          data: attachmentData,
-        } as DashboardAttachment),
+      data: data ?? attachmentDataToDashboardState(attachmentData),
       meta: {
         outcome: 'exactMatch',
         version: 'v1',
@@ -236,13 +234,13 @@ describe('dashboardSmlType', () => {
     expect(attachmentData?.panels).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          uid: 'panel-1',
-          type: 'lens',
+          id: 'panel-1',
+          type: LENS_EMBEDDABLE_TYPE,
         }),
         expect.objectContaining({
-          uid: 'section-1',
+          id: 'section-1',
           title: 'Operations',
-          panels: [expect.objectContaining({ uid: 'panel-2', type: 'markdown' })],
+          panels: [expect.objectContaining({ id: 'panel-2', type: 'markdown' })],
         }),
       ])
     );
@@ -295,8 +293,8 @@ describe('dashboardSmlType', () => {
 
     expect(attachmentData?.panels).toEqual([
       expect.objectContaining({
-        uid: 'panel-3',
-        type: 'lens',
+        id: 'panel-3',
+        type: LENS_EMBEDDABLE_TYPE,
         config: expect.objectContaining({
           attributes: expect.objectContaining({
             type: 'lnsXY',

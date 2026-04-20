@@ -24,7 +24,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       .set(samlAuth.getInternalRequestHeader())
       .send({
         kind: 'alert',
-        metadata: { name: 'original-rule', owner: 'team-a', labels: ['prod'] },
+        metadata: { name: 'original-rule', owner: 'team-a', tags: ['prod'] },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '10m' },
         evaluation: {

@@ -15,6 +15,16 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EnhancedAlertFlyoutFooter } from './enhanced_alert_flyout_footer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
+const mockRefetchNext = jest.fn();
+
+jest.mock('../../../../application/main/state_management/redux', () => ({
+  useCurrentTabDataStateContainer: () => ({
+    refetch$: {
+      next: mockRefetchNext,
+    },
+  }),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -53,7 +63,13 @@ describe('EnhancedAlertFlyoutFooter', () => {
       </IntlProvider>
     );
 
-    expect(renderFooterFeature).toHaveBeenCalledWith(hit);
+    expect(renderFooterFeature).toHaveBeenCalledWith(
+      expect.objectContaining({
+        hit,
+        dataView: dataViewMock,
+        onAlertUpdated: expect.any(Function),
+      })
+    );
     expect(screen.getByText('Footer')).toBeInTheDocument();
   });
 

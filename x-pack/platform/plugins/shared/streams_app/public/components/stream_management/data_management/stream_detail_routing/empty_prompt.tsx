@@ -6,15 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiButton,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -39,7 +31,6 @@ const CreatePartitionButton = ({ createNewRule }: { createNewRule: () => void })
         color: ${euiTheme.colors.textPrimary};
       `}
       data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-      iconType="timeline" // TODO: Replace with the "if" icon still not available in EUI
       aria-label={i18n.translate(
         'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.manualButton',
         {
@@ -67,7 +58,7 @@ export const NoDataEmptyPrompt = ({
     <EuiEmptyPrompt
       aria-live="polite"
       css={css`
-        margin-top: unset;
+        margin-block: unset;
       `}
       body={
         <EuiFlexGroup direction="column" gutterSize="s">
@@ -78,41 +69,16 @@ export const NoDataEmptyPrompt = ({
           ) : (
             <>
               <EuiFlexItem>
-                <PartitioningPanel message={message}>
-                  {isAiEnabled ? children : <CreatePartitionButton createNewRule={createNewRule} />}
-                </PartitioningPanel>
+                <PartitioningPanel message={message} />
               </EuiFlexItem>
-              {isAiEnabled && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiFlexItem>
-                    <EuiFlexGroup alignItems="center" gutterSize="m">
-                      <EuiFlexItem>
-                        <EuiHorizontalRule margin="none" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          {i18n.translate(
-                            'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.or',
-                            {
-                              defaultMessage: 'or',
-                            }
-                          )}
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiHorizontalRule margin="none" />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiSpacer size="s" />
-                  <EuiFlexItem>
-                    <div>
-                      <CreatePartitionButton createNewRule={createNewRule} />
-                    </div>
-                  </EuiFlexItem>
-                </>
-              )}
+              <EuiSpacer size="l" />
+              <EuiFlexGroup gutterSize="s" justifyContent="center">
+                {isAiEnabled && <>{children}</>}
+
+                <div>
+                  <CreatePartitionButton createNewRule={createNewRule} />
+                </div>
+              </EuiFlexGroup>
             </>
           )}
         </EuiFlexGroup>
@@ -125,7 +91,7 @@ const cardDescriptionAiEnabled = i18n.translate(
   'xpack.streams.streamDetailView.routingTab.noDataEmptyPrompt.cardDescription',
   {
     defaultMessage:
-      'Define how your data is split into streams. Do it yourself, or let Elastic suggest an AI-generated proposal based on your data.',
+      'Partition this data into child streams based on logical groupings; for example, to apply distinct lifecycles or processing to specific data subsets.',
   }
 );
 

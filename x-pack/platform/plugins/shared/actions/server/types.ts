@@ -66,6 +66,7 @@ export interface HookServices {
 export interface ActionsApiRequestHandlerContext {
   getActionsClient: () => ActionsClient;
   listTypes(featureId?: string): ReturnType<ActionTypeRegistry['list']>;
+  getSkippedPreconfiguredConnectorIds: () => Set<string>;
 }
 
 export type ActionsRequestHandlerContext = CustomRequestHandlerContext<{
@@ -195,7 +196,6 @@ export type ConnectorLifecyclePostCreateParams = Omit<
 > & {
   connectorType: string;
   connectorName: string;
-  workflowTemplates: string[];
 };
 export type ConnectorLifecyclePostDeleteParams = PostDeleteConnectorHookParams & {
   connectorType: string;

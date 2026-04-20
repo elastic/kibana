@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
 import { fetchEvents } from './fetch_events_graph';
-import { fetchEntityRelationships } from './fetch_entity_relationships_graph';
+import { fetchEntityRelationships, fetchEntities } from './fetch_entity_relationships_graph';
 import type { EventEdge, RelationshipEdge } from './types';
 
 jest.mock('./fetch_events_graph');
@@ -19,6 +19,7 @@ const mockedFetchEvents = fetchEvents as jest.MockedFunction<typeof fetchEvents>
 const mockedFetchEntityRelationships = fetchEntityRelationships as jest.MockedFunction<
   typeof fetchEntityRelationships
 >;
+const mockedFetchEntities = fetchEntities as jest.MockedFunction<typeof fetchEntities>;
 
 describe('fetchGraph', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -74,6 +75,10 @@ describe('fetchGraph', () => {
     mockedFetchEntityRelationships.mockResolvedValue({
       columns: [],
       records: mockRelationshipRecords,
+    } as any);
+    mockedFetchEntities.mockResolvedValue({
+      columns: [],
+      records: [],
     } as any);
   });
 

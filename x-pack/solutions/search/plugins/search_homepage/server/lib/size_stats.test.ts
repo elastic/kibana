@@ -74,17 +74,19 @@ describe('fetchSizeStats', () => {
   describe('hosted/self-managed mode', () => {
     it('should fetch stats from indices stats API and return formatted response', async () => {
       const mockIndicesStatsResponse = {
-        _all: {
-          primaries: {
-            docs: {
-              count: 500000,
-              deleted: 0,
+        indices: {
+          'my-user-index': {
+            primaries: {
+              docs: {
+                count: 500000,
+                deleted: 0,
+              },
             },
-          },
-          total: {
-            store: {
-              size_in_bytes: 5368709120, // 5 GB in bytes
-              total_data_set_size_in_bytes: 5368709120,
+            total: {
+              store: {
+                size_in_bytes: 5368709120, // 5 GB in bytes
+                total_data_set_size_in_bytes: 5368709120,
+              },
             },
           },
         },
@@ -97,7 +99,7 @@ describe('fetchSizeStats', () => {
       const result = await fetchSizeStats(mockScopedClusterClient, false);
 
       expect(mockScopedClusterClient.asCurrentUser.indices.stats).toHaveBeenCalledWith({
-        expand_wildcards: ['hidden', 'all'],
+        expand_wildcards: ['open', 'closed'],
         forbid_closed_indices: false,
         metric: ['docs', 'store'],
       });
@@ -110,16 +112,79 @@ describe('fetchSizeStats', () => {
       });
     });
 
+    it('should exclude dot-prefix (system/hidden) indices from document and size count', async () => {
+      const mockIndicesStatsResponse = {
+        indices: {
+          'my-user-index': {
+            primaries: { docs: { count: 300, deleted: 0 } },
+            total: { store: { size_in_bytes: 1024 } },
+          },
+          '.kibana': {
+            primaries: { docs: { count: 50000, deleted: 0 } },
+            total: { store: { size_in_bytes: 10485760 } },
+          },
+          '.fleet-actions': {
+            primaries: { docs: { count: 100, deleted: 0 } },
+            total: { store: { size_in_bytes: 2048 } },
+          },
+        },
+      };
+
+      mockScopedClusterClient.asCurrentUser.indices.stats.mockResolvedValue(
+        mockIndicesStatsResponse as any
+      );
+
+      const result = await fetchSizeStats(mockScopedClusterClient, false);
+
+      // Only 'my-user-index' should be counted; dot-prefix indices are excluded
+      expect(result).toEqual({
+        sizeStats: {
+          size: '1kb',
+          documents: 300,
+        },
+      });
+    });
+
+    it('should return zero documents when only dot-prefix indices exist (new ECH deployment)', async () => {
+      const mockIndicesStatsResponse = {
+        indices: {
+          '.kibana': {
+            primaries: { docs: { count: 500, deleted: 0 } },
+            total: { store: { size_in_bytes: 1048576 } },
+          },
+          '.security-7': {
+            primaries: { docs: { count: 10, deleted: 0 } },
+            total: { store: { size_in_bytes: 4096 } },
+          },
+        },
+      };
+
+      mockScopedClusterClient.asCurrentUser.indices.stats.mockResolvedValue(
+        mockIndicesStatsResponse as any
+      );
+
+      const result = await fetchSizeStats(mockScopedClusterClient, false);
+
+      expect(result).toEqual({
+        sizeStats: {
+          size: '0b',
+          documents: 0,
+        },
+      });
+    });
+
     it('should handle missing store stats with default value', async () => {
       const mockIndicesStatsResponse = {
-        _all: {
-          primaries: {
-            docs: {
-              count: 1000,
-              deleted: 0,
+        indices: {
+          'my-user-index': {
+            primaries: {
+              docs: {
+                count: 1000,
+                deleted: 0,
+              },
             },
+            total: {},
           },
-          total: {},
         },
       };
 
@@ -139,11 +204,13 @@ describe('fetchSizeStats', () => {
 
     it('should handle missing docs stats with default value', async () => {
       const mockIndicesStatsResponse = {
-        _all: {
-          primaries: {},
-          total: {
-            store: {
-              size_in_bytes: 1024000,
+        indices: {
+          'my-user-index': {
+            primaries: {},
+            total: {
+              store: {
+                size_in_bytes: 1024000,
+              },
             },
           },
         },
@@ -163,10 +230,8 @@ describe('fetchSizeStats', () => {
       });
     });
 
-    it('should handle completely missing stats with defaults', async () => {
-      const mockIndicesStatsResponse = {
-        _all: {},
-      };
+    it('should handle completely missing indices with defaults', async () => {
+      const mockIndicesStatsResponse = {};
 
       mockScopedClusterClient.asCurrentUser.indices.stats.mockResolvedValue(
         mockIndicesStatsResponse as any

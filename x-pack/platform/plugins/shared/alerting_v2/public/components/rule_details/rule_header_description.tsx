@@ -8,11 +8,7 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { RuleApiResponse } from '../../services/rules_api';
-
-export interface RuleHeaderDescriptionProps {
-  rule: RuleApiResponse;
-}
+import { useRule } from './rule_context';
 
 const KIND_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.kindSignal', {
@@ -29,20 +25,37 @@ const KIND_ICONS: Record<string, string> = {
 };
 
 /**
- * Renders the tags row below the page title.
+ * Renders the description and tags row below the page title.
  */
-export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ rule }) => {
-  if (!rule.metadata.labels || rule.metadata.labels.length === 0) {
+export const RuleHeaderDescription: React.FC = () => {
+  const rule = useRule();
+  const { description, tags } = rule.metadata;
+  const hasTags = tags && tags.length > 0;
+
+  if (!description && !hasTags) {
     return null;
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
-      {rule.metadata.labels.map((label) => (
-        <EuiFlexItem key={label} grow={false}>
-          <EuiBadge color="hollow">{label}</EuiBadge>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      {description && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="ruleDescription">
+            {description}
+          </EuiText>
         </EuiFlexItem>
-      ))}
+      )}
+      {hasTags && (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false} data-test-subj="ruleTags">
+            {tags!.map((tag) => (
+              <EuiFlexItem key={tag} grow={false}>
+                <EuiBadge color="hollow">{tag}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };
@@ -50,7 +63,8 @@ export const RuleHeaderDescription: React.FC<RuleHeaderDescriptionProps> = ({ ru
 /**
  * Rule name with kind and status rendered inline, separated by vertical dividers.
  */
-export const RuleTitleWithBadges: React.FC<RuleHeaderDescriptionProps> = ({ rule }) => {
+export const RuleTitleWithBadges: React.FC = () => {
+  const rule = useRule();
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m" wrap={false} responsive={false}>
       <EuiFlexItem grow={false}>

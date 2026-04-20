@@ -80,6 +80,23 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.AsCodeQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "AsCodeQuery",
+        "description": [],
+        "signature": [
+          "{ readonly language: \"kql\" | \"lucene\"; readonly expression: string; }"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/query/schema.ts",
+        "lineNumber": 37,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -181,6 +198,46 @@
           "<string | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/meta/schema.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/as-code-shared-schemas",
+        "id": "def-common.asCodeQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "asCodeQuerySchema",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ expression: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; language: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<\"kql\" | \"lucene\">; }>"
+        ],
+        "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/query/schema.ts",
         "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,

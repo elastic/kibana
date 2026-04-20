@@ -10,8 +10,24 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import XmattersActionConnectorFields from './xmatters_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
-import { act } from 'react-dom/test-utils';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
+
+const mockUseKibanaReturnValue = createStartServicesMock();
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
+
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 describe('XmattersActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -156,28 +172,29 @@ describe('XmattersActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.xmatters',
-          name: 'xmatters',
-          config: {
-            configUrl: 'https://test.com',
-            usesBasic: true,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.xmatters',
+            name: 'xmatters',
+            config: {
+              configUrl: 'https://test.com',
+              usesBasic: true,
+            },
+            secrets: {
+              user: 'user',
+              password: 'pass',
+            },
+            __internal__: {
+              auth: 'Basic Authentication',
+            },
+            isDeprecated: false,
+            id: 'xmatters',
           },
-          secrets: {
-            user: 'user',
-            password: 'pass',
-          },
-          __internal__: {
-            auth: 'Basic Authentication',
-          },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -192,24 +209,25 @@ describe('XmattersActionConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
-        data: {
-          actionTypeId: '.xmatters',
-          name: 'xmatters',
-          config: {
-            usesBasic: false,
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({
+          data: {
+            actionTypeId: '.xmatters',
+            name: 'xmatters',
+            config: {
+              usesBasic: false,
+            },
+            secrets: {
+              secretsUrl: 'https://test.com',
+            },
+            __internal__: { auth: 'URL Authentication' },
+            isDeprecated: false,
+            id: 'xmatters',
           },
-          secrets: {
-            secretsUrl: 'https://test.com',
-          },
-          __internal__: { auth: 'URL Authentication' },
-          isDeprecated: false,
-        },
-        isValid: true,
+          isValid: true,
+        });
       });
     });
 
@@ -233,7 +251,9 @@ describe('XmattersActionConnectorFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
 
     it.each(urlAuthTests)('validates correctly %p', async (field, value) => {
@@ -256,7 +276,9 @@ describe('XmattersActionConnectorFields renders', () => {
 
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

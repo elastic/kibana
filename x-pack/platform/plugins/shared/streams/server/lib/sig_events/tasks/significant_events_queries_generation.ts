@@ -28,6 +28,7 @@ export interface SignificantEventsQueriesGenerationTaskParams {
   end: number;
   sampleDocsSize?: number;
   streamName: string;
+  connectorId?: string;
 }
 
 export const SIGNIFICANT_EVENTS_QUERIES_GENERATION_TASK_TYPE =
@@ -49,7 +50,14 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               }
               const { fakeRequest } = runContext;
 
-              const { start, end, sampleDocsSize, streamName, _task } = runContext.taskInstance
+              const {
+                start,
+                end,
+                sampleDocsSize,
+                streamName,
+                connectorId: connectorIdOverride,
+                _task,
+              } = runContext.taskInstance
                 .params as TaskParams<SignificantEventsQueriesGenerationTaskParams>;
 
               const {
@@ -57,25 +65,31 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 streamsClient,
                 inferenceClient,
                 soClient,
-                featureClient,
+                getFeatureClient,
+                getQueryClient,
                 scopedClusterClient,
               } = await taskContext.getScopedClients({
                 request: runContext.fakeRequest,
               });
 
+              const featureClient = await getFeatureClient();
+
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
-              const connectorId = await resolveConnectorForFeature({
-                searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
-                featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-                featureName: 'query generation',
-                request: fakeRequest,
-              });
+              const connectorId =
+                connectorIdOverride ??
+                (await resolveConnectorForFeature({
+                  searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
+                  featureId: STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+                  featureName: 'query generation',
+                  request: fakeRequest,
+                }));
               taskLogger.debug(`Using connector ${connectorId} for rule generation`);
 
               try {
                 const stream = await streamsClient.getStream(streamName);
 
                 const esClient = scopedClusterClient.asCurrentUser;
+                const queryClient = await getQueryClient();
 
                 const promptsConfigService = new PromptsConfigService({
                   soClient,
@@ -88,14 +102,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                   {
                     definition: stream,
                     connectorId,
-                    start,
-                    end,
                     systemPrompt: significantEventsPromptOverride,
                   },
                   {
                     inferenceClient,
                     esClient,
                     featureClient,
+                    queryClient,
                     logger: taskContext.logger.get('significant_events_generation'),
                     signal: runContext.abortController.signal,
                   }
@@ -113,7 +126,11 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 await taskClient.complete<
                   SignificantEventsQueriesGenerationTaskParams,
                   SignificantEventsQueriesGenerationResult
-                >(_task, { start, end, sampleDocsSize, streamName }, result);
+                >(
+                  _task,
+                  { start, end, sampleDocsSize, streamName, connectorId: connectorIdOverride },
+                  result
+                );
               } catch (error) {
                 if (isDefinitionNotFoundError(error)) {
                   taskContext.logger.debug(
@@ -146,7 +163,13 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
 
                 await taskClient.fail<SignificantEventsQueriesGenerationTaskParams>(
                   _task,
-                  { start, end, sampleDocsSize, streamName },
+                  {
+                    start,
+                    end,
+                    sampleDocsSize,
+                    streamName,
+                    connectorId: connectorIdOverride,
+                  },
                   errorMessage
                 );
 

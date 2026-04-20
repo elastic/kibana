@@ -18,6 +18,7 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
+  tags: ['production'],
   groupingMode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
@@ -139,6 +140,7 @@ describe('useNotificationPolicyForm', () => {
       expect(result.current.methods.getValues()).toEqual({
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
+        tags: ['production'],
         matcher: 'data.severity : "critical"',
         groupingMode: 'per_field',
         groupBy: ['host.name', 'service.name'],
@@ -186,6 +188,7 @@ describe('useNotificationPolicyForm', () => {
         name: 'Critical production alerts',
         description: 'Routes critical alerts',
         groupingMode: 'per_field',
+        tags: ['production'],
         matcher: 'data.severity : "critical"',
         groupBy: ['host.name', 'service.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },

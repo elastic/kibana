@@ -24,7 +24,7 @@ jest.mock('../../../kibana_services', () => ({
 describe('transformPinnedPanelsIn', () => {
   const mockPinnedPanelsState: Required<DashboardState>['pinned_panels'] = [
     {
-      uid: 'control1',
+      id: 'control1',
       type: 'type1',
       width: CONTROL_WIDTH_SMALL,
       config: { bizz: 'buzz' },

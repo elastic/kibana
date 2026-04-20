@@ -11,8 +11,7 @@ export * from './owners';
 export * from './files';
 export * from './application';
 export * from './observables';
-export { SECURITY_ENDPOINT_ATTACHMENT_TYPE } from './attachments';
-export { LENS_ATTACHMENT_TYPE } from './visualizations';
+export * from './attachments';
 
 /**
  * Cases connector limits.

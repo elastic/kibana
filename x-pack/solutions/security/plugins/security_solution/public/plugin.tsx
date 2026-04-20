@@ -69,6 +69,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getEndpointUnifiedAttachment } from './cases/attachments/endpoint/unified_attachment';
+import { getEventType } from './cases/attachments/event';
 import { isSecuritySolutionAccessible } from './helpers_access';
 import { generateIndicatorAttachmentType } from './cases/attachments/indicator/utils/attachments';
 import { defaultDeepLinks } from './app/links/default_deep_links';
@@ -268,8 +269,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         }
       });
 
-    cases?.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
-    cases?.attachmentFramework?.registerExternalReference(generateIndicatorAttachmentType());
+    if (!cases?.attachmentFramework) {
+      throw new Error(
+        'Security Solution requires the Cases setup contract to register security.event attachments'
+      );
+    }
+
+    cases.attachmentFramework.registerExternalReference(generateIndicatorAttachmentType());
+    cases.attachmentFramework.registerUnified(getEndpointUnifiedAttachment());
+    cases.attachmentFramework.registerUnified(getEventType());
 
     this.registerDiscoverSharedFeatures(core, plugins);
 
@@ -429,7 +437,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     });
     const headerFooterFeature: SecuritySolutionAlertFlyoutFooterFeature = {
       id: 'security-solution-alert-flyout-footer',
-      renderFooter: (hit) => {
+      renderFooter: ({ hit, onAlertUpdated }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -439,6 +447,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               hit={hit}
               servicesPromise={servicesPromise}
               storePromise={storePromise}
+              onAlertUpdated={onAlertUpdated}
             />
           </React.Suspense>
         );
@@ -601,7 +610,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       applicationLinksUpdater.update(appLinks, params);
     });
 
-    const filteredLinks = await getFilteredLinks(core, plugins);
+    const filteredLinks = await getFilteredLinks(core, plugins, this.experimentalFeatures);
     appLinksToUpdate$.next(filteredLinks);
   }
 

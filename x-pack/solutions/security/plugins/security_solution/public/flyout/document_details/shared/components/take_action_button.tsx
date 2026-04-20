@@ -54,8 +54,13 @@ interface AlertSummaryData {
  */
 export const TakeActionButton: FC = () => {
   const { closeFlyout } = useExpandableFlyoutApi();
-  const { dataFormattedForFieldBrowser, dataAsNestedObject, refetchFlyoutData, scopeId } =
-    useDocumentDetailsContext();
+  const {
+    dataFormattedForFieldBrowser,
+    dataAsNestedObject,
+    refetchFlyoutData,
+    scopeId,
+    searchHit,
+  } = useDocumentDetailsContext();
 
   // host isolation interaction
   const {
@@ -162,6 +167,7 @@ export const TakeActionButton: FC = () => {
           refetch={refetchAll}
           scopeId={scopeId}
           onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
+          searchHit={searchHit}
         />
       )}
 

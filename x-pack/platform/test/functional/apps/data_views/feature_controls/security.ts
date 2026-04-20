@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Stack Management']);
+        expect(navLinks).to.contain('Stack Management');
       });
 
       it(`index pattern listing shows create button`, async () => {
@@ -130,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Stack Management']);
+        expect(navLinks).to.eql(['Workflows', 'Stack Management']);
       });
 
       it(`index pattern listing shows disabled create button`, async () => {
@@ -184,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('does not show Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover']);
+        expect(navLinks).to.eql(['Discover', 'Workflows']);
       });
 
       it(`doesn't show Data Views in management side-nav`, async () => {

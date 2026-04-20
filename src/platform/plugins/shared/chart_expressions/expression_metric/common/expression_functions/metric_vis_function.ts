@@ -110,13 +110,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     primaryPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
-        defaultMessage: 'The postion of the Primary Metric (top or bottom).',
-      }),
-    },
-    titleWeight: {
-      types: ['string'],
-      help: i18n.translate('expressionMetricVis.function.titleWeight.help', {
-        defaultMessage: 'The title weight.',
+        defaultMessage: 'The position of the Primary Metric (top, middle, or bottom).',
       }),
     },
     color: {
@@ -289,7 +283,6 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             iconAlign: args.iconAlign,
             valueFontSize: args.valueFontSize,
             primaryPosition: args.primaryPosition,
-            titleWeight: args.titleWeight,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,

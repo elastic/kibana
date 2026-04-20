@@ -38,7 +38,7 @@ export class DiscoverServerPlugin
 {
   private readonly config: ConfigSchema;
   private subscriptions: Subscription[] = [];
-  private embeddableTransformsEnabled = false;
+  private embeddableTransformsEnabled = true;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();

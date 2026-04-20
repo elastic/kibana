@@ -41,7 +41,6 @@ import {
   fetchRule,
   waitForAlertToComplete,
   refreshIndex,
-  rulesAllPreviewIndexRole,
   createExceptionListItem,
 } from '../../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
@@ -754,13 +753,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('@skipInServerless as a user with only the Rules feature', () => {
+      const role = ROLES.rules_all_preview_index;
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
-        await utils.createSuperTestWithCustomRole(rulesAllPreviewIndexRole);
+        await createUserAndRole(getService, role);
       });
 
       afterEach(async () => {
-        await utils.cleanUpCustomRoles();
+        await deleteUserAndRole(getService, role);
         await deleteAllRules(supertest, log);
         await deleteAllExceptions(supertest, log);
       });
@@ -798,10 +798,8 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         });
 
-        const restrictedApis = detectionsApi.withUser({
-          username: rulesAllPreviewIndexRole.name,
-          password: 'changeme',
-        });
+        const restrictedUser = { username: role, password: 'changeme' };
+        const restrictedApis = detectionsApi.withUser(restrictedUser);
 
         const { body: createdRule } = await restrictedApis
           .createRule({ body: ruleParams })

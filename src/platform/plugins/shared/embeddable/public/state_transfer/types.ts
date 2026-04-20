@@ -10,12 +10,28 @@
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 
 /**
+ * A serializable breadcrumb entry passed from the originating app to editor apps.
+ * Uses href instead of onClick for sessionStorage serialization.
+ * @public
+ */
+export interface EmbeddableEditorBreadcrumb {
+  text: string;
+  href: string;
+}
+
+/**
  * A state package that contains information an editor will need to create or edit an embeddable then redirect back.
  * @public
  */
 export interface EmbeddableEditorState {
   originatingApp: string;
   originatingPath?: string;
+  /**
+   * Breadcrumbs from the originating app context (e.g. [Dashboards, Visualizations]).
+   * Consumers prepend these to their own breadcrumbs. Computed by the originating app
+   * using getUrlForApp.
+   */
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   embeddableId?: string;
   valueInput?: object;
 
