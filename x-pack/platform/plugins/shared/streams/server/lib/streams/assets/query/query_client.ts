@@ -597,11 +597,22 @@ export class QueryClient {
       size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       retriever: {
-        standard: {
-          query: {
-            match: { [QUERY_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [QUERY_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: SEARCH_SIZE_LIMIT,
           min_score: this.config.semantic_min_score,
         },
       },
@@ -629,11 +640,21 @@ export class QueryClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [QUERY_SEARCH_EMBEDDING]: query },
-                },
-                // See config.semantic_min_score for rationale.
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [QUERY_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: SEARCH_SIZE_LIMIT,
                 min_score: this.config.semantic_min_score,
               },
             },

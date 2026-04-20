@@ -448,7 +448,7 @@ describe('QueryClient backward compatibility', () => {
       await client.findQueries(['logs.test'], 'SSH', undefined, 'semantic');
 
       const searchArgs = storageClient.search.mock.calls[0][0];
-      expect(searchArgs.retriever?.standard).toBeDefined();
+      expect(searchArgs.retriever?.linear).toBeDefined();
     });
 
     it('falls back to keyword when auto-resolved hybrid search throws an error', async () => {

@@ -39,7 +39,7 @@ const sigEventsTuningConfigSchema = schema.object(
     diverse_ratio: schema.number({ min: 0, max: 1 }),
     max_excluded_features_in_prompt: schema.number({ min: 0, max: 50 }),
     max_entity_filters: schema.number({ min: 1, max: 50 }),
-    semantic_min_score: schema.number({ min: 0, max: 100 }),
+    semantic_min_score: schema.number({ min: 0, max: 1 }),
     rrf_rank_constant: schema.number({ min: 1, max: 100 }),
   },
   {

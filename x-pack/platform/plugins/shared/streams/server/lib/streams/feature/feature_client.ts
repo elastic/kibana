@@ -395,11 +395,22 @@ export class FeatureClient {
       size: limit ?? SEARCH_SIZE_LIMIT,
       track_total_hits: true,
       retriever: {
-        standard: {
-          query: {
-            match: { [FEATURE_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [FEATURE_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
           min_score: this.config.semantic_min_score,
         },
       },
@@ -430,11 +441,21 @@ export class FeatureClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [FEATURE_SEARCH_EMBEDDING]: query },
-                },
-                // See config.semantic_min_score for rationale.
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [FEATURE_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: limit ?? SEARCH_SIZE_LIMIT,
                 min_score: this.config.semantic_min_score,
               },
             },

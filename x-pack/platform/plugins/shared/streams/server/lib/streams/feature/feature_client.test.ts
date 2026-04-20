@@ -516,7 +516,7 @@ describe('FeatureClient', () => {
       await client.findFeatures('logs.test', 'http', { searchMode: 'semantic' });
 
       const args = storageClient.search.mock.calls[0][0];
-      expect(args.retriever?.standard).toBeDefined();
+      expect(args.retriever?.linear).toBeDefined();
       expect(JSON.stringify(args.retriever)).toContain(FEATURE_SEARCH_EMBEDDING);
     });
 
