@@ -496,7 +496,7 @@ export const getXyVisualization = ({
         .unsubscribe();
     } else {
       const palette = paletteService.get(
-        dataLayer.palette?.name || getDefaultPalette(layer.seriesType)
+        dataLayer.palette?.name || getDefaultPalette(dataLayer.seriesType)
       );
       colors = palette.getCategoricalColors(10, dataLayer.palette?.params);
     }
