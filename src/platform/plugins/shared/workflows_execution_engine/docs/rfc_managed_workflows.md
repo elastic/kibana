@@ -141,9 +141,14 @@ These are capabilities that interact with or are prerequisites for managed workf
 
    The first delivery should at minimum be designed to not preclude these approaches.
 
-3. <a id="id-uniqueness"></a>**How is workflow ID uniqueness enforced?**
-   Managed workflow IDs are caller-provided (R16) and must be globally unique — no collisions between managed workflows from different plugins, or between managed and user-defined workflows. Without this, existing APIs (get, execute, clone) become ambiguous. An option:
-   - **Reserved prefix** — managed workflow IDs use a prefix (e.g., `system:`) that `createWorkflow` rejects for user workflows. Strongest guarantee but adds a naming constraint.
+3. <a id="id-uniqueness"></a>**How to prevent ID collisions between managed and user-defined workflows?**
+   ID uniqueness is key for lifecycle management and for keeping existing APIs working with minimum changes. If a user-defined workflow can have the same ID as a managed one, every API (get, execute, clone, delete) needs additional logic to disambiguate. Three approaches:
+
+   - **Reserved prefix** (e.g., `system:`) — `createWorkflow` rejects user-defined workflows with the reserved prefix. All existing APIs remain unchanged — IDs are globally unique by construction, so get-by-ID, execute-by-ID, etc. just work. The prefix is not used to determine whether a workflow is managed (the `managed` flag or separate index handles that), it only guarantees collision-free coexistence.
+   - **Dedicated endpoints** — Separate API routes for managed workflows (e.g., `/api/workflows/system/...`). Avoids ID collisions by routing, but duplicates the API surface and requires consumers to know which endpoint to call.
+   - **Flag on every API call** — A parameter (e.g., `managed=true`) on each request to scope the lookup. Avoids ID collisions at query time, but adds friction to every API call and is easy to forget.
+
+   The simplest approach is the reserved prefix — it keeps the API surface unchanged for users while guaranteeing no collisions. Human-readable, caller-provided custom IDs are already supported by the platform; managed workflows use this existing capability with the added prefix convention.
 
 4. **Should conditions gate registration?**
    E.g., a workflow registers only if tier is Enterprise, deployment type is Serverless, or a feature flag is enabled. KDKHD proposed `shouldInstallWorkflow({ spaceId, ...ctx })` as a general-purpose hook.
