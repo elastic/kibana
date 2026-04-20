@@ -70,11 +70,12 @@ function createApiClient(kibanaUrl, username, password, connectorId) {
       return req('POST', `${basePath}/api/agent_builder/converse`, body);
     },
 
-    async extractMemories(message, method, convId) {
+    async extractMemories(message, method, convId, timestamp) {
       const body = { message };
       if (method) body.method = method;
       // Don't pass connector_id — let the API fall back to kibana.yml config
       if (convId) body.conversation_id = convId;
+      if (timestamp) body.timestamp = timestamp;
       return req('POST', `${basePath}/internal/agent_builder/memory/extract`, body);
     },
 
@@ -84,6 +85,10 @@ function createApiClient(kibanaUrl, username, password, connectorId) {
 
     async listMemories() {
       return req('GET', `${basePath}/internal/agent_builder/memory`);
+    },
+
+    async getConversation(conversationId) {
+      return req('GET', `${basePath}/internal/agent_builder/conversations/${conversationId}`);
     },
   };
 }
@@ -181,15 +186,16 @@ async function feedSessions(api, feedMode, sessions, options = {}) {
     chunkSize = 5000,
     delayMs = 500,
     concurrency = 1,
+    timestamps,
     logger = console,
   } = options;
 
   let totalMemories = 0;
   let totalCalls = 0;
 
-  const extract = async (message, convId) => {
+  const extract = async (message, convId, timestamp) => {
     try {
-      const result = await api.extractMemories(message, method, convId);
+      const result = await api.extractMemories(message, method, convId, timestamp);
       totalMemories += result.created ?? 0;
       totalCalls++;
     } catch (err) {
@@ -229,8 +235,9 @@ async function feedSessions(api, feedMode, sessions, options = {}) {
           .join('\n');
         if (!sessionText.trim()) continue;
         const idx = si;
+        const ts = timestamps?.[si];
         tasks.push(async () => {
-          await extract(sessionText, `${conversationIdPrefix}-session-${idx}`);
+          await extract(sessionText, `${conversationIdPrefix}-session-${idx}`, ts);
           logger.log(`    ✓ session ${idx + 1}/${sessions.length} (${totalMemories} memories total)`);
         });
       }
@@ -243,6 +250,7 @@ async function feedSessions(api, feedMode, sessions, options = {}) {
       const tasks = [];
       for (let si = 0; si < sessions.length; si++) {
         const session = sessions[si];
+        const ts = timestamps?.[si];
         for (let ti = 0; ti < session.length; ti += 2) {
           const userTurn = session[ti];
           const assistantTurn = session[ti + 1];
@@ -253,7 +261,7 @@ async function feedSessions(api, feedMode, sessions, options = {}) {
           if (!turnText.trim()) continue;
           const convId = `${conversationIdPrefix}-s${si}-t${ti}`;
           tasks.push(async () => {
-            await extract(turnText, convId);
+            await extract(turnText, convId, ts);
             turnCount++;
           });
         }

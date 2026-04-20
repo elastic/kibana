@@ -26,6 +26,11 @@ import {
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import {
+  getInjectedMemoriesByKey,
+  getRetrievalDurationMsByKey,
+  startMemoryTracking,
+} from '../services/memory/hooks/before_agent_hook';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import type { AgentExecutionService } from '../services/execution';
@@ -356,6 +361,8 @@ export function registerChatRoutes({
           abortController.abort();
         });
 
+        const corrId = startMemoryTracking();
+
         const chatEvents$ = await executeAgent({
           payload,
           request,
@@ -373,6 +380,8 @@ export function registerChatRoutes({
           (e): e is ConversationUpdatedEvent | ConversationCreatedEvent =>
             isConversationUpdatedEvent(e) || isConversationCreatedEvent(e)
         )!;
+        const memories = getInjectedMemoriesByKey(corrId);
+        const retrievalMs = getRetrievalDurationMsByKey(corrId);
         return response.ok<ChatResponse>({
           body: {
             conversation_id: convId,
@@ -382,6 +391,8 @@ export function registerChatRoutes({
               ...round.response,
               prompts: round.pending_prompts,
             },
+            ...(memories.length > 0 ? { injected_memories: memories } : {}),
+            ...(retrievalMs > 0 ? { memory_retrieval_duration_ms: retrievalMs } : {}),
           },
         });
       })

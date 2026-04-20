@@ -30,6 +30,8 @@ export interface CandidatePipelineContext {
   space: string;
   userName: string;
   userId?: string;
+  /** Override created_at on all memories produced by this pipeline run (ISO 8601). */
+  timestamp?: string;
 }
 
 /** Deps needed by the candidate pipeline */
@@ -142,6 +144,7 @@ export class CandidatePipeline {
             space: context.space,
             user_name: context.userName,
             ...(context.userId ? { user_id: context.userId } : {}),
+            ...(context.timestamp ? { created_at: context.timestamp } : {}),
           };
 
           if (dedupResult.disposition === 'derived') {

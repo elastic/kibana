@@ -12,7 +12,7 @@ import { memoryTools } from '@kbn/agent-builder-common';
 import type { AgentBuilderConfig } from '../../../config';
 import type { InternalSetupServices, InternalStartServices } from '../../types';
 import { runRetrieval } from '../retrieval/run_retrieval';
-import { formatMemoryInjection } from './before_agent_hook';
+import { formatMemoryInjection, appendInjectedMemories } from './before_agent_hook';
 import type { MemoryNode } from '@kbn/agent-builder-common';
 
 interface AutoRetrievalDeps {
@@ -199,6 +199,17 @@ export const registerMemoryAutoRetrievalHook = (
             seen.add(m.id);
             return true;
           });
+
+          // Track auto-retrieved memories in the per-request store
+          appendInjectedMemories(
+            context.request,
+            dedupedMemories.map((m) => ({
+              id: m.id,
+              type: m.type,
+              summary: m.summary,
+              created_at: m.created_at,
+            }))
+          );
 
           const memoriesText = formatMemoryInjection(
             dedupedMemories.map((m) => ({ node: m, score: m.confidence }))

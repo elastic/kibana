@@ -35,6 +35,13 @@ export interface ChatRequestBodyPayload {
   _execution_mode?: 'local' | 'task_manager';
 }
 
+export interface ChatResponseInjectedMemory {
+  id: string;
+  type: string;
+  summary: string;
+  created_at: string;
+}
+
 export type ChatResponse = Omit<
   ConversationRound,
   'id' | 'input' | 'pending_prompts' | 'response' | 'state'
@@ -44,4 +51,6 @@ export type ChatResponse = Omit<
   response: Partial<AssistantResponse> & {
     prompts?: PromptRequest[];
   };
+  injected_memories?: ChatResponseInjectedMemory[];
+  memory_retrieval_duration_ms?: number;
 };

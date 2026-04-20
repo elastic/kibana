@@ -15,6 +15,7 @@ import type { MemoryService } from '../memory_service';
 import { ActiveMemorySet } from '../active_memory_set';
 import { createGraphTraversalService } from '../graph/graph_traversal';
 import { runRetrieval } from '../retrieval/run_retrieval';
+import { appendInjectedMemories } from '../hooks/before_agent_hook';
 
 /** Tool ID for the memory remember tool. */
 export const MEMORY_REMEMBER_TOOL_ID = 'memory.remember';
@@ -208,6 +209,8 @@ export const createRememberTool = ({
           // Sort by timestamp so the timeline makes sense
           nearby.sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0));
 
+          appendInjectedMemories(context.request, nearby);
+
           return {
             results: [
               {
@@ -268,6 +271,8 @@ export const createRememberTool = ({
           created_at: anchorMemory.created_at,
         });
         processHits(afterRes.hits.hits as any[]);
+
+        appendInjectedMemories(context.request, nearby);
 
         return {
           results: [
@@ -412,6 +417,12 @@ export const createRememberTool = ({
         relation: link ? link.type : 'related_to',
       };
     });
+
+    // Track all memories surfaced by this tool call
+    appendInjectedMemories(context.request, [
+      { id: memory.id, type: memory.type, summary: memory.summary, created_at: memory.created_at },
+      ...neighbors.map((n) => ({ id: n.id, type: n.type, summary: n.summary, created_at: n.created_at })),
+    ]);
 
     return {
       results: [

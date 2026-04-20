@@ -20,7 +20,8 @@
  *   --method           Extraction method: llm, cognitive, chunking, turn (default: turn)
  *   --delay            Delay between API calls in ms (default: 2000)
  *   --max-sessions     Max sessions per question (default: all)
- *   --output           Output file (default: longmemeval_results.json)
+ *   --output           Output file (default: longmemeval_results_<timestamp>.json)
+ *   --concurrency      Parallel extract requests (default: 10, use 1 for sequential)
  *   --skip-feeding     Skip feeding, go straight to questions
  *   --no-cleanup       Don't wipe memories between questions
  */
@@ -47,6 +48,7 @@ const FEED_MODE = getArg(args, 'feed-mode', 'per-session');
 const DELAY_MS = parseInt(getArg(args, 'delay', '2000'), 10);
 const MAX_SESSIONS = getArg(args, 'max-sessions', 'all');
 const OUTPUT_FILE = getArg(args, 'output', `longmemeval_results_${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+const CONCURRENCY = parseInt(getArg(args, 'concurrency', '1'), 10);
 const SKIP_FEEDING = hasFlag(args, 'skip-feeding');
 const NO_CLEANUP = hasFlag(args, 'no-cleanup');
 
@@ -83,6 +85,17 @@ function sessionToText(session) {
     .join('\n');
 }
 
+/**
+ * Convert LongMemEval date format "2023/05/20 (Sat) 02:21" to ISO 8601.
+ */
+function parseHaystackDate(dateStr) {
+  if (!dateStr) return undefined;
+  const match = dateStr.match(/^(\d{4})\/(\d{2})\/(\d{2})\s+\(\w+\)\s+(\d{2}):(\d{2})$/);
+  if (!match) return undefined;
+  const [, year, month, day, hour, minute] = match;
+  return `${year}-${month}-${day}T${hour}:${minute}:00.000Z`;
+}
+
 async function main() {
   console.log('=== LongMemEval Memory Benchmark ===\n');
 
@@ -110,8 +123,10 @@ async function main() {
     total++;
     const catName = item.question_type;
     const sessions = item.haystack_sessions;
+    const dates = item.haystack_dates || [];
     const maxSess = MAX_SESSIONS === 'all' ? sessions.length : parseInt(MAX_SESSIONS, 10);
     const sessionsToFeed = sessions.slice(0, maxSess);
+    const datesToFeed = dates.slice(0, maxSess).map(parseHaystackDate);
 
     console.log(`\n--- Q${total}/${selected.length} [${catName}] ${item.question_id} ---`);
     console.log(`  Sessions: ${sessionsToFeed.length}, Question: ${item.question}`);
@@ -131,7 +146,8 @@ async function main() {
         method: EXTRACTION_METHOD,
         conversationIdPrefix: `longmemeval-${item.question_id}`,
         delayMs: Math.min(DELAY_MS, 500),
-        concurrency: 10,
+        concurrency: CONCURRENCY,
+        timestamps: datesToFeed,
         logger: console,
       });
       await new Promise((r) => setTimeout(r, 2000));
@@ -139,10 +155,42 @@ async function main() {
 
     // Step 3: Ask question in a fresh conversation
     let predicted = '';
+    let toolCallCount = 0;
+    let memoryToolCalls = 0;
+    let injectedMemoryCount = 0;
+    let injectedMemoryTokens = 0;
+    let retrievalMs = 0;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let llmCalls = 0;
     try {
-      const result = await api.converse(item.question, null);
+      const questionDate = item.question_date;
+      const questionWithDate = questionDate
+        ? `Today is ${questionDate}. ${item.question}`
+        : item.question;
+      const result = await api.converse(questionWithDate, null);
       predicted = result.response?.message || '';
+
+      // Count tool calls from steps
+      const steps = result.steps || [];
+      toolCallCount = steps.filter((s) => s.type === 'tool_call').length;
+      memoryToolCalls = steps.filter((s) => s.type === 'tool_call' && s.tool_id?.startsWith('memory.')).length;
+
+      // Injected memories from beforeAgent hook
+      const memories = result.injected_memories || [];
+      injectedMemoryCount = memories.length;
+      injectedMemoryTokens = memories.reduce((sum, m) => sum + Math.ceil((m.summary || '').length / 4), 0);
+      retrievalMs = result.memory_retrieval_duration_ms || 0;
+
+      // Extract model usage stats
+      if (result.model_usage) {
+        inputTokens = result.model_usage.input_tokens || 0;
+        outputTokens = result.model_usage.output_tokens || 0;
+        llmCalls = result.model_usage.llm_calls || 0;
+      }
+
       console.log(`  Pred: ${predicted.slice(0, 120)}${predicted.length > 120 ? '...' : ''}`);
+      console.log(`  Stats: ${injectedMemoryCount} memories (~${injectedMemoryTokens} tokens, retrieval ${retrievalMs}ms), ${toolCallCount} tool calls (${memoryToolCalls} memory), ${inputTokens}/${outputTokens} in/out tokens, ${llmCalls} LLM calls`);
     } catch (err) {
       console.log(`  ✗ Error: ${err.message.slice(0, 80)}`);
     }
@@ -163,6 +211,14 @@ async function main() {
       question: item.question, gold_answer: item.answer,
       predicted_answer: predicted, score,
       sessions_fed: sessionsToFeed.length,
+      injected_memories: injectedMemoryCount,
+      injected_memory_tokens: injectedMemoryTokens,
+      memory_retrieval_ms: retrievalMs,
+      tool_calls: toolCallCount,
+      memory_tool_calls: memoryToolCalls,
+      input_tokens: inputTokens,
+      output_tokens: outputTokens,
+      llm_calls: llmCalls,
     });
 
     await new Promise((r) => setTimeout(r, DELAY_MS));

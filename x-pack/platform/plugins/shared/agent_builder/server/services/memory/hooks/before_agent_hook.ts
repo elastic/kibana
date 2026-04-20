@@ -9,6 +9,7 @@ import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { HookHandlerResult } from '@kbn/agent-builder-server';
 import type { BeforeAgentHookContext } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { MemoryNode } from '@kbn/agent-builder-common';
 import type { InternalSetupServices, InternalStartServices } from '../../types';
 import { getCurrentSpaceId } from '../../../utils/spaces';
@@ -19,6 +20,91 @@ import type { AgentBuilderConfig } from '../../../config';
 import { getTokenBudgetForStage } from '../retrieval/retrieval_service';
 import { runRetrieval } from '../retrieval/run_retrieval';
 import { getMemoryPreloader } from '../preload/memory_preloader';
+
+export interface InjectedMemory {
+  id: string;
+  type: string;
+  summary: string;
+  created_at: string;
+}
+
+/**
+ * Global store for injected memories, keyed by a correlation ID.
+ * The route handler allocates an ID, registers it, and the hooks/tools
+ * write to the currently active correlation ID.
+ */
+let activeCorrelationId: string | undefined;
+let nextCorrelationId = 0;
+
+const injectedMemoriesStore = new Map<string, InjectedMemory[]>();
+const retrievalDurationStore = new Map<string, number>();
+
+const cleanupAfterMs = 5 * 60 * 1000;
+const scheduleCleanup = (key: string) => {
+  setTimeout(() => {
+    injectedMemoriesStore.delete(key);
+    retrievalDurationStore.delete(key);
+  }, cleanupAfterMs).unref();
+};
+
+/**
+ * Start a new memory tracking session. Returns a correlation ID.
+ * All subsequent appendInjectedMemories calls will write to this ID
+ * until a new session starts.
+ */
+export const startMemoryTracking = (): string => {
+  const id = String(++nextCorrelationId);
+  activeCorrelationId = id;
+  return id;
+};
+
+/**
+ * Retrieve the list of memories by correlation key.
+ */
+export const getInjectedMemoriesByKey = (key: string): InjectedMemory[] => {
+  return injectedMemoriesStore.get(key) ?? [];
+};
+
+/**
+ * Retrieve the list of memories that were injected into the agent prompt
+ * for the given request (across all injection sources: round-start, auto-retrieval, remember tool).
+ */
+export const getInjectedMemories = (request: KibanaRequest): InjectedMemory[] => {
+  return injectedMemoriesStore.get(request.id) ?? [];
+};
+
+/**
+ * Append memories to the injected memories list.
+ * Uses the active correlation ID set by startMemoryTracking().
+ * Falls back to request.id if no active session.
+ */
+export const appendInjectedMemories = (request: KibanaRequest, memories: InjectedMemory[]): void => {
+  const key = activeCorrelationId ?? request.id;
+  const existing = injectedMemoriesStore.get(key) ?? [];
+  const seen = new Set(existing.map((m) => m.id));
+  const deduped = memories.filter((m) => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+  injectedMemoriesStore.set(key, [...existing, ...deduped]);
+  scheduleCleanup(key);
+};
+
+/**
+ * Retrieve the duration (ms) of the blocking pre-round memory retrieval
+ * by correlation key.
+ */
+export const getRetrievalDurationMsByKey = (key: string): number => {
+  return retrievalDurationStore.get(key) ?? 0;
+};
+
+/**
+ * Retrieve the duration (ms) of the blocking pre-round memory retrieval.
+ */
+export const getRetrievalDurationMs = (request: KibanaRequest): number => {
+  return retrievalDurationStore.get(request.id) ?? 0;
+};
 
 /**
  * Deps needed to register the before-agent memory injection hook.
@@ -272,6 +358,20 @@ export const runMemoryBeforeAgentHook = async (
   logger.info(
     `memory.beforeAgent: injected ${scoredNodes.length} memories into message (total ${totalDuration}ms, space=${space})`
   );
+
+  // Store injected memories and retrieval duration for the response
+  const corrKey = activeCorrelationId ?? context.request.id;
+  injectedMemoriesStore.set(
+    corrKey,
+    scoredNodes.map(({ node }) => ({
+      id: node.id,
+      type: node.type,
+      summary: node.summary,
+      created_at: node.created_at,
+    }))
+  );
+  retrievalDurationStore.set(corrKey, totalDuration);
+  scheduleCleanup(corrKey);
 
   // Inject memory context by prepending to the user message.
   // The agent sees both the memory context and the original message.

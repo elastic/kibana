@@ -130,6 +130,7 @@ export const runAfterRoundExtractionPipeline = async (
         roundId: context.roundId,
         space: context.space,
         userName: 'user', // actual user is embedded in the scoped memory client
+        timestamp: context.round.started_at,
       },
       context.reinforcementSignals
     );

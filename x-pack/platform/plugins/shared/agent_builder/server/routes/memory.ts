@@ -645,6 +645,11 @@ export function registerMemoryRoutes({
               meta: { description: 'Optional conversation ID to associate memories with.' },
             })
           ),
+          timestamp: schema.maybe(
+            schema.string({
+              meta: { description: 'Optional ISO 8601 timestamp for created_at on extracted memories. Defaults to now.' },
+            })
+          ),
         }),
       },
       options: { access: 'internal' },
@@ -655,12 +660,13 @@ export function registerMemoryRoutes({
       const memoryClient = await services.memory.getScopedClient({ request });
       const space = getCurrentSpaceId({ request, spaces: services.spaces });
 
-      const { message, method: methodOverride, connector_id: connectorId, conversation_id: conversationId } =
+      const { message, method: methodOverride, connector_id: connectorId, conversation_id: conversationId, timestamp } =
         request.body as {
           message: string;
           method?: string;
           connector_id?: string;
           conversation_id?: string;
+          timestamp?: string;
         };
 
       const extractionLog = logger.get('memory.extract-api');
@@ -730,6 +736,7 @@ export function registerMemoryRoutes({
             roundId: 'extract-api',
             space,
             userName: 'extract-api',
+            timestamp,
           },
           []
         );

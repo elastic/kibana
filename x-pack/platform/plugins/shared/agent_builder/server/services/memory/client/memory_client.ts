@@ -179,6 +179,7 @@ class MemoryClientImpl implements MemoryClient {
 
   async create(req: MemoryCreateRequest): Promise<MemoryNode> {
     const now = new Date().toISOString();
+    const timestamp = req.created_at ?? now;
     const id = uuidv4();
 
     const conversationId = req.source_refs?.[0]?.conversation_id;
@@ -195,13 +196,13 @@ class MemoryClientImpl implements MemoryClient {
       full_semantic: req.full,
       confidence: req.confidence,
       salience: req.salience ?? 0.5,
-      recency: now,
+      recency: timestamp,
       utility: req.utility ?? 0.5,
       stability: req.stability ?? 0.1,
       access_count: 0,
       reinforcement_score: 0,
       status: req.status ?? 'candidate',
-      created_at: now,
+      created_at: timestamp,
       updated_at: now,
       links: req.links ? linksToStorage(req.links) : [],
       source_refs: req.source_refs ? sourceRefsToStorage(req.source_refs) : [],
@@ -287,35 +288,38 @@ class MemoryClientImpl implements MemoryClient {
 
     const now = new Date().toISOString();
     const operations: Array<{ index: { document: MemoryProperties; _id?: string } }> = reqs.map(
-      (req) => ({
-        index: {
-          _id: uuidv4(),
-          document: {
-            space: this.space,
-            user_id: this.userId,
-            user_name: this.userName,
-            conversation_id: req.source_refs?.[0]?.conversation_id,
-            type: req.type,
-            subtype: req.subtype,
-            summary: req.summary,
-            full: req.full,
-            full_semantic: req.full,
-            confidence: req.confidence,
-            salience: req.salience ?? 0.5,
-            recency: now,
-            utility: req.utility ?? 0.5,
-            stability: req.stability ?? 0.1,
-            access_count: 0,
-            reinforcement_score: 0,
-            status: req.status ?? 'candidate',
-            created_at: now,
-            updated_at: now,
-            links: req.links ? linksToStorage(req.links) : [],
-            source_refs: req.source_refs ? sourceRefsToStorage(req.source_refs) : [],
-            params: req.params,
+      (req) => {
+        const timestamp = req.created_at ?? now;
+        return {
+          index: {
+            _id: uuidv4(),
+            document: {
+              space: this.space,
+              user_id: this.userId,
+              user_name: this.userName,
+              conversation_id: req.source_refs?.[0]?.conversation_id,
+              type: req.type,
+              subtype: req.subtype,
+              summary: req.summary,
+              full: req.full,
+              full_semantic: req.full,
+              confidence: req.confidence,
+              salience: req.salience ?? 0.5,
+              recency: timestamp,
+              utility: req.utility ?? 0.5,
+              stability: req.stability ?? 0.1,
+              access_count: 0,
+              reinforcement_score: 0,
+              status: req.status ?? 'candidate',
+              created_at: timestamp,
+              updated_at: now,
+              links: req.links ? linksToStorage(req.links) : [],
+              source_refs: req.source_refs ? sourceRefsToStorage(req.source_refs) : [],
+              params: req.params,
+            },
           },
-        },
-      })
+        };
+      }
     );
 
     const ids = operations.map((op) => op.index._id!);
