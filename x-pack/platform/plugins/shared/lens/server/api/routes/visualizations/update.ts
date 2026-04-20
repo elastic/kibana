@@ -9,6 +9,7 @@ import { boomify, isBoom } from '@hapi/boom';
 
 import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 
 import {
   LENS_VIS_API_PATH,
@@ -111,6 +112,14 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       } catch (error) {
         if (isBoom(error) && error.output.statusCode === 404) {
           createdNew = true;
+        }
+      }
+
+      if (createdNew) {
+        try {
+          asCodeIdSchema.validate(req.params.id);
+        } catch (error) {
+          return res.badRequest({ body: { message: error.message } });
         }
       }
 
