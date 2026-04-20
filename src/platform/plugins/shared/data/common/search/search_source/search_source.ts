@@ -1045,7 +1045,9 @@ export class SearchSource {
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const sortValues = Array.isArray(sort) ? sort : sort ? [sort] : [];
     const filtersInMustClause = sortValues.some(
-      (srt) => typeof srt === 'object' && srt !== null && Object.hasOwn(srt, '_score')
+      (srt) =>
+        srt === '_score' ||
+        (typeof srt === 'object' && srt !== null && Object.hasOwn(srt, '_score'))
     );
     const overwriteTimezone = this.getField('timezone');
     const esQueryConfigs = {
