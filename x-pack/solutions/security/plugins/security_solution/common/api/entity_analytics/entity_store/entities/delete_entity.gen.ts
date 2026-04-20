@@ -35,5 +35,8 @@ export type DeleteSingleEntityRequestBodyInput = z.input<typeof DeleteSingleEnti
 
 export type DeleteSingleEntityResponse = z.infer<typeof DeleteSingleEntityResponse>;
 export const DeleteSingleEntityResponse = z.object({
+  /**
+   * Whether the entity was successfully deleted.
+   */
   deleted: z.boolean().optional(),
 });
