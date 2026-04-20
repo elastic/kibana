@@ -224,8 +224,8 @@ export function ESQLEditor({
         setCurrentAttributes?.(attrs);
         setErrors([]);
         updateSuggestion?.(attrs);
+        suppressNextChartLoadGridRefreshRef.current = true;
       }
-      suppressNextChartLoadGridRefreshRef.current = true;
       prevQuery.current = q;
       setSubmittedQuery(q);
       setIsVisualizationLoading(false);
