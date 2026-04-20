@@ -292,7 +292,7 @@ function buildCheckResponse({
     const evidenceRows = redFindings.flatMap((r) =>
       r.findings
         .filter((f) => f.evidence && f.evidence.values.length > 0)
-        .flatMap((f) => f.evidence!.values.map((row) => [r.requirement, r.name, ...row]))
+        .flatMap((f) => f.evidence?.values.map((row) => [r.requirement, r.name, ...row]) ?? [])
     );
     if (evidenceRows.length > 0) {
       const firstEvidence = redFindings[0]?.findings.find((f) => f.evidence);

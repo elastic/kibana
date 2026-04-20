@@ -131,14 +131,14 @@ const fetchFieldsByIndex = async (
       const presentEverywhere = typeEntries.some((entry) => !entry?.indices);
       if (presentEverywhere) {
         for (const set of byIndex.values()) set.add(fieldName);
-        continue;
-      }
-      for (const entry of typeEntries) {
-        const entryIndices = entry?.indices ?? [];
-        const arr = Array.isArray(entryIndices) ? entryIndices : [entryIndices];
-        for (const idx of arr) {
-          const set = byIndex.get(idx);
-          if (set) set.add(fieldName);
+      } else {
+        for (const entry of typeEntries) {
+          const entryIndices = entry?.indices ?? [];
+          const arr = Array.isArray(entryIndices) ? entryIndices : [entryIndices];
+          for (const idx of arr) {
+            const set = byIndex.get(idx);
+            if (set) set.add(fieldName);
+          }
         }
       }
     }

@@ -52,13 +52,15 @@ describe('PCI compliance requirement builders', () => {
 
     it('uses ?_tstart / ?_tend placeholders in every violation query', () => {
       for (const def of Object.values(PCI_REQUIREMENTS)) {
-        if (!def.buildViolationEsql) continue;
-        const esql = def.buildViolationEsql(indexPattern);
-        expect(esql).toContain('?_tstart');
-        expect(esql).toContain('?_tend');
-        expect(esql).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
-        expect(esql).not.toMatch(/\$\{[^}]+\}/);
-        expect(esql).toContain(`FROM ${indexPattern}`);
+        const builder = def.buildViolationEsql;
+        if (builder) {
+          const esql = builder(indexPattern);
+          expect(esql).toContain('?_tstart');
+          expect(esql).toContain('?_tend');
+          expect(esql).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+          expect(esql).not.toMatch(/\$\{[^}]+\}/);
+          expect(esql).toContain(`FROM ${indexPattern}`);
+        }
       }
     });
 

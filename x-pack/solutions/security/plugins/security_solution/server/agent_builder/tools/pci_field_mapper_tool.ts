@@ -204,16 +204,17 @@ export const pciFieldMapperTool = (
       }> = [];
 
       for (const field of nonEcsFields) {
-        if (isSensitiveField(field)) continue;
-        for (const ecsTarget of ecsMissing) {
-          const match = matchFieldToEcs(field, ecsTarget);
-          if (match && match.score >= 0.5) {
-            mappings.push({
-              sourceField: field,
-              suggestedEcsField: ecsTarget,
-              confidence: match.score,
-              reason: match.reason,
-            });
+        if (!isSensitiveField(field)) {
+          for (const ecsTarget of ecsMissing) {
+            const match = matchFieldToEcs(field, ecsTarget);
+            if (match && match.score >= 0.5) {
+              mappings.push({
+                sourceField: field,
+                suggestedEcsField: ecsTarget,
+                confidence: match.score,
+                reason: match.reason,
+              });
+            }
           }
         }
       }
