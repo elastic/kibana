@@ -23,10 +23,14 @@ import { AppMenuPopoverActionButtons } from './components/app_menu_popover_actio
 import type {
   AppMenuConfig,
   AppMenuItemCommon,
+  AppMenuItemType,
   AppMenuPopoverItem,
   AppMenuPrimaryActionItem,
 } from './types';
 import { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+
+const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
+  [...items].sort((a, b) => a.order - b.order);
 
 /**
  * Calculate how many items can be displayed.
@@ -67,8 +71,8 @@ export const getShouldOverflow = ({
 /**
  * Split the items into displayed and overflow based on the configuration.
  */
-export const getAppMenuItems = ({ config }: { config: AppMenuConfig }) => {
-  if (!config.items) {
+export const getAppMenuItems = ({ config }: { config?: AppMenuConfig }) => {
+  if (!config || !config.items) {
     return {
       displayedItems: [],
       overflowItems: [],
@@ -79,7 +83,7 @@ export const getAppMenuItems = ({ config }: { config: AppMenuConfig }) => {
   const displayedItemsAllowedAmount = getDisplayedItemsAllowedAmount(config);
   const shouldOverflow = getShouldOverflow({ config, displayedItemsAllowedAmount });
 
-  const sortedItems = [...config.items].sort((a, b) => a.order - b.order);
+  const sortedItems = sortByOrder(config.items);
   const nonOverflowItems = sortedItems.filter((item) => !item.overflow);
 
   if (!shouldOverflow) {
@@ -100,6 +104,13 @@ export const getAppMenuItems = ({ config }: { config: AppMenuConfig }) => {
     shouldOverflow: overflowItems.length > 0,
   };
 };
+
+export const processStaticItems = (staticItems?: AppMenuItemType[]): AppMenuItemType[] =>
+  sortByOrder(staticItems ?? []).map(({ separator, ...item }, index) => ({
+    ...item,
+    overflow: true,
+    ...(index === 0 ? { separator: 'above' as const } : {}),
+  }));
 
 export const isDisabled = (disableButton: AppMenuItemCommon['disableButton']) =>
   Boolean(isFunction(disableButton) ? disableButton() : disableButton);
@@ -258,6 +269,7 @@ export const getPopoverActionItems = ({
  */
 export const getPopoverPanels = ({
   items,
+  staticItems,
   primaryActionItem,
   startPanelId = 0,
   rootPanelWidth = DEFAULT_POPOVER_WIDTH,
@@ -267,6 +279,7 @@ export const getPopoverPanels = ({
   anchorDomElement,
 }: {
   items: AppMenuPopoverItem[];
+  staticItems?: AppMenuPopoverItem[];
   primaryActionItem?: AppMenuPrimaryActionItem;
   startPanelId?: number;
   rootPanelWidth?: number;
@@ -356,6 +369,29 @@ export const getPopoverPanels = ({
     parentPopoverTestId: rootPopoverTestId,
     parentPopoverWidth: rootPanelWidth,
   });
+
+  /**
+   * Static items are appended to the main panel after the sorted regular items,
+   * preserving their own order without being re-sorted with regular items.
+   */
+  if (staticItems && staticItems.length > 0) {
+    const staticPanelId = -1;
+    processItems({
+      itemsToProcess: staticItems,
+      panelId: staticPanelId,
+    });
+
+    const staticPanel = panels.find((panel) => panel.id === staticPanelId);
+    const mainPanel = panels.find((panel) => panel.id === startPanelId);
+
+    if (staticPanel && mainPanel) {
+      mainPanel.items = [
+        ...(mainPanel.items as EuiContextMenuPanelItemDescriptor[]),
+        ...(staticPanel.items as EuiContextMenuPanelItemDescriptor[]),
+      ];
+      panels.splice(panels.indexOf(staticPanel), 1);
+    }
+  }
 
   /**
    * Action items are only added to the main panel and only in lower breakpoints (below "m").

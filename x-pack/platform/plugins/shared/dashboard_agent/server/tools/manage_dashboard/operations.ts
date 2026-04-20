@@ -16,7 +16,6 @@ import type {
 import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
 import {
   appendPanelsToDashboard,
   findPanelById,
@@ -368,10 +367,12 @@ const materializeResolvedVisualizationPanels = ({
 
     successfulPanels.push({
       request,
-      panel: toEmbeddablePanel({
-        ...resolvedPanel.visContent,
+      panel: {
+        id: uuidv4(),
+        type: resolvedPanel.visContent.type,
+        config: resolvedPanel.visContent.config,
         grid: request.panelInput.grid,
-      }),
+      },
     });
   }
 
@@ -416,11 +417,12 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = toEmbeddablePanel({
+        const markdownPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: operation.markdownContent },
           grid: operation.grid,
-        });
+          id: uuidv4(),
+        };
         nextDashboardData = appendPanelsToDashboard({
           dashboardData: nextDashboardData,
           panelsToAdd: [markdownPanel],
@@ -511,10 +513,10 @@ export const executeDashboardOperations = async ({
             dashboardData: nextDashboardData,
             panelId: panelInput.panelId,
             transformPanel: (panel) => ({
-              ...toEmbeddablePanel({
+              ...{
                 ...panel,
                 ...resolvedPanel.visContent,
-              }),
+              },
             }),
           });
 

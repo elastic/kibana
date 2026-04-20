@@ -30,6 +30,10 @@ export const extractIsPrivileged = (entity: LeadEntity): boolean => {
   return attrs?.privileged === true;
 };
 
+/** Capitalises the entity type for use in human-readable descriptions (e.g. "host" → "Host"). */
+export const entityTypeLabel = (entity: LeadEntity): string =>
+  entity.type.charAt(0).toUpperCase() + entity.type.slice(1);
+
 /** Groups entities by their type field. */
 export const groupEntitiesByType = (entities: LeadEntity[]): Map<string, LeadEntity[]> =>
   entities.reduce((map, e) => {

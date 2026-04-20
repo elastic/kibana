@@ -79,10 +79,12 @@ export const AlertHeaderTitle = memo(() => {
 
   return (
     <>
-      <DocumentSeverity hit={hit} />
-      <EuiSpacer size="m" />
-      <Timestamp hit={hit} />
-      <EuiSpacer size="xs" />
+      <DocumentSeverity hit={hit}>
+        <EuiSpacer size="m" />
+      </DocumentSeverity>
+      <Timestamp hit={hit}>
+        <EuiSpacer size="xs" />
+      </Timestamp>
       <Title hit={hit} hideLink={isRulePreview} />
       <EuiSpacer size="m" />
       <EuiFlexGroup

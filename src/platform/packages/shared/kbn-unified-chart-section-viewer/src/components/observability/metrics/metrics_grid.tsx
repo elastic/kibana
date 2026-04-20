@@ -107,13 +107,9 @@ export const MetricsGrid = ({
     <FieldsMetadataProvider fields={metricItems} services={services}>
       <A11yGridWrapper
         ref={gridRef}
-        aria-label={i18n.translate('metricsExperience.gridAriaLabel', {
-          defaultMessage: 'Metric charts grid. Use arrow keys to navigate.',
-        })}
         gridRows={gridRows}
         gridColumns={gridColumns}
         onKeyDown={handleKeyDown}
-        data-test-subj="unifiedMetricsExperienceGrid"
       >
         <EuiFlexGrid
           gutterSize="s"
@@ -224,20 +220,26 @@ const ChartItem = React.memo(
       [euiTheme.colors.vis]
     );
 
+    const applicableDimensions = useMemo(
+      () =>
+        dimensions.filter((dim) => metricItem.dimensionFields.some((df) => df.name === dim.name)),
+      [dimensions, metricItem.dimensionFields]
+    );
+
     const esqlQuery = useMemo(() => {
       const fieldType = firstNonNullable(metricItem.fieldTypes);
       const isSupported = fieldType !== 'unsigned_long';
       return isSupported
         ? createESQLQuery({
             metricItem,
-            splitAccessors: dimensions.map((dim) => dim.name),
+            splitAccessors: applicableDimensions.map((dim) => dim.name),
             whereStatements,
           })
         : '';
-    }, [metricItem, dimensions, whereStatements]);
+    }, [metricItem, applicableDimensions, whereStatements]);
 
     const color = useMemo(() => colorPalette[index % colorPalette.length], [index, colorPalette]);
-    const chartLayers = useChartLayers({ dimensions, metricItem, color });
+    const chartLayers = useChartLayers({ dimensions: applicableDimensions, metricItem, color });
     const handleViewDetailsCallback = useCallback(
       () => onViewDetails(index, esqlQuery, metricItem),
       [index, esqlQuery, metricItem, onViewDetails]
@@ -351,15 +353,12 @@ const A11yGridCell = React.forwardRef(
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
         css={css`
-          outline: none,
-          cursor: pointer,
-          ${
-            isFocused && {
-              boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
-              borderRadius: euiTheme.border.radius.medium,
-            }
-          }
-
+          outline: none;
+          cursor: pointer;
+          ${isFocused && {
+            boxShadow: `0 0 ${euiTheme.focus.width} ${euiTheme.colors.primary}`,
+            borderRadius: euiTheme.border.radius.medium,
+          }}
         `}
       >
         {children}
