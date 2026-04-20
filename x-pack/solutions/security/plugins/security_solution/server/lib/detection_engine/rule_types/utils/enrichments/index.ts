@@ -130,15 +130,15 @@ export const enrichEvents: EnrichEvents = async <T extends DetectionAlertLatest>
       ? await resolveV2Enrichments(enrichmentOpts)
       : await resolveLegacyEnrichments(enrichmentOpts);
 
-    const results = await Promise.allSettled(enrichments);
+    const allEnrichmentsResults = await Promise.allSettled(enrichments);
 
-    const fulfilledResults = results.flatMap((result) =>
-      result.status === 'fulfilled' ? [result.value] : []
-    );
+    const allFulfilledEnrichmentsResults: EventsMapByEnrichments[] = allEnrichmentsResults
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
 
     return applyEnrichmentsToEvents({
       events,
-      enrichmentsList: fulfilledResults,
+      enrichmentsList: allFulfilledEnrichmentsResults,
       logger,
     });
   } catch (error) {
