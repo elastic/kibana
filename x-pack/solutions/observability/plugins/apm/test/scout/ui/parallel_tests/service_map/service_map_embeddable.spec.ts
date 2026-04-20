@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { tags, EuiComboBoxWrapper } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../../fixtures';
 
@@ -48,6 +48,10 @@ test.describe(
         await pageObjects.dashboard.openNewDashboard();
       });
 
+      await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_1 hour');
+      });
+
       await test.step('open add panel flyout', async () => {
         await pageObjects.dashboard.openAddPanelFlyout();
       });
@@ -65,20 +69,23 @@ test.describe(
           page.getByRole('heading', { name: 'Add service map panel', level: 2 })
         ).toBeVisible();
 
-        // Select service name from dropdown (services load automatically)
-        const serviceNameComboBox = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
-        await serviceNameComboBox.click();
-        const serviceOption = page.getByRole('option', { name: SERVICE_MAP_TEST_SERVICE });
-        await serviceOption.waitFor({ state: 'visible', timeout: 15000 });
-        await serviceOption.click();
+        // Select service name from dropdown
+        const serviceNameComboBox = new EuiComboBoxWrapper(
+          page,
+          'apmServiceMapEditorServiceNameComboBox'
+        );
+        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE);
 
-        // Select environment from dropdown (environments load automatically)
-        const environmentComboBox = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
-        await environmentComboBox.click();
+        // Select environment from dropdown (has a default value so manually type and select)
+        const environmentInput = page.testSubj
+          .locator('apmServiceMapEditorEnvironmentComboBox')
+          .locator('[data-test-subj="comboBoxInput"]');
+        await environmentInput.click();
+        await page.keyboard.type(SERVICE_MAP_TEST_ENVIRONMENT_STAGING, { delay: 50 });
         const environmentOption = page.getByRole('option', {
           name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING,
         });
-        await environmentOption.waitFor({ state: 'visible' });
+        await environmentOption.waitFor({ state: 'visible', timeout: 10000 });
         await environmentOption.click();
 
         // Add KQL filter matching the staging transaction
@@ -120,9 +127,6 @@ test.describe(
 
         const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
         await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
-
-        // Dismiss popover by clicking on the service node again (toggle behavior)
-        await serviceNode.click();
       });
 
       await test.step('maximize the Service map panel', async () => {
@@ -145,6 +149,13 @@ test.describe(
 
         expect(horizontalFill).toBeGreaterThan(0.95);
         expect(verticalFill).toBeGreaterThan(0.9);
+      });
+
+      await test.step('disable custom time range and verify badge disappears', async () => {
+        await pageObjects.dashboard.openCustomizePanel();
+        await pageObjects.dashboard.disableCustomTimeRange();
+        await pageObjects.dashboard.saveCustomizePanel();
+        await pageObjects.dashboard.expectTimeRangeBadgeMissing();
       });
 
       await test.step('click View full service map button and verify navigation', async () => {

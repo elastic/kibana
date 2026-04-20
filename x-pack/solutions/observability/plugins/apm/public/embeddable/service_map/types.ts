@@ -6,12 +6,10 @@
  */
 /* istanbul ignore file */
 
-import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
 import type { Environment } from '../../../common/environment_rt';
 
-export interface ServiceMapEmbeddableState extends SerializedTitles {
-  rangeFrom?: string;
-  rangeTo?: string;
+export interface ServiceMapEmbeddableState extends SerializedTitles, SerializedTimeRange {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
