@@ -33,6 +33,7 @@
     "@kbn/product-doc-base-plugin",
     "@kbn/ai-assistant-common",
     "@kbn/ai-agent-confirmation-modal",
+    "@kbn/anonymization-common",
     "@kbn/anonymization-ui",
     "@kbn/product-doc-common",
     "@kbn/react-kibana-mount",
@@ -42,7 +43,6 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-plugin",
     "@kbn/zod",
-    "@kbn/shared-ux-ai-components"
   ],
   "exclude": ["target/**/*"]
 }

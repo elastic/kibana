@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-test
 dependsOn:
   - '@kbn/kbn-client'
+  - '@kbn/dev-validation-runner'
   - '@kbn/std'
   - '@kbn/test-es-server'
   - '@kbn/tooling-log'
@@ -43,6 +44,7 @@ dependsOn:
   - '@kbn/babel-preset'
   - '@kbn/dot-text'
   - '@kbn/apm-utils'
+  - '@kbn/moon'
 tags:
   - shared-common
   - package

@@ -22,10 +22,10 @@ import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
 export const EPMApp: React.FunctionComponent = () => {
-  const { automaticImport, automaticImportVTwo } = useStartServices();
+  const { automaticImport } = useStartServices();
   useBreadcrumbs('integrations');
 
-  const hasCreateIntegration = !!(automaticImportVTwo || automaticImport);
+  const hasCreateIntegration = Boolean(automaticImport);
 
   return (
     <Routes>

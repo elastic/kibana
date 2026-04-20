@@ -19,12 +19,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/260441
-  describe.skip('Conversation Flow', function () {
+  describe('Conversation Flow', function () {
     let llmProxy: LlmProxy;
 
     before(async () => {
       llmProxy = await createLlmProxy(log);
+      await deleteConnectors(supertest);
       await createConnector(llmProxy, supertest);
     });
 
@@ -38,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         wait_for_completion: true,
         refresh: true,
         conflicts: 'proceed',
+        ignore_unavailable: true,
       });
     });
 
@@ -50,11 +51,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Assert the text input box renders
       await testSubjects.existOrFail('agentBuilderConversationInputForm');
 
-      // Assert the default agent is "Elastic AI Agent"
-      await testSubjects.existOrFail('agentBuilderAgentSelectorButton');
-      const agentButton = await testSubjects.find('agentBuilderAgentSelectorButton');
-      const agentText = await agentButton.getVisibleText();
-      expect(agentText).to.contain('Elastic AI Agent');
+      // Assert the default agent is "Elastic AI Agent" — the agent name is fetched
+      // asynchronously after the button renders, so retry until the label is populated
+      await retry.try(async () => {
+        const agentButton = await testSubjects.find('agentBuilderAgentSelectorButton');
+        const agentText = await agentButton.getVisibleText();
+        expect(agentText).to.contain('Elastic AI Agent');
+      });
     });
 
     it('sends a message with tool call and receives response with thinking', async () => {

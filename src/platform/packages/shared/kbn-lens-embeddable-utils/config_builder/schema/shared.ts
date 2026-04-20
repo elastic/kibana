@@ -98,9 +98,9 @@ export const ignoringGlobalFiltersSchemaRaw = {
 
 export const layerSettingsSchema = {
   /**
-   * The sampling factor for the dataset.
+   * The sampling factor for the data source.
    *
-   * Determines the proportion of the dataset to be used. Must be a number between 0 and 1 (inclusive).
+   * Determines the proportion of the data source to be used. Must be a number between 0 and 1 (inclusive).
    * - 0: No sampling (use none of the data)
    * - 1: Full sampling (use all data)
    * - Any value between 0 and 1: Use that proportion of the data

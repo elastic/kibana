@@ -74,6 +74,17 @@ describe('processResolutionCsvUpload', () => {
       expect(result.items[0].error).toContain('Invalid entity type');
     });
 
+    it('should reject generic entity type', async () => {
+      const csv = 'type,user.email,resolved_to\ngeneric,thing@example.com,target:1';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.total).toBe(1);
+      expect(result.failed).toBe(1);
+      expect(result.items[0].status).toBe('error');
+      expect(result.items[0].error).toContain('Invalid entity type');
+      expect(result.items[0].error).toContain('generic');
+    });
+
     it('should reject missing resolved_to', async () => {
       const csv = 'type,user.email,resolved_to\nuser,test@example.com,';
       const result = await processResolutionCsvUpload(createMockStream(csv), deps());
@@ -102,7 +113,6 @@ describe('processResolutionCsvUpload', () => {
         'user,alice,target:1',
         'host,server1,target:1',
         'service,api,target:1',
-        'generic,thing,target:1',
       ].join('\n');
 
       const result = await processResolutionCsvUpload(createMockStream(csv), deps());
@@ -247,6 +257,38 @@ describe('processResolutionCsvUpload', () => {
         ]),
         source: ['entity.id'],
       });
+    });
+
+    it('should error when matched entities exceed the limit', async () => {
+      // Generate enough entities to exceed the 1000 limit
+      const pageSize = 100;
+      const pages = 11; // 11 pages × 100 = 1100 entities > 1000 limit
+
+      mockCrudClient.listEntities.mockReset();
+      // Target lookup
+      mockCrudClient.listEntities.mockResolvedValueOnce({
+        entities: [createMockEntity('target:golden')],
+        nextSearchAfter: undefined,
+      });
+      // Entity matching pages
+      for (let page = 0; page < pages; page++) {
+        const entities = Array.from({ length: pageSize }, (_, i) =>
+          createMockEntity(`alias:${page * pageSize + i}`)
+        );
+        mockCrudClient.listEntities.mockResolvedValueOnce({
+          entities,
+          nextSearchAfter: [page + 1, 0],
+        });
+      }
+
+      const csv = 'type,user.email,resolved_to\nuser,common@test.com,target:golden';
+      const result = await processResolutionCsvUpload(createMockStream(csv), deps());
+
+      expect(result.failed).toBe(1);
+      expect(result.items[0].status).toBe('error');
+      expect(result.items[0].error).toContain('Matched more than 1000 entities');
+      expect(result.items[0].error).toContain('Narrow your identifying fields');
+      expect(mockResolutionClient.linkEntities).not.toHaveBeenCalled();
     });
 
     it('should handle pagination', async () => {

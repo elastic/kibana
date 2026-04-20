@@ -8,14 +8,12 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { RowControlColumn } from '@kbn/discover-utils';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { createDataProviders } from '../../../../../app/actions/add_to_timeline/data_provider';
-import {
-  SecurityAgentBuilderAttachments,
-  THREAT_HUNTING_AGENT_ID,
-} from '../../../../../../common/constants';
+import { SecurityAgentBuilderAttachments } from '../../../../../../common/constants';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useKibana } from '../../../../../common/lib/kibana/use_kibana';
 import { getEntityFields } from '../utils';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../constants';
 
@@ -37,16 +35,15 @@ interface UseLeadingControlColumnsArgs {
   investigateInTimeline: (args: {
     dataProviders: NonNullable<ReturnType<typeof createDataProviders>>;
   }) => void;
-  isAgentBuilderEnabled: boolean;
-  agentBuilder: AgentBuilderPluginStart | undefined;
 }
 
 export const useLeadingControlColumns = ({
   canUseTimeline,
   investigateInTimeline,
-  isAgentBuilderEnabled,
-  agentBuilder,
 }: UseLeadingControlColumnsArgs): RowControlColumn[] => {
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const { agentBuilder } = useKibana().services;
+
   return useMemo(() => {
     const columns: RowControlColumn[] = [];
 
@@ -98,7 +95,6 @@ export const useLeadingControlColumns = ({
               )}
               color="text"
               onClick={() => {
-                const attachmentId = `${SecurityAgentBuilderAttachments.entity}-${Date.now()}`;
                 agentBuilder.openChat({
                   autoSendInitialMessage: false,
                   newConversation: true,
@@ -111,7 +107,7 @@ export const useLeadingControlColumns = ({
                   ),
                   attachments: [
                     {
-                      id: attachmentId,
+                      id: `${SecurityAgentBuilderAttachments.entity}-${Date.now()}`,
                       type: SecurityAgentBuilderAttachments.entity,
                       data: {
                         identifierType: entityType,
@@ -121,7 +117,6 @@ export const useLeadingControlColumns = ({
                     },
                   ],
                   sessionTag: 'security',
-                  agentId: THREAT_HUNTING_AGENT_ID,
                 });
               }}
               data-test-subj="entity-analytics-home-ai-action-icon"

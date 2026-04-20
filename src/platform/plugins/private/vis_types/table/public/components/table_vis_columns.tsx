@@ -91,7 +91,7 @@ export const createGridColumns = (
                   onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false);
                   closeCellPopover?.();
                 }}
-                iconType="plusInCircle"
+                iconType="plusCircle"
               >
                 {filterForText}
               </Component>
@@ -126,7 +126,7 @@ export const createGridColumns = (
                   onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true);
                   closeCellPopover?.();
                 }}
-                iconType="minusInCircle"
+                iconType="minusCircle"
               >
                 {filterOutText}
               </Component>

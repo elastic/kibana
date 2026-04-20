@@ -16,6 +16,7 @@ import {
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
   EDIT_PACK_HEADER_BUTTON,
+  rowActionsMenuSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
 } from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
@@ -71,7 +72,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       const suffix = generateRandomStringName(1)[0];
       const savedQueryId = `Saved-Query-Id-${suffix}`;
       const savedQueryDescription = `Test saved query description ${suffix}`;
-      cy.contains('New live query').click();
+      cy.contains('Run query').click();
       selectAllAgents();
       inputQuery(BIG_QUERY);
       getAdvancedButton().click();
@@ -124,10 +125,17 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel('osquery-status-tab').click();
       cy.get('tbody > tr.euiTableRow').should('have.lengthOf', 2);
 
-      // save new query
+      // save new query from the detail page
       cy.contains('Exit full screen').should('not.exist');
-      cy.contains('Save for later').click();
-      cy.contains('Save query');
+      navigateTo('/app/osquery/live_queries');
+      cy.get('tbody tr', { timeout: 60000 })
+        .first()
+        .within(() => {
+          cy.get('[aria-label="Details"]').click();
+        });
+      cy.contains('Query results');
+      cy.getBySel('save-query-button').should('exist').click();
+      cy.getBySel('osquery-save-query-flyout').should('exist');
       cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
       cy.get('input[name="description"]').type(`${savedQueryDescription}{downArrow}{enter}`);
       cy.getBySel('savedQueryFlyoutSaveButton').click();
@@ -143,10 +151,11 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       submitQuery();
 
       // edit saved query
-      cy.contains('Saved queries').click();
+      navigateTo('/app/osquery/saved_queries');
       cy.contains(savedQueryId);
 
-      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get(rowActionsMenuSelector(savedQueryId)).click();
+      cy.contains('Edit query').click();
       cy.get('input[name="description"]').type(` Edited{downArrow}{enter}`);
 
       // Run in test configuration
@@ -175,7 +184,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
       // delete saved query
       cy.contains(savedQueryId);
-      cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
+      cy.get(rowActionsMenuSelector(savedQueryId)).click();
+      cy.contains('Edit query').click();
 
       deleteAndConfirm('query');
       cy.contains(savedQueryId).should('exist');
@@ -183,46 +193,13 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('checks that user cant add a saved query with an ID that already exists', () => {
-    const duplicateTestQueryId = 'duplicate-test-query';
-    let duplicateTestSavedQueryId: string;
+  // Removed: 'shows ID must be unique error'
+  // Migrated to Jest component test: public/form/query_id_field.test.tsx
+  // Phase 2 migration — ID uniqueness validation is a form-field-level assertion
 
-    before(() => {
-      loadSavedQuery({
-        id: duplicateTestQueryId,
-        query: 'select * from uptime;',
-        interval: '3600',
-      }).then((data) => {
-        duplicateTestSavedQueryId = data.saved_object_id;
-      });
-    });
-
-    after(() => {
-      cleanupSavedQuery(duplicateTestSavedQueryId);
-    });
-
-    it('shows ID must be unique error', () => {
-      cy.intercept('GET', '**/api/osquery/saved_queries**').as('savedQueriesLoaded');
-      cy.contains('Saved queries').click();
-      cy.wait('@savedQueriesLoaded');
-      cy.contains('Add saved query').click();
-      cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
-
-      cy.contains('ID must be unique').should('not.exist');
-      inputQuery('test');
-      cy.contains('Save query').click();
-      cy.contains('ID must be unique').should('exist');
-    });
-  });
-
-  it('checks default values on new saved query', () => {
-    cy.contains('Saved queries').click();
-    cy.contains('Add saved query').click();
-    // ADD MORE FIELDS HERE
-    cy.getBySel('resultsTypeField').within(() => {
-      cy.contains('Snapshot');
-    });
-  });
+  // Removed: 'checks default values on new saved query'
+  // Migrated to Jest component test: public/form/results_type_field.test.tsx
+  // Phase 2 migration — form field default values are UI-only assertions
 
   describe('prebuilt', () => {
     let packName: string;
@@ -259,14 +236,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cleanupSavedQuery(savedQueryId);
     });
 
-    it('checks result type on prebuilt saved query', () => {
-      // Navigate to page 2 where users_elastic is located
-      cy.getBySel('pagination-button-1').click();
-      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
-      cy.getBySel('resultsTypeField').within(() => {
-        cy.contains('Snapshot');
-      });
-    });
+    // Removed: 'checks result type on prebuilt saved query'
+    // Migrated to Jest component test: public/form/results_type_field.test.tsx
+    // Phase 2 migration — result type field rendering is a UI-only assertion
 
     it('user can run prebuilt saved query and add to case', () => {
       // Navigate to page 2 where users_elastic is located
@@ -283,7 +255,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     it('user can not delete prebuilt saved query but can delete normal saved query', () => {
       // Navigate to page 2 where users_elastic is located
       cy.getBySel('pagination-button-1').click();
-      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
+      cy.get(rowActionsMenuSelector('users_elastic')).click();
+      cy.contains('Edit query').click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 

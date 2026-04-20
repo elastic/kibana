@@ -5,27 +5,20 @@
  * 2.0.
  */
 
-export interface ThrottleFrequency {
-  type: 'throttle';
-  interval: string; // e.g. '1h', '30m', '5m'
-}
-
-export interface ImmediateFrequency {
-  type: 'immediate';
-}
-
-export type NotificationPolicyFrequency = ThrottleFrequency | ImmediateFrequency;
-
-export interface NotificationPolicyDestination {
-  type: 'workflow';
-  id: string;
-}
+import type {
+  GroupingMode,
+  NotificationPolicyDestination,
+  ThrottleStrategy,
+} from '@kbn/alerting-v2-schemas';
 
 export interface NotificationPolicyFormState {
   name: string;
   description: string;
+  tags: string[];
   matcher: string;
+  groupingMode: GroupingMode;
   groupBy: string[];
-  frequency: NotificationPolicyFrequency;
+  throttleStrategy: ThrottleStrategy;
+  throttleInterval: string;
   destinations: NotificationPolicyDestination[];
 }

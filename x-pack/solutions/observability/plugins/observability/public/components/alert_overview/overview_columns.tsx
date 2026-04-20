@@ -187,7 +187,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
                     'xpack.observability.columns.euiCallOut.multipleConditionsLabel',
                     { defaultMessage: 'Multiple conditions' }
                   )}
-                  iconType="alert"
+                  iconType="warning"
                 />
               )}
             </div>

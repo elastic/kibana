@@ -5,23 +5,26 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities/common.gen';
 import type { LeadEntity } from './types';
 
-const ENTITY_PAGE_SIZE = 1000;
+const MAX_CANDIDATE_ENTITIES = 500;
+
+/** Row shape returned by {@link EntityStoreCRUDClient.listEntities}. */
+type EntityStoreEntity = Awaited<
+  ReturnType<EntityStoreCRUDClient['listEntities']>
+>['entities'][number];
 
 /**
  * Convert an Entity Store V2 record into a LeadEntity, extracting the
  * convenience `type` and `name` fields from the nested `entity` object.
  * Falls back to `entity.id` (EUID) when `entity.name` is absent.
- *
- * Accepts `Record<string, unknown>` so it works with Entity types from
- * both the security_solution and entity_store plugins (structurally
- * equivalent but separate Zod-generated types).
  */
-export const entityRecordToLeadEntity = (record: Record<string, unknown>): LeadEntity => {
-  const entityField = record.entity as
+export const entityRecordToLeadEntity = (record: EntityStoreEntity): LeadEntity => {
+  const r = record as Record<string, unknown>;
+  const entityField = r.entity as
     | { name?: string; type?: string; id?: string; EngineMetadata?: { Type?: string } }
     | undefined;
   return {
@@ -32,27 +35,31 @@ export const entityRecordToLeadEntity = (record: Record<string, unknown>): LeadE
 };
 
 /**
- * Paginate through all entities in the V2 unified index via
- * `CRUDClient.listEntities()`, accumulating results across pages.
+ * Fetch the top candidate entities from the V2 unified index, sorted by
+ * risk score descending and capped at {@link MAX_CANDIDATE_ENTITIES}.
+ *
+ * Sorting and limiting are pushed to Elasticsearch via the CRUD client's
+ * page-mode query so we avoid fetching all entities into Kibana memory.
+ * Entities without a risk score sort last (ES `missing` default for desc).
  */
-export const fetchAllLeadEntities = async (
-  crudClient: EntityStoreCRUDClient
+export const fetchCandidateEntities = async (
+  crudClient: EntityStoreCRUDClient,
+  logger?: Logger
 ): Promise<LeadEntity[]> => {
-  const allEntities: LeadEntity[] = [];
-  let searchAfter: Array<string | number> | undefined;
+  const { entities, total } = await crudClient.listEntities({
+    sortField: 'entity.risk.calculated_score_norm',
+    sortOrder: 'desc',
+    perPage: MAX_CANDIDATE_ENTITIES,
+    page: 1,
+  });
 
-  do {
-    const { entities, nextSearchAfter } = await crudClient.listEntities({
-      size: ENTITY_PAGE_SIZE,
-      searchAfter,
-    });
+  const leadEntities = entities.map(entityRecordToLeadEntity);
 
-    for (const entity of entities) {
-      allEntities.push(entityRecordToLeadEntity(entity));
-    }
+  logger?.debug(
+    `[LeadGeneration] Entity selection: ${total ?? leadEntities.length} total -> ${
+      leadEntities.length
+    } candidates (cap ${MAX_CANDIDATE_ENTITIES})`
+  );
 
-    searchAfter = nextSearchAfter;
-  } while (searchAfter !== undefined);
-
-  return allEntities;
+  return leadEntities;
 };

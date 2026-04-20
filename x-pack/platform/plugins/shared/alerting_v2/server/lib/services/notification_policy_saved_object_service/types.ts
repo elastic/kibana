@@ -73,4 +73,5 @@ export interface NotificationPolicySavedObjectServiceContract {
     }>;
     total: number;
   }>;
+  getDistinctTags(params?: { search?: string }): Promise<string[]>;
 }

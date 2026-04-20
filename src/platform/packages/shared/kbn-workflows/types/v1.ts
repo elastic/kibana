@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
+import type { JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
@@ -119,6 +120,8 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
+  /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
+  dispatchEventId?: string;
 }
 
 export interface ProviderInput {
@@ -257,11 +260,28 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+// IDs must start and end with a lowercase alphanumeric character, contain only lowercase
+// alphanumeric chars and hyphens in the middle. Length is enforced separately via
+// WORKFLOW_ID_MIN_LENGTH (3) and WORKFLOW_ID_MAX_LENGTH (255).
+// This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
+// plain UUIDs, while rejecting leading/trailing separators, snake case and
+// special characters like spaces, dots, or '@'.
+//
+// NOTE: The regex intentionally allows 1-2 char IDs (the inner group is optional).
+// The 3-char minimum is enforced by WORKFLOW_ID_MIN_LENGTH at the Zod schema
+// level so that the pattern and length constraints remain independently testable.
+export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+export const WORKFLOW_ID_MAX_LENGTH = 255;
+export const WORKFLOW_ID_MIN_LENGTH = 3;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
-  id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
+  id: z
+    .string()
+    .min(WORKFLOW_ID_MIN_LENGTH)
+    .max(WORKFLOW_ID_MAX_LENGTH)
+    .regex(WORKFLOW_ID_PATTERN)
+    .optional(),
 });
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
@@ -356,7 +376,7 @@ export interface WorkflowListItemDto {
   enabled: boolean;
   definition: WorkflowYaml | null;
   createdAt: string;
-  history: WorkflowExecutionHistoryModel[];
+  history?: WorkflowExecutionHistoryModel[];
   tags?: string[];
   valid: boolean;
 }
@@ -396,7 +416,7 @@ export interface WorkflowStatsDto {
     enabled: number;
     disabled: number;
   };
-  executions: WorkflowExecutionsHistoryStats[];
+  executions?: WorkflowExecutionsHistoryStats[];
 }
 
 export interface WorkflowAggsDto {
@@ -452,6 +472,8 @@ export interface BaseConnectorContract {
   documentation?: string | null;
   /** API stability level derived from the OpenAPI `x-state` field */
   stability?: StepStabilityLevel;
+  /** Deprecation metadata for this step type. */
+  deprecation?: StepDeprecationInfo;
   examples?: ConnectorExamples;
   // Rich property handlers for completions, validation and decorations
   editorHandlers?: {
@@ -501,12 +523,16 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
-export interface StepPropertyHandler<T = unknown> {
+export interface StepPropertyHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /**
    * Entity selection configuration for the property.
    * Provides a unified interface for search, resolution, and decoration of entity references.
    */
-  selection?: PropertySelectionHandler<Exclude<T, undefined>>;
+  selection?: PropertySelectionHandler<Exclude<T, undefined>, TConfig, TInput>;
   /**
    * Connector ID selection configuration for the property.
    * Used to resolve connector IDs for custom steps.
@@ -516,19 +542,35 @@ export interface StepPropertyHandler<T = unknown> {
   connectorIdSelection?: ConnectorIdSelectionHandler;
 }
 
-export interface PropertySelectionHandler<T = unknown> {
+type DependsOnValuePath = `config.${string}` | `input.${string}`;
+export interface PropertySelectionHandler<
+  T = unknown,
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /**
+   * Dot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`
+   * and included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`.
+   */
+  dependsOnValues?: DependsOnValuePath[];
   /**
    * Search for options matching the input query.
    * Used by autocomplete dropdowns when the user types.
    */
-  search: (input: string, context: SelectionContext) => Promise<SelectionOption<T>[]>;
+  search: (
+    input: string,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T>[]>;
 
   /**
    * Resolve an entity by its value.
    * Used when loading existing values or when a value is pasted.
    * Returns null if the entity is not found.
    */
-  resolve: (value: T, context: SelectionContext) => Promise<SelectionOption<T> | null>;
+  resolve: (
+    value: T,
+    context: SelectionContext<TConfig, TInput>
+  ) => Promise<SelectionOption<T> | null>;
 
   /**
    * Get detailed information for the current value.
@@ -537,7 +579,7 @@ export interface PropertySelectionHandler<T = unknown> {
    */
   getDetails: (
     input: string,
-    context: SelectionContext,
+    context: SelectionContext<TConfig, TInput>,
     option: SelectionOption<T> | null
   ) => Promise<SelectionDetails>;
 }
@@ -565,13 +607,35 @@ export interface SelectionDetails {
   }>;
 }
 
-export interface SelectionContext {
+/**
+ * Structured values of the current step, split by scope.
+ *
+ * Built from scalar leaf properties in the YAML step definition.
+ * Intermediate map nodes that have no scalar value are **not** represented;
+ * a missing key means "not yet defined in the YAML", not "empty object".
+ */
+export interface StepSelectionValues<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
+  /** Root-level step properties (everything outside the `with` block). */
+  config: RecursivePartial<TConfig>;
+  /** Properties nested under the `with` block. */
+  input: RecursivePartial<TInput>;
+}
+
+export interface SelectionContext<
+  TConfig extends Record<string, unknown> = Record<string, unknown>,
+  TInput extends Record<string, unknown> = Record<string, unknown>
+> {
   /** The step type ID (e.g., "onechat.runAgent") */
   stepType: string;
   /** The property path ("config" or "input") */
   scope: 'config' | 'input';
   /** The property key (e.g., "agent_id") */
   propertyKey: string;
+  /** Sibling values of the current step, keyed by scope (only paths listed in `dependsOnValues` are populated). */
+  values: StepSelectionValues<TConfig, TInput>;
 }
 
 export interface ConnectorIdSelectionHandler {

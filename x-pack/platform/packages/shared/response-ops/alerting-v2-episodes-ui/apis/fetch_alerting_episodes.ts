@@ -8,17 +8,22 @@
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import {
-  ALERTING_EPISODES_PAGINATED_QUERY,
-  LAST_EPISODE_TIMESTAMP_VARIABLE,
-  PAGE_SIZE_VARIABLE,
-} from '../constants';
+  buildEpisodesQuery,
+  type AlertEpisode,
+  type EpisodesFilterState,
+  type EpisodesSortState,
+} from '../queries/episodes_query';
+import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertingEpisodesOptions {
-  abortSignal?: AbortSignal;
-  beforeTimestamp?: string | null;
   pageSize: number;
+  timeRange?: TimeRange | null;
+  filterState?: EpisodesFilterState;
+  sortState?: EpisodesSortState;
+  abortSignal?: AbortSignal;
   services: { expressions: ExpressionsStart };
 }
 
@@ -29,27 +34,32 @@ export interface FetchAlertingEpisodesOptions {
 export const fetchAlertingEpisodes = ({
   abortSignal,
   pageSize,
-  beforeTimestamp = null,
   services: { expressions },
-}: FetchAlertingEpisodesOptions) => {
-  // With ES|QL, we can only paginate using a @timestamp cursor, so we use the timestamp
-  // of the last episode from the previous page as the cursor for the next page.
-  // For the first page, we use null to disable the condition.
-  return executeEsqlQuery({
+  filterState,
+  sortState = { sortField: '@timestamp', sortDirection: 'desc' },
+  timeRange,
+}: FetchAlertingEpisodesOptions): Promise<AlertEpisode[]> => {
+  const query = buildEpisodesQuery(sortState, filterState);
+
+  const input: {
+    type: 'kibana_context';
+    esqlVariables: ESQLControlVariable[];
+    timeRange?: TimeRange;
+  } = {
+    type: 'kibana_context',
+    esqlVariables: [
+      { key: PAGE_SIZE_ESQL_VARIABLE, value: pageSize, type: ESQLVariableType.VALUES },
+    ],
+  };
+
+  if (timeRange) {
+    input.timeRange = timeRange;
+  }
+
+  return executeEsqlQuery<AlertEpisode>({
     expressions,
-    query: ALERTING_EPISODES_PAGINATED_QUERY,
-    input: {
-      type: 'kibana_context',
-      esqlVariables: [
-        {
-          key: LAST_EPISODE_TIMESTAMP_VARIABLE,
-          // null is not a valid type but works in practice
-          value: beforeTimestamp as ESQLControlVariable['value'],
-          type: ESQLVariableType.VALUES,
-        },
-        { key: PAGE_SIZE_VARIABLE, value: pageSize, type: ESQLVariableType.VALUES },
-      ] satisfies ESQLControlVariable[],
-    },
+    query: query.print('basic'),
+    input,
     abortSignal,
   });
 };

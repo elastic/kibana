@@ -32,7 +32,7 @@ export type GetEndpointSuggestionsRequestBody = z.infer<typeof GetEndpointSugges
 export const GetEndpointSuggestionsRequestBody = z.object({
   field: z.string().optional(),
   query: z.string().optional(),
-  filters: z.unknown(),
+  filters: z.array(z.object({})).max(50).optional(),
   fieldMeta: z.unknown(),
 });
 export type GetEndpointSuggestionsRequestBodyInput = z.input<

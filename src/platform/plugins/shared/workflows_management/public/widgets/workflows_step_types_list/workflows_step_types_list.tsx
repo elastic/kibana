@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Step } from '@kbn/workflows';
 import { collectAllSteps, getBuiltInStepDefinition } from '@kbn/workflows';
-import { getStepIconType } from '../../shared/ui/step_icons/get_step_icon_type';
+import { getBaseConnectorType } from '../../shared/ui/step_icons/get_base_connector_type';
+import { StepIcon } from '../../shared/ui/step_icons/step_icon';
 import { PopoverItems } from '../worflows_triggers_list/popover_items';
 
 interface WorkflowsStepTypesListProps {
@@ -73,28 +74,30 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
 
-  const uniqueStepTypes = useMemo(() => {
+  const uniqueBaseTypes = useMemo(() => {
     const allSteps = collectAllSteps(steps);
     const seen = new Set<string>();
-    return allSteps.filter((step) => {
-      if (seen.has(step.type)) {
-        return false;
+    const result: string[] = [];
+    for (const step of allSteps) {
+      const baseType = getBaseConnectorType(step.type);
+      if (!seen.has(baseType)) {
+        seen.add(baseType);
+        result.push(baseType);
       }
-      seen.add(step.type);
-      return true;
-    });
+    }
+    return result;
   }, [steps]);
 
   useLayoutEffect(() => {
     const container = containerRef.current;
-    if (!container || uniqueStepTypes.length === 0) {
+    if (!container || uniqueBaseTypes.length === 0) {
       return;
     }
 
     const update = () => {
       const width = container.getBoundingClientRect().width;
       if (width > 0) {
-        setVisibleCount(calculateVisibleIconsCount(width, uniqueStepTypes.length));
+        setVisibleCount(calculateVisibleIconsCount(width, uniqueBaseTypes.length));
       }
     };
 
@@ -106,15 +109,15 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
       cancelAnimationFrame(rafId);
       observer.disconnect();
     };
-  }, [uniqueStepTypes.length]);
+  }, [uniqueBaseTypes.length]);
 
-  if (uniqueStepTypes.length === 0) {
+  if (uniqueBaseTypes.length === 0) {
     return null;
   }
 
-  const displayCount = visibleCount ?? uniqueStepTypes.length;
-  const visibleItems = uniqueStepTypes.slice(0, displayCount);
-  const hasOverflow = displayCount < uniqueStepTypes.length;
+  const displayCount = visibleCount ?? uniqueBaseTypes.length;
+  const visibleItems = uniqueBaseTypes.slice(0, displayCount);
+  const hasOverflow = displayCount < uniqueBaseTypes.length;
 
   return (
     <div ref={containerRef} css={stepTypesListStyles.container}>
@@ -125,40 +128,41 @@ export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) =
         wrap={false}
         css={stepTypesListStyles.iconGroup}
       >
-        {visibleItems.map((step) => (
-          <EuiFlexItem grow={false} key={step.type}>
-            <EuiIcon
-              type={getStepIconType(step.type)}
+        {visibleItems.map((baseType) => (
+          <EuiFlexItem grow={false} key={baseType}>
+            <StepIcon
+              stepType={baseType}
+              executionStatus={undefined}
               size="m"
-              title={getStepTypeLabel(step.type)}
+              title={getStepTypeLabel(baseType)}
             />
           </EuiFlexItem>
         ))}
         {hasOverflow && (
           <EuiFlexItem grow={false}>
             <PopoverItems
-              items={uniqueStepTypes}
+              items={uniqueBaseTypes}
               popoverTitle={i18n.translate('workflows.stepTypesList.title', {
                 defaultMessage: 'Step types',
               })}
               popoverButtonTitle={
                 displayCount === 0
-                  ? uniqueStepTypes.length.toString()
-                  : `+${(uniqueStepTypes.length - displayCount).toString()}`
+                  ? uniqueBaseTypes.length.toString()
+                  : `+${(uniqueBaseTypes.length - displayCount).toString()}`
               }
               dataTestPrefix="stepTypes"
-              renderItem={(step, idx) => (
+              renderItem={(baseType, idx) => (
                 <EuiFlexGroup
-                  key={`${step.type}-${idx}`}
+                  key={`${baseType}-${idx}`}
                   alignItems="center"
                   gutterSize="s"
                   responsive={false}
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={getStepIconType(step.type)} size="s" aria-hidden={true} />
+                    <StepIcon stepType={baseType} executionStatus={undefined} size="s" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiText size="s">{getStepTypeLabel(step.type)}</EuiText>
+                    <EuiText size="s">{getStepTypeLabel(baseType)}</EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               )}

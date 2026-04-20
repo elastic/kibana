@@ -6,33 +6,23 @@
  */
 
 import expect from '@kbn/expect';
-import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
-  const endpointTestResources = getService('endpointTestResources');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/251545
-  describe.skip('When on the Trusted Apps list', function () {
+  describe('When on the Trusted Apps list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
-      indexedData = await endpointTestResources.loadEndpointData();
-      await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
-    after(async () => {
-      await endpointTestResources.unloadEndpointData(indexedData);
-    });
 
-    it('should not show page title if there is no trusted app', async () => {
-      await testSubjects.missingOrFail('header-page-title');
+    it('should show empty state if there is no trusted app', async () => {
+      await testSubjects.existOrFail('trustedAppsListPage-emptyState');
     });
 
     it('should be able to add a new trusted app and remove it', async () => {
@@ -52,11 +42,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
       await toasts.dismiss();
 
-      // Title is shown after adding an item
-      expect(await testSubjects.getVisibleText('header-page-title')).to.equal(
-        'Trusted applications'
-      );
-
       // Remove it
       await pageObjects.trustedApps.clickCardActionMenu();
       await testSubjects.click('trustedAppsListPage-card-cardDeleteAction');
@@ -64,8 +49,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.waitForDeleted('trustedAppsListPage-deleteModal-submitButton');
       // We only expect one trusted app to have been visible
       await testSubjects.missingOrFail('trustedAppsListPage-card');
-      // Header has gone because there is no trusted app
-      await testSubjects.missingOrFail('header-page-title');
+      // Empty state is shown because there is no trusted app
+      await testSubjects.existOrFail('trustedAppsListPage-emptyState');
     });
   });
 };

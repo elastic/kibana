@@ -8,7 +8,11 @@
  */
 
 import { fromTermsLensApiToLensState, fromTermsLensStateToAPI } from './top_values';
-import type { TermsIndexPatternColumn } from '@kbn/lens-common';
+import type {
+  PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 import type { LensApiTermsOperation } from '../../schema/bucket_ops';
 import { LENS_EMPTY_AS_NULL_DEFAULT_VALUE } from './utils';
 
@@ -103,7 +107,7 @@ describe('Top Values Transforms', () => {
         operation: 'terms',
         fields: ['status'],
         limit: 5,
-        rank_by: { type: 'column', metric: 0, direction: 'desc' },
+        rank_by: { type: 'metric', metric_index: 0, direction: 'desc' },
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
@@ -111,17 +115,104 @@ describe('Top Values Transforms', () => {
       expect(result.params.orderDirection).toBe('desc');
     });
 
+    it('should resolve a non-zero metric_index to the correct metric column', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: { type: 'metric', metric_index: 1, direction: 'asc' },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'column', columnId: 'metricCol2' });
+      expect(result.params.orderDirection).toBe('asc');
+    });
+
     it('should fallback to alphabetical order if metric column id is missing', () => {
       const input: LensApiTermsOperation = {
         operation: 'terms',
         fields: ['status'],
         limit: 5,
-        rank_by: { type: 'column', metric: 3, direction: 'desc' },
+        rank_by: { type: 'metric', metric_index: 3, direction: 'desc' },
       };
 
       const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
       expect(result.params.orderBy).toEqual({ type: 'alphabetical', fallback: true });
       expect(result.params.orderDirection).toBe('desc');
+    });
+
+    it('should handle custom rank_by with a basic operation', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: { type: 'custom', operation: 'average', field: 'score', direction: 'desc' },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('desc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'average',
+        sourceField: 'score',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+      });
+    });
+
+    it('should handle custom rank_by with percentile operation', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile',
+          field: 'latency',
+          direction: 'desc',
+          percentile: 90,
+        },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('desc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'percentile',
+        sourceField: 'latency',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+        params: { percentile: 90 },
+      });
+    });
+
+    it('should handle custom rank_by with percentile_rank operation', () => {
+      const input: LensApiTermsOperation = {
+        operation: 'terms',
+        fields: ['status'],
+        limit: 5,
+        rank_by: {
+          type: 'custom',
+          operation: 'percentile_rank',
+          field: 'latency',
+          direction: 'asc',
+          rank: 500,
+        },
+      };
+
+      const result = fromTermsLensApiToLensState(input, getMetricColumnIdByIndex);
+      expect(result.params.orderBy).toEqual({ type: 'custom' });
+      expect(result.params.orderDirection).toBe('asc');
+      expect(result.params.orderAgg).toEqual({
+        operationType: 'percentile_rank',
+        sourceField: 'latency',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+        params: { value: 500 },
+      });
     });
   });
 
@@ -245,7 +336,7 @@ describe('Top Values Transforms', () => {
       };
 
       const result = fromTermsLensStateToAPI(input, columns);
-      expect(result.rank_by).toEqual({ type: 'column', metric: 1, direction: 'desc' });
+      expect(result.rank_by).toEqual({ type: 'metric', metric_index: 1, direction: 'desc' });
     });
 
     it('should handle custom label', () => {
@@ -274,6 +365,108 @@ describe('Top Values Transforms', () => {
 
       const result = fromTermsLensStateToAPI(input, columns);
       expect(result.label).toBe('Custom Label');
+    });
+
+    it('should handle custom orderBy with a basic operation', () => {
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'desc',
+          orderAgg: {
+            operationType: 'average',
+            sourceField: 'score',
+            dataType: 'number',
+            isBucketed: false,
+            label: '',
+          },
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'average',
+        field: 'score',
+        direction: 'desc',
+      });
+    });
+
+    it('should handle custom orderBy with percentile operation', () => {
+      const percentileOrderAgg: PercentileIndexPatternColumn = {
+        operationType: 'percentile',
+        sourceField: 'latency',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+        params: { percentile: 90 },
+      };
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'desc',
+          orderAgg: percentileOrderAgg,
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'percentile',
+        field: 'latency',
+        direction: 'desc',
+        percentile: 90,
+      });
+    });
+
+    it('should handle custom orderBy with percentile_rank operation', () => {
+      const percentileRankOrderAgg: PercentileRanksIndexPatternColumn = {
+        operationType: 'percentile_rank',
+        sourceField: 'latency',
+        dataType: 'number',
+        isBucketed: false,
+        label: '',
+        params: { value: 500 },
+      };
+      const input: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'status',
+        customLabel: false,
+        label: 'Top 5 values for status',
+        isBucketed: true,
+        dataType: 'string',
+        params: {
+          size: 5,
+          orderBy: { type: 'custom' },
+          orderDirection: 'asc',
+          orderAgg: percentileRankOrderAgg,
+          parentFormat: { id: 'terms' },
+        },
+      };
+
+      const result = fromTermsLensStateToAPI(input, columns);
+      expect(result.rank_by).toEqual({
+        type: 'custom',
+        operation: 'percentile_rank',
+        field: 'latency',
+        direction: 'asc',
+        rank: 500,
+      });
     });
 
     it('should handle grouping other values', () => {

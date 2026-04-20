@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { WaffleStateNoESQL, WaffleStateESQL } from './waffle';
 import { waffleStateSchema } from './waffle';
 
@@ -16,9 +17,9 @@ describe('Waffle Schema', () => {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
-      dataset: {
-        type: 'dataView',
-        id: 'test-data-view',
+      data_source: {
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'test-data-view',
       },
     } satisfies Partial<WaffleStateNoESQL>;
 
@@ -36,7 +37,7 @@ describe('Waffle Schema', () => {
       const validated = waffleStateSchema.validate(input);
       expect(validated.type).toBe('waffle');
       expect(validated.metrics).toHaveLength(1);
-      expect(validated.metrics[0].operation).toBe('count');
+      expect(validated.metrics[0]).toHaveProperty('operation', 'count');
     });
 
     it('validates configuration with metrics and group_by', () => {
@@ -91,17 +92,19 @@ describe('Waffle Schema', () => {
           visibility: 'visible',
           size: 'm',
         },
-        values: {
-          visible: true,
-          mode: 'percentage',
-          percent_decimals: 1,
+        styling: {
+          values: {
+            visible: true,
+            mode: 'percentage',
+            percent_decimals: 1,
+          },
         },
       };
 
       const validated = waffleStateSchema.validate(input);
       expect(validated.title).toBe('Sales Waffle');
       expect(validated.legend?.values).toEqual(['absolute']);
-      expect(validated.values?.mode).toBe('percentage');
+      expect(validated.styling?.values?.mode).toBe('percentage');
     });
 
     it('validates multiple metrics without group_by', () => {
@@ -450,7 +453,7 @@ describe('Waffle Schema', () => {
       type: 'waffle',
       ignore_global_filters: false,
       sampling: 1,
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM my-index | STATS count() BY category',
       },
@@ -461,15 +464,14 @@ describe('Waffle Schema', () => {
         ...baseESQLWaffleConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
       };
 
       const validated = waffleStateSchema.validate(input);
-      expect(validated.dataset.type).toBe('esql');
-      expect(validated.metrics[0].operation).toBe('value');
+      expect(validated.data_source.type).toBe('esql');
+      expect(validated.metrics[0]).toHaveProperty('column', 'count');
     });
 
     it('validates ES|QL configuration with group_by', () => {
@@ -477,13 +479,11 @@ describe('Waffle Schema', () => {
         ...baseESQLWaffleConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
         ],
         group_by: [
           {
-            operation: 'value',
             column: 'category',
           },
         ],
@@ -501,11 +501,9 @@ describe('Waffle Schema', () => {
         ...baseESQLWaffleConfig,
         metrics: [
           {
-            operation: 'value',
             column: 'count',
           },
           {
-            operation: 'value',
             column: 'sum_sales',
           },
         ],

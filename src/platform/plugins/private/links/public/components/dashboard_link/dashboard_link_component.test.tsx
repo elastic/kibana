@@ -21,7 +21,7 @@ import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 function createMockLinksParent({
   initialQuery,
@@ -178,7 +178,7 @@ describe('Dashboard link component', () => {
       dashboardId: '456',
       time_range: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
-      query: initialQuery,
+      query: initialQuery as Query,
     });
   });
 
@@ -214,7 +214,7 @@ describe('Dashboard link component', () => {
     expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
       dashboardId: '456',
       filters: initialFilters,
-      query: initialQuery,
+      query: initialQuery as Query,
     });
   });
 

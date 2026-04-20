@@ -23,6 +23,7 @@ import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './prebuilt_ru
 import { useInvalidateFetchPrebuiltRulesInstallReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_install_review_query';
 import { useInvalidateFetchCoverageOverviewQuery } from './use_fetch_coverage_overview_query';
 import { useInvalidateFetchPrebuiltRuleBaseVersionQuery } from './prebuilt_rules/use_fetch_prebuilt_rule_base_version_query';
+import { useInvalidateFetchPrebuiltRulesDeprecationReviewQuery } from './prebuilt_rules/use_fetch_prebuilt_rules_deprecation_review_query';
 
 export const BULK_ACTION_MUTATION_KEY = ['POST', DETECTION_ENGINE_RULES_BULK_ACTION];
 
@@ -43,6 +44,8 @@ export const useBulkActionMutation = (
     useInvalidateFetchPrebuiltRulesUpgradeReviewQuery();
   const invalidateFetchCoverageOverviewQuery = useInvalidateFetchCoverageOverviewQuery();
   const invalidateFetchPrebuiltRuleBaseVerison = useInvalidateFetchPrebuiltRuleBaseVersionQuery();
+  const invalidateFetchPrebuiltRulesDeprecationReview =
+    useInvalidateFetchPrebuiltRulesDeprecationReviewQuery();
   const updateRulesCache = useUpdateRulesCache();
 
   return useMutation<
@@ -87,6 +90,7 @@ export const useBulkActionMutation = (
           invalidateFetchPrebuiltRulesUpgradeReviewQuery();
           invalidateFetchCoverageOverviewQuery();
           invalidateFetchPrebuiltRuleBaseVerison();
+          invalidateFetchPrebuiltRulesDeprecationReview();
           break;
         case BulkActionTypeEnum.duplicate:
           invalidateFindRulesQuery();

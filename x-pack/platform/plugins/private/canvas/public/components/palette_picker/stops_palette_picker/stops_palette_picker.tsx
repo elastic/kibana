@@ -134,7 +134,7 @@ export const StopsPalettePicker: FC<StopsPalettePickerProps> = (props) => {
       <EuiSpacer size="s" />
 
       <EuiButtonEmpty
-        iconType="plusInCircle"
+        iconType="plusCircle"
         color="primary"
         aria-label={strings.getAddColorStopLabel()}
         size="xs"

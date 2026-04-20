@@ -32,7 +32,7 @@ export interface UsePreviewChartResult {
 }
 
 export interface UsePreviewChartParams {
-  /** The base ES|QL query (without condition) */
+  /** The full ES|QL query */
   query: string;
   /** The time field name for the date histogram */
   timeField: string;

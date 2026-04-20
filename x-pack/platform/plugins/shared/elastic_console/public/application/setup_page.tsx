@@ -7,6 +7,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
@@ -42,7 +43,7 @@ export const SetupPage: React.FC = () => {
     setError(null);
 
     try {
-      const data = await services.http.post<SetupResponse>('/internal/elastic_console/setup');
+      const data = await services.http.post<SetupResponse>('/internal/elastic_ramen/setup');
       setSetupData(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create setup credentials');
@@ -53,8 +54,26 @@ export const SetupPage: React.FC = () => {
 
   return (
     <EuiPageTemplate>
-      <EuiPageTemplate.Header pageTitle="Elastic Console Setup" />
+      <EuiPageTemplate.Header
+        pageTitle={<>{'🍜 Elastic Ramen Setup'}</>}
+        rightSideItems={[<EuiBetaBadge label="Experimental" color="hollow" />]}
+      />
       <EuiPageTemplate.Section>
+        <EuiCallOut
+          title="Experimental feature — proceed with caution"
+          color="warning"
+          iconType="beaker"
+        >
+          <p>
+            Elastic Ramen is an <strong>experimental</strong> feature under active development. It
+            may change, break, or be removed without notice. Use at your own risk — it can expose AI
+            connectors to external tools and may produce unexpected behavior. Do not rely on it for
+            production workloads.
+          </p>
+        </EuiCallOut>
+
+        <EuiSpacer />
+
         <EuiText>
           <p>
             Generate connection credentials for external tools to use Kibana-configured AI
@@ -126,7 +145,7 @@ export const SetupPage: React.FC = () => {
                       },
                     },
                     options: {
-                      baseURL: `${setupData.kibanaUrl}/internal/elastic_console/v1`,
+                      baseURL: `${setupData.kibanaUrl}/internal/elastic_ramen/v1`,
                       apiKey: 'ignored',
                       headers: {
                         Authorization: `ApiKey ${setupData.apiKeyEncoded}`,

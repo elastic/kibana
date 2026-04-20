@@ -138,7 +138,7 @@ describe('GCPCloudConnectorForm', () => {
                 {
                   name: 'gcp_credentials_cloud_connector_id',
                   type: 'text',
-                  title: 'Cloud Connector ID',
+                  title: 'Federated Identity ID',
                   multi: false,
                   required: false,
                   show_user: true,

@@ -11,69 +11,69 @@ actions:
       required: true
   # Add some connector API examples
   - target: "$.paths['/api/actions/connector/{id}']['post']"
-    description: "Add examples to create connector API"
+    description: 'Add examples to create connector API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               createEmailConnectorRequest:
-                $ref: "../examples/create_email_connector_request.yaml"
+                $ref: '../examples/create_email_connector_request.yaml'
               createIndexConnectorRequest:
-                $ref: "../examples/create_index_connector_request.yaml"
+                $ref: '../examples/create_index_connector_request.yaml'
               createWebhookConnectorRequest:
-                $ref: "../examples/create_webhook_connector_request.yaml"
+                $ref: '../examples/create_webhook_connector_request.yaml'
               createXmattersConnectorRequest:
-                $ref: "../examples/create_xmatters_connector_request.yaml"
+                $ref: '../examples/create_xmatters_connector_request.yaml'
       responses:
         200:
           content:
             application/json:
               examples:
                 createEmailConnectorResponse:
-                  $ref: "../examples/create_email_connector_response.yaml"
+                  $ref: '../examples/create_email_connector_response.yaml'
                 createIndexConnectorResponse:
-                  $ref: "../examples/create_index_connector_response.yaml"
+                  $ref: '../examples/create_index_connector_response.yaml'
                 createWebhookConnectorResponse:
-                  $ref: "../examples/create_webhook_connector_response.yaml"
+                  $ref: '../examples/create_webhook_connector_response.yaml'
                 createXmattersConnectorResponse:
-                  $ref: "../examples/get_connector_response.yaml"
+                  $ref: '../examples/get_connector_response.yaml'
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
-    description: "Add examples to run connector API"
+    description: 'Add examples to run connector API'
     update:
       requestBody:
         content:
           application/json:
             examples:
               runIndexConnectorRequest:
-                $ref: "../examples/run_index_connector_request.yaml"
+                $ref: '../examples/run_index_connector_request.yaml'
               runJiraConnectorRequest:
-                $ref: "../examples/run_jira_connector_request.yaml"
+                $ref: '../examples/run_jira_connector_request.yaml'
               runServerLogConnectorRequest:
-                $ref: "../examples/run_servicenow_itom_connector_request.yaml"
+                $ref: '../examples/run_servicenow_itom_connector_request.yaml'
               runSlackConnectorRequest:
-                $ref: "../examples/run_slack_api_connector_request.yaml"
+                $ref: '../examples/run_slack_api_connector_request.yaml'
               runSwimlaneConnectorRequest:
-                $ref: "../examples/run_swimlane_connector_request.yaml"
+                $ref: '../examples/run_swimlane_connector_request.yaml'
       responses:
         200:
           content:
             application/json:
               examples:
                 runIndexConnectorResponse:
-                  $ref: "../examples/run_index_connector_response.yaml"
+                  $ref: '../examples/run_index_connector_response.yaml'
                 runJiraConnectorResponse:
-                  $ref: "../examples/run_jira_connector_response.yaml"
+                  $ref: '../examples/run_jira_connector_response.yaml'
                 runServerLogConnectorResponse:
-                  $ref: "../examples/run_server_log_connector_response.yaml"
+                  $ref: '../examples/run_server_log_connector_response.yaml'
                 runServiceNowITOMConnectorResponse:
-                  $ref: "../examples/run_servicenow_itom_connector_response.yaml"
+                  $ref: '../examples/run_servicenow_itom_connector_response.yaml'
                 runSlackConnectorResponse:
-                  $ref: "../examples/run_slack_api_connector_response.yaml"
+                  $ref: '../examples/run_slack_api_connector_response.yaml'
                 runSwimlaneConnectorResponse:
-                  $ref: "../examples/run_swimlane_connector_response.yaml"
+                  $ref: '../examples/run_swimlane_connector_response.yaml'
   - target: "$.paths['/api/actions/connector/{id}']['get']"
-    description: "Add examples to get connector API"
+    description: 'Add examples to get connector API'
     update:
       responses:
         200:
@@ -83,7 +83,7 @@ actions:
                 getConnectorResponse:
                   $ref: '../examples/get_connector_response.yaml'
   - target: "$.paths['/api/actions/connector_types']['get']"
-    description: "Add examples to get connector types API"
+    description: 'Add examples to get connector types API'
     update:
       responses:
         200:
@@ -94,7 +94,7 @@ actions:
                 getConnectorTypesServerlessResponse:
                   $ref: '../examples/get_connector_types_generativeai_response.yaml'
   - target: "$.paths['/api/actions/connectors']['get']"
-    description: "Add examples to get all connectors API"
+    description: 'Add examples to get all connectors API'
     update:
       responses:
         200:
@@ -105,7 +105,7 @@ actions:
                 getConnectorsResponse:
                   $ref: '../examples/get_connectors_response.yaml'
   - target: "$.paths['/api/actions/connector/{id}']['put']"
-    description: "Add examples to update connector API"
+    description: 'Add examples to update connector API'
     update:
       requestBody:
         content:
@@ -115,20 +115,20 @@ actions:
                 $ref: '../examples/update_index_connector_request.yaml'
   # Remove the automated empty connector config and secrets
   - target: "$.paths['/api/actions/connector/{id}']['post'].requestBody.content.*.schema.properties.config"
-    description: "Remove config in create connector API"
+    description: 'Remove config in create connector API'
     remove: true
   - target: "$.paths['/api/actions/connector/{id}']['put'].requestBody.content.*.schema.properties.config"
-    description: "Remove config in update connector API"
+    description: 'Remove config in update connector API'
     remove: true
   - target: "$.paths['/api/actions/connector/{id}']['post'].requestBody.content.*.schema.properties.secrets"
-    description: "Remove secrets in create connector API"
+    description: 'Remove secrets in create connector API'
     remove: true
   - target: "$.paths['/api/actions/connector/{id}']['put'].requestBody.content.*.schema.properties.secrets"
-    description: "Remove secrets in update connector API"
+    description: 'Remove secrets in update connector API'
     remove: true
   # Add some connector configuration schemas
   - target: "$.paths['/api/actions/connector/{id}']['post']"
-    description: "Add config and secrets to create connector API"
+    description: 'Add config and secrets to create connector API'
     update:
       requestBody:
         content:
@@ -161,9 +161,9 @@ actions:
                     # Microsoft Teams (.teams) N/A
                     # Observability AI Assistant (.observability-ai-assistant) TBD
                     # Azure OpenAI (.gen-ai)
-                    - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
                     # OpenAI (.gen-ai)
-                    - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
                     # Other OpenAI (.gen-ai)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_other_config.yaml'
                     # Opsgenie (.opsgenie)
@@ -221,7 +221,7 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/teams_secrets.yaml'
                     # Observability AI Assistant (.observability-ai-assistant) TBD
                     # OpenAI (.gen-ai)
-                    - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_secrets.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_secrets.yaml'
                     # Opsgenie (.opsgenie)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_secrets.yaml'
                     # PagerDuty (.pagerduty)
@@ -249,7 +249,7 @@ actions:
                     # xMatters (.xmatters)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/xmatters_secrets.yaml'
   - target: "$.paths['/api/actions/connector/{id}']['put']"
-    description: "Add config and secrets to update connector API"
+    description: 'Add config and secrets to update connector API'
     update:
       requestBody:
         content:
@@ -284,9 +284,9 @@ actions:
                     # Microsoft Teams (.teams) N/A
                     # Observability AI Assistant (.observability-ai-assistant) TBD
                     # Azue OpenAI (.gen-ai)
-                    - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
-                   # OpenAI (.gen-ai)
-                    - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_azure_config.yaml'
+                    # OpenAI (.gen-ai)
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_openai_config.yaml'
                     # Opsgenie (.opsgenie)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_config.yaml'
                     # PagerDuty (.pagerduty)
@@ -340,7 +340,7 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/teams_secrets.yaml'
                     # Observability AI Assistant (.observability-ai-assistant) TBD
                     # OpenAI (.gen-ai)
-                    - $ref:  '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_secrets.yaml'
+                    - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/genai_secrets.yaml'
                     # Opsgenie (.opsgenie)
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/opsgenie_secrets.yaml'
                     # PagerDuty (.pagerduty)
@@ -369,11 +369,11 @@ actions:
                     - $ref: '../../x-pack/platform/plugins/shared/actions/docs/openapi/components/schemas/xmatters_secrets.yaml'
   # Remove the automated empty run connector params
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post'].requestBody.content.*.schema.properties.params"
-    description: "Remove params in run connector API"
+    description: 'Remove params in run connector API'
     remove: true
   # Add some run connector params
   - target: "$.paths['/api/actions/connector/{id}/_execute']['post']"
-    description: "Add examples to run connector API"
+    description: 'Add examples to run connector API'
     update:
       requestBody:
         content:

@@ -19,6 +19,7 @@ import type { ICommandCallbacks, ICommandContext, ISuggestionItem } from '../../
 import { getAssignmentExpressionRoot } from '../expressions';
 import { suggestForExpression } from './expressions';
 import { withAutoSuggest } from './helpers';
+import { TRAILING_COMMA_REGEX } from '../shared';
 import type { ExpressionContextOptions } from './expressions/types';
 
 const ENDS_WITH_WHITESPACE_REGEX = /\s$/;
@@ -54,7 +55,7 @@ export async function suggestFieldsList(
   const innerText = query.substring(0, cursorPosition);
   const lastField = fieldList[fieldList.length - 1];
 
-  const endsWithComma = /,\s*$/.test(innerText);
+  const endsWithComma = TRAILING_COMMA_REGEX.test(innerText);
   const withinFunction =
     lastField && isFunctionExpression(lastField) && within(innerText.length, lastField);
   const startingNewExpression = endsWithComma && !withinFunction;
