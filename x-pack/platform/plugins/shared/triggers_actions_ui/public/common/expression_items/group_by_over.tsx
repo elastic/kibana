@@ -123,6 +123,10 @@ export const GroupByExpression = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.common.expressionItems.groupByOver.popoverAriaLabel',
+        { defaultMessage: 'Over' }
+      )}
       button={
         <EuiExpression
           description={`${

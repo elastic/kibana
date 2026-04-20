@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -16,7 +17,11 @@ import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions
 import { ENGINE_STATUS } from '../../domain/constants';
 
 const bodySchema = z.object({
-  entityTypes: z.array(EntityType).optional().default(ALL_ENTITY_TYPES),
+  entityTypes: z
+    .array(EntityType)
+    .optional()
+    .default(ALL_ENTITY_TYPES)
+    .describe('Entity types to stop. Defaults to all running types.'),
 });
 
 export function registerStop(router: EntityStorePluginRouter) {
@@ -24,6 +29,12 @@ export function registerStop(router: EntityStorePluginRouter) {
     .put({
       path: ENTITY_STORE_ROUTES.public.STOP,
       access: 'public',
+      summary: 'Stop Entity Store engines',
+      description:
+        'Stop running entity engines, pausing data processing for the specified entity types.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -36,6 +47,9 @@ export function registerStop(router: EntityStorePluginRouter) {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_stop.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
