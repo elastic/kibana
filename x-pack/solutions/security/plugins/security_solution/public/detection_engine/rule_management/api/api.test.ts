@@ -514,7 +514,7 @@ describe('Detections Rules API', () => {
     test('uses _search with default sort and API version', async () => {
       await fetchSearchRules({});
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules/_search',
+        '/internal/detection_engine/rules/_search',
         expect.objectContaining({
           method: 'POST',
           version: '1',
@@ -536,7 +536,7 @@ describe('Detections Rules API', () => {
         sort_order: 'asc',
       });
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/rules/_search',
+        '/internal/detection_engine/rules/_search',
         expect.objectContaining({
           method: 'POST',
           version: '1',

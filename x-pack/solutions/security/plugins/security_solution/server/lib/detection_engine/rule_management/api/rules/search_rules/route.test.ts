@@ -15,10 +15,10 @@ jest.mock('../../../logic/search/get_gap_filtered_rule_ids');
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import {
-  DETECTION_ENGINE_RULES_URL_SEARCH,
   MAX_RULES_WITH_GAPS_TO_FETCH,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
 } from '../../../../../../../common/constants';
+import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../../../common/api/detection_engine/rule_management/urls';
 import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
 import { getFindResultWithSingleHit } from '../../../../routes/__mocks__/request_responses';
 import { searchRulesRoute } from './route';
@@ -69,7 +69,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...defaultInput,
           search_after: [...searchAfter],
@@ -94,15 +94,15 @@ describe('search rules route', () => {
     it('passes request page to rulesClient.find when search_after is absent', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
-        body: { ...defaultInput, page: 3 },
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
+        body: { ...defaultInput, page: 1, per_page: 1 },
       });
 
       await server.inject(request, requestContextMock.convertContext(context));
 
       expect(clients.rulesClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          options: expect.objectContaining({ page: 3 }),
+          options: expect.objectContaining({ page: 1, perPage: 1 }),
         })
       );
     });
@@ -110,7 +110,7 @@ describe('search rules route', () => {
     it('omits page for rulesClient.find when search_after is present', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...defaultInput,
           page: 7,
@@ -130,7 +130,7 @@ describe('search rules route', () => {
     it('returns 400 when only sort_field is set without sort_order', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           per_page: 20,
           page: 1,
@@ -151,7 +151,7 @@ describe('search rules route', () => {
     it('returns search_after when page * per_page reaches the max result window', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         // page(1) * per_page(2) == MAX_RESULTS_WINDOW(2)
         body: { ...defaultInput, page: 1, per_page: 2 },
       });
@@ -165,7 +165,7 @@ describe('search rules route', () => {
     it('returns search_after when the request includes search_after (continuation)', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...defaultInput,
           search_after: [1234567890, 'prev-cursor'],
@@ -181,7 +181,7 @@ describe('search rules route', () => {
     it('does not return search_after when sort_field and sort_order are missing even at max window', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         // page(1) * per_page(2) == MAX_RESULTS_WINDOW(2) but no sort
         body: { page: 1, per_page: 2 },
       });
@@ -197,7 +197,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: { ...defaultInput, page: 1, per_page: 2 },
       });
 
@@ -224,7 +224,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...defaultInput,
           aggregations: { counts: ['tags'] },
@@ -265,7 +265,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...defaultInput,
           aggregations: { counts: ['enabled'] },
@@ -294,7 +294,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: gapBody,
       });
 
@@ -326,7 +326,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: { ...gapBody, gap_auto_fill_scheduler_id: 'scheduler-abc' },
       });
 
@@ -342,7 +342,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: gapBody,
       });
 
@@ -359,7 +359,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: gapBody,
       });
 
@@ -376,7 +376,7 @@ describe('search rules route', () => {
     it('returns 400 when gap_fill_statuses is provided without range', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...defaultInput,
           gap_fill_statuses: ['unfilled'],
@@ -392,7 +392,7 @@ describe('search rules route', () => {
     it('does not call getGapFilteredRuleIds when no gap params are set', async () => {
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: defaultInput,
       });
 
@@ -406,7 +406,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: {
           ...gapBody,
           search_after: [12345, 'cursor'],
@@ -428,7 +428,7 @@ describe('search rules route', () => {
 
       const request = requestMock.create({
         method: 'post',
-        path: DETECTION_ENGINE_RULES_URL_SEARCH,
+        path: RULE_MANAGEMENT_RULES_URL_SEARCH,
         body: { ...gapBody, page: 1, per_page: 2 },
       });
 

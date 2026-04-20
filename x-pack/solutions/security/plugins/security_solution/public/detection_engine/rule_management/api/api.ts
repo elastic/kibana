@@ -59,6 +59,7 @@ import {
   BulkActionTypeEnum,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   RULE_MANAGEMENT_FILTERS_URL,
+  RULE_MANAGEMENT_RULES_URL_SEARCH,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -66,7 +67,6 @@ import {
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
-  DETECTION_ENGINE_RULES_URL_SEARCH,
 } from '../../../../common/constants';
 
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/api/detection_engine/rule_exceptions';
@@ -285,7 +285,7 @@ export const fetchSearchRules = async ({
   };
 
   return KibanaServices.get().http.fetch<FetchSearchRulesResponse>(
-    DETECTION_ENGINE_RULES_URL_SEARCH,
+    RULE_MANAGEMENT_RULES_URL_SEARCH,
     {
       method: 'POST',
       version: '1',

@@ -18,7 +18,7 @@ import type {
   SearchRulesSearchAfterItem,
   GranularRulesSearch,
 } from '../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_URL_SEARCH } from '../../../../../common/constants';
+import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../common/api/detection_engine/rule_management/urls';
 import type { PaginationOptions } from '../../logic';
 import { fetchSearchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
@@ -38,7 +38,7 @@ export interface FindRulesQueryArgs {
   gap_auto_fill_scheduler_id?: string;
 }
 
-const FIND_RULES_QUERY_KEY = ['POST', DETECTION_ENGINE_RULES_URL_SEARCH];
+const FIND_RULES_QUERY_KEY = ['POST', RULE_MANAGEMENT_RULES_URL_SEARCH];
 
 export interface RulesQueryResponse {
   rules: RuleResponse[];

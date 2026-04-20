@@ -13,7 +13,6 @@ import type { GapFillStatus } from '@kbn/alerting-plugin/common/constants/gap_st
 import type { GapReasonType } from '@kbn/alerting-plugin/common/constants/gap_reason';
 import { MAX_RESULTS_WINDOW } from '../../../../../../usage/constants';
 import {
-  DETECTION_ENGINE_RULES_URL_SEARCH,
   MAX_RULES_WITH_GAPS_TO_FETCH,
   MAX_RULES_WITH_GAPS_LIMIT_REACHED_WARNING_TYPE,
   EXCLUDED_GAP_REASONS_KEY,
@@ -22,6 +21,7 @@ import type {
   SearchRulesField,
   SearchRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
+import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '../../../../../../../common/api/detection_engine/rule_management/urls';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import { SearchRulesRequestBody } from '../../../../../../../common/api/detection_engine/rule_management';
 import { validateSearchRulesRequestBody } from './request_schema_validation';
@@ -126,7 +126,7 @@ export const searchRulesRoute = (router: SecuritySolutionPluginRouter, logger: L
   router.versioned
     .post({
       access: 'internal',
-      path: DETECTION_ENGINE_RULES_URL_SEARCH,
+      path: RULE_MANAGEMENT_RULES_URL_SEARCH,
       security: {
         authz: {
           requiredPrivileges: [RULES_API_READ],

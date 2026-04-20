@@ -462,7 +462,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
    */
   searchRules(props: SearchRulesProps, kibanaSpace: string = 'default') {
     return supertest
-      .post(getRouteUrlForSpace('/api/detection_engine/rules/_search', kibanaSpace))
+      .post(getRouteUrlForSpace('/internal/detection_engine/rules/_search', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

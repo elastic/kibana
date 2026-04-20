@@ -3,7 +3,7 @@ info:
   title: Search Rules API endpoint
   version: '1'
 paths:
-  /api/detection_engine/rules/_search:
+  /internal/detection_engine/rules/_search:
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -81,7 +81,7 @@ paths:
                 gap_fill_statuses:
                   type: array
                   description: |
-                    Filter rules to only those with gaps matching these fill statuses in the given range.
+                    Filter rules to specific gap fill statuses.
                     When active, the result set is capped and `search_after` is not supported. Use
                     offset pagination (`page` / `per_page`) instead.
                   items:
@@ -91,7 +91,7 @@ paths:
                   description: Gap range start. 
                 gaps_range_end:
                     type: string
-                    description: End of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+                    description: Gap range end.
                 gap_auto_fill_scheduler_id:
                   type: string
                   description: Gap auto fill scheduler ID used to determine gap fill status for rules

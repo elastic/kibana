@@ -11,7 +11,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
-import { DETECTION_ENGINE_RULES_URL_SEARCH } from '@kbn/security-solution-plugin/common/constants';
+import { RULE_MANAGEMENT_RULES_URL_SEARCH } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { MAX_SEARCH_RULES_SEARCH_TERM_LENGTH } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_management/api/rules/search_rules/request_schema_validation';
 import { getSimpleRule } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   const searchRules = (requestBody: Record<string, unknown>) =>
     supertest
-      .post(DETECTION_ENGINE_RULES_URL_SEARCH)
+      .post(RULE_MANAGEMENT_RULES_URL_SEARCH)
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -69,25 +69,6 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body.data[0].name).to.be('Simple Rule Match');
     });
 
-    it('accepts both friendly and full-path KQL field names', async () => {
-      await createRule(supertest, log, {
-        ...getSimpleRule('friendly-test', true),
-        name: 'Friendly Field Test',
-      });
-
-      const friendly = await searchRules({
-        filter: 'enabled: true',
-      }).expect(200);
-      expect(friendly.body.total).to.be(1);
-      expect(friendly.body.data[0].name).to.be('Friendly Field Test');
-
-      const fullPath = await searchRules({
-        filter: 'alert.attributes.enabled: true',
-      }).expect(200);
-      expect(fullPath.body.total).to.be(1);
-      expect(fullPath.body.data[0].name).to.be('Friendly Field Test');
-    });
-
     it('returns facet counts of filtered rules when aggregations.counts is set', async () => {
       await createRule(supertest, log, { ...getSimpleRule('enabled-rule'), enabled: true });
       await createRule(supertest, log, { ...getSimpleRule('enabled-rule-2'), enabled: true });
@@ -105,7 +86,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(bucketValues['1']).to.be(2);
 
       const { body: filteredBody } = await searchRules({
-        filter: 'enabled: true',
+        filter: 'alert.attributes.enabled: true',
         aggregations: { counts: ['enabled'] },
       }).expect(200);
       expect(filteredBody.counts.enabled).to.be.an('object');

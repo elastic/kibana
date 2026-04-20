@@ -81,7 +81,7 @@ export const SearchRulesRequestBody = z
       */
     search_after: z.array(SearchRulesSearchAfterItem).min(1).optional(),
     /**
-      * Filter rules to only those with gaps matching these fill statuses in the given range.
+      * Filter rules to specific gap fill statuses.
 When active, the result set is capped and `search_after` is not supported. Use
 offset pagination (`page` / `per_page`) instead.
 
@@ -92,7 +92,7 @@ offset pagination (`page` / `per_page`) instead.
      */
     gaps_range_start: z.string().optional(),
     /**
-     * End of the gap range (ISO 8601). Required when gap_fill_statuses is set.
+     * Gap range end.
      */
     gaps_range_end: z.string().optional(),
     /**

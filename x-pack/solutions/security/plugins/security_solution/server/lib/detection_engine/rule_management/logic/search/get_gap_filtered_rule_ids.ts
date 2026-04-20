@@ -15,6 +15,12 @@ import type { FindRulesSortField } from '../../../../../../common/api/detection_
 import type { SortOrder } from '../../../../../../common/api/detection_engine';
 import { findRules } from './find_rules';
 
+/**
+ * Filters rule IDs with gaps by applying the user's filter.
+ * Splits the rule IDs into batches and processes them sequentially so we can
+ * stop early once we've collected enough results to return.
+ * Then return maxRuleIds of them.
+ */
 const filterRuleIdsWithGaps = async ({
   rulesClient,
   ruleIdsWithGaps,
@@ -33,9 +39,11 @@ const filterRuleIdsWithGaps = async ({
   ruleIds: string[];
   truncated: boolean;
 }> => {
+  // Split rule IDs into batches to avoid exceeding ES max clause limits
   const batches = chunk(ruleIdsWithGaps, maxRuleIds);
   const allMatchingRuleIds: string[] = [];
-
+  // Process batches sequentially so we can stop once we have enough results to know
+  // whether the response should be truncated.
   for (const batch of batches) {
     const result = await findRules({
       rulesClient,
@@ -81,6 +89,12 @@ export interface GapFilteredRuleIdsResult {
   truncated: boolean;
 }
 
+/**
+ * Returns rule IDs that:
+ * - have gap fill status in the specified range and
+ * - match the provided rule-level filter
+ * - are capped at maxRuleIds to avoid exceeding ES max clause limits.
+ */
 export const getGapFilteredRuleIds = async ({
   rulesClient,
   gapRange,
@@ -92,6 +106,7 @@ export const getGapFilteredRuleIds = async ({
   excludedReasons,
   schedulerId,
 }: GapFilteredRuleIdsOptions): Promise<GapFilteredRuleIdsResult> => {
+  // Step 1: get ALL rule IDs with gaps for the selected range and gap fill statuses
   const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
     highestPriorityGapFillStatuses: gapFillStatuses,
     start: gapRange.start,
@@ -103,6 +118,8 @@ export const getGapFilteredRuleIds = async ({
   const initialRuleIds = ruleIdsWithGaps.ruleIds.slice(0, maxRuleIds);
   const gapsTruncated = ruleIdsWithGaps.ruleIds.length > maxRuleIds;
 
+  // If the number of rules with gaps is under our cap, or no filter is applied,
+  // we can just return them directly.
   if (!gapsTruncated || !filter) {
     return {
       ruleIds: initialRuleIds,
@@ -110,6 +127,9 @@ export const getGapFilteredRuleIds = async ({
     };
   }
 
+  // Step 2: There are many rules with gaps AND a filter is applied.
+  // Filter the rule IDs with gaps by the user's filter.
+  // This ensures we return rules that HAVE gaps AND match the filter,
   return filterRuleIdsWithGaps({
     rulesClient,
     ruleIdsWithGaps: ruleIdsWithGaps.ruleIds,

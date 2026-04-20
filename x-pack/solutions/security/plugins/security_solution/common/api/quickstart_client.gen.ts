@@ -3073,7 +3073,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
     this.log.info(`${new Date().toISOString()} Calling API SearchRules`);
     return this.kbnClient
       .request<SearchRulesResponse>({
-        path: '/api/detection_engine/rules/_search',
+        path: '/internal/detection_engine/rules/_search',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
