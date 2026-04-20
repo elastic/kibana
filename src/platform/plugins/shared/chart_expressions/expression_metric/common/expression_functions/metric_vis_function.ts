@@ -110,7 +110,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
     primaryPosition: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.primaryPosition.help', {
-        defaultMessage: 'The postion of the Primary Metric (top or bottom).',
+        defaultMessage: 'The position of the Primary Metric (top, middle, or bottom).',
       }),
     },
     color: {

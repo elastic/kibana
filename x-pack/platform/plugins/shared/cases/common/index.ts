@@ -58,6 +58,7 @@ export {
   CREATE_COMMENT_CAPABILITY,
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
 } from './constants';
 
@@ -69,4 +70,16 @@ export { getApiTags, type CasesApiTags } from './utils/api_tags';
 export { CaseMetricsFeature } from './types/api';
 export type { SingleCaseMetricsResponse, CasesMetricsResponse } from './types/api';
 
+export { CASE_VIEW_PAGE_TABS } from './types';
+
 export { getSavedObjectsTypes } from './utils/saved_object_types';
+
+export {
+  isEventAttachmentType,
+  isLegacyAttachmentRequest,
+  isUnifiedEventAttachment,
+  assertValidIndexMetadata,
+  isIndexMetadata,
+  toStringArray,
+  toStringOrStringArray,
+} from './utils/attachments';

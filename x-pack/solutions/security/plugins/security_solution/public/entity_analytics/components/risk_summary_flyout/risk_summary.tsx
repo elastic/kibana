@@ -33,8 +33,11 @@ import { FormattedRelativePreferenceDate } from '../../../common/components/form
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import type { RiskScoreState } from '../../api/hooks/use_risk_score';
+import { useRiskScore } from '../../api/hooks/use_risk_score';
 import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_summary';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
+import { useResolutionGroup } from '../entity_resolution/hooks/use_resolution_group';
+import { getEntityId } from '../entity_resolution/helpers';
 
 import {
   columnsArray,
@@ -46,6 +49,11 @@ import {
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
+
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
 
 export interface RiskSummaryProps<T extends EntityType> {
   riskScoreData: RiskScoreState<T>;
@@ -68,33 +76,63 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
-  const riskData = data && data.length > 0 ? data[0] : undefined;
-  const entityData = getEntityData<T>(entityType, riskData);
+  const fallbackRiskData = data && data.length > 0 ? data[0] : undefined;
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
+  const entityRiskFilterQueryDsl = useMemo(
+    () =>
+      entityId
+        ? {
+            bool: {
+              filter: [{ term: { [`${entityType}.risk.id_value`]: entityId } }],
+              must_not: [{ term: { [`${entityType}.risk.score_type`]: 'resolution' } }],
+            },
+          }
+        : undefined,
+    [entityId, entityType]
+  );
+  const nonResolutionRiskScoreData = useRiskScore({
+    riskEntity: entityType,
+    filterQuery: entityRiskFilterQueryDsl,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: !entityId,
+  });
+  const nonResolutionRiskData =
+    nonResolutionRiskScoreData.data && nonResolutionRiskScoreData.data.length > 0
+      ? nonResolutionRiskScoreData.data[0]
+      : undefined;
+  const riskData = nonResolutionRiskData ?? fallbackRiskData;
+  const entityData = getEntityData<T>(entityType, riskData);
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
-    const fieldName = EntityTypeToIdentifierField[entityType];
     const query = entityId
-      ? `entity.id: "${entityId}" AND entity.EngineMetadata.Type: "${entityType}"`
-      : `${fieldName}: "${entityName}"`;
+      ? `${entityType}.risk.id_value: "${entityId}" AND NOT ${entityType}.risk.score_type: "resolution"`
+      : `${EntityTypeToIdentifierField[entityType]}: "${entityName}" AND NOT ${entityType}.risk.score_type: "resolution"`;
 
     return getRiskScoreSummaryAttributes({
       severity: entityData?.risk?.calculated_level,
       query,
       spaceId,
       riskEntity: entityType,
-      entityId,
+      dataSource: 'risk_index',
+      metricLabel: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.riskSummary.entityRiskScoreLabel',
+        {
+          defaultMessage: 'Entity risk score',
+        }
+      ),
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, spaceId, entityId]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, entityId, spaceId]);
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const isPrivmonModifierEnabled = useIsExperimentalFeatureEnabled(
     'enableRiskScorePrivmonModifier'
   );
+  const isWatchlistEnabled = useIsExperimentalFeatureEnabled('entityAnalyticsWatchlistEnabled');
   const rows = useMemo(
-    () => getItems(entityData, isPrivmonModifierEnabled),
-    [entityData, isPrivmonModifierEnabled]
+    () => getItems(entityData, isPrivmonModifierEnabled, isWatchlistEnabled),
+    [entityData, isPrivmonModifierEnabled, isWatchlistEnabled]
   );
 
   const onToggle = useCallback(
@@ -149,6 +187,86 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
     }),
     [goToEntityInsightsTab]
   );
+
+  const { data: resolutionGroup } = useResolutionGroup(entityId ?? '', {
+    enabled: Boolean(entityId),
+  });
+  const resolutionTargetEntityId = useMemo(
+    () => (resolutionGroup?.target ? getEntityId(resolutionGroup.target) : undefined),
+    [resolutionGroup?.target]
+  );
+  const resolutionRiskFilterQueryDsl = useMemo(
+    () =>
+      resolutionTargetEntityId
+        ? {
+            bool: {
+              filter: [
+                { term: { [`${entityType}.risk.id_value`]: resolutionTargetEntityId } },
+                { term: { [`${entityType}.risk.score_type`]: 'resolution' } },
+              ],
+            },
+          }
+        : undefined,
+    [entityType, resolutionTargetEntityId]
+  );
+  const resolutionRiskScoreData = useRiskScore({
+    riskEntity: entityType,
+    filterQuery: resolutionRiskFilterQueryDsl,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: !resolutionTargetEntityId,
+  });
+  const resolutionRiskData =
+    resolutionRiskScoreData.data && resolutionRiskScoreData.data.length > 0
+      ? resolutionRiskScoreData.data[0]
+      : undefined;
+  const resolutionEntityData = getEntityData<T>(entityType, resolutionRiskData);
+  const resolutionRows = useMemo(
+    () => getItems(resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled),
+    [resolutionEntityData, isPrivmonModifierEnabled, isWatchlistEnabled]
+  );
+  const showResolutionRiskSummary = Boolean(resolutionEntityData?.risk);
+  const resolutionLensAttributes = useMemo(() => {
+    if (!resolutionTargetEntityId) {
+      return undefined;
+    }
+
+    return getRiskScoreSummaryAttributes({
+      severity: resolutionEntityData?.risk?.calculated_level,
+      query: `${entityType}.risk.id_value: "${resolutionTargetEntityId}" AND ${entityType}.risk.score_type: "resolution"`,
+      spaceId,
+      riskEntity: entityType,
+      dataSource: 'risk_index',
+      metricLabel: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.riskSummary.resolutionGroupRiskScoreLabel',
+        {
+          defaultMessage: 'Resolution group risk score',
+        }
+      ),
+    });
+  }, [entityType, resolutionEntityData?.risk?.calculated_level, resolutionTargetEntityId, spaceId]);
+  const resolutionCasesAttachmentMetadata = useMemo(
+    () => ({
+      description: i18n.translate(
+        'xpack.securitySolution.flyout.entityDetails.resolutionRiskSummary.casesAttachmentLabel',
+        {
+          defaultMessage:
+            'Resolution group risk score for {entityType, select, user {user} other {host}} {entityName}',
+          values: {
+            entityName: resolutionEntityData?.name,
+            entityType,
+          },
+        }
+      ),
+    }),
+    [entityType, resolutionEntityData?.name]
+  );
+  const resolutionTimerange = useMemo(() => {
+    const from = dateMath.parse(LAST_30_DAYS.from)?.toISOString() ?? LAST_30_DAYS.from;
+    const to = dateMath.parse(LAST_30_DAYS.to)?.toISOString() ?? LAST_30_DAYS.to;
+    return { from, to };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resolutionRiskData?.['@timestamp']]);
 
   return (
     <EuiAccordion
@@ -291,12 +409,77 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                   columns={columnsArray}
                   items={rows}
                   compressed
-                  loading={riskScoreData.loading || recalculatingScore}
+                  loading={
+                    riskScoreData.loading ||
+                    nonResolutionRiskScoreData.loading ||
+                    recalculatingScore
+                  }
                 />
               </div>
             </InspectButtonContainer>
           </EuiFlexItem>
         </EuiFlexGroup>
+        {showResolutionRiskSummary && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="m" direction="row" wrap>
+              <EuiFlexItem grow={1}>
+                <div
+                  // Improve Visualization loading state by predefining the size
+                  // Set min-width for a fluid layout
+                  css={css`
+                    height: ${LENS_VISUALIZATION_HEIGHT}px;
+                    min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
+                  `}
+                >
+                  {resolutionRiskData && resolutionLensAttributes && (
+                    <VisualizationEmbeddable
+                      applyGlobalQueriesAndFilters={false}
+                      applyPageAndTabsFilters={false}
+                      lensAttributes={resolutionLensAttributes}
+                      id={`RiskSummary-resolution_risk_score_metric`}
+                      timerange={resolutionTimerange}
+                      width={'100%'}
+                      height={LENS_VISUALIZATION_HEIGHT}
+                      disableOnClickFilter
+                      inspectTitle={
+                        <FormattedMessage
+                          id="xpack.securitySolution.flyout.entityDetails.inspectResolutionVisualizationTitle"
+                          defaultMessage="Resolution Risk Summary Visualization"
+                        />
+                      }
+                      casesAttachmentMetadata={resolutionCasesAttachmentMetadata}
+                    />
+                  )}
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem
+                grow={3}
+                css={css`
+                  min-width: ${SUMMARY_TABLE_MIN_WIDTH}px;
+                `}
+              >
+                <EuiBasicTable
+                  tableCaption={i18n.translate(
+                    'xpack.securitySolution.flyout.entityDetails.resolutionRiskSummaryTableCaption',
+                    {
+                      defaultMessage: 'Resolution risk summary for {entity}',
+                      values: {
+                        entity: capitalize(entityType),
+                      },
+                    }
+                  )}
+                  data-test-subj="resolution-risk-summary-table"
+                  responsiveBreakpoint={false}
+                  columns={columnsArray}
+                  items={resolutionRows}
+                  compressed
+                  loading={resolutionRiskScoreData.loading || recalculatingScore}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </ExpandablePanel>
       <EuiSpacer size="s" />
     </EuiAccordion>

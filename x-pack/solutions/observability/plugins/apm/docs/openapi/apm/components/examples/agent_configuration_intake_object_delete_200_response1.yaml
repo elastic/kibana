@@ -1,0 +1,4 @@
+# summary:
+description: An example of a successful response from `DELETE /api/apm/settings/agent-configuration`.
+value:
+  result: "deleted"

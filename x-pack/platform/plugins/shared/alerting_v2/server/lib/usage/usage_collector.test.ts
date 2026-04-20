@@ -195,16 +195,8 @@ describe('registerAlertingV2UsageCollector', () => {
             _meta: { description: 'Number of rules with no data handling configured.' },
             type: 'long',
           },
-          count_with_query_condition: {
-            _meta: { description: 'Number of rules with a query condition.' },
-            type: 'long',
-          },
           count_with_recovery_policy: {
             _meta: { description: 'Number of rules with a recovery policy.' },
-            type: 'long',
-          },
-          count_with_recovery_query_condition: {
-            _meta: { description: 'Number of rules with a recovery query condition.' },
             type: 'long',
           },
           dispatcher_executions_count_24hr: {

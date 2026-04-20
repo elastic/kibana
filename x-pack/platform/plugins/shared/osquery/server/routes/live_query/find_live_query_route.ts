@@ -27,6 +27,8 @@ import { OsqueryQueries } from '../../../common/search_strategy';
 import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
+import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -52,6 +54,11 @@ export const findLiveQueryRoute = (
               typeof findLiveQueryRequestQuerySchema,
               FindLiveQueryRequestQuerySchema
             >(findLiveQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findLiveQueryResponseSchema,
+            },
           },
         },
       },
@@ -89,6 +96,7 @@ export const findLiveQueryRoute = (
             try {
               const [coreStartServices] = await osqueryContext.getStartServices();
               const esClient = coreStartServices.elasticsearch.client.asInternalUser;
+              const ccsEnabled = await hasConnectedRemoteClusters(esClient);
 
               const allActionIds: string[] = [];
               for (const item of items) {
@@ -105,7 +113,8 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 esClient,
                 allActionIds,
-                spaceId
+                spaceId,
+                ccsEnabled
               );
 
               items = items.map((item) => {

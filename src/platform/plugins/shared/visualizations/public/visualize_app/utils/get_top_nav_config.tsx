@@ -28,7 +28,10 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import { VISUALIZE_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '@kbn/visualizations-common';
@@ -64,6 +67,7 @@ export interface TopNavConfigParams {
   openInspector: () => void;
   originatingApp?: string;
   originatingPath?: string;
+  incomingBreadcrumbs?: EmbeddableEditorBreadcrumb[];
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
@@ -97,6 +101,7 @@ export const getTopNavConfig = (
     openInspector,
     originatingApp,
     originatingPath,
+    incomingBreadcrumbs,
     setOriginatingApp,
     hasUnappliedChanges,
     visInstance,
@@ -222,22 +227,24 @@ export const getTopNavConfig = (
           }
           chrome.docTitle.change(savedVis.lastSavedTitle);
           if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
+            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs(savedVis.lastSavedTitle));
           } else {
             const originatingAppName = originatingApp
               ? stateTransfer.getAppNameFromId(originatingApp)
               : undefined;
-            chrome.setBreadcrumbs(
-              getEditBreadcrumbs(
-                {
-                  ...(originatingAppName && {
-                    originatingAppName,
-                    redirectToOrigin: navigateToOriginatingApp,
-                  }),
-                },
-                savedVis.lastSavedTitle
-              )
+            const breadcrumbs = getEditBreadcrumbs(
+              {
+                ...(originatingAppName && {
+                  originatingAppName,
+                  redirectToOrigin: navigateToOriginatingApp,
+                }),
+                incomingBreadcrumbs,
+              },
+              savedVis.lastSavedTitle
             );
+            chrome.setBreadcrumbs(breadcrumbs, {
+              project: { value: breadcrumbs, absolute: true },
+            });
           }
 
           if (id !== visualizationIdFromUrl) {
@@ -417,12 +424,15 @@ export const getTopNavConfig = (
                 ...navigateToLensConfig,
                 embeddableId,
                 vizEditorOriginatingAppUrl: getVizEditorOriginatingAppUrl(history),
+                legacyEditorOriginatingApp: VisualizeConstants.APP_ID,
                 originatingApp,
+                originatingPath,
+                breadcrumbs: incomingBreadcrumbs,
                 title: visInstance?.panelTitle || vis.title,
                 visTypeTitle: vis.type.title,
                 description: visInstance?.panelDescription || vis.description,
                 panelTimeRange: visInstance?.panelTimeRange,
-                isEmbeddable: Boolean(originatingApp),
+                isEmbeddable: isOriginatingFromDashboardPanel,
                 ...(searchFilters && { searchFilters }),
                 ...(searchQuery && { searchQuery }),
               };

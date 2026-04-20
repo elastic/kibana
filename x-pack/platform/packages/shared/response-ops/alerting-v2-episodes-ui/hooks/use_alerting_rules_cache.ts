@@ -7,7 +7,7 @@
 
 import { useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { FindRulesResponse } from '@kbn/alerting-v2-plugin/public/services/rules_api';
+import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import useAsync from 'react-use/lib/useAsync';
 

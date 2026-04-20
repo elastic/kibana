@@ -7,10 +7,14 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../common/types/session_view';
 import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
@@ -23,6 +27,10 @@ import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_
 import { SessionViewDetails } from './components/session_view_details';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
+
+const TITLE = i18n.translate('xpack.securitySolution.flyout.sessionView.title', {
+  defaultMessage: 'Session view',
+});
 
 const EUI_HEADER_HEIGHT = 96;
 const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = 72;
@@ -59,6 +67,7 @@ export interface SessionViewProps {
  */
 export const SessionView: FC<SessionViewProps> = memo(
   ({ hit, jumpToEntityId, jumpToCursor, renderCellActions, onAlertUpdated }) => {
+    const { euiTheme } = useEuiTheme();
     const { services } = useKibana();
     const { overlays, sessionView } = services;
     const store = useStore();
@@ -79,7 +88,7 @@ export const SessionView: FC<SessionViewProps> = memo(
 
     const openAlertDetails = useCallback(
       (alertId: string, alertIndex: string, onClose?: () => void) =>
-        overlays?.openSystemFlyout(
+        overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
@@ -93,7 +102,10 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         ),
       [
         defaultFlyoutProperties,
@@ -158,7 +170,10 @@ export const SessionView: FC<SessionViewProps> = memo(
               />
             ),
           }),
-          { ...defaultFlyoutProperties, session: 'inherit' }
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+          }
         );
       },
       [
@@ -189,19 +204,36 @@ export const SessionView: FC<SessionViewProps> = memo(
       SESSION_VIEW_SEARCH_BAR_HEIGHT;
 
     return (
-      <div data-test-subj={SESSION_VIEW_TEST_ID}>
-        {sessionView.getSessionView({
-          ...(sessionViewConfig as SessionViewConfig),
-          height,
-          isFullScreen: true,
-          loadAlertDetails: openAlertDetails,
-          openDetails: (selectedProcess: Process | null) => openDetails(selectedProcess),
-          closeDetails: () => closeDetails(),
-          canReadPolicyManagement,
-          resetJumpToEntityId: jumpTarget.jumpToEntityId,
-          resetJumpToCursor: jumpTarget.jumpToCursor,
-        })}
-      </div>
+      <>
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding-block: ${euiTheme.size.s} !important;
+          `}
+        >
+          <ToolsFlyoutHeader
+            hit={hit}
+            title={TITLE}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <div data-test-subj={SESSION_VIEW_TEST_ID}>
+            {sessionView.getSessionView({
+              ...(sessionViewConfig as SessionViewConfig),
+              height,
+              isFullScreen: true,
+              loadAlertDetails: openAlertDetails,
+              openDetails: (selectedProcess: Process | null) => openDetails(selectedProcess),
+              closeDetails: () => closeDetails(),
+              canReadPolicyManagement,
+              resetJumpToEntityId: jumpTarget.jumpToEntityId,
+              resetJumpToCursor: jumpTarget.jumpToCursor,
+            })}
+          </div>
+        </EuiFlyoutBody>
+      </>
     );
   }
 );

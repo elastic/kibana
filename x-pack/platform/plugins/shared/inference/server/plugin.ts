@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type {
   BoundInferenceClient,
@@ -17,6 +18,7 @@ import type {
 import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
+import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
 import {
   createClient as createInferenceClient,
   createClientWithoutRequest,
@@ -40,6 +42,8 @@ import { getConnectorById, getConnectorByIdWithoutClientRequest } from './util/g
 import { getInferenceEndpoints } from './util/get_inference_endpoints';
 import { getInferenceEndpointById } from './util/get_inference_endpoint_by_id';
 import { InferenceEndpointIdCache } from './util/inference_endpoint_id_cache';
+import { TokenUsageLogger } from './token_usage';
+import { installTokenUsageDashboard } from './dashboard';
 
 const parseLegacyAnonymizationRules = (value: unknown): AnonymizationRule[] => {
   let parsed: unknown = value;
@@ -96,18 +100,19 @@ export class InferencePlugin
   private config: InferenceConfig;
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
+  private tokenUsageLogger: TokenUsageLogger;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
     this.config = context.config.get<InferenceConfig>();
     this.endpointIdCache = new InferenceEndpointIdCache();
+    this.tokenUsageLogger = new TokenUsageLogger(this.logger);
   }
   setup(
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    const anonymizationEnabled = pluginsSetup.anonymization?.isEnabled() ?? false;
-    coreSetup.uiSettings.register(getUiSettings({ anonymizationEnabled }));
+    coreSetup.uiSettings.register(getUiSettings());
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -122,6 +127,14 @@ export class InferencePlugin
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
+    this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
+
+    const internalRepository = core.savedObjects.createInternalRepository();
+    const internalClient = new SavedObjectsClient(internalRepository);
+    const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
+    installTokenUsageDashboard(savedObjectsImporter, this.logger).catch((e) => {
+      this.logger.error(`Failed to install token usage dashboard: ${e.message}`);
+    });
 
     if (anonymizationEnabled) {
       this.logger.info(
@@ -215,6 +228,18 @@ export class InferencePlugin
       };
     };
 
+    const createTokenUsageTrackingEnabledCheck = (request: KibanaRequest) => {
+      return async () => {
+        try {
+          const scopedSavedObjectsClient = core.savedObjects.getScopedClient(request);
+          const uiSettingsClient = core.uiSettings.asScopedToClient(scopedSavedObjectsClient);
+          return await uiSettingsClient.get<boolean>(GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING);
+        } catch (e) {
+          return false;
+        }
+      };
+    };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({
@@ -224,6 +249,8 @@ export class InferencePlugin
           logger: this.logger.get('client'),
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,
+          tokenUsageLogger: this.tokenUsageLogger,
+          isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -240,6 +267,8 @@ export class InferencePlugin
           esClient: core.elasticsearch.client.asScoped(options.request).asCurrentUser,
           endpointIdCache: this.endpointIdCache,
           logger: this.logger,
+          tokenUsageLogger: this.tokenUsageLogger,
+          isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
         });
       },
 

@@ -109,7 +109,6 @@ export const DissectPatternAISuggestions = ({
             <EuiFlexItem grow={false}>
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
-                iconType="refresh"
                 size="s"
                 onClick={(connectorId) => {
                   refreshSuggestions({

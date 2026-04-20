@@ -53,12 +53,20 @@ export const SecretsSchema = z
     }
   });
 
+export const HttpMethodSchema = z.enum(HTTP_METHODS).default('GET');
+
+export const HttpRequestBodySchema = z.union([
+  z.string(),
+  z.array(z.unknown()),
+  z.record(z.string(), z.unknown()),
+]);
+
 export const ParamsSchema = z
   .object({
     url: z.string().url().optional(),
     path: z.string().optional(),
-    method: z.enum(HTTP_METHODS).default('GET'),
-    body: z.string().optional(),
+    method: HttpMethodSchema,
+    body: HttpRequestBodySchema.optional(),
     query: z.record(z.string(), z.string()).optional(),
     headers: z.record(z.string(), z.string()).optional(),
     fetcher: z

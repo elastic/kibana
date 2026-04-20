@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { getLatestEntitiesIndexName } from '@kbn/entity-store/server';
+import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
@@ -16,6 +16,7 @@ import { EntityType } from '../../../../../common/entity_analytics/types';
 
 import type { IntegrationType } from '../entity_sources/infra';
 import type { CorrelationMap } from './types';
+import { getEntityType } from './utils';
 
 export type EntityStoreEntityIdsByType = Record<EntityType, string[]>;
 
@@ -77,7 +78,7 @@ export const createWatchlistEntitiesService = ({
 
     while (fetchMore) {
       const response = await esClient.search<EntityStoreEntity>({
-        index: getLatestEntitiesIndexName(namespace),
+        index: getEntitiesAlias(ENTITY_LATEST, namespace),
         size: 1000,
         sort: ['_doc'],
         search_after: searchAfter,
@@ -150,16 +151,6 @@ const createEmptyEntityStoreEntityIdsByType = (): EntityStoreEntityIdsByType => 
 const integrationToStoreNamespaceMap: Record<IntegrationType, string> = {
   entityanalytics_okta: 'okta',
   entityanalytics_ad: 'active_directory',
-};
-
-const getEntityType = (record: EntityStoreEntity): EntityType => {
-  const entityType = record.entity.EngineMetadata?.Type || record.entity.type;
-
-  if (!entityType || !Object.values(EntityType).includes(entityType as EntityType)) {
-    throw new Error(`Unexpected entity store record: ${JSON.stringify(record)}`);
-  }
-
-  return EntityType[entityType as keyof typeof EntityType];
 };
 
 const dedup = (entityIdsByType: EntityStoreEntityIdsByType): EntityStoreEntityIdsByType =>

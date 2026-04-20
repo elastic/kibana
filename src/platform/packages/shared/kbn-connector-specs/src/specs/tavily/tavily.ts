@@ -70,9 +70,8 @@ export const TavilyConnector: ConnectorSpec = {
   actions: {
     tavilySearch: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.tavily.actions.tavilySearch.description', {
-        defaultMessage: 'Search the web for current information on any topic using Tavily.',
-      }),
+      description:
+        'Search the web for current information on any topic using Tavily. Returns a list of relevant web pages with titles, URLs, snippets, and relevance scores. Use this when you need up-to-date information, news, or answers to factual questions that may not be in your training data.',
       input: SearchInputSchema,
       handler: async (ctx, input: SearchInput) => {
         return callToolJson(ctx, 'tavily_search', {
@@ -86,9 +85,8 @@ export const TavilyConnector: ConnectorSpec = {
 
     tavilyExtract: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.tavily.actions.tavilyExtract.description', {
-        defaultMessage: 'Extract and retrieve content from one or more web page URLs using Tavily.',
-      }),
+      description:
+        'Extract and retrieve the full text content from one or more web page URLs using Tavily. Use this when you have specific URLs and need to read their content — for example, to summarize an article, answer questions about a page, or process structured data from a known source. Prefer this over tavilySearch when you already know the exact URLs.',
       input: ExtractInputSchema,
       handler: async (ctx, input: ExtractInput) => {
         return callToolJson(ctx, 'tavily_extract', {
@@ -101,10 +99,8 @@ export const TavilyConnector: ConnectorSpec = {
 
     tavilyCrawl: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.tavily.actions.tavilyCrawl.description', {
-        defaultMessage:
-          'Crawl a website starting from a URL, extracting content from pages with configurable depth and breadth.',
-      }),
+      description:
+        'Crawl a website starting from a root URL, following links and extracting page content with configurable depth and breadth. Returns the text content of each discovered page. Use this when you need to ingest content from an entire site or section — for example, to build a knowledge base from documentation, scan a product catalog, or audit a set of pages. For just a list of URLs without content, use tavilyMap instead.',
       input: CrawlInputSchema,
       handler: async (ctx, input: CrawlInput) => {
         return callToolJson(ctx, 'tavily_crawl', {
@@ -120,10 +116,8 @@ export const TavilyConnector: ConnectorSpec = {
 
     tavilyMap: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.tavily.actions.tavilyMap.description', {
-        defaultMessage:
-          "Map a website's structure by returning a list of URLs found starting from a base URL.",
-      }),
+      description:
+        "Map a website's structure by returning a list of URLs discovered starting from a base URL, without fetching page content. Use this to understand the shape of a site, find relevant sub-pages to later extract or crawl, or enumerate available resources. For retrieving actual page content, use tavilyCrawl instead.",
       input: MapInputSchema,
       handler: async (ctx, input: MapInput) => {
         return callToolJson(ctx, 'tavily_map', {
@@ -138,10 +132,8 @@ export const TavilyConnector: ConnectorSpec = {
 
     listTools: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.tavily.actions.listTools.description', {
-        defaultMessage:
-          'List all tools available on the Tavily MCP server. Use this to discover available capabilities.',
-      }),
+      description:
+        'List all tools available on the Tavily MCP server. Use this to discover available capabilities.',
       input: ListToolsInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -153,10 +145,8 @@ export const TavilyConnector: ConnectorSpec = {
 
     callTool: {
       isTool: true,
-      description: i18n.translate('connectorSpecs.tavily.actions.callTool.description', {
-        defaultMessage:
-          'Call any tool on the Tavily MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
-      }),
+      description:
+        'Call any tool on the Tavily MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
@@ -178,4 +168,15 @@ export const TavilyConnector: ConnectorSpec = {
       });
     },
   },
+
+  skill: [
+    'Tavily — cross-action guidance for web research.',
+    '',
+    'Typical pattern for researching an unfamiliar site:',
+    '  1. tavilyMap — discover available URLs.',
+    '  2. Review the URL list to identify relevant pages.',
+    '  3. tavilyExtract — fetch content from the specific pages that matter.',
+    '',
+    'Use tavilyCrawl instead of map+extract when you need broad coverage and cannot review URLs first.',
+  ].join('\n'),
 };

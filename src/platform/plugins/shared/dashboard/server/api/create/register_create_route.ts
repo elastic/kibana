@@ -16,6 +16,7 @@ import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schem
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { telemetryHandler } from '../telemetry_handler';
+import { writeErrorHandler } from '../write_error_handler';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -68,11 +69,7 @@ export function registerCreateRoute(
           );
           return res.created({ body: result });
         } catch (e) {
-          if (e.isBoom && e.output.statusCode === 403) {
-            return res.forbidden({ body: { message: e.message } });
-          }
-
-          return res.badRequest({ body: { message: e.message } });
+          return writeErrorHandler(e, res);
         }
       })
   );
