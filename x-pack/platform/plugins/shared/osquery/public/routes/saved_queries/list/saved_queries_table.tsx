@@ -346,6 +346,7 @@ const SavedQueriesTableComponent = () => {
   const saveQueryButton = useMemo(
     () => (
       <EuiButton
+        data-test-subj="savedQueriesCreateQueryButton"
         {...newQueryLinkProps}
         iconType="plusInCircle"
         isDisabled={!permissions.writeSavedQueries}

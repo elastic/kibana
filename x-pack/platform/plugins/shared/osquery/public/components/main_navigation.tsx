@@ -122,7 +122,12 @@ export const MainNavigation = () => {
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton fill {...newQueryNavProps} isDisabled={!canRunQuery}>
+                <EuiButton
+                  fill
+                  data-test-subj="newLiveQueryButton"
+                  {...newQueryNavProps}
+                  isDisabled={!canRunQuery}
+                >
                   <FormattedMessage
                     id="xpack.osquery.history.newLiveQueryButtonLabel"
                     defaultMessage="Run query"

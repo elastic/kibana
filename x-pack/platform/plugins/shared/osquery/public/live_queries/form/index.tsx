@@ -199,6 +199,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               id="submit-button"
+              data-test-subj="liveQuerySubmitButton"
               disabled={!enabled}
               isLoading={isLoading}
               onClick={handleSubmit(onSubmit)}
@@ -315,7 +316,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
   return (
     <>
       <FormProvider {...hooksForm}>
-        <EuiFlexGroup direction="column" css={groupStyles}>
+        <EuiFlexGroup direction="column" css={groupStyles} data-test-subj="liveQueryForm">
           {queryField && (
             <QueryPackSelectable canRunPacks={canRunPacks} canRunSingleQuery={canRunSingleQuery} />
           )}
