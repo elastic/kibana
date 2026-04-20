@@ -25,6 +25,7 @@ const createRootMock = () => {
   const userProfile = userProfileServiceMock.createStart();
   const i18n: I18nStart = {
     Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+    getConfigLocale: () => 'en',
   };
   const theme = themeServiceMock.createStartContract();
   return {
