@@ -254,23 +254,6 @@
     "misc": [
       {
         "parentPluginId": "observabilityAgentBuilder",
-        "id": "def-public.OBSERVABILITY_AGENT_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_AGENT_ID",
-        "description": [],
-        "signature": [
-          "\"observability.agent\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 9,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-public.OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -280,7 +263,7 @@
           "\"observability.ai_insight\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -297,7 +280,7 @@
           "\"observability.alert\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -314,7 +297,7 @@
           "\"observability.error\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -331,7 +314,7 @@
           "\"observability.host\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -348,7 +331,7 @@
           "\"observability.log\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -365,7 +348,7 @@
           "\"observability.synthetics_monitor\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -382,7 +365,7 @@
           "\"observability.service\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -399,7 +382,7 @@
           "\"observability.slo\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -416,7 +399,7 @@
           "\"observability.transaction\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -686,8 +669,7 @@
                 "docId": "kibSearchInferenceEndpointsPluginApi",
                 "section": "def-server.SearchInferenceEndpointsPluginSetup",
                 "text": "SearchInferenceEndpointsPluginSetup"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
             "lineNumber": 52,
@@ -976,8 +958,7 @@
                 "docId": "kibSearchInferenceEndpointsPluginApi",
                 "section": "def-server.SearchInferenceEndpointsPluginStart",
                 "text": "SearchInferenceEndpointsPluginStart"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/observability/plugins/observability_agent_builder/server/types.ts",
             "lineNumber": 67,
@@ -1231,23 +1212,6 @@
     "misc": [
       {
         "parentPluginId": "observabilityAgentBuilder",
-        "id": "def-common.OBSERVABILITY_AGENT_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_AGENT_ID",
-        "description": [],
-        "signature": [
-          "\"observability.agent\""
-        ],
-        "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 9,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "observabilityAgentBuilder",
         "id": "def-common.OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID",
         "type": "string",
         "tags": [],
@@ -1257,7 +1221,7 @@
           "\"observability.ai_insight\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1274,7 +1238,7 @@
           "\"observability_ai_insights_inference_parent_feature\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 9,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1291,7 +1255,7 @@
           "\"observability_ai_insights_inference_subfeature\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 14,
+        "lineNumber": 11,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1308,7 +1272,7 @@
           "\"observability.alert\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1325,7 +1289,7 @@
           "\"observability.error\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1342,7 +1306,7 @@
           "\"observability.host\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 24,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1359,7 +1323,7 @@
           "\"observability.log\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 21,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1376,7 +1340,7 @@
           "\"observability.synthetics_monitor\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 26,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1393,7 +1357,7 @@
           "\"observability.service\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 22,
+        "lineNumber": 19,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1410,7 +1374,7 @@
           "\"observability.slo\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 23,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1427,7 +1391,7 @@
           "\"observability.transaction\""
         ],
         "path": "x-pack/solutions/observability/plugins/observability_agent_builder/common/constants.ts",
-        "lineNumber": 25,
+        "lineNumber": 22,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

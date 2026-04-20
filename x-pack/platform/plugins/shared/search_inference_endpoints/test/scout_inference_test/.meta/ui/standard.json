@@ -1,0 +1,350 @@
+{
+  "sha1": "73e752bf7fd7b69711327a38cb0b4e1942164c85",
+  "tests": [
+    {
+      "id": "42293a2b206815f-21f4f530da45d0c",
+      "title": "EIS Models Page displays page header and documentation link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "42293a2b206815f-cb0c6e1c4ee77b3",
+      "title": "EIS Models Page renders model cards from mock data",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 32,
+        "column": 9
+      }
+    },
+    {
+      "id": "42293a2b206815f-32337d7f8778b44",
+      "title": "EIS Models Page search filters model cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 47,
+        "column": 9
+      }
+    },
+    {
+      "id": "42293a2b206815f-b38677823af138c",
+      "title": "EIS Models Page task type filter buttons filter model cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 66,
+        "column": 9
+      }
+    },
+    {
+      "id": "42293a2b206815f-92c0688ca2cd666",
+      "title": "EIS Models Page model family filter filters cards by provider",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 85,
+        "column": 9
+      }
+    },
+    {
+      "id": "42293a2b206815f-0537dd8c36ee3ef",
+      "title": "EIS Models Page shows empty state when no models match search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/eis_models_page.spec.ts",
+        "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-d5355675947674e",
+      "title": "Feature Settings shows empty state when no models are available",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 34,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-2a44bf3f7ae15b7",
+      "title": "Feature Settings displays page header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 44,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-9892a48538e11bb",
+      "title": "Feature Settings renders default model section and controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-d926e1a42b2e157",
+      "title": "Feature Settings toggling disallow other models hides and restores feature sections",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 64,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-bd688cac48e54cb",
+      "title": "Feature Settings renders feature sections with sub-feature cards and endpoint rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 86,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-c1ed8d81cd86cff",
+      "title": "Feature Settings renders fixture sub-feature cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 107,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-64e8d22a32d3078",
+      "title": "Feature Settings opens add model popover with search input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 119,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-ad69c74bc665a4d",
+      "title": "Feature Settings cancelling reset to defaults modal preserves state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 128,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-e32c159bcb80e61",
+      "title": "Feature Settings cancelling copy to modal closes without changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 143,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-d2bc77c931af42f",
+      "title": "Feature Settings searching in add model popover filters the results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 158,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-97467ab3c0742ec",
+      "title": "Feature Settings selecting a model from the popover adds it to the endpoint list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 177,
+        "column": 9
+      }
+    },
+    {
+      "id": "600135eb4869d8a-e96e035f3a50d36",
+      "title": "Feature Settings copy to applies source endpoint list to the target sub-feature",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/feature_settings.spec.ts",
+        "line": 204,
+        "column": 9
+      }
+    },
+    {
+      "id": "68d451451493487-058290624b65263",
+      "title": "Model Detail Flyout opens flyout with model details, task badges, and author",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 27,
+        "column": 9
+      }
+    },
+    {
+      "id": "68d451451493487-d3714c3b3281706",
+      "title": "Model Detail Flyout flyout shows correct endpoint count and closes via button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 50,
+        "column": 9
+      }
+    },
+    {
+      "id": "68d451451493487-dd8296e96e954d7",
+      "title": "Model Detail Flyout non-preconfigured endpoint shows delete button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 74,
+        "column": 9
+      }
+    },
+    {
+      "id": "68d451451493487-b65ba509a034716",
+      "title": "Model Detail Flyout opens add endpoint modal from flyout and cancels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "68d451451493487-a7f4daa29d4e5a6",
+      "title": "Model Detail Flyout opens view endpoint modal from flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-stateful-search",
+        "@local-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/search_inference_endpoints/test/scout_inference_test/ui/tests/model_detail_flyout.spec.ts",
+        "line": 125,
+        "column": 9
+      }
+    }
+  ]
+}

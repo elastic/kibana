@@ -159,15 +159,17 @@ describe('Mosaic Schema', () => {
           visibility: 'visible',
           size: 's',
         },
-        values: {
-          visible: false,
+        styling: {
+          values: {
+            visible: false,
+          },
         },
       };
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.values?.visible).toBe(false);
+      expect(validated.styling?.values?.visible).toBe(false);
     });
 
     it('throws on empty group_by array', () => {

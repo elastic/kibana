@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import JSZip from 'jszip';
+import { parse as parseYaml } from 'yaml';
 import useObservable from 'react-use/lib/useObservable';
 import {
   EuiCallOut,
@@ -21,6 +23,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import { ButtonsFooter } from '../../../common/components/button_footer';
 import {
   getIntegrationNameFromResponse,
+  fetchTakenPackageNames,
   runInstallPackage,
   type RequestDeps,
 } from '../../../common';
@@ -29,6 +32,22 @@ import { LicensePaywallCard } from '../../license_paywall/license_paywall_card';
 import { useTelemetry } from '../../telemetry_context';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
+
+const extractPackageNameFromZip = async (file: Blob): Promise<string | null> => {
+  try {
+    const zip = await JSZip.loadAsync(file);
+    // Top-level manifest one directory deep: <name>-<version>/manifest.yml
+    const manifestEntry = Object.values(zip.files).find(
+      (f) => !f.dir && /^[^/]+\/manifest\.yml$/.test(f.name)
+    );
+    if (!manifestEntry) return null;
+    const content = await manifestEntry.async('string');
+    const parsed = parseYaml(content);
+    return typeof parsed?.name === 'string' ? parsed.name : null;
+  } catch {
+    return null;
+  }
+};
 
 export const CreateIntegrationUpload = React.memo(() => {
   const services = useKibana().services;
@@ -45,9 +64,10 @@ export const CreateIntegrationUpload = React.memo(() => {
 
   const [file, setFile] = useState<Blob>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isValidating, setIsValidating] = useState<boolean>(false);
   const [error, setError] = useState<string>();
   const [integrationName, setIntegrationName] = useState<string>();
-
+  const validateAbortRef = useRef<AbortController | null>(null);
   const integrationsHref = useMemo(() => application.getUrlForApp('integrations'), [application]);
 
   const onBack = useCallback(() => {
@@ -63,10 +83,37 @@ export const CreateIntegrationUpload = React.memo(() => {
     application.navigateToUrl(integrationsHref);
   }, [application, integrationsHref]);
 
-  const onChangeFile = useCallback((files: FileList | null) => {
-    setFile(files?.[0]);
-    setError(undefined);
-  }, []);
+  const onChangeFile = useCallback(
+    async (files: FileList | null) => {
+      validateAbortRef.current?.abort();
+      const abortController = new AbortController();
+      validateAbortRef.current = abortController;
+
+      const selectedFile = files?.[0];
+      if (!selectedFile || !http) return;
+
+      setFile(selectedFile);
+      setError(undefined);
+      setIsValidating(true);
+
+      try {
+        const packageName = await extractPackageNameFromZip(selectedFile);
+        if (!packageName || abortController.signal.aborted) return;
+        const takenNames = await fetchTakenPackageNames({
+          http,
+          abortSignal: abortController.signal,
+        });
+        if (!abortController.signal.aborted && takenNames.has(packageName)) {
+          setError(i18n.DUPLICATE_PACKAGE_NAME_ERROR(packageName));
+        }
+      } catch {
+        // Silently ignore — the install step will surface any errors
+      } finally {
+        if (!abortController.signal.aborted) setIsValidating(false);
+      }
+    },
+    [http]
+  );
 
   const onConfirm = useCallback(() => {
     if (http == null || file == null) {
@@ -146,7 +193,7 @@ export const CreateIntegrationUpload = React.memo(() => {
                   display="large"
                   aria-label="Upload .zip file"
                   accept="application/zip"
-                  isLoading={isLoading}
+                  isLoading={isLoading || isValidating}
                   fullWidth
                   isInvalid={error != null}
                 />
@@ -172,7 +219,7 @@ export const CreateIntegrationUpload = React.memo(() => {
         <ButtonsFooter
           cancelButtonText={i18n.BACK_BUTTON}
           actionButtonText={i18n.INSTALL_BUTTON}
-          isActionDisabled={file == null}
+          isActionDisabled={file == null || isValidating || error != null}
           isActionLoading={isLoading}
           onCancel={onBack}
           onAction={onConfirm}
