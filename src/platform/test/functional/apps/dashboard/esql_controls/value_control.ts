@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
 
   // Failing: See https://github.com/elastic/kibana/issues/251388
-  describe.skip('dashboard - add a value type ES|QL control', function () {
+  describe('dashboard - add a value type ES|QL control', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -61,18 +61,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
-      await retry.waitFor('control flyout to open', async () => {
-        await esql.typeEsqlEditorQuery(
-          'FROM logstash-* | WHERE geo.dest == ',
-          'InlineEditingESQLEditor'
-        );
-        // Wait until suggestions are loaded
-        await common.sleep(1000);
-        // Create control is the first suggestion
-        await browser.pressKeys(browser.keys.ENTER);
 
-        return await testSubjects.exists('create_esql_control_flyout');
-      });
+      await esql.typeEsqlEditorQuery(
+        'FROM logstash-* | WHERE geo.dest == ',
+        'InlineEditingESQLEditor'
+      );
+      await esql.selectEsqlSuggestionByLabel('Create control');
+
+      await testSubjects.existOrFail('create_esql_control_flyout');
 
       const valuesQueryEditorValue = await esql.getEsqlEditorQuery();
       expect(valuesQueryEditorValue).to.contain(
