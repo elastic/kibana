@@ -109,13 +109,13 @@ export const ManageIntegrationsTable: React.FC<{
   const [isBulkInstalling, setIsBulkInstalling] = useState(false);
 
   const queryClient = useQueryClient();
-  const { data: packagesData } = useGetPackagesQuery({});
+  const { data: packagesData } = useGetPackagesQuery({ prerelease: true });
   const installedPackageVersions = useMemo(
     () =>
       new Map(
         (packagesData?.items ?? [])
-          .filter((item) => item.status === 'installed')
-          .map((item) => [item.name, item.version])
+          .filter((item) => item.installationInfo?.install_status === 'installed')
+          .map((item) => [item.installationInfo!.name, item.installationInfo!.version])
       ),
     [packagesData]
   );
