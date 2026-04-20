@@ -14,7 +14,6 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -106,7 +105,7 @@ export const RuleSummaryFlyout = ({
           </EuiFlexGroup>
         </EuiPanel>
         <EuiHorizontalRule margin="none" />
-        <EuiFlyoutHeader hasBorder>
+        <EuiFlyoutBody>
           <EuiPanel
             paddingSize="m"
             hasShadow={false}
@@ -122,8 +121,7 @@ export const RuleSummaryFlyout = ({
             <EuiSpacer size="s" />
             <RuleHeaderDescription />
           </EuiPanel>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+          <EuiHorizontalRule margin="xs" />
           <EuiPanel
             paddingSize="m"
             hasShadow={false}

@@ -181,6 +181,18 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({
 
   return (
     <>
+      {isSummary && (
+        <>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('xpack.alertingV2.ruleDetails.conditions', {
+                defaultMessage: 'Rule conditions',
+              })}
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiTitle size="xxs">
         <h3>
           {i18n.translate('xpack.alertingV2.ruleDetails.esqlQuery', {
