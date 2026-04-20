@@ -31,18 +31,12 @@ export const PreviewRenderCellValue: React.FC<
   truncate,
 }) => {
   const alert = useMemo<Alert>(() => {
-    const result = (data ?? []).reduce<Record<string, unknown>>((acc, { field, value }) => {
-      if (field === '_id' || field === '_index') {
-        acc[field] = (value as string[])?.[0] ?? '';
-      } else {
-        acc[field] = value;
-      }
-      return acc;
-    }, {});
-    // Fallback _id/_index from ecsData if not in data
-    if (!result._id && ecsData?._id) result._id = ecsData._id;
-    if (!result._index && ecsData?._index) result._index = ecsData._index;
-    return result as Alert;
+    const fields = Object.fromEntries((data ?? []).map(({ field, value }) => [field, value]));
+    return {
+      ...fields,
+      _id: fields._id?.[0] || ecsData?._id || '',
+      _index: fields._index?.[0] || ecsData?._index || '',
+    } as Alert;
   }, [data, ecsData]);
 
   return (
