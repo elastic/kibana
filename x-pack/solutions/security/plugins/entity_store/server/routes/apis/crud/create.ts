@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
@@ -22,7 +23,7 @@ import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const paramsSchema = z
   .object({
-    entityType: z.enum(ALL_ENTITY_TYPES),
+    entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to create.'),
   })
   .required();
 
@@ -31,6 +32,11 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.public.CRUD_CREATE,
       access: 'public',
+      summary: 'Create an entity',
+      description: 'Create a new entity record in the Entity Store for the specified entity type.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -46,6 +52,9 @@ export function registerCRUDCreate(router: EntityStorePluginRouter) {
             ),
             params: buildRouteValidationWithZod(paramsSchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_create.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

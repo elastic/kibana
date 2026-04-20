@@ -12,9 +12,49 @@ import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_ind
 const LATEST_INDEX = getLatestEntitiesIndexName('default');
 type Hits = SearchHitsMetadata<unknown>['hits'];
 
-// Takes non sorted hits and compares them by _id
-export function assertEntitiesEqual(expected: Hits, actual: Hits) {
-  expect(actual).toHaveLength(expected.length);
+// Takes non sorted hits and compares them by _id, also prints rich information about missing entities
+export function assertEntitiesEqual(
+  expected: Hits,
+  actual: Hits,
+  logError?: (message: string) => void
+) {
+  if (actual.length !== expected.length) {
+    const actualIdSet = new Set(actual.map((h) => h._id));
+    const expectedIdSet = new Set(expected.map((h) => h._id));
+
+    const missingEntities = expected.filter((h) => !actualIdSet.has(h._id));
+    const extraEntities = actual.filter((h) => !expectedIdSet.has(h._id));
+
+    const messageParts: string[] = [];
+    if (missingEntities.length > 0) {
+      logError?.(
+        'Entities present in expected not in actual:' + JSON.stringify(missingEntities, null, 2)
+      );
+      messageParts.push(
+        `Entities present in expected not in actual (${missingEntities.length}): ${missingEntities
+          .map((h) => h._id)
+          .join(', ')}`
+      );
+    }
+    if (extraEntities.length > 0) {
+      logError?.(
+        'Entities present in actual but not in expected:' + JSON.stringify(extraEntities, null, 2)
+      );
+      messageParts.push(
+        `Entities present in actual but not in expected (${extraEntities.length}): ${extraEntities
+          .map((h) => h._id)
+          .join(', ')}`
+      );
+    }
+
+    const lengthMismatchMessage =
+      messageParts.length > 0
+        ? messageParts.join('; ')
+        : `Expected ${expected.length} hits, got ${actual.length} (duplicate _id values may hide which ids differ between expected and actual)`;
+
+    expect(actual, lengthMismatchMessage).toHaveLength(expected.length);
+  }
+
   for (const expectedHit of expected) {
     const actualHit = actual.find((h) => h._id === expectedHit._id);
     expect(actualHit, `Could not find hit with id ${expectedHit._id}`).toBeDefined();
@@ -303,6 +343,33 @@ export const expectedHostEntities: Hits = [
       },
     },
   },
+  {
+    _index: LATEST_INDEX,
+    _id: '461490dda53c8f34ea128a61fb4f9463adddfc4f4073be8c45f3a2f05f13e509',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:24.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      entity: {
+        EngineMetadata: {
+          Type: 'host',
+          UntypedId: 'macbookpro-123',
+        },
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:23.000Z',
+          last_seen: '2026-01-20T12:05:24.000Z',
+        },
+        name: 'macbookpro-123',
+        source: 'jamf',
+        id: 'host:macbookpro-123',
+        type: 'Host',
+      },
+    },
+  },
 ];
 
 export const expectedUserEntities: Hits = [
@@ -323,7 +390,7 @@ export const expectedUserEntities: Hits = [
   },
   {
     _index: LATEST_INDEX,
-    _id: '3d2e874ed64e8b5c6b3cd7a72f620dd5e4f1be97e6faab4da281f8b8f6c04913',
+    _id: 'cd38727a29cb7953f67860937ad78e7ccc83bb267d2bdd237c68e8b1c6ca3b88',
     _source: {
       '@timestamp': '2026-01-20T12:05:01.000Z',
       user: { name: 'jane.smith' },
@@ -331,8 +398,8 @@ export const expectedUserEntities: Hits = [
       entity: {
         name: 'jane.smith',
         type: 'Identity',
-        id: 'user:jane.smith@entra_id',
-        EngineMetadata: { Type: 'user', UntypedId: 'jane.smith@entra_id' },
+        id: 'user:jane.smith@host-456@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'jane.smith@host-456@local' },
       },
     },
   },
@@ -464,7 +531,7 @@ export const expectedUserEntities: Hits = [
   },
   {
     _index: LATEST_INDEX,
-    _id: 'a797c8c22378d097a5c2a04496a8d7a62d6f44bf2c4bb3fc59a4863e36e159da',
+    _id: '16fe33533e168db368bc1fe511528ee3c3fc97f89653d714cb71b7c42a04f350',
     _source: {
       '@timestamp': '2026-01-20T12:05:10.000Z',
       user: { name: 'eve.martin' },
@@ -472,8 +539,8 @@ export const expectedUserEntities: Hits = [
       entity: {
         name: 'eve.martin',
         type: 'Identity',
-        id: 'user:eve.martin@microsoft_365',
-        EngineMetadata: { Type: 'user', UntypedId: 'eve.martin@microsoft_365' },
+        id: 'user:eve.martin@host-404@local',
+        EngineMetadata: { Type: 'user', UntypedId: 'eve.martin@host-404@local' },
       },
     },
   },
@@ -661,6 +728,77 @@ export const expectedUserEntities: Hits = [
         type: 'Identity',
         id: 'user:alice.local@host-nonidp-001@local',
         EngineMetadata: { Type: 'user', UntypedId: 'alice.local@host-nonidp-001@local' },
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default-00001',
+    _id: 'b344de5598be1f9ca0f3438b9e1dc4711a3677cea2c4187bc404013764caa3b5',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:23.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      event: {
+        kind: 'asset',
+      },
+      user: {
+        name: 'should-be-local',
+        email: 'should_be_local@example.com',
+      },
+      entity: {
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:23.000Z',
+          last_seen: '2026-01-20T12:05:23.000Z',
+        },
+        EngineMetadata: {
+          Type: 'user',
+          UntypedId: 'should-be-local@macbookpro-123@local',
+        },
+        confidence: 'medium',
+        namespace: 'local',
+        name: 'should-be-local',
+        source: 'jamf',
+        id: 'user:should-be-local@macbookpro-123@local',
+        type: 'Identity',
+      },
+    },
+  },
+  {
+    _index: '.entities.v2.latest.security_default-00001',
+    _id: '91e6005b85bd2de67e1610f7bb07e2dd8506088f74729d56b9e8867d8f6dc102',
+    _source: {
+      '@timestamp': '2026-01-20T12:05:24.000Z',
+      data_stream: {
+        dataset: 'jamf',
+      },
+      host: {
+        id: 'macbookpro-123',
+      },
+      event: {
+        kind: 'asset',
+      },
+      user: {
+        name: 'root',
+      },
+      entity: {
+        lifecycle: {
+          first_seen: '2026-01-20T12:05:24.000Z',
+          last_seen: '2026-01-20T12:05:24.000Z',
+        },
+        EngineMetadata: {
+          Type: 'user',
+          UntypedId: 'root@jamf',
+        },
+        confidence: 'high',
+        namespace: 'jamf',
+        name: 'root',
+        source: 'jamf',
+        id: 'user:root@jamf',
+        type: 'Identity',
       },
     },
   },
