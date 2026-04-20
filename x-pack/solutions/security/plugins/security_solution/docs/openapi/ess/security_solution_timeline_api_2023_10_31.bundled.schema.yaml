@@ -3,14 +3,14 @@ info:
   description: You can create Timelines and Timeline templates via the API, as
     well as import new Timelines from an ndjson file.
   title: Security Timeline API (Elastic Cloud and self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 paths:
   /api/note:
     delete:
@@ -41,7 +41,7 @@ paths:
         description: The ID of the note to delete.
         required: true
       responses:
-        "200":
+        '200':
           description: Indicates the note was successfully deleted.
       summary: Delete a note
       tags:
@@ -54,11 +54,11 @@ paths:
         - in: query
           name: documentIds
           schema:
-            $ref: "#/components/schemas/DocumentIds"
+            $ref: '#/components/schemas/DocumentIds'
         - in: query
           name: savedObjectIds
           schema:
-            $ref: "#/components/schemas/SavedObjectIds"
+            $ref: '#/components/schemas/SavedObjectIds'
         - in: query
           name: page
           schema:
@@ -97,13 +97,13 @@ paths:
         - in: query
           name: associatedFilter
           schema:
-            $ref: "#/components/schemas/AssociatedFilterType"
+            $ref: '#/components/schemas/AssociatedFilterType'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetNotesResult"
+                $ref: '#/components/schemas/GetNotesResult'
           description: Indicates the requested notes were returned.
       summary: Get notes
       tags:
@@ -119,7 +119,7 @@ paths:
               type: object
               properties:
                 note:
-                  $ref: "#/components/schemas/BareNote"
+                  $ref: '#/components/schemas/BareNote'
                   description: The note to add or update.
                 noteId:
                   description: The `savedObjectId` of the note
@@ -136,11 +136,11 @@ paths:
         description: The note to add or update, along with additional metadata.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResponseNote"
+                $ref: '#/components/schemas/ResponseNote'
           description: Indicates the note was successfully created.
       summary: Add or update a note
       tags:
@@ -176,11 +176,11 @@ paths:
         description: The pinned event to add or unpin, along with additional metadata.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PersistPinnedEventResponse"
+                $ref: '#/components/schemas/PersistPinnedEventResponse'
           description: Indicates the event was successfully pinned to or unpinned from the
             Timeline.
       summary: Pin/unpin an event
@@ -219,7 +219,7 @@ paths:
         description: The IDs of the Timelines or Timeline templates to delete.
         required: true
       responses:
-        "200":
+        '200':
           description: Indicates the Timeline was successfully deleted.
       summary: Delete Timelines or Timeline templates
       tags:
@@ -240,11 +240,11 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TimelineResponse"
+                $ref: '#/components/schemas/TimelineResponse'
           description: Indicates that the (template) Timeline was found and returned.
       summary: Get Timeline or Timeline template details
       tags:
@@ -262,7 +262,7 @@ paths:
               type: object
               properties:
                 timeline:
-                  $ref: "#/components/schemas/SavedTimeline"
+                  $ref: '#/components/schemas/SavedTimeline'
                   description: The timeline object of the Timeline or Timeline template that
                     you’re updating.
                 timelineId:
@@ -284,13 +284,13 @@ paths:
         description: The Timeline updates, along with the Timeline ID and version.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PersistTimelineResponse"
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the Timeline was successfully updated.
-        "405":
+        '405':
           content:
             application/json:
               schema:
@@ -319,7 +319,7 @@ paths:
               type: object
               properties:
                 status:
-                  $ref: "#/components/schemas/TimelineStatus"
+                  $ref: '#/components/schemas/TimelineStatus'
                   nullable: true
                 templateTimelineId:
                   description: A unique identifier for the Timeline template.
@@ -332,14 +332,14 @@ paths:
                   nullable: true
                   type: number
                 timeline:
-                  $ref: "#/components/schemas/SavedTimeline"
+                  $ref: '#/components/schemas/SavedTimeline'
                 timelineId:
                   description: A unique identifier for the Timeline.
                   example: 6ce1b592-84e3-4b4a-9552-f189d4b82075
                   nullable: true
                   type: string
                 timelineType:
-                  $ref: "#/components/schemas/TimelineType"
+                  $ref: '#/components/schemas/TimelineType'
                   nullable: true
                 version:
                   nullable: true
@@ -350,13 +350,13 @@ paths:
           with optional fields that will be created if not provided.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PersistTimelineResponse"
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates the Timeline was successfully created.
-        "405":
+        '405':
           content:
             application/json:
               schema:
@@ -386,7 +386,7 @@ paths:
               type: object
               properties:
                 timeline:
-                  $ref: "#/components/schemas/SavedTimeline"
+                  $ref: '#/components/schemas/SavedTimeline'
                 timelineIdToCopy:
                   type: string
               required:
@@ -394,11 +394,11 @@ paths:
                 - timelineIdToCopy
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PersistTimelineResponse"
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the timeline has been successfully copied.
       summary: Copies timeline or timeline template
       tags:
@@ -415,15 +415,15 @@ paths:
           name: timelineType
           required: true
           schema:
-            $ref: "#/components/schemas/TimelineType"
+            $ref: '#/components/schemas/TimelineType'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PersistTimelineResponse"
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the draft Timeline was successfully retrieved.
-        "403":
+        '403':
           content:
             application/json:
               schema:
@@ -436,7 +436,7 @@ paths:
           description: If a draft Timeline was not found and we attempted to create one,
             it indicates that the user does not have the required permissions to
             create a draft Timeline.
-        "409":
+        '409':
           content:
             application/json:
               schema:
@@ -469,22 +469,22 @@ paths:
               type: object
               properties:
                 timelineType:
-                  $ref: "#/components/schemas/TimelineType"
+                  $ref: '#/components/schemas/TimelineType'
               required:
                 - timelineType
         description: The type of Timeline to create. Valid values are `default` and
           `template`.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PersistTimelineResponse"
+                $ref: '#/components/schemas/PersistTimelineResponse'
           description: Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
             Timeline is cleared and returned.
-        "403":
+        '403':
           content:
             application/json:
               schema:
@@ -496,7 +496,7 @@ paths:
                     type: number
           description: Indicates that the user does not have the required permissions to
             create a draft Timeline.
-        "409":
+        '409':
           content:
             application/json:
               schema:
@@ -539,14 +539,14 @@ paths:
         description: The IDs of the Timelines to export.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/ndjson:
               schema:
                 description: NDJSON of the exported Timelines
                 type: string
           description: Indicates the Timelines were successfully exported.
-        "400":
+        '400':
           content:
             application/ndjson:
               schema:
@@ -581,7 +581,7 @@ paths:
                   nullable: true
                   type: string
                 timelineType:
-                  $ref: "#/components/schemas/TimelineType"
+                  $ref: '#/components/schemas/TimelineType'
                   nullable: true
               required:
                 - timelineId
@@ -591,13 +591,13 @@ paths:
         description: The required fields used to favorite a (template) Timeline.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FavoriteTimelineResponse"
+                $ref: '#/components/schemas/FavoriteTimelineResponse'
           description: Indicates the favorite status was successfully updated.
-        "403":
+        '403':
           content:
             application/json:
               schema:
@@ -627,21 +627,21 @@ paths:
                 isImmutable:
                   description: Whether the Timeline should be immutable
                   enum:
-                    - "true"
-                    - "false"
+                    - 'true'
+                    - 'false'
                   type: string
               required:
                 - file
         description: The Timelines to import as a readable stream.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ImportTimelineResult"
+                $ref: '#/components/schemas/ImportTimelineResult'
           description: Indicates the import of Timelines was successful.
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -656,7 +656,7 @@ paths:
                     type: number
           description: Indicates the import of Timelines was unsuccessful because of an
             invalid file extension.
-        "404":
+        '404':
           content:
             application/json:
               schema:
@@ -671,7 +671,7 @@ paths:
                     type: number
           description: Indicates that we were unable to locate the saved object client
             necessary to handle the import.
-        "409":
+        '409':
           content:
             application/json:
               schema:
@@ -701,17 +701,17 @@ paths:
               properties:
                 prepackagedTimelines:
                   items:
-                    $ref: "#/components/schemas/TimelineSavedToReturnObject"
+                    $ref: '#/components/schemas/TimelineSavedToReturnObject'
                     nullable: true
                   type: array
                 timelinesToInstall:
                   items:
-                    $ref: "#/components/schemas/ImportTimelines"
+                    $ref: '#/components/schemas/ImportTimelines'
                     nullable: true
                   type: array
                 timelinesToUpdate:
                   items:
-                    $ref: "#/components/schemas/ImportTimelines"
+                    $ref: '#/components/schemas/ImportTimelines'
                     nullable: true
                   type: array
               required:
@@ -721,13 +721,13 @@ paths:
         description: The Timelines to install or update.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ImportTimelineResult"
+                $ref: '#/components/schemas/ImportTimelineResult'
           description: Indicates the installation of prepackaged Timelines was successful.
-        "500":
+        '500':
           content:
             application/json:
               schema:
@@ -757,15 +757,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResolvedTimeline"
+                $ref: '#/components/schemas/ResolvedTimeline'
           description: The (template) Timeline has been found
-        "400":
+        '400':
           description: The request is missing parameters
-        "404":
+        '404':
           description: The (template) Timeline was not found
       summary: Get an existing saved Timeline or Timeline template
       tags:
@@ -782,19 +782,19 @@ paths:
           name: only_user_favorite
           schema:
             enum:
-              - "true"
-              - "false"
+              - 'true'
+              - 'false'
             nullable: true
             type: string
         - in: query
           name: timeline_type
           schema:
-            $ref: "#/components/schemas/TimelineType"
+            $ref: '#/components/schemas/TimelineType'
             nullable: true
         - in: query
           name: sort_field
           schema:
-            $ref: "#/components/schemas/SortFieldTimeline"
+            $ref: '#/components/schemas/SortFieldTimeline'
         - description: Whether to sort the results `ascending` or `descending`
           in: query
           name: sort_order
@@ -824,10 +824,10 @@ paths:
         - in: query
           name: status
           schema:
-            $ref: "#/components/schemas/TimelineStatus"
+            $ref: '#/components/schemas/TimelineStatus'
             nullable: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -855,7 +855,7 @@ paths:
                     type: number
                   timeline:
                     items:
-                      $ref: "#/components/schemas/TimelineResponse"
+                      $ref: '#/components/schemas/TimelineResponse'
                     type: array
                   totalCount:
                     description: The total amount of results
@@ -865,7 +865,7 @@ paths:
                   - timeline
                   - totalCount
           description: Indicates that the (template) Timelines were found and returned.
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -896,7 +896,7 @@ components:
       type: string
     BareNote:
       allOf:
-        - $ref: "#/components/schemas/NoteCreatedAndUpdatedMetadata"
+        - $ref: '#/components/schemas/NoteCreatedAndUpdatedMetadata'
         - type: object
           properties:
             eventId:
@@ -918,7 +918,7 @@ components:
             - timelineId
     BarePinnedEvent:
       allOf:
-        - $ref: "#/components/schemas/PinnedEventCreatedAndUpdatedMetadata"
+        - $ref: '#/components/schemas/PinnedEventCreatedAndUpdatedMetadata'
         - type: object
           properties:
             eventId:
@@ -990,17 +990,17 @@ components:
           nullable: true
           type: string
         queryMatch:
-          $ref: "#/components/schemas/QueryMatchResult"
+          $ref: '#/components/schemas/QueryMatchResult'
           nullable: true
         type:
-          $ref: "#/components/schemas/DataProviderType"
+          $ref: '#/components/schemas/DataProviderType'
           nullable: true
     DataProviderResult:
       type: object
       properties:
         and:
           items:
-            $ref: "#/components/schemas/DataProviderQueryMatch"
+            $ref: '#/components/schemas/DataProviderQueryMatch'
           nullable: true
           type: array
         enabled:
@@ -1019,10 +1019,10 @@ components:
           nullable: true
           type: string
         queryMatch:
-          $ref: "#/components/schemas/QueryMatchResult"
+          $ref: '#/components/schemas/QueryMatchResult'
           nullable: true
         type:
-          $ref: "#/components/schemas/DataProviderType"
+          $ref: '#/components/schemas/DataProviderType'
           nullable: true
     DataProviderType:
       description: The type of data provider.
@@ -1041,7 +1041,7 @@ components:
       properties:
         favorite:
           items:
-            $ref: "#/components/schemas/FavoriteTimelineResult"
+            $ref: '#/components/schemas/FavoriteTimelineResult'
           type: array
         savedObjectId:
           type: string
@@ -1052,7 +1052,7 @@ components:
           nullable: true
           type: number
         timelineType:
-          $ref: "#/components/schemas/TimelineType"
+          $ref: '#/components/schemas/TimelineType'
         version:
           type: string
       required:
@@ -1080,7 +1080,7 @@ components:
           alias: Custom filter name
           disabled: false
           index: .alerts-security.alerts-default,logs-*
-          key: "@timestamp"
+          key: '@timestamp'
           negate: false,
           type: exists
           value: exists
@@ -1147,7 +1147,7 @@ components:
       properties:
         notes:
           items:
-            $ref: "#/components/schemas/Note"
+            $ref: '#/components/schemas/Note'
           type: array
         totalCount:
           type: number
@@ -1197,17 +1197,17 @@ components:
           type: number
     ImportTimelines:
       allOf:
-        - $ref: "#/components/schemas/SavedTimeline"
+        - $ref: '#/components/schemas/SavedTimeline'
         - type: object
           properties:
             eventNotes:
               items:
-                $ref: "#/components/schemas/BareNote"
+                $ref: '#/components/schemas/BareNote'
               nullable: true
               type: array
             globalNotes:
               items:
-                $ref: "#/components/schemas/BareNote"
+                $ref: '#/components/schemas/BareNote'
               nullable: true
               type: array
             pinnedEventIds:
@@ -1229,7 +1229,7 @@ components:
             - globalNotes
     Note:
       allOf:
-        - $ref: "#/components/schemas/BareNote"
+        - $ref: '#/components/schemas/BareNote'
         - type: object
           properties:
             noteId:
@@ -1268,7 +1268,7 @@ components:
           type: string
     PersistPinnedEventResponse:
       oneOf:
-        - $ref: "#/components/schemas/PinnedEvent"
+        - $ref: '#/components/schemas/PinnedEvent'
         - type: object
           properties:
             unpinned:
@@ -1277,10 +1277,10 @@ components:
           required:
             - unpinned
     PersistTimelineResponse:
-      $ref: "#/components/schemas/TimelineResponse"
+      $ref: '#/components/schemas/TimelineResponse'
     PinnedEvent:
       allOf:
-        - $ref: "#/components/schemas/BarePinnedEvent"
+        - $ref: '#/components/schemas/BarePinnedEvent'
         - type: object
           properties:
             pinnedEventId:
@@ -1346,13 +1346,13 @@ components:
       type: object
       properties:
         alias_purpose:
-          $ref: "#/components/schemas/SavedObjectResolveAliasPurpose"
+          $ref: '#/components/schemas/SavedObjectResolveAliasPurpose'
         alias_target_id:
           type: string
         outcome:
-          $ref: "#/components/schemas/SavedObjectResolveOutcome"
+          $ref: '#/components/schemas/SavedObjectResolveOutcome'
         timeline:
-          $ref: "#/components/schemas/TimelineSavedToReturnObject"
+          $ref: '#/components/schemas/TimelineSavedToReturnObject'
       required:
         - timeline
         - outcome
@@ -1360,7 +1360,7 @@ components:
       type: object
       properties:
         note:
-          $ref: "#/components/schemas/Note"
+          $ref: '#/components/schemas/Note'
       required:
         - note
     RowRendererId:
@@ -1409,11 +1409,11 @@ components:
           description: The Timeline's columns
           example:
             - columnHeaderType: not-filtered
-              id: "@timestamp"
+              id: '@timestamp'
             - columnHeaderType: not-filtered
               id: event.category
           items:
-            $ref: "#/components/schemas/ColumnHeaderResult"
+            $ref: '#/components/schemas/ColumnHeaderResult'
           nullable: true
           type: array
         created:
@@ -1435,10 +1435,10 @@ components:
               name: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b
               queryMatch:
                 field: _id,
-                operator: ":"
+                operator: ':'
                 value: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bcbf66f57d124dcc739c98e6b,
           items:
-            $ref: "#/components/schemas/DataProviderResult"
+            $ref: '#/components/schemas/DataProviderResult'
           nullable: true
           type: array
         dataViewId:
@@ -1477,7 +1477,7 @@ components:
             eventCategoryField: event.category
             query: sequence\n[process where process.name == "sudo"]\n[any where true]
             size: 100
-            timestampField: "@timestamp"
+            timestampField: '@timestamp'
           nullable: true
           type: object
           properties:
@@ -1509,18 +1509,18 @@ components:
           description: A list of row renderers that should not be used when in `Event
             renderers` mode
           items:
-            $ref: "#/components/schemas/RowRendererId"
+            $ref: '#/components/schemas/RowRendererId'
           nullable: true
           type: array
         favorite:
           items:
-            $ref: "#/components/schemas/FavoriteTimelineResult"
+            $ref: '#/components/schemas/FavoriteTimelineResult'
           nullable: true
           type: array
         filters:
           description: A list of filters that should be applied to the query
           items:
-            $ref: "#/components/schemas/FilterTimelineResult"
+            $ref: '#/components/schemas/FilterTimelineResult'
           nullable: true
           type: array
         indexNames:
@@ -1542,7 +1542,7 @@ components:
           nullable: true
           type: string
         kqlQuery:
-          $ref: "#/components/schemas/SerializedFilterQueryResult"
+          $ref: '#/components/schemas/SerializedFilterQueryResult'
           nullable: true
         savedQueryId:
           description: The ID of the saved query that might be used in the Query tab
@@ -1555,10 +1555,10 @@ components:
           nullable: true
           type: string
         sort:
-          $ref: "#/components/schemas/Sort"
+          $ref: '#/components/schemas/Sort'
           nullable: true
         status:
-          $ref: "#/components/schemas/TimelineStatus"
+          $ref: '#/components/schemas/TimelineStatus'
           nullable: true
         templateTimelineId:
           description: A unique ID (UUID) for Timeline templates. For Timelines, the value
@@ -1572,7 +1572,7 @@ components:
           nullable: true
           type: number
         timelineType:
-          $ref: "#/components/schemas/TimelineType"
+          $ref: '#/components/schemas/TimelineType'
           nullable: true
         title:
           description: The Timeline's title.
@@ -1592,7 +1592,7 @@ components:
           type: string
     SavedTimelineWithSavedObjectId:
       allOf:
-        - $ref: "#/components/schemas/SavedTimeline"
+        - $ref: '#/components/schemas/SavedTimeline'
         - type: object
           properties:
             savedObjectId:
@@ -1611,7 +1611,7 @@ components:
       example:
         filterQuery: null
         kuery:
-          expression: "_id : *"
+          expression: '_id : *'
           kind: kuery
         serializedQuery: '{"bool":{"should":[{"exists":{"field":"_id"}}],"minimum_should_match":1}}'
       type: object
@@ -1635,9 +1635,9 @@ components:
               type: string
     Sort:
       oneOf:
-        - $ref: "#/components/schemas/SortObject"
+        - $ref: '#/components/schemas/SortObject'
         - items:
-            $ref: "#/components/schemas/SortObject"
+            $ref: '#/components/schemas/SortObject'
           type: array
     SortFieldTimeline:
       description: The field to sort the timelines by.
@@ -1650,7 +1650,7 @@ components:
     SortObject:
       description: Object indicating how rows are sorted in the Timeline's grid
       example:
-        columnId: "@timestamp"
+        columnId: '@timestamp'
         sortDirection: desc
       type: object
       properties:
@@ -1665,14 +1665,14 @@ components:
           type: string
     TimelineResponse:
       allOf:
-        - $ref: "#/components/schemas/SavedTimeline"
-        - $ref: "#/components/schemas/SavedTimelineWithSavedObjectId"
+        - $ref: '#/components/schemas/SavedTimeline'
+        - $ref: '#/components/schemas/SavedTimelineWithSavedObjectId'
         - type: object
           properties:
             eventIdToNoteIds:
               description: A list of all the notes that are associated to this Timeline.
               items:
-                $ref: "#/components/schemas/Note"
+                $ref: '#/components/schemas/Note'
               nullable: true
               type: array
             noteIds:
@@ -1687,7 +1687,7 @@ components:
             notes:
               description: A list of all the notes that are associated to this Timeline.
               items:
-                $ref: "#/components/schemas/Note"
+                $ref: '#/components/schemas/Note'
               nullable: true
               type: array
             pinnedEventIds:
@@ -1703,17 +1703,17 @@ components:
               description: A list of all the pinned events that are associated to this
                 Timeline.
               items:
-                $ref: "#/components/schemas/PinnedEvent"
+                $ref: '#/components/schemas/PinnedEvent'
               nullable: true
               type: array
     TimelineSavedToReturnObject:
       allOf:
-        - $ref: "#/components/schemas/SavedTimeline"
+        - $ref: '#/components/schemas/SavedTimeline'
         - type: object
           properties:
             eventIdToNoteIds:
               items:
-                $ref: "#/components/schemas/Note"
+                $ref: '#/components/schemas/Note'
               nullable: true
               type: array
             noteIds:
@@ -1723,7 +1723,7 @@ components:
               type: array
             notes:
               items:
-                $ref: "#/components/schemas/Note"
+                $ref: '#/components/schemas/Note'
               nullable: true
               type: array
             pinnedEventIds:
@@ -1733,7 +1733,7 @@ components:
               type: array
             pinnedEventsSaveObject:
               items:
-                $ref: "#/components/schemas/PinnedEvent"
+                $ref: '#/components/schemas/PinnedEvent'
               nullable: true
               type: array
             savedObjectId:

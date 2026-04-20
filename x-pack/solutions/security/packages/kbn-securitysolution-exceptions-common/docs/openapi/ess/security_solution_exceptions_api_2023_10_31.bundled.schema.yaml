@@ -4,14 +4,14 @@ info:
     prevent a rule from generating an alert from incoming events even when the
     rule's other criteria are met.
   title: Security Exceptions API (Elastic Cloud and self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 paths:
   /api/detection_engine/rules/{id}/exceptions:
     post:
@@ -26,7 +26,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/RuleId"
+            $ref: '#/components/schemas/RuleId'
       requestBody:
         content:
           application/json:
@@ -57,14 +57,14 @@ paths:
               properties:
                 items:
                   items:
-                    $ref: "#/components/schemas/CreateRuleExceptionListItemProps"
+                    $ref: '#/components/schemas/CreateRuleExceptionListItemProps'
                   type: array
               required:
                 - items
         description: Rule exception items.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -100,10 +100,10 @@ paths:
                       updated_by: elastic
               schema:
                 items:
-                  $ref: "#/components/schemas/ExceptionListItem"
+                  $ref: '#/components/schemas/ExceptionListItem'
                 type: array
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -115,29 +115,29 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request params]: id: Invalid uuid"
+                    message: '[request params]: id: Invalid uuid'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -146,9 +146,9 @@ paths:
                     message: Unable to create exception-list
                     status_code: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -157,7 +157,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create rule exception items
       tags:
@@ -173,7 +173,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListId"
+            $ref: '#/components/schemas/ExceptionListId'
         - description: Human readable exception list string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `list_id` must be
             specified.
@@ -186,7 +186,7 @@ paths:
           name: list_id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListHumanId"
+            $ref: '#/components/schemas/ExceptionListHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -196,10 +196,10 @@ paths:
           name: namespace_type
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -224,9 +224,9 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/ExceptionList"
+                $ref: '#/components/schemas/ExceptionList'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -238,25 +238,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -269,9 +269,9 @@ paths:
                       Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -280,9 +280,9 @@ paths:
                     message: 'exception list list_id: "foo" does not exist'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -291,7 +291,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Delete an exception list
       tags:
@@ -306,7 +306,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListId"
+            $ref: '#/components/schemas/ExceptionListId'
         - description: Human readable exception list string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `list_id` must be
             specified.
@@ -314,7 +314,7 @@ paths:
           name: list_id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListHumanId"
+            $ref: '#/components/schemas/ExceptionListHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -324,10 +324,10 @@ paths:
           name: namespace_type
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -352,9 +352,9 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/ExceptionList"
+                $ref: '#/components/schemas/ExceptionList'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -366,25 +366,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -397,9 +397,9 @@ paths:
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -408,9 +408,9 @@ paths:
                     message": 'exception list id: "foo" does not exist'
                     status_code": 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -419,7 +419,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get exception list details
       tags:
@@ -456,25 +456,25 @@ paths:
               type: object
               properties:
                 description:
-                  $ref: "#/components/schemas/ExceptionListDescription"
+                  $ref: '#/components/schemas/ExceptionListDescription'
                 list_id:
-                  $ref: "#/components/schemas/ExceptionListHumanId"
+                  $ref: '#/components/schemas/ExceptionListHumanId'
                 meta:
-                  $ref: "#/components/schemas/ExceptionListMeta"
+                  $ref: '#/components/schemas/ExceptionListMeta'
                 name:
-                  $ref: "#/components/schemas/ExceptionListName"
+                  $ref: '#/components/schemas/ExceptionListName'
                 namespace_type:
-                  $ref: "#/components/schemas/ExceptionNamespaceType"
+                  $ref: '#/components/schemas/ExceptionNamespaceType'
                   default: single
                 os_types:
-                  $ref: "#/components/schemas/ExceptionListOsTypeArray"
+                  $ref: '#/components/schemas/ExceptionListOsTypeArray'
                 tags:
-                  $ref: "#/components/schemas/ExceptionListTags"
+                  $ref: '#/components/schemas/ExceptionListTags'
                   default: []
                 type:
-                  $ref: "#/components/schemas/ExceptionListType"
+                  $ref: '#/components/schemas/ExceptionListType'
                 version:
-                  $ref: "#/components/schemas/ExceptionListVersion"
+                  $ref: '#/components/schemas/ExceptionListVersion'
                   default: 1
               required:
                 - name
@@ -483,7 +483,7 @@ paths:
         description: Exception list's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -568,23 +568,23 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/ExceptionList"
+                $ref: '#/components/schemas/ExceptionList'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: list_id: Expected string, received number"
+                    message: '[request body]: list_id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
@@ -597,9 +597,9 @@ paths:
                       		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -610,9 +610,9 @@ paths:
                       is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               examples:
@@ -621,9 +621,9 @@ paths:
                     message: 'exception list id: "simple_list" already exists'
                     status_code: 409
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list already exists response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -632,7 +632,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create an exception list
       tags:
@@ -661,27 +661,27 @@ paths:
                     version.
                   type: string
                 description:
-                  $ref: "#/components/schemas/ExceptionListDescription"
+                  $ref: '#/components/schemas/ExceptionListDescription'
                 id:
-                  $ref: "#/components/schemas/ExceptionListId"
+                  $ref: '#/components/schemas/ExceptionListId'
                 list_id:
-                  $ref: "#/components/schemas/ExceptionListHumanId"
+                  $ref: '#/components/schemas/ExceptionListHumanId'
                 meta:
-                  $ref: "#/components/schemas/ExceptionListMeta"
+                  $ref: '#/components/schemas/ExceptionListMeta'
                 name:
-                  $ref: "#/components/schemas/ExceptionListName"
+                  $ref: '#/components/schemas/ExceptionListName'
                 namespace_type:
-                  $ref: "#/components/schemas/ExceptionNamespaceType"
+                  $ref: '#/components/schemas/ExceptionNamespaceType'
                   default: single
                 os_types:
-                  $ref: "#/components/schemas/ExceptionListOsTypeArray"
+                  $ref: '#/components/schemas/ExceptionListOsTypeArray'
                   default: []
                 tags:
-                  $ref: "#/components/schemas/ExceptionListTags"
+                  $ref: '#/components/schemas/ExceptionListTags'
                 type:
-                  $ref: "#/components/schemas/ExceptionListType"
+                  $ref: '#/components/schemas/ExceptionListType'
                 version:
-                  $ref: "#/components/schemas/ExceptionListVersion"
+                  $ref: '#/components/schemas/ExceptionListVersion'
               required:
                 - name
                 - description
@@ -689,7 +689,7 @@ paths:
         description: Exception list's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -713,38 +713,38 @@ paths:
                     updated_by: elastic
                     version: 2
               schema:
-                $ref: "#/components/schemas/ExceptionList"
+                $ref: '#/components/schemas/ExceptionList'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: list_id: Expected string, received number"
+                    message: '[request body]: list_id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -755,9 +755,9 @@ paths:
                       granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -766,9 +766,9 @@ paths:
                     message": 'exception list id: "foo" does not exist'
                     status_code": 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -777,7 +777,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Update an exception list
       tags:
@@ -791,7 +791,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: "#/components/schemas/ExceptionListHumanId"
+            $ref: '#/components/schemas/ExceptionListHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -801,21 +801,21 @@ paths:
           name: namespace_type
           required: true
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
         - description: Determines whether to include expired exceptions in the duplicated
             list. Expiration date defined by `expire_time`.
           in: query
           name: include_expired_exceptions
           required: true
           schema:
-            default: "true"
+            default: 'true'
             enum:
-              - "true"
-              - "false"
+              - 'true'
+              - 'false'
             example: true
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -839,9 +839,9 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/ExceptionList"
+                $ref: '#/components/schemas/ExceptionList'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -853,25 +853,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -883,9 +883,9 @@ paths:
                       [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -894,15 +894,15 @@ paths:
                     message": 'exception list id: "foo" does not exist'
                     status_code": 404
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Exception list not found
-        "405":
+        '405':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list to duplicate not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -911,7 +911,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Duplicate an exception list
       tags:
@@ -925,12 +925,12 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/ExceptionListId"
+            $ref: '#/components/schemas/ExceptionListId'
         - in: query
           name: list_id
           required: true
           schema:
-            $ref: "#/components/schemas/ExceptionListHumanId"
+            $ref: '#/components/schemas/ExceptionListHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -940,7 +940,7 @@ paths:
           name: namespace_type
           required: true
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
         - description: Determines whether to include expired exceptions in the exported
             list. Expiration date defined by `expire_time`.
           example: true
@@ -948,13 +948,13 @@ paths:
           name: include_expired_exceptions
           required: true
           schema:
-            default: "true"
+            default: 'true'
             enum:
-              - "true"
-              - "false"
+              - 'true'
+              - 'false'
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/ndjson:
               examples:
@@ -968,36 +968,36 @@ paths:
                 format: binary
                 type: string
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: list_id: Required, namespace_type: Required"
+                    message: '[request query]: list_id: Required, namespace_type: Required'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1008,9 +1008,9 @@ paths:
                       action is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1019,9 +1019,9 @@ paths:
                     message": 'exception list id: "foo" does not exist'
                     status_code": 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1030,7 +1030,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Export an exception list
       tags:
@@ -1057,7 +1057,7 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: "#/components/schemas/FindExceptionListsFilter"
+            $ref: '#/components/schemas/FindExceptionListsFilter'
         - description: >
             Determines whether the returned containers are Kibana associated
             with a Kibana space
@@ -1075,7 +1075,7 @@ paths:
             default:
               - single
             items:
-              $ref: "#/components/schemas/ExceptionNamespaceType"
+              $ref: '#/components/schemas/ExceptionNamespaceType'
             type: array
         - description: The page number to return
           in: query
@@ -1111,7 +1111,7 @@ paths:
             example: desc
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1143,7 +1143,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: "#/components/schemas/ExceptionList"
+                      $ref: '#/components/schemas/ExceptionList'
                     type: array
                   page:
                     minimum: 1
@@ -1160,7 +1160,7 @@ paths:
                   - per_page
                   - total
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1172,25 +1172,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1202,9 +1202,9 @@ paths:
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1213,7 +1213,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get exception lists
       tags:
@@ -1266,7 +1266,7 @@ paths:
                   type: string
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1304,7 +1304,7 @@ paths:
                 type: object
                 properties:
                   errors:
-                    $ref: "#/components/schemas/ExceptionListsImportBulkErrorArray"
+                    $ref: '#/components/schemas/ExceptionListsImportBulkErrorArray'
                   success:
                     type: boolean
                   success_count:
@@ -1329,30 +1329,30 @@ paths:
                   - success_exception_list_items
                   - success_count_exception_list_items
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1363,9 +1363,9 @@ paths:
                       action is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1374,7 +1374,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Import an exception list
       tags:
@@ -1390,7 +1390,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListItemId"
+            $ref: '#/components/schemas/ExceptionListItemId'
         - description: Human readable exception item string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `item_id` must be
             specified
@@ -1398,7 +1398,7 @@ paths:
           name: item_id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListItemHumanId"
+            $ref: '#/components/schemas/ExceptionListItemHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -1408,10 +1408,10 @@ paths:
           name: namespace_type
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1446,9 +1446,9 @@ paths:
                     updated_at: 2025-01-07T20:07:33.119Z
                     updated_by: elastic
               schema:
-                $ref: "#/components/schemas/ExceptionListItem"
+                $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -1458,25 +1458,25 @@ paths:
                     'agnostic' | 'single', received 'blob'"
                   statusCode: 400
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1489,9 +1489,9 @@ paths:
                       Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1500,9 +1500,9 @@ paths:
                     message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1511,7 +1511,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Delete an exception list item
       tags:
@@ -1527,7 +1527,7 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListItemId"
+            $ref: '#/components/schemas/ExceptionListItemId'
         - description: Human readable exception item string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `item_id` must be
             specified.
@@ -1535,7 +1535,7 @@ paths:
           name: item_id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListItemHumanId"
+            $ref: '#/components/schemas/ExceptionListItemHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -1545,10 +1545,10 @@ paths:
           name: namespace_type
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1583,9 +1583,9 @@ paths:
                     updated_at: 2025-01-07T20:07:33.119Z
                     updated_by: elastic
               schema:
-                $ref: "#/components/schemas/ExceptionListItem"
+                $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1597,25 +1597,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1627,9 +1627,9 @@ paths:
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1638,9 +1638,9 @@ paths:
                     message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1649,7 +1649,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get an exception list item
       tags:
@@ -1668,23 +1668,23 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: "#/components/schemas/CreateExceptionListItemGeneric"
-                - $ref: "#/components/schemas/CreateExceptionListItemEndpointList"
-                - $ref: "#/components/schemas/CreateExceptionListItemTrustedAppsWindows"
-                - $ref: "#/components/schemas/CreateExceptionListItemTrustedAppsMac"
-                - $ref: "#/components/schemas/CreateExceptionListItemTrustedAppsLinux"
-                - $ref: "#/components/schemas/CreateExceptionListItemTrustedDevicesWindows"
-                - $ref: "#/components/schemas/CreateExceptionListItemTrustedDevicesMac"
-                - $ref: "#/components/schemas/CreateExceptionListItemTrustedDevicesWindowsMac"
-                - $ref: "#/components/schemas/CreateExceptionListItemEventFilters"
-                - $ref: "#/components/schemas/CreateExceptionListItemHostIsolation"
-                - $ref: "#/components/schemas/CreateExceptionListItemBlocklistWindows"
-                - $ref: "#/components/schemas/CreateExceptionListItemBlocklistLinux"
-                - $ref: "#/components/schemas/CreateExceptionListItemBlocklistMac"
+                - $ref: '#/components/schemas/CreateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/CreateExceptionListItemEndpointList'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedAppsLinux'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevicesWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevicesMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemTrustedDevicesWindowsMac'
+                - $ref: '#/components/schemas/CreateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/CreateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistWindows'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistLinux'
+                - $ref: '#/components/schemas/CreateExceptionListItemBlocklistMac'
         description: Exception list item's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1872,38 +1872,38 @@ paths:
                     updated_at: 2025-01-09T01:31:12.614Z
                     updated_by: elastic
               schema:
-                $ref: "#/components/schemas/ExceptionListItem"
+                $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request,
-                    message: "[request body]: list_id: Expected string, received number"
+                    message: '[request body]: list_id: Expected string, received number'
                     statusCode: 400,
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1914,9 +1914,9 @@ paths:
                       action is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               examples:
@@ -1925,9 +1925,9 @@ paths:
                     message: 'exception list item id: \"simple_list_item\" already exists'
                     status_code: 409
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list item already exists response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1936,7 +1936,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create an exception list item
       tags:
@@ -1949,23 +1949,23 @@ paths:
           application/json:
             schema:
               oneOf:
-                - $ref: "#/components/schemas/UpdateExceptionListItemGeneric"
-                - $ref: "#/components/schemas/UpdateExceptionListItemEndpointList"
-                - $ref: "#/components/schemas/UpdateExceptionListItemTrustedAppsWindows"
-                - $ref: "#/components/schemas/UpdateExceptionListItemTrustedAppsMac"
-                - $ref: "#/components/schemas/UpdateExceptionListItemTrustedAppsLinux"
-                - $ref: "#/components/schemas/UpdateExceptionListItemTrustedDevicesWindows"
-                - $ref: "#/components/schemas/UpdateExceptionListItemTrustedDevicesMac"
-                - $ref: "#/components/schemas/UpdateExceptionListItemTrustedDevicesWindowsMac"
-                - $ref: "#/components/schemas/UpdateExceptionListItemEventFilters"
-                - $ref: "#/components/schemas/UpdateExceptionListItemHostIsolation"
-                - $ref: "#/components/schemas/UpdateExceptionListItemBlocklistWindows"
-                - $ref: "#/components/schemas/UpdateExceptionListItemBlocklistLinux"
-                - $ref: "#/components/schemas/UpdateExceptionListItemBlocklistMac"
+                - $ref: '#/components/schemas/UpdateExceptionListItemGeneric'
+                - $ref: '#/components/schemas/UpdateExceptionListItemEndpointList'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsMac'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedAppsLinux'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevicesWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevicesMac'
+                - $ref: '#/components/schemas/UpdateExceptionListItemTrustedDevicesWindowsMac'
+                - $ref: '#/components/schemas/UpdateExceptionListItemEventFilters'
+                - $ref: '#/components/schemas/UpdateExceptionListItemHostIsolation'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistWindows'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistLinux'
+                - $ref: '#/components/schemas/UpdateExceptionListItemBlocklistMac'
         description: Exception list item's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1993,38 +1993,38 @@ paths:
                     updated_at: 2025-01-07T21:34:50.233Z
                     updated_by: elastic
               schema:
-                $ref: "#/components/schemas/ExceptionListItem"
+                $ref: '#/components/schemas/ExceptionListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: item_id: Expected string, received number"
+                    message: '[request body]: item_id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -2035,9 +2035,9 @@ paths:
                       action is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -2046,9 +2046,9 @@ paths:
                     message: 'exception list item item_id: \"foo\" does not exist'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -2057,7 +2057,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Update an exception list item
       tags:
@@ -2073,7 +2073,7 @@ paths:
           required: true
           schema:
             items:
-              $ref: "#/components/schemas/ExceptionListHumanId"
+              $ref: '#/components/schemas/ExceptionListHumanId'
             type: array
         - description: >
             Filters the returned results according to the value of the specified
@@ -2090,7 +2090,7 @@ paths:
           schema:
             default: []
             items:
-              $ref: "#/components/schemas/FindExceptionListItemsFilter"
+              $ref: '#/components/schemas/FindExceptionListItemsFilter'
             type: array
         - description: >
             Determines whether the returned containers are Kibana associated
@@ -2108,7 +2108,7 @@ paths:
             default:
               - single
             items:
-              $ref: "#/components/schemas/ExceptionNamespaceType"
+              $ref: '#/components/schemas/ExceptionNamespaceType'
             type: array
         - in: query
           name: search
@@ -2138,7 +2138,7 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
         - description: Determines the sort order, which can be `desc` or `asc`.
           in: query
           name: sort_order
@@ -2150,7 +2150,7 @@ paths:
             example: desc
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -2193,7 +2193,7 @@ paths:
                 properties:
                   data:
                     items:
-                      $ref: "#/components/schemas/ExceptionListItem"
+                      $ref: '#/components/schemas/ExceptionListItem'
                     type: array
                   page:
                     minimum: 1
@@ -2212,7 +2212,7 @@ paths:
                   - per_page
                   - total
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -2224,25 +2224,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -2255,9 +2255,9 @@ paths:
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -2266,9 +2266,9 @@ paths:
                     message: 'exception list list_id: "foo" does not exist'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -2277,7 +2277,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get exception list items
       tags:
@@ -2292,13 +2292,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListId"
+            $ref: '#/components/schemas/ExceptionListId'
         - description: Exception list's human readable identifier.
           in: query
           name: list_id
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionListHumanId"
+            $ref: '#/components/schemas/ExceptionListHumanId'
         - examples:
             agnostic:
               value: agnostic
@@ -2308,7 +2308,7 @@ paths:
           name: namespace_type
           required: false
           schema:
-            $ref: "#/components/schemas/ExceptionNamespaceType"
+            $ref: '#/components/schemas/ExceptionNamespaceType'
             default: single
         - description: Search filter clause
           in: query
@@ -2319,7 +2319,7 @@ paths:
               exception-list-agnostic.attributes.tags:"policy:all"
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -2345,7 +2345,7 @@ paths:
                     minimum: 0
                     type: integer
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -2357,25 +2357,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -2388,9 +2388,9 @@ paths:
                       Kibana privileges [lists-summary]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -2399,9 +2399,9 @@ paths:
                     message": 'exception list id: "foo" does not exist'
                     status_code": 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -2410,7 +2410,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get an exception list summary
       tags:
@@ -2447,15 +2447,15 @@ paths:
               type: object
               properties:
                 description:
-                  $ref: "#/components/schemas/ExceptionListDescription"
+                  $ref: '#/components/schemas/ExceptionListDescription'
                 name:
-                  $ref: "#/components/schemas/ExceptionListName"
+                  $ref: '#/components/schemas/ExceptionListName'
               required:
                 - name
                 - description
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -2480,23 +2480,23 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/ExceptionList"
+                $ref: '#/components/schemas/ExceptionList'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: list_id: Expected string, received number"
+                    message: '[request body]: list_id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
@@ -2509,9 +2509,9 @@ paths:
                       		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -2520,9 +2520,9 @@ paths:
                     message: Unable to create exception-list
                     status_code: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               examples:
@@ -2531,9 +2531,9 @@ paths:
                     message: 'exception list id: "simple_list" already exists'
                     status_code: 409
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Exception list already exists response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -2542,7 +2542,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create a shared exception list
       tags:
@@ -2592,7 +2592,7 @@ components:
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
             * Path entry: only 1 allowed
           items:
-            $ref: "#/components/schemas/BlocklistHashOrPathEntry"
+            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
           minItems: 1
           type: array
         list_id:
@@ -2610,7 +2610,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     BlocklistMacProperties:
@@ -2623,7 +2623,7 @@ components:
             * Hash entries: up to 3 (one for each hash type: md5, sha1, sha256)
             * Path entry: only 1 allowed
           items:
-            $ref: "#/components/schemas/BlocklistHashOrPathEntry"
+            $ref: '#/components/schemas/BlocklistHashOrPathEntry'
           minItems: 1
           type: array
         list_id:
@@ -2641,7 +2641,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     BlocklistWindowsCodeSignatureEntry:
@@ -2710,8 +2710,8 @@ components:
             * Code signature entry: only 1 allowed
           items:
             oneOf:
-              - $ref: "#/components/schemas/BlocklistHashOrPathEntry"
-              - $ref: "#/components/schemas/BlocklistWindowsCodeSignatureEntry"
+              - $ref: '#/components/schemas/BlocklistHashOrPathEntry'
+              - $ref: '#/components/schemas/BlocklistWindowsCodeSignatureEntry'
           minItems: 1
           type: array
         list_id:
@@ -2729,68 +2729,68 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     CreateExceptionListItemBase:
       type: object
       properties:
         comments:
-          $ref: "#/components/schemas/CreateExceptionListItemCommentArray"
+          $ref: '#/components/schemas/CreateExceptionListItemCommentArray'
           default: []
         description:
-          $ref: "#/components/schemas/ExceptionListItemDescription"
+          $ref: '#/components/schemas/ExceptionListItemDescription'
         expire_time:
-          $ref: "#/components/schemas/ExceptionListItemExpireTime"
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
         item_id:
-          $ref: "#/components/schemas/ExceptionListItemHumanId"
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
         meta:
-          $ref: "#/components/schemas/ExceptionListItemMeta"
+          $ref: '#/components/schemas/ExceptionListItemMeta'
         name:
-          $ref: "#/components/schemas/ExceptionListItemName"
+          $ref: '#/components/schemas/ExceptionListItemName'
         namespace_type:
-          $ref: "#/components/schemas/ExceptionNamespaceType"
+          $ref: '#/components/schemas/ExceptionNamespaceType'
           default: single
         type:
-          $ref: "#/components/schemas/ExceptionListItemType"
+          $ref: '#/components/schemas/ExceptionListItemType'
       required:
         - type
         - name
         - description
     CreateExceptionListItemBlocklistLinux:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/BlocklistLinuxProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistLinuxProperties'
     CreateExceptionListItemBlocklistMac:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/BlocklistMacProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistMacProperties'
     CreateExceptionListItemBlocklistWindows:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/BlocklistWindowsProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistWindowsProperties'
     CreateExceptionListItemComment:
       type: object
       properties:
         comment:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - comment
     CreateExceptionListItemCommentArray:
       items:
-        $ref: "#/components/schemas/CreateExceptionListItemComment"
+        $ref: '#/components/schemas/CreateExceptionListItemComment'
       type: array
     CreateExceptionListItemEndpointList:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/EndpointListProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/EndpointListProperties'
     CreateExceptionListItemEventFilters:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/EventFiltersProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/EventFiltersProperties'
     CreateExceptionListItemGeneric:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
         - example:
             description: This is a sample detection type exception item.
             entries:
@@ -2815,87 +2815,87 @@ components:
           type: object
           properties:
             entries:
-              $ref: "#/components/schemas/ExceptionListItemEntryArray"
+              $ref: '#/components/schemas/ExceptionListItemEntryArray'
             list_id:
-              $ref: "#/components/schemas/ExceptionListHumanId"
+              $ref: '#/components/schemas/ExceptionListHumanId'
             os_types:
-              $ref: "#/components/schemas/ExceptionListItemOsTypeArray"
+              $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
               default: []
             tags:
-              $ref: "#/components/schemas/ExceptionListItemTags"
+              $ref: '#/components/schemas/ExceptionListItemTags'
               default: []
           required:
             - list_id
             - entries
     CreateExceptionListItemHostIsolation:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/HostIsolationProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/HostIsolationProperties'
     CreateExceptionListItemTrustedAppsLinux:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedAppsLinuxProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsLinuxProperties'
     CreateExceptionListItemTrustedAppsMac:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedAppsMacProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsMacProperties'
     CreateExceptionListItemTrustedAppsWindows:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedAppsWindowsProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsWindowsProperties'
     CreateExceptionListItemTrustedDevicesMac:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedDevicesMacProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesMacProperties'
     CreateExceptionListItemTrustedDevicesWindows:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedDevicesWindowsProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsProperties'
     CreateExceptionListItemTrustedDevicesWindowsMac:
       allOf:
-        - $ref: "#/components/schemas/CreateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedDevicesWindowsMacProperties"
+        - $ref: '#/components/schemas/CreateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsMacProperties'
     CreateRuleExceptionListItemComment:
       type: object
       properties:
         comment:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - comment
     CreateRuleExceptionListItemCommentArray:
       items:
-        $ref: "#/components/schemas/CreateRuleExceptionListItemComment"
+        $ref: '#/components/schemas/CreateRuleExceptionListItemComment'
       type: array
     CreateRuleExceptionListItemProps:
       type: object
       properties:
         comments:
-          $ref: "#/components/schemas/CreateRuleExceptionListItemCommentArray"
+          $ref: '#/components/schemas/CreateRuleExceptionListItemCommentArray'
           default: []
         description:
-          $ref: "#/components/schemas/ExceptionListItemDescription"
+          $ref: '#/components/schemas/ExceptionListItemDescription'
         entries:
-          $ref: "#/components/schemas/ExceptionListItemEntryArray"
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
         expire_time:
           format: date-time
           type: string
         item_id:
-          $ref: "#/components/schemas/ExceptionListItemHumanId"
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
         meta:
-          $ref: "#/components/schemas/ExceptionListItemMeta"
+          $ref: '#/components/schemas/ExceptionListItemMeta'
         name:
-          $ref: "#/components/schemas/ExceptionListItemName"
+          $ref: '#/components/schemas/ExceptionListItemName'
         namespace_type:
-          $ref: "#/components/schemas/ExceptionNamespaceType"
+          $ref: '#/components/schemas/ExceptionNamespaceType'
           default: single
         os_types:
-          $ref: "#/components/schemas/ExceptionListItemOsTypeArray"
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
           default: []
         tags:
-          $ref: "#/components/schemas/ExceptionListItemTags"
+          $ref: '#/components/schemas/ExceptionListItemTags'
           default: []
         type:
-          $ref: "#/components/schemas/ExceptionListItemType"
+          $ref: '#/components/schemas/ExceptionListItemType'
       required:
         - type
         - name
@@ -2920,7 +2920,7 @@ components:
       type: object
       properties:
         entries:
-          $ref: "#/components/schemas/ExceptionListItemEntryArray"
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
           description: >
             Exception entries for endpoint security exceptions (used to prevent
             detection rule alerts).
@@ -2935,10 +2935,10 @@ components:
           example: endpoint_list
           type: string
         os_types:
-          $ref: "#/components/schemas/ExceptionListItemOsTypeArray"
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
           default: []
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     EventFiltersProperties:
@@ -2946,7 +2946,7 @@ components:
       type: object
       properties:
         entries:
-          $ref: "#/components/schemas/ExceptionListItemEntryArray"
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
           description: >
             Exception entries for the event filter.
 
@@ -2963,10 +2963,10 @@ components:
           example: endpoint_event_filters
           type: string
         os_types:
-          $ref: "#/components/schemas/ExceptionListItemOsTypeArray"
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
           default: []
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     ExceptionList:
@@ -2985,29 +2985,29 @@ components:
           description: Autogenerated value - user that created object.
           type: string
         description:
-          $ref: "#/components/schemas/ExceptionListDescription"
+          $ref: '#/components/schemas/ExceptionListDescription'
         id:
-          $ref: "#/components/schemas/ExceptionListId"
+          $ref: '#/components/schemas/ExceptionListId'
         immutable:
           type: boolean
         list_id:
-          $ref: "#/components/schemas/ExceptionListHumanId"
+          $ref: '#/components/schemas/ExceptionListHumanId'
         meta:
-          $ref: "#/components/schemas/ExceptionListMeta"
+          $ref: '#/components/schemas/ExceptionListMeta'
         name:
-          $ref: "#/components/schemas/ExceptionListName"
+          $ref: '#/components/schemas/ExceptionListName'
         namespace_type:
-          $ref: "#/components/schemas/ExceptionNamespaceType"
+          $ref: '#/components/schemas/ExceptionNamespaceType'
         os_types:
-          $ref: "#/components/schemas/ExceptionListOsTypeArray"
+          $ref: '#/components/schemas/ExceptionListOsTypeArray'
         tags:
-          $ref: "#/components/schemas/ExceptionListTags"
+          $ref: '#/components/schemas/ExceptionListTags'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
-          $ref: "#/components/schemas/ExceptionListType"
+          $ref: '#/components/schemas/ExceptionListType'
         updated_at:
           description: Autogenerated date of last object update.
           format: date-time
@@ -3016,7 +3016,7 @@ components:
           description: Autogenerated value - user that last updated object.
           type: string
         version:
-          $ref: "#/components/schemas/ExceptionListVersion"
+          $ref: '#/components/schemas/ExceptionListVersion'
       required:
         - id
         - list_id
@@ -3066,7 +3066,7 @@ components:
             version.
           type: string
         comments:
-          $ref: "#/components/schemas/ExceptionListItemCommentArray"
+          $ref: '#/components/schemas/ExceptionListItemCommentArray'
         created_at:
           description: Autogenerated date of object creation.
           format: date-time
@@ -3075,33 +3075,33 @@ components:
           description: Autogenerated value - user that created object.
           type: string
         description:
-          $ref: "#/components/schemas/ExceptionListItemDescription"
+          $ref: '#/components/schemas/ExceptionListItemDescription'
         entries:
-          $ref: "#/components/schemas/ExceptionListItemEntryArray"
+          $ref: '#/components/schemas/ExceptionListItemEntryArray'
         expire_time:
-          $ref: "#/components/schemas/ExceptionListItemExpireTime"
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
         id:
-          $ref: "#/components/schemas/ExceptionListItemId"
+          $ref: '#/components/schemas/ExceptionListItemId'
         item_id:
-          $ref: "#/components/schemas/ExceptionListItemHumanId"
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
         list_id:
-          $ref: "#/components/schemas/ExceptionListHumanId"
+          $ref: '#/components/schemas/ExceptionListHumanId'
         meta:
-          $ref: "#/components/schemas/ExceptionListItemMeta"
+          $ref: '#/components/schemas/ExceptionListItemMeta'
         name:
-          $ref: "#/components/schemas/ExceptionListItemName"
+          $ref: '#/components/schemas/ExceptionListItemName'
         namespace_type:
-          $ref: "#/components/schemas/ExceptionNamespaceType"
+          $ref: '#/components/schemas/ExceptionNamespaceType'
         os_types:
-          $ref: "#/components/schemas/ExceptionListItemOsTypeArray"
+          $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
         tags:
-          $ref: "#/components/schemas/ExceptionListItemTags"
+          $ref: '#/components/schemas/ExceptionListItemTags'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and
             returned correctly.
           type: string
         type:
-          $ref: "#/components/schemas/ExceptionListItemType"
+          $ref: '#/components/schemas/ExceptionListItemType'
         updated_at:
           description: Autogenerated date of last object update.
           format: date-time
@@ -3128,21 +3128,21 @@ components:
       type: object
       properties:
         comment:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         created_at:
           description: Autogenerated date of object creation.
           format: date-time
           type: string
         created_by:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         id:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         updated_at:
           description: Autogenerated date of last object update.
           format: date-time
           type: string
         updated_by:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - id
         - comment
@@ -3154,32 +3154,32 @@ components:
 
         - comment (string): Comments about the exception item.
       items:
-        $ref: "#/components/schemas/ExceptionListItemComment"
+        $ref: '#/components/schemas/ExceptionListItemComment'
       type: array
     ExceptionListItemDescription:
       description: Describes the exception list.
       type: string
     ExceptionListItemEntry:
       anyOf:
-        - $ref: "#/components/schemas/ExceptionListItemEntryMatch"
-        - $ref: "#/components/schemas/ExceptionListItemEntryMatchAny"
-        - $ref: "#/components/schemas/ExceptionListItemEntryList"
-        - $ref: "#/components/schemas/ExceptionListItemEntryExists"
-        - $ref: "#/components/schemas/ExceptionListItemEntryNested"
-        - $ref: "#/components/schemas/ExceptionListItemEntryMatchWildcard"
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryList'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
+        - $ref: '#/components/schemas/ExceptionListItemEntryNested'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchWildcard'
       discriminator:
         propertyName: type
     ExceptionListItemEntryArray:
       items:
-        $ref: "#/components/schemas/ExceptionListItemEntry"
+        $ref: '#/components/schemas/ExceptionListItemEntry'
       type: array
     ExceptionListItemEntryExists:
       type: object
       properties:
         field:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         operator:
-          $ref: "#/components/schemas/ExceptionListItemEntryOperator"
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
         type:
           enum:
             - exists
@@ -3192,19 +3192,19 @@ components:
       type: object
       properties:
         field:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         list:
           type: object
           properties:
             id:
-              $ref: "#/components/schemas/ListId"
+              $ref: '#/components/schemas/ListId'
             type:
-              $ref: "#/components/schemas/ListType"
+              $ref: '#/components/schemas/ListType'
           required:
             - id
             - type
         operator:
-          $ref: "#/components/schemas/ExceptionListItemEntryOperator"
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
         type:
           enum:
             - list
@@ -3218,15 +3218,15 @@ components:
       type: object
       properties:
         field:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         operator:
-          $ref: "#/components/schemas/ExceptionListItemEntryOperator"
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
         type:
           enum:
             - match
           type: string
         value:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - type
         - field
@@ -3236,16 +3236,16 @@ components:
       type: object
       properties:
         field:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         operator:
-          $ref: "#/components/schemas/ExceptionListItemEntryOperator"
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
         type:
           enum:
             - match_any
           type: string
         value:
           items:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
           minItems: 1
           type: array
       required:
@@ -3257,15 +3257,15 @@ components:
       type: object
       properties:
         field:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         operator:
-          $ref: "#/components/schemas/ExceptionListItemEntryOperator"
+          $ref: '#/components/schemas/ExceptionListItemEntryOperator'
         type:
           enum:
             - wildcard
           type: string
         value:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - type
         - field
@@ -3276,11 +3276,11 @@ components:
       properties:
         entries:
           items:
-            $ref: "#/components/schemas/ExceptionListItemEntryNestedEntryItem"
+            $ref: '#/components/schemas/ExceptionListItemEntryNestedEntryItem'
           minItems: 1
           type: array
         field:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         type:
           enum:
             - nested
@@ -3291,9 +3291,9 @@ components:
         - entries
     ExceptionListItemEntryNestedEntryItem:
       oneOf:
-        - $ref: "#/components/schemas/ExceptionListItemEntryMatch"
-        - $ref: "#/components/schemas/ExceptionListItemEntryMatchAny"
-        - $ref: "#/components/schemas/ExceptionListItemEntryExists"
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatch'
+        - $ref: '#/components/schemas/ExceptionListItemEntryMatchAny'
+        - $ref: '#/components/schemas/ExceptionListItemEntryExists'
     ExceptionListItemEntryOperator:
       enum:
         - excluded
@@ -3326,7 +3326,7 @@ components:
       type: string
     ExceptionListItemOsTypeArray:
       items:
-        $ref: "#/components/schemas/ExceptionListOsType"
+        $ref: '#/components/schemas/ExceptionListOsType'
       type: array
     ExceptionListItemTags:
       items:
@@ -3358,7 +3358,7 @@ components:
     ExceptionListOsTypeArray:
       description: Use this field to specify the operating system. Only enter one value.
       items:
-        $ref: "#/components/schemas/ExceptionListOsType"
+        $ref: '#/components/schemas/ExceptionListOsType'
       type: array
     ExceptionListsImportBulkError:
       type: object
@@ -3374,16 +3374,16 @@ components:
             - status_code
             - message
         id:
-          $ref: "#/components/schemas/ExceptionListId"
+          $ref: '#/components/schemas/ExceptionListId'
         item_id:
-          $ref: "#/components/schemas/ExceptionListItemHumanId"
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
         list_id:
-          $ref: "#/components/schemas/ExceptionListHumanId"
+          $ref: '#/components/schemas/ExceptionListHumanId'
       required:
         - error
     ExceptionListsImportBulkErrorArray:
       items:
-        $ref: "#/components/schemas/ExceptionListsImportBulkError"
+        $ref: '#/components/schemas/ExceptionListsImportBulkError'
       type: array
     ExceptionListTags:
       description: String array containing words and phrases to help categorize
@@ -3429,7 +3429,7 @@ components:
         - single
       type: string
     FindExceptionListItemsFilter:
-      $ref: "#/components/schemas/NonEmptyString"
+      $ref: '#/components/schemas/NonEmptyString'
     FindExceptionListsFilter:
       example: exception-list.attributes.name:%Detection%20List
       type: string
@@ -3486,7 +3486,7 @@ components:
           minItems: 3
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     ListId:
@@ -3551,7 +3551,7 @@ components:
         - error
         - message
     RuleId:
-      $ref: "#/components/schemas/UUID"
+      $ref: '#/components/schemas/UUID'
     SiemErrorResponse:
       type: object
       properties:
@@ -3636,7 +3636,7 @@ components:
                   value:
                     description: Must be the string 'true'
                     enum:
-                      - "true"
+                      - 'true'
                     type: string
                 required:
                   - field
@@ -3694,8 +3694,8 @@ components:
             supported on Linux)
           items:
             oneOf:
-              - $ref: "#/components/schemas/TrustedAppHashEntry"
-              - $ref: "#/components/schemas/TrustedAppPathEntry"
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
           minItems: 1
           type: array
         list_id:
@@ -3713,7 +3713,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     TrustedAppsMacProperties:
@@ -3724,9 +3724,9 @@ components:
           description: Process hash, executable path, or code signature entries
           items:
             oneOf:
-              - $ref: "#/components/schemas/TrustedAppHashEntry"
-              - $ref: "#/components/schemas/TrustedAppPathEntry"
-              - $ref: "#/components/schemas/TrustedAppMacCodeSignatureEntry"
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+              - $ref: '#/components/schemas/TrustedAppMacCodeSignatureEntry'
           minItems: 1
           type: array
         list_id:
@@ -3744,7 +3744,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     TrustedAppsWindowsProperties:
@@ -3755,9 +3755,9 @@ components:
           description: Process hash, executable path, or code signature entries
           items:
             oneOf:
-              - $ref: "#/components/schemas/TrustedAppHashEntry"
-              - $ref: "#/components/schemas/TrustedAppPathEntry"
-              - $ref: "#/components/schemas/TrustedAppWindowsCodeSignatureEntry"
+              - $ref: '#/components/schemas/TrustedAppHashEntry'
+              - $ref: '#/components/schemas/TrustedAppPathEntry'
+              - $ref: '#/components/schemas/TrustedAppWindowsCodeSignatureEntry'
           minItems: 1
           type: array
         list_id:
@@ -3775,7 +3775,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     TrustedAppWindowsCodeSignatureEntry:
@@ -3825,7 +3825,7 @@ components:
                   value:
                     description: Must be the string 'true'
                     enum:
-                      - "true"
+                      - 'true'
                     type: string
                 required:
                   - field
@@ -3913,7 +3913,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     TrustedDevicesWindowsMacProperties:
@@ -3982,7 +3982,7 @@ components:
           minItems: 2
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     TrustedDevicesWindowsProperties:
@@ -4051,7 +4051,7 @@ components:
           minItems: 1
           type: array
         tags:
-          $ref: "#/components/schemas/EndpointArtifactTags"
+          $ref: '#/components/schemas/EndpointArtifactTags'
       required:
         - list_id
     UpdateExceptionListItemBase:
@@ -4063,67 +4063,67 @@ components:
             version.
           type: string
         comments:
-          $ref: "#/components/schemas/UpdateExceptionListItemCommentArray"
+          $ref: '#/components/schemas/UpdateExceptionListItemCommentArray'
           default: []
         description:
-          $ref: "#/components/schemas/ExceptionListItemDescription"
+          $ref: '#/components/schemas/ExceptionListItemDescription'
         expire_time:
-          $ref: "#/components/schemas/ExceptionListItemExpireTime"
+          $ref: '#/components/schemas/ExceptionListItemExpireTime'
         id:
-          $ref: "#/components/schemas/ExceptionListItemId"
+          $ref: '#/components/schemas/ExceptionListItemId'
           description: Either `id` or `item_id` must be specified
         item_id:
-          $ref: "#/components/schemas/ExceptionListItemHumanId"
+          $ref: '#/components/schemas/ExceptionListItemHumanId'
           description: Either `id` or `item_id` must be specified
         meta:
-          $ref: "#/components/schemas/ExceptionListItemMeta"
+          $ref: '#/components/schemas/ExceptionListItemMeta'
         name:
-          $ref: "#/components/schemas/ExceptionListItemName"
+          $ref: '#/components/schemas/ExceptionListItemName'
         namespace_type:
-          $ref: "#/components/schemas/ExceptionNamespaceType"
+          $ref: '#/components/schemas/ExceptionNamespaceType'
           default: single
         type:
-          $ref: "#/components/schemas/ExceptionListItemType"
+          $ref: '#/components/schemas/ExceptionListItemType'
       required:
         - type
         - name
         - description
     UpdateExceptionListItemBlocklistLinux:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/BlocklistLinuxProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistLinuxProperties'
     UpdateExceptionListItemBlocklistMac:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/BlocklistMacProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistMacProperties'
     UpdateExceptionListItemBlocklistWindows:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/BlocklistWindowsProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/BlocklistWindowsProperties'
     UpdateExceptionListItemComment:
       type: object
       properties:
         comment:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
         id:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - comment
     UpdateExceptionListItemCommentArray:
       items:
-        $ref: "#/components/schemas/UpdateExceptionListItemComment"
+        $ref: '#/components/schemas/UpdateExceptionListItemComment'
       type: array
     UpdateExceptionListItemEndpointList:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/EndpointListProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/EndpointListProperties'
     UpdateExceptionListItemEventFilters:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/EventFiltersProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/EventFiltersProperties'
     UpdateExceptionListItemGeneric:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
         - example:
             comments: []
             description: Updated description
@@ -4140,44 +4140,44 @@ components:
           type: object
           properties:
             entries:
-              $ref: "#/components/schemas/ExceptionListItemEntryArray"
+              $ref: '#/components/schemas/ExceptionListItemEntryArray'
             list_id:
-              $ref: "#/components/schemas/ExceptionListHumanId"
+              $ref: '#/components/schemas/ExceptionListHumanId'
             os_types:
-              $ref: "#/components/schemas/ExceptionListItemOsTypeArray"
+              $ref: '#/components/schemas/ExceptionListItemOsTypeArray'
               default: []
             tags:
-              $ref: "#/components/schemas/ExceptionListItemTags"
+              $ref: '#/components/schemas/ExceptionListItemTags'
           required:
             - entries
     UpdateExceptionListItemHostIsolation:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/HostIsolationProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/HostIsolationProperties'
     UpdateExceptionListItemTrustedAppsLinux:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedAppsLinuxProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsLinuxProperties'
     UpdateExceptionListItemTrustedAppsMac:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedAppsMacProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsMacProperties'
     UpdateExceptionListItemTrustedAppsWindows:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedAppsWindowsProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedAppsWindowsProperties'
     UpdateExceptionListItemTrustedDevicesMac:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedDevicesMacProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesMacProperties'
     UpdateExceptionListItemTrustedDevicesWindows:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedDevicesWindowsProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsProperties'
     UpdateExceptionListItemTrustedDevicesWindowsMac:
       allOf:
-        - $ref: "#/components/schemas/UpdateExceptionListItemBase"
-        - $ref: "#/components/schemas/TrustedDevicesWindowsMacProperties"
+        - $ref: '#/components/schemas/UpdateExceptionListItemBase'
+        - $ref: '#/components/schemas/TrustedDevicesWindowsMacProperties'
     UUID:
       description: A universally unique identifier
       format: uuid

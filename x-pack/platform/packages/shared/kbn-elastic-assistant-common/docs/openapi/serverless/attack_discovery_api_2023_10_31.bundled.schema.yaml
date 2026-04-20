@@ -7,14 +7,14 @@ info:
     alerts to tell you which users and hosts are involved, how alerts correspond
     to the MITRE ATT&CK matrix, and which threat actor might be responsible.
   title: Security Attack discovery API (Elastic Cloud Serverless)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 paths:
   /api/attack_discovery/_bulk:
     post:
@@ -84,7 +84,7 @@ paths:
         description: Bulk update parameters for Attack discoveries
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -94,12 +94,12 @@ paths:
                     description: Array of updated Attack discovery alert objects. Each item includes
                       the applied modifications from the bulk update request.
                     items:
-                      $ref: "#/components/schemas/AttackDiscoveryApiAlert"
+                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                 required:
                   - data
           description: Successful response containing the updated Attack discovery alerts
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -219,7 +219,7 @@ paths:
             type: integer
         - description: Free-text search query applied to relevant text fields of Attack
             discoveries (title, description, tags, etc.)
-          example: ""
+          example: ''
           in: query
           name: search
           required: false
@@ -245,13 +245,13 @@ paths:
             type: boolean
         - description: Field used to sort results. See `AttackDiscoveryFindSortField` for
             allowed values.
-          example: "@timestamp"
+          example: '@timestamp'
           in: query
           name: sort_field
           required: false
           schema:
-            $ref: "#/components/schemas/AttackDiscoveryFindSortField"
-            default: "@timestamp"
+            $ref: '#/components/schemas/AttackDiscoveryFindSortField'
+            default: '@timestamp'
         - description: Sort order direction `asc` for ascending or `desc` for descending.
             Defaults to `desc`.
           example: desc
@@ -259,7 +259,7 @@ paths:
           name: sort_order
           required: false
           schema:
-            $ref: "#/components/schemas/SortOrder"
+            $ref: '#/components/schemas/SortOrder'
             default: desc
         - description: Start of the time range for the search. Accepts absolute timestamps
             (ISO 8601) or relative date math (e.g. "now-7d").
@@ -296,7 +296,7 @@ paths:
             default: true
             type: boolean
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -313,7 +313,7 @@ paths:
                     description: Array of matched Attack discovery objects. Each item follows the
                       `AttackDiscoveryApiAlert` schema.
                     items:
-                      $ref: "#/components/schemas/AttackDiscoveryApiAlert"
+                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                   page:
                     description: Current page number of the paginated result set.
@@ -345,7 +345,7 @@ paths:
                   - total
                   - unique_alert_ids_count
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -386,17 +386,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AttackDiscoveryGenerationConfig"
+              $ref: '#/components/schemas/AttackDiscoveryGenerationConfig'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   execution_uuid:
-                    $ref: "#/components/schemas/NonEmptyString"
+                    $ref: '#/components/schemas/NonEmptyString'
                     description: The unique identifier for the attack discovery generation process.
                       Use this UUID to track the generation progress and
                       retrieve results via the find endpoint.
@@ -404,7 +404,7 @@ paths:
                 required:
                   - execution_uuid
           description: Attack discovery generation initiated successfully
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -473,7 +473,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -482,12 +482,12 @@ paths:
                   generations:
                     description: List of attack discovery generations
                     items:
-                      $ref: "#/components/schemas/AttackDiscoveryGeneration"
+                      $ref: '#/components/schemas/AttackDiscoveryGeneration'
                     type: array
                 required:
                   - generations
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -532,7 +532,7 @@ paths:
           name: execution_uuid
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
         - description: Enables a markdown syntax used to render pivot fields, for example
             `{{ user.name james }}`. When disabled, the same example would be
             rendered as `james`. This is primarily used for Attack discovery
@@ -555,7 +555,7 @@ paths:
             default: true
             type: boolean
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -564,17 +564,17 @@ paths:
                   data:
                     description: Array of Attack discoveries generated during this execution.
                     items:
-                      $ref: "#/components/schemas/AttackDiscoveryApiAlert"
+                      $ref: '#/components/schemas/AttackDiscoveryApiAlert'
                     type: array
                   generation:
-                    $ref: "#/components/schemas/AttackDiscoveryGeneration"
+                    $ref: '#/components/schemas/AttackDiscoveryGeneration'
                     description: Optional metadata about the attack discovery generation process,
                       metadata including execution status and statistics. This
                       metadata may not be available for all generations.
                 required:
                   - data
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -626,9 +626,9 @@ paths:
           name: execution_uuid
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -669,7 +669,7 @@ paths:
                     description: The timestamp when the generation process completed, in ISO 8601
                       format. This field may be absent for generations that
                       haven't finished.
-                    example: 2025-09-29T06:42:44.810Z
+                    example: '2025-09-29T06:42:44.810Z'
                     type: string
                   execution_uuid:
                     description: The unique identifier for this attack discovery generation
@@ -693,7 +693,7 @@ paths:
                   start:
                     description: The timestamp when the generation process began, in ISO 8601
                       format. This marks the beginning of the AI analysis.
-                    example: 2025-09-29T06:42:08.962Z
+                    example: '2025-09-29T06:42:08.962Z'
                     type: string
                   status:
                     description: The current status of the attack discovery generation. After
@@ -715,7 +715,7 @@ paths:
                   - status
           description: Successful response - The attack discovery generation has been
             dismissed
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -777,17 +777,17 @@ paths:
               schedule:
                 interval: 24h
             schema:
-              $ref: "#/components/schemas/AttackDiscoveryApiScheduleCreateProps"
+              $ref: '#/components/schemas/AttackDiscoveryApiScheduleCreateProps'
         description: Attack discovery schedule configuration including name, parameters,
           schedule interval, and actions
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               example:
                 actions: []
-                created_at: 2023-10-31T10:00:00.000Z
+                created_at: '2023-10-31T10:00:00.000Z'
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
@@ -803,12 +803,12 @@ paths:
                   start: now-24h
                 schedule:
                   interval: 24h
-                updated_at: 2023-10-31T10:00:00.000Z
+                updated_at: '2023-10-31T10:00:00.000Z'
                 updated_by: elastic
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryApiSchedule"
+                $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
           description: Successfully created Attack discovery schedule
-        "400":
+        '400':
           content:
             application/json:
               example:
@@ -816,7 +816,7 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryGenericError"
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Generic Error
       summary: Create Attack discovery schedule
       tags:
@@ -858,7 +858,7 @@ paths:
           name: sort_field
           required: false
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
         - description: Sort order direction. Use 'asc' for ascending or 'desc' for
             descending. Defaults to 'asc'.
           example: asc
@@ -871,7 +871,7 @@ paths:
               - desc
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -880,7 +880,7 @@ paths:
                   data:
                     description: Array of matched Attack discovery schedule objects.
                     items:
-                      $ref: "#/components/schemas/AttackDiscoveryApiSchedule"
+                      $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
                     type: array
                   page:
                     description: Current page number of the paginated result set.
@@ -898,7 +898,7 @@ paths:
                   - total
                   - data
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
@@ -942,9 +942,9 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               example:
@@ -953,13 +953,13 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: "#/components/schemas/NonEmptyString"
+                    $ref: '#/components/schemas/NonEmptyString'
                     description: The unique identifier of the deleted Attack Discovery schedule
                 required:
                   - id
           description: Successfully deleted Attack Discovery schedule, returning the ID of
             the deleted schedule for confirmation
-        "400":
+        '400':
           content:
             application/json:
               example:
@@ -967,7 +967,7 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryGenericError"
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Generic Error
       summary: Delete Attack discovery schedule
       tags:
@@ -995,19 +995,19 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               example:
                 actions: []
-                created_at: 2023-10-31T10:00:00.000Z
+                created_at: '2023-10-31T10:00:00.000Z'
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
                 last_execution:
-                  date: 2023-10-31T10:00:00.000Z
+                  date: '2023-10-31T10:00:00.000Z'
                   last_duration: 45.2
                   status: ok
                 name: Daily Security Analysis
@@ -1022,13 +1022,13 @@ paths:
                   start: now-24h
                 schedule:
                   interval: 24h
-                updated_at: 2023-10-31T10:00:00.000Z
+                updated_at: '2023-10-31T10:00:00.000Z'
                 updated_by: elastic
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryApiSchedule"
+                $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
           description: Successfully retrieved Attack Discovery schedule with complete
             configuration and metadata
-        "400":
+        '400':
           content:
             application/json:
               example:
@@ -1036,7 +1036,7 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryGenericError"
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Generic Error
       summary: Get Attack discovery schedule by ID
       tags:
@@ -1064,7 +1064,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
       requestBody:
         content:
           application/json:
@@ -1083,17 +1083,17 @@ paths:
               schedule:
                 interval: 12h
             schema:
-              $ref: "#/components/schemas/AttackDiscoveryApiScheduleUpdateProps"
+              $ref: '#/components/schemas/AttackDiscoveryApiScheduleUpdateProps'
         description: Updated Attack discovery schedule configuration. All fields are
           required as this replaces the entire schedule configuration.
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               example:
                 actions: []
-                created_at: 2023-10-31T10:00:00.000Z
+                created_at: '2023-10-31T10:00:00.000Z'
                 created_by: elastic
                 enabled: true
                 id: 12345678-1234-1234-1234-123456789012
@@ -1109,13 +1109,13 @@ paths:
                   start: now-48h
                 schedule:
                   interval: 12h
-                updated_at: 2023-10-31T12:00:00.000Z
+                updated_at: '2023-10-31T12:00:00.000Z'
                 updated_by: elastic
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryApiSchedule"
+                $ref: '#/components/schemas/AttackDiscoveryApiSchedule'
           description: Successfully updated Attack Discovery schedule with the new
             configuration and metadata
-        "400":
+        '400':
           content:
             application/json:
               example:
@@ -1123,7 +1123,7 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryGenericError"
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Generic Error
       summary: Update Attack discovery schedule
       tags:
@@ -1153,9 +1153,9 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               example:
@@ -1164,13 +1164,13 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: "#/components/schemas/NonEmptyString"
+                    $ref: '#/components/schemas/NonEmptyString'
                     description: The unique identifier of the disabled Attack Discovery schedule
                 required:
                   - id
           description: Successfully disabled Attack Discovery schedule, returning the
             schedule ID for confirmation
-        "400":
+        '400':
           content:
             application/json:
               example:
@@ -1178,7 +1178,7 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryGenericError"
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Generic Error
       summary: Disable Attack discovery schedule
       tags:
@@ -1207,9 +1207,9 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/NonEmptyString"
+            $ref: '#/components/schemas/NonEmptyString'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               example:
@@ -1218,13 +1218,13 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref: "#/components/schemas/NonEmptyString"
+                    $ref: '#/components/schemas/NonEmptyString'
                     description: The unique identifier of the enabled Attack Discovery schedule
                 required:
                   - id
           description: Successfully enabled Attack Discovery schedule, returning the
             schedule ID for confirmation
-        "400":
+        '400':
           content:
             application/json:
               example:
@@ -1232,7 +1232,7 @@ paths:
                 message: Invalid request parameters
                 status_code: 400
               schema:
-                $ref: "#/components/schemas/AttackDiscoveryGenericError"
+                $ref: '#/components/schemas/AttackDiscoveryGenericError'
           description: Generic Error
       summary: Enable Attack discovery schedule
       tags:
@@ -1260,7 +1260,7 @@ components:
           type: boolean
         createdAt:
           description: Timestamp of when the anonymization field was created.
-          example: 2023-10-31T12:00:00Z
+          example: '2023-10-31T12:00:00Z'
           type: string
         createdBy:
           description: Username of the person who created the anonymization field.
@@ -1271,18 +1271,18 @@ components:
           example: url.domain
           type: string
         id:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
           description: The ID of the anonymization field.
         namespace:
           description: Kibana space in which this anonymization field exists.
           example: default
           type: string
         timestamp:
-          $ref: "#/components/schemas/NonEmptyTimestamp"
+          $ref: '#/components/schemas/NonEmptyTimestamp'
           description: Timestamp when the anonymization field was initially created.
         updatedAt:
           description: Timestamp of the last update.
-          example: 2023-10-31T12:00:00Z
+          example: '2023-10-31T12:00:00Z'
           type: string
         updatedBy:
           description: Username of the person who last updated the field.
@@ -1311,7 +1311,7 @@ components:
           example: gpt-4
           type: string
         provider:
-          $ref: "#/components/schemas/Provider"
+          $ref: '#/components/schemas/Provider'
           description: Provider
           example: OpenAI
       required:
@@ -1388,7 +1388,7 @@ components:
             type: string
           type: array
         replacements:
-          $ref: "#/components/schemas/Replacements"
+          $ref: '#/components/schemas/Replacements'
           description: Key-value pairs that are used to replace placeholders in the
             markdown fields
         risk_score:
@@ -1404,7 +1404,7 @@ components:
             type: string
           type: array
         timestamp:
-          $ref: "#/components/schemas/NonEmptyTimestamp"
+          $ref: '#/components/schemas/NonEmptyTimestamp'
           description: The time the attack discovery was generated
         title:
           description: A title for the attack discovery, in plain text
@@ -1420,7 +1420,7 @@ components:
           description: The optional array of users who may view the attack discovery. When
             empty, (or not present), all users may view the attack discovery.
           items:
-            $ref: "#/components/schemas/User"
+            $ref: '#/components/schemas/User'
           type: array
       required:
         - alert_ids
@@ -1439,7 +1439,7 @@ components:
         actions:
           description: The attack discovery schedule actions
           items:
-            $ref: "#/components/schemas/AttackDiscoveryApiScheduleAction"
+            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
         created_at:
           description: The date the schedule was created
@@ -1455,16 +1455,16 @@ components:
           description: UUID of attack discovery schedule
           type: string
         last_execution:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleExecution"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecution'
           description: The attack discovery schedule last execution summary
         name:
           description: The name of the schedule
           type: string
         params:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleParams"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
           description: The attack discovery schedule configuration parameters
         schedule:
-          $ref: "#/components/schemas/IntervalApiSchedule"
+          $ref: '#/components/schemas/IntervalApiSchedule'
           description: The attack discovery schedule interval
         updated_at:
           description: The date the schedule was updated
@@ -1486,8 +1486,8 @@ components:
         - actions
     AttackDiscoveryApiScheduleAction:
       oneOf:
-        - $ref: "#/components/schemas/AttackDiscoveryApiScheduleGeneralAction"
-        - $ref: "#/components/schemas/AttackDiscoveryApiScheduleSystemAction"
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleGeneralAction'
+        - $ref: '#/components/schemas/AttackDiscoveryApiScheduleSystemAction'
     AttackDiscoveryApiScheduleActionAlertsFilter:
       additionalProperties: true
       type: object
@@ -1497,14 +1497,14 @@ components:
       type: object
       properties:
         notify_when:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionNotifyWhen'
         summary:
           description: Action summary indicates whether we will send a summary
             notification about all the generate alerts or notification per
             individual alert
           type: boolean
         throttle:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionThrottle"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionThrottle'
           nullable: true
       required:
         - summary
@@ -1517,8 +1517,8 @@ components:
       description: The connector ID.
       type: string
     AttackDiscoveryApiScheduleActionNotifyWhen:
-      description: "The condition for throttling the notification:
-        `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`"
+      description: 'The condition for throttling the notification:
+        `onActionGroupChange`, `onActiveAlert`,  or `onThrottleInterval`'
       enum:
         - onActiveAlert
         - onThrottleInterval
@@ -1542,7 +1542,7 @@ components:
         actions:
           description: The attack discovery schedule actions
           items:
-            $ref: "#/components/schemas/AttackDiscoveryApiScheduleAction"
+            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
         enabled:
           description: Indicates whether the schedule is enabled
@@ -1551,10 +1551,10 @@ components:
           description: The name of the schedule
           type: string
         params:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleParams"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
           description: The attack discovery schedule configuration parameters
         schedule:
-          $ref: "#/components/schemas/IntervalApiSchedule"
+          $ref: '#/components/schemas/IntervalApiSchedule'
           description: The attack discovery schedule interval
       required:
         - name
@@ -1574,7 +1574,7 @@ components:
         message:
           type: string
         status:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleExecutionStatus"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleExecutionStatus'
           description: Status of the execution
       required:
         - date
@@ -1596,17 +1596,17 @@ components:
           description: The action type used for sending notifications.
           type: string
         alerts_filter:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionAlertsFilter'
         frequency:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionFrequency"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionFrequency'
         group:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionGroup"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionGroup'
         id:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionId"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
         params:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionParams"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
         uuid:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - action_type_id
         - group
@@ -1621,7 +1621,7 @@ components:
           type: string
         api_config:
           allOf:
-            - $ref: "#/components/schemas/ApiConfig"
+            - $ref: '#/components/schemas/ApiConfig'
             - type: object
               properties:
                 name:
@@ -1636,9 +1636,9 @@ components:
         end:
           type: string
         filters:
-          $ref: "#/components/schemas/Filters"
+          $ref: '#/components/schemas/Filters'
         query:
-          $ref: "#/components/schemas/Query"
+          $ref: '#/components/schemas/Query'
         size:
           type: number
         start:
@@ -1654,11 +1654,11 @@ components:
           description: The action type used for sending notifications.
           type: string
         id:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionId"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionId'
         params:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleActionParams"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleActionParams'
         uuid:
-          $ref: "#/components/schemas/NonEmptyString"
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - action_type_id
         - id
@@ -1670,16 +1670,16 @@ components:
         actions:
           description: The attack discovery schedule actions
           items:
-            $ref: "#/components/schemas/AttackDiscoveryApiScheduleAction"
+            $ref: '#/components/schemas/AttackDiscoveryApiScheduleAction'
           type: array
         name:
           description: The name of the schedule
           type: string
         params:
-          $ref: "#/components/schemas/AttackDiscoveryApiScheduleParams"
+          $ref: '#/components/schemas/AttackDiscoveryApiScheduleParams'
           description: The attack discovery schedule configuration parameters
         schedule:
-          $ref: "#/components/schemas/IntervalApiSchedule"
+          $ref: '#/components/schemas/IntervalApiSchedule'
           description: The attack discovery schedule interval
       required:
         - name
@@ -1690,7 +1690,7 @@ components:
       description: Allowed field names to sort Attack discovery results by. Clients
         should only pass one of the listed values.
       enum:
-        - "@timestamp"
+        - '@timestamp'
       type: string
     AttackDiscoveryGeneration:
       type: object
@@ -1771,10 +1771,10 @@ components:
             `/api/security_ai_assistant/anonymization_fields/_find` API (for a
             specific Kibana space) to provide this value.
           items:
-            $ref: "#/components/schemas/AnonymizationFieldResponse"
+            $ref: '#/components/schemas/AnonymizationFieldResponse'
           type: array
         apiConfig:
-          $ref: "#/components/schemas/ApiConfig"
+          $ref: '#/components/schemas/ApiConfig'
           description: LLM API configuration.
         connectorName:
           type: string
@@ -1813,7 +1813,7 @@ components:
         model:
           type: string
         replacements:
-          $ref: "#/components/schemas/Replacements"
+          $ref: '#/components/schemas/Replacements'
         size:
           type: number
         start:
@@ -1867,7 +1867,7 @@ components:
     NonEmptyTimestamp:
       description: A string that represents a timestamp in ISO 8601 format and does
         not contain only whitespace characters.
-      example: 2023-10-31T12:00:00Z
+      example: '2023-10-31T12:00:00Z'
       format: nonempty
       minLength: 1
       type: string

@@ -2,14 +2,14 @@ openapi: 3.0.3
 info:
   description: Interact with and manage endpoints running the Elastic Defend integration.
   title: Security Endpoint Management API (Elastic Cloud and self-hosted)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 paths:
   /api/endpoint/action:
     get:
@@ -20,58 +20,58 @@ paths:
           name: page
           required: false
           schema:
-            $ref: "#/components/schemas/Page"
+            $ref: '#/components/schemas/Page'
         - in: query
           name: pageSize
           required: false
           schema:
-            $ref: "#/components/schemas/PageSize"
+            $ref: '#/components/schemas/PageSize'
         - in: query
           name: commands
           required: false
           schema:
-            $ref: "#/components/schemas/Commands"
+            $ref: '#/components/schemas/Commands'
         - in: query
           name: agentIds
           required: false
           schema:
-            $ref: "#/components/schemas/AgentIds"
+            $ref: '#/components/schemas/AgentIds'
         - in: query
           name: userIds
           required: false
           schema:
-            $ref: "#/components/schemas/UserIds"
+            $ref: '#/components/schemas/UserIds'
         - in: query
           name: startDate
           required: false
           schema:
-            $ref: "#/components/schemas/StartDate"
+            $ref: '#/components/schemas/StartDate'
         - in: query
           name: endDate
           required: false
           schema:
-            $ref: "#/components/schemas/EndDate"
+            $ref: '#/components/schemas/EndDate'
         - in: query
           name: agentTypes
           required: false
           schema:
-            $ref: "#/components/schemas/AgentTypes"
+            $ref: '#/components/schemas/AgentTypes'
         - in: query
           name: withOutputs
           required: false
           schema:
-            $ref: "#/components/schemas/WithOutputs"
+            $ref: '#/components/schemas/WithOutputs'
         - in: query
           name: types
           required: false
           schema:
-            $ref: "#/components/schemas/Types"
+            $ref: '#/components/schemas/Types'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetEndpointActionListResponse"
+                $ref: '#/components/schemas/GetEndpointActionListResponse'
           description: OK
       summary: Get response actions
       tags:
@@ -88,13 +88,13 @@ paths:
             type: object
             properties:
               agent_ids:
-                $ref: "#/components/schemas/AgentIds"
+                $ref: '#/components/schemas/AgentIds'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ActionStatusSuccessResponse"
+                $ref: '#/components/schemas/ActionStatusSuccessResponse'
           description: OK
       summary: Get response actions status
       tags:
@@ -112,11 +112,11 @@ paths:
             example: fr518850-681a-4y60-aa98-e22640cae2b8
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ActionDetailsResponse"
+                $ref: '#/components/schemas/ActionDetailsResponse'
           description: OK
       summary: Get action details
       tags:
@@ -148,7 +148,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -214,7 +214,7 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/octet-stream:
               schema:
@@ -243,14 +243,14 @@ paths:
                   parameters:
                     id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
             schema:
-              $ref: "#/components/schemas/CancelRouteRequestBody"
+              $ref: '#/components/schemas/CancelRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResponseActionCreateSuccessResponse"
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Successfully cancelled the response action
       summary: Cancel a response action
       tags:
@@ -263,14 +263,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExecuteRouteRequestBody"
+              $ref: '#/components/schemas/ExecuteRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExecuteRouteResponse"
+                $ref: '#/components/schemas/ExecuteRouteResponse'
           description: OK
       summary: Run a command
       tags:
@@ -283,14 +283,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GetFileRouteRequestBody"
+              $ref: '#/components/schemas/GetFileRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetFileRouteResponse"
+                $ref: '#/components/schemas/GetFileRouteResponse'
           description: OK
       summary: Get a file
       tags:
@@ -331,7 +331,7 @@ paths:
               type: object
               properties:
                 agent_type:
-                  $ref: "#/components/schemas/AgentTypes"
+                  $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
                   description: If this action is associated with any alerts, they can be specified
                     here. The action will be logged in any cases associated with
@@ -357,20 +357,20 @@ paths:
                   minItems: 1
                   type: array
                 comment:
-                  $ref: "#/components/schemas/Comment"
+                  $ref: '#/components/schemas/Comment'
                 endpoint_ids:
-                  $ref: "#/components/schemas/EndpointIds"
+                  $ref: '#/components/schemas/EndpointIds'
                 parameters:
-                  $ref: "#/components/schemas/Parameters"
+                  $ref: '#/components/schemas/Parameters'
               required:
                 - endpoint_ids
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/IsolateRouteResponse"
+                $ref: '#/components/schemas/IsolateRouteResponse'
           description: OK
       summary: Isolate an endpoint
       tags:
@@ -383,14 +383,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/KillProcessRouteRequestBody"
+              $ref: '#/components/schemas/KillProcessRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/KillProcessRouteResponse"
+                $ref: '#/components/schemas/KillProcessRouteResponse'
           description: OK
       summary: Terminate a process
       tags:
@@ -414,10 +414,10 @@ paths:
                     entity_id: abc123
                     type: process
             schema:
-              $ref: "#/components/schemas/MemoryDumpRouteRequestBody"
+              $ref: '#/components/schemas/MemoryDumpRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -444,11 +444,11 @@ paths:
                       parameters:
                         entity_id: abc123
                         type: process
-                      startedAt: 2022-07-29T19:08:49.126Z
+                      startedAt: '2022-07-29T19:08:49.126Z'
                       status: pending
                       wasSuccessful: false
               schema:
-                $ref: "#/components/schemas/ResponseActionCreateSuccessResponse"
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Action request was successfully created
       summary: Generate a memory dump from the host machine
       tags:
@@ -461,14 +461,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GetProcessesRouteRequestBody"
+              $ref: '#/components/schemas/GetProcessesRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/GetProcessesRouteResponse"
+                $ref: '#/components/schemas/GetProcessesRouteResponse'
           description: OK
       summary: Get running processes
       tags:
@@ -502,14 +502,14 @@ paths:
                     scriptId: 1111-2222-3333-4444-5555-6666-7777-8888
                     scriptInput: --delete --paths-to-delete /tmp/temp_file.txt,/tmp/random_file.txt
             schema:
-              $ref: "#/components/schemas/RunScriptRouteRequestBody"
+              $ref: '#/components/schemas/RunScriptRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResponseActionCreateSuccessResponse"
+                $ref: '#/components/schemas/ResponseActionCreateSuccessResponse'
           description: Action request was successfully created
       summary: Run a script
       tags:
@@ -522,14 +522,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ScanRouteRequestBody"
+              $ref: '#/components/schemas/ScanRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ScanRouteResponse"
+                $ref: '#/components/schemas/ScanRouteResponse'
           description: OK
       summary: Scan a file or directory
       tags:
@@ -540,11 +540,11 @@ paths:
         enabled.
       operationId: EndpointGetActionsState
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ActionStateSuccessResponse"
+                $ref: '#/components/schemas/ActionStateSuccessResponse'
           description: OK
       summary: Get actions state
       tags:
@@ -557,14 +557,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SuspendProcessRouteRequestBody"
+              $ref: '#/components/schemas/SuspendProcessRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuspendProcessRouteResponse"
+                $ref: '#/components/schemas/SuspendProcessRouteResponse'
           description: OK
       summary: Suspend a process
       tags:
@@ -578,7 +578,7 @@ paths:
           application/json:
             examples:
               multipleHosts:
-                summary: "Releases several hosts; includes a comment:"
+                summary: 'Releases several hosts; includes a comment:'
                 value:
                   comment: Benign process identified, releasing group
                   endpoint_ids:
@@ -604,7 +604,7 @@ paths:
               type: object
               properties:
                 agent_type:
-                  $ref: "#/components/schemas/AgentTypes"
+                  $ref: '#/components/schemas/AgentTypes'
                 alert_ids:
                   description: If this action is associated with any alerts, they can be specified
                     here. The action will be logged in any cases associated with
@@ -630,20 +630,20 @@ paths:
                   minItems: 1
                   type: array
                 comment:
-                  $ref: "#/components/schemas/Comment"
+                  $ref: '#/components/schemas/Comment'
                 endpoint_ids:
-                  $ref: "#/components/schemas/EndpointIds"
+                  $ref: '#/components/schemas/EndpointIds'
                 parameters:
-                  $ref: "#/components/schemas/Parameters"
+                  $ref: '#/components/schemas/Parameters'
               required:
                 - endpoint_ids
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UnisolateRouteResponse"
+                $ref: '#/components/schemas/UnisolateRouteResponse'
           description: OK
       summary: Release an isolated endpoint
       tags:
@@ -656,14 +656,14 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: "#/components/schemas/UploadRouteRequestBody"
+              $ref: '#/components/schemas/UploadRouteRequestBody'
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UploadRouteResponse"
+                $ref: '#/components/schemas/UploadRouteResponse'
           description: OK
       summary: Upload a file
       tags:
@@ -676,38 +676,38 @@ paths:
           name: page
           required: false
           schema:
-            $ref: "#/components/schemas/Page"
+            $ref: '#/components/schemas/Page'
         - in: query
           name: pageSize
           required: false
           schema:
-            $ref: "#/components/schemas/PageSize"
+            $ref: '#/components/schemas/PageSize'
         - in: query
           name: kuery
           required: false
           schema:
-            $ref: "#/components/schemas/Kuery"
+            $ref: '#/components/schemas/Kuery'
         - in: query
           name: hostStatuses
           required: true
           schema:
-            $ref: "#/components/schemas/HostStatuses"
+            $ref: '#/components/schemas/HostStatuses'
         - in: query
           name: sortField
           required: false
           schema:
-            $ref: "#/components/schemas/SortField"
+            $ref: '#/components/schemas/SortField'
         - in: query
           name: sortDirection
           required: false
           schema:
-            $ref: "#/components/schemas/SortDirection"
+            $ref: '#/components/schemas/SortDirection'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MetadataListResponse"
+                $ref: '#/components/schemas/MetadataListResponse'
           description: OK
       summary: Get a metadata list
       tags:
@@ -723,11 +723,11 @@ paths:
             example: ed518850-681a-4d60-bb98-e22640cae2a8
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/EndpointMetadataResponse"
+                $ref: '#/components/schemas/EndpointMetadataResponse'
           description: OK
       summary: Get metadata
       tags:
@@ -743,13 +743,13 @@ paths:
             type: object
             properties:
               agentId:
-                $ref: "#/components/schemas/AgentId"
+                $ref: '#/components/schemas/AgentId'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SuccessResponse"
+                $ref: '#/components/schemas/SuccessResponse'
           description: OK
       summary: Get a policy response
       tags:
@@ -764,11 +764,11 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProtectionUpdatesNoteResponse"
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: OK
       summary: Get a protection updates note
       tags:
@@ -791,11 +791,11 @@ paths:
                   type: string
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProtectionUpdatesNoteResponse"
+                $ref: '#/components/schemas/ProtectionUpdatesNoteResponse'
           description: OK
       summary: Create or update a protection updates note
       tags:
@@ -805,32 +805,32 @@ components:
     ActionDetailsResponse:
       discriminator:
         mapping:
-          cancel: "#/components/schemas/Cancel"
-          execute: "#/components/schemas/Execute"
-          get-file: "#/components/schemas/GetFile"
-          isolate: "#/components/schemas/Isolate"
-          kill-process: "#/components/schemas/KillProcess"
-          memory-dump: "#/components/schemas/MemoryDump"
-          running-processes: "#/components/schemas/RunningProcesses"
-          runscript: "#/components/schemas/Runscript"
-          scan: "#/components/schemas/Scan"
-          suspend-process: "#/components/schemas/SuspendProcess"
-          unisolate: "#/components/schemas/Unisolate"
-          upload: "#/components/schemas/Upload"
+          cancel: '#/components/schemas/Cancel'
+          execute: '#/components/schemas/Execute'
+          get-file: '#/components/schemas/GetFile'
+          isolate: '#/components/schemas/Isolate'
+          kill-process: '#/components/schemas/KillProcess'
+          memory-dump: '#/components/schemas/MemoryDump'
+          running-processes: '#/components/schemas/RunningProcesses'
+          runscript: '#/components/schemas/Runscript'
+          scan: '#/components/schemas/Scan'
+          suspend-process: '#/components/schemas/SuspendProcess'
+          unisolate: '#/components/schemas/Unisolate'
+          upload: '#/components/schemas/Upload'
         propertyName: command
       oneOf:
-        - $ref: "#/components/schemas/KillProcess"
-        - $ref: "#/components/schemas/GetFile"
-        - $ref: "#/components/schemas/Execute"
-        - $ref: "#/components/schemas/Runscript"
-        - $ref: "#/components/schemas/Upload"
-        - $ref: "#/components/schemas/Scan"
-        - $ref: "#/components/schemas/Cancel"
-        - $ref: "#/components/schemas/Isolate"
-        - $ref: "#/components/schemas/Unisolate"
-        - $ref: "#/components/schemas/SuspendProcess"
-        - $ref: "#/components/schemas/RunningProcesses"
-        - $ref: "#/components/schemas/MemoryDump"
+        - $ref: '#/components/schemas/KillProcess'
+        - $ref: '#/components/schemas/GetFile'
+        - $ref: '#/components/schemas/Execute'
+        - $ref: '#/components/schemas/Runscript'
+        - $ref: '#/components/schemas/Upload'
+        - $ref: '#/components/schemas/Scan'
+        - $ref: '#/components/schemas/Cancel'
+        - $ref: '#/components/schemas/Isolate'
+        - $ref: '#/components/schemas/Unisolate'
+        - $ref: '#/components/schemas/SuspendProcess'
+        - $ref: '#/components/schemas/RunningProcesses'
+        - $ref: '#/components/schemas/MemoryDump'
     ActionStateSuccessResponse:
       type: object
       properties:
@@ -856,9 +856,9 @@ components:
               type: object
               properties:
                 agent_id:
-                  $ref: "#/components/schemas/AgentId"
+                  $ref: '#/components/schemas/AgentId'
                 pending_actions:
-                  $ref: "#/components/schemas/PendingActionsSchema"
+                  $ref: '#/components/schemas/PendingActionsSchema'
               required:
                 - agent_id
                 - pending_actions
@@ -895,7 +895,7 @@ components:
       type: string
     Cancel:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -919,7 +919,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -945,11 +945,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -1006,7 +1006,7 @@ components:
         - isolate
         - unisolate
       items:
-        $ref: "#/components/schemas/Command"
+        $ref: '#/components/schemas/Command'
       maxItems: 50
       type: array
     Comment:
@@ -1027,7 +1027,7 @@ components:
           type: string
     EndDate:
       description: An end date in ISO format or Date Math format.
-      example: 2023-10-31T23:59:59.999Z
+      example: '2023-10-31T23:59:59.999Z'
       type: string
     EndpointIds:
       description: List of endpoint IDs (cannot contain empty strings). Max of 250.
@@ -1043,13 +1043,13 @@ components:
     EndpointMetadataResponse:
       example:
         host_status: healthy
-        last_checkin: 2023-07-04T15:48:57.360Z
+        last_checkin: '2023-07-04T15:48:57.360Z'
         metadata:
-          "@timestamp": 2023-07-04T15:48:57.3609346Z
+          '@timestamp': '2023-07-04T15:48:57.3609346Z'
           agent:
             build:
-              original: "version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
-                commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab"
+              original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
+                commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
             id: abb8a826-6812-448c-a571-6d8269b51449
             type: endpoint
             version: 7.16.0
@@ -1069,11 +1069,11 @@ components:
               isolation: false
             policy:
               applied:
-                endpoint_policy_version: "2"
+                endpoint_policy_version: '2'
                 id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
                 name: test
                 status: success
-                version: "3"
+                version: '3'
             state:
               isolation: false
             status: enrolled
@@ -1082,10 +1082,10 @@ components:
             agent_id_status: verified
             category:
               - host
-            created: 2023-07-04T15:48:57.3609346Z
+            created: '2023-07-04T15:48:57.3609346Z'
             dataset: endpoint.metadata
             id: MNtRc++KoKHXXwlj+++++OhZ
-            ingested: 2023-07-04T15:48:58Z
+            ingested: '2023-07-04T15:48:58Z'
             kind: metric
             module: endpoint
             sequence: 43757
@@ -1129,7 +1129,7 @@ components:
       properties: {}
     Execute:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -1138,7 +1138,7 @@ components:
                 properties:
                   content:
                     allOf:
-                      - $ref: "#/components/schemas/DownloadUri"
+                      - $ref: '#/components/schemas/DownloadUri'
                       - type: object
                         properties:
                           code:
@@ -1174,7 +1174,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -1200,11 +1200,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -1213,7 +1213,7 @@ components:
               type: object
               properties:
                 command:
-                  $ref: "#/components/schemas/Command"
+                  $ref: '#/components/schemas/Command'
                 timeout:
                   description: The maximum timeout value in seconds before the command is
                     terminated.
@@ -1253,7 +1253,7 @@ components:
           parameters:
             command: ls -al
             timeout: 600
-          startedAt: 2023-07-28T18:43:27.362Z
+          startedAt: '2023-07-28T18:43:27.362Z'
           status: pending
           wasSuccessful: false
       type: object
@@ -1265,47 +1265,47 @@ components:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: running-processes
-            completedAt: 2022-08-08T09:50:47.672Z
+            completedAt: '2022-08-08T09:50:47.672Z'
             createdBy: elastic
             id: b3d6de74-36b0-4fa8-be46-c375bf1771bf
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T15:24:57.402Z
+            startedAt: '2022-08-08T15:24:57.402Z'
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: isolate
-            completedAt: 2022-08-08T10:41:57.352Z
+            completedAt: '2022-08-08T10:41:57.352Z'
             createdBy: elastic
             id: 43b4098b-8752-4fbb-a7a7-6df7c74d0ee3
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T15:23:37.359Z
+            startedAt: '2022-08-08T15:23:37.359Z'
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: kill-process
             comment: bad process - taking up too much cpu
-            completedAt: 2022-08-08T09:44:50.952Z
+            completedAt: '2022-08-08T09:44:50.952Z'
             createdBy: elastic
             id: 5bc92c86-b8e6-42dd-837f-12ad29e09caa
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T14:38:44.125Z
+            startedAt: '2022-08-08T14:38:44.125Z'
             wasSuccessful: true
           - agents:
               - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
             agentType: endpoint
             command: unisolate
             comment: Not a threat to the network
-            completedAt: 2022-08-08T09:40:47.398Z
+            completedAt: '2022-08-08T09:40:47.398Z'
             createdBy: elastic
             id: 790d54e0-3aa3-4e5b-8255-3ce9d851246a
             isCompleted: true
             isExpired: false
-            startedAt: 2022-08-08T14:38:15.391Z
+            startedAt: '2022-08-08T14:38:15.391Z'
             wasSuccessful: true
         elasticAgentIds:
           - afdc366c-e2e0-4cdb-ae1d-94575bd2d8e0
@@ -1318,7 +1318,7 @@ components:
       properties: {}
     GetFile:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -1327,7 +1327,7 @@ components:
                 properties:
                   content:
                     allOf:
-                      - $ref: "#/components/schemas/DownloadUri"
+                      - $ref: '#/components/schemas/DownloadUri'
                       - type: object
                         properties:
                           code:
@@ -1360,7 +1360,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -1386,11 +1386,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -1431,7 +1431,7 @@ components:
           outputs: {}
           parameters:
             path: /usr/my-file.txt
-          startedAt: 2023-07-28T19:00:03.911Z
+          startedAt: '2023-07-28T19:00:03.911Z'
           status: pending
           wasSuccessful: false
       type: object
@@ -1443,7 +1443,7 @@ components:
       type: object
       properties:
         agent_type:
-          $ref: "#/components/schemas/AgentTypes"
+          $ref: '#/components/schemas/AgentTypes'
         alert_ids:
           description: If this action is associated with any alerts, they can be specified
             here. The action will be logged in any cases associated with the
@@ -1469,11 +1469,11 @@ components:
           minItems: 1
           type: array
         comment:
-          $ref: "#/components/schemas/Comment"
+          $ref: '#/components/schemas/Comment'
         endpoint_ids:
-          $ref: "#/components/schemas/EndpointIds"
+          $ref: '#/components/schemas/EndpointIds'
         parameters:
-          $ref: "#/components/schemas/Parameters"
+          $ref: '#/components/schemas/Parameters'
       required:
         - endpoint_ids
     GetProcessesRouteResponse:
@@ -1483,8 +1483,8 @@ components:
             - ed518850-681a-4d60-bb98-e22640cae2a8
           agentType: endpoint
           command: running-processes
-          comment: ""
-          completedAt: 2022-07-29T19:09:44.961Z
+          comment: ''
+          completedAt: '2022-07-29T19:09:44.961Z'
           createdBy: myuser
           errors: []
           id: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -1496,7 +1496,7 @@ components:
                 key: value
               type: json
           parameters: {}
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           wasSuccessful: true
       type: object
       properties: {}
@@ -1534,7 +1534,7 @@ components:
       type: array
     Isolate:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - description: Details of an isolate action response.
           type: object
     IsolateRouteResponse:
@@ -1546,7 +1546,7 @@ components:
           agentType: endpoint
           command: suspend-process
           comment: suspend the process
-          completedAt: 2022-07-29T19:09:44.961Z
+          completedAt: '2022-07-29T19:09:44.961Z'
           createdBy: myuser
           errors: []
           id: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -1559,13 +1559,13 @@ components:
               type: json
           parameters:
             entity_id: abc123
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           wasSuccessful: true
       type: object
       properties: {}
     KillProcess:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -1624,7 +1624,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -1650,11 +1650,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -1699,7 +1699,7 @@ components:
           agentType: endpoint
           command: kill-process
           comment: terminate the process
-          completedAt: 2022-07-29T19:09:44.961Z
+          completedAt: '2022-07-29T19:09:44.961Z'
           createdBy: myuser
           errors: []
           id: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -1712,7 +1712,7 @@ components:
               type: json
           parameters:
             entity_id: abc123
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           wasSuccessful: true
       type: object
       properties: {}
@@ -1745,7 +1745,7 @@ components:
       type: object
     MemoryDump:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -1816,7 +1816,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -1842,11 +1842,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -1892,13 +1892,13 @@ components:
       example:
         data:
           - host_status: healthy
-            last_checkin: 2023-07-04T15:47:57.432Z
+            last_checkin: '2023-07-04T15:47:57.432Z'
             metadata:
-              "@timestamp": 2023-07-04T15:47:57.432173535Z
+              '@timestamp': '2023-07-04T15:47:57.432173535Z'
               agent:
                 build:
-                  original: "version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch: 7.16,
-                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab"
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 16:00:00 2021, branch: 7.16,
+                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
                 id: 285297c6-3bff-4b83-9a07-f3e749801123
                 type: endpoint
                 version: 7.16.0
@@ -1918,11 +1918,11 @@ components:
                   isolation: false
                 policy:
                   applied:
-                    endpoint_policy_version: "2"
+                    endpoint_policy_version: '2'
                     id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
                     name: test
                     status: success
-                    version: "3"
+                    version: '3'
                 state:
                   isolation: false
                 status: enrolled
@@ -1931,10 +1931,10 @@ components:
                 agent_id_status: verified
                 category:
                   - host
-                created: 2023-07-04T15:47:57.432173535Z
+                created: '2023-07-04T15:47:57.432173535Z'
                 dataset: endpoint.metadata
                 id: MNtSXK/SkhEBnmgt++++++7S
-                ingested: 2023-07-04T15:47:58Z
+                ingested: '2023-07-04T15:47:58Z'
                 kind: metric
                 module: endpoint
                 sequence: 400
@@ -1957,7 +1957,7 @@ components:
                     variant: Ubuntu
                   family: ubuntu
                   full: Ubuntu 20.04.2
-                  kernel: "5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021"
+                  kernel: '5.8.0-59-generic #66~20.04.1-Ubuntu SMP Thu Jun 17 11:14:10 UTC 2021'
                   name: Linux
                   platform: ubuntu
                   type: linux
@@ -1975,13 +1975,13 @@ components:
                 id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
                 revision: 2
           - host_status: healthy
-            last_checkin: 2023-07-04T15:44:31.491Z
+            last_checkin: '2023-07-04T15:44:31.491Z'
             metadata:
-              "@timestamp": 2023-07-04T15:44:31.4917849Z
+              '@timestamp': '2023-07-04T15:44:31.4917849Z'
               agent:
                 build:
-                  original: "version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
-                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab"
+                  original: 'version: 7.16.0, compiled: Tue Nov 16 17:00:00 2021, branch: 7.16,
+                    commit: 73a51033db85e0fb3be1c934697ef6a2b08979ab'
                 id: abb8a826-6812-448c-a571-6d8269b51449
                 type: endpoint
                 version: 7.16.0
@@ -2001,11 +2001,11 @@ components:
                   isolation: false
                 policy:
                   applied:
-                    endpoint_policy_version: "2"
+                    endpoint_policy_version: '2'
                     id: d5371dcd-93b7-4627-af88-4084f7d6aa3e
                     name: test
                     status: success
-                    version: "3"
+                    version: '3'
                 state:
                   isolation: false
                 status: enrolled
@@ -2014,10 +2014,10 @@ components:
                 agent_id_status: verified
                 category:
                   - host
-                created: 2023-07-04T15:44:31.4917849Z
+                created: '2023-07-04T15:44:31.4917849Z'
                 dataset: endpoint.metadata
                 id: MNtRc++KoKHXXwlj+++++/N9
-                ingested: 2023-07-04T15:44:33Z
+                ingested: '2023-07-04T15:44:33Z'
                 kind: metric
                 module: endpoint
                 sequence: 5159
@@ -2087,23 +2087,23 @@ components:
         - type: object
           properties:
             execute:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             get-file:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             isolate:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             kill-process:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             running-processes:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             scan:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             suspend-process:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             unisolate:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
             upload:
-              $ref: "#/components/schemas/PendingActionDataType"
+              $ref: '#/components/schemas/PendingActionDataType'
         - additionalProperties: true
           type: object
     ProtectionUpdatesNoteResponse:
@@ -2148,13 +2148,13 @@ components:
           isExpired: false
           outputs: {}
           parameters: {}
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           status: pending
           wasSuccessful: false
       type: object
       properties:
         data:
-          $ref: "#/components/schemas/ResponseActionDetails"
+          $ref: '#/components/schemas/ResponseActionDetails'
     ResponseActionDetails:
       type: object
       properties:
@@ -2183,9 +2183,9 @@ components:
             to
           type: object
         agentType:
-          $ref: "#/components/schemas/AgentTypes"
+          $ref: '#/components/schemas/AgentTypes'
         command:
-          $ref: "#/components/schemas/Command"
+          $ref: '#/components/schemas/Command'
         completedAt:
           description: The response action completion time
           format: date-time
@@ -2260,7 +2260,7 @@ components:
         - command
     RunningProcesses:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -2269,8 +2269,8 @@ components:
                 properties:
                   content:
                     oneOf:
-                      - $ref: "#/components/schemas/RunningProcessesOutputEndpoint"
-                      - $ref: "#/components/schemas/RunningProcessesOutputSentinelOne"
+                      - $ref: '#/components/schemas/RunningProcessesOutputEndpoint'
+                      - $ref: '#/components/schemas/RunningProcessesOutputSentinelOne'
               type: object
     RunningProcessesOutputEndpoint:
       description: Processes output for `agentType` of `endpoint`
@@ -2293,7 +2293,7 @@ components:
           type: array
     RunningProcessesOutputSentinelOne:
       allOf:
-        - $ref: "#/components/schemas/DownloadUri"
+        - $ref: '#/components/schemas/DownloadUri'
         - description: Processes output for `agentType` of `sentinel_one`
           type: object
           properties:
@@ -2301,7 +2301,7 @@ components:
               type: string
     Runscript:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -2310,7 +2310,7 @@ components:
                 properties:
                   content:
                     allOf:
-                      - $ref: "#/components/schemas/DownloadUri"
+                      - $ref: '#/components/schemas/DownloadUri'
                       - type: object
                         properties:
                           code:
@@ -2322,9 +2322,9 @@ components:
               type: object
             parameters:
               oneOf:
-                - $ref: "#/components/schemas/RunscriptParamsCrowdStrike"
-                - $ref: "#/components/schemas/RunscriptParamsMicrosoft"
-                - $ref: "#/components/schemas/RunscriptParamsSentinelOne"
+                - $ref: '#/components/schemas/RunscriptParamsCrowdStrike'
+                - $ref: '#/components/schemas/RunscriptParamsMicrosoft'
+                - $ref: '#/components/schemas/RunscriptParamsSentinelOne'
     RunscriptParamsCrowdStrike:
       type: object
       properties:
@@ -2357,7 +2357,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -2383,11 +2383,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -2396,16 +2396,16 @@ components:
               description: |
                 One of the following set of parameters must be provided
               oneOf:
-                - $ref: "#/components/schemas/RawScriptParameters"
-                - $ref: "#/components/schemas/HostPathScriptParameters"
-                - $ref: "#/components/schemas/CloudFileScriptParameters"
-                - $ref: "#/components/schemas/SentinelOneRunScriptParameters"
-                - $ref: "#/components/schemas/MDERunScriptParameters"
+                - $ref: '#/components/schemas/RawScriptParameters'
+                - $ref: '#/components/schemas/HostPathScriptParameters'
+                - $ref: '#/components/schemas/CloudFileScriptParameters'
+                - $ref: '#/components/schemas/SentinelOneRunScriptParameters'
+                - $ref: '#/components/schemas/MDERunScriptParameters'
           required:
             - parameters
     Scan:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -2428,7 +2428,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -2454,11 +2454,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -2501,7 +2501,7 @@ components:
           outputs: {}
           parameters:
             path: /usr/my-file.txt
-          startedAt: 2023-07-28T19:00:03.911Z
+          startedAt: '2023-07-28T19:00:03.911Z'
           status: pending
           wasSuccessful: false
       type: object
@@ -2551,14 +2551,14 @@ components:
       type: string
     StartDate:
       description: A start date in ISO 8601 format or Date Math format.
-      example: 2023-10-31T00:00:00.000Z
+      example: '2023-10-31T00:00:00.000Z'
       type: string
     SuccessResponse:
       type: object
       properties: {}
     SuspendProcess:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -2603,7 +2603,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -2629,11 +2629,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -2670,7 +2670,7 @@ components:
           agentType: endpoint
           command: suspend-process
           comment: suspend the process
-          completedAt: 2022-07-29T19:09:44.961Z
+          completedAt: '2022-07-29T19:09:44.961Z'
           createdBy: myuser
           errors: []
           id: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -2683,7 +2683,7 @@ components:
               type: json
           parameters:
             entity_id: abc123
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           wasSuccessful: true
       type: object
       properties: {}
@@ -2699,13 +2699,13 @@ components:
         - automated
         - manual
       items:
-        $ref: "#/components/schemas/Type"
+        $ref: '#/components/schemas/Type'
       maxLength: 2
       minLength: 1
       type: array
     Unisolate:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - description: Details of an unisolate action response.
           type: object
     UnisolateRouteResponse:
@@ -2717,7 +2717,7 @@ components:
           agentType: endpoint
           command: suspend-process
           comment: suspend the process
-          completedAt: 2022-07-29T19:09:44.961Z
+          completedAt: '2022-07-29T19:09:44.961Z'
           createdBy: myuser
           errors: []
           id: 233db9ea-6733-4849-9226-5a7039c7161d
@@ -2730,13 +2730,13 @@ components:
               type: json
           parameters:
             entity_id: abc123
-          startedAt: 2022-07-29T19:08:49.126Z
+          startedAt: '2022-07-29T19:08:49.126Z'
           wasSuccessful: true
       type: object
       properties: {}
     Upload:
       allOf:
-        - $ref: "#/components/schemas/ResponseActionDetails"
+        - $ref: '#/components/schemas/ResponseActionDetails'
         - type: object
           properties:
             outputs:
@@ -2774,7 +2774,7 @@ components:
         - type: object
           properties:
             agent_type:
-              $ref: "#/components/schemas/AgentTypes"
+              $ref: '#/components/schemas/AgentTypes'
             alert_ids:
               description: If this action is associated with any alerts, they can be specified
                 here. The action will be logged in any cases associated with the
@@ -2800,11 +2800,11 @@ components:
               minItems: 1
               type: array
             comment:
-              $ref: "#/components/schemas/Comment"
+              $ref: '#/components/schemas/Comment'
             endpoint_ids:
-              $ref: "#/components/schemas/EndpointIds"
+              $ref: '#/components/schemas/EndpointIds'
             parameters:
-              $ref: "#/components/schemas/Parameters"
+              $ref: '#/components/schemas/Parameters'
           required:
             - endpoint_ids
         - type: object
@@ -2854,7 +2854,7 @@ components:
             file_name: fix-malware.sh
             file_sha256: a0bed94220193ba4895c0aa5b4e7e293381d15765cb164ddf7be5cdd010ae42a
             file_size: 69
-          startedAt: 2023-07-03T15:07:22.837Z
+          startedAt: '2023-07-03T15:07:22.837Z'
           status: pending
           wasSuccessful: false
       type: object

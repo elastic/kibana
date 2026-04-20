@@ -2,14 +2,14 @@ openapi: 3.0.3
 info:
   description: Lists API allows you to manage lists of keywords, IPs or IP ranges items.
   title: Security Lists API (Elastic Cloud Serverless)
-  version: 2023-10-31
+  version: '2023-10-31'
 servers:
   - url: http://{kibana_host}:{port}
     variables:
       kibana_host:
         default: localhost
       port:
-        default: "5601"
+        default: '5601'
 paths:
   /api/lists:
     delete:
@@ -23,7 +23,7 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
         - description: Determines whether exception items referencing this value list
             should be deleted.
           in: query
@@ -43,14 +43,14 @@ paths:
             example: false
             type: boolean
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ipList:
                   value:
                     _version: WzIsMV0=
-                    "@timestamp": 2025-01-08T04:47:34.273Z
+                    '@timestamp': 2025-01-08T04:47:34.273Z
                     created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: List of bad internet ips.
@@ -63,38 +63,38 @@ paths:
                     updated_by: elastic
                     version: 3
               schema:
-                $ref: "#/components/schemas/List"
+                $ref: '#/components/schemas/List'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: id: Required"
+                    message: '[request query]: id: Required'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -105,9 +105,9 @@ paths:
                       action is granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -116,9 +116,9 @@ paths:
                     message: 'list id: \"ip_list\" was not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -127,7 +127,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Delete a value list
       tags:
@@ -140,16 +140,16 @@ paths:
           name: id
           required: true
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzEsMV0=
-                    "@timestamp": 2025-01-08T04:47:34.273Z
+                    '@timestamp': 2025-01-08T04:47:34.273Z
                     created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ip
@@ -162,23 +162,23 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/List"
+                $ref: '#/components/schemas/List'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: id: Required"
+                    message: '[request query]: id: Required'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
@@ -191,9 +191,9 @@ paths:
                       		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -204,9 +204,9 @@ paths:
                       is granted by the Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -215,9 +215,9 @@ paths:
                     message: 'list id: \"foo\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -226,7 +226,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get value list details
       tags:
@@ -244,30 +244,30 @@ paths:
               type: object
               properties:
                 _version:
-                  $ref: "#/components/schemas/ListVersionId"
+                  $ref: '#/components/schemas/ListVersionId'
                 description:
-                  $ref: "#/components/schemas/ListDescription"
+                  $ref: '#/components/schemas/ListDescription'
                 id:
-                  $ref: "#/components/schemas/ListId"
+                  $ref: '#/components/schemas/ListId'
                 meta:
-                  $ref: "#/components/schemas/ListMetadata"
+                  $ref: '#/components/schemas/ListMetadata'
                 name:
-                  $ref: "#/components/schemas/ListName"
+                  $ref: '#/components/schemas/ListName'
                 version:
-                  $ref: "#/components/schemas/ListVersion"
+                  $ref: '#/components/schemas/ListVersion'
               required:
                 - id
         description: Value list's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzEsMV0=
-                    "@timestamp": 2025-01-08T04:47:34.273Z
+                    '@timestamp': 2025-01-08T04:47:34.273Z
                     created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ips
@@ -280,38 +280,38 @@ paths:
                     updated_by: elastic
                     version: 2
               schema:
-                $ref: "#/components/schemas/List"
+                $ref: '#/components/schemas/List'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: name: Expected string, received number"
+                    message: '[request body]: name: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -322,9 +322,9 @@ paths:
                       by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -333,9 +333,9 @@ paths:
                     message: 'list id: \"foo\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -344,7 +344,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Patch a value list
       tags:
@@ -384,15 +384,15 @@ paths:
               type: object
               properties:
                 description:
-                  $ref: "#/components/schemas/ListDescription"
+                  $ref: '#/components/schemas/ListDescription'
                 id:
-                  $ref: "#/components/schemas/ListId"
+                  $ref: '#/components/schemas/ListId'
                 meta:
-                  $ref: "#/components/schemas/ListMetadata"
+                  $ref: '#/components/schemas/ListMetadata'
                 name:
-                  $ref: "#/components/schemas/ListName"
+                  $ref: '#/components/schemas/ListName'
                 type:
-                  $ref: "#/components/schemas/ListType"
+                  $ref: '#/components/schemas/ListType'
                 version:
                   default: 1
                   minimum: 1
@@ -404,14 +404,14 @@ paths:
         description: Value list's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    "@timestamp": 2025-01-08T04:47:34.273Z
+                    '@timestamp': 2025-01-08T04:47:34.273Z
                     created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ips
@@ -426,7 +426,7 @@ paths:
                 ip_range:
                   value:
                     _version: WzAsMV0=
-                    "@timestamp": 2025-01-09T18:23:52.241Z
+                    '@timestamp': 2025-01-09T18:23:52.241Z
                     created_at: 2025-01-09T18:23:52.241Z
                     created_by: elastic
                     description: This list has ip ranges
@@ -441,7 +441,7 @@ paths:
                 keyword:
                   value:
                     _version: WzEsMV0=
-                    "@timestamp": 2025-01-09T18:24:55.786Z
+                    '@timestamp': 2025-01-09T18:24:55.786Z
                     created_at: 2025-01-09T18:24:55.786Z
                     created_by: elastic
                     description: This list describes bad host names
@@ -456,7 +456,7 @@ paths:
                 keyword_custom_format:
                   value:
                     _version: WzIsMV0=
-                    "@timestamp": 2025-01-09T18:25:39.604Z
+                    '@timestamp': 2025-01-09T18:25:39.604Z
                     created_at: 2025-01-09T18:25:39.604Z
                     created_by: elastic
                     description: This parses the first found ipv4 only
@@ -469,9 +469,9 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/List"
+                $ref: '#/components/schemas/List'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -482,25 +482,25 @@ paths:
                     status_code: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -511,9 +511,9 @@ paths:
                       by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               examples:
@@ -522,9 +522,9 @@ paths:
                     message: 'list id: "keyword_custom_format_list" already exists'
                     status_code: 409
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List already exists response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -533,7 +533,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create a value list
       tags:
@@ -558,17 +558,17 @@ paths:
               type: object
               properties:
                 _version:
-                  $ref: "#/components/schemas/ListVersionId"
+                  $ref: '#/components/schemas/ListVersionId'
                 description:
-                  $ref: "#/components/schemas/ListDescription"
+                  $ref: '#/components/schemas/ListDescription'
                 id:
-                  $ref: "#/components/schemas/ListId"
+                  $ref: '#/components/schemas/ListId'
                 meta:
-                  $ref: "#/components/schemas/ListMetadata"
+                  $ref: '#/components/schemas/ListMetadata'
                 name:
-                  $ref: "#/components/schemas/ListName"
+                  $ref: '#/components/schemas/ListName'
                 version:
-                  $ref: "#/components/schemas/ListVersion"
+                  $ref: '#/components/schemas/ListVersion'
               required:
                 - id
                 - name
@@ -576,14 +576,14 @@ paths:
         description: Value list's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzIsMV0=
-                    "@timestamp": 2025-01-08T04:47:34.273Z
+                    '@timestamp': 2025-01-08T04:47:34.273Z
                     created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: Latest list of bad ips
@@ -596,38 +596,38 @@ paths:
                     updated_by: elastic
                     version: 3
               schema:
-                $ref: "#/components/schemas/List"
+                $ref: '#/components/schemas/List'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: id: Expected string, received number"
+                    message: '[request body]: id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -638,9 +638,9 @@ paths:
                       by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -649,9 +649,9 @@ paths:
                     message: 'list id: \"foo\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -660,7 +660,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Update a value list
       tags:
@@ -712,7 +712,7 @@ paths:
           name: cursor
           required: false
           schema:
-            $ref: "#/components/schemas/FindListsCursor"
+            $ref: '#/components/schemas/FindListsCursor'
         - description: >
             Filters the returned results according to the value of the specified
             field,
@@ -722,9 +722,9 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: "#/components/schemas/FindListsFilter"
+            $ref: '#/components/schemas/FindListsFilter'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -733,7 +733,7 @@ paths:
                     cursor: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
                     data:
                       - _version: WzAsMV0=
-                        "@timestamp": |
+                        '@timestamp': |
                           2025-01-08T04:47:34.273Z
                         created_at: |
                           2025-01-08T04:47:34.273Z
@@ -755,10 +755,10 @@ paths:
                 type: object
                 properties:
                   cursor:
-                    $ref: "#/components/schemas/FindListsCursor"
+                    $ref: '#/components/schemas/FindListsCursor'
                   data:
                     items:
-                      $ref: "#/components/schemas/List"
+                      $ref: '#/components/schemas/List'
                     type: array
                   page:
                     minimum: 0
@@ -776,36 +776,36 @@ paths:
                   - total
                   - cursor
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: page: Expected number, received nan"
+                    message: '[request query]: page: Expected number, received nan'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -817,9 +817,9 @@ paths:
                       [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -828,7 +828,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get value lists
       tags:
@@ -838,7 +838,7 @@ paths:
       description: Delete the `.lists` and `.items` data streams.
       operationId: DeleteListIndex
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -849,42 +849,42 @@ paths:
                 required:
                   - acknowledged
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -893,7 +893,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Delete value list data streams
       tags:
@@ -902,7 +902,7 @@ paths:
       description: Verify that `.lists` and `.items` data streams exist.
       operationId: ReadListIndex
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -916,42 +916,42 @@ paths:
                   - list_index
                   - list_item_index
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream(s) not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -960,7 +960,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get status of value list data streams
       tags:
@@ -970,7 +970,7 @@ paths:
       description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
       responses:
-        "200":
+        '200':
           content:
             application/json:
               schema:
@@ -981,15 +981,15 @@ paths:
                 required:
                   - acknowledged
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
@@ -1004,15 +1004,15 @@ paths:
                       [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               examples:
@@ -1021,9 +1021,9 @@ paths:
                     message: 'data stream: \".lists-default\" and \".items-default\" already exists'
                     status_code: 409
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List data stream exists response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1032,7 +1032,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create list data streams
       tags:
@@ -1049,13 +1049,13 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ListItemId"
+            $ref: '#/components/schemas/ListItemId'
         - description: Value list's identifier. Required if `id` is not specified.
           in: query
           name: list_id
           required: false
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
         - description: The value used to evaluate exceptions. Required if `id` is not
             specified.
           in: query
@@ -1070,22 +1070,22 @@ paths:
           name: refresh
           required: false
           schema:
-            default: "false"
+            default: 'false'
             enum:
-              - "true"
-              - "false"
+              - 'true'
+              - 'false'
               - wait_for
             example: false
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    "@timestamp": 2025-01-08T05:15:05.159Z
+                    '@timestamp': 2025-01-08T05:15:05.159Z
                     created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
@@ -1097,12 +1097,12 @@ paths:
                     value: 255.255.255.255
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/ListItem"
+                  - $ref: '#/components/schemas/ListItem'
                   - items:
-                      $ref: "#/components/schemas/ListItem"
+                      $ref: '#/components/schemas/ListItem'
                     type: array
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1112,25 +1112,25 @@ paths:
                     status_code: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1142,9 +1142,9 @@ paths:
                       [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1153,9 +1153,9 @@ paths:
                     message: 'list item with id: \"pd1WRJQBs4HAK3VQeHFI\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1164,7 +1164,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Delete a value list item
       tags:
@@ -1179,14 +1179,14 @@ paths:
           name: id
           required: false
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
         - description: Value list item list's `id` identfier. Required if `id` is not
             specified.
           in: query
           name: list_id
           required: false
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
         - description: The value used to evaluate exceptions. Required if `id` is not
             specified.
           in: query
@@ -1196,14 +1196,14 @@ paths:
             example: 127.0.0.2
             type: string
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzExLDFd
-                    "@timestamp": 2025-01-08T05:16:25.882Z
+                    '@timestamp': 2025-01-08T05:16:25.882Z
                     created_at: 2025-01-08T05:16:25.882Z
                     created_by: elastic
                     id: qN1XRJQBs4HAK3VQs3Gc
@@ -1215,12 +1215,12 @@ paths:
                     value: 127.0.0.2
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/ListItem"
+                  - $ref: '#/components/schemas/ListItem'
                   - items:
-                      $ref: "#/components/schemas/ListItem"
+                      $ref: '#/components/schemas/ListItem'
                     type: array
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1230,25 +1230,25 @@ paths:
                     status_code: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1260,9 +1260,9 @@ paths:
                       [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1271,9 +1271,9 @@ paths:
                     message: 'list item id: \"foo\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1282,7 +1282,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get a value list item
       tags:
@@ -1301,34 +1301,34 @@ paths:
               type: object
               properties:
                 _version:
-                  $ref: "#/components/schemas/ListVersionId"
+                  $ref: '#/components/schemas/ListVersionId'
                 id:
-                  $ref: "#/components/schemas/ListItemId"
+                  $ref: '#/components/schemas/ListItemId'
                 meta:
-                  $ref: "#/components/schemas/ListItemMetadata"
+                  $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
                   description: Determines when changes made by the request are made visible to
                     search.
                   enum:
-                    - "true"
-                    - "false"
+                    - 'true'
+                    - 'false'
                     - wait_for
                   type: string
                 value:
-                  $ref: "#/components/schemas/ListItemValue"
+                  $ref: '#/components/schemas/ListItemValue'
               required:
                 - id
         description: Value list item's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ipItem:
                   value:
                     _version: WzE5LDFd
-                    "@timestamp": 2025-01-08T05:15:05.159Z
+                    '@timestamp': 2025-01-08T05:15:05.159Z
                     created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
@@ -1339,9 +1339,9 @@ paths:
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
-                $ref: "#/components/schemas/ListItem"
+                $ref: '#/components/schemas/ListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1355,25 +1355,25 @@ paths:
                     status_code: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1384,9 +1384,9 @@ paths:
                       granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1395,9 +1395,9 @@ paths:
                     message: 'list item id: \"foo\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1406,7 +1406,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Patch a value list item
       tags:
@@ -1444,36 +1444,36 @@ paths:
               type: object
               properties:
                 id:
-                  $ref: "#/components/schemas/ListItemId"
+                  $ref: '#/components/schemas/ListItemId'
                 list_id:
-                  $ref: "#/components/schemas/ListId"
+                  $ref: '#/components/schemas/ListId'
                 meta:
-                  $ref: "#/components/schemas/ListItemMetadata"
+                  $ref: '#/components/schemas/ListItemMetadata'
                 refresh:
                   description: Determines when changes made by the request are made visible to
                     search.
                   enum:
-                    - "true"
-                    - "false"
+                    - 'true'
+                    - 'false'
                     - wait_for
                   example: wait_for
                   type: string
                 value:
-                  $ref: "#/components/schemas/ListItemValue"
+                  $ref: '#/components/schemas/ListItemValue'
               required:
                 - list_id
                 - value
         description: Value list item's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    "@timestamp": 2025-01-08T04:59:06.154Z
+                    '@timestamp': 2025-01-08T04:59:06.154Z
                     created_at: 2025-01-08T04:59:06.154Z
                     created_by: elastic
                     id: 21b01cfb-058d-44b9-838c-282be16c91cc
@@ -1486,7 +1486,7 @@ paths:
                 ip_range:
                   value:
                     _version: WzEsMV0=
-                    "@timestamp": 2025-01-09T18:33:08.202Z
+                    '@timestamp': 2025-01-09T18:33:08.202Z
                     created_at: 2025-01-09T18:33:08.202Z
                     created_by: elastic
                     id: ip_range_item
@@ -1499,7 +1499,7 @@ paths:
                 keyword:
                   value:
                     _version: WzIsMV0=
-                    "@timestamp": 2025-01-09T18:34:29.422Z
+                    '@timestamp': 2025-01-09T18:34:29.422Z
                     created_at: 2025-01-09T18:34:29.422Z
                     created_by: elastic
                     id: 7f24737d-1da8-4626-a568-33070591bb4e
@@ -1510,9 +1510,9 @@ paths:
                     updated_by: elastic
                     value: zeek
               schema:
-                $ref: "#/components/schemas/ListItem"
+                $ref: '#/components/schemas/ListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1524,25 +1524,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1553,9 +1553,9 @@ paths:
                       granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1564,9 +1564,9 @@ paths:
                     message: 'list id: \"ip_list\" does not exist'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               examples:
@@ -1575,9 +1575,9 @@ paths:
                     message: 'list item id: \"ip_item\" already exists'
                     status_code: 409
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List item already exists response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1586,7 +1586,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Create a value list item
       tags:
@@ -1610,27 +1610,27 @@ paths:
               type: object
               properties:
                 _version:
-                  $ref: "#/components/schemas/ListVersionId"
+                  $ref: '#/components/schemas/ListVersionId'
                 id:
-                  $ref: "#/components/schemas/ListItemId"
+                  $ref: '#/components/schemas/ListItemId'
                 meta:
-                  $ref: "#/components/schemas/ListItemMetadata"
+                  $ref: '#/components/schemas/ListItemMetadata'
                 value:
-                  $ref: "#/components/schemas/ListItemValue"
+                  $ref: '#/components/schemas/ListItemValue'
               required:
                 - id
                 - value
         description: Value list item's properties
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzIwLDFd
-                    "@timestamp": 2025-01-08T05:15:05.159Z
+                    '@timestamp': 2025-01-08T05:15:05.159Z
                     created_at: 2025-01-08T05:15:05.159Z
                     created_by: elastic
                     id: pd1WRJQBs4HAK3VQeHFI
@@ -1641,38 +1641,38 @@ paths:
                     updated_by: elastic
                     value: 255.255.255.255
               schema:
-                $ref: "#/components/schemas/ListItem"
+                $ref: '#/components/schemas/ListItem'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request body]: id: Expected string, received number"
+                    message: '[request body]: id: Expected string, received number'
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1683,9 +1683,9 @@ paths:
                       granted by the Kibana privileges [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               examples:
@@ -1694,9 +1694,9 @@ paths:
                     message: 'list item id: \"foo\" not found'
                     status_code: 404
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List item not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1705,7 +1705,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Update a value list item
       tags:
@@ -1720,9 +1720,9 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
       responses:
-        "200":
+        '200':
           content:
             application/ndjson:
               schema:
@@ -1740,7 +1740,7 @@ paths:
                 format: binary
                 type: string
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -1750,25 +1750,25 @@ paths:
                     statusCode: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1780,15 +1780,15 @@ paths:
                       [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "404":
+        '404':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List not found response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1797,7 +1797,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Export value list items
       tags:
@@ -1811,7 +1811,7 @@ paths:
           name: list_id
           required: true
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
         - description: The page number to return.
           in: query
           name: page
@@ -1849,7 +1849,7 @@ paths:
           name: cursor
           required: false
           schema:
-            $ref: "#/components/schemas/FindListItemsCursor"
+            $ref: '#/components/schemas/FindListItemsCursor'
         - description: >
             Filters the returned results according to the value of the specified
             field,
@@ -1859,9 +1859,9 @@ paths:
           name: filter
           required: false
           schema:
-            $ref: "#/components/schemas/FindListItemsFilter"
+            $ref: '#/components/schemas/FindListItemsFilter'
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -1870,7 +1870,7 @@ paths:
                     cursor: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
                     data:
                       - _version: WzAsMV0=
-                        "@timestamp": 2025-01-08T04:59:06.154Z
+                        '@timestamp': 2025-01-08T04:59:06.154Z
                         created_at: 2025-01-08T04:59:06.154Z
                         created_by: elastic
                         id: 21b01cfb-058d-44b9-838c-282be16c91cc
@@ -1887,10 +1887,10 @@ paths:
                 type: object
                 properties:
                   cursor:
-                    $ref: "#/components/schemas/FindListItemsCursor"
+                    $ref: '#/components/schemas/FindListItemsCursor'
                   data:
                     items:
-                      $ref: "#/components/schemas/ListItem"
+                      $ref: '#/components/schemas/ListItem'
                     type: array
                   page:
                     minimum: 0
@@ -1908,36 +1908,36 @@ paths:
                   - total
                   - cursor
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
                 badRequest:
                   value:
                     error: Bad Request,
-                    message: "[request query]: list_id: Required"
+                    message: '[request query]: list_id: Required'
                     statusCode: 400,
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -1949,9 +1949,9 @@ paths:
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -1960,7 +1960,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get value list items
       tags:
@@ -1983,7 +1983,7 @@ paths:
           name: list_id
           required: false
           schema:
-            $ref: "#/components/schemas/ListId"
+            $ref: '#/components/schemas/ListId'
         - description: |
             Type of the importing list.
 
@@ -1995,7 +1995,7 @@ paths:
           name: type
           required: false
           schema:
-            $ref: "#/components/schemas/ListType"
+            $ref: '#/components/schemas/ListType'
         - description: Determines when changes made by the request are made visible to
             search.
           in: query
@@ -2003,8 +2003,8 @@ paths:
           required: false
           schema:
             enum:
-              - "true"
-              - "false"
+              - 'true'
+              - 'false'
               - wait_for
             example: true
             type: string
@@ -2030,14 +2030,14 @@ paths:
                   type: string
         required: true
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
                 ip:
                   value:
                     _version: WzAsMV0=
-                    "@timestamp": 2025-01-08T04:47:34.273Z
+                    '@timestamp': 2025-01-08T04:47:34.273Z
                     created_at: 2025-01-08T04:47:34.273Z
                     created_by: elastic
                     description: This list describes bad internet ip
@@ -2050,9 +2050,9 @@ paths:
                     updated_by: elastic
                     version: 1
               schema:
-                $ref: "#/components/schemas/List"
+                $ref: '#/components/schemas/List'
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               examples:
@@ -2062,25 +2062,25 @@ paths:
                     status_code: 400
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -2092,15 +2092,15 @@ paths:
                       [lists-all]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "409":
+        '409':
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: List with specified list_id does not exist response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -2109,7 +2109,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Import value list items
       tags:
@@ -2118,7 +2118,7 @@ paths:
     get:
       operationId: ReadListPrivileges
       responses:
-        "200":
+        '200':
           content:
             application/json:
               examples:
@@ -2195,38 +2195,38 @@ paths:
                   is_authenticated:
                     type: boolean
                   listItems:
-                    $ref: "#/components/schemas/ListItemPrivileges"
+                    $ref: '#/components/schemas/ListItemPrivileges'
                   lists:
-                    $ref: "#/components/schemas/ListPrivileges"
+                    $ref: '#/components/schemas/ListPrivileges'
                 required:
                   - lists
                   - listItems
                   - is_authenticated
           description: Successful response
-        "400":
+        '400':
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PlatformErrorResponse"
-                  - $ref: "#/components/schemas/SiemErrorResponse"
+                  - $ref: '#/components/schemas/PlatformErrorResponse'
+                  - $ref: '#/components/schemas/SiemErrorResponse'
           description: Invalid input data response
-        "401":
+        '401':
           content:
             application/json:
               examples:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: "[security_exception\\n\\tRoot causes:\\n\\t\\tsecurity_exception:
-                      unable to authenticate user [elastic] for REST request
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
+                      authenticate user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]"
+                      [elastic] for REST request [/_security/_authenticate]'
                     statusCode: 401
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Unsuccessful authentication response
-        "403":
+        '403':
           content:
             application/json:
               examples:
@@ -2237,9 +2237,9 @@ paths:
                       is granted by the Kibana privileges [lists-read]
                     statusCode: 403
               schema:
-                $ref: "#/components/schemas/PlatformErrorResponse"
+                $ref: '#/components/schemas/PlatformErrorResponse'
           description: Not enough privileges response
-        "500":
+        '500':
           content:
             application/json:
               examples:
@@ -2248,7 +2248,7 @@ paths:
                     message: Internal Server Error
                     status_code: 500
               schema:
-                $ref: "#/components/schemas/SiemErrorResponse"
+                $ref: '#/components/schemas/SiemErrorResponse'
           description: Internal server error response
       summary: Get value list privileges
       tags:
@@ -2279,8 +2279,8 @@ components:
       type: object
       properties:
         _version:
-          $ref: "#/components/schemas/ListVersionId"
-        "@timestamp":
+          $ref: '#/components/schemas/ListVersionId'
+        '@timestamp':
           example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
@@ -2294,22 +2294,22 @@ components:
           example: elastic
           type: string
         description:
-          $ref: "#/components/schemas/ListDescription"
+          $ref: '#/components/schemas/ListDescription'
         id:
-          $ref: "#/components/schemas/ListId"
+          $ref: '#/components/schemas/ListId'
         immutable:
           type: boolean
         meta:
-          $ref: "#/components/schemas/ListMetadata"
+          $ref: '#/components/schemas/ListMetadata'
         name:
-          $ref: "#/components/schemas/ListName"
+          $ref: '#/components/schemas/ListName'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and
             returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
         type:
-          $ref: "#/components/schemas/ListType"
+          $ref: '#/components/schemas/ListType'
         updated_at:
           description: Autogenerated date of last object update.
           example: 2025-01-08T04:47:34.273Z
@@ -2320,7 +2320,7 @@ components:
           example: elastic
           type: string
         version:
-          $ref: "#/components/schemas/ListVersion"
+          $ref: '#/components/schemas/ListVersion'
       required:
         - id
         - type
@@ -2348,8 +2348,8 @@ components:
       type: object
       properties:
         _version:
-          $ref: "#/components/schemas/ListVersionId"
-        "@timestamp":
+          $ref: '#/components/schemas/ListVersionId'
+        '@timestamp':
           example: 2025-01-08T04:47:34.273Z
           format: date-time
           type: string
@@ -2363,18 +2363,18 @@ components:
           example: elastic
           type: string
         id:
-          $ref: "#/components/schemas/ListItemId"
+          $ref: '#/components/schemas/ListItemId'
         list_id:
-          $ref: "#/components/schemas/ListId"
+          $ref: '#/components/schemas/ListId'
         meta:
-          $ref: "#/components/schemas/ListItemMetadata"
+          $ref: '#/components/schemas/ListItemMetadata'
         tie_breaker_id:
           description: Field used in search to ensure all containers are sorted and
             returned correctly.
           example: f5508188-b1e9-4e6e-9662-d039a7d89899
           type: string
         type:
-          $ref: "#/components/schemas/ListType"
+          $ref: '#/components/schemas/ListType'
         updated_at:
           description: Autogenerated date of last object update.
           example: 2025-01-08T04:47:34.273Z
@@ -2385,7 +2385,7 @@ components:
           example: elastic
           type: string
         value:
-          $ref: "#/components/schemas/ListItemValue"
+          $ref: '#/components/schemas/ListItemValue'
       required:
         - id
         - type
