@@ -47,8 +47,17 @@ test.describe('FilterMonitors', { tag: [...tags.stateful.classic] }, () => {
 
     await test.step('filter by tags with AND', async () => {
       await page.getByLabel('expands filter group for Tags filter').click();
+
       await page.getByRole('option', { name: FIRST_TAG }).click();
+      await expect(
+        page.locator('[role="option"][aria-checked="true"]').filter({ hasText: FIRST_TAG })
+      ).toBeVisible();
+
       await page.getByRole('option', { name: SECOND_TAG }).click();
+      await expect(
+        page.locator('[role="option"][aria-checked="true"]').filter({ hasText: SECOND_TAG })
+      ).toBeVisible();
+
       await page.testSubj.click('tagsLogicalOperatorSwitch');
       await page.testSubj.click('o11yFieldValueSelectionApplyButton');
       await expect(page.getByLabel('expands filter group for Tags filter')).toBeVisible();
