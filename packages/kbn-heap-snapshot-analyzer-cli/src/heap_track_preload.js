@@ -80,12 +80,15 @@ if (process.env.HEAP_TRACK_FORCE === '1' || process.env.isDevCliChild === 'true'
       (err) => {
         session.removeListener('HeapProfiler.addHeapSnapshotChunk', chunkListener);
         stream.end(() => {
-          const elapsed = ((Date.now() - start) / 1000).toFixed(1);
-          const sizeMb = (fs.statSync(outPath).size / 1024 / 1024).toFixed(1);
-          console.error(`[heap-track] snapshot written in ${elapsed}s (${sizeMb} MB)`);
+          if (err) {
+            console.error('[heap-track] takeHeapSnapshot failed:', err);
+          } else {
+            const elapsed = ((Date.now() - start) / 1000).toFixed(1);
+            const sizeMb = (fs.statSync(outPath).size / 1024 / 1024).toFixed(1);
+            console.error(`[heap-track] snapshot written in ${elapsed}s (${sizeMb} MB)`);
+          }
           snapshotInFlight = false;
         });
-        if (err) console.error('[heap-track] takeHeapSnapshot failed:', err);
       }
     );
   };
