@@ -234,7 +234,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             {
               id: 'collector-config',
               name: i18n.translate('xpack.fleet.agentDetails.subTabs.collectorConfigTab', {
-                defaultMessage: 'Collector Config',
+                defaultMessage: 'Collector config',
               }),
               href: getHref('agent_details_collector_config', {
                 agentId,
