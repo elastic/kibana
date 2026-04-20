@@ -17,6 +17,7 @@ import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
 import { isNotEmptyCondition } from '../definitions/common_fields';
 import { USER_ENTITY_NAMESPACE } from '../definitions/user_entity_constants';
+import { applyFieldEvaluations } from './field_evaluations';
 
 describe('getDocument', () => {
   it('returns _source when doc is an Elasticsearch hit', () => {
@@ -397,80 +398,86 @@ describe('applyWhenConditionTrueSetFields', () => {
 });
 
 describe('user containsId filter condition (documentsFilter AND postAggFilter)', () => {
-  function getUserContainsIdCondition() {
-    const def = getEntityDefinitionWithoutId('user');
-    const { identityField } = def;
-    if (isSingleFieldIdentity(identityField)) {
-      throw new Error('User has calculated identity');
-    }
-    let condition: Condition = identityField.documentsFilter;
-    if (def.postAggFilter) {
-      condition = { and: [condition, def.postAggFilter] };
-    }
-    return condition;
+  const def = getEntityDefinitionWithoutId('user');
+  const { identityField } = def;
+  if (isSingleFieldIdentity(identityField)) {
+    throw new Error('User has calculated identity');
+  }
+  let condition: Condition = identityField.documentsFilter;
+  if (def.postAggFilter) {
+    condition = { and: [condition, def.postAggFilter] };
   }
 
+  const fieldEvaluations = identityField.fieldEvaluations!;
+  const userContainsIdCondition = condition;
+
+  const applyFieldEvaluationsToDoc = (doc: Record<string, unknown>) => {
+    const evals = applyFieldEvaluations(doc, fieldEvaluations);
+    return { ...doc, ...evals };
+  };
+
   it('matches IDP doc: event.kind=asset, user.email present', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'event.kind': 'asset',
       'user.email': 'alice@example.com',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+    });
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
   });
 
   it('matches IDP doc: event.category=iam, event.type=user, user.id present', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'event.category': 'iam',
       'event.type': 'user',
       'user.id': 'user-123',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+    });
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
   });
 
   it('matches non-IDP doc: user.name + host.id, user.name not in excluded list', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'user.name': 'john.doe',
       'host.id': 'host-1',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+    });
+
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
   });
 
   it('matches doc with entity.id (shared entity from store)', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'user.email': 'alice@example.com',
       'entity.id': 'user:alice@okta',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(true);
+    });
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(true);
   });
 
   it('excludes invalid doc: user.email + event.module only, no IDP or non-IDP postAggFilter', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'user.email': 'alice@example.com',
       'event.module': 'okta',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(false);
+    });
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(false);
   });
 
   it('excludes invalid doc: event.outcome=failure', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'failure',
       'event.kind': 'asset',
       'user.email': 'alice@example.com',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(false);
+    });
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(false);
   });
 
   it('excludes non-IDP doc with excluded user.name (root)', () => {
-    const doc = {
+    const doc = applyFieldEvaluationsToDoc({
       'event.outcome': 'success',
       'user.name': 'root',
       'host.id': 'host-1',
-    };
-    expect(evaluateStreamlangCondition(doc, getUserContainsIdCondition())).toBe(false);
+    });
+    expect(evaluateStreamlangCondition(doc, userContainsIdCondition)).toBe(false);
   });
 });
