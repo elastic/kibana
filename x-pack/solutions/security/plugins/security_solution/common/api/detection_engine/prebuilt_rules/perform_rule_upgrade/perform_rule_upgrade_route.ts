@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { mapValues } from 'lodash';
-import { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import { AggregatedPrebuiltRuleError, DiffableAllFields, ThreeWayDiffConflict } from '../model';
 import { RuleSignatureId, RuleVersion } from '../../model';
 import { PrebuiltRulesFilter } from '../common/prebuilt_rules_filter';
+import { RuleVersionSpecifier } from '../common/rule_version_specifier';
 
 export type Mode = z.infer<typeof Mode>;
 export const Mode = z.enum(['ALL_RULES', 'SPECIFIC_RULES']);
@@ -168,7 +168,7 @@ export const PerformRuleUpgradeResponseBody = z.object({
     failed: z.number(),
   }),
   results: z.object({
-    updated: z.array(RuleResponse),
+    updated: z.array(RuleVersionSpecifier),
     skipped: z.array(SkippedRuleUpgrade),
   }),
   errors: z.array(AggregatedPrebuiltRuleError),
