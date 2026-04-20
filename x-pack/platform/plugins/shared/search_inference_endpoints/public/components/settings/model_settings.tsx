@@ -9,14 +9,15 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { Location } from 'history';
 import { useHistory } from 'react-router-dom';
-import * as i18n from '../../../common/translations';
 import { docLinks } from '../../../common/doc_links';
 import { FeatureSection } from './feature_section';
 import { DefaultModelSection } from './default_model_section';
@@ -26,6 +27,7 @@ import { UnsavedChangesModal } from './unsaved_changes_modal';
 import { useModelSettingsForm } from './use_model_settings_form';
 import { useDefaultModelSettings } from '../../hooks/use_default_model_settings';
 import { useConnectors } from '../../hooks/use_connectors';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const ModelSettings: React.FC = () => {
   const {
@@ -34,13 +36,17 @@ export const ModelSettings: React.FC = () => {
     isDirty: isFeatureDirty,
     assignments,
     sections,
+    invalidEndpointIds,
     updateEndpoints,
     save: saveFeatures,
     resetSection,
   } = useModelSettingsForm();
 
   const defaultModelSettings = useDefaultModelSettings();
-  const { connectors, loading: connectorsLoading } = useConnectors();
+  const { data: connectors, isLoading: connectorsLoading } = useConnectors();
+  const {
+    services: { application, http },
+  } = useKibana();
 
   const isDirty = isFeatureDirty || defaultModelSettings.isDirty;
   const isSaving = isFeatureSaving;
@@ -83,10 +89,14 @@ export const ModelSettings: React.FC = () => {
     unblockRef.current?.();
     unblockRef.current = null;
     if (pendingLocation) {
-      history.push(pendingLocation);
+      const url =
+        http.basePath.prepend(pendingLocation.pathname) +
+        pendingLocation.search +
+        pendingLocation.hash;
+      application.navigateToUrl(url, { state: pendingLocation.state });
     }
     setPendingLocation(null);
-  }, [history, pendingLocation, defaultModelSettings]);
+  }, [application, http.basePath, pendingLocation, defaultModelSettings]);
 
   const handleResetConfirm = useCallback(() => {
     if (!resetParentKey) return;
@@ -118,7 +128,9 @@ export const ModelSettings: React.FC = () => {
     <>
       <EuiPageTemplate.Header
         data-test-subj="modelSettingsPageHeader"
-        pageTitle={i18n.SETTINGS_TITLE}
+        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+          defaultMessage: 'Feature settings',
+        })}
         bottomBorder
         paddingSize="none"
         restrictWidth={true}
@@ -130,7 +142,9 @@ export const ModelSettings: React.FC = () => {
             isDisabled={!isDirty}
             data-test-subj="save-settings-button"
           >
-            {i18n.SETTINGS_SAVE_BUTTON}
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
+              defaultMessage: 'Save settings',
+            })}
           </EuiButton>,
           <EuiButtonEmpty
             iconType="popout"
@@ -141,7 +155,9 @@ export const ModelSettings: React.FC = () => {
             data-test-subj="settings-api-documentation"
             href={docLinks.createInferenceEndpoint}
           >
-            {i18n.API_DOCUMENTATION_LINK}
+            {i18n.translate('xpack.searchInferenceEndpoints.apiDocumentationLink', {
+              defaultMessage: 'API Documentation',
+            })}
           </EuiButtonEmpty>,
         ]}
       />
@@ -154,13 +170,60 @@ export const ModelSettings: React.FC = () => {
         <DefaultModelSection defaultModelSettings={defaultModelSettings} />
         {disallowOtherModels ? null : (
           <>
+            {invalidEndpointIds.size > 0 && (
+              <>
+                <EuiSpacer size="l" />
+                <EuiCallOut
+                  title={i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
+                    {
+                      defaultMessage: 'Some assigned inference endpoints are no longer available',
+                    }
+                  )}
+                  color="warning"
+                  iconType="warning"
+                  data-test-subj="invalidEndpointsCallout"
+                  announceOnMount
+                >
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                      {
+                        defaultMessage:
+                          'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                        values: {
+                          endpointList: [...invalidEndpointIds].join(', '),
+                        },
+                      }
+                    )}
+                  </p>
+                </EuiCallOut>
+              </>
+            )}
+
             <EuiSpacer size="xl" />
 
             {sections.length === 0 ? (
               <EuiEmptyPrompt
                 iconType="gear"
-                title={<h2>{i18n.SETTINGS_NO_FEATURES_TITLE}</h2>}
-                body={<p>{i18n.SETTINGS_NO_FEATURES_DESCRIPTION}</p>}
+                title={
+                  <h2>
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.noFeatures.title', {
+                      defaultMessage: 'No features registered',
+                    })}
+                  </h2>
+                }
+                body={
+                  <p>
+                    {i18n.translate(
+                      'xpack.searchInferenceEndpoints.settings.noFeatures.description',
+                      {
+                        defaultMessage:
+                          'No features have been registered for inference settings in this project.',
+                      }
+                    )}
+                  </p>
+                }
                 data-test-subj="settings-no-features"
               />
             ) : (
@@ -175,6 +238,7 @@ export const ModelSettings: React.FC = () => {
                     }))}
                     onReset={() => setResetParentKey(section.featureId)}
                     onEndpointsChange={updateEndpoints}
+                    invalidEndpointIds={invalidEndpointIds}
                     isBeta={section.isBeta}
                     isTechPreview={section.isTechPreview}
                   />

@@ -24,6 +24,7 @@ import {
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DEFAULT_SCHEMA } from '../../common/constants';
 import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 import { Popover } from './popover';
 
@@ -227,7 +228,7 @@ export const SchemaSelector = ({
             id="infraSchemaSelectorSelect"
             options={displayOptions}
             compressed
-            valueOfSelected={isInvalid ? 'unknown' : value ?? 'semconv'}
+            valueOfSelected={isInvalid ? 'unknown' : value ?? DEFAULT_SCHEMA}
             onChange={onSelect}
             isLoading={isLoading}
             fullWidth

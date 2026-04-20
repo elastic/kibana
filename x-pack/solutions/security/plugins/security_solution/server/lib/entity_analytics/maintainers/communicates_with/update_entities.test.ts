@@ -14,7 +14,7 @@ function createRecord(overrides?: Partial<ProcessedEntityRecord>): ProcessedEnti
   return {
     entityId: 'user:alice@acme.com@aws',
     entityType: 'user',
-    communicates_with: ['service:s3.amazonaws.com'],
+    communicates_with: { ids: ['service:s3.amazonaws.com'] },
     ...overrides,
   };
 }
@@ -43,8 +43,8 @@ describe('communicates_with updateEntityRelationships', () => {
   it('returns 0 without calling the API when all records have empty communicates_with', async () => {
     const crudClient = createCrudClient();
     const records = [
-      createRecord({ communicates_with: [] }),
-      createRecord({ communicates_with: [] }),
+      createRecord({ communicates_with: { ids: [] } }),
+      createRecord({ communicates_with: { ids: [] } }),
     ];
     const result = await updateEntityRelationships(crudClient, logger, records);
     expect(result).toBe(0);
@@ -56,9 +56,9 @@ describe('communicates_with updateEntityRelationships', () => {
     const records = [
       createRecord({
         entityId: 'user:alice@acme.com@aws',
-        communicates_with: ['service:s3.amazonaws.com'],
+        communicates_with: { ids: ['service:s3.amazonaws.com'] },
       }),
-      createRecord({ entityId: 'user:bob@acme.com@aws', communicates_with: [] }),
+      createRecord({ entityId: 'user:bob@acme.com@aws', communicates_with: { ids: [] } }),
     ];
     await updateEntityRelationships(crudClient, logger, records);
     const { objects } = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
@@ -69,14 +69,13 @@ describe('communicates_with updateEntityRelationships', () => {
   it('passes communicates_with strings directly', async () => {
     const crudClient = createCrudClient();
     const record = createRecord({
-      communicates_with: ['service:s3.amazonaws.com', 'service:ec2.amazonaws.com'],
+      communicates_with: { ids: ['service:s3.amazonaws.com', 'service:ec2.amazonaws.com'] },
     });
     await updateEntityRelationships(crudClient, logger, [record]);
     const { objects } = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
-    expect(objects[0].doc.entity.relationships.communicates_with).toEqual([
-      'service:s3.amazonaws.com',
-      'service:ec2.amazonaws.com',
-    ]);
+    expect(objects[0].doc.entity.relationships.communicates_with).toEqual({
+      ids: ['service:s3.amazonaws.com', 'service:ec2.amazonaws.com'],
+    });
   });
 
   it('sets entity.id to entityId', async () => {
@@ -128,9 +127,15 @@ describe('communicates_with updateEntityRelationships', () => {
   it('updates all records in a single bulk call', async () => {
     const crudClient = createCrudClient();
     const records = [
-      createRecord({ entityId: 'user:a@acme.com@aws', communicates_with: ['service:s3'] }),
-      createRecord({ entityId: 'user:b@acme.com@aws', communicates_with: ['service:ec2'] }),
-      createRecord({ entityId: 'user:c@acme.com@aws', communicates_with: ['service:lambda'] }),
+      createRecord({ entityId: 'user:a@acme.com@aws', communicates_with: { ids: ['service:s3'] } }),
+      createRecord({
+        entityId: 'user:b@acme.com@aws',
+        communicates_with: { ids: ['service:ec2'] },
+      }),
+      createRecord({
+        entityId: 'user:c@acme.com@aws',
+        communicates_with: { ids: ['service:lambda'] },
+      }),
     ];
     await updateEntityRelationships(crudClient, logger, records);
     expect(crudClient.bulkUpdateEntity).toHaveBeenCalledTimes(1);
@@ -143,20 +148,20 @@ describe('communicates_with updateEntityRelationships', () => {
     const records = [
       createRecord({
         entityId: 'user:alice@acme.com@entra_id',
-        communicates_with: ['service:Microsoft Teams'],
+        communicates_with: { ids: ['service:Microsoft Teams'] },
       }),
       createRecord({
         entityId: 'user:alice@acme.com@entra_id',
-        communicates_with: ['service:Slack'],
+        communicates_with: { ids: ['service:Slack'] },
       }),
     ];
     await updateEntityRelationships(crudClient, logger, records);
     const { objects } = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
     expect(objects).toHaveLength(1);
     expect(objects[0].doc.entity.id).toBe('user:alice@acme.com@entra_id');
-    expect(objects[0].doc.entity.relationships.communicates_with).toEqual(
-      expect.arrayContaining(['service:Microsoft Teams', 'service:Slack'])
-    );
+    expect(objects[0].doc.entity.relationships.communicates_with).toEqual({
+      ids: expect.arrayContaining(['service:Microsoft Teams', 'service:Slack']),
+    });
   });
 
   it('deduplicates identical target strings when merging records', async () => {
@@ -164,17 +169,17 @@ describe('communicates_with updateEntityRelationships', () => {
     const records = [
       createRecord({
         entityId: 'user:bob@acme.com@aws',
-        communicates_with: ['service:s3.amazonaws.com', 'service:ec2.amazonaws.com'],
+        communicates_with: { ids: ['service:s3.amazonaws.com', 'service:ec2.amazonaws.com'] },
       }),
       createRecord({
         entityId: 'user:bob@acme.com@aws',
-        communicates_with: ['service:s3.amazonaws.com', 'service:lambda.amazonaws.com'],
+        communicates_with: { ids: ['service:s3.amazonaws.com', 'service:lambda.amazonaws.com'] },
       }),
     ];
     await updateEntityRelationships(crudClient, logger, records);
     const { objects } = (crudClient.bulkUpdateEntity as jest.Mock).mock.calls[0][0];
     expect(objects).toHaveLength(1);
-    const targets = objects[0].doc.entity.relationships.communicates_with;
+    const { ids: targets } = objects[0].doc.entity.relationships.communicates_with;
     expect(targets).toHaveLength(3);
     expect(targets).toEqual(
       expect.arrayContaining([

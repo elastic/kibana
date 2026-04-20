@@ -32,7 +32,6 @@ export enum AppMenuActionId {
  */
 export interface DiscoverAppMenuContext extends Record<string, unknown> {
   onFinishAction: () => void;
-  parentTestId?: string;
 }
 
 /**

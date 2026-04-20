@@ -50,7 +50,11 @@ import type {
   GetStatusResult,
 } from '../types';
 import { getExtractEntityTaskId } from '../../tasks/extract_entity_task';
-import { getEntitiesAlias, ENTITY_LATEST } from '../../../common/domain/entity_index';
+import {
+  getEntitiesAlias,
+  ENTITY_LATEST,
+  getLatestEntitiesIndexName,
+} from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
@@ -439,7 +443,7 @@ export class AssetManagerClient {
 
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
-    const latestIndex = getEntitiesAlias(ENTITY_LATEST, this.namespace);
+    const latestIndex = getLatestEntitiesIndexName(this.namespace);
     const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
     const [latestExists, updatesExists] = await Promise.all([
       this.esClient.indices.exists({ index: latestIndex }),
