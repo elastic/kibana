@@ -38,6 +38,46 @@ export const platformCoreTools = {
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
 } as const;
 
+const casesTool = <TName extends string>(
+  toolName: TName
+): `${typeof internalNamespaces.platformCore}.cases.${TName}` => {
+  return `${internalNamespaces.platformCore}.cases.${toolName}`;
+};
+
+/**
+ * Ids of built-in Cases CRUD tools, registered by the Cases plugin.
+ * All live under `platform.core.cases.*`.
+ */
+export const platformCoreCasesTools = {
+  getCase: casesTool('get_case'),
+  getCases: casesTool('get_cases'),
+  getCasesByAlertId: casesTool('get_cases_by_alert_id'),
+  createCase: casesTool('create_case'),
+  updateCase: casesTool('update_case'),
+  updateCases: casesTool('update_cases'),
+  deleteCases: casesTool('delete_cases'),
+  findCases: casesTool('find_cases'),
+  findSimilarCases: casesTool('find_similar_cases'),
+  addComment: casesTool('add_comment'),
+  addAlerts: casesTool('add_alerts'),
+  addEvents: casesTool('add_events'),
+  addObservables: casesTool('add_observables'),
+  addTags: casesTool('add_tags'),
+  getAllAttachments: casesTool('get_all_attachments'),
+  assignCase: casesTool('assign_case'),
+  unassignCase: casesTool('unassign_case'),
+  closeCase: casesTool('close_case'),
+  setTitle: casesTool('set_title'),
+  setDescription: casesTool('set_description'),
+  setSeverity: casesTool('set_severity'),
+  setStatus: casesTool('set_status'),
+  setCategory: casesTool('set_category'),
+  updateObservable: casesTool('update_observable'),
+  deleteObservable: casesTool('delete_observable'),
+  createCaseFromTemplate: casesTool('create_case_from_template'),
+  setCustomField: casesTool('set_custom_field'),
+} as const;
+
 export const platformStreamsSigEventsTools = {
   searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
   createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
