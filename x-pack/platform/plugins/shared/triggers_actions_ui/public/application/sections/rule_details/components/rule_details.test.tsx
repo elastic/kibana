@@ -246,6 +246,17 @@ describe('rule_details', () => {
       expect(screen.getByText(rule.name)).toBeInTheDocument();
     });
 
+    it('renders the rule execution status badge', () => {
+      const rule = mockRule({
+        executionStatus: {
+          status: 'active',
+          lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+        },
+      });
+      renderPage(rule);
+      expect(screen.getByText('Active')).toBeInTheDocument();
+    });
+
     it('renders the API key owner badge when user can manage API keys', () => {
       const rule = mockRule({ apiKeyOwner: 'elastic' });
       renderPage(rule);
@@ -331,6 +342,44 @@ describe('rule_details', () => {
       expect(ruleWarningBanner).toHaveTextContent('warning message');
     });
 
+    it('renders a rule with one action', async () => {
+      const rule = mockRule({
+        actions: [
+          {
+            group: 'default',
+            id: uuidv4(),
+            params: {},
+            actionTypeId: '.server-log',
+          },
+        ],
+      });
+      renderPage(rule);
+      expect(screen.getByTestId('ruleDetailsTitle')).toBeInTheDocument();
+      expect(screen.getByText(rule.name)).toBeInTheDocument();
+    });
+
+    it('renders a rule with multiple actions', async () => {
+      const rule = mockRule({
+        actions: [
+          {
+            group: 'default',
+            id: uuidv4(),
+            params: {},
+            actionTypeId: '.server-log',
+          },
+          {
+            group: 'default',
+            id: uuidv4(),
+            params: {},
+            actionTypeId: '.email',
+          },
+        ],
+      });
+      renderPage(rule);
+      expect(screen.getByTestId('ruleDetailsTitle')).toBeInTheDocument();
+      expect(screen.getByText(rule.name)).toBeInTheDocument();
+    });
+
     it('displays a toast message when interval is less than configured minimum', async () => {
       const rule = mockRule({
         schedule: {
@@ -364,6 +413,53 @@ describe('rule_details', () => {
         await userEvent.click(screen.getByTestId('ruleActionsButton'));
 
         await screen.findByTestId('openEditRuleFlyoutButton');
+      });
+
+      it('renders view in Discover button when navigation is available', async () => {
+        const alertingMock = useKibanaMock().services.alerting;
+        (alertingMock!.getNavigation as jest.Mock).mockResolvedValueOnce('/app/discover#/alert');
+
+        const rule = mockRule();
+        render(
+          <QueryClientProvider client={queryClient}>
+            <IntlProvider locale="en">
+              <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+            </IntlProvider>
+          </QueryClientProvider>
+        );
+
+        expect(await screen.findByTestId('ruleDetails-viewInDiscover')).toBeInTheDocument();
+        expect(screen.getByText('View in Discover')).toBeInTheDocument();
+      });
+
+      it('renders view linked object button for supported rule types', async () => {
+        const mockLocator = {
+          getRedirectUrl: jest.fn().mockReturnValue('/app/slos/slo-id-1'),
+        };
+        useKibanaMock().services.share = {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue(mockLocator),
+            },
+          },
+        } as any;
+
+        const rule = mockRule({
+          ruleTypeId: 'slo.rules.burnRate',
+          params: { sloId: 'slo-id-1' },
+        });
+        render(
+          <QueryClientProvider client={queryClient}>
+            <IntlProvider locale="en">
+              <RuleDetails rule={rule} ruleType={ruleType} actionTypes={[]} {...mockRuleApis} />
+            </IntlProvider>
+          </QueryClientProvider>
+        );
+
+        expect(screen.getByTestId('ruleDetails-viewLinkedObject')).toBeInTheDocument();
+        expect(screen.getByText('View linked SLO')).toBeInTheDocument();
+
+        delete (useKibanaMock().services as any).share;
       });
     });
   });
