@@ -1,0 +1,140 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { z } from '@kbn/zod/v4';
+
+// =============================================================================
+// Action input schemas & inferred types
+// =============================================================================
+
+export const SearchMessagesInputSchema = z.object({
+  query: z
+    .string()
+    .describe(
+      'Keyword Query Language (KQL) search query for mail content. Examples: "subject:budget Q4", "from:alice@contoso.com", "hasAttachments:true AND subject:report". Supports standard KQL operators (AND, OR, NOT) and property restrictions (from, subject, body, hasAttachments, sent, received).'
+    ),
+  userId: z
+    .string()
+    .optional()
+    .describe(
+      "User ID or UPN (e.g. user@contoso.com) for app-only auth (client credentials). Omit when using delegated auth (bearer token) to search the signed-in user's mailbox."
+    ),
+  from: z
+    .number()
+    .min(0)
+    .default(0)
+    .describe('Zero-based offset for pagination (default: 0). Use with size to page results.'),
+  size: z
+    .number()
+    .min(1)
+    .max(25)
+    .default(10)
+    .describe('Number of results to return (1–25, default 10).'),
+});
+export type SearchMessagesInput = z.infer<typeof SearchMessagesInputSchema>;
+
+export const ListMessagesInputSchema = z.object({
+  userId: z
+    .string()
+    .optional()
+    .describe(
+      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
+    ),
+  folderId: z
+    .string()
+    .optional()
+    .describe(
+      'The well-known folder name or ID of the mail folder to list messages from. Well-known names: "inbox", "sentitems", "drafts", "deleteditems", "junkemail". Omit to list from all folders via the search API. Use listFolders to discover folder IDs.'
+    ),
+  top: z
+    .number()
+    .min(1)
+    .max(100)
+    .default(20)
+    .describe('Maximum number of messages to return (1–100, default 20).'),
+  filter: z
+    .string()
+    .optional()
+    .describe(
+      'OData $filter expression to filter messages. Examples: "isRead eq false", "receivedDateTime ge 2024-01-01T00:00:00Z", "from/emailAddress/address eq \'alice@contoso.com\'". Supports OData filter operators.'
+    ),
+  orderby: z
+    .string()
+    .optional()
+    .describe(
+      'OData $orderby expression to sort messages. Examples: "receivedDateTime desc" (default), "subject asc". Only one property can be used.'
+    ),
+});
+export type ListMessagesInput = z.infer<typeof ListMessagesInputSchema>;
+
+export const GetMessageInputSchema = z.object({
+  messageId: z
+    .string()
+    .describe(
+      'The ID of the Outlook message to retrieve. Obtain this from listMessages (the "id" field on each message object) or searchMessages (the resource.id field in hits).'
+    ),
+  userId: z
+    .string()
+    .optional()
+    .describe(
+      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
+    ),
+});
+export type GetMessageInput = z.infer<typeof GetMessageInputSchema>;
+
+export const GetAttachmentInputSchema = z.object({
+  messageId: z
+    .string()
+    .describe(
+      'The ID of the Outlook message that contains the attachment. Use listMessages or searchMessages to find message IDs.'
+    ),
+  attachmentId: z
+    .string()
+    .describe(
+      'The ID of the attachment to retrieve. Use listAttachments to discover attachment IDs for a given message.'
+    ),
+  userId: z
+    .string()
+    .optional()
+    .describe(
+      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
+    ),
+});
+export type GetAttachmentInput = z.infer<typeof GetAttachmentInputSchema>;
+
+export const ListAttachmentsInputSchema = z.object({
+  messageId: z
+    .string()
+    .describe(
+      'The ID of the Outlook message whose attachments you want to list. Use listMessages or searchMessages to find message IDs.'
+    ),
+  userId: z
+    .string()
+    .optional()
+    .describe(
+      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
+    ),
+});
+export type ListAttachmentsInput = z.infer<typeof ListAttachmentsInputSchema>;
+
+export const ListFoldersInputSchema = z.object({
+  userId: z
+    .string()
+    .optional()
+    .describe(
+      'User ID or UPN for app-only auth (client credentials). Omit when using delegated auth (bearer token).'
+    ),
+  includeHidden: z
+    .boolean()
+    .default(false)
+    .describe(
+      'Whether to include hidden mail folders (default: false). Set to true to enumerate all folders including system folders.'
+    ),
+});
+export type ListFoldersInput = z.infer<typeof ListFoldersInputSchema>;
