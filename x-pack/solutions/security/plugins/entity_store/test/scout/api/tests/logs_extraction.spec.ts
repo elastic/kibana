@@ -12,6 +12,7 @@ import {
   INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
@@ -28,6 +29,7 @@ import {
   clearEntityStoreIndices,
   forceLogExtraction,
   ingestDoc,
+  normalizeKeywordList,
   searchDocById,
 } from '../fixtures/helpers';
 
@@ -94,7 +96,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -131,7 +133,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(expectedResultCount);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -174,7 +176,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(2);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -210,7 +212,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     expect(extractionResponse.body.count).toBe(1);
 
     const entities = await esClient.search({
-      index: '.entities.v2.latest.security_default',
+      index: LATEST_ALIAS,
       query: {
         bool: {
           filter: {
@@ -1065,7 +1067,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       expect(extractionResponse.body.success).toBe(true);
 
       const entities = await esClient.search({
-        index: '.entities.v2.latest.security_default',
+        index: LATEST_ALIAS,
         query: { bool: { filter: { term: { 'entity.EngineMetadata.Type': 'host' } } } },
         size: 5,
       });
@@ -1080,6 +1082,85 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         const dottedKeys = topLevelKeys.filter((k) => k.includes('.'));
         expect(dottedKeys).toHaveLength(0);
       }
+    }
+  );
+
+  apiTest(
+    'Should merge entity.relationships.* identifier from host.entity on source documents',
+    async ({ apiClient, esClient }) => {
+      const fromIso = '2026-04-10T09:00:00Z';
+      const toIso = '2026-04-10T11:00:00Z';
+      const ts = '2026-04-10T10:00:00Z';
+      const hostName = 'relationship-bag-smoke-host';
+      const entityId = `host:${hostName}`;
+
+      await ingestDoc(esClient, {
+        '@timestamp': ts,
+        host: {
+          name: hostName,
+          entity: {
+            relationships: {
+              owns: {
+                user: {
+                  email: ['owner-rel-test@example.com'],
+                  id: ['00u_rel_test'],
+                },
+                host: {
+                  name: ['asset-rel-01'],
+                },
+              },
+              supervises: {
+                user: {
+                  email: ['supervisee@example.com'],
+                  name: ['supervisor_login'],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'host',
+        fromIso,
+        toIso
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({
+        success: true,
+        count: 1,
+      });
+
+      const hitResponse = await searchDocById(esClient, entityId);
+      expect(hitResponse.hits.hits).toHaveLength(1);
+      const source = hitResponse.hits.hits[0]._source as Record<string, unknown>;
+      const entity = source.entity as Record<string, unknown>;
+      expect(entity).toBeDefined();
+
+      const relationships = entity.relationships as Record<string, unknown> | undefined;
+      expect(relationships).toBeDefined();
+
+      const owns = relationships!.owns as Record<string, unknown> | undefined;
+      expect(owns).toBeDefined();
+      const ownsRawIdentifiers = owns!.raw_identifiers as Record<string, unknown> | undefined;
+      expect(ownsRawIdentifiers).toBeDefined();
+      const ownsUser = ownsRawIdentifiers!.user as Record<string, unknown> | undefined;
+      const ownsHost = ownsRawIdentifiers!.host as Record<string, unknown> | undefined;
+      expect(normalizeKeywordList(ownsUser?.email)).toStrictEqual(['owner-rel-test@example.com']);
+      expect(normalizeKeywordList(ownsUser?.id)).toStrictEqual(['00u_rel_test']);
+      expect(normalizeKeywordList(ownsHost?.name)).toStrictEqual(['asset-rel-01']);
+
+      const supervises = relationships!.supervises as Record<string, unknown> | undefined;
+      expect(supervises).toBeDefined();
+      const supervisesRawIdentifiers = supervises!.raw_identifiers as
+        | Record<string, unknown>
+        | undefined;
+      expect(supervisesRawIdentifiers).toBeDefined();
+      const supervisesUser = supervisesRawIdentifiers!.user as Record<string, unknown> | undefined;
+      expect(normalizeKeywordList(supervisesUser?.email)).toStrictEqual(['supervisee@example.com']);
+      expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
     }
   );
 });

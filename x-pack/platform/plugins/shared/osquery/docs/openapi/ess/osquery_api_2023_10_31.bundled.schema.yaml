@@ -11,32 +11,157 @@ servers:
       port:
         default: '5601'
 paths:
+  /api/osquery/history:
+    get:
+      description: >
+        Get a unified, time-sorted history of live, rule-triggered, and
+        scheduled osquery executions. The response uses cursor-based pagination.
+      operationId: OsqueryGetUnifiedHistory
+      parameters:
+        - description: The number of results to return per page.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            default: 20
+            description: The number of results to return per page.
+            maximum: 100
+            minimum: 1
+            type: integer
+        - description: >-
+            A base64-encoded cursor for pagination. Use the value from the
+            previous response to fetch the next page.
+          in: query
+          name: nextPage
+          required: false
+          schema:
+            description: >-
+              A base64-encoded cursor for pagination. Use the value from the
+              previous response to fetch the next page.
+            type: string
+        - description: >-
+            A search string to filter history entries by pack name, query text,
+            or query ID.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            description: >-
+              A search string to filter history entries by pack name, query
+              text, or query ID.
+            type: string
+        - description: Comma-separated list of user IDs to filter live query history.
+          in: query
+          name: userIds
+          required: false
+          schema:
+            description: Comma-separated list of user IDs to filter live query history.
+            example: elastic,admin
+            type: string
+        - description: >-
+            Comma-separated list of source types to include. Valid values are
+            `live`, `rule`, and `scheduled`.
+          in: query
+          name: sourceFilters
+          required: false
+          schema:
+            description: >-
+              Comma-separated list of source types to include. Valid values are
+              `live`, `rule`, and `scheduled`.
+            example: live,scheduled
+            type: string
+        - description: The start of the time range filter (ISO 8601).
+          in: query
+          name: startDate
+          required: false
+          schema:
+            description: The start of the time range filter (ISO 8601).
+            example: '2024-01-01T00:00:00Z'
+            type: string
+        - description: The end of the time range filter (ISO 8601).
+          in: query
+          name: endDate
+          required: false
+          schema:
+            description: The end of the time range filter (ISO 8601).
+            example: '2024-12-31T23:59:59Z'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                unifiedHistoryExample:
+                  summary: Example unified history response
+                  value:
+                    data:
+                      - actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+                        agentCount: 5
+                        errorCount: 0
+                        id: 3c42c847-eb30-4452-80e0-728584042334
+                        queryName: uptime_query
+                        queryText: select * from uptime;
+                        source: Live
+                        sourceType: live
+                        successCount: 5
+                        timestamp: '2024-07-26T09:59:32.220Z'
+                        totalRows: 42
+                        userId: elastic
+                      - agentCount: 10
+                        errorCount: 1
+                        executionCount: 3
+                        id: pack_my_pack_uptime_3
+                        packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                        packName: My Pack
+                        plannedTime: '2024-07-26T09:00:00.000Z'
+                        queryName: uptime
+                        queryText: select * from uptime;
+                        scheduleId: pack_my_pack_uptime
+                        source: Scheduled
+                        sourceType: scheduled
+                        successCount: 9
+                        timestamp: '2024-07-26T09:00:00.000Z'
+                        totalRows: 100
+                    hasMore: true
+                    nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
+              schema:
+                $ref: '#/components/schemas/GetUnifiedHistoryResponse'
+          description: Indicates a successful call.
+      summary: Get unified query history
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.4.0
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
       operationId: OsqueryFindLiveQueries
       parameters:
-        - in: query
+        - description: A KQL search string to filter live queries.
+          in: query
           name: kuery
           required: false
           schema:
             $ref: '#/components/schemas/KueryOrUndefined'
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/PageOrUndefined'
-        - in: query
+        - description: The number of results to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSizeOrUndefined'
-        - in: query
+        - description: The field to sort results by.
+          in: query
           name: sort
           required: false
           schema:
             $ref: '#/components/schemas/SortOrUndefined'
-        - in: query
+        - description: The sort order.
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -47,7 +172,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FindLiveQueryResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get live queries
       tags:
         - Security Osquery API
@@ -66,7 +191,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateLiveQueryResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Create a live query
       tags:
         - Security Osquery API
@@ -75,7 +200,8 @@ paths:
       description: Get the details of a live query using the query ID.
       operationId: OsqueryGetLiveQueryDetails
       parameters:
-        - in: path
+        - description: The ID of the live query.
+          in: path
           name: id
           required: true
           schema:
@@ -88,7 +214,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FindLiveQueryDetailsResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get live query details
       tags:
         - Security Osquery API
@@ -97,41 +223,48 @@ paths:
       description: Get the results of a live query using the query action ID.
       operationId: OsqueryGetLiveQueryResults
       parameters:
-        - in: path
+        - description: The ID of the live query.
+          in: path
           name: id
           required: true
           schema:
             description: The ID of the live query result you want to retrieve.
             example: 3c42c847-eb30-4452-80e0-728584042334
             type: string
-        - in: path
+        - description: The ID of the query action.
+          in: path
           name: actionId
           required: true
           schema:
             description: The ID of the query action that generated the live query results.
             example: 609c4c66-ba3d-43fa-afdd-53e244577aa0
             type: string
-        - in: query
+        - description: A KQL search string to filter results.
+          in: query
           name: kuery
           required: false
           schema:
             $ref: '#/components/schemas/KueryOrUndefined'
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/PageOrUndefined'
-        - in: query
+        - description: The number of results to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSizeOrUndefined'
-        - in: query
+        - description: The field to sort results by.
+          in: query
           name: sort
           required: false
           schema:
             $ref: '#/components/schemas/SortOrUndefined'
-        - in: query
+        - description: The sort order.
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -142,7 +275,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetLiveQueryResultsResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get live query results
       tags:
         - Security Osquery API
@@ -151,22 +284,26 @@ paths:
       description: Get a list of all query packs.
       operationId: OsqueryFindPacks
       parameters:
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/PageOrUndefined'
-        - in: query
+        - description: The number of results to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSizeOrUndefined'
-        - in: query
+        - description: The field to sort results by.
+          in: query
           name: sort
           required: false
           schema:
             $ref: '#/components/schemas/SortOrUndefined'
-        - in: query
+        - description: The sort order.
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -177,7 +314,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FindPacksResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get packs
       tags:
         - Security Osquery API
@@ -196,7 +333,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreatePacksResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Create a pack
       tags:
         - Security Osquery API
@@ -205,7 +342,8 @@ paths:
       description: Delete a query pack using the pack ID.
       operationId: OsqueryDeletePacks
       parameters:
-        - in: path
+        - description: The pack ID.
+          in: path
           name: id
           required: true
           schema:
@@ -218,7 +356,7 @@ paths:
                 example: {}
                 type: object
                 properties: {}
-          description: OK
+          description: Indicates a successful call.
       summary: Delete a pack
       tags:
         - Security Osquery API
@@ -226,7 +364,8 @@ paths:
       description: Get the details of a query pack using the pack ID.
       operationId: OsqueryGetPacksDetails
       parameters:
-        - in: path
+        - description: The pack ID.
+          in: path
           name: id
           required: true
           schema:
@@ -237,7 +376,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FindPackResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get pack details
       tags:
         - Security Osquery API
@@ -248,7 +387,8 @@ paths:
         > You cannot update a prebuilt pack.
       operationId: OsqueryUpdatePacks
       parameters:
-        - in: path
+        - description: The pack ID.
+          in: path
           name: id
           required: true
           schema:
@@ -265,31 +405,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdatePacksResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Update a pack
       tags:
         - Security Osquery API
+  /api/osquery/packs/{id}/copy:
+    post:
+      description: >-
+        Create a copy of a query pack with a unique name by appending a `_copy`
+        suffix. If the name already exists, a numeric suffix is added (e.g.,
+        `_copy_2`). The copied pack is always created with `enabled` set to
+        `false`.
+      operationId: OsqueryCopyPacks
+      parameters:
+        - description: The ID of the pack to copy.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/PackId'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                copyPackExample:
+                  summary: Example response for copying a pack
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: My pack
+                      enabled: false
+                      name: my_pack_copy
+                      policy_ids: []
+                      queries:
+                        - ecs_mapping:
+                            - key: client.port
+                              value:
+                                field: port
+                          id: ports
+                          interval: 60
+                          query: SELECT * FROM listening_ports;
+                          removed: false
+                          snapshot: true
+                          timeout: 120
+                      saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+                      shards: []
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/CopyPacksResponse'
+          description: Indicates a successful call.
+      summary: Copy a pack
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.4.0
   /api/osquery/saved_queries:
     get:
       description: Get a list of all saved queries.
       operationId: OsqueryFindSavedQueries
       parameters:
-        - in: query
+        - description: The page number to return.
+          in: query
           name: page
           required: false
           schema:
             $ref: '#/components/schemas/PageOrUndefined'
-        - in: query
+        - description: The number of results to return per page.
+          in: query
           name: pageSize
           required: false
           schema:
             $ref: '#/components/schemas/PageSizeOrUndefined'
-        - in: query
+        - description: The field to sort results by.
+          in: query
           name: sort
           required: false
           schema:
             $ref: '#/components/schemas/SortOrUndefined'
-        - in: query
+        - description: The sort order.
+          in: query
           name: sortOrder
           required: false
           schema:
@@ -300,12 +496,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FindSavedQueryResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get saved queries
       tags:
         - Security Osquery API
     post:
-      description: Create and run a saved query.
+      description: Create and save a query for later use.
       operationId: OsqueryCreateSavedQuery
       requestBody:
         content:
@@ -319,7 +515,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateSavedQueryResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Create a saved query
       tags:
         - Security Osquery API
@@ -328,7 +524,8 @@ paths:
       description: Delete a saved query using the query ID.
       operationId: OsqueryDeleteSavedQuery
       parameters:
-        - in: path
+        - description: The saved query ID.
+          in: path
           name: id
           required: true
           schema:
@@ -339,7 +536,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DefaultSuccessResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Delete a saved query
       tags:
         - Security Osquery API
@@ -347,7 +544,8 @@ paths:
       description: Get the details of a saved query using the query ID.
       operationId: OsqueryGetSavedQueryDetails
       parameters:
-        - in: path
+        - description: The saved query ID.
+          in: path
           name: id
           required: true
           schema:
@@ -358,7 +556,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FindSavedQueryDetailResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Get saved query details
       tags:
         - Security Osquery API
@@ -369,7 +567,8 @@ paths:
         > You cannot update a prebuilt saved query.
       operationId: OsqueryUpdateSavedQuery
       parameters:
-        - in: path
+        - description: The saved query ID.
+          in: path
           name: id
           required: true
           schema:
@@ -386,10 +585,236 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateSavedQueryResponse'
-          description: OK
+          description: Indicates a successful call.
       summary: Update a saved query
       tags:
         - Security Osquery API
+  /api/osquery/saved_queries/{id}/copy:
+    post:
+      description: >-
+        Create a copy of a saved query with a unique name by appending a `_copy`
+        suffix. If the name already exists, a numeric suffix is added (e.g.,
+        `_copy_2`).
+      operationId: OsqueryCopySavedQuery
+      parameters:
+        - description: The ID of the saved query to copy.
+          in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                copySavedQueryExample:
+                  summary: Example response for copying a saved query
+                  value:
+                    data:
+                      created_at: '2025-02-26T13:37:30.452Z'
+                      created_by: elastic
+                      description: Saved query description
+                      ecs_mapping:
+                        host.uptime:
+                          field: total_seconds
+                      id: my_saved_query_copy
+                      interval: '60'
+                      platform: linux,darwin
+                      query: select * from uptime;
+                      removed: false
+                      saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+                      snapshot: true
+                      timeout: 120
+                      updated_at: '2025-02-26T13:37:30.452Z'
+                      updated_by: elastic
+              schema:
+                $ref: '#/components/schemas/CopySavedQueryResponse'
+          description: Indicates a successful call.
+      summary: Copy a saved query
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.4.0
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}:
+    get:
+      description: >
+        Get paginated per-agent action results for a specific scheduled query
+        execution, with success/failure aggregation and execution metadata (pack
+        name, query name/text, timestamp).
+      operationId: OsqueryGetScheduledActionResults
+      parameters:
+        - description: The schedule ID of the scheduled query.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            description: The schedule ID of the scheduled query.
+            example: pack_my_pack_uptime
+            type: string
+        - description: The execution count for this scheduled query run.
+          in: path
+          name: executionCount
+          required: true
+          schema:
+            description: The execution count for this scheduled query run.
+            example: 3
+            type: integer
+        - description: The kuery to filter the results by.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/KueryOrUndefined'
+        - description: The page number to return. The default is 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageOrUndefined'
+        - description: The number of results to return per page. The default is 20.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageSizeOrUndefined'
+        - description: The field that is used to sort the results.
+          in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrUndefined'
+        - description: Specifies the sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrderOrUndefined'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                scheduledActionResultsExample:
+                  summary: Example scheduled action results response
+                  value:
+                    aggregations:
+                      failed: 1
+                      pending: 0
+                      successful: 9
+                      totalResponded: 10
+                      totalRowCount: 42
+                    currentPage: 0
+                    edges:
+                      - _id: result-001
+                        fields:
+                          agent_id: 16d7caf5-efd2-4212-9b62-73dafc91fa13
+                          rows_count: 5
+                          status: success
+                    metadata:
+                      executionCount: 3
+                      packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+                      packName: My Pack
+                      queryName: uptime
+                      queryText: select * from uptime;
+                      scheduleId: pack_my_pack_uptime
+                      timestamp: '2024-07-26T09:00:00.000Z'
+                    pageSize: 20
+                    total: 10
+                    totalPages: 1
+              schema:
+                $ref: '#/components/schemas/GetScheduledActionResultsResponse'
+          description: Indicates a successful call.
+      summary: Get scheduled action results
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.4.0
+  /api/osquery/scheduled_results/{scheduleId}/{executionCount}/results:
+    get:
+      description: >
+        Get paginated query result rows (the actual osquery output data) for a
+        specific scheduled query execution.
+      operationId: OsqueryGetScheduledQueryResults
+      parameters:
+        - description: The schedule ID of the scheduled query.
+          in: path
+          name: scheduleId
+          required: true
+          schema:
+            description: The schedule ID of the scheduled query.
+            example: pack_my_pack_uptime
+            type: string
+        - description: The execution count for this scheduled query run.
+          in: path
+          name: executionCount
+          required: true
+          schema:
+            description: The execution count for this scheduled query run.
+            example: 3
+            type: integer
+        - description: The kuery to filter the results by.
+          in: query
+          name: kuery
+          required: false
+          schema:
+            $ref: '#/components/schemas/KueryOrUndefined'
+        - description: The page number to return. The default is 1.
+          in: query
+          name: page
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageOrUndefined'
+        - description: The number of results to return per page. The default is 20.
+          in: query
+          name: pageSize
+          required: false
+          schema:
+            $ref: '#/components/schemas/PageSizeOrUndefined'
+        - description: The field that is used to sort the results.
+          in: query
+          name: sort
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrUndefined'
+        - description: Specifies the sort order.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrderOrUndefined'
+        - description: The start date filter (ISO 8601) to narrow down results.
+          in: query
+          name: startDate
+          required: false
+          schema:
+            description: The start date filter (ISO 8601) to narrow down results.
+            example: '2024-01-01T00:00:00Z'
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                scheduledQueryResultsExample:
+                  summary: Example scheduled query results response
+                  value:
+                    data:
+                      edges:
+                        - _id: row-001
+                          fields:
+                            host.uptime:
+                              - '12345'
+                        - _id: row-002
+                          fields:
+                            host.uptime:
+                              - '67890'
+                      total: 2
+              schema:
+                $ref: '#/components/schemas/GetScheduledQueryResultsResponse'
+          description: Indicates a successful call.
+      summary: Get scheduled query results
+      tags:
+        - Security Osquery API
+      x-state: Generally available; Added in 9.4.0
 components:
   schemas:
     ArrayQueries:
@@ -414,6 +839,175 @@ components:
           $ref: '#/components/schemas/SnapshotOrUndefined'
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
+    CopyPacksResponse:
+      description: The response for copying a pack.
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: My pack
+          enabled: false
+          name: my_pack_copy
+          policy_ids: []
+          queries:
+            - ecs_mapping:
+                - key: client.port
+                  value:
+                    field: port
+              id: ports
+              interval: 60
+              query: SELECT * FROM listening_ports;
+              removed: false
+              snapshot: true
+              timeout: 120
+          saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
+          shards: []
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
+            enabled:
+              $ref: '#/components/schemas/EnabledOrUndefined'
+            name:
+              $ref: '#/components/schemas/PackName'
+            policy_ids:
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
+            queries:
+              description: >-
+                Pack queries in saved-object storage format (array). Note: the
+                read endpoint returns object format.
+              items:
+                type: object
+                properties:
+                  ecs_mapping:
+                    $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                  id:
+                    type: string
+                  interval:
+                    type: integer
+                  platform:
+                    type: string
+                  query:
+                    type: string
+                  removed:
+                    type: boolean
+                  snapshot:
+                    type: boolean
+                  timeout:
+                    type: integer
+                  version:
+                    type: string
+              type: array
+            saved_object_id:
+              description: The saved object ID of the copied pack.
+              type: string
+            shards:
+              description: Shard configuration as an array of key-value pairs.
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
+              type: array
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+            version:
+              description: The pack version number.
+              type: integer
+          required:
+            - saved_object_id
+            - name
+      required:
+        - data
+    CopySavedQueryResponse:
+      description: The response for copying a saved query.
+      example:
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: Saved query description
+          ecs_mapping:
+            host.uptime:
+              field: total_seconds
+          id: my_saved_query_copy
+          interval: '60'
+          platform: linux,darwin
+          query: select * from uptime;
+          removed: false
+          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+          snapshot: true
+          timeout: 120
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+            ecs_mapping:
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
+            id:
+              $ref: '#/components/schemas/SavedQueryId'
+            interval:
+              oneOf:
+                - type: integer
+                - type: string
+            platform:
+              $ref: '#/components/schemas/PlatformOrUndefined'
+            query:
+              $ref: '#/components/schemas/Query'
+            removed:
+              $ref: '#/components/schemas/RemovedOrUndefined'
+            saved_object_id:
+              type: string
+            snapshot:
+              $ref: '#/components/schemas/SnapshotOrUndefined'
+            timeout:
+              type: integer
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     CreateLiveQueryRequestBody:
       example:
         agent_all: true
@@ -471,6 +1065,7 @@ components:
         saved_query_id:
           $ref: '#/components/schemas/SavedQueryIdOrUndefined'
     CreateLiveQueryResponse:
+      description: The response for creating a live query.
       example:
         data:
           '@timestamp': '2022-07-26T09:59:32.220Z'
@@ -500,7 +1095,89 @@ components:
           type: INPUT_ACTION
           user_id: elastic
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            '@timestamp':
+              description: The timestamp when the action was created.
+              format: date-time
+              type: string
+            action_id:
+              description: The ID of the action.
+              type: string
+            agent_all:
+              description: Whether the query targets all agents.
+              type: boolean
+            agent_ids:
+              description: The agent IDs targeted by the action.
+              items:
+                type: string
+              type: array
+            agent_platforms:
+              description: The agent platforms targeted.
+              items:
+                type: string
+              type: array
+            agent_policy_ids:
+              description: The agent policy IDs targeted.
+              items:
+                type: string
+              type: array
+            agents:
+              description: The resolved list of agent IDs.
+              items:
+                type: string
+              type: array
+            expiration:
+              description: The expiration date of the action.
+              format: date-time
+              type: string
+            input_type:
+              description: The input type.
+              type: string
+            metadata:
+              description: Custom metadata associated with the action.
+              type: object
+            pack_id:
+              description: The pack ID if the query was run from a pack.
+              type: string
+            queries:
+              description: The queries in this action.
+              items:
+                type: object
+                properties:
+                  action_id:
+                    type: string
+                  agents:
+                    items:
+                      type: string
+                    type: array
+                  ecs_mapping:
+                    $ref: '#/components/schemas/ECSMappingOrUndefined'
+                  id:
+                    type: string
+                  platform:
+                    type: string
+                  query:
+                    type: string
+                  saved_query_id:
+                    type: string
+                  timeout:
+                    type: integer
+                  version:
+                    type: string
+              type: array
+            type:
+              description: The action type.
+              type: string
+            user_id:
+              description: The user who created the action.
+              type: string
+          required:
+            - action_id
+      required:
+        - data
     CreatePacksRequestBody:
       example:
         description: My pack
@@ -539,6 +1216,7 @@ components:
         shards:
           $ref: '#/components/schemas/Shards'
     CreatePacksResponse:
+      description: The response for creating a pack.
       example:
         data:
           created_at: '2025-02-26T13:37:30.452Z'
@@ -546,6 +1224,8 @@ components:
           description: My pack
           enabled: true
           name: my_pack
+          policy_ids:
+            - my_policy_id
           queries:
             ports:
               ecs_mapping:
@@ -558,14 +1238,69 @@ components:
               timeout: 120
           saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
           shards:
-            - key: 47638692-7c4c-4053-aa3e-7186f28df349
-              value: 35
-            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
-              value: 58
+            47638692-7c4c-4053-aa3e-7186f28df349: 35
+            5e267651-fe50-443e-8d3f-3bbc9171b618: 58
           updated_at: '2025-02-26T13:37:30.452Z'
           updated_by: elastic
+          version: 1
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              description: The date and time the pack was created.
+              format: date-time
+              type: string
+            created_by:
+              description: The user who created the pack.
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              description: The profile UID of the user who created the pack.
+              type: string
+            description:
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
+            enabled:
+              $ref: '#/components/schemas/EnabledOrUndefined'
+            name:
+              $ref: '#/components/schemas/PackName'
+            policy_ids:
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
+            queries:
+              $ref: '#/components/schemas/ObjectQueries'
+            saved_object_id:
+              description: The saved object ID of the pack.
+              type: string
+            shards:
+              description: Shard configuration as an array of key-value pairs.
+              items:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value:
+                    type: number
+              type: array
+            updated_at:
+              description: The date and time the pack was last updated.
+              format: date-time
+              type: string
+            updated_by:
+              description: The user who last updated the pack.
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              description: The profile UID of the user who last updated the pack.
+              type: string
+            version:
+              description: The pack version number.
+              type: integer
+          required:
+            - saved_object_id
+            - name
+      required:
+        - data
     CreateSavedQueryRequestBody:
       example:
         description: Saved query description
@@ -599,11 +1334,88 @@ components:
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
     CreateSavedQueryResponse:
+      description: The response for creating a saved query.
       example:
-        data: {}
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: Saved query description
+          ecs_mapping:
+            host.uptime:
+              field: total_seconds
+          id: saved_query_id
+          interval: '60'
+          platform: linux,darwin
+          prebuilt: false
+          query: select * from uptime;
+          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+          timeout: 120
+          updated_at: '2025-02-26T13:37:30.452Z'
+          updated_by: elastic
+          version: 2.8.0
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+            ecs_mapping:
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
+            id:
+              $ref: '#/components/schemas/SavedQueryId'
+            interval:
+              description: >-
+                An interval, in seconds, on which to run the query. May be
+                returned as number or string.
+              oneOf:
+                - type: integer
+                - type: string
+            platform:
+              $ref: '#/components/schemas/PlatformOrUndefined'
+            prebuilt:
+              description: Whether the saved query is prebuilt.
+              type: boolean
+            query:
+              $ref: '#/components/schemas/Query'
+            removed:
+              $ref: '#/components/schemas/RemovedOrUndefined'
+            saved_object_id:
+              description: The saved object ID of the saved query.
+              type: string
+            snapshot:
+              $ref: '#/components/schemas/SnapshotOrUndefined'
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+            version:
+              description: The saved query version.
+              oneOf:
+                - type: integer
+                - type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     DefaultSuccessResponse:
+      example: {}
       type: object
       properties: {}
     ECSMapping:
@@ -616,6 +1428,26 @@ components:
         host.uptime:
           field: total_seconds
       type: object
+    ECSMappingArray:
+      description: >-
+        ECS mapping in saved-object storage format (array of key-value pairs).
+        The find and copy pack endpoints return this format. The read endpoint
+        returns object format (ECSMapping).
+      items:
+        $ref: '#/components/schemas/ECSMappingArrayItem'
+      type: array
+    ECSMappingArrayItem:
+      description: ECS mapping item in saved-object storage format (key-value pair).
+      type: object
+      properties:
+        key:
+          description: The ECS field name.
+          type: string
+        value:
+          $ref: '#/components/schemas/ECSMappingItem'
+    ECSMappingArrayOrUndefined:
+      $ref: '#/components/schemas/ECSMappingArray'
+      nullable: true
     ECSMappingItem:
       type: object
       properties:
@@ -668,12 +1500,88 @@ components:
           status: completed
           user_id: elastic
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            action_id:
+              type: string
+            agents:
+              items:
+                type: string
+              type: array
+            expiration:
+              format: date-time
+              type: string
+            pack_id:
+              type: string
+            pack_name:
+              type: string
+            prebuilt_pack:
+              type: boolean
+            queries:
+              description: The queries with their execution status.
+              items:
+                type: object
+                properties:
+                  action_id:
+                    type: string
+                  agents:
+                    items:
+                      type: string
+                    type: array
+                  docs:
+                    description: Number of result documents.
+                    type: integer
+                  ecs_mapping:
+                    $ref: '#/components/schemas/ECSMappingOrUndefined'
+                  failed:
+                    description: Number of failed queries.
+                    type: integer
+                  id:
+                    type: string
+                  pending:
+                    description: Number of pending agents.
+                    type: integer
+                  query:
+                    type: string
+                  responded:
+                    description: Total responded agents.
+                    type: integer
+                  saved_query_id:
+                    type: string
+                  status:
+                    description: Status of this individual query.
+                    enum:
+                      - completed
+                      - running
+                    type: string
+                  successful:
+                    description: Number of successful agents.
+                    type: integer
+              type: array
+            status:
+              description: Global status of the live query (completed, running).
+              enum:
+                - completed
+                - running
+              type: string
+            tags:
+              items:
+                type: string
+              type: array
+            user_id:
+              type: string
+            user_profile_uid:
+              type: string
     FindLiveQueryResponse:
       example:
         data:
           items:
-            - fields:
+            - _source:
                 '@timestamp': '2023-10-31T00:00:00Z'
                 action_id: 3c42c847-eb30-4452-80e0-728584042334
                 agents:
@@ -695,16 +1603,81 @@ components:
                   successful_agents: 1
                   total_rows: 42
                 user_id: elastic
+          total: 1
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              description: An array of live query action items.
+              items:
+                type: object
+                properties:
+                  _source:
+                    type: object
+                    properties:
+                      '@timestamp':
+                        format: date-time
+                        type: string
+                      action_id:
+                        type: string
+                      agents:
+                        items:
+                          type: string
+                        type: array
+                      expiration:
+                        format: date-time
+                        type: string
+                      pack_id:
+                        type: string
+                      queries:
+                        items:
+                          type: object
+                          properties:
+                            action_id:
+                              type: string
+                            agents:
+                              items:
+                                type: string
+                              type: array
+                            ecs_mapping:
+                              $ref: '#/components/schemas/ECSMappingOrUndefined'
+                            id:
+                              type: string
+                            query:
+                              type: string
+                            saved_query_id:
+                              type: string
+                        type: array
+                      result_counts:
+                        description: >-
+                          Result count statistics (present when withResultCounts
+                          is true).
+                        type: object
+                        properties:
+                          error_agents:
+                            type: integer
+                          responded_agents:
+                            type: integer
+                          successful_agents:
+                            type: integer
+                          total_rows:
+                            type: integer
+                      user_id:
+                        type: string
+              type: array
+            total:
+              description: The total number of live queries.
+              type: integer
     FindPackResponse:
+      description: The details of a single query pack.
       example:
         data:
           created_at: '2022-07-25T19:41:10.263Z'
           created_by: elastic
           description: ''
           enabled: true
-          id: 3c42c847-eb30-4452-80e0-728584042334
           name: test_pack
           namespaces:
             - default
@@ -717,47 +1690,259 @@ components:
               interval: 3600
               query: select * from uptime
           read_only: false
+          saved_object_id: 3c42c847-eb30-4452-80e0-728584042334
+          shards: {}
           type: osquery-pack
           updated_at: '2022-07-25T20:12:01.455Z'
           updated_by: elastic
+          version: 1
       type: object
-      properties: {}
+      properties:
+        data:
+          description: The pack details.
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
+            enabled:
+              $ref: '#/components/schemas/EnabledOrUndefined'
+            name:
+              $ref: '#/components/schemas/PackName'
+            namespaces:
+              description: The namespaces the pack belongs to.
+              items:
+                type: string
+              type: array
+            policy_ids:
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
+            queries:
+              $ref: '#/components/schemas/ObjectQueries'
+            read_only:
+              description: Whether the pack is read-only (true for prebuilt packs).
+              type: boolean
+            saved_object_id:
+              description: The saved object ID of the pack.
+              type: string
+            shards:
+              $ref: '#/components/schemas/Shards'
+            type:
+              description: The saved object type.
+              type: string
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+            version:
+              description: The pack version number.
+              type: integer
+          required:
+            - saved_object_id
+            - name
+      required:
+        - data
     FindPacksResponse:
+      description: A paginated list of query packs.
       example:
         data:
-          - attributes:
-              created_at: '2023-10-31T00:00:00Z'
-              created_by: elastic
-              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              description: My pack description
-              enabled: true
-              name: My Pack
-              queries:
-                - ecs_mapping:
-                    - host.uptime:
-                        field: total_seconds
-                  id: uptime
-                  interval: '3600'
-                  query: select * from uptime;
-              updated_at: '2023-10-31T00:00:00Z'
-              updated_by: elastic
-              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            namespaces:
-              - default
-            type: osquery-pack
+          - created_at: '2023-10-31T00:00:00Z'
+            created_by: elastic
+            created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
+            description: My pack description
+            enabled: true
+            name: My Pack
+            policy_ids: []
+            queries:
+              - ecs_mapping:
+                  - key: host.uptime
+                    value:
+                      field: total_seconds
+                id: uptime
+                interval: 3600
+                query: select * from uptime;
+            read_only: false
+            saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            updated_at: '2023-10-31T00:00:00Z'
+            updated_by: elastic
+            updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
         page: 1
-        pageSize: 10
-        policy_ids: []
+        per_page: 10
         total: 1
       type: object
-      properties: {}
+      properties:
+        data:
+          description: An array of pack objects.
+          items:
+            type: object
+            properties:
+              created_at:
+                format: date-time
+                type: string
+              created_by:
+                nullable: true
+                type: string
+              created_by_profile_uid:
+                type: string
+              description:
+                $ref: '#/components/schemas/PackDescriptionOrUndefined'
+              enabled:
+                $ref: '#/components/schemas/EnabledOrUndefined'
+              name:
+                $ref: '#/components/schemas/PackName'
+              policy_ids:
+                $ref: '#/components/schemas/PolicyIdsOrUndefined'
+              queries:
+                description: >-
+                  Pack queries in saved-object storage format (array). Note: the
+                  read endpoint returns object format.
+                items:
+                  type: object
+                  properties:
+                    ecs_mapping:
+                      $ref: '#/components/schemas/ECSMappingArrayOrUndefined'
+                    id:
+                      type: string
+                    interval:
+                      type: integer
+                    platform:
+                      type: string
+                    query:
+                      type: string
+                    removed:
+                      type: boolean
+                    snapshot:
+                      type: boolean
+                    timeout:
+                      type: integer
+                    version:
+                      type: string
+                type: array
+              read_only:
+                description: Whether the pack is read-only (true for prebuilt packs).
+                type: boolean
+              saved_object_id:
+                description: The saved object ID of the pack.
+                type: string
+              updated_at:
+                format: date-time
+                type: string
+              updated_by:
+                nullable: true
+                type: string
+              updated_by_profile_uid:
+                type: string
+              version:
+                description: The pack version number.
+                type: integer
+            required:
+              - saved_object_id
+              - name
+          type: array
+        page:
+          description: The current page number.
+          type: integer
+        per_page:
+          description: The number of results per page.
+          type: integer
+        total:
+          description: The total number of packs.
+          type: integer
+      required:
+        - page
+        - per_page
+        - total
+        - data
     FindSavedQueryDetailResponse:
+      description: The details of a single saved query.
       example:
         data:
-          attributes:
-            created_at: '2022-07-26T09:28:08.597Z'
+          created_at: '2022-07-26T09:28:08.597Z'
+          created_by: elastic
+          description: Saved query description
+          ecs_mapping:
+            host.uptime:
+              field: total_seconds
+          id: saved_query_id
+          interval: '60'
+          platform: linux,darwin
+          prebuilt: false
+          query: select * from uptime;
+          saved_object_id: 3c42c847-eb30-4452-80e0-728584042334
+          updated_at: '2022-07-26T09:28:08.597Z'
+          updated_by: elastic
+          version: 2.8.0
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+            ecs_mapping:
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
+            id:
+              $ref: '#/components/schemas/SavedQueryId'
+            interval:
+              oneOf:
+                - type: integer
+                - type: string
+            platform:
+              $ref: '#/components/schemas/PlatformOrUndefined'
+            prebuilt:
+              type: boolean
+            query:
+              $ref: '#/components/schemas/Query'
+            removed:
+              $ref: '#/components/schemas/RemovedOrUndefined'
+            saved_object_id:
+              type: string
+            snapshot:
+              $ref: '#/components/schemas/SnapshotOrUndefined'
+            timeout:
+              type: integer
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+            version:
+              oneOf:
+                - type: integer
+                - type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
+    FindSavedQueryResponse:
+      description: A paginated list of saved queries.
+      example:
+        data:
+          - created_at: '2022-07-26T09:28:08.597Z'
             created_by: elastic
+            created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             description: Saved query description
             ecs_mapping:
               host.uptime:
@@ -767,58 +1952,247 @@ components:
             platform: linux,darwin
             prebuilt: false
             query: select * from uptime;
+            saved_object_id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
             updated_at: '2022-07-26T09:28:08.597Z'
             updated_by: elastic
+            updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
             version: 2.8.0
-          coreMigrationVersion: 8.4.0
-          id: 3c42c847-eb30-4452-80e0-728584042334
-          namespaces:
-            - default
-          references: []
-          type: osquery-saved-query
-          updated_at: '2022-07-26T09:28:08.600Z'
-          version: WzQzMTcsMV0=
-      type: object
-      properties: {}
-    FindSavedQueryResponse:
-      example:
-        data:
-          - attributes:
-              created_at: '2022-07-26T09:28:08.597Z'
-              created_by: elastic
-              created_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              description: Saved query description
-              ecs_mapping:
-                host.uptime:
-                  field: total_seconds
-              id: saved_query_id
-              interval: '60'
-              platform: linux,darwin
-              prebuilt: false
-              query: select * from uptime;
-              updated_at: '2022-07-26T09:28:08.597Z'
-              updated_by: elastic
-              updated_by_profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
-              version: 2.8.0
-            id: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
-            namespaces:
-              - default
-            type: osquery-saved-query
         page: 1
         per_page: 100
         total: 11
       type: object
-      properties: {}
+      properties:
+        data:
+          description: An array of saved query objects.
+          items:
+            type: object
+            properties:
+              created_at:
+                format: date-time
+                type: string
+              created_by:
+                nullable: true
+                type: string
+              created_by_profile_uid:
+                type: string
+              description:
+                $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+              ecs_mapping:
+                $ref: '#/components/schemas/ECSMappingOrUndefined'
+              id:
+                $ref: '#/components/schemas/SavedQueryId'
+              interval:
+                oneOf:
+                  - type: integer
+                  - type: string
+              platform:
+                $ref: '#/components/schemas/PlatformOrUndefined'
+              prebuilt:
+                type: boolean
+              query:
+                $ref: '#/components/schemas/Query'
+              removed:
+                $ref: '#/components/schemas/RemovedOrUndefined'
+              saved_object_id:
+                type: string
+              snapshot:
+                $ref: '#/components/schemas/SnapshotOrUndefined'
+              timeout:
+                type: integer
+              updated_at:
+                format: date-time
+                type: string
+              updated_by:
+                nullable: true
+                type: string
+              updated_by_profile_uid:
+                type: string
+              version:
+                oneOf:
+                  - type: integer
+                  - type: string
+            required:
+              - saved_object_id
+              - id
+          type: array
+        page:
+          description: The current page number.
+          type: integer
+        per_page:
+          description: The number of results per page.
+          type: integer
+        total:
+          description: The total number of saved queries.
+          type: integer
+      required:
+        - page
+        - per_page
+        - total
+        - data
     GetLiveQueryResultsResponse:
       description: The response for getting live query results.
       example:
         data:
           edges:
-            - {}
-            - {}
+            - _id: doc1
+              _source: {}
+            - _id: doc2
+              _source: {}
           total: 2
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            edges:
+              description: The result rows from the query execution.
+              items:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  _source:
+                    description: >-
+                      The Elasticsearch document source containing query
+                      results.
+                    type: object
+              type: array
+            total:
+              description: The total number of result rows.
+              type: integer
+    GetScheduledActionResultsResponse:
+      example:
+        aggregations:
+          failed: 1
+          pending: 0
+          successful: 9
+          totalResponded: 10
+          totalRowCount: 42
+        currentPage: 0
+        edges:
+          - _id: result-001
+            fields:
+              agent_id: 16d7caf5-efd2-4212-9b62-73dafc91fa13
+              rows_count: 5
+              status: success
+        metadata:
+          executionCount: 3
+          packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+          packName: My Pack
+          queryName: uptime
+          queryText: select * from uptime;
+          scheduleId: pack_my_pack_uptime
+          timestamp: '2024-07-26T09:00:00.000Z'
+        pageSize: 20
+        total: 10
+        totalPages: 1
+      type: object
+      properties:
+        aggregations:
+          $ref: '#/components/schemas/ScheduledActionResultsAggregations'
+        currentPage:
+          description: The current page number (zero-based).
+          type: integer
+        edges:
+          description: The paginated list of per-agent action results.
+          items:
+            type: object
+          type: array
+        inspect:
+          description: Debug/inspection data for the search query.
+          type: object
+        metadata:
+          $ref: '#/components/schemas/ScheduledExecutionMetadata'
+        pageSize:
+          description: The number of results per page.
+          type: integer
+        total:
+          description: The total number of action results.
+          type: integer
+        totalPages:
+          description: The total number of pages.
+          type: integer
+    GetScheduledQueryResultsResponse:
+      description: The response for getting scheduled query results.
+      example:
+        data:
+          edges:
+            - _id: row-001
+              fields:
+                host.uptime:
+                  - '12345'
+            - _id: row-002
+              fields:
+                host.uptime:
+                  - '67890'
+          total: 2
+      type: object
+      properties:
+        data:
+          description: The query results data wrapper.
+          type: object
+          properties:
+            edges:
+              description: The paginated list of query result rows.
+              items:
+                type: object
+              type: array
+            inspect:
+              description: Debug/inspection data for the search query.
+              type: object
+            total:
+              description: The total number of result rows.
+              type: integer
+    GetUnifiedHistoryResponse:
+      example:
+        data:
+          - actionId: 609c4c66-ba3d-43fa-afdd-53e244577aa0
+            agentCount: 5
+            errorCount: 0
+            id: 3c42c847-eb30-4452-80e0-728584042334
+            queryName: uptime_query
+            queryText: select * from uptime;
+            source: Live
+            sourceType: live
+            successCount: 5
+            timestamp: '2024-07-26T09:59:32.220Z'
+            totalRows: 42
+            userId: elastic
+          - agentCount: 10
+            errorCount: 1
+            executionCount: 3
+            id: pack_my_pack_uptime_3
+            packId: 42ba9c50-0cc5-11ed-aa1d-2b27890bc90d
+            packName: My Pack
+            plannedTime: '2024-07-26T09:00:00.000Z'
+            queryName: uptime
+            queryText: select * from uptime;
+            scheduleId: pack_my_pack_uptime
+            source: Scheduled
+            sourceType: scheduled
+            successCount: 9
+            timestamp: '2024-07-26T09:00:00.000Z'
+            totalRows: 100
+        hasMore: true
+        nextPage: eyJhY3Rpb25TZWFyY2hBZnRlciI6WzE3...
+      type: object
+      properties:
+        data:
+          description: The list of unified history rows for the current page.
+          items:
+            $ref: '#/components/schemas/UnifiedHistoryRow'
+          type: array
+        hasMore:
+          description: Whether there are more results beyond the current page.
+          type: boolean
+        nextPage:
+          description: >-
+            A base64-encoded cursor to fetch the next page. Absent when there
+            are no more results.
+          type: string
+      required:
+        - data
+        - hasMore
     Interval:
       description: An interval, in seconds, on which to run the query.
       example: '60'
@@ -831,6 +2205,72 @@ components:
       example: 'agent.id: 16d7caf5-efd2-4212-9b62-73dafc91fa13'
       nullable: true
       type: string
+    LiveHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/UnifiedHistoryRowBase'
+        - type: object
+          properties:
+            actionId:
+              description: The Fleet action ID for the live query.
+              type: string
+            agentAll:
+              description: Whether the query targeted all agents.
+              type: boolean
+            agentIds:
+              description: List of targeted agent IDs.
+              items:
+                type: string
+              type: array
+            agentPlatforms:
+              description: List of targeted agent platforms.
+              items:
+                type: string
+              type: array
+            agentPolicyIds:
+              description: List of targeted agent policy IDs.
+              items:
+                type: string
+              type: array
+            ecsMapping:
+              additionalProperties: true
+              description: ECS mapping configuration used for the query.
+              type: object
+            queriesTotal:
+              description: The total number of sub-queries in the live action.
+              type: integer
+            queriesWithResults:
+              description: The number of sub-queries that returned results.
+              type: integer
+            savedQueryId:
+              description: >-
+                The saved query ID, if the live query was based on a saved
+                query.
+              type: string
+            source:
+              description: >-
+                Whether this was a manually run live query or triggered by a
+                rule.
+              enum:
+                - Live
+                - Rule
+              type: string
+            sourceType:
+              description: Identifies this as a live query history row.
+              enum:
+                - live
+              type: string
+            timeout:
+              description: The query timeout in seconds.
+              type: integer
+            userId:
+              description: The ID of the user who ran the query.
+              type: string
+            userProfileUid:
+              description: The user profile UID of the user who ran the query.
+              type: string
+          required:
+            - sourceType
+            - source
     ObjectQueries:
       additionalProperties:
         $ref: '#/components/schemas/ObjectQueriesItem'
@@ -863,7 +2303,7 @@ components:
       $ref: '#/components/schemas/PackDescription'
       nullable: true
     PackId:
-      description: The ID of the pack you want to run, retrieve, update, or delete.
+      description: The ID of the pack.
       example: 3c42c847-eb30-4452-80e0-728584042334
       type: string
     PackIdOrUndefined:
@@ -871,6 +2311,7 @@ components:
       nullable: true
     PackName:
       description: The pack name.
+      example: my_pack
       type: string
     PageOrUndefined:
       description: The page number to return. The default is 1.
@@ -935,6 +2376,76 @@ components:
     SavedQueryIdOrUndefined:
       $ref: '#/components/schemas/SavedQueryId'
       nullable: true
+    ScheduledActionResultsAggregations:
+      type: object
+      properties:
+        failed:
+          description: The number of agents that returned errors.
+          type: integer
+        pending:
+          description: The number of agents with pending responses.
+          type: integer
+        successful:
+          description: The number of agents that completed successfully.
+          type: integer
+        totalResponded:
+          description: The total number of agents that responded.
+          type: integer
+        totalRowCount:
+          description: The total number of result rows across all agents.
+          type: integer
+    ScheduledExecutionMetadata:
+      description: Execution metadata resolved from the pack saved object.
+      type: object
+      properties:
+        executionCount:
+          description: The execution count for this scheduled query run.
+          type: integer
+        packId:
+          description: The ID of the pack containing the query.
+          type: string
+        packName:
+          description: The name of the pack containing the query.
+          type: string
+        queryName:
+          description: The name of the query within the pack.
+          type: string
+        queryText:
+          description: The SQL query that was executed.
+          type: string
+        scheduleId:
+          description: The schedule ID for the scheduled query.
+          type: string
+        timestamp:
+          description: The timestamp of the most recent response for this execution.
+          type: string
+    ScheduledHistoryRow:
+      allOf:
+        - $ref: '#/components/schemas/UnifiedHistoryRowBase'
+        - type: object
+          properties:
+            executionCount:
+              description: The execution count for this scheduled query run.
+              type: integer
+            plannedTime:
+              description: The planned execution time for the scheduled query.
+              type: string
+            scheduleId:
+              description: The schedule ID for the scheduled query.
+              type: string
+            source:
+              description: Indicates this is a scheduled query execution.
+              enum:
+                - Scheduled
+              type: string
+            sourceType:
+              description: Identifies this as a scheduled query history row.
+              enum:
+                - scheduled
+              type: string
+          required:
+            - sourceType
+            - source
     Shards:
       additionalProperties:
         type: number
@@ -965,6 +2476,59 @@ components:
       example: createdAt
       nullable: true
       type: string
+    UnifiedHistoryRow:
+      discriminator:
+        mapping:
+          live: '#/components/schemas/LiveHistoryRow'
+          scheduled: '#/components/schemas/ScheduledHistoryRow'
+        propertyName: sourceType
+      oneOf:
+        - $ref: '#/components/schemas/LiveHistoryRow'
+        - $ref: '#/components/schemas/ScheduledHistoryRow'
+    UnifiedHistoryRowBase:
+      type: object
+      properties:
+        agentCount:
+          description: The number of agents targeted by the query.
+          type: integer
+        errorCount:
+          description: The number of agent responses with errors.
+          nullable: true
+          type: integer
+        id:
+          description: Unique identifier for the history row.
+          type: string
+        packId:
+          description: The ID of the pack containing the query.
+          type: string
+        packName:
+          description: The name of the pack containing the query.
+          type: string
+        queryName:
+          description: The name of the query, if available.
+          type: string
+        queryText:
+          description: The SQL query that was executed.
+          type: string
+        spaceId:
+          description: The Kibana space ID where the query was executed.
+          type: string
+        successCount:
+          description: The number of successful agent responses.
+          nullable: true
+          type: integer
+        timestamp:
+          description: The timestamp of the query execution.
+          type: string
+        totalRows:
+          description: The total number of result rows returned across all agents.
+          nullable: true
+          type: integer
+      required:
+        - id
+        - timestamp
+        - queryText
+        - agentCount
     UpdatePacksRequestBody:
       example:
         name: updated_my_pack_name
@@ -983,6 +2547,7 @@ components:
         shards:
           $ref: '#/components/schemas/Shards'
     UpdatePacksResponse:
+      description: The response for updating a pack.
       example:
         data:
           created_at: '2025-02-26T13:37:30.452Z'
@@ -990,6 +2555,8 @@ components:
           description: My pack
           enabled: true
           name: updated_my_pack_name
+          policy_ids:
+            - my_policy_id
           queries:
             ports:
               ecs_mapping:
@@ -1002,14 +2569,50 @@ components:
               timeout: 120
           saved_object_id: 1c266590-381f-428c-878f-c80c1334f856
           shards:
-            - key: 47638692-7c4c-4053-aa3e-7186f28df349
-              value: 35
-            - key: 5e267651-fe50-443e-8d3f-3bbc9171b618
-              value: 58
+            47638692-7c4c-4053-aa3e-7186f28df349: 35
+            5e267651-fe50-443e-8d3f-3bbc9171b618: 58
           updated_at: '2025-02-26T13:40:16.297Z'
           updated_by: elastic
+          version: 1
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/PackDescriptionOrUndefined'
+            enabled:
+              $ref: '#/components/schemas/EnabledOrUndefined'
+            name:
+              $ref: '#/components/schemas/PackName'
+            policy_ids:
+              $ref: '#/components/schemas/PolicyIdsOrUndefined'
+            queries:
+              $ref: '#/components/schemas/ObjectQueries'
+            saved_object_id:
+              description: The saved object ID of the pack.
+              type: string
+            shards:
+              $ref: '#/components/schemas/Shards'
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+            version:
+              description: The pack version number.
+              type: integer
     UpdateSavedQueryRequestBody:
       example:
         id: updated_my_saved_query_name
@@ -1034,10 +2637,72 @@ components:
         version:
           $ref: '#/components/schemas/VersionOrUndefined'
     UpdateSavedQueryResponse:
+      description: The response for updating a saved query.
       example:
-        data: {}
+        data:
+          created_at: '2025-02-26T13:37:30.452Z'
+          created_by: elastic
+          description: Saved query description
+          id: updated_my_saved_query_name
+          interval: '60'
+          query: select * from uptime;
+          saved_object_id: 42ba1280-2172-11ee-8523-5765fca79a3c
+          updated_at: '2025-02-26T13:40:16.297Z'
+          updated_by: elastic
+          version: WzQzMTcsMV0=
       type: object
-      properties: {}
+      properties:
+        data:
+          type: object
+          properties:
+            created_at:
+              format: date-time
+              type: string
+            created_by:
+              nullable: true
+              type: string
+            created_by_profile_uid:
+              type: string
+            description:
+              $ref: '#/components/schemas/SavedQueryDescriptionOrUndefined'
+            ecs_mapping:
+              $ref: '#/components/schemas/ECSMappingOrUndefined'
+            id:
+              $ref: '#/components/schemas/SavedQueryId'
+            interval:
+              oneOf:
+                - type: integer
+                - type: string
+            platform:
+              $ref: '#/components/schemas/PlatformOrUndefined'
+            prebuilt:
+              type: boolean
+            query:
+              $ref: '#/components/schemas/Query'
+            removed:
+              $ref: '#/components/schemas/RemovedOrUndefined'
+            saved_object_id:
+              type: string
+            snapshot:
+              $ref: '#/components/schemas/SnapshotOrUndefined'
+            timeout:
+              type: integer
+            updated_at:
+              format: date-time
+              type: string
+            updated_by:
+              nullable: true
+              type: string
+            updated_by_profile_uid:
+              type: string
+            version:
+              description: The saved query version.
+              type: string
+          required:
+            - saved_object_id
+            - id
+      required:
+        - data
     Version:
       description: >-
         Uses the Osquery versions greater than or equal to the specified version

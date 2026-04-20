@@ -7,6 +7,7 @@
 
 import {
   createNotificationPolicyDataSchema,
+  notificationPolicyResponseSchema,
   type CreateNotificationPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
@@ -21,7 +22,10 @@ import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 import { buildRouteValidationWithZod } from '../route_validation';
 
 const createNotificationPolicyParamsSchema = z.object({
-  id: z.string().optional(),
+  id: z
+    .string()
+    .optional()
+    .describe('An optional custom identifier. If omitted, an ID is generated automatically.'),
 });
 
 @injectable()
@@ -42,7 +46,16 @@ export class CreateNotificationPolicyRoute extends BaseAlertingRoute {
       body: buildRouteValidationWithZod(createNotificationPolicyDataSchema),
       params: buildRouteValidationWithZod(createNotificationPolicyParamsSchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => notificationPolicyResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates invalid request parameters or body.',
+      },
+    },
+  };
 
   protected readonly routeName = 'create notification policy';
 

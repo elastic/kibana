@@ -20,7 +20,6 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
-import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
@@ -63,6 +62,7 @@ import {
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
+import { getEventAttachmentType } from './cases/attachments/event';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -274,9 +274,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
-    });
-    registerAgents(agentBuilder, core, logger).catch((error) => {
-      this.logger.error(`Error registering security agent: ${error}`);
     });
     registerSkills({
       agentBuilder,
@@ -526,6 +523,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.cases.attachmentFramework.registerExternalReference({
       id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
     });
+    plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();

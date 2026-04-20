@@ -21,7 +21,6 @@ import {
   getAllAttachmentsStepDefinition,
   getCasesByAlertIdStepDefinition,
   getCasesStepDefinition,
-  setCategoryStepDefinition,
   setDescriptionStepDefinition,
   setSeverityStepDefinition,
   setStatusStepDefinition,
@@ -29,6 +28,7 @@ import {
   unassignCaseStepDefinition,
   updateObservableStepDefinition,
 } from './simple_steps';
+import { setCategoryStepDefinition } from './set_category';
 
 describe('new cases public step definitions', () => {
   const steps = [
@@ -57,7 +57,7 @@ describe('new cases public step definitions', () => {
 
   it.each(steps)('returns expected metadata for %s', (definition) => {
     expect(definition.id.startsWith('cases.')).toBe(true);
-    expect(definition.category).toBe('kibana');
+    expect(definition.category).toBe('kibana.cases');
     expect(definition.documentation?.examples?.length).toBeGreaterThan(0);
   });
 

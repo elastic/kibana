@@ -46,6 +46,7 @@ const mappings: MappingsDefinition = {
     notification_group_id: { type: 'keyword' },
     source: { type: 'keyword' },
     reason: { type: 'text' },
+    space_id: { type: 'keyword' },
   },
 };
 
@@ -64,6 +65,7 @@ export const alertActionSchema = z.object({
   source: z.string().optional(),
   tags: z.array(z.string()).optional(),
   reason: z.string().optional(),
+  space_id: z.string(),
 });
 
 export type AlertAction = z.infer<typeof alertActionSchema>;
