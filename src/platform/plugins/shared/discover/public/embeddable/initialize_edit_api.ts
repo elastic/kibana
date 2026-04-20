@@ -102,7 +102,9 @@ export function initializeEditApi({
             },
             savedSearch: {
               ...partialApi.savedSearch$.getValue(),
-              controlGroupJson: JSON.stringify(locatorParams.esqlControls ?? {}),
+              controlGroupJson: locatorParams.esqlControls
+                ? JSON.stringify(locatorParams.esqlControls)
+                : undefined,
             },
             services: discoverServices,
           });
