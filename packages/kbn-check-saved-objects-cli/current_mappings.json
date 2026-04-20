@@ -4938,6 +4938,16 @@
       "name": {
         "type": "text"
       },
+      "range": {
+        "properties": {
+          "end": {
+            "type": "keyword"
+          },
+          "start": {
+            "type": "keyword"
+          }
+        }
+      },
       "type": {
         "type": "keyword"
       }
