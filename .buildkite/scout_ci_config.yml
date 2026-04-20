@@ -45,6 +45,7 @@ plugins:
     - streams
     - streams_app
     - synthetics
+    - task_manager
     - transform
     - triggers_actions_ui
     - uptime

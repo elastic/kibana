@@ -71,6 +71,7 @@ packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
+packages/kbn-heap-snapshot-analyzer-cli @elastic/kibana-core
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
@@ -1733,8 +1734,15 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management @elastic/obs-onboarding-team
 /x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams @elastic/obs-onboarding-team
 
-# Streams parts owned by Kibana Management
-x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
+# Streams - Data retention overrides (owned by Kibana Management)
+x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/failure_store @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/routes/internal/streams/failure_store @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/routes/internal/streams/lifecycle @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
 
 # Streams — sig events overrides (obs-sig-events-team owns these subtrees)
 x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team

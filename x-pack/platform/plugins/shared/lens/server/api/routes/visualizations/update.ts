@@ -8,7 +8,7 @@
 import { boomify, isBoom } from '@hapi/boom';
 
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
