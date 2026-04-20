@@ -206,7 +206,9 @@ export class StreamsPlugin
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
             soClient,
-            rulesClient,
+            alertingRulesClient: rulesClient,
+            coreStart,
+            request,
             config: tuningConfig,
           });
         })();

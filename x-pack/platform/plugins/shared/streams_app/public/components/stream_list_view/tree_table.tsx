@@ -137,7 +137,7 @@ export function StreamsTreeTable({
 
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
-    getCanReadFailureStore: (streamName: string | undefined) =>
+    getCanReadFailureStore: (streamName?: string) =>
       streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
     numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   });

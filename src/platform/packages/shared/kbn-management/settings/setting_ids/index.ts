@@ -162,6 +162,8 @@ export const OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS =
 export const OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG =
   'observability:streamsSigEventsTuningConfig';
 export const OBSERVABILITY_STREAMS_ENABLE_MEMORY = 'observability:streamsEnableMemory';
+export const OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2 =
+  'observability:streamsEnableSignificantEventsAlertingV2';
 export const OBSERVABILITY_ENABLE_DIAGNOSTIC_MODE = 'observability:enableDiagnosticMode';
 
 // Reporting settings

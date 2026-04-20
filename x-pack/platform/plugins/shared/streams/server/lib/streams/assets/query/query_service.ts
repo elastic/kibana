@@ -7,11 +7,16 @@
 
 import type {
   CoreSetup,
+  CoreStart,
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import {
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
+} from '@kbn/management-settings-ids';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import {
@@ -39,6 +44,9 @@ import { getQueryStorageSettings } from '../storage_settings';
 import { QueryClient, type StoredQueryLink } from './query_client';
 import { computeRuleId, buildEsqlQueryFromKql } from './helpers/query';
 import type { InferenceResolver } from './helpers/inference_availability';
+import { V1RulesAdapter } from './v1_rules_adapter';
+import { V2RulesHttpClient } from './v2_rules_http_client';
+import { DualCleanupRulesAdapter } from './dual_cleanup_rules_adapter';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   type SigEventsTuningConfig,
@@ -54,19 +62,35 @@ export class QueryService {
   async getClient({
     esClient,
     soClient,
-    rulesClient,
+    alertingRulesClient,
+    coreStart,
+    request,
     config = DEFAULT_SIG_EVENTS_TUNING_CONFIG,
   }: {
     esClient: ElasticsearchClient;
     soClient: SavedObjectsClientContract;
-    rulesClient: RulesClient;
+    alertingRulesClient: RulesClient;
+    coreStart: CoreStart;
+    request: KibanaRequest;
     config?: Pick<SigEventsTuningConfig, 'semantic_min_score' | 'rrf_rank_constant'>;
   }): Promise<QueryClient> {
     const [core] = await this.coreSetup.getStartServices();
 
     const uiSettings = core.uiSettings.asScopedToClient(soClient);
-    const isSignificantEventsEnabled =
-      (await uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS)) ?? false;
+    const [isSignificantEventsEnabled, alertingV2Enabled] = await Promise.all([
+      uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS).then((v) => v ?? false),
+      uiSettings
+        .get(OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2)
+        .then((v) => v ?? false)
+        .catch((err) => {
+          this.logger.warn(
+            `Failed to read alerting v2 feature flag, defaulting to v1: ${
+              err instanceof Error ? err.message : String(err)
+            }`
+          );
+          return false;
+        }),
+    ]);
 
     const { inferenceId, available: inferenceAvailable } = await this.resolveInference(esClient);
 
@@ -176,11 +200,26 @@ export class QueryService {
       }
     );
 
+    const v1Adapter = new V1RulesAdapter(alertingRulesClient);
+
+    const rulesManagementClient = alertingV2Enabled
+      ? new DualCleanupRulesAdapter(
+          new V2RulesHttpClient(
+            request,
+            coreStart.http.getServerInfo(),
+            coreStart.http.basePath.serverBasePath,
+            this.logger
+          ),
+          v1Adapter,
+          this.logger
+        )
+      : v1Adapter;
+
     return new QueryClient(
       {
         storageClient: adapter.getClient(),
         soClient,
-        rulesClient,
+        rulesManagementClient,
         logger: this.logger,
       },
       isSignificantEventsEnabled,

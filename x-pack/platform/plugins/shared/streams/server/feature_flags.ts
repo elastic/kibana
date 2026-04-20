@@ -23,6 +23,7 @@ import {
   OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIG_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_ENABLE_MEMORY,
+  OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from './types';
@@ -141,6 +142,30 @@ export function registerFeatureFlags(
             requiresPageReload: false,
             solutionViews: ['classic', 'oblt'],
             technicalPreview: true,
+          },
+          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_ALERTING_V2]: {
+            category: ['observability'],
+            name: i18n.translate('xpack.streams.significantEventsAlertingV2SettingsName', {
+              defaultMessage: 'Streams significant events — Alerting v2',
+            }) as string,
+            value: false,
+            description: i18n.translate(
+              'xpack.streams.significantEventsAlertingV2SettingsDescription',
+              {
+                defaultMessage:
+                  'Back significant event queries with Alerting v2 (kind: signal) instead of the custom streams.rules.esql rule type. ' +
+                  'Requires the write-alerting-v2-rules privilege. ' +
+                  'When disabled, rules are created via Alerting v1 (default). ' +
+                  'Note: turning this flag OFF after it was ON does not automatically remove orphaned v2 rules.',
+              }
+            ),
+            type: 'boolean',
+            schema: schema.boolean(),
+            requiresPageReload: false,
+            solutionViews: ['classic', 'oblt'],
+            technicalPreview: true,
+            readonly: true,
+            readonlyMode: 'ui',
           },
         });
 
