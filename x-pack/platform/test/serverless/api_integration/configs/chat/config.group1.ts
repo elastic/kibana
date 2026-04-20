@@ -9,10 +9,7 @@ import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({
   serverlessProject: 'chat',
-  testFiles: [
-    require.resolve('../../test_suites/core'),
-    require.resolve('../../test_suites/elasticsearch_api'),
-  ],
+  testFiles: [require.resolve('../../test_suites/elasticsearch_api')],
   junit: {
     reportName: 'Serverless Chat Platform API Integration Tests - Common Group 1',
   },
