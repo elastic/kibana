@@ -128,9 +128,9 @@ describe('AgentDetailsPage', () => {
     setupMocks({ agent: mockAgent({ type: 'PERMANENT' }), enableOtelUI: true });
     const renderer = createFleetTestRendererMock();
     renderer.mountHistory.push('/agents/agent-1/collector-config');
-    let result: ReturnType<typeof renderer.render>;
+
     await act(async () => {
-      result = renderer.render(<AgentDetailsPage />);
+      renderer.render(<AgentDetailsPage />);
     });
     expect(renderer.mountHistory.location.pathname).toBe('/agents/agent-1');
   });
