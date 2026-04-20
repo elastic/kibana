@@ -23,7 +23,77 @@ import type {
   NotificationGroup,
   NotificationGroupId,
   NotificationPolicy,
+  NotificationPolicyId,
 } from '../types';
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Minimum lookback for the last-notified query. Covers the `on_status_change` strategy
+ * (which has no interval) when an episode has been stable for a while: a spurious
+ * re-notification at this cadence is acceptable and acts as a "still active" signal.
+ */
+export const LAST_NOTIFIED_LOOKBACK_FLOOR_MS = ONE_DAY_MS;
+
+/**
+ * Hard cap on the lookback, protecting against pathological policy configurations
+ * (e.g. a multi-year throttle interval) that would otherwise re-expand the query
+ * toward a full data-stream scan.
+ */
+export const LAST_NOTIFIED_LOOKBACK_CEILING_MS = 90 * ONE_DAY_MS;
+
+/**
+ * Headroom on top of the longest configured throttle interval. A record at exactly
+ * the interval boundary is no longer "within interval", but the factor gives us a
+ * safety margin against clock skew and pipeline latency.
+ */
+export const LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR = 1.2;
+
+/**
+ * Derives the lookback window for `getLastNotifiedTimestampsQuery` from the currently
+ * enabled notification policies. Throttling decisions only need history within the
+ * longest configured throttle interval; anything older cannot change the outcome.
+ *
+ * Policies with malformed interval strings are skipped (not fatal) so a single bad
+ * policy cannot break throttling for the rest.
+ */
+export function computeLastNotifiedLookbackMs(
+  policies: ReadonlyMap<NotificationPolicyId, NotificationPolicy>,
+  logger?: LoggerServiceContract
+): number {
+  let maxIntervalMs = 0;
+
+  for (const policy of policies.values()) {
+    const interval = policy.throttle?.interval;
+    if (!interval) continue;
+    try {
+      const ms = parseDurationToMs(interval);
+      if (ms > maxIntervalMs) maxIntervalMs = ms;
+    } catch {
+      // Intentionally swallow: invalid interval strings are handled defensively here
+      // so throttling for other policies keeps working.
+    }
+  }
+
+  const desiredMs = maxIntervalMs * LAST_NOTIFIED_LOOKBACK_SAFETY_FACTOR;
+  const clampedMs = Math.min(
+    LAST_NOTIFIED_LOOKBACK_CEILING_MS,
+    Math.max(LAST_NOTIFIED_LOOKBACK_FLOOR_MS, desiredMs)
+  );
+
+  if (desiredMs > LAST_NOTIFIED_LOOKBACK_CEILING_MS) {
+    logger?.warn({
+      message: () =>
+        `Notification policy throttle interval (~${Math.round(
+          maxIntervalMs / ONE_DAY_MS
+        )}d) exceeds the maximum supported last-notified lookback (${Math.round(
+          LAST_NOTIFIED_LOOKBACK_CEILING_MS / ONE_DAY_MS
+        )}d); clamping. Throttling for policies with longer intervals may allow spurious re-notification.`,
+    });
+  }
+
+  return clampedMs;
+}
 
 @injectable()
 export class ApplyThrottlingStep implements DispatcherStep {
@@ -41,7 +111,13 @@ export class ApplyThrottlingStep implements DispatcherStep {
       return { type: 'continue', data: { dispatch: [], throttled: [] } };
     }
 
-    const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(groups.map((g) => g.id));
+    const lookbackMs = computeLastNotifiedLookbackMs(policies, this.logger);
+    const since = new Date(input.startedAt.getTime() - lookbackMs);
+
+    const lastNotifiedMap = await this.fetchLastNotifiedTimestamps(
+      groups.map((g) => g.id),
+      since
+    );
 
     const { dispatch, throttled } = applyThrottling(
       groups,
@@ -59,10 +135,11 @@ export class ApplyThrottlingStep implements DispatcherStep {
   }
 
   private async fetchLastNotifiedTimestamps(
-    notificationGroupIds: NotificationGroupId[]
+    notificationGroupIds: NotificationGroupId[],
+    since: Date
   ): Promise<Map<NotificationGroupId, LastNotifiedInfo>> {
     const records = await this.queryService.executeQueryRows<LastNotifiedRecord>({
-      query: getLastNotifiedTimestampsQuery(notificationGroupIds).query,
+      query: getLastNotifiedTimestampsQuery(notificationGroupIds, since).query,
     });
 
     return new Map<NotificationGroupId, LastNotifiedInfo>(

@@ -205,8 +205,10 @@ describe('getAlertEpisodeSuppressionsQuery', () => {
 });
 
 describe('getLastNotifiedTimestampsQuery', () => {
+  const SINCE = new Date('2026-01-22T00:00:00.000Z');
+
   it('builds a query for a single notification group', () => {
-    const req = getLastNotifiedTimestampsQuery(['group-1']);
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
 
     expect(req.query).toContain('notification_group_id IN ("group-1")');
     expect(req.query).toContain('.alert-actions');
@@ -214,32 +216,48 @@ describe('getLastNotifiedTimestampsQuery', () => {
   });
 
   it('builds a query for multiple notification groups', () => {
-    const req = getLastNotifiedTimestampsQuery(['group-1', 'group-2']);
+    const req = getLastNotifiedTimestampsQuery(['group-1', 'group-2'], SINCE);
 
     expect(req.query).toContain('notification_group_id IN ("group-1", "group-2")');
   });
 
   it('filters for notified action type', () => {
-    const req = getLastNotifiedTimestampsQuery(['group-1']);
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
 
     expect(req.query).toContain('action_type == "notified"');
   });
 
   it('keeps the expected output columns', () => {
-    const req = getLastNotifiedTimestampsQuery(['group-1']);
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
 
     expect(req.query).toContain('KEEP notification_group_id, last_notified, episode_status');
   });
 
   it('aggregates episode_status using LAST by timestamp', () => {
-    const req = getLastNotifiedTimestampsQuery(['group-1']);
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
 
     expect(req.query).toContain('episode_status = LAST(episode_status, @timestamp)');
   });
 
   it('groups by notification_group_id', () => {
-    const req = getLastNotifiedTimestampsQuery(['group-1']);
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
 
     expect(req.query).toContain('BY notification_group_id');
+  });
+
+  it('bounds the scan by the given `since` timestamp', () => {
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
+
+    expect(req.query).toContain(`@timestamp >= "${SINCE.toISOString()}"::DATETIME`);
+  });
+
+  it('applies the timestamp bound before the notification group filter', () => {
+    const req = getLastNotifiedTimestampsQuery(['group-1'], SINCE);
+
+    const timestampBoundIndex = req.query.indexOf(`@timestamp >= "${SINCE.toISOString()}"`);
+    const notifiedFilterIndex = req.query.indexOf('action_type == "notified"');
+
+    expect(timestampBoundIndex).toBeGreaterThanOrEqual(0);
+    expect(notifiedFilterIndex).toBeGreaterThan(timestampBoundIndex);
   });
 });
