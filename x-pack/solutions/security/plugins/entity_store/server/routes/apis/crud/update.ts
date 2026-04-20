@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { z } from '@kbn/zod/v4';
@@ -22,12 +23,14 @@ import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const paramsSchema = z
   .object({
-    entityType: z.enum(ALL_ENTITY_TYPES),
+    entityType: z.enum(ALL_ENTITY_TYPES).describe('The entity type to update.'),
   })
   .required();
 
 const querySchema = z.object({
-  force: BooleanFromString.optional().default(false),
+  force: BooleanFromString.optional()
+    .default(false)
+    .describe('When true, allows updating protected fields.'),
 });
 
 export function registerCRUDUpdate(router: EntityStorePluginRouter) {
@@ -35,6 +38,12 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
     .put({
       path: ENTITY_STORE_ROUTES.public.CRUD_UPDATE,
       access: 'public',
+      summary: 'Update an entity',
+      description:
+        'Update an existing entity record in the Entity Store. By default only certain fields can be updated. Set the `force` query parameter to `true` to update protected fields.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -51,6 +60,9 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
             params: buildRouteValidationWithZod(paramsSchema),
             query: buildRouteValidationWithZod(querySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_update.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
