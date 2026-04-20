@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback, useRef, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
@@ -143,7 +144,25 @@ export const useDeprecatedRuleDetailsCallout = ({
     <>
       <DeprecatedRulesCallout
         title={i18n.DEPRECATION_DETAILS_CALLOUT_TITLE}
-        description={i18n.DEPRECATION_DETAILS_CALLOUT_DESCRIPTION}
+        description={
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.deprecation.detailsCalloutDescription"
+            defaultMessage="This rule won't receive new updates or fixes. If you still need it, duplicate it as a custom rule. Otherwise, you can delete it now. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink
+                  href="https://www.elastic.co/docs/solutions/security/detect-and-alert/manage-detection-rules#deprecated-prebuilt-rules"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.detectionEngine.deprecation.detailsCalloutDocsLink"
+                    defaultMessage="Read the docs to learn more."
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         reason={deprecatedRule.deprecated_reason}
         buttons={[
           <EuiButton

@@ -14,26 +14,10 @@ export const DEPRECATION_CALLOUT_TITLE = (count: number) =>
     values: { count },
   });
 
-export const DEPRECATION_TABLE_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.deprecation.tableCalloutDescription',
-  {
-    defaultMessage:
-      "These rules have been deprecated. They won't receive new updates or fixes. If you still need them, duplicate them as custom rules. Otherwise, you can delete them now. You can revisit this anytime, or dismiss to be reminded in 7 days.",
-  }
-);
-
 export const DEPRECATION_DETAILS_CALLOUT_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.deprecation.detailsCalloutTitle',
   {
     defaultMessage: 'This rule has been deprecated and is no longer being maintained.',
-  }
-);
-
-export const DEPRECATION_DETAILS_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.deprecation.detailsCalloutDescription',
-  {
-    defaultMessage:
-      "This rule won't receive new updates or fixes. If you still need it, duplicate it as a custom rule. Otherwise, you can delete it now.",
   }
 );
 

@@ -6,7 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -51,7 +52,25 @@ export const useDeprecatedRulesTableCallout = () => {
     <>
       <DeprecatedRulesCallout
         title={i18n.DEPRECATION_CALLOUT_TITLE(data.rules.length)}
-        description={i18n.DEPRECATION_TABLE_CALLOUT_DESCRIPTION}
+        description={
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.deprecation.tableCalloutDescription"
+            defaultMessage="These rules have been deprecated and won't receive new updates or fixes. Duplicate them as custom rules, delete them now, or dismiss this to be reminded in 7 days. {docsLink}"
+            values={{
+              docsLink: (
+                <EuiLink
+                  href="https://www.elastic.co/docs/solutions/security/detect-and-alert/manage-detection-rules#deprecated-prebuilt-rules"
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.detectionEngine.deprecation.tableCalloutDocsLink"
+                    defaultMessage="Read the docs to learn more."
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
         buttons={[
           <EuiButton
             color="warning"

@@ -11,7 +11,7 @@ import * as i18n from './translations';
 
 interface DeprecatedRulesCalloutProps {
   title: string;
-  description: string;
+  description: React.ReactNode;
   reason?: string;
   buttons: React.ReactNode[];
   onDismiss?: () => void;
