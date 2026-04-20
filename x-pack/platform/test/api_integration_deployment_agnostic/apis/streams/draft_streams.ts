@@ -337,6 +337,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(result.values[0][bodyCol]).to.eql('doc-gamma');
         expect(result.values[0][targetCol]).to.eql(OTHER_TARGET);
       });
+
+      it('reflects processing steps in query results', async () => {
+        const streamDef = Streams.WiredStream.GetResponse.parse(
+          await getStream(apiClient, E2E_DRAFT)
+        );
+        const { updated_at: _, ...processing } = streamDef.stream.ingest.processing;
+        await putStream(apiClient, E2E_DRAFT, {
+          ...emptyAssets,
+          stream: {
+            type: streamDef.stream.type,
+            description: streamDef.stream.description,
+            ingest: {
+              ...streamDef.stream.ingest,
+              processing: {
+                ...processing,
+                steps: [{ action: 'set', to: 'attributes.enriched', value: 'from-draft' }],
+              },
+            },
+          },
+        });
+
+        const viewName = getEsqlViewName(E2E_DRAFT);
+        const result = await executeEsql(
+          esClient,
+          `${SET_UNMAPPED}FROM ${viewName} | KEEP \`body.text\`, \`attributes.enriched\` | SORT \`body.text\``
+        );
+
+        const bodyCol = result.columns.findIndex((c) => c.name === 'body.text');
+        const enrichedCol = result.columns.findIndex((c) => c.name === 'attributes.enriched');
+
+        expect(result.values.length).to.eql(1);
+        expect(result.values[0][bodyCol]).to.eql('doc-gamma');
+        expect(result.values[0][enrichedCol]).to.eql('from-draft');
+      });
     });
 
     describe('Materialization (draft to non-draft)', () => {
