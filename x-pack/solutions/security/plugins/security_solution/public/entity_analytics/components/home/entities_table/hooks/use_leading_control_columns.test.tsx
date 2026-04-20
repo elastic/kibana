@@ -22,10 +22,6 @@ jest.mock('../../../../../common/lib/kibana/use_kibana', () => ({
   useKibana: (...args: unknown[]) => mockUseKibana(...args),
 }));
 
-jest.mock('../../../../../agent_builder/hooks/use_security_agent_id', () => ({
-  useSecurityAgentId: jest.fn().mockReturnValue('security.agent'),
-}));
-
 describe('useLeadingControlColumns', () => {
   const defaultArgs = {
     canUseTimeline: false,

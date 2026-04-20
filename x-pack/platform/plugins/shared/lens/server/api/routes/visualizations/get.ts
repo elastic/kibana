@@ -29,11 +29,12 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
     summary: 'Get visualization',
-    description: 'Get a visualization from id.',
+    description: 'Returns a single Lens visualization by its ID.',
     options: {
       tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {

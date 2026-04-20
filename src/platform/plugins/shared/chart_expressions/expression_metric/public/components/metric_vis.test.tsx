@@ -533,7 +533,37 @@ describe('MetricVisComponent', function () {
     expect(screen.getByText('N/A')).toBeInTheDocument();
   });
 
-  // do not test with undefined as it relies on a Kibana formatter behaviour which is mocked here
+  it('should convert undefined primary metric to NaN', async () => {
+    const metricId = faker.lorem.word();
+
+    const tableWMissingCell: Datatable = {
+      type: 'datatable',
+      columns: [
+        {
+          id: metricId,
+          name: metricId,
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      rows: [{ [metricId]: undefined }],
+    };
+    await renderMetricChart({
+      config: {
+        metric: {
+          ...defaultMetricParams,
+        },
+        dimensions: {
+          metric: metricId,
+        },
+      },
+      data: tableWMissingCell,
+    });
+
+    expect(screen.getByTitle(metricId)).toBeInTheDocument();
+    expect(screen.getByText('N/A')).toBeInTheDocument();
+  });
 
   describe('metric grid', () => {
     const config: Props['config'] = {
