@@ -279,7 +279,11 @@ function buildBulkOps(
 
         if (unresolvedMemberIds.length > 0) {
           logger.warn(
-            `Composite SLO [${compositeSlo.id}] in space [${spaceId}] has ${unresolvedMemberIds.length} unresolved member SLO(s) — they may have been deleted: ${unresolvedMemberIds.join(', ')}`
+            `Composite SLO [${compositeSlo.id}] in space [${spaceId}] has ${
+              unresolvedMemberIds.length
+            } unresolved member SLO(s) — they may have been deleted: ${unresolvedMemberIds.join(
+              ', '
+            )}`
           );
         }
 
