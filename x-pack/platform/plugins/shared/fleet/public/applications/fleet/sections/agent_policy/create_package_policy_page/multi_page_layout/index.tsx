@@ -9,6 +9,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
 import { splitPkgKey } from '../../../../../../../common/services';
+import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 
 import {
   useGetPackageInfoByKeyQuery,
@@ -17,6 +18,11 @@ import {
 } from '../../../../hooks';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
+
+import {
+  useAgentless,
+  isAgentlessSetupDefault,
+} from '../single_page_layout/hooks/setup_technology';
 
 import { useGetAgentPolicyOrDefault } from './hooks';
 
@@ -63,6 +69,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   const [onSplash, setOnSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(0);
   const [isManaged, setIsManaged] = useState(true);
+  const { isAgentlessEnabled, isAgentlessDefault } = useAgentless();
   const { getHref } = useLink();
   const [enrolledAgentIds, setEnrolledAgentIds] = useState<string[]>([]);
   const toggleIsManaged = (newIsManaged: boolean) => {
@@ -84,6 +91,17 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
   } = useGetAgentPolicyOrDefault(agentPolicyId);
 
   const packageInfo = useMemo(() => packageInfoData?.item, [packageInfoData]);
+
+  // Skip the splash for agentless-only or agentless-default integrations — the
+  // "Install Elastic Agent" first step is not applicable to those flows.
+  const isAgentlessByDefault = useMemo(
+    () =>
+      isAgentlessEnabled &&
+      !!packageInfo &&
+      (isOnlyAgentlessIntegration(packageInfo, integration) ||
+        isAgentlessSetupDefault(isAgentlessDefault, packageInfo, integration)),
+    [isAgentlessEnabled, isAgentlessDefault, packageInfo, integration]
+  );
 
   const integrationInfo = useMemo(() => {
     if (!integration) return;
@@ -107,7 +125,7 @@ export const CreatePackagePolicyMultiPage: CreatePackagePolicyParams = ({
     ...(prerelease ? { prerelease: 'true' } : {}),
   });
 
-  if (onSplash || !packageInfo) {
+  if ((onSplash && !isAgentlessByDefault) || !packageInfo) {
     return (
       <AddFirstIntegrationSplashScreen
         isLoading={isPackageInfoLoading || isLoadingInitialRequest || isAgentPolicyLoading}
