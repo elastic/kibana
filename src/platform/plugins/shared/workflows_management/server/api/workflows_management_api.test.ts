@@ -871,7 +871,7 @@ steps:
       yaml: 'name: Workflow B',
     };
 
-    it('returns an empty result when items is empty without calling the engine', async () => {
+    it('returns an empty result and forwards an empty array to the engine', async () => {
       const mockWorkflowsExecutionEngine = {
         bulkScheduleWorkflow: jest.fn().mockResolvedValue([]),
       };
@@ -880,8 +880,6 @@ steps:
       const result = await api.bulkScheduleWorkflow([], mockRequest);
 
       expect(result).toEqual([]);
-      // The management wrapper still forwards to the engine with an empty array;
-      // the engine is the one that short-circuits and avoids any batch work.
       expect(mockWorkflowsExecutionEngine.bulkScheduleWorkflow).toHaveBeenCalledWith(
         [],
         mockRequest

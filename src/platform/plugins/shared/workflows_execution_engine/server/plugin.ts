@@ -717,15 +717,15 @@ export class WorkflowsExecutionEnginePlugin
 
     const toItemError = (err: unknown): BulkScheduleWorkflowResult[number] => {
       const message = err instanceof Error ? err.message : String(err);
-      const code =
+      const rawCode =
         err && typeof err === 'object' && 'code' in err
-          ? (err as { code?: string }).code
+          ? (err as { code?: unknown }).code
           : undefined;
       return {
         status: 'error',
         error: {
           message,
-          ...(code !== undefined ? { code } : {}),
+          ...(typeof rawCode === 'string' ? { code: rawCode } : {}),
         },
       };
     };
