@@ -131,8 +131,10 @@ function normalizeSingleQuotedScalars(fileContent: string): string {
   );
 
   // Restore each block scalar's original verbatim content.
+  // Use a replacer function (not a string) so that $ characters in the
+  // placeholder are never interpreted as replacement patterns ($&, $', etc.).
   for (let j = 0; j < placeholders.length; j++) {
-    masked = masked.replace(`\x00BLOCK_${j}\x00`, placeholders[j]);
+    masked = masked.replace(`\x00BLOCK_${j}\x00`, () => placeholders[j]);
   }
 
   return masked;
