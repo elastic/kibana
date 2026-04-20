@@ -175,10 +175,10 @@ In another terminal window, run `yarn start --run-examples` to boot up Kibana an
 
 If you build it manually it will look something like this:
 
-![hello world manual plugin in nav](./kibana_hello_world_home_nav.png)
+![hello world manual plugin in nav](./images/kibana_hello_world_home_nav.png)
 
-![hello world manual plugin](./kibana_hello_world.png)
+![hello world manual plugin](./images/kibana_hello_world.png)
 
 If you built it with the generator, it will look something like this:
 
-![hello world generated](./hello_world_generated.png)
+![hello world generated](./images/hello_world_generated.png)
