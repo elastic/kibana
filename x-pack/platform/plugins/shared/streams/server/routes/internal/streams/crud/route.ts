@@ -20,8 +20,8 @@ export interface ListStreamDetail {
   stream: Streams.all.Definition;
   effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
-  privileges?: {
-    canReadFailureStore: boolean;
+  privileges: {
+    read_failure_store: boolean;
   };
 }
 
@@ -57,7 +57,6 @@ export const listStreamsRoute = createServerRoute({
       .filter(({ exists }) => exists)
       .map(({ stream }) => stream.name);
 
-    // Store per-stream privileges
     const streamPrivilegesMap = new Map<string, { read_failure_store: boolean }>();
 
     const dataStreams = await processAsyncInChunks(streamNames, async (streamNamesChunk) => {
@@ -69,7 +68,6 @@ export const listStreamsRoute = createServerRoute({
         scopedClusterClient.asCurrentUser.indices.getDataStream({ name: streamNamesChunk }),
       ]);
 
-      // Store per-stream privileges
       Object.entries(privilegesPerStream).forEach(([name, privs]) => {
         streamPrivilegesMap.set(name, privs);
       });
@@ -79,7 +77,7 @@ export const listStreamsRoute = createServerRoute({
 
     const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
       if (Streams.QueryStream.Definition.is(stream)) {
-        return { stream };
+        return { stream, privileges: { read_failure_store: false } };
       }
 
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
@@ -89,11 +87,7 @@ export const listStreamsRoute = createServerRoute({
         stream,
         effective_lifecycle: getDataStreamLifecycle(match ?? null),
         data_stream: match,
-        privileges: privileges
-          ? {
-              canReadFailureStore: privileges.read_failure_store,
-            }
-          : undefined,
+        privileges: { read_failure_store: privileges?.read_failure_store ?? false },
       };
     });
 

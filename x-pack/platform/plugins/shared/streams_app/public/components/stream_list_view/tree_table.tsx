@@ -124,20 +124,16 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
-  // Build privilege map from streams
-  const privilegeMap = React.useMemo(() => {
-    const map = new Map<string, boolean>();
-    streams.forEach((streamDetail) => {
-      if (streamDetail.privileges?.canReadFailureStore !== undefined) {
-        map.set(streamDetail.stream.name, streamDetail.privileges.canReadFailureStore);
-      }
-    });
-    return map;
+  const { privilegeMap, hasFailureStoreAccess } = React.useMemo(() => {
+    return streams.reduce(
+      (acc, streamDetail) => {
+        acc.privilegeMap.set(streamDetail.stream.name, streamDetail.privileges.read_failure_store);
+        acc.hasFailureStoreAccess ||= streamDetail.privileges.read_failure_store;
+        return acc;
+      },
+      { privilegeMap: new Map<string, boolean>(), hasFailureStoreAccess: false }
+    );
   }, [streams]);
-
-  const hasFailureStoreAccess = React.useMemo(() => {
-    return [...privilegeMap.values()].some((v) => v);
-  }, [privilegeMap]);
 
   const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,

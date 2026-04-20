@@ -811,41 +811,11 @@ export class StreamsClient {
       return result;
     }
 
-    const isServerless = this.dependencies.isServerless;
-    const REQUIRED_MANAGE_PRIVILEGES = [
-      'manage_index_templates',
-      'manage_ingest_pipelines',
-      'manage_pipeline',
-      'read_pipeline',
-    ];
-
-    if (!isServerless) {
-      REQUIRED_MANAGE_PRIVILEGES.push('monitor_text_structure');
-    }
-
-    const CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE = 'cluster:admin/repository/put';
-
-    const REQUIRED_INDEX_PRIVILEGES = [
-      'read',
-      'write',
-      'create',
-      'manage',
-      'monitor',
-      'view_index_metadata',
-      'manage_data_stream_lifecycle',
-      'read_failure_store',
-      'manage_failure_store',
-    ];
-    if (!isServerless) {
-      REQUIRED_INDEX_PRIVILEGES.push('manage_ilm');
-    }
-
     const privileges = await this.dependencies.esClient.security.hasPrivileges({
-      cluster: [...REQUIRED_MANAGE_PRIVILEGES, CREATE_SNAPSHOT_REPOSITORY_CLUSTER_PRIVILEGE],
       index: [
         {
           names,
-          privileges: REQUIRED_INDEX_PRIVILEGES,
+          privileges: ['read_failure_store'],
         },
       ],
     });
