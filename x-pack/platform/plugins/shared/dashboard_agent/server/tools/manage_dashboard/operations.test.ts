@@ -14,7 +14,6 @@ import type {
 import { isSection } from '@kbn/dashboard-agent-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import type { ResolveVisualizationConfig, VisualizationAttempt } from './inline_visualization';
-import type { VisualizationContent } from '@kbn/dashboard-agent-common';
 import { executeDashboardOperations, type DashboardOperation } from './operations';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
@@ -65,7 +64,9 @@ describe('executeDashboardOperations', () => {
     panels,
   });
 
-  const createResolvedVisualization = (visContent: VisualizationContent): VisualizationAttempt => ({
+  const createResolvedVisualization = (
+    visContent: Pick<AttachmentPanel, 'type' | 'config'>
+  ): VisualizationAttempt => ({
     type: 'success',
     visContent,
   });
@@ -301,12 +302,12 @@ describe('executeDashboardOperations', () => {
       panels: [
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
-          config: { attributes: { type: 'metric' } },
+          config: { type: 'metric' },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
-          config: { attributes: { type: 'bar' } },
+          config: { type: 'bar' },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ],
@@ -361,7 +362,7 @@ describe('executeDashboardOperations', () => {
     expect(sections[0].panels).toEqual([
       expect.objectContaining({
         type: LENS_EMBEDDABLE_TYPE,
-        config: { attributes: { type: 'metric' } },
+        config: { type: 'metric' },
         grid: { x: 0, y: 0, w: 24, h: 9 },
       }),
     ]);
@@ -459,11 +460,11 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         title: 'Overview',
-        panels: [expect.objectContaining({ config: { attributes: { type: 'metric' } } })],
+        panels: [expect.objectContaining({ config: { type: 'metric' } })],
       }),
       expect.objectContaining({
         title: 'Errors',
-        panels: [expect.objectContaining({ config: { attributes: { type: 'bar' } } })],
+        panels: [expect.objectContaining({ config: { type: 'bar' } })],
       }),
     ]);
   });
@@ -551,11 +552,11 @@ describe('executeDashboardOperations', () => {
     expect(getSections(result.dashboardData.panels)).toEqual([
       expect.objectContaining({
         title: 'Overview',
-        panels: [expect.objectContaining({ config: { attributes: { type: 'metric' } } })],
+        panels: [expect.objectContaining({ config: { type: 'metric' } })],
       }),
     ]);
     expect(getPanelsOnly(result.dashboardData.panels)).toEqual([
-      expect.objectContaining({ config: { attributes: { type: 'bar' } } }),
+      expect.objectContaining({ config: { type: 'bar' } }),
     ]);
   });
 
@@ -928,14 +929,14 @@ describe('executeDashboardOperations', () => {
       expect(topLevelPanels).toEqual([
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
-          config: { attributes: { type: 'metric' } },
+          config: { type: 'metric' },
           grid: { x: 0, y: 0, w: 24, h: 9 },
         }),
       ]);
       expect(sections[0].panels).toEqual([
         expect.objectContaining({
           type: LENS_EMBEDDABLE_TYPE,
-          config: { attributes: { type: 'bar' } },
+          config: { type: 'bar' },
           grid: { x: 24, y: 0, w: 24, h: 9 },
         }),
       ]);
@@ -981,14 +982,14 @@ describe('executeDashboardOperations', () => {
         expect.objectContaining({
           id: 'panel-1',
           grid: { x: 0, y: 5, w: 24, h: 9 },
-          config: { attributes: { type: 'bar' } },
+          config: { type: 'bar' },
         })
       );
       expect(sections[0].panels[0]).toEqual(
         expect.objectContaining({
           id: 'section-panel-1',
           grid: { x: 0, y: 0, w: 24, h: 9 },
-          config: { attributes: { type: 'line' } },
+          config: { type: 'line' },
         })
       );
     });
@@ -1043,7 +1044,7 @@ describe('executeDashboardOperations', () => {
       expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
         expect.objectContaining({
           id: 'panel-1',
-          config: { attributes: { type: 'metric', testStep: 'after-second-edit' } },
+          config: { type: 'metric', testStep: 'after-second-edit' },
           grid: { x: 0, y: 5, w: 24, h: 9 },
         })
       );
