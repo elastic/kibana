@@ -180,11 +180,11 @@ export function InternalDashboardTopNav({
               {dashboardTitle}
               <EuiButtonEmpty
                 onClick={() => openSettingsFlyout(dashboardApi)}
-                size="xxs"
+                size="xs"
                 aria-label={topNavStrings.settings.description}
                 color="text"
                 textProps={false}
-                css={styles.updateIcon}
+                css={styles.updateEditButton}
               >
                 <EuiIcon size="s" type="pencil" aria-hidden={true} />
               </EuiButtonEmpty>
@@ -228,7 +228,7 @@ export function InternalDashboardTopNav({
     dashboardApi,
     viewMode,
     customLeadingBreadCrumbs,
-    styles.updateIcon,
+    styles.updateEditButton,
   ]);
 
   /**
@@ -453,9 +453,10 @@ const topNavStyles = {
         paddingTop: 0,
       },
     }),
-  updateIcon: ({ euiTheme }: UseEuiTheme) =>
+  updateEditButton: ({ euiTheme }: UseEuiTheme) =>
     css({
-      marginLeft: euiTheme.size.xs,
+      blockSize: '100%',
+      marginLeft: euiTheme.size.xxs,
       padding: 0,
     }),
 };
