@@ -22,9 +22,11 @@ import { StreamOverview } from '../../../stream_detail_overview';
 import { StreamsAppPageTemplate } from '../../../streams_app_page_template';
 import { useStreamsDetailManagementTabs } from './use_streams_detail_management_tabs';
 import type { ManagementTabs } from './wrapper';
+import { QueryStreamPartitioning } from '../stream_detail_routing/query_stream_partitioning';
 
 const queryStreamManagementSubTabs = [
   'overview',
+  'partitioning',
   'advanced',
   'schema',
   'significantEvents',
@@ -77,6 +79,13 @@ export function QueryStreamDetailManagement({
       }),
     };
   }
+
+  tabs.partitioning = {
+    content: <QueryStreamPartitioning />,
+    label: i18n.translate('xpack.streams.streamDetailView.partitioningTab', {
+      defaultMessage: 'Partitioning',
+    }),
+  };
 
   tabs.schema = {
     content: (
