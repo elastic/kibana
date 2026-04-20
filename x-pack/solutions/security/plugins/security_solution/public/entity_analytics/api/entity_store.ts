@@ -22,9 +22,12 @@ import type {
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
 import { ENTITY_STORE_WATCHLISTS_INSTALL_URL } from '../../../common/entity_analytics/entity_store/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import * as entityAnalyticsI18n from '../translations';
+
+const WATCHLIST_TOAST_LIFETIME_MS = 8000;
 
 export const useEntityStoreRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
+  const { http, uiSettings, notifications } = useKibana().services;
   const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   return useMemo(() => {
@@ -33,6 +36,19 @@ export const useEntityStoreRoutes = () => {
         method: 'POST',
         version: API_VERSIONS.public.v1,
       });
+
+    // This is here while waiting for unified installs https://github.com/elastic/security-team/issues/16607
+    const tryInstallPrebuiltWatchlistsWithToast = async () => {
+      try {
+        await installPrebuiltWatchlists();
+      } catch {
+        notifications?.toasts?.addWarning({
+          title: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TITLE,
+          text: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT,
+          toastLifeTimeMs: WATCHLIST_TOAST_LIFETIME_MS,
+        });
+      }
+    };
 
     const getEntityStoreStatus = async (withComponents = false) => {
       if (isV2Enabled) {
@@ -51,8 +67,8 @@ export const useEntityStoreRoutes = () => {
 
     const installEntityStore = async (options?: InitEntityStoreRequestBodyInput) => {
       if (isV2Enabled) {
-        await installPrebuiltWatchlists();
-        return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
+        await tryInstallPrebuiltWatchlistsWithToast();
+        await http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
           method: 'POST',
           version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
@@ -67,7 +83,8 @@ export const useEntityStoreRoutes = () => {
 
     const startEntityStore = async (entityTypes?: EntityType[]) => {
       if (isV2Enabled) {
-        return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
+        await tryInstallPrebuiltWatchlistsWithToast();
+        await http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
           method: 'PUT',
           version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
@@ -158,5 +175,5 @@ export const useEntityStoreRoutes = () => {
       initEntityEngine,
       listEntityEngines,
     };
-  }, [http, isV2Enabled]);
+  }, [http, isV2Enabled, notifications]);
 };
