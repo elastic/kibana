@@ -61,7 +61,6 @@
     "@kbn/es-errors",
     "@kbn/content-connectors-plugin",
     "@kbn/search-playground",
-    "@kbn/utility-types",
     "@kbn/index-management-shared-types",
     "@kbn/deeplinks-search",
     "@kbn/react-kibana-context-theme",

@@ -197,10 +197,11 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
             await executorClient.runExperiment(
               {
                 dataset: {
-                  name: `sigevents: KI query generation: ${scenario.input.scenario_id} (${dataset.id}) (${kiSource})`,
-                  description: `[${dataset.id}] ${scenario.input.stream_description}`,
+                  name: `sigevents: KI query generation (${dataset.id}) (${kiSource})`,
+                  description: `[${dataset.id}] KI query generation across scenarios (${kiSource})`,
                   examples: [
                     {
+                      id: scenario.input.scenario_id,
                       input: {
                         ...scenario.input,
                         features: kis,

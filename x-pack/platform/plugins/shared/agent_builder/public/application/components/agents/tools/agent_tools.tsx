@@ -19,9 +19,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ToolDefinition, ToolSelection } from '@kbn/agent-builder-common';
+import type { ToolDefinition } from '@kbn/agent-builder-common';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
-import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useQueryState } from '../../../hooks/use_query_state';
 import { searchParamNames } from '../../../search_param_names';
 import { labels } from '../../../utils/i18n';
@@ -29,15 +28,8 @@ import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useToolsService } from '../../../hooks/tools/use_tools';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
-import { useToasts } from '../../../hooks/use_toasts';
-import { queryKeys } from '../../../query_keys';
 import { useFlyoutState } from '../../../hooks/use_flyout_state';
-import {
-  getActiveTools,
-  isToolSelected,
-  toggleToolSelection,
-} from '../../../utils/tool_selection_utils';
+import { getActiveTools } from '../../../utils/tool_selection_utils';
 import { ActiveItemRow } from '../common/active_item_row';
 import { ToolLibraryPanel } from './tool_library_panel';
 import { ToolDetailPanel } from './tool_detail_panel';
@@ -45,6 +37,7 @@ import { PageWrapper } from '../common/page_wrapper';
 import { useListDetailPageStyles } from '../common/styles';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { ToolsCustomizeEmptyState } from './tools_customize_empty_state';
+import { useToolsMutation } from './use_tools_mutation';
 
 const ActiveToolsList: React.FC<{
   filteredActiveTools: ToolDefinition[];
@@ -115,17 +108,18 @@ export const AgentTools: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const styles = useListDetailPageStyles();
   const { createAgentBuilderUrl } = useNavigation();
-  const { agentService } = useAgentBuilderServices();
-  const { addSuccessToast, addErrorToast } = useToasts();
-  const queryClient = useQueryClient();
 
   const { agent, isLoading: agentLoading } = useAgentBuilderAgentById(agentId);
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const canEditAgent = useCanEditAgent({ agent });
 
+  const { handleAddTool, handleRemoveTool } = useToolsMutation({
+    agent: agent ?? null,
+    allTools,
+  });
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedToolId, setSelectedToolId] = useQueryState<string>(searchParamNames.toolId);
-  const [mutatingToolId, setMutatingToolId] = useState<string | null>(null);
   const {
     isOpen: isLibraryOpen,
     openFlyout: openLibrary,
@@ -179,48 +173,6 @@ export const AgentTools: React.FC = () => {
     );
   }, [activeTools, searchQuery]);
 
-  const updateToolsMutation = useMutation({
-    mutationFn: (newToolSelections: ToolSelection[]) => {
-      return agentService.update(agentId!, { configuration: { tools: newToolSelections } });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
-    },
-    onError: () => {
-      addErrorToast({ title: labels.agentTools.updateToolsErrorToast });
-    },
-  });
-
-  const handleAddTool = useCallback(
-    async (tool: ToolDefinition) => {
-      if (isToolSelected(tool, agentToolSelections)) return;
-      const newSelections = toggleToolSelection(tool.id, allTools, agentToolSelections);
-      setMutatingToolId(tool.id);
-      try {
-        await updateToolsMutation.mutateAsync(newSelections);
-        addSuccessToast({ title: labels.agentTools.addToolSuccessToast(tool.id) });
-      } finally {
-        setMutatingToolId(null);
-      }
-    },
-    [agentToolSelections, allTools, updateToolsMutation, addSuccessToast]
-  );
-
-  const handleRemoveTool = useCallback(
-    (tool: ToolDefinition) => {
-      const newSelections = toggleToolSelection(tool.id, allTools, agentToolSelections);
-      setMutatingToolId(tool.id);
-      updateToolsMutation.mutate(newSelections, {
-        onSuccess: () => {
-          setSelectedToolId(null);
-          addSuccessToast({ title: labels.agentTools.removeToolSuccessToast(tool.id) });
-        },
-        onSettled: () => setMutatingToolId(null),
-      });
-    },
-    [agentToolSelections, allTools, updateToolsMutation, addSuccessToast, setSelectedToolId]
-  );
-
   const handleToggleTool = useCallback(
     (tool: ToolDefinition, isActive: boolean) => {
       if (enableElasticCapabilities && defaultToolIdSet.has(tool.id)) return;
@@ -233,15 +185,23 @@ export const AgentTools: React.FC = () => {
     [handleAddTool, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]
   );
 
+  const handleRemoveToolWithDeselect = useCallback(
+    (tool: ToolDefinition) => {
+      handleRemoveTool(tool);
+      setSelectedToolId(null);
+    },
+    [handleRemoveTool, setSelectedToolId]
+  );
+
   /** Guarded removal: only prevents removing auto-included tools from the agent. */
-  const handleRemoveSelectedTool = useCallback(() => {
+  const handleRemoveSelectedTool = () => {
     if (!selectedToolId) return;
     if (enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)) return;
     const tool = activeTools.find((t) => t.id === selectedToolId);
     if (tool) {
-      handleRemoveTool(tool);
+      handleRemoveToolWithDeselect(tool);
     }
-  }, [selectedToolId, activeTools, handleRemoveTool, enableElasticCapabilities, defaultToolIdSet]);
+  };
 
   const showCustomizeEmptyState = activeTools.length === 0 && !searchQuery.trim();
 
@@ -261,102 +221,98 @@ export const AgentTools: React.FC = () => {
       allTools={allTools}
       activeToolIdSet={libraryActiveToolIdSet}
       onToggleTool={handleToggleTool}
-      mutatingToolId={mutatingToolId}
       enableElasticCapabilities={enableElasticCapabilities}
       builtinToolIdSet={defaultToolIdSet}
     />
   ) : null;
 
-  if (showCustomizeEmptyState) {
-    return (
-      <PageWrapper>
-        <ToolsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
-        {toolModals}
-      </PageWrapper>
-    );
-  }
-
   return (
     <PageWrapper>
-      <div css={styles.header}>
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
-              <h1>{labels.tools.title}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      {showCustomizeEmptyState ? (
+        <ToolsCustomizeEmptyState canEditAgent={canEditAgent} onOpenLibrary={openLibrary} />
+      ) : (
+        <>
+          <div css={styles.header}>
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
-                  {labels.agentTools.manageAllTools}
-                </EuiButtonEmpty>
+                <EuiTitle size="l">
+                  <h1>{labels.tools.title}</h1>
+                </EuiTitle>
               </EuiFlexItem>
-              {canEditAgent && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
-                    {labels.agentTools.addToolButton}
-                  </EuiButton>
-                </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
+                      {labels.agentTools.manageAllTools}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  {canEditAgent && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton fill iconType="plusInCircle" iconSide="left" onClick={openLibrary}>
+                        {labels.agentTools.addToolButton}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiSpacer size="m" />
+            <EuiText size="m" color="default">
+              {labels.agentTools.pageDescription}
+            </EuiText>
+          </div>
+
+          <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
+            <EuiFlexItem grow={false} css={styles.searchColumn}>
+              <div css={styles.searchInputWrapper}>
+                <EuiFieldSearch
+                  placeholder={labels.agentTools.searchActiveToolsPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  incremental
+                  fullWidth
+                />
+              </div>
+
+              <div css={styles.scrollableList}>
+                <ActiveToolsList
+                  filteredActiveTools={filteredActiveTools}
+                  searchQuery={searchQuery}
+                  selectedToolId={selectedToolId}
+                  enableElasticCapabilities={enableElasticCapabilities}
+                  defaultToolIdSet={defaultToolIdSet}
+                  isRemoving={false}
+                  onSelect={setSelectedToolId}
+                  onRemove={handleRemoveToolWithDeselect}
+                  canEditAgent={canEditAgent}
+                />
+              </div>
+            </EuiFlexItem>
+
+            <EuiFlexItem css={styles.detailPanelWrapper}>
+              {selectedToolId ? (
+                <ToolDetailPanel
+                  toolId={selectedToolId}
+                  onRemove={handleRemoveSelectedTool}
+                  isAutoIncluded={enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)}
+                  canEditAgent={canEditAgent}
+                />
+              ) : (
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="center"
+                  css={styles.noSelectionPlaceholder}
+                >
+                  <EuiText size="s" color="subdued">
+                    {labels.agentTools.noToolSelectedMessage}
+                  </EuiText>
+                </EuiFlexGroup>
               )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-        <EuiText size="m" color="default">
-          {labels.agentTools.pageDescription}
-        </EuiText>
-      </div>
-
-      <EuiFlexGroup gutterSize="none" responsive={false} css={styles.body}>
-        <EuiFlexItem grow={false} css={styles.searchColumn}>
-          <div css={styles.searchInputWrapper}>
-            <EuiFieldSearch
-              placeholder={labels.agentTools.searchActiveToolsPlaceholder}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              incremental
-              fullWidth
-            />
-          </div>
-
-          <div css={styles.scrollableList}>
-            <ActiveToolsList
-              filteredActiveTools={filteredActiveTools}
-              searchQuery={searchQuery}
-              selectedToolId={selectedToolId}
-              enableElasticCapabilities={enableElasticCapabilities}
-              defaultToolIdSet={defaultToolIdSet}
-              isRemoving={updateToolsMutation.isLoading}
-              onSelect={setSelectedToolId}
-              onRemove={handleRemoveTool}
-              canEditAgent={canEditAgent}
-            />
-          </div>
-        </EuiFlexItem>
-
-        <EuiFlexItem css={styles.detailPanelWrapper}>
-          {selectedToolId ? (
-            <ToolDetailPanel
-              toolId={selectedToolId}
-              onRemove={handleRemoveSelectedTool}
-              isAutoIncluded={enableElasticCapabilities && defaultToolIdSet.has(selectedToolId)}
-              canEditAgent={canEditAgent}
-            />
-          ) : (
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="center"
-              css={styles.noSelectionPlaceholder}
-            >
-              <EuiText size="s" color="subdued">
-                {labels.agentTools.noToolSelectedMessage}
-              </EuiText>
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
 
       {toolModals}
     </PageWrapper>
