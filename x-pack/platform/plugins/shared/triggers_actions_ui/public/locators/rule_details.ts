@@ -12,11 +12,11 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_HISTORY_TAB,
+  getRulesAppDetailsRoute,
   ruleDetailsLocatorID,
   type RuleDetailsLocatorParams,
   type RuleDetailsTabId,
-} from '@kbn/deeplinks-management';
-import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils';
+} from '@kbn/rule-data-utils';
 
 const RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY = 'searchBarParams';
 

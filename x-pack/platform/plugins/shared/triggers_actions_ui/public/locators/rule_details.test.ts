@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { RULE_DETAILS_ALERTS_TAB, RULE_DETAILS_HISTORY_TAB } from '@kbn/deeplinks-management';
-import { ALERT_RULE_NAME, ALERT_STATUS } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_NAME,
+  ALERT_STATUS,
+  RULE_DETAILS_ALERTS_TAB,
+  RULE_DETAILS_HISTORY_TAB,
+} from '@kbn/rule-data-utils';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
 
 describe('RuleDetailsLocator', () => {

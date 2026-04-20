@@ -16,8 +16,7 @@ project:
   channel: ''
   owner: '@elastic/kibana-management'
   sourceRoot: src/platform/packages/shared/deeplinks/management
-dependsOn:
-  - '@kbn/utility-types'
+dependsOn: []
 tags:
   - shared-common
   - package
