@@ -18,6 +18,10 @@ import {
   MEMORY_CONSOLIDATION_TASK_ID,
 } from '../services/memory/consolidation';
 import { getMemoryPreloader } from '../services/memory/preload/memory_preloader';
+import { createExtractionStrategy } from '../services/memory/extraction/extractor_factory';
+import { CandidatePipeline } from '../services/memory/extraction/candidate_pipeline';
+import { createEmbeddingService } from '../services/memory/embeddings';
+import { getCurrentSpaceId } from '../utils/spaces';
 
 const MEMORY_BASE_PATH = `${internalApiPath}/memory`;
 
@@ -84,6 +88,7 @@ export function registerMemoryRoutes({
   getInternalServices,
   logger,
   coreSetup,
+  config: pluginConfig,
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -278,21 +283,24 @@ export function registerMemoryRoutes({
       security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const { memory } = getInternalServices();
-      const client = await memory.getScopedClient({ request });
+      const services = getInternalServices();
+      const esClient = services.elasticsearch.client.asInternalUser;
 
-      // Fetch all memories and hard-delete them
-      let deleted = 0;
-      let batch = await client.list({ size: 100 });
-      while (batch.length > 0) {
-        for (const node of batch) {
-          await client.delete(node.id);
-          deleted++;
-        }
-        batch = await client.list({ size: 100 });
+      // Use deleteByQuery for fast bulk deletion instead of looping
+      try {
+        const result = await esClient.deleteByQuery({
+          index: '.chat-memory*',
+          query: { match_all: {} },
+          refresh: true,
+        });
+
+        return response.ok({
+          body: { success: true, deleted: result.deleted ?? 0 },
+        });
+      } catch (err) {
+        // Index might not exist yet
+        return response.ok({ body: { success: true, deleted: 0 } });
       }
-
-      return response.ok({ body: { success: true, deleted } });
     })
   );
 
@@ -604,6 +612,148 @@ export function registerMemoryRoutes({
           review_item_id: id,
         },
       });
+    })
+  );
+
+  // POST /internal/agent_builder/memory/extract — run memory extraction on arbitrary content
+  router.post(
+    {
+      path: `${MEMORY_BASE_PATH}/extract`,
+      validate: {
+        body: schema.object({
+          message: schema.string({
+            meta: { description: 'Content to extract memories from. Can be a single turn, full conversation, or any text.' },
+          }),
+          method: schema.maybe(
+            schema.oneOf(
+              [
+                schema.literal('llm'),
+                schema.literal('cognitive'),
+                schema.literal('chunking'),
+                schema.literal('turn'),
+              ],
+              { meta: { description: 'Extraction method. Defaults to "turn".' } }
+            )
+          ),
+          connector_id: schema.maybe(
+            schema.string({
+              meta: { description: 'Connector ID for LLM-based extraction methods (llm, cognitive).' },
+            })
+          ),
+          conversation_id: schema.maybe(
+            schema.string({
+              meta: { description: 'Optional conversation ID to associate memories with.' },
+            })
+          ),
+        }),
+      },
+      options: { access: 'internal' },
+      security: AGENT_BUILDER_WRITE_SECURITY,
+    },
+    wrapHandler(async (ctx, request, response) => {
+      const services = getInternalServices();
+      const memoryClient = await services.memory.getScopedClient({ request });
+      const space = getCurrentSpaceId({ request, spaces: services.spaces });
+
+      const { message, method: methodOverride, connector_id: connectorId, conversation_id: conversationId } =
+        request.body as {
+          message: string;
+          method?: string;
+          connector_id?: string;
+          conversation_id?: string;
+        };
+
+      const extractionLog = logger.get('memory.extract-api');
+
+      // Fall back to plugin config when method/connector not provided
+      const extractionMethod = methodOverride ?? pluginConfig?.memory?.extraction?.method ?? 'turn';
+      const resolvedConnectorId = connectorId ?? pluginConfig?.memory?.extraction?.connectorId;
+
+      extractionLog.info(
+        `extract API: method=${extractionMethod}, message=${message.length} chars`
+      );
+
+      try {
+        const extractionConfig = pluginConfig?.memory?.extraction ?? {} as any;
+        const minimalConfig = {
+          memory: {
+            extraction: {
+              method: extractionMethod,
+              connectorId: resolvedConnectorId,
+              chunking: extractionConfig.chunking ?? {
+                method: 'fixed',
+                maxChunkChars: 300,
+                overlapChars: 30,
+                texttiling: { windowSize: 20, smoothingWidth: 2, threshold: 0.1 },
+                embeddingSimilarity: { sentenceWindowSize: 3, similarityThreshold: 0.3, similarity: 'tfidf' },
+              },
+            },
+            retrieval: pluginConfig?.memory?.retrieval ?? { inferenceEndpointId: undefined },
+          },
+        };
+
+          const extractor = createExtractionStrategy({
+            config: minimalConfig as any,
+            logger: extractionLog,
+            inference: services.inference,
+            connectorId: resolvedConnectorId,
+            request,
+          esClient: services.elasticsearch.client.asInternalUser,
+        });
+
+        const extraction = await extractor.extract({ message });
+
+        const candidateCount =
+          extraction.semantic.length + extraction.episodic.length + extraction.procedural.length;
+
+        if (candidateCount === 0) {
+          return response.ok({ body: { created: 0, memories: [] } });
+        }
+
+        const noopEmbedding = createEmbeddingService({
+          esClient: services.elasticsearch.client.asInternalUser,
+          config: { inferenceEndpointId: undefined },
+          logger: extractionLog,
+        });
+
+        const pipeline = new CandidatePipeline({
+          memoryClient,
+          esClient: services.elasticsearch.client.asInternalUser,
+          embeddingService: noopEmbedding,
+          logger: extractionLog,
+        });
+
+        const result = await pipeline.run(
+          extraction,
+          {
+            conversationId: conversationId ?? `extract-${Date.now()}`,
+            roundId: 'extract-api',
+            space,
+            userName: 'extract-api',
+          },
+          []
+        );
+
+        extractionLog.info(`extract API: created ${result.created} memories`);
+
+        return response.ok({
+          body: {
+            created: result.created,
+            memories: result.createdNodes.map((m) => ({
+              id: m.id,
+              type: m.type,
+              subtype: m.subtype,
+              summary: m.summary,
+            })),
+          },
+        });
+      } catch (err) {
+        extractionLog.warn(`extract API: failed — ${(err as Error).message}`);
+        return response.customError({
+          statusCode: 500,
+          body: { message: `Extraction failed: ${(err as Error).message}` },
+        });
+      }
     })
   );
 

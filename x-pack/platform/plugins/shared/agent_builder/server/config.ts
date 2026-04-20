@@ -20,6 +20,7 @@ export const configSchema = schema.object({
     showToolCalls: schema.boolean({ defaultValue: true }),
     retrieval: schema.object({
       roundStartEnabled: schema.boolean({ defaultValue: true }),
+      roundStartBlocking: schema.boolean({ defaultValue: true }),
       method: schema.oneOf(
         [
           schema.literal('bm25'),

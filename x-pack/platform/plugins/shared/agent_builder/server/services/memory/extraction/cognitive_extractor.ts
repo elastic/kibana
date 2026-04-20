@@ -131,35 +131,7 @@ export class CognitiveExtractor {
   }
 
   private buildUserContent(input: ExtractionInput): string {
-    const parts: string[] = [];
-
-    parts.push(`**User message:**\n${input.userMessage}`);
-
-    if (input.reasoningSteps && input.reasoningSteps.length > 0) {
-      parts.push(`**Agent reasoning steps:**\n${input.reasoningSteps.join('\n')}`);
-    }
-
-    if (input.toolCalls && input.toolCalls.length > 0) {
-      const summaries = input.toolCalls
-        .map((tc) => {
-          const paramsText = Object.keys(tc.params).length > 0
-            ? ` params=${JSON.stringify(tc.params).slice(0, 500)}`
-            : '';
-          const resultText = tc.results
-            .map((r) => (typeof r.data === 'string' ? r.data : JSON.stringify(r.data)).slice(0, 1000))
-            .join(' | ');
-          return `[${tc.tool_id}]${paramsText} → ${resultText || '(no result)'}`;
-        })
-        .filter((s) => s.length > 0);
-
-      if (summaries.length > 0) {
-        parts.push(`**Tool calls and results:**\n${summaries.join('\n')}`);
-      }
-    }
-
-    parts.push(`**Assistant response:**\n${input.assistantResponse}`);
-
-    return parts.join('\n\n');
+    return input.message;
   }
 
   private parseAndFilter(raw: string): ExtractionResult {

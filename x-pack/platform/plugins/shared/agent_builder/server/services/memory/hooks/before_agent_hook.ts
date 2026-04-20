@@ -25,6 +25,7 @@ import { getMemoryPreloader } from '../preload/memory_preloader';
  */
 export interface MemoryRetrievalConfig {
   roundStartEnabled: boolean;
+  roundStartBlocking: boolean;
   method: string;
 }
 
@@ -45,18 +46,28 @@ export interface RegisterMemoryBeforeAgentHookDeps {
  * [mem_002] (procedural) Always add tests for new API endpoints. [confidence: 0.8]
  * ```
  */
+const MEMORY_INSTRUCTIONS =
+  'You can explore these memories further:\n' +
+  '- Read full memory: remember(memory_id)\n' +
+  '- Search memories by keyword: remember(query="keyword")\n' +
+  '- Search around a specific memory: remember(query="keyword", around_id="memory_id", hops=10)\n' +
+  '- Browse nearby memories without search: remember(around_id="memory_id", hops=10)';
+
 export const formatMemoryInjection = (nodes: ScoredMemoryNode[]): string => {
   if (nodes.length === 0) {
     return '';
   }
 
-  const lines: string[] = ['## Active Memories'];
+  const lines: string[] = ['## Retrieved Memories'];
   for (const { node } of nodes) {
-    const idStr = `[${node.id.slice(0, 7)}]`;
-    const typeStr = `(${node.type})`;
-    const confidenceStr = `[confidence: ${node.confidence.toFixed(1)}]`;
-    lines.push(`${idStr} ${typeStr} ${node.summary} ${confidenceStr}`);
+    const timestamp = node.created_at
+      ? new Date(node.created_at).toISOString().slice(0, 16).replace('T', ' ')
+      : '';
+    lines.push(`[${node.id}] (${node.type}) ${timestamp} — ${node.summary}`);
   }
+
+  lines.push('');
+  lines.push(MEMORY_INSTRUCTIONS);
 
   return lines.join('\n');
 };
@@ -285,17 +296,67 @@ export const registerMemoryBeforeAgentHook = (
   deps: RegisterMemoryBeforeAgentHookDeps
 ): void => {
   const logger = deps.logger.get('memory.beforeAgent');
+  const blocking = deps.retrieval.roundStartBlocking;
 
-  serviceSetups.hooks.register({
-    id: 'memory-round-start-injection',
-    hooks: {
-      [HookLifecycle.beforeAgent]: {
-        mode: HookExecutionMode.blocking,
-        handler: async (context: BeforeAgentHookContext) =>
-          runMemoryBeforeAgentHook(context, { ...deps, logger }),
+  if (blocking) {
+    // Blocking mode: wait for memories before agent starts
+    serviceSetups.hooks.register({
+      id: 'memory-round-start-injection',
+      hooks: {
+        [HookLifecycle.beforeAgent]: {
+          mode: HookExecutionMode.blocking,
+          handler: async (context: BeforeAgentHookContext) =>
+            runMemoryBeforeAgentHook(context, { ...deps, logger }),
+        },
       },
-    },
-  });
+    });
+    logger.info('Memory before-agent hook registered (blocking)');
+  } else {
+    // Non-blocking mode: fire search, results delivered via auto-retrieval
+    // hook on first tool call or at handover to answering agent.
+    serviceSetups.hooks.register({
+      id: 'memory-round-start-injection',
+      hooks: {
+        [HookLifecycle.beforeAgent]: {
+          mode: HookExecutionMode.nonBlocking,
+          handler: async (context: BeforeAgentHookContext) => {
+            // Import lazily to avoid circular deps
+            const { addUndeliveredRetrieval } = await import('./auto_retrieval_hook');
 
-  logger.debug('Memory before-agent hook registered');
+            const { retrieval, getInternalServices, config } = deps;
+
+            if (!retrieval.roundStartEnabled) return;
+
+            const query = context.nextInput.message;
+            if (!query) return;
+
+            let services;
+            try { services = getInternalServices(); } catch { return; }
+
+            const memoryClient = await services.memory.getScopedClient({ request: context.request });
+            const space = getCurrentSpaceId({ request: context.request, spaces: services.spaces });
+
+            logger.info(`memory.beforeAgent: starting non-blocking search for "${query.slice(0, 60)}..."`);
+
+            const retrievalPromise = runRetrieval(retrieval.method, memoryClient, query, logger, {
+              stage: 'round_start',
+              size: 20,
+              esClient: services.elasticsearch.client.asInternalUser,
+              space,
+              config,
+              inference: services.inference,
+              request: context.request,
+              connectorId: config.memory.extraction.connectorId,
+            }).catch((err) => {
+              logger.warn(`memory.beforeAgent: non-blocking search failed — ${(err as Error).message}`);
+              return [] as MemoryNode[];
+            });
+
+            addUndeliveredRetrieval(retrievalPromise);
+          },
+        },
+      },
+    });
+    logger.info('Memory before-agent hook registered (non-blocking — results via auto-retrieval)');
+  }
 };

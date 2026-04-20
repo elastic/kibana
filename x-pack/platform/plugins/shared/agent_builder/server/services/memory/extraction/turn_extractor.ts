@@ -28,19 +28,14 @@ export class TurnExtractor {
   }
 
   async extract(input: ExtractionInput): Promise<ExtractionResult> {
-    const userMessage = input.userMessage?.trim() ?? '';
-    const assistantResponse = input.assistantResponse?.trim() ?? '';
+    const message = input.message?.trim() ?? '';
 
-    if (!userMessage && !assistantResponse) {
+    if (!message) {
       return { semantic: [], episodic: [], procedural: [] };
     }
 
-    const full = `User: ${userMessage}\n\nAssistant: ${assistantResponse}`;
-
-    const summary =
-      userMessage.length > 80
-        ? userMessage.slice(0, 77) + '...'
-        : userMessage || assistantResponse.slice(0, 80);
+    const full = message;
+    const summary = message.length > 80 ? message.slice(0, 77) + '...' : message;
 
     const candidate: ExtractedMemoryCandidate = {
       summary,

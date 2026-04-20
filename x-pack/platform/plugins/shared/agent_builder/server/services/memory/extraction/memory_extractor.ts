@@ -65,20 +65,14 @@ const MAX_PROCEDURAL_PER_ROUND = 3;
 /** Minimum confidence threshold — candidates below this are discarded */
 const MIN_CONFIDENCE_THRESHOLD = 0.4;
 
-/** Maximum characters for individual tool call param/result summaries */
-const MAX_TOOL_RESULT_CHARS = 500;
 
 // ---------------------------------------------------------------------------
 // Extraction prompt
 // ---------------------------------------------------------------------------
 
-const EXTRACTION_SYSTEM_PROMPT = `You are a memory extraction assistant. Your job is to identify and extract durable knowledge from a single conversation round.
+const EXTRACTION_SYSTEM_PROMPT = `You are a memory extraction assistant. Your job is to identify and extract durable knowledge from conversation content.
 
-You will receive:
-- The user's message
-- The assistant's reasoning steps (internal thought process)
-- Tool calls with their parameters and results
-- The assistant's final response
+You will receive conversation content which may include user messages, assistant responses, tool calls, reasoning steps, or any combination thereof.
 
 Extract memories in three categories:
 
@@ -131,11 +125,10 @@ export interface MemoryExtractorDeps {
 // ---------------------------------------------------------------------------
 
 export interface ExtractionInput {
-  userMessage: string;
-  assistantResponse: string;
-  toolCalls?: ToolCallWithResult[];
-  reasoningSteps?: string[];
-  /** Full conversation for context. Not used by current extractors. */
+  /** The content to extract memories from. Can be a single turn, multiple turns,
+   *  a full conversation, or any text. The caller decides what to include. */
+  message: string;
+  /** Full conversation object for context. Used by hybrid chunking extractor. */
   conversation?: Conversation;
 }
 
@@ -206,42 +199,7 @@ export class MemoryExtractor {
   // ---------------------------------------------------------------------------
 
   private buildUserContent(input: ExtractionInput): string {
-    const parts: string[] = [];
-
-    parts.push(`**User message:**\n${input.userMessage}`);
-
-    if (input.reasoningSteps && input.reasoningSteps.length > 0) {
-      parts.push(`**Agent reasoning steps:**\n${input.reasoningSteps.join('\n')}`);
-    }
-
-    if (input.toolCalls && input.toolCalls.length > 0) {
-      const summaries = input.toolCalls
-        .map((tc) => this.summarizeToolCall(tc))
-        .filter((s) => s.length > 0);
-
-      if (summaries.length > 0) {
-        parts.push(`**Tool calls and results:**\n${summaries.join('\n')}`);
-      }
-    }
-
-    parts.push(`**Assistant response:**\n${input.assistantResponse}`);
-
-    return parts.join('\n\n');
-  }
-
-  private summarizeToolCall(tc: ToolCallWithResult): string {
-    const paramsText = Object.keys(tc.params).length > 0
-      ? ` params=${JSON.stringify(tc.params).slice(0, MAX_TOOL_RESULT_CHARS)}`
-      : '';
-
-    const resultText = tc.results
-      .map((r) => {
-        const text = typeof r.data === 'string' ? r.data : JSON.stringify(r.data);
-        return text.slice(0, MAX_TOOL_RESULT_CHARS * 2);
-      })
-      .join(' | ');
-
-    return `[${tc.tool_id}]${paramsText} → ${resultText || '(no result)'}`;
+    return input.message;
   }
 
   private parseAndFilter(raw: string): ExtractionResult {
@@ -376,30 +334,44 @@ const emptyResult = (): ExtractionResult => ({
 
 /**
  * Build an ExtractionInput from a ConversationRound.
- * Extracts user message, assistant response, reasoning steps, and all tool calls.
- * Optionally includes previous rounds for context.
+ * Assembles user message, reasoning steps, tool calls, and assistant response
+ * into a single message string.
  */
 export const buildExtractionInputFromRound = (
   round: ConversationRound,
   conversation?: Conversation
 ): ExtractionInput => {
-  const userMessage = round.input.message ?? '';
-  const assistantResponse = round.response.message ?? '';
+  const parts: string[] = [];
 
-  const toolCalls: ToolCallWithResult[] = round.steps
-    .filter(isToolCallStep)
-    .map((step) => step as unknown as ToolCallWithResult);
+  const userMsg = round.input.message ?? '';
+  if (userMsg) parts.push(`User: ${userMsg}`);
 
-  const reasoningSteps: string[] = round.steps
+  const reasoningSteps = round.steps
     .filter(isReasoningStep)
     .filter((step) => !step.transient && step.reasoning?.trim())
     .map((step) => step.reasoning.trim());
+  if (reasoningSteps.length > 0) {
+    parts.push(`Agent reasoning:\n${reasoningSteps.join('\n')}`);
+  }
+
+  const toolCalls = round.steps
+    .filter(isToolCallStep)
+    .map((step) => step as unknown as ToolCallWithResult);
+  for (const tc of toolCalls) {
+    const paramsText = Object.keys(tc.params).length > 0
+      ? ` params=${JSON.stringify(tc.params).slice(0, 500)}`
+      : '';
+    const resultText = tc.results
+      .map((r) => (typeof r.data === 'string' ? r.data : JSON.stringify(r.data)).slice(0, 1000))
+      .join(' | ');
+    parts.push(`[${tc.tool_id}]${paramsText} → ${resultText || '(no result)'}`);
+  }
+
+  const assistantMsg = round.response.message ?? '';
+  if (assistantMsg) parts.push(`Assistant: ${assistantMsg}`);
 
   return {
-    userMessage,
-    assistantResponse,
-    toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-    reasoningSteps: reasoningSteps.length > 0 ? reasoningSteps : undefined,
+    message: parts.join('\n\n'),
     conversation,
   };
 };
@@ -411,35 +383,17 @@ export const buildExtractionInputFromRound = (
 export const buildExtractionInputFromConversation = (
   conversation: Conversation
 ): ExtractionInput => {
-  const allMessages: string[] = [];
-  const allToolCalls: ToolCallWithResult[] = [];
-  const allReasoningSteps: string[] = [];
+  const parts: string[] = [];
 
   for (const round of conversation.rounds) {
-    const userMsg = round.input.message ?? '';
-    const assistantMsg = round.response.message ?? '';
-
-    if (userMsg) allMessages.push(`User: ${userMsg}`);
-
-    const toolCalls = round.steps
-      .filter(isToolCallStep)
-      .map((step) => step as unknown as ToolCallWithResult);
-    allToolCalls.push(...toolCalls);
-
-    const reasoning = round.steps
-      .filter(isReasoningStep)
-      .filter((step) => !step.transient && step.reasoning?.trim())
-      .map((step) => step.reasoning.trim());
-    allReasoningSteps.push(...reasoning);
-
-    if (assistantMsg) allMessages.push(`Assistant: ${assistantMsg}`);
+    const roundInput = buildExtractionInputFromRound(round);
+    if (roundInput.message.trim()) {
+      parts.push(roundInput.message);
+    }
   }
 
   return {
-    userMessage: allMessages.filter((m) => m.startsWith('User:')).join('\n'),
-    assistantResponse: allMessages.filter((m) => m.startsWith('Assistant:')).join('\n'),
-    toolCalls: allToolCalls.length > 0 ? allToolCalls : undefined,
-    reasoningSteps: allReasoningSteps.length > 0 ? allReasoningSteps : undefined,
+    message: parts.join('\n\n---\n\n'),
     conversation,
   };
 };

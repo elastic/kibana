@@ -101,10 +101,10 @@ export const createExtractionStrategy = (
           try {
             const response = await esClient.inference.inference({
               inference_id: endpointId,
-              task_type: 'text_embedding',
               input: text,
             });
-            const embedding = (response as any).text_embedding?.embedding;
+            const resp = response as any;
+            const embedding = resp.text_embedding?.[0]?.embedding ?? resp.sparse_embedding?.[0]?.embedding;
             return Array.isArray(embedding) ? embedding : [];
           } catch (err) {
             opts.logger.warn(`embedFn: inference call failed: ${(err as Error).message}`);

@@ -18,3 +18,5 @@ export type {
   MemorySearchOptions,
   RetrievalStage,
 } from './types';
+
+export { VALID_EDGE_TYPES } from './types';

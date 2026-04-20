@@ -250,4 +250,5 @@ export type {
   MemoryListOptions,
   MemorySearchOptions,
   RetrievalStage,
+  VALID_EDGE_TYPES,
 } from './memory';

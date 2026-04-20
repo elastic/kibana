@@ -28,19 +28,30 @@ const rememberSchema = z.object({
     .min(1)
     .max(128)
     .optional()
-    .describe('The unique ID of a specific memory node to retrieve. Provide either memory_id or query, not both.'),
+    .describe('The unique ID of a specific memory to read in full.'),
   query: z
     .string()
     .min(1)
     .max(500)
     .optional()
-    .describe('A text query to search memories by content. Returns the top matching memory and its neighbors. Provide either memory_id or query, not both.'),
+    .describe('A text query to search memories by content.'),
+  around_id: z
+    .string()
+    .min(1)
+    .max(128)
+    .optional()
+    .describe('A memory ID to search around. Returns memories created near this memory in time. Combine with query to search only nearby memories.'),
+  hops: z
+    .number()
+    .min(1)
+    .max(50)
+    .optional()
+    .describe('How many memories before and after around_id to include. Defaults to 10.'),
   full: z
     .boolean()
+    .optional()
     .describe(
-      'When true: return the full memory content (up to ~500 tokens) and apply a stronger ' +
-        'reinforcement bump (reinforcement_score += 0.05). ' +
-        'When false: return only the summary (up to ~100 tokens) with a lighter access bump.'
+      'When true: return full memory content. When false (default): return summaries only.'
     ),
 });
 
@@ -82,19 +93,17 @@ export const createRememberTool = ({
   id: MEMORY_REMEMBER_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Retrieve a memory by ID or search by text query, with optional full content and neighboring memories. ' +
-    'Use this to expand on a memory surfaced during retrieval, or to search for memories by topic. ' +
-    'Provide either memory_id (for a specific memory) or query (to search by content). ' +
-    'Returns the memory content and up to 5 related memories from the knowledge graph. ' +
-    'full=true returns complete content (~500 tokens) with stronger reinforcement. Capped at 10 calls per round.',
+    'Retrieve memories. Use memory_id to read a specific memory. Use query to search by keyword. ' +
+    'Use around_id to browse memories near a specific memory in time (combine with query to search nearby). ' +
+    'Use hops to control how many memories before/after to include (default 10).',
   schema: rememberSchema,
   tags: ['memory', 'system'],
-  handler: async ({ memory_id: memoryId, query, full }, context) => {
-    if (!memoryId && !query) {
+  handler: async ({ memory_id: memoryId, query, around_id: aroundId, hops = 10, full }, context) => {
+    if (!memoryId && !query && !aroundId) {
       return {
         results: [
           createErrorResult({
-            message: 'Either memory_id or query must be provided.',
+            message: 'Provide at least one of: memory_id, query, or around_id.',
           }),
         ],
       };
@@ -118,7 +127,175 @@ export const createRememberTool = ({
     const memoryService = getMemoryService();
     const memoryClient = await memoryService.getScopedClient({ request: context.request });
 
-    // Resolve the target memory — either by ID or by search query
+    // Mode 1: around_id — browse/search memories near a specific memory in time
+    if (aroundId) {
+      let anchorMemory: MemoryNode;
+      try {
+        anchorMemory = await memoryClient.get(aroundId);
+      } catch {
+        return {
+          results: [createErrorResult({ message: `Anchor memory not found: ${aroundId}` })],
+        };
+      }
+
+      const anchorTime = anchorMemory.created_at;
+
+      const services = getInternalServices();
+      const esClient = services.elasticsearch.client.asInternalUser;
+      const { memoryIndexName } = await import('../client/storage');
+
+      try {
+        // When a query is provided, run semantic/hybrid retrieval scoped to the
+        // time window around the anchor memory instead of a plain keyword filter.
+        if (query) {
+          const config = getConfig();
+          const searchResults = await runRetrieval(
+            retrievalMethod,
+            memoryClient,
+            query,
+            context.logger,
+            {
+              size: hops * 2,
+              esClient,
+              space: '',
+              config,
+              inference: services.inference,
+              request: context.request,
+              connectorId: config.memory.extraction.connectorId,
+            }
+          );
+
+          // Also fetch timestamp-based neighbors for context
+          const [beforeRes, afterRes] = await Promise.all([
+            esClient.search({
+              index: memoryIndexName,
+              size: hops,
+              query: { bool: { filter: [{ range: { created_at: { lt: anchorTime } } }] } },
+              sort: [{ created_at: { order: 'desc' } }],
+            }),
+            esClient.search({
+              index: memoryIndexName,
+              size: hops,
+              query: { bool: { filter: [{ range: { created_at: { gt: anchorTime } } }] } },
+              sort: [{ created_at: { order: 'asc' } }],
+            }),
+          ]);
+
+          // Merge: timestamp neighbors + semantic results, deduplicated
+          const nearbyIds = new Set<string>();
+          const nearby: Array<{ id: string; summary: string; type: string; created_at: string }> = [];
+
+          const addNode = (id: string, summary: string, type: string, createdAt: string) => {
+            if (nearbyIds.has(id)) return;
+            nearbyIds.add(id);
+            nearby.push({ id, summary, type, created_at: createdAt });
+          };
+
+          // Add timestamp neighbors
+          for (const hit of (beforeRes.hits.hits as any[]).reverse()) {
+            addNode(hit._id, hit._source?.summary ?? '', hit._source?.type ?? '', hit._source?.created_at ?? '');
+          }
+          addNode(anchorMemory.id, `>>> ${anchorMemory.summary}`, anchorMemory.type, anchorMemory.created_at);
+          for (const hit of afterRes.hits.hits as any[]) {
+            addNode(hit._id, hit._source?.summary ?? '', hit._source?.type ?? '', hit._source?.created_at ?? '');
+          }
+
+          // Add semantic/hybrid results (these may include temporally distant but relevant memories)
+          for (const node of searchResults) {
+            addNode(node.id, node.summary, node.type, node.created_at);
+          }
+
+          // Sort by timestamp so the timeline makes sense
+          nearby.sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0));
+
+          return {
+            results: [
+              {
+                tool_result_id: getToolResultId(),
+                type: ToolResultType.other,
+                data: {
+                  anchor: { id: anchorMemory.id, summary: anchorMemory.summary, created_at: anchorMemory.created_at },
+                  nearby: nearby.map((m) => ({
+                    id: m.id,
+                    summary: m.summary,
+                    type: m.type,
+                    created_at: m.created_at,
+                  })),
+                  total_nearby: nearby.length,
+                },
+              },
+            ],
+          };
+        }
+
+        // No query — pure timestamp-based proximity search
+        const [beforeRes, afterRes] = await Promise.all([
+          esClient.search({
+            index: memoryIndexName,
+            size: hops,
+            query: { bool: { filter: [{ range: { created_at: { lt: anchorTime } } }] } },
+            sort: [{ created_at: { order: 'desc' } }],
+          }),
+          esClient.search({
+            index: memoryIndexName,
+            size: hops,
+            query: { bool: { filter: [{ range: { created_at: { gt: anchorTime } } }] } },
+            sort: [{ created_at: { order: 'asc' } }],
+          }),
+        ]);
+
+        const nearbyIds = new Set<string>();
+        const nearby: Array<{ id: string; summary: string; type: string; created_at: string }> = [];
+
+        const processHits = (hits: any[]) => {
+          for (const hit of hits) {
+            if (nearbyIds.has(hit._id)) continue;
+            nearbyIds.add(hit._id);
+            nearby.push({
+              id: hit._id,
+              summary: hit._source?.summary ?? '',
+              type: hit._source?.type ?? '',
+              created_at: hit._source?.created_at ?? '',
+            });
+          }
+        };
+
+        processHits((beforeRes.hits.hits as any[]).reverse());
+        nearby.push({
+          id: anchorMemory.id,
+          summary: `>>> ${anchorMemory.summary}`,
+          type: anchorMemory.type,
+          created_at: anchorMemory.created_at,
+        });
+        processHits(afterRes.hits.hits as any[]);
+
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                anchor: { id: anchorMemory.id, summary: anchorMemory.summary, created_at: anchorMemory.created_at },
+                nearby: nearby.map((m) => ({
+                  id: m.id,
+                  summary: m.summary,
+                  type: m.type,
+                  created_at: m.created_at,
+                })),
+                total_nearby: nearby.length,
+              },
+            },
+          ],
+        };
+      } catch (err) {
+        return {
+          results: [createErrorResult({ message: `Nearby search failed: ${(err as Error).message}` })],
+        };
+      }
+    }
+
+    // Mode 2: memory_id — read a specific memory
+    // Mode 3: query — search memories by content
     let memory: MemoryNode;
     if (memoryId) {
       try {
@@ -133,11 +310,11 @@ export const createRememberTool = ({
           ],
         };
       }
-    } else {
+    } else if (query) {
       try {
         const services = getInternalServices();
         const config = getConfig();
-        const searchResults = await runRetrieval(retrievalMethod, memoryClient, query!, context.logger, {
+        const searchResults = await runRetrieval(retrievalMethod, memoryClient, query, context.logger, {
           size: 1,
           esClient: services.elasticsearch.client.asInternalUser,
           space: '',
@@ -172,6 +349,10 @@ export const createRememberTool = ({
           ],
         };
       }
+    } else {
+      return {
+        results: [createErrorResult({ message: 'Provide memory_id, query, or around_id.' })],
+      };
     }
 
     // Apply access bump (best-effort)
@@ -218,8 +399,8 @@ export const createRememberTool = ({
 
     // Determine what content to return based on full flag
     const memoryContent = full
-      ? { id: memory.id, summary: memory.summary, full: memory.full }
-      : { id: memory.id, summary: memory.summary };
+      ? { id: memory.id, summary: memory.summary, full: memory.full, created_at: memory.created_at }
+      : { id: memory.id, summary: memory.summary, created_at: memory.created_at };
 
     // Build related items from neighbors
     const related = neighbors.map((neighbor) => {
@@ -227,6 +408,7 @@ export const createRememberTool = ({
       return {
         id: neighbor.id,
         summary: neighbor.summary,
+        created_at: neighbor.created_at,
         relation: link ? link.type : 'related_to',
       };
     });

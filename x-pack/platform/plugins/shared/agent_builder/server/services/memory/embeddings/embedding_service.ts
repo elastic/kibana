@@ -29,8 +29,8 @@ export interface EmbeddingServiceConfig {
  * When no embedding model is configured, all embed() calls return empty arrays,
  * effectively enabling BM25-only retrieval mode. This is the safe default.
  *
- * Supports both ELSER (sparse) and dense vector models. The caller is responsible
- * for ensuring the inference endpoint is of the correct task type (text_embedding).
+ * Supports both ELSER (sparse) and dense vector models. The task type is
+ * auto-detected from the inference endpoint configuration.
  */
 export class EmbeddingService {
   private readonly esClient: ElasticsearchClient;
@@ -70,7 +70,6 @@ export class EmbeddingService {
     try {
       const response = await (this.esClient as any).inference.inference({
         inference_id: this.inferenceEndpointId,
-        task_type: 'text_embedding',
         body: {
           input: text,
         },
@@ -110,7 +109,6 @@ export class EmbeddingService {
     try {
       const response = await (this.esClient as any).inference.inference({
         inference_id: this.inferenceEndpointId,
-        task_type: 'text_embedding',
         body: {
           input: texts,
         },
@@ -148,22 +146,29 @@ export class EmbeddingService {
   private extractEmbeddingFromResponse(response: unknown, _text: string): number[] {
     const result = response as {
       text_embedding?: Array<{ embedding: number[] | Record<string, number> }>;
+      sparse_embedding?: Array<{ embedding: Record<string, number> }>;
     };
 
-    const embedding = result?.text_embedding?.[0]?.embedding;
+    // Try dense embeddings first
+    const denseEmbedding = result?.text_embedding?.[0]?.embedding;
+    if (denseEmbedding && Array.isArray(denseEmbedding)) {
+      return denseEmbedding as number[];
+    }
 
-    if (!embedding) {
+    // Sparse embeddings (ELSER) — convert token weights to a deterministic dense-ish vector
+    // by returning the weights as-is for sparse retrieval downstream
+    if (result?.sparse_embedding?.[0]?.embedding) {
+      this.logger.debug('EmbeddingService: sparse embedding received — not usable for dense kNN');
+      return [];
+    }
+
+    if (!denseEmbedding) {
       this.logger.debug('EmbeddingService: response contained no embedding');
       return [];
     }
 
-    if (Array.isArray(embedding)) {
-      return embedding as number[];
-    }
-
-    // Sparse model — not compatible with dense kNN; return []
     this.logger.debug(
-      'EmbeddingService: sparse embedding received; returning [] (use ELSER kNN query instead)'
+      'EmbeddingService: non-array embedding received; returning []'
     );
     return [];
   }
@@ -174,9 +179,10 @@ export class EmbeddingService {
   private extractBatchEmbeddingsFromResponse(response: unknown, texts: string[]): number[][] {
     const result = response as {
       text_embedding?: Array<{ embedding: number[] | Record<string, number> }>;
+      sparse_embedding?: Array<{ embedding: Record<string, number> }>;
     };
 
-    const embeddings = result?.text_embedding;
+    const embeddings = result?.text_embedding ?? result?.sparse_embedding;
 
     if (!Array.isArray(embeddings)) {
       this.logger.debug('EmbeddingService: batch response contained no embeddings array');

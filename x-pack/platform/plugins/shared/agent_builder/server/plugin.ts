@@ -202,6 +202,7 @@ export class AgentBuilderPlugin
       getInternalServices,
       trackingService: this.trackingService,
       analyticsService: this.analyticsService,
+      config: this.config,
     });
 
     registerBeforeAgentWorkflowsHook(serviceSetups, {

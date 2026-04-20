@@ -31,6 +31,15 @@ const pendingRetrievals = new Map<string, Promise<MemoryNode[]>>();
 let undeliveredMemories: Promise<MemoryNode[]>[] = [];
 
 /**
+ * Add a retrieval promise to the undelivered queue.
+ * Used by the non-blocking beforeAgent hook to queue round-start
+ * retrieval for delivery on the next tool call or at handover.
+ */
+export const addUndeliveredRetrieval = (promise: Promise<MemoryNode[]>): void => {
+  undeliveredMemories.push(promise);
+};
+
+/**
  * Get and clear any undelivered memories from auto-retrieval.
  * Called by the prepareToAnswer step to inject into the answer agent context.
  */

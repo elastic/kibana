@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { MemoryCreateRequest, MemoryNode, MemoryType, MemoryEdgeType } from '@kbn/agent-builder-common';
-import { VALID_EDGE_TYPES } from '@kbn/agent-builder-common';
+
+const VALID_EDGE_TYPES: MemoryEdgeType[] = [
+  'related_to', 'applies_to', 'derived_from', 'contradicts',
+  'same_project', 'preference_cluster', 'refines',
+];
 import type { MemoryClient } from '../client';
 import type { EmbeddingService } from '../embeddings';
 import type { ReinforcementSignal } from '../active_memory_set';

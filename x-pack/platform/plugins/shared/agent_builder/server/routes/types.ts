@@ -25,4 +25,5 @@ export interface RouteDependencies {
   pluginsSetup: AgentBuilderSetupDependencies;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  config?: import('../config').AgentBuilderConfig;
 }

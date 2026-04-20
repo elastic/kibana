@@ -119,12 +119,10 @@ export class ChunkingExtractor {
     const semantic: ExtractedMemoryCandidate[] = [];
 
     // Step 1: Current turn → episodic memory
-    const turnText = `User: ${input.userMessage?.trim() ?? ''}\nAssistant: ${input.assistantResponse?.trim() ?? ''}`;
-    if (turnText.trim().length > 10) {
+    const turnText = input.message?.trim() ?? '';
+    if (turnText.length > 10) {
       episodic.push({
-        summary: input.userMessage?.length > 80
-          ? input.userMessage.slice(0, 77) + '...'
-          : input.userMessage || input.assistantResponse?.slice(0, 80) || '',
+        summary: turnText.length > 80 ? turnText.slice(0, 77) + '...' : turnText,
         full: turnText,
         subtype: 'turn',
         confidence: 0.6,
@@ -173,28 +171,7 @@ export class ChunkingExtractor {
   }
 
   private buildText(input: ExtractionInput): string {
-    const parts: string[] = [];
-
-    if (input.userMessage?.trim()) {
-      parts.push(input.userMessage.trim());
-    }
-    if (input.reasoningSteps && input.reasoningSteps.length > 0) {
-      parts.push(input.reasoningSteps.join('\n'));
-    }
-    if (input.toolCalls) {
-      for (const tc of input.toolCalls) {
-        const resultText = tc.results
-          .map((r) => (typeof r.data === 'string' ? r.data : JSON.stringify(r.data)))
-          .join(' ')
-          .slice(0, this.config.maxChunkChars * 2);
-        parts.push(`[${tc.tool_id}]: ${resultText || '(no result)'}`);
-      }
-    }
-    if (input.assistantResponse?.trim()) {
-      parts.push(input.assistantResponse.trim());
-    }
-
-    return parts.join('\n\n');
+    return input.message?.trim() ?? '';
   }
 
   /**
