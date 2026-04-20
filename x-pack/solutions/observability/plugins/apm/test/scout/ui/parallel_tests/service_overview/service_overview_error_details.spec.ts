@@ -121,18 +121,20 @@ test.describe(
       });
 
       await test.step('Verify error is visible in errors table', async () => {
-        await expect(page.getByRole('link', { name: 'ResponseError', exact: true })).toBeVisible();
+        await expect(page.getByTestId('apmErrorDetailsLink')).toBeVisible();
       });
 
       await test.step('Click on error link and wait for navigation', async () => {
-        await page.getByRole('link', { name: 'ResponseError', exact: true }).click();
+        await page.getByTestId('apmErrorDetailsLink').click();
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('Verify navigated to error detail page', async () => {
-        await expect(page.getByText(testData.EDOT_ERROR_MESSAGE)).toBeVisible({
+        await expect(
+          page.getByTestId('breadcrumb last').getByText(testData.EDOT_ERROR_MESSAGE)
+        ).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
@@ -149,7 +151,7 @@ test.describe(
       });
 
       await test.step('Click on error link to go to detail page', async () => {
-        await page.getByRole('link', { name: 'ResponseError', exact: true }).click();
+        await page.getByTestId('apmErrorDetailsLink').click();
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });

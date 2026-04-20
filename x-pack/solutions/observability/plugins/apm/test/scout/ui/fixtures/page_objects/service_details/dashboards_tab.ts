@@ -23,16 +23,27 @@ export class DashboardsTab extends ServiceDetailsTab {
   }
 
   protected async waitForTabLoad(): Promise<void> {
-    await this.page
-      .getByTestId('apmUnifiedSearchBar')
-      .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    await this.page.getByTestId('apmUnifiedSearchBar').waitFor({ timeout: EXTENDED_TIMEOUT });
   }
 
   public async linkDashboardByTitle(dashboardTitle: string) {
+    await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
-    await this.page.getByTestId('apmSelectServiceDashboard').getByTestId('comboBoxInput').click();
-    await this.page.getByText(dashboardTitle).click();
-    await this.page.getByTestId('apmSelectDashboardButton').click();
+
+    const modal = this.page.getByTestId('apmSelectServiceDashboard');
+    await modal.waitFor({ timeout: EXTENDED_TIMEOUT });
+
+    const comboBoxInput = modal.getByTestId('comboBoxSearchInput');
+    await comboBoxInput.waitFor();
+    await comboBoxInput.fill(dashboardTitle);
+    await this.page
+      .getByRole('option', { name: dashboardTitle })
+      .waitFor({ timeout: EXTENDED_TIMEOUT });
+    await this.page.getByRole('option', { name: dashboardTitle }).click();
+
+    const selectDashboardButton = this.page.getByTestId('apmSelectDashboardButton');
+    await selectDashboardButton.waitFor();
+    await selectDashboardButton.click();
   }
 
   public async unlinkDashboard() {
