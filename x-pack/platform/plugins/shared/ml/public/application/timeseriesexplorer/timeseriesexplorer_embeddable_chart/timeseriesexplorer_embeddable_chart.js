@@ -44,6 +44,7 @@ import { forecastServiceFactory } from '../../services/forecast_service';
 import { EntityFieldNamesAndFilterButtons } from './timeseriesexplorer_title';
 import {
   SingleMetricViewerChartSurface,
+  applySmvTableFilter,
   buildCriteriaFields,
   consumeSmvContextLoadResult,
   fetchAnomaliesTableData$,
@@ -153,33 +154,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   previousShowModelBounds = undefined;
 
   tableFilter = (field, value, operator) => {
-    const entities = this.getControlsForDetector();
-    const entity = entities.find(({ fieldName }) => fieldName === field);
-
-    if (entity === undefined) {
-      return;
-    }
-
-    const { appStateHandler } = this.props;
-
-    let resultValue = '';
-    if (operator === '+' && entity.fieldValue !== value) {
-      resultValue = value;
-    } else if (operator === '-' && entity.fieldValue === value) {
-      resultValue = null;
-    } else {
-      return;
-    }
-
-    const resultEntities = {
-      ...entities.reduce((appStateEntities, appStateEntity) => {
-        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
-        return appStateEntities;
-      }, {}),
-      [entity.fieldName]: resultValue,
-    };
-
-    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+    applySmvTableFilter(field, value, operator, this.getControlsForDetector(), (entities) =>
+      this.props.appStateHandler(APP_STATE_ACTION.SET_ENTITIES, entities)
+    );
   };
 
   contextChartSelectedInitCallDone = false;
@@ -341,14 +318,12 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       },
       () => {
         const { loadCounter, modelPlotEnabled } = this.state;
-        const { selectedJob: jobFromProps } = this.props;
-
         const detectorIndex = selectedDetectorIndex;
 
         loadSingleMetricContextData({
           signal: contextLoadSignal,
           bounds,
-          selectedJob: jobFromProps,
+          selectedJob,
           detectorIndex,
           entityControls,
           modelPlotEnabled,

@@ -72,6 +72,7 @@ import { timeBucketsServiceFactory } from '../util/time_buckets_service';
 import { TimeSeriesExplorerControls } from './components/timeseriesexplorer_controls';
 import {
   SingleMetricViewerChartSurface,
+  applySmvTableFilter,
   buildCriteriaFields,
   consumeSmvContextLoadResult,
   fetchAnomaliesTableData$,
@@ -223,33 +224,9 @@ export class TimeSeriesExplorer extends React.Component {
   previousShowModelBounds = undefined;
 
   tableFilter = (field, value, operator) => {
-    const entities = this.getControlsForDetector();
-    const entity = entities.find(({ fieldName }) => fieldName === field);
-
-    if (entity === undefined) {
-      return;
-    }
-
-    const { appStateHandler } = this.props;
-
-    let resultValue = '';
-    if (operator === '+' && entity.fieldValue !== value) {
-      resultValue = value;
-    } else if (operator === '-' && entity.fieldValue === value) {
-      resultValue = null;
-    } else {
-      return;
-    }
-
-    const resultEntities = {
-      ...entities.reduce((appStateEntities, appStateEntity) => {
-        appStateEntities[appStateEntity.fieldName] = appStateEntity.fieldValue;
-        return appStateEntities;
-      }, {}),
-      [entity.fieldName]: resultValue,
-    };
-
-    appStateHandler(APP_STATE_ACTION.SET_ENTITIES, resultEntities);
+    applySmvTableFilter(field, value, operator, this.getControlsForDetector(), (entities) =>
+      this.props.appStateHandler(APP_STATE_ACTION.SET_ENTITIES, entities)
+    );
   };
 
   contextChartSelectedInitCallDone = false;

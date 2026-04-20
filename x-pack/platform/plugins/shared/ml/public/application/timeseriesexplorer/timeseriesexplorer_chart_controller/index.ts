@@ -30,7 +30,11 @@
  * - `node scripts/functional_test_runner --config=x-pack/platform/test/functional/apps/ml/anomaly_detection_integrations/config.ts` (includes `single_metric_viewer_dashboard_embeddables.ts`)
  */
 
-export { buildCriteriaFields } from './entity_partition_helpers';
+export {
+  applySmvTableFilter,
+  buildCriteriaFields,
+  type SmvEntityControl,
+} from './entity_partition_helpers';
 export { normalizeSeverityThresholdForApi } from './normalize_table_severity';
 export {
   fetchAnomaliesTableData$,
