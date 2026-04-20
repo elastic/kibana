@@ -18,18 +18,12 @@ import type {
   Logger,
   SecurityServiceStart,
 } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  ExecutionType,
-  NonTerminalExecutionStatuses,
-  transformWorkflowYamlJsontoEsWorkflow,
-} from '@kbn/workflows';
+import { ExecutionType, NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type {
   ConnectorTypeInfo,
   CreateWorkflowCommand,
   EsWorkflow,
-  EsWorkflowCreate,
   EsWorkflowExecution,
   EsWorkflowStepExecution,
   ExecutionStatus,
@@ -62,10 +56,25 @@ import type {
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import { extractBulkItemError, partitionBulkResults } from './lib/bulk_response_helpers';
+import { isIndexNotFoundError } from './lib/es_error_helpers';
 import { getChildWorkflowExecutions } from './lib/get_child_workflow_executions';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
+import { paginateWithSearchAfter } from './lib/paginate_with_search_after';
 import { searchStepExecutions, type StepExecutionListResult } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
+import {
+  applyFieldUpdates,
+  applyYamlUpdate,
+  getTriggerTypesFromDefinition,
+  prepareWorkflowDocument,
+  workflowYamlDeclaresTopLevelEnabled,
+} from './lib/workflow_prepare';
+import {
+  buildConditionalTermsFilters,
+  buildWorkflowTextSearchClause,
+  workflowSpaceFilter,
+} from './lib/workflow_query_filters';
 
 import type {
   DeleteWorkflowsResponse,
@@ -77,9 +86,8 @@ import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../
 import { CONNECTOR_SUB_ACTIONS_MAP } from '../../common/connector_sub_actions_map';
 import { WorkflowConflictError } from '../../common/lib/errors';
 
-import { generateWorkflowId } from '../../common/lib/import';
 import { validateWorkflowYaml } from '../../common/lib/validate_workflow_yaml';
-import { parseYamlToJSONWithoutValidation, updateWorkflowYamlFields } from '../../common/lib/yaml';
+import { updateWorkflowYamlFields } from '../../common/lib/yaml';
 import { getWorkflowZodSchema } from '../../common/schema';
 import type { BulkFailureEntry, BulkWorkflowEntry } from '../lib/bulk_id_helpers';
 import {
@@ -94,23 +102,6 @@ import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_st
 import { createStorage, workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import type { WorkflowsServerPluginStartDeps } from '../types';
-
-/** Derives a list of trigger type ids from a workflow definition (e.g. ['manual', 'scheduled', 'cases.updated']). */
-function getTriggerTypesFromDefinition(definition: WorkflowYaml | null | undefined): string[] {
-  const triggers = definition?.triggers ?? [];
-  return triggers
-    .map((t) => (t && typeof t.type === 'string' ? t.type : null))
-    .filter(<T>(v: T): v is NonNullable<T> => v != null);
-}
-
-/** True when the YAML root map includes `enabled` (before Zod defaults). */
-function workflowYamlDeclaresTopLevelEnabled(yamlString: string): boolean {
-  const parsed = parseYamlToJSONWithoutValidation(yamlString);
-  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
-    return false;
-  }
-  return Object.prototype.hasOwnProperty.call(parsed.json, 'enabled');
-}
 
 const DEFAULT_PAGE_SIZE = 100;
 
@@ -190,12 +181,10 @@ export class WorkflowsService {
     await this.ensureInitialized();
 
     try {
+      const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+      must.push({ ids: { values: [id] } });
       const response = await this.workflowStorage.getClient().search({
-        query: {
-          bool: {
-            must: [{ ids: { values: [id] } }, { term: { spaceId } }],
-          },
-        },
+        query: { bool: { must } },
         size: 1,
         track_total_hits: false,
       });
@@ -223,13 +212,11 @@ export class WorkflowsService {
       return [];
     }
 
+    const { must, must_not } = workflowSpaceFilter(spaceId);
+    must.push({ ids: { values: ids } });
+
     const response = await this.workflowStorage.getClient().search({
-      query: {
-        bool: {
-          must: [{ ids: { values: ids } }, { term: { spaceId } }],
-          must_not: [{ exists: { field: 'deleted_at' } }],
-        },
-      },
+      query: { bool: { must, must_not } },
       size: ids.length,
       track_total_hits: false,
     });
@@ -253,13 +240,11 @@ export class WorkflowsService {
       return [];
     }
 
+    const { must, must_not } = workflowSpaceFilter(spaceId);
+    must.push({ ids: { values: ids } });
+
     const response = await this.workflowStorage.getClient().search({
-      query: {
-        bool: {
-          must: [{ ids: { values: ids } }, { term: { spaceId } }],
-          must_not: [{ exists: { field: 'deleted_at' } }],
-        },
-      },
+      query: { bool: { must, must_not } },
       _source: source ?? true,
       size: ids.length,
       track_total_hits: false,
@@ -276,54 +261,6 @@ export class WorkflowsService {
    * When triggerDefinitions is provided, custom trigger on.condition values are validated
    * (valid KQL and only event schema properties).
    */
-  private prepareWorkflowDocument(
-    workflow: CreateWorkflowCommand,
-    zodSchema: z.ZodType,
-    authenticatedUser: string,
-    now: Date,
-    spaceId: string,
-    triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>
-  ): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } {
-    let workflowToCreate: EsWorkflowCreate = {
-      name: 'Untitled workflow',
-      description: undefined,
-      enabled: false,
-      tags: [],
-      definition: undefined,
-      valid: false,
-    };
-
-    const validation = validateWorkflowYaml(workflow.yaml, zodSchema, { triggerDefinitions });
-    if (validation.valid && validation.parsedWorkflow) {
-      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
-    } else if (validation.parsedWorkflow) {
-      workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
-      workflowToCreate.valid = false;
-      workflowToCreate.definition = undefined;
-    }
-
-    const id = workflow.id || generateWorkflowId(workflowToCreate.name);
-
-    const workflowData: WorkflowProperties = {
-      name: workflowToCreate.name,
-      description: workflowToCreate.description,
-      enabled: workflowToCreate.enabled,
-      tags: workflowToCreate.tags || [],
-      triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
-      yaml: workflow.yaml,
-      definition: workflowToCreate.definition ?? null,
-      createdBy: authenticatedUser,
-      lastUpdatedBy: authenticatedUser,
-      spaceId,
-      valid: workflowToCreate.valid,
-      deleted_at: null,
-      created_at: now.toISOString(),
-      updated_at: now.toISOString(),
-    };
-
-    return { id, workflowData, definition: workflowToCreate.definition };
-  }
-
   /**
    * Schedules triggers for a workflow. Used by both createWorkflow and bulkCreateWorkflows.
    */
@@ -374,14 +311,14 @@ export class WorkflowsService {
       id: baseId,
       workflowData,
       definition,
-    } = this.prepareWorkflowDocument(
+    } = prepareWorkflowDocument({
       workflow,
       zodSchema,
       authenticatedUser,
       now,
       spaceId,
-      triggerDefinitions
-    );
+      triggerDefinitions,
+    });
 
     let id = baseId;
     if (workflow.id) {
@@ -445,14 +382,14 @@ export class WorkflowsService {
         if (customId) {
           validateWorkflowId(customId);
         }
-        const prepared = this.prepareWorkflowDocument(
-          workflows[i],
+        const prepared = prepareWorkflowDocument({
+          workflow: workflows[i],
           zodSchema,
           authenticatedUser,
           now,
           spaceId,
-          triggerDefinitions
-        );
+          triggerDefinitions,
+        });
 
         validWorkflows.push({
           idx: i,
@@ -503,10 +440,7 @@ export class WorkflowsService {
           failed.push({
             index: resolvedWorkflow.idx,
             id: resolvedWorkflow.id,
-            error:
-              typeof operation.error === 'object' && 'reason' in operation.error
-                ? operation.error.reason ?? JSON.stringify(operation.error)
-                : JSON.stringify(operation.error),
+            error: extractBulkItemError(operation.error),
           });
         } else {
           created.push(
@@ -541,12 +475,10 @@ export class WorkflowsService {
     id: string,
     spaceId: string
   ): Promise<{ source: WorkflowProperties }> {
+    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+    must.push({ ids: { values: [id] } });
     const searchResponse = await this.workflowStorage.getClient().search({
-      query: {
-        bool: {
-          must: [{ ids: { values: [id] } }, { term: { spaceId } }],
-        },
-      },
+      query: { bool: { must } },
       size: 1,
       track_total_hits: false,
     });
@@ -560,93 +492,6 @@ export class WorkflowsService {
       throw new Error(`Workflow with id ${id} not found`);
     }
     return { source: hit._source as WorkflowProperties };
-  }
-
-  /**
-   * Validates workflow YAML and produces the update patch and validation errors.
-   * Used by updateWorkflow when workflow.yaml is provided.
-   */
-  private async applyYamlUpdate(
-    workflowYaml: string,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<{
-    updatedDataPatch: Partial<WorkflowProperties>;
-    validationErrors: string[];
-    shouldUpdateScheduler: boolean;
-  }> {
-    const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
-    const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
-    const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
-
-    if (!validation.valid || !validation.parsedWorkflow) {
-      return {
-        updatedDataPatch: { definition: undefined, enabled: false, valid: false, triggerTypes: [] },
-        validationErrors: validation.diagnostics
-          .filter((d) => d.severity === 'error')
-          .map((d) => d.message),
-        shouldUpdateScheduler: true,
-      };
-    }
-
-    const workflowDef = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
-    return {
-      updatedDataPatch: {
-        definition: workflowDef.definition,
-        name: workflowDef.name,
-        enabled: workflowDef.enabled,
-        description: workflowDef.description,
-        tags: workflowDef.tags,
-        triggerTypes: getTriggerTypesFromDefinition(workflowDef.definition),
-        valid: true,
-        yaml: workflowYaml,
-      },
-      validationErrors: [],
-      shouldUpdateScheduler: true,
-    };
-  }
-
-  /**
-   * Builds the update patch when only individual fields (name, enabled, description, tags) are updated.
-   * Used by updateWorkflow when workflow.yaml is not provided.
-   */
-  private applyFieldUpdates(
-    workflow: Partial<EsWorkflow>,
-    existingSource: WorkflowProperties
-  ): Partial<WorkflowProperties> {
-    const patch: Partial<WorkflowProperties> = {};
-    let yamlUpdated = false;
-
-    if (workflow.name !== undefined) {
-      patch.name = workflow.name;
-      yamlUpdated = true;
-    }
-    if (workflow.enabled !== undefined) {
-      if (workflow.enabled && existingSource?.definition) {
-        patch.enabled = true;
-      } else if (!workflow.enabled) {
-        patch.enabled = false;
-      }
-      yamlUpdated = true;
-    }
-    if (workflow.description !== undefined) {
-      patch.description = workflow.description;
-      yamlUpdated = true;
-    }
-    if (workflow.tags !== undefined) {
-      patch.tags = workflow.tags;
-      yamlUpdated = true;
-    }
-
-    if (yamlUpdated && existingSource?.yaml) {
-      patch.yaml = updateWorkflowYamlFields(
-        existingSource.yaml,
-        workflow,
-        patch.enabled ?? existingSource.enabled
-      );
-    }
-
-    return patch;
   }
 
   /**
@@ -715,7 +560,13 @@ export class WorkflowsService {
         workflow.enabled !== undefined && workflow.enabled !== existingSource.enabled;
 
       if (workflow.yaml) {
-        const yamlResult = await this.applyYamlUpdate(workflow.yaml, spaceId, request);
+        const zodSchema = await this.getWorkflowZodSchema({ loose: false }, spaceId, request);
+        const triggerDefinitions = this.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+        const yamlResult = applyYamlUpdate({
+          workflowYaml: workflow.yaml,
+          zodSchema,
+          triggerDefinitions,
+        });
         // Always persist the submitted yaml (draft) even when validation fails
         updatedData = { ...updatedData, yaml: workflow.yaml, ...yamlResult.updatedDataPatch };
         validationErrors.push(...yamlResult.validationErrors);
@@ -737,7 +588,7 @@ export class WorkflowsService {
           } as WorkflowYaml;
         }
       } else {
-        updatedData = { ...updatedData, ...this.applyFieldUpdates(workflow, existingSource) };
+        updatedData = { ...updatedData, ...applyFieldUpdates(workflow, existingSource) };
       }
 
       const finalData: WorkflowProperties = { ...existingSource, ...updatedData };
@@ -783,12 +634,10 @@ export class WorkflowsService {
     const client = this.workflowStorage.getClient();
 
     // Bulk fetch all workflows in a single search call
+    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+    must.push({ ids: { values: ids } });
     const searchResponse = await client.search({
-      query: {
-        bool: {
-          must: [{ ids: { values: ids } }, { term: { spaceId } }],
-        },
-      },
+      query: { bool: { must } },
       size: ids.length,
       track_total_hits: false,
     });
@@ -1013,20 +862,9 @@ export class WorkflowsService {
           refresh: true,
         });
 
-        bulkResponse.items.forEach((item) => {
-          const operation = item.index;
-          if (operation?.error) {
-            failures.push({
-              id: operation._id ?? 'unknown',
-              error:
-                typeof operation.error === 'object' && 'reason' in operation.error
-                  ? operation.error.reason ?? JSON.stringify(operation.error)
-                  : JSON.stringify(operation.error),
-            });
-          } else if (operation?._id) {
-            successfulIds.push(operation._id);
-          }
-        });
+        const { successIds, failures: bulkFailures } = partitionBulkResults(bulkResponse.items);
+        successfulIds.push(...successIds);
+        failures.push(...bulkFailures);
 
         await this.unscheduleDeletedWorkflowTasks(successfulIds);
       } catch (error) {
@@ -1076,10 +914,8 @@ export class WorkflowsService {
 
     const client = this.workflowStorage.getClient();
     const pageSize = 1000;
-    const MAX_PAGES = 50;
     const failures: Array<{ id: string; error: string }> = [];
     const disabledIds: string[] = [];
-    let totalHits = 0;
 
     const query = {
       bool: {
@@ -1089,105 +925,68 @@ export class WorkflowsService {
     };
     const sort = [{ updated_at: { order: 'desc' as const } }, '_shard_doc'];
 
-    let searchAfter: estypes.SortResults | undefined;
-    let hasMore = true;
-    let pageCount = 0;
-
-    while (hasMore && pageCount < MAX_PAGES) {
-      pageCount++;
-
-      const searchResponse = await client.search({
-        query,
-        size: pageSize,
-        sort,
-        _source: true,
-        track_total_hits: pageCount === 1,
-        ...(searchAfter ? { search_after: searchAfter } : {}),
-      });
-
-      const hits = searchResponse.hits.hits.filter(
-        (hit): hit is typeof hit & { _id: string; _source: WorkflowProperties } =>
-          hit._id != null && hit._source != null
-      );
-
-      if (hits.length === 0) {
-        break;
-      }
-
-      totalHits += hits.length;
-
-      const bulkOperations = hits.map((hit) => {
-        const source = hit._source;
-        const updatedYaml = updateWorkflowYamlFields(source.yaml, { enabled: false }, false);
-        return {
-          index: {
-            _id: hit._id,
-            document: {
-              ...source,
-              enabled: false,
-              yaml: updatedYaml,
+    const { totalProcessed } = await paginateWithSearchAfter<WorkflowProperties>(
+      {
+        search: (searchAfter) =>
+          client.search({
+            query,
+            size: pageSize,
+            sort,
+            _source: true,
+            track_total_hits: false,
+            ...(searchAfter ? { search_after: searchAfter } : {}),
+          }),
+        pageSize,
+        logger: this.logger,
+        operationName: 'disableAllWorkflows',
+      },
+      async (hits) => {
+        const bulkOperations = hits.map((hit) => {
+          const updatedYaml = updateWorkflowYamlFields(hit._source.yaml, { enabled: false }, false);
+          return {
+            index: {
+              _id: hit._id,
+              document: {
+                ...hit._source,
+                enabled: false,
+                yaml: updatedYaml,
+              },
             },
-          },
-        };
-      });
-
-      try {
-        const bulkResponse = await client.bulk({
-          operations: bulkOperations,
-          refresh: true,
+          };
         });
 
-        const pageDisabledIds: string[] = [];
-        bulkResponse.items.forEach((item) => {
-          const operation = item.index;
-          if (operation?.error) {
-            failures.push({
-              id: operation._id ?? 'unknown',
-              error:
-                typeof operation.error === 'object' && 'reason' in operation.error
-                  ? operation.error.reason ?? JSON.stringify(operation.error)
-                  : JSON.stringify(operation.error),
-            });
-          } else if (operation?._id) {
-            pageDisabledIds.push(operation._id);
-          }
-        });
-
-        if (pageDisabledIds.length > 0) {
-          disabledIds.push(...pageDisabledIds);
-          await this.unscheduleDeletedWorkflowTasks(pageDisabledIds);
-        }
-      } catch (error) {
-        bulkOperations.forEach((op) => {
-          failures.push({
-            id: op.index._id ?? 'unknown',
-            error: error instanceof Error ? error.message : String(error),
+        try {
+          const bulkResponse = await client.bulk({
+            operations: bulkOperations,
+            refresh: true,
           });
-        });
-      }
 
-      hasMore = hits.length >= pageSize;
-      if (hasMore) {
-        const lastHit = hits[hits.length - 1];
-        if (!lastHit.sort) {
-          break;
+          const { successIds: pageDisabledIds, failures: bulkFailures } = partitionBulkResults(
+            bulkResponse.items
+          );
+          failures.push(...bulkFailures);
+
+          if (pageDisabledIds.length > 0) {
+            disabledIds.push(...pageDisabledIds);
+            await this.unscheduleDeletedWorkflowTasks(pageDisabledIds);
+          }
+        } catch (error) {
+          bulkOperations.forEach((op) => {
+            failures.push({
+              id: op.index._id ?? 'unknown',
+              error: error instanceof Error ? error.message : String(error),
+            });
+          });
         }
-        searchAfter = lastHit.sort;
       }
-    }
-
-    if (hasMore && pageCount >= MAX_PAGES) {
-      this.logger.warn(
-        `disableAllWorkflows truncated at ${MAX_PAGES} pages (${totalHits} workflows processed)`
-      );
-    }
+    );
 
     this.logger.info(
       `Disabled ${disabledIds.length} workflows across all spaces (${failures.length} failures)`
     );
 
     return {
-      total: totalHits,
+      total: totalProcessed,
       disabled: disabledIds.length,
       failures,
     };
@@ -1211,16 +1010,9 @@ export class WorkflowsService {
     const keepAlive = '1m';
     const indexPattern = `${workflowIndexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
-    const query = {
-      bool: {
-        must: [
-          { term: { spaceId } },
-          { term: { enabled: true } },
-          { term: { triggerTypes: triggerId } },
-        ],
-        must_not: [{ exists: { field: 'deleted_at' } }],
-      },
-    };
+    const { must, must_not } = workflowSpaceFilter(spaceId);
+    must.push({ term: { enabled: true } }, { term: { triggerTypes: triggerId } });
+    const query = { bool: { must, must_not } };
     const _source = [
       'name',
       'description',
@@ -1243,49 +1035,30 @@ export class WorkflowsService {
 
     try {
       const allHits: Array<{ _id: string; _source: WorkflowProperties }> = [];
-      let searchAfter: estypes.SearchHit['sort'] | undefined;
-      let hasMore = true;
-      let pageCount = 0;
 
-      while (hasMore && pageCount < MAX_PAGES) {
-        pageCount++;
-        const searchResponse = await this.esClient.search<WorkflowProperties>({
-          pit: { id: pitId, keep_alive: keepAlive },
-          size: pageSize,
-          _source,
-          query,
-          sort,
-          ...(searchAfter ? { search_after: searchAfter } : {}),
-        });
-
-        const hits = searchResponse.hits.hits;
-        for (const hit of hits) {
-          if (hit._source && hit._id) {
-            allHits.push({ _id: hit._id, _source: hit._source as WorkflowProperties });
+      await paginateWithSearchAfter<WorkflowProperties>(
+        {
+          search: (searchAfter) =>
+            this.esClient.search<WorkflowProperties>({
+              pit: { id: pitId, keep_alive: keepAlive },
+              size: pageSize,
+              _source,
+              query,
+              sort,
+              ...(searchAfter ? { search_after: searchAfter } : {}),
+            }),
+          pageSize,
+          maxPages: MAX_PAGES,
+          logger: this.logger,
+          operationName: `getWorkflowsSubscribedToTrigger(${triggerId}, ${spaceId})`,
+          throwOnMissingSort: true,
+        },
+        async (hits) => {
+          for (const hit of hits) {
+            allHits.push({ _id: hit._id, _source: hit._source });
           }
         }
-
-        hasMore = hits.length >= pageSize;
-        if (hasMore) {
-          const lastHit = hits[hits.length - 1];
-          if (!lastHit.sort) {
-            throw new Error(
-              `Missing sort value on last hit (required for search_after). Last hit: ${JSON.stringify(
-                lastHit
-              )}`
-            );
-          }
-          searchAfter = lastHit.sort;
-        }
-      }
-
-      if (hasMore && pageCount >= MAX_PAGES) {
-        this.logger.warn(
-          `getWorkflowsSubscribedToTrigger truncated at ${MAX_PAGES} pages (${
-            pageCount * pageSize
-          } workflows) for trigger ${triggerId} in space ${spaceId}`
-        );
-      }
+      );
 
       return allHits.map(({ _id, _source: source }) =>
         this.transformStorageDocumentToWorkflowDto(_id, source)
@@ -1309,101 +1082,18 @@ export class WorkflowsService {
     const { size = 100, page = 1, enabled, createdBy, tags, query } = params;
     const from = (page - 1) * size;
 
-    const must: estypes.QueryDslQueryContainer[] = [];
+    const { must, must_not } = workflowSpaceFilter(spaceId);
 
-    // Filter by spaceId
-    must.push({ term: { spaceId } });
-
-    // Exclude soft-deleted workflows
-    must.push({
-      bool: {
-        must_not: {
-          exists: { field: 'deleted_at' },
-        },
-      },
-    });
-
-    if (enabled !== undefined && enabled.length > 0) {
-      must.push({ terms: { enabled } });
-    }
-
-    if (createdBy && createdBy.length > 0) {
-      must.push({ terms: { createdBy } });
-    }
-
-    if (tags && tags.length > 0) {
-      must.push({ terms: { tags } });
-    }
+    must.push(
+      ...buildConditionalTermsFilters([
+        { field: 'enabled', values: enabled },
+        { field: 'createdBy', values: createdBy },
+        { field: 'tags', values: tags },
+      ])
+    );
 
     if (query) {
-      must.push({
-        bool: {
-          should: [
-            // Exact phrase matching with boost (text fields only)
-            {
-              multi_match: {
-                query,
-                fields: ['name^3', 'description^2'],
-                type: 'phrase',
-                boost: 3,
-              },
-            },
-            // Word-level matching (all fields)
-            {
-              multi_match: {
-                query,
-                fields: ['name^2', 'description', 'tags'],
-                type: 'best_fields',
-                boost: 2,
-              },
-            },
-            // Prefix matching for partial word matches (text fields only)
-            {
-              multi_match: {
-                query,
-                fields: ['name^2', 'description'],
-                type: 'phrase_prefix',
-                boost: 1.5,
-              },
-            },
-            // Wildcard matching for more flexible partial matches
-            {
-              bool: {
-                should: [
-                  {
-                    wildcard: {
-                      'name.keyword': {
-                        value: `*${query}*`,
-                        case_insensitive: true,
-                        boost: 1,
-                      },
-                    },
-                  },
-                  {
-                    wildcard: {
-                      'description.keyword': {
-                        value: `*${query}*`,
-                        case_insensitive: true,
-                        boost: 0.5,
-                      },
-                    },
-                  },
-                  {
-                    wildcard: {
-                      tags: {
-                        value: `*${query}*`,
-                        case_insensitive: true,
-                        boost: 0.5,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
+      must.push(buildWorkflowTextSearchClause(query));
     }
 
     const searchResponse = await this.workflowStorage.getClient().search({
@@ -1411,7 +1101,7 @@ export class WorkflowsService {
       from,
       track_total_hits: true,
       query: {
-        bool: { must },
+        bool: { must, must_not },
       },
       sort: [{ updated_at: { order: 'desc' } }],
     });
@@ -1459,12 +1149,7 @@ export class WorkflowsService {
       size: 0,
       track_total_hits: true,
       query: {
-        bool: {
-          must: [{ term: { spaceId } }],
-          must_not: {
-            exists: { field: 'deleted_at' },
-          },
-        },
+        bool: workflowSpaceFilter(spaceId),
       },
       aggs: {
         enabled_count: {
@@ -1572,12 +1257,7 @@ export class WorkflowsService {
       size: 0,
       track_total_hits: true,
       query: {
-        bool: {
-          must: [{ term: { spaceId } }],
-          must_not: {
-            exists: { field: 'deleted_at' },
-          },
-        },
+        bool: workflowSpaceFilter(spaceId),
       },
       aggs,
     });
@@ -1851,7 +1531,7 @@ export class WorkflowsService {
       return result;
     } catch (error) {
       // Index not found is expected when no workflows have been executed yet
-      if (!isResponseError(error) || error.body?.error?.type !== 'index_not_found_exception') {
+      if (!isIndexNotFoundError(error)) {
         this.logger.error(`Failed to fetch recent executions for workflows: ${error}`);
       }
       return {};
@@ -2025,12 +1705,11 @@ export class WorkflowsService {
       return new Set();
     }
 
+    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
+    must.push({ ids: { values: ids } });
+
     const response = await this.workflowStorage.getClient().search({
-      query: {
-        bool: {
-          must: [{ ids: { values: ids } }, { term: { spaceId } }],
-        },
-      },
+      query: { bool: { must } },
       size: ids.length,
       track_total_hits: false,
     });

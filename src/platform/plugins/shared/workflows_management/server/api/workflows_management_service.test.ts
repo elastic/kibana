@@ -347,7 +347,7 @@ describe('WorkflowsService', () => {
       expect(result).toHaveLength(50000);
       expect(mockLogger.warn).toHaveBeenCalledWith(
         expect.stringMatching(
-          /getWorkflowsSubscribedToTrigger truncated at 50 pages \(50000 workflows\) for trigger cases\.updated in space default/
+          /getWorkflowsSubscribedToTrigger\(cases\.updated, default\) truncated at 50 pages \(50000 processed\)/
         )
       );
     });
@@ -394,16 +394,8 @@ describe('WorkflowsService', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            must: [
-              { term: { spaceId: 'default' } },
-              {
-                bool: {
-                  must_not: {
-                    exists: { field: 'deleted_at' },
-                  },
-                },
-              },
-            ],
+            must: [{ term: { spaceId: 'default' } }],
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         sort: [{ updated_at: { order: 'desc' } }],
@@ -430,17 +422,8 @@ describe('WorkflowsService', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            must: [
-              { term: { spaceId: 'default' } },
-              {
-                bool: {
-                  must_not: {
-                    exists: { field: 'deleted_at' },
-                  },
-                },
-              },
-              { terms: { enabled: [true] } },
-            ],
+            must: [{ term: { spaceId: 'default' } }, { terms: { enabled: [true] } }],
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         sort: [{ updated_at: { order: 'desc' } }],
@@ -467,17 +450,8 @@ describe('WorkflowsService', () => {
         allow_no_indices: true,
         query: {
           bool: {
-            must: [
-              { term: { spaceId: 'default' } },
-              {
-                bool: {
-                  must_not: {
-                    exists: { field: 'deleted_at' },
-                  },
-                },
-              },
-              { terms: { tags: ['test', 'production'] } },
-            ],
+            must: [{ term: { spaceId: 'default' } }, { terms: { tags: ['test', 'production'] } }],
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         sort: [{ updated_at: { order: 'desc' } }],
@@ -508,15 +482,7 @@ describe('WorkflowsService', () => {
               { term: { spaceId: 'default' } },
               {
                 bool: {
-                  must_not: {
-                    exists: { field: 'deleted_at' },
-                  },
-                },
-              },
-              {
-                bool: {
                   should: [
-                    // Exact phrase matching with boost (text fields only)
                     {
                       multi_match: {
                         query: 'test query',
@@ -525,7 +491,6 @@ describe('WorkflowsService', () => {
                         boost: 3,
                       },
                     },
-                    // Word-level matching (all fields)
                     {
                       multi_match: {
                         query: 'test query',
@@ -534,7 +499,6 @@ describe('WorkflowsService', () => {
                         boost: 2,
                       },
                     },
-                    // Prefix matching for partial word matches (text fields only)
                     {
                       multi_match: {
                         query: 'test query',
@@ -543,7 +507,6 @@ describe('WorkflowsService', () => {
                         boost: 1.5,
                       },
                     },
-                    // Wildcard matching for more flexible partial matches
                     {
                       bool: {
                         should: [
@@ -582,6 +545,7 @@ describe('WorkflowsService', () => {
                 },
               },
             ],
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         sort: [{ updated_at: { order: 'desc' } }],
@@ -2614,7 +2578,7 @@ steps:
         expect.objectContaining({
           query: {
             bool: {
-              must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
+              must: [{ term: { spaceId: 'default' } }, { ids: { values: ['test-workflow-id'] } }],
             },
           },
           size: 1,
@@ -2741,7 +2705,7 @@ steps:
         expect.objectContaining({
           query: {
             bool: {
-              must: [{ ids: { values: ['test-workflow-id'] } }, { term: { spaceId: 'default' } }],
+              must: [{ term: { spaceId: 'default' } }, { ids: { values: ['test-workflow-id'] } }],
             },
           },
         })
@@ -3014,9 +2978,7 @@ steps:
         query: {
           bool: {
             must: [{ term: { spaceId: 'default' } }],
-            must_not: {
-              exists: { field: 'deleted_at' },
-            },
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         aggs: {
@@ -3076,9 +3038,7 @@ steps:
         query: {
           bool: {
             must: [{ term: { spaceId: 'default' } }],
-            must_not: {
-              exists: { field: 'deleted_at' },
-            },
+            must_not: [{ exists: { field: 'deleted_at' } }],
           },
         },
         aggs: {
