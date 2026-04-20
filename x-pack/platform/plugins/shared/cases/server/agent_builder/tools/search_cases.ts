@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { Logger } from '@kbn/logging';
 import type { CoreSetup } from '@kbn/core/server';
 import type { CasesFindRequest } from '../../../common/types/api';
 import type { Case, RelatedCase } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
 import type { CasesServerStartDependencies } from '../../types';
 import {
   normalizeTimeRange,
@@ -324,7 +324,9 @@ Returns case details (id, title, description, status, severity, tags, assignees,
           return createResult(
             casesData,
             timeRange,
-            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alertIds.join(', ')}`
+            `Found ${casesData.length} unique case(s) containing alert ID(s): ${alertIds.join(
+              ', '
+            )}`
           );
         }
 

@@ -8,10 +8,10 @@
 import { createErrorResult } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { CoreStart } from '@kbn/core/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CasesClient } from '../../client';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import type { Case, AttachmentV2, RelatedCase } from '../../../common/types/domain';
 import type { CasesFindRequest } from '../../../common/types/api';
 import { getCaseViewPath } from '../../common/utils';
@@ -174,8 +174,13 @@ export const enhanceCaseData = (
   logger: Logger
 ): EnhancedCaseData => {
   const caseUrl =
-    getCaseUrl(request, coreServices.coreStart, coreServices.spaceId, caseItem.id, caseItem.owner) ||
-    null;
+    getCaseUrl(
+      request,
+      coreServices.coreStart,
+      coreServices.spaceId,
+      caseItem.id,
+      caseItem.owner
+    ) || null;
   if (!caseUrl) {
     logger.warn(
       `[Cases Tool] Failed to generate URL for case ${caseItem.id} with owner ${caseItem.owner}`

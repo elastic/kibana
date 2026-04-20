@@ -6,8 +6,9 @@
  */
 
 import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { CasesClient } from '../client';
-import type { AgentBuilderPluginSetupContract, CasesServerStartDependencies } from '../types';
+import type { CasesServerStartDependencies } from '../types';
 import { casesStepRegistry } from '../workflows/registry';
 import { createAgentToolFromCasesStep } from './utils/step_to_tool';
 import { searchCasesTool } from './tools/search_cases';
@@ -24,7 +25,7 @@ import { searchCasesTool } from './tools/search_cases';
  * tool's input schema per the registry entry's `agentToolConfigFields`.
  */
 export function registerCasesAgentBuilderTools(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>,
   coreSetup: CoreSetup<CasesServerStartDependencies>
 ): void {

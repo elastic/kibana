@@ -21,6 +21,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { APP_ID, CASE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -58,7 +59,6 @@ import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from 
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
-import type { AgentBuilderPluginSetupContract } from './types';
 import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
@@ -220,7 +220,7 @@ export class CasePlugin
     registerCaseWorkflowSteps(plugins.workflowsExtensions, getCasesClient);
 
     void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetupContract }>('agentBuilder')
+      .onSetup<{ agentBuilder: AgentBuilderPluginSetup }>('agentBuilder')
       .then(({ agentBuilder }) => {
         if (agentBuilder.found) {
           registerCasesAgentBuilderTools(agentBuilder.contract, getCasesClient, core);
