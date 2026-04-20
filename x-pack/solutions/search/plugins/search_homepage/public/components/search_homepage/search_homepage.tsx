@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
-import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
@@ -25,7 +24,6 @@ export const SearchHomepagePage = () => {
     services: { console: consolePlugin, history, searchNavigation, cloud, kibanaVersion },
   } = useKibana();
 
-  const { isTrial } = useGetLicenseInfo();
   const { user } = useAuthenticatedUser();
 
   useEffect(() => {
@@ -74,7 +72,7 @@ export const SearchHomepagePage = () => {
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {(isTrial || (!cloud?.isServerlessEnabled && !cloud?.isCloudEnabled)) && (
+              {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
                 <EuiFlexItem grow={false}>
                   <LicenseBadge />
                 </EuiFlexItem>
