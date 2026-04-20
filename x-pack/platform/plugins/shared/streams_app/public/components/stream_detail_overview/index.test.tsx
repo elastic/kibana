@@ -37,9 +37,7 @@ jest.mock('./ingest_rate_chart', () => ({
 }));
 
 jest.mock('./attached_assets_panel', () => ({
-  AttachedAssetsPanel: () => (
-    <div data-test-subj="mockAttachedAssetsPanel">Attached assets</div>
-  ),
+  AttachedAssetsPanel: () => <div data-test-subj="mockAttachedAssetsPanel">Attached assets</div>,
 }));
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
