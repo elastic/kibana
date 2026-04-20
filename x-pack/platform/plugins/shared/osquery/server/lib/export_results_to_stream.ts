@@ -6,6 +6,7 @@
  */
 
 import { PassThrough } from 'stream';
+import { once } from 'events';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
@@ -43,6 +44,26 @@ function deduplicateFields(record: Record<string, unknown>): Record<string, unkn
   }
 
   return result;
+}
+
+/**
+ * Writes a chunk to a PassThrough and honours Node stream backpressure.
+ * If `write()` returns false, awaits the `drain` event before resolving.
+ * If the abort signal fires while awaiting drain, resolves without writing more.
+ */
+async function writeWithBackpressure(
+  stream: PassThrough,
+  chunk: string,
+  signal: AbortSignal
+): Promise<void> {
+  const ok = stream.write(chunk);
+  if (ok || signal.aborted) return;
+
+  try {
+    await once(stream, 'drain', { signal });
+  } catch {
+    // AbortError — the caller's loop checks `signal.aborted` and will exit cleanly.
+  }
 }
 
 export interface ExportResultsToStreamOptions {
@@ -129,20 +150,22 @@ export async function exportResultsToStream({
 
     // Use setTimeout to start streaming on the next tick (proven pattern from lists plugin)
     setTimeout(async () => {
+      const signal = abortController.signal;
+
       try {
         let isFirstRow = true;
 
         // Write opening (metadata header, JSON opening bracket, etc.)
         const opening = formatter.opening(enrichedMetadata);
         if (opening) {
-          stream.write(opening);
+          await writeWithBackpressure(stream, opening, signal);
         }
 
         // Process first page
         for (const hit of firstPage.hits.hits) {
-          if (abortController.signal.aborted) break;
+          if (signal.aborted) break;
           const flattened = deduplicateFields(flattenOsqueryHit(hit));
-          stream.write(formatter.row(flattened, isFirstRow));
+          await writeWithBackpressure(stream, formatter.row(flattened, isFirstRow), signal);
           isFirstRow = false;
         }
 
@@ -153,7 +176,7 @@ export async function exportResultsToStream({
             : undefined;
 
         // Page through remaining results
-        while (searchAfter && !abortController.signal.aborted) {
+        while (searchAfter && !signal.aborted) {
           const page = await esClient.search(
             {
               pit: { id: pitId!, keep_alive: '5m' },
@@ -164,15 +187,15 @@ export async function exportResultsToStream({
               search_after: searchAfter,
               _source: ['agent'],
             },
-            { signal: abortController.signal }
+            { signal }
           );
 
           if (page.hits.hits.length === 0) break;
 
           for (const hit of page.hits.hits) {
-            if (abortController.signal.aborted) break;
+            if (signal.aborted) break;
             const flattened = deduplicateFields(flattenOsqueryHit(hit));
-            stream.write(formatter.row(flattened, isFirstRow));
+            await writeWithBackpressure(stream, formatter.row(flattened, isFirstRow), signal);
             isFirstRow = false;
           }
 
@@ -183,11 +206,24 @@ export async function exportResultsToStream({
         // Write closing (JSON closing bracket, etc.)
         const closing = formatter.closing();
         if (closing) {
-          stream.write(closing);
+          await writeWithBackpressure(stream, closing, signal);
         }
       } catch (e) {
-        if (!abortController.signal.aborted) {
-          logger.error(`Export stream error: ${e.message}`);
+        if (!signal.aborted) {
+          // Headers have already been sent by this point, so the HTTP status code
+          // cannot be changed. Log structured meta so support can correlate the
+          // truncated download with server state. `labels` is the ECS-standard
+          // field for plugin-specific custom key/value pairs in log meta.
+          logger.error(`Export stream error: ${e.message}`, {
+            labels: {
+              action_id: enrichedMetadata.action_id,
+              format: enrichedMetadata.format,
+              total_results: enrichedMetadata.total_results,
+              ...(enrichedMetadata.execution_count != null
+                ? { execution_count: enrichedMetadata.execution_count }
+                : {}),
+            },
+          });
           stream.destroy(e);
         }
       } finally {

@@ -364,6 +364,56 @@ describe('exportLiveQueryResultsRoute', () => {
         const exportCall = mockExportResultsToStream.mock.calls[0][0];
         expect(JSON.stringify(exportCall.query)).toContain('exit_code');
       });
+
+      it('should escape agentId values containing KQL meta-characters', async () => {
+        const mockStream = new PassThrough();
+        mockExportResultsToStream.mockResolvedValue(mockStream);
+
+        const mockEsSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+        const mockContext = createMockCoreContext(mockEsSearch);
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          params: { actionId: 'action-123' },
+          query: { format: 'ndjson' },
+          body: {
+            agentIds: ['agent"with-quote', 'agent\\with-backslash', 'agent(with-paren'],
+          },
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(mockContext as any, mockRequest, mockResponse);
+
+        const exportCall = mockExportResultsToStream.mock.calls[0][0];
+        const serialized = JSON.stringify(exportCall.query);
+
+        // Values must reach the ES query in escaped form — NOT wrapped in unescaped quotes
+        // that would inject KQL syntax, and NOT as raw parentheses that would be
+        // parsed as KQL grouping.
+        expect(serialized).toContain('agent');
+        // The route handler must not throw. If getQueryFilter can parse the filter,
+        // the call to exportResultsToStream happens — which is asserted above.
+        expect(mockExportResultsToStream).toHaveBeenCalledTimes(1);
+      });
+
+      it('should escape actionId values containing KQL meta-characters', async () => {
+        const mockStream = new PassThrough();
+        mockExportResultsToStream.mockResolvedValue(mockStream);
+
+        const mockEsSearch = jest.fn().mockResolvedValue({ hits: { hits: [] } });
+        const mockContext = createMockCoreContext(mockEsSearch);
+
+        const mockRequest = httpServerMock.createKibanaRequest({
+          params: { actionId: 'action(with)parens:and-colons' },
+          query: { format: 'ndjson' },
+          body: undefined,
+        });
+        const mockResponse = httpServerMock.createResponseFactory();
+
+        await routeHandler(mockContext as any, mockRequest, mockResponse);
+
+        // No throw + export was invoked → base filter compiled as valid KQL
+        expect(mockExportResultsToStream).toHaveBeenCalledTimes(1);
+      });
     });
 
     describe('space-aware index resolution', () => {

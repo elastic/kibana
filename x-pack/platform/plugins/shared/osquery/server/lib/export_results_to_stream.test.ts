@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { exportResultsToStream } from './export_results_to_stream';
+import { createCsvFormatter } from './format_results';
 import type { ResultFormatter, ExportMetadata } from './format_results';
 
 /**
@@ -651,6 +652,26 @@ describe('exportResultsToStream', () => {
       expect(output).toContain('CLOSING');
     });
 
+    it('should produce a zero-byte body for CSV when result set is empty', async () => {
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        hits: { hits: [], total: { value: 0 } },
+      });
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createCsvFormatter(),
+        metadata: { ...metadata, format: 'csv' },
+        aborted$,
+        logger,
+      });
+
+      const output = await collectStream(result as NodeJS.ReadableStream);
+
+      expect(output).toBe('');
+    });
+
     it('should end stream cleanly when result set is empty', async () => {
       (esClient.search as jest.Mock).mockResolvedValueOnce({
         hits: { hits: [], total: { value: 0 } },
@@ -798,7 +819,80 @@ describe('exportResultsToStream', () => {
 
       await waitForStreamClose(result as NodeJS.ReadableStream);
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Export stream error'));
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Export stream error'),
+        expect.objectContaining({
+          labels: expect.objectContaining({ action_id: 'test-action' }),
+        })
+      );
+    });
+
+    it('should log structured labels (action_id, format, total_results) on stream error', async () => {
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({
+          hits: { hits: [createMockHit('1')], total: { value: 17 } },
+        })
+        .mockRejectedValueOnce(new Error('Connection reset'));
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata: {
+          action_id: 'action-log-test',
+          timestamp: '2024-01-01T00:00:00.000Z',
+          exported_by: 'test-user',
+          format: 'csv',
+        },
+        aborted$,
+        logger,
+      });
+
+      await waitForStreamClose(result as NodeJS.ReadableStream);
+
+      expect(logger.error).toHaveBeenCalledWith('Export stream error: Connection reset', {
+        labels: {
+          action_id: 'action-log-test',
+          format: 'csv',
+          total_results: 17,
+        },
+      });
+    });
+
+    it('should include execution_count in labels for scheduled-query exports', async () => {
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({
+          hits: { hits: [createMockHit('1')], total: { value: 3 } },
+        })
+        .mockRejectedValueOnce(new Error('Shard unavailable'));
+
+      const result = await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata: {
+          action_id: 'schedule-xyz',
+          timestamp: '2024-01-01T00:00:00.000Z',
+          exported_by: 'test-user',
+          format: 'ndjson',
+          execution_count: 42,
+        },
+        aborted$,
+        logger,
+      });
+
+      await waitForStreamClose(result as NodeJS.ReadableStream);
+
+      expect(logger.error).toHaveBeenCalledWith('Export stream error: Shard unavailable', {
+        labels: {
+          action_id: 'schedule-xyz',
+          format: 'ndjson',
+          total_results: 3,
+          execution_count: 42,
+        },
+      });
     });
 
     it('should not log error when stream is destroyed due to abort', async () => {
@@ -835,6 +929,121 @@ describe('exportResultsToStream', () => {
 
       await waitForStreamClose(result as NodeJS.ReadableStream);
 
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('backpressure handling', () => {
+    it('should pause and await drain when stream.write returns false', async () => {
+      const hits = [createMockHit('1'), createMockHit('2'), createMockHit('3')];
+
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({
+          hits: { hits, total: { value: 3 } },
+        })
+        .mockResolvedValueOnce({
+          hits: { hits: [], total: { value: 3 } },
+        });
+
+      const result = (await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata,
+        aborted$,
+        logger,
+      })) as import('stream').PassThrough;
+
+      // Intercept write() after the first row to return false, then emit 'drain'
+      // on the next tick so the loop can continue.
+      let writeCount = 0;
+      const realWrite = result.write.bind(result);
+      jest.spyOn(result, 'write').mockImplementation((chunk: unknown, ...rest: unknown[]) => {
+        writeCount += 1;
+        // Return false on row 2 so the loop awaits drain; accept normally for others.
+        if (writeCount === 3) {
+          // Schedule a drain emission on the next microtask.
+          setImmediate(() => result.emit('drain'));
+
+          return false;
+        }
+
+        return realWrite(chunk as string, ...(rest as []));
+      });
+
+      await collectStream(result);
+
+      // All 3 rows plus the opening write should have been attempted.
+      // Loop paused on write #3 and resumed after drain.
+      expect(writeCount).toBeGreaterThanOrEqual(4);
+    });
+
+    it('should not attach a drain listener when all writes succeed (fast consumer)', async () => {
+      const hits = [createMockHit('1'), createMockHit('2')];
+
+      (esClient.search as jest.Mock)
+        .mockResolvedValueOnce({
+          hits: { hits, total: { value: 2 } },
+        })
+        .mockResolvedValueOnce({
+          hits: { hits: [], total: { value: 2 } },
+        });
+
+      const result = (await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata,
+        aborted$,
+        logger,
+      })) as import('stream').PassThrough;
+
+      const onceSpy = jest.spyOn(result, 'once');
+
+      await collectStream(result);
+
+      // No drain listener should have been installed because every write
+      // returned true (real PassThrough default highWaterMark).
+      const drainListens = onceSpy.mock.calls.filter((call) => call[0] === 'drain');
+      expect(drainListens).toHaveLength(0);
+    });
+
+    it('should exit cleanly when abort fires while awaiting drain', async () => {
+      const hits = [createMockHit('1'), createMockHit('2'), createMockHit('3')];
+
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        hits: { hits, total: { value: 3 } },
+      });
+
+      const result = (await exportResultsToStream({
+        esClient,
+        index: 'test-index',
+        query: { match_all: {} },
+        formatter: createMockFormatter(),
+        metadata,
+        aborted$,
+        logger,
+      })) as import('stream').PassThrough;
+
+      // Make the second write return false — and never emit drain. Abort fires instead.
+      let writeCount = 0;
+      jest.spyOn(result, 'write').mockImplementation(() => {
+        writeCount += 1;
+        if (writeCount === 2) {
+          // Fire abort once the loop is awaiting drain
+          setImmediate(() => aborted$.next());
+
+          return false;
+        }
+
+        return true;
+      });
+
+      await waitForStreamClose(result);
+
+      expect(result.destroyed).toBe(true);
       expect(logger.error).not.toHaveBeenCalled();
     });
   });

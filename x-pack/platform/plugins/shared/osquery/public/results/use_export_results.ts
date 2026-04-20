@@ -76,8 +76,7 @@ export const useExportResults = ({
         // Extract filename from Content-Disposition or generate one
         const contentDisposition = rawResp.headers?.get('content-disposition') ?? '';
         const fileNameMatch = contentDisposition.match(/filename="(.+)"/);
-        const fileName =
-          fileNameMatch?.[1] ?? `osquery-results-${actionId}.${format === 'csv' ? 'csv' : format}`;
+        const fileName = fileNameMatch?.[1] ?? `osquery-results-${actionId}.${format}`;
 
         // Trigger browser download
         const url = URL.createObjectURL(blob);

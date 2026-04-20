@@ -14,6 +14,7 @@ import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createExportRouteHandler } from '../export/create_export_route_handler';
+import { exportRequestBodySchema } from '../export/export_request_body_schema';
 
 export const exportScheduledQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -46,13 +47,7 @@ export const exportScheduledQueryResultsRoute = (
                 { defaultValue: 'ndjson' }
               ),
             }),
-            body: schema.nullable(
-              schema.object({
-                kuery: schema.maybe(schema.string()),
-                agentIds: schema.maybe(schema.arrayOf(schema.string())),
-                esFilters: schema.maybe(schema.arrayOf(schema.any())),
-              })
-            ),
+            body: exportRequestBodySchema,
           },
         },
       },
@@ -61,10 +56,13 @@ export const exportScheduledQueryResultsRoute = (
           const { scheduleId, executionCount } = request.params;
 
           return await handleExport(context, request, response, {
-            baseFilter: `schedule_id: "${escapeKuery(scheduleId)}" AND osquery_meta.schedule_execution_count: ${executionCount}`,
+            baseFilter: `schedule_id: ${escapeKuery(
+              scheduleId
+            )} AND osquery_meta.schedule_execution_count: ${executionCount}`,
             metadata: {
               action_id: scheduleId,
               query: `Scheduled query: ${scheduleId}`,
+              execution_count: executionCount,
             },
             fileNamePrefix: `osquery-scheduled-results-${scheduleId}-${executionCount}`,
           });

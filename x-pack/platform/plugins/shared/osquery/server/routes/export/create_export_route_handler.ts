@@ -13,8 +13,8 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { escapeKuery } from '@kbn/es-query';
+import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { getQueryFilter } from '../../utils/build_query';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
@@ -28,7 +28,7 @@ export interface ExportRouteParams {
   /** KQL base filter (e.g. `action_id: "abc"` or `schedule_id: "x" AND ...`) */
   baseFilter: string;
   /** Metadata fields specific to this export type */
-  metadata: Pick<ExportMetadata, 'action_id' | 'query'>;
+  metadata: Pick<ExportMetadata, 'action_id' | 'query' | 'execution_count'>;
   /** Filename prefix (e.g. `osquery-results-{id}` or `osquery-scheduled-results-{id}-{count}`) */
   fileNamePrefix: string;
 }
@@ -37,7 +37,11 @@ export const createExportRouteHandler =
   (osqueryContext: OsqueryAppContext) =>
   async (
     context: RequestHandlerContext & DataRequestHandlerContext,
-    request: KibanaRequest<unknown, { format: string }, { kuery?: string; agentIds?: string[]; esFilters?: unknown[] } | null>,
+    request: KibanaRequest<
+      unknown,
+      { format: string },
+      { kuery?: string; agentIds?: string[]; esFilters?: unknown[] } | null
+    >,
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
@@ -52,9 +56,10 @@ export const createExportRouteHandler =
     // Build filter query
     let filter = baseFilter;
     if (agentIds && agentIds.length > 0) {
-      const agentFilter = agentIds.map((id) => `agent.id: "${escapeKuery(id)}"`).join(' OR ');
+      const agentFilter = agentIds.map((id) => `agent.id: ${escapeKuery(id)}`).join(' OR ');
       filter += ` AND (${agentFilter})`;
     }
+
     if (kuery) {
       filter += ` AND ${kuery}`;
     }
@@ -108,7 +113,9 @@ export const createExportRouteHandler =
 
     const formatter = createFormatter(format);
     const timestamp = new Date().toISOString();
-    const fileName = `${fileNamePrefix}-${timestamp.replace(/[:.]/g, '-')}.${formatter.fileExtension}`;
+    const fileName = `${fileNamePrefix}-${timestamp.replace(/[:.]/g, '-')}.${
+      formatter.fileExtension
+    }`;
 
     const result = await exportResultsToStream({
       esClient,

@@ -14,6 +14,7 @@ import { PLUGIN_ID } from '../../../common';
 import { API_VERSIONS, OSQUERY_ACTIONS_INDEX } from '../../../common/constants';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createExportRouteHandler } from '../export/create_export_route_handler';
+import { exportRequestBodySchema } from '../export/export_request_body_schema';
 
 export const exportLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -45,13 +46,7 @@ export const exportLiveQueryResultsRoute = (
                 { defaultValue: 'ndjson' }
               ),
             }),
-            body: schema.nullable(
-              schema.object({
-                kuery: schema.maybe(schema.string()),
-                agentIds: schema.maybe(schema.arrayOf(schema.string())),
-                esFilters: schema.maybe(schema.arrayOf(schema.any())),
-              })
-            ),
+            body: exportRequestBodySchema,
           },
         },
       },
@@ -81,7 +76,7 @@ export const exportLiveQueryResultsRoute = (
           }
 
           return await handleExport(context, request, response, {
-            baseFilter: `action_id: "${escapeKuery(actionId)}"`,
+            baseFilter: `action_id: ${escapeKuery(actionId)}`,
             metadata: {
               action_id: actionId,
               query: queryString,
