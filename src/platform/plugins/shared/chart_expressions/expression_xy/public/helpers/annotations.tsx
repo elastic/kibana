@@ -130,6 +130,8 @@ export function MarkerBody({
 }
 
 export const getGroupedAnnotationTextColor = (backgroundColor: string) => {
+  // Defensive: chroma.contrast can throw on invalid color values, though
+  // our code resolves colors before reaching here so this shouldn't happen.
   try {
     return chroma.contrast(backgroundColor, euiDarkVars.euiColorTextParagraph) >=
       chroma.contrast(backgroundColor, euiLightVars.euiColorTextParagraph)
@@ -238,7 +240,7 @@ export function Marker({
     if (hasReducedPadding && label) {
       return <MarkerBody label={label} isHorizontal={isHorizontal} />;
     }
-    return <EuiIcon type="empty" />;
+    return <EuiIcon type="empty" aria-hidden={true} />;
   }
   return null;
 }
