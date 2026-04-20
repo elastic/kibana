@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -145,6 +146,7 @@ const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps
   return (
     <EuiPopover
       panelPaddingSize="s"
+      aria-label={i18n.translate('AlertingExample.alwaysFiring.thresholdPopover', { defaultMessage: 'Set threshold' })}
       button={
         <EuiExpression
           description={'Is Above'}
