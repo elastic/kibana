@@ -37,26 +37,40 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 ### Must Have
 
+#### Core
+
 | # | Requirement | Details |
 |---|-------------|---------|
 | **R1** | **Distinguish managed from user-defined** | The platform must be able to distinguish managed workflows from user-defined ones. The designation is not user-settable. How this is achieved (a flag on the same index, a separate index, or other mechanism) is discussed in the [Storage](#1-storage) section of the technical design. |
 | **R2** | **Server-side read-only enforcement** | Mutation APIs (`updateWorkflow`, `deleteWorkflows`, and their REST routes) reject changes to managed workflows. This includes the `enabled` toggle (enable/disable is an update). UI-only restrictions are insufficient — API callers can still mutate. Note: this conflicts with the force override (S5) — see the [Force Override](#21-force-override) section for the interaction model and options. |
 | **R3** | **Active by default** | Registered managed workflows are immediately active and ready to execute. No separate activation step required. |
 | **R4** | **Ownership metadata** | Every managed workflow identifies its owning plugin, team, or feature. Visible when inspecting the workflow. |
-| **R5** | **Plugin-level registration API** | A registration API (e.g., `registerBundledWorkflow()`) on the server setup contract. Plugins declare workflow definitions and the platform handles provisioning. This is distinct from the existing `workflows_extensions` step registration — it covers full workflow lifecycle. |
-| **R6** | **Auto-provisioning across spaces** | At startup, managed workflows are provisioned into all existing spaces and into newly created spaces, without requiring the consuming plugin to trigger provisioning via request-scoped logic. |
-| **R7** | **Privileged update path** | The platform supports updating managed workflows on plugin upgrades (system update) while still blocking user edits. Without this, read-only enforcement prevents plugins from evolving their workflows. Pattern: create-if-absent, update-if-changed. |
-| **R8** | **Hidden by default [UI]** | Managed workflows do not appear in workflow management or execution views by default. |
-| **R9** | **Opt-in visibility toggle [UI]** | A lightweight, consistent mechanism reveals managed workflows across management and execution surfaces. When visible, they are clearly distinguished from user workflows (badge, icon, label). |
-| **R10** | **Read-only when visible [UI]** | Users can view the full definition. Edit, delete, and disable controls are not available. |
-| **R11** | **Execution view filtering [UI]** | Managed workflow executions are hidden by default. The same toggle mechanism reveals them. |
-| **R12** | **UI enforcement + visual indication [UI]** | Managed workflows are visually indicated (badge/icon) in list and detail views. Edit, delete, and bulk-delete actions are disabled/hidden. |
-| **R13** | **Clone into user-owned copy [UI]** | Users can clone a managed workflow into an editable copy. See [Open Questions > Cloning #11](#cloning) for behavior details. |
-| **R14** | **Enterprise tier gating** | Features registering managed workflows require Enterprise license. On lower tiers, managed workflows are not installed or not executed. Note: this conflicts with Entity Analytics (#15382) which needs Basic tier support — see [Open Questions > Licensing #12](#licensing) for the discussion. |
-| **R15** | **Metering exemption** | Managed workflow executions are excluded from the customer's workflow execution meter (success or failure). Only user workflow executions are counted and billed. Managed executions are still tracked internally for capacity planning. |
-| **R16** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
-| **R17** | **Custom triggers and custom steps** | Managed workflows support custom step types and custom triggers registered via `workflows_extensions`. Same engine, same capabilities. |
-| **R18** | **Existing guardrails apply** | All existing concurrency strategies, execution limits, and guardrails apply to managed workflows. |
+| **R5** | **Registration mechanism** | A way for solution teams to register managed workflows with the platform, including the workflow definition and ownership metadata. The workflow plugin handles installation and activation. How this is exposed (plugin contract, file-based convention, or other mechanism) is an implementation detail discussed in the [Registration](#3-registration) section of the technical design. |
+| **R6** | **Caller-provided workflow ID with uniqueness guarantee** | Plugins can specify stable, deterministic IDs instead of auto-generated IDs. IDs must be globally unique so all existing APIs continue to serve both managed and user-defined workflows unambiguously. See [Open Questions > Registration #3](#id-uniqueness) for enforcement approaches. |
+| **R7** | **Custom triggers and custom steps** | Managed workflows support custom step types and custom triggers registered via `workflows_extensions`. Same engine, same capabilities. |
+| **R8** | **Existing guardrails apply** | All existing concurrency strategies, execution limits, and guardrails apply to managed workflows. |
+| **R9** | **Enterprise tier gating** | Features registering managed workflows require Enterprise license. On lower tiers, managed workflows are not installed or not executed. Note: this conflicts with Entity Analytics (#15382) which needs Basic tier support — see [Open Questions > Licensing #12](#licensing) for the discussion. |
+| **R10** | **Metering exemption** | Managed workflow executions are excluded from the customer's workflow execution meter (success or failure). Only user workflow executions are counted and billed. Managed executions are still tracked internally for capacity planning. |
+
+#### Lifecycle
+
+| # | Requirement | Details |
+|---|-------------|---------|
+| **R11** | **Auto-provisioning across spaces** | At startup, managed workflows are provisioned into all existing spaces and into newly created spaces, without requiring the consuming plugin to trigger provisioning via request-scoped logic. |
+| **R12** | **Privileged update path** | The platform supports updating managed workflows on plugin upgrades (system update) while still blocking user edits. Without this, read-only enforcement prevents plugins from evolving their workflows. Pattern: create-if-absent, update-if-changed. |
+| **R13** | **Cleanup on plugin uninstall** | When a plugin is uninstalled, all managed workflows it owns (identified by `managedBy`) are removed from all spaces. |
+| **R14** | **Cleanup on unregistration** | When a managed workflow is no longer registered in code (i.e., the plugin removes the registration in a new release), the platform removes it from all spaces during startup reconciliation. |
+
+#### UI
+
+| # | Requirement | Details |
+|---|-------------|---------|
+| **R15** | **Hidden by default** | Managed workflows do not appear in workflow management or execution views by default. |
+| **R16** | **Opt-in visibility toggle** | A lightweight, consistent mechanism reveals managed workflows across management and execution surfaces. When visible, they are clearly distinguished from user workflows (badge, icon, label). |
+| **R17** | **Read-only when visible** | Users can view the full definition. Edit, delete, and disable controls are not available. |
+| **R18** | **Execution view filtering** | Managed workflow executions are hidden by default. The same toggle mechanism reveals them. |
+| **R19** | **UI enforcement + visual indication** | Managed workflows are visually indicated (badge/icon) in list and detail views. Edit, delete, and bulk-delete actions are disabled/hidden. |
+| **R20** | **Clone into user-owned copy** | Users can clone a managed workflow into an editable copy. See [Open Questions > Cloning #11](#cloning) for behavior details. |
 
 ### Should Have
 
@@ -76,12 +90,10 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 | **N2** | **Plugin-controlled install decision** | `shouldInstallWorkflow({ spaceId, ...ctx })` hook to decide per-space whether to install. | Security AB (KDKHD) |
 | **N3** | **Registration health / introspection** | Registry view: what's registered, what's installed per space, version/hash. | Security AB (KDKHD) |
 | **N4** | **Standardized gating + rollout controls** | Feature flags for progressive enablement of managed workflows. | Security AB (KDKHD) |
-| **N5** | **Max parallelism control** | Control over concurrent execution of managed workflows. | Security AB (KDKHD) |
-| **N6** | **Ephemeral runtime workflows** | Define workflows at runtime and delete after completion. | Security AB (KDKHD) |
-| **N7** | **Out-of-band updates** | Update managed workflow definitions outside of Kibana release cycles. | Security AB (KDKHD) |
-| **N8** | **Type safety for code-defined workflows** | TypeScript types for workflow definitions in code. | Security AB (KDKHD) |
-| **N9** | **Internal-only steps** | Limit some registered steps to managed workflows only, not available to customers. | O11y (open question) |
-| **N10** | **Integration-based distribution** | Ship managed workflows as part of integrations. Registration happens through the integration lifecycle (install/uninstall). | O11y (ruflin), Search (pgayvallet) |
+| **N5** | **Out-of-band updates** | Update managed workflow definitions outside of Kibana release cycles. Related to integration-based distribution (N7). | Security AB (KDKHD) |
+| **N6** | **Type safety for code-defined workflows** | TypeScript types for workflow definitions in code. For the first delivery, workflow registration validates the YAML at startup, and the approval gate's Scout tests provide compile-time coverage. | Security AB (KDKHD) |
+| **N7** | **Integration-based distribution** | Ship managed workflows as part of integrations. Registration happens through the integration lifecycle (install/uninstall). | O11y (ruflin), Search (pgayvallet) |
+| **N8** | **Partial user editability** | Allow the registering plugin to declare specific properties as user-editable while keeping the rest read-only. See [Open Questions > Mutability #4](#mutability) for the full design discussion, upgrade conflict analysis, and the recommended first-phase approach. | — |
 
 ### Telemetry
 
@@ -106,24 +118,6 @@ These are capabilities that interact with or are prerequisites for managed workf
 | **Workflow-Defined Priority** | — | Should managed workflows have execution priority over user workflows? No stakeholder request yet — flagging for consideration. |
 | **Parallel Execution of Sub-Workflows** | — | O11y (miltonhultgren) needs parallel onboarding tasks across streams. Not supported today. |
 | **Scheduling** | — | Entity Analytics (#15382) needs periodic execution (every 10 min / hourly / daily). The epic does not address scheduling of managed workflows. |
-| **Internal-Only Steps** | — | O11y raised whether some steps should be restricted to managed workflows only (N9). Platform decision. |
-| **Integration-Based Distribution** | search-team#13253 | Search and O11y envision shipping workflows via integrations with install/uninstall lifecycle. Different model than startup registration. |
-
----
-
-## Execution Identity (Interim Approach)
-
-This is the most contentious open topic. The full solution is tracked in #15718 (Configurable Workflow Execution Identity). Below is the proposed interim approach for the first delivery.
-
-| Trigger | Runs As | Notes |
-|---------|---------|-------|
-| User-initiated (manual run, UI action) | The triggering user | Permissions are scoped to the user. This works today. |
-| Scheduled / background | System identity | Requires scoping what the system identity can access. Kibana system user only has `.kibana*` — likely insufficient for workflows that query customer indices. |
-| Nested (workflow calls workflow) | The parent workflow's identity | Inherited. |
-
-**Known issue:** When a workflow step patches a detection rule, the rule's execution identity changes to whoever ran the step (alerting framework regenerates the API key from the updater). In autonomous mode with no human approver, the identity used by the apply step becomes the rule's permanent identity. This cascading side effect needs resolution.
-
-**Future state:** A dedicated service account with scoped permissions, decoupled from any individual user. The workflow author assigns it; the platform enforces it across all execution modes.
 
 ---
 
@@ -148,9 +142,7 @@ This is the most contentious open topic. The full solution is tracked in #15718 
    The first delivery should at minimum be designed to not preclude these approaches.
 
 3. <a id="id-uniqueness"></a>**How is workflow ID uniqueness enforced?**
-   Managed workflow IDs are caller-provided (R16) and must be globally unique — no collisions between managed workflows from different plugins, or between managed and user-defined workflows. Without this, existing APIs (get, execute, clone) become ambiguous. Options:
-   - **Namespacing convention** (e.g., `{pluginId}.{workflowName}`) — enforced by the approval gate during code review. Simple but relies on convention.
-   - **Runtime validation** — the registration API rejects duplicate IDs at startup (across all registered managed workflows). For managed-vs-user collisions, provisioning checks whether a user workflow with the same ID already exists in a space and logs a warning / skips.
+   Managed workflow IDs are caller-provided (R16) and must be globally unique — no collisions between managed workflows from different plugins, or between managed and user-defined workflows. Without this, existing APIs (get, execute, clone) become ambiguous. An option:
    - **Reserved prefix** — managed workflow IDs use a prefix (e.g., `system:`) that `createWorkflow` rejects for user workflows. Strongest guarantee but adds a naming constraint.
 
 4. **Should conditions gate registration?**
@@ -158,21 +150,32 @@ This is the most contentious open topic. The full solution is tracked in #15718 
 
 ### Mutability
 
-4. **Can users modify any part of the definition?**
-   E.g., the scheduling interval, trigger types, or connector configuration. The current position is "fully read-only," but partial mutability could be valuable. Not raised in the issues — needs product input.
+4. <a id="mutability"></a>**Can users modify any part of the definition?**
+   E.g., the scheduling interval, connector ID, or enable/disable toggle. The current position is "fully read-only," but partial mutability is a realistic future need.
+
+   **How it could work:** The registering plugin declares which properties are user-editable (an allowlist). The platform enforces the allowlist at the service layer — user mutations that touch non-allowlisted fields are rejected, allowlisted field changes are persisted.
+
+   **The upgrade conflict problem:** If a user edits an allowlisted field (e.g., changes the scheduling interval from 10m to 1h), and a new Kibana release ships an updated version of the same managed workflow, should the platform:
+   - **Overwrite user edits?** Simple, but the user loses their customization silently.
+   - **Preserve user edits and merge?** Apply the new definition but keep the user's values for allowlisted fields. Complex — requires field-level merge logic, and the new definition may not be compatible with the old user values.
+   - **Skip the update?** Leave the user's version in place. The workflow drifts from what the plugin intended. Risky.
+
+   None of these options are clean. This is the core reason partial editability is deferred.
+
+   **Recommended first-phase approach:** For the first delivery, only the enable/disable state is editable, and only via the `--force` flag (see #5 below). For any other customization, the user should:
+   1. Clone the managed workflow into a user-owned copy.
+   2. Edit whatever is needed on the clone.
+   3. Disable the original managed workflow (via `--force`).
+   4. When a new version of the managed workflow ships, the platform re-enables the updated original during reconciliation. The user can then clone and edit again if needed.
+
+   This keeps the managed workflow definition clean (no merge conflicts), gives users full editing power on the clone, and the reconciliation safety net restores the original on upgrade.
 
 5. **Should a `--force` flag allow overriding read-only?**
    ruflin proposed this for testing, recovery, and urgent fixes. If supported, it should be API-only (not UI), logged, and clearly documented as "you own the consequences."
 
 ### Lifecycle
 
-6. **What happens when a managed workflow is no longer registered in code?**
-   If a plugin removes a workflow definition in a new release, should the platform auto-delete it from all spaces? Or leave orphans? A reconciliation pass at startup (compare registered vs. stored, remove orphans) is one approach. Needs a clear policy.
-
-7. **Should uninstalling a plugin uninstall its workflows?**
-   The Search team expects yes ("uninstalling the plugin deletes the workflow"). This implies the platform tracks the plugin-to-workflow ownership for cleanup.
-
-8. **What happens if a workflow references a step or trigger from an unavailable plugin?**
+6. **What happens if a workflow references a step or trigger from an unavailable plugin?**
    Assumptions: (a) cross-solution workflows are against Kibana best practices, (b) products are available/not based on tiering, so filtering at registration time is sufficient for the first iteration.
 
 ### Execution
@@ -574,6 +577,10 @@ Today, the execution engine resolves identity via `getAuthenticatedUser(request,
 | **C: Defer scheduled managed workflows** | For the first delivery, managed workflows only support on-demand and event-driven execution (where a user context exists). Scheduled execution waits for the Execution Identity epic (#15718). | Limits use cases (Entity Analytics needs scheduling). But gets the core platform shipped. |
 
 **Recommendation:** Option C for the first delivery. On-demand and event-driven execution cover the immediate consumer needs (Attack Discovery is invoked from UI actions, Streams is invoked programmatically). Entity Analytics' scheduling requirement is blocked on execution identity regardless. This avoids building a temporary identity system that #15718 will replace.
+
+**Known issue:** When a workflow step patches a detection rule, the rule's execution identity changes to whoever ran the step (the alerting framework regenerates the API key from the updater). In autonomous mode with no human approver, the identity used by the apply step becomes the rule's permanent identity. This cascading side effect needs resolution as part of #15718.
+
+**Future state:** A dedicated service account with scoped permissions, decoupled from any individual user. The workflow author assigns it; the platform enforces it across all execution modes.
 
 ---
 
