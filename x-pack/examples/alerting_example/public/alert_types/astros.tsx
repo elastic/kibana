@@ -154,9 +154,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="craft"
-            aria-label={i18n.translate('AlertingExample.astros.craftPopover', {
-              defaultMessage: 'Select spacecraft',
-            })}
+            aria-label="Select spacecraft"
             button={
               <EuiExpression
                 description="When the People in"
@@ -211,9 +209,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="outerSpaceCapacity"
-            aria-label={i18n.translate('AlertingExample.astros.outerSpaceCapacityPopover', {
-              defaultMessage: 'Set capacity threshold',
-            })}
+            aria-label="Set capacity threshold"
             button={
               <EuiExpression
                 description={outerSpaceCapacityTrigger.op}
