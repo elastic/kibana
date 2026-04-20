@@ -110,15 +110,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const userMsgsReq = simulator.requestBody.messages.filter((m: any) => m.role === 'user');
       // Consecutive user messages are merged into a single message with array content
       expect(userMsgsReq).to.have.length(1);
-      const contentParts = userMsgsReq[0].content;
+      const contentParts = userMsgsReq[0].content!;
       expect(contentParts).to.be.an('array');
       expect(contentParts).to.have.length(2);
       // First content part (email anonymized)
-      const firstPart = contentParts[0].text;
+      const firstPart = (contentParts[0] as { text: string }).text;
       expect(firstPart).to.not.contain('claudia@example.com');
       expect((firstPart.match(/[0-9a-f]{40}/g) || []).length).to.be(1);
       // Second content part (URL anonymized)
-      const secPart = contentParts[1].text;
+      const secPart = (contentParts[1] as { text: string }).text;
       expect(secPart).to.not.contain('http://claudia.is');
       expect((secPart.match(/[0-9a-f]{40}/g) || []).length).to.be(1);
     });
