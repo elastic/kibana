@@ -3808,12 +3808,13 @@ function _compilePackageStream(
 
   stream = _applyIndexPrivileges(packageDataStream, streamIn);
 
+  const effectiveInputName = getInputEffectiveName(input);
   const streamFromPkg = (packageDataStream.streams || []).find(
-    (pkgStream) => pkgStream.input === input.type
+    (pkgStream) => pkgStream.input === effectiveInputName
   );
   if (!streamFromPkg) {
     throw new StreamNotFoundError(
-      `Stream template not found, unable to find stream for input ${input.type}`
+      `Stream template not found, unable to find stream for input ${effectiveInputName} (type: ${input.type})`
     );
   }
 

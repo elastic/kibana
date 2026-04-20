@@ -2143,6 +2143,55 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should compile stream templates when stream.input references a named input (name ?? type)', async () => {
+      const inputs = await _compilePackagePolicyInputs(
+        {
+          name: 'test',
+          version: '1.0.0',
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'package.dataset1',
+              streams: [{ input: 'named_logfile', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log', name: 'named_logfile' }],
+            },
+          ],
+        } as unknown as PackageInfo,
+        {},
+        [
+          {
+            type: 'log',
+            name: 'named_logfile',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+                vars: {
+                  paths: {
+                    value: ['/var/log/set.log'],
+                  },
+                },
+              },
+            ],
+          },
+        ],
+        ASSETS_MAP_FIXTURES
+      );
+
+      expect(inputs[0].streams[0].compiled_stream).toEqual({
+        metricset: ['dataset1'],
+        paths: ['/var/log/set.log'],
+        type: 'log',
+      });
+    });
+
     it('should compile integration stream data_stream.dataset from package stream var default value', async () => {
       const pkgInfo = {
         name: 'dsvarpkg',
