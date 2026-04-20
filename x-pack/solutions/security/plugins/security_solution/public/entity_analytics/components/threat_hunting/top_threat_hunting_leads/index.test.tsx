@@ -51,6 +51,8 @@ const defaultProps = {
   onLeadClick: jest.fn(),
   onHuntInChat: jest.fn(),
   onGenerate: jest.fn(),
+  connectorId: 'test-connector-id',
+  onConnectorIdSelected: jest.fn(),
 };
 
 describe('TopThreatHuntingLeads', () => {
@@ -128,6 +130,18 @@ describe('TopThreatHuntingLeads', () => {
     fireEvent.click(screen.getByTestId('seeAllLeadsButton'));
 
     expect(onSeeAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('"Generate" button is disabled when connectorId is not provided', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId={undefined} />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
+  });
+
+  it('"Generate" button is disabled when connectorId is empty string', () => {
+    render(<TopThreatHuntingLeads {...defaultProps} connectorId="" />);
+
+    expect(screen.getByTestId('generateLeadsButton')).toBeDisabled();
   });
 
   it('shows "Generate" button when no leads exist and calls onGenerate', () => {
