@@ -189,7 +189,6 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
             flyoutProps: {
               type: 'overlay',
               size: 'm',
-              container: null,
               'data-test-subj': 'apmServiceMapEditorFlyout',
               focusedPanelId: uuid,
             },
