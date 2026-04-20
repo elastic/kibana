@@ -16,10 +16,8 @@ import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../commo
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import { useLicenseContext } from '../../context/license/use_license_context';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
-import { LicensePrompt } from '../../components/shared/license_prompt';
 import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
-import { DisabledPrompt } from '../../components/app/service_map/disabled_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
 import { getServiceMapUrl } from './get_service_map_url';
@@ -96,7 +94,7 @@ export function ServiceMapEmbeddable({
     serviceName,
   });
 
-  if (!license) {
+  if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
     return (
       <div
         data-test-subj="apmServiceMapEmbeddable"
@@ -111,22 +109,6 @@ export function ServiceMapEmbeddable({
       >
         <LoadingSpinner />
       </div>
-    );
-  }
-
-  if (!isActivePlatinumLicense(license)) {
-    return (
-      <EuiPanel hasBorder paddingSize="l">
-        <LicensePrompt text={invalidLicenseMessage} />
-      </EuiPanel>
-    );
-  }
-
-  if (!config.serviceMapEnabled) {
-    return (
-      <EuiPanel hasBorder paddingSize="l">
-        <DisabledPrompt />
-      </EuiPanel>
     );
   }
 

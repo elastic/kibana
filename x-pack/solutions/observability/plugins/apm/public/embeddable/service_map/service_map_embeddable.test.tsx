@@ -146,7 +146,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when license is not platinum', () => {
-    it('renders the license prompt', () => {
+    it('renders loading state while blocking error takes effect', () => {
       const goldLicense = new License({
         signature: 'test',
         license: {
@@ -168,7 +168,8 @@ describe('ServiceMapEmbeddable', () => {
           </LicenseContext.Provider>
         </ApmEmbeddableContext>
       );
-      expect(screen.getByText(/Platinum/)).toBeInTheDocument();
+      expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
+      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
 
     it('calls onBlockingError with license error', () => {
@@ -200,7 +201,7 @@ describe('ServiceMapEmbeddable', () => {
   });
 
   describe('when service map is not enabled', () => {
-    it('renders the disabled prompt', () => {
+    it('renders loading state while blocking error takes effect', () => {
       mockUseServiceMap.mockReturnValue({
         data: { nodes: [], edges: [], nodesCount: 0, tracesCount: 0 },
         status: FETCH_STATUS.SUCCESS,
@@ -217,11 +218,8 @@ describe('ServiceMapEmbeddable', () => {
           },
         }
       );
-      expect(
-        screen.getByText(
-          /The service map has been disabled\. It can be enabled via `xpack\.apm\.serviceMapEnabled`/
-        )
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
+      expect(document.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
     });
 
     it('calls onBlockingError with disabled error', () => {
