@@ -36,7 +36,7 @@ jest.mock('../../../services/kibana_services', () => ({
           {
             id: 'visualizations',
             order: 1000,
-            getDisplayName: () => 'Visualizations',
+            getDisplayName: () => 'Other visualizations',
           },
         ],
         getDisplayName: () => 'myVis',
@@ -60,7 +60,7 @@ describe('getMenuItemGroups', () => {
     const groups = await getMenuItemGroups(api);
     expect(groups.length).toBe(2);
 
-    expect(groups[0].title).toBe('Visualizations');
+    expect(groups[0].title).toBe('Other visualizations');
     expect(groups[0].items.length).toBe(1);
     expect(groups[1].title).toBe('My group');
     expect(groups[1].items.length).toBe(1);

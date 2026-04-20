@@ -33,7 +33,7 @@ import type { DashboardApi } from '../../../../dashboard_api/types';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
 import { Groups } from './groups';
-import { selectFeaturedVisualizationActions } from './select_featured_items';
+import { selectFeaturedVisualizationActions, LENS_ACTION_ID, ESQL_CHART_ACTION_ID } from './select_featured_items';
 
 export function AddPanelFlyout({
   dashboardApi,
@@ -99,6 +99,13 @@ export function AddPanelFlyout({
     [filteredGroups]
   );
 
+  const groupsForList = useMemo(() => {
+    const featuredIds = new Set([LENS_ACTION_ID, ESQL_CHART_ACTION_ID]);
+    return filteredGroups
+      .map((group) => ({ ...group, items: group.items.filter((item) => !featuredIds.has(item.id)) }))
+      .filter((group) => group.items.length > 0);
+  }, [filteredGroups]);
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -142,75 +149,72 @@ export function AddPanelFlyout({
               </EuiForm>
             </EuiFlexItem>
             {(lens || esql) && (
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="m" responsive={false}>
-                  {lens && !lens.isDisabled && (
-                    <EuiFlexItem>
-                      <EuiPanel
-                        hasBorder
-                        paddingSize="m"
-                        onClick={lens.onClick}
-                        data-test-subj="dashboardAddPanelFeatured-visualization"
-                        css={{ cursor: 'pointer' }}
-                      >
-                        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon type="visBarVertical" size="m" aria-hidden={true} />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <EuiText size="s">
-                              <strong>
-                                {i18nFn.translate(
-                                  'dashboard.addPanelFlyout.featured.visualizationTitle',
-                                  { defaultMessage: 'Visualization' }
-                                )}
-                              </strong>
-                            </EuiText>
-                            <EuiText size="xs" color="subdued">
-                              {i18nFn.translate(
-                                'dashboard.addPanelFlyout.featured.visualizationDescription',
-                                { defaultMessage: 'Build charts using the point and click editor' }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  )}
-                  {esql && !esql.isDisabled && (
-                    <EuiFlexItem>
-                      <EuiPanel
-                        hasBorder
-                        paddingSize="m"
-                        onClick={esql.onClick}
-                        data-test-subj="dashboardAddPanelFeatured-esqlVisualization"
-                        css={{ cursor: 'pointer' }}
-                      >
-                        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon type="editorCodeBlock" size="m" aria-hidden={true} />
-                          </EuiFlexItem>
-                          <EuiFlexItem>
-                            <EuiText size="s">
-                              <strong>
-                                {i18nFn.translate(
-                                  'dashboard.addPanelFlyout.featured.esqlVisualizationTitle',
-                                  { defaultMessage: 'Visualization (query)' }
-                                )}
-                              </strong>
-                            </EuiText>
-                            <EuiText size="xs" color="subdued">
-                              {i18nFn.translate(
-                                'dashboard.addPanelFlyout.featured.esqlVisualizationDescription',
-                                { defaultMessage: 'Build charts with ES|QL' }
-                              )}
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiPanel>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+              <EuiFlexItem
+                grow={false}
+                css={{ display: 'flex', flexDirection: 'column', gap: euiTheme.size.s }}
+              >
+                {lens && !lens.isDisabled && (
+                  <EuiPanel
+                    hasBorder
+                    paddingSize="none"
+                    onClick={lens.onClick}
+                    data-test-subj="dashboardAddPanelFeatured-visualization"
+                    css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
+                  >
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="visBarVertical" size="m" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">
+                          <strong>
+                            {i18nFn.translate(
+                              'dashboard.addPanelFlyout.featured.visualizationTitle',
+                              { defaultMessage: 'Visualization' }
+                            )}
+                          </strong>
+                        </EuiText>
+                        <EuiText size="xs" color="subdued">
+                          {i18nFn.translate(
+                            'dashboard.addPanelFlyout.featured.visualizationDescription',
+                            { defaultMessage: 'Build charts using the point and click editor' }
+                          )}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
+                {esql && !esql.isDisabled && (
+                  <EuiPanel
+                    hasBorder
+                    paddingSize="none"
+                    onClick={esql.onClick}
+                    data-test-subj="dashboardAddPanelFeatured-esqlVisualization"
+                    css={{ cursor: 'pointer', padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}
+                  >
+                    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="editorCodeBlock" size="m" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">
+                          <strong>
+                            {i18nFn.translate(
+                              'dashboard.addPanelFlyout.featured.esqlVisualizationTitle',
+                              { defaultMessage: 'Visualization (query)' }
+                            )}
+                          </strong>
+                        </EuiText>
+                        <EuiText size="xs" color="subdued">
+                          {i18nFn.translate(
+                            'dashboard.addPanelFlyout.featured.esqlVisualizationDescription',
+                            { defaultMessage: 'Build charts with ES|QL' }
+                          )}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiPanel>
+                )}
               </EuiFlexItem>
             )}
             <EuiFlexItem
@@ -239,7 +243,7 @@ export function AddPanelFlyout({
                   data-test-subj="dashboardPanelSelectionErrorIndicator"
                 />
               ) : (
-                <Groups groups={filteredGroups} />
+                <Groups groups={groupsForList} />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

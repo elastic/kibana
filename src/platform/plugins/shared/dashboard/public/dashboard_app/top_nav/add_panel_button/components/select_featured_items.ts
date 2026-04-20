@@ -10,8 +10,8 @@
 import type { MenuItem, MenuItemGroup } from '../types';
 
 // Synced with Lens plugin registration (x-pack/platform/plugins/shared/lens/public)
-const LENS_ACTION_ID = 'addLensPanelAction';
-const ESQL_CHART_ACTION_ID = 'ACTION_CREATE_ESQL_CHART';
+export const LENS_ACTION_ID = 'addLensPanelAction';
+export const ESQL_CHART_ACTION_ID = 'ACTION_CREATE_ESQL_CHART';
 
 export function selectFeaturedVisualizationActions(groups: MenuItemGroup[]): {
   lens: MenuItem | undefined;
