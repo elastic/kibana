@@ -1,5 +1,5 @@
 {
-  "sha1": "343974e8132531b3c2d13821e401baaae29ebbb2",
+  "sha1": "bc9d51b45677f41e7153da001143202a2ea3dadd",
   "tests": [
     {
       "id": "2b226b45edecc17-e395ce97cca539e",
@@ -1524,7 +1524,7 @@
     {
       "id": "9698b39c072261f-fb5d89006e5f2aa",
       "title": "Entity Store History Snapshot history snapshot: copies latest to history index and resets behaviors on latest",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1533,7 +1533,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/history_snapshot.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 10
       }
     },
@@ -1597,7 +1597,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 24,
+        "line": 34,
         "column": 10
       }
     },
@@ -1613,7 +1613,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 47,
+        "line": 69,
         "column": 10
       }
     },
@@ -1629,7 +1629,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 60,
+        "line": 82,
         "column": 10
       }
     },
@@ -1645,7 +1645,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 79,
+        "line": 101,
         "column": 10
       }
     },
@@ -1661,7 +1661,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 98,
+        "line": 120,
         "column": 10
       }
     },
@@ -1677,7 +1677,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 123,
+        "line": 145,
         "column": 10
       }
     },
@@ -1693,7 +1693,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/install_update.spec.ts",
-        "line": 160,
+        "line": 182,
         "column": 10
       }
     },
