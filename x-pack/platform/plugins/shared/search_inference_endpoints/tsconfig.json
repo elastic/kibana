@@ -37,7 +37,6 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
     "@kbn/react-query",
-    "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
     "@kbn/core-http-router-server-mocks",
     "@kbn/logging-mocks",

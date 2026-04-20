@@ -97,7 +97,7 @@ export const EntityResolutionFilePickerStep: React.FC<FilePickerStepProps> = Rea
                 id="xpack.securitySolution.entityAnalytics.entityResolutionUpload.typeColumn"
                 values={{
                   type: <b>{'type'}</b>,
-                  values: 'user, host, service, generic',
+                  values: 'user, host, service',
                 }}
               />
             </li>

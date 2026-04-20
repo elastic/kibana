@@ -122,6 +122,8 @@ export const fromSettingsAttribute = (
     defaultEmail: attr.defaultEmail,
     defaultStatusRuleEnabled: attr.defaultStatusRuleEnabled ?? true,
     defaultTLSRuleEnabled: attr.defaultTLSRuleEnabled ?? true,
+    useAllRemoteClusters: attr.useAllRemoteClusters ?? false,
+    selectedRemoteClusters: attr.selectedRemoteClusters ?? [],
   };
 };
 
@@ -158,4 +160,6 @@ export const DynamicSettingsSchema = schema.object({
       validate: validateInteger,
     })
   ),
+  useAllRemoteClusters: schema.maybe(schema.boolean()),
+  selectedRemoteClusters: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
 });
