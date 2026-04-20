@@ -7,6 +7,10 @@
 
 export const AGENT_BUILDER_PARENT_INFERENCE_FEATURE_ID = 'agent_builder_parent';
 export const AGENT_BUILDER_INFERENCE_FEATURE_ID = 'agent_builder';
+/**
+ * ID of the (fake) user assigned as owner / creator for assets created by our system.
+ */
+export const SYSTEM_USER_ID = 'system';
 export const AGENT_BUILDER_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-4.6-opus-chat_completion',
   '.anthropic-claude-4.6-sonnet-chat_completion',
