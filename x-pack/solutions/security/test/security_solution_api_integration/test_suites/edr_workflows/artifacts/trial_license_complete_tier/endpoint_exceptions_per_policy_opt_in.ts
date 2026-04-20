@@ -23,9 +23,11 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
   const config = getService('config');
   const kibanaServer = getService('kibanaServer');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const retry = getService('retry');
 
   const isServerless = config.get('serverless');
-  const username = isServerless ? 'elastic_admin' : 'elastic';
+  // In serverless, usernames of Cloud users are purely numeric.
+  const username = isServerless ? '1954128031' : 'elastic';
   const superuserRole = isServerless ? 'admin' : 'elastic';
 
   const IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED = (
@@ -166,13 +168,17 @@ export default function endpointExceptionsPerPolicyOptInTests({ getService }: Ft
             });
 
             it('should return `true` opt-in status when it is a new deployment', async () => {
-              // Simulate new deployment by ensuring the SO does not exist and deleting
-              await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
-              // the Endpoint exceptions list as this is the base for deciding the default opt-in status
+              // Simulate new deployment by deleting Endpoint exceptions list, and
               await endpointArtifactTestResources.deleteList(
-                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
-                superuser
+                ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
               );
+              // removing the opt-in status SO
+              await deleteEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+
+              await retry.try(async () => {
+                const optInStatusSO = await findEndpointExceptionsPerPolicyOptInSO(kibanaServer);
+                expect(optInStatusSO).to.be(undefined);
+              });
 
               const response = await superuser
                 .get(ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE)

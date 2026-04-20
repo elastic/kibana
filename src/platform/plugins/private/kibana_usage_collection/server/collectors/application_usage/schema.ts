@@ -130,6 +130,7 @@ export const applicationUsageSchema = {
   status: commonSchema,
   kibanaOverview: commonSchema,
   r: commonSchema,
+  workflows: commonSchema,
 
   // X-Pack
   agent_builder: commonSchema,
@@ -142,7 +143,7 @@ export const applicationUsageSchema = {
   searchPlayground: commonSchema,
   searchSynonyms: commonSchema,
   searchQueryRules: commonSchema,
-  elasticConsole: commonSchema,
+  elasticRamen: commonSchema,
   elasticsearchIndexManagement: commonSchema,
   enterpriseSearchAnalytics: commonSchema,
   enterpriseSearchApplications: commonSchema,

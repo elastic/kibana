@@ -146,12 +146,6 @@ export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetail
 
 export const EXECUTIONS_TAB = 'a[data-test-subj="navigation-execution_results"]';
 
-export const EXECUTION_SHOWING = `[data-test-subj="executionsShowing"]`;
-
-export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
-
-export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
-
 export const EXECUTION_RESULTS_CONTAINER = `[data-test-subj="executionResultsContainer"]`;
 
 export const EXECUTION_RESULTS_TABLE = `[data-test-subj="executionResultsTable"]`;

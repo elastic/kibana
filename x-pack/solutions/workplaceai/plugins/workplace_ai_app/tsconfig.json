@@ -26,7 +26,7 @@
     "@kbn/actions-plugin",
     "@kbn/features-plugin",
     "@kbn/logging",
-    "@kbn/data-catalog-plugin",
+
     "@kbn/react-query",
     "@kbn/deeplinks-agent-builder",
     "@kbn/deeplinks-analytics",
@@ -43,7 +43,6 @@
     "@kbn/workflows-extensions",
     "@kbn/zod",
     "@kbn/workflows",
-    "@kbn/deeplinks-data-sources"
   ],
   "exclude": [
     "target/**/*"

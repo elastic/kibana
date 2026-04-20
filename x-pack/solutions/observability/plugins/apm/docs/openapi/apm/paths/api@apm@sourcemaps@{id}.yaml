@@ -23,6 +23,10 @@ delete:
           schema:
             type: object
             additionalProperties: false
+            description: The response body is intentionally empty for this endpoint.
+          examples:
+            deleteSourceMapResponseExample1:
+              $ref: '../components/examples/source_maps_delete_200_response1.yaml'
     '400':
       description: Bad Request response
       content:

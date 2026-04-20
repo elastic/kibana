@@ -11,6 +11,8 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { ServerEvaluator } from './lib/evaluation_engine';
 
@@ -23,12 +25,14 @@ export interface EvalsPluginStart {
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   actions?: ActionsPluginSetup;
   agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
   workflows?: any; // Optional: Required for AESOP workflow registration
 }
 
 export interface EvalsStartDependencies {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   actions?: ActionsPluginStart;
   agentBuilder?: any; // Optional: Required for AESOP agent auto-creation
   workflows?: any; // Optional: Required for AESOP workflow execution

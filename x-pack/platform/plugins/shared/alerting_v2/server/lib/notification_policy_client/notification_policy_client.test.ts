@@ -138,6 +138,7 @@ describe('NotificationPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'my-workflow' }],
           matcher: null,
           groupBy: null,
+          tags: null,
           throttle: null,
           snoozedUntil: null,
           auth: {
@@ -205,6 +206,61 @@ describe('NotificationPolicyClient', () => {
       expect(res.createdByUsername).toBe('elastic');
       expect(res.updatedByUsername).toBe('elastic');
       expect(res.auth).not.toHaveProperty('apiKey');
+    });
+
+    it('creates a notification policy with tags', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-with-tags',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      await client.createNotificationPolicy({
+        data: {
+          name: 'tagged-policy',
+          description: 'policy with tags',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          tags: ['production', 'critical'],
+        },
+        options: { id: 'policy-with-tags' },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          tags: ['production', 'critical'],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('stores tags as null when not provided', async () => {
+      mockSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'policy-no-tags',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzEsMV0=',
+      });
+
+      await client.createNotificationPolicy({
+        data: {
+          name: 'no-tags-policy',
+          description: 'policy without tags',
+          destinations: [{ type: 'workflow', id: 'my-workflow' }],
+        },
+        options: { id: 'policy-no-tags' },
+      });
+
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        expect.objectContaining({
+          tags: null,
+        }),
+        expect.anything()
+      );
     });
 
     it('throws 400 when data is invalid', async () => {
@@ -674,6 +730,42 @@ describe('NotificationPolicyClient', () => {
       );
     });
 
+    it('builds KQL filter for tags', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ tags: ['production', 'critical'] });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('builds KQL filter for a single tag', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ tags: ['production'] });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({ type: 'function' }),
+        })
+      );
+    });
+
+    it('does not build a filter for empty tags array', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
+
+      await client.findNotificationPolicies({ tags: [] });
+
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: undefined,
+        })
+      );
+    });
+
     it('builds KQL filter for enabled=false', async () => {
       mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindResponse([]));
 
@@ -795,6 +887,7 @@ describe('NotificationPolicyClient', () => {
         data: {
           matcher: null,
           groupBy: null,
+          tags: null,
           throttle: null,
         },
         options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
@@ -810,6 +903,7 @@ describe('NotificationPolicyClient', () => {
           destinations: [{ type: 'workflow', id: 'original-workflow' }],
           matcher: null,
           groupBy: null,
+          tags: null,
           throttle: null,
           updatedByUsername: 'elastic',
         }),
@@ -906,6 +1000,104 @@ describe('NotificationPolicyClient', () => {
       expect(res.auth).not.toHaveProperty('apiKey');
 
       expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
+    });
+
+    it('preserves existing tags when tags is not provided in update', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'tagged-policy',
+        description: 'a policy with tags',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+        tags: ['production', 'critical'],
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      await client.updateNotificationPolicy({
+        data: { name: 'renamed-policy' },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          tags: ['production', 'critical'],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('replaces tags when tags is provided in update', async () => {
+      const existingAttributes: NotificationPolicySavedObjectAttributes = {
+        name: 'tagged-policy',
+        description: 'a policy with tags',
+        enabled: true,
+        destinations: [{ type: 'workflow', id: 'wf-1' }],
+        tags: ['production'],
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'creator_profile_uid',
+        createdByUsername: 'creator',
+        createdAt: '2024-12-01T00:00:00.000Z',
+        updatedBy: 'updater_profile_uid',
+        updatedByUsername: 'updater',
+        updatedAt: '2024-12-01T00:00:00.000Z',
+      };
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: existingAttributes,
+      });
+      mockSavedObjectsClient.update.mockResolvedValueOnce({
+        id: 'policy-id-update-1',
+        type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {} as NotificationPolicySavedObjectAttributes,
+        references: [],
+        version: 'WzIsMV0=',
+      });
+
+      await client.updateNotificationPolicy({
+        data: { tags: ['staging', 'low-priority'] },
+        options: { id: 'policy-id-update-1', version: 'WzEsMV0=' },
+      });
+
+      expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+        NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+        'policy-id-update-1',
+        expect.objectContaining({
+          tags: ['staging', 'low-priority'],
+        }),
+        expect.anything()
+      );
     });
 
     it('does not call invalidation for old key when decrypted policy has createdByUser: true', async () => {
@@ -1352,6 +1544,36 @@ describe('NotificationPolicyClient', () => {
         output: { statusCode: 404 },
       });
     });
+
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-enable-update-404'
+        )
+      );
+
+      await expect(
+        client.enableNotificationPolicy({ id: 'policy-id-enable-update-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('throws 409 when update rejects with ConflictError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-enable-conflict'
+        )
+      );
+
+      await expect(
+        client.enableNotificationPolicy({ id: 'policy-id-enable-conflict' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+    });
   });
 
   describe('disableNotificationPolicy', () => {
@@ -1404,6 +1626,21 @@ describe('NotificationPolicyClient', () => {
 
       expect(res.id).toBe('policy-id-disable');
       expect(res.auth).not.toHaveProperty('apiKey');
+    });
+
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-disable-404'
+        )
+      );
+
+      await expect(
+        client.disableNotificationPolicy({ id: 'policy-id-disable-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
   });
 
@@ -1473,6 +1710,41 @@ describe('NotificationPolicyClient', () => {
       });
 
       expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-snooze-404'
+        )
+      );
+
+      await expect(
+        client.snoozeNotificationPolicy({
+          id: 'policy-id-snooze-404',
+          snoozedUntil: '2025-06-01T12:00:00.000Z',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  describe('unsnoozeNotificationPolicy', () => {
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-unsnooze-404'
+        )
+      );
+
+      await expect(
+        client.unsnoozeNotificationPolicy({ id: 'policy-id-unsnooze-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
   });
 
@@ -1812,6 +2084,70 @@ describe('NotificationPolicyClient', () => {
 
       expect(res).toEqual({ processed: 1, total: 1, errors: [] });
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getAllTags', () => {
+    const makeFindAggResponse = (buckets: Array<{ key: string }>) => ({
+      saved_objects: [],
+      total: 0,
+      per_page: 0,
+      page: 1,
+      aggregations: {
+        tags: { buckets },
+      },
+    });
+
+    it('returns tags from aggregation buckets', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindAggResponse([{ key: 'critical' }, { key: 'production' }, { key: 'staging' }])
+      );
+
+      const result = await client.getAllTags();
+
+      expect(result).toEqual(['critical', 'production', 'staging']);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          perPage: 0,
+          aggs: expect.objectContaining({
+            tags: expect.objectContaining({
+              terms: expect.objectContaining({
+                field: `${NOTIFICATION_POLICY_SAVED_OBJECT_TYPE}.attributes.tags`,
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('passes search parameter as include prefix pattern', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(
+        makeFindAggResponse([{ key: 'production' }])
+      );
+
+      const result = await client.getAllTags({ search: 'prod' });
+
+      expect(result).toEqual(['production']);
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          aggs: expect.objectContaining({
+            tags: expect.objectContaining({
+              terms: expect.objectContaining({
+                include: 'prod.*',
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('returns empty array when no tags exist', async () => {
+      mockSavedObjectsClient.find.mockResolvedValueOnce(makeFindAggResponse([]));
+
+      const result = await client.getAllTags();
+
+      expect(result).toEqual([]);
     });
   });
 

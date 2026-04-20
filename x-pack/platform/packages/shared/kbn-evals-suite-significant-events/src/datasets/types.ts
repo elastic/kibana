@@ -6,9 +6,13 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EvaluationCriterion } from '@kbn/evals';
+import type { EvaluationCriterion, EvaluationCriterionStructured } from '@kbn/evals';
 import type { GcsConfig } from '../data_generators/replay';
-import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction/evaluators';
+import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
+
+export interface SamplingCriterion extends EvaluationCriterionStructured {
+  sampling_filters?: QueryDslQueryContainer[];
+}
 
 interface ScenarioMetadata {
   difficulty: 'easy' | 'medium' | 'hard';
@@ -45,7 +49,7 @@ export interface KIFeatureExtractionScenario {
     log_query_filter?: QueryDslQueryContainer[];
   };
   output: {
-    criteria: EvaluationCriterion[];
+    criteria: SamplingCriterion[];
     min_features?: number;
     max_features?: number;
     required_types?: ValidKIFeatureType[];

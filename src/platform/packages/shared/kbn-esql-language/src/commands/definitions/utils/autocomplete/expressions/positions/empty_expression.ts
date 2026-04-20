@@ -234,7 +234,6 @@ async function buildFieldAndFunctionSuggestions(
       types: config.acceptedTypes,
       ignoredColumns,
       addComma: config.shouldAddComma,
-      promoteToTop: true,
       canBeMultiValue,
     });
   }
@@ -279,7 +278,6 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
         types: acceptedTypes,
         ignoredColumns,
         addSpaceAfterField,
-        promoteToTop: true,
         ...(options.openSuggestions !== undefined && { openSuggestions: options.openSuggestions }),
       });
     }

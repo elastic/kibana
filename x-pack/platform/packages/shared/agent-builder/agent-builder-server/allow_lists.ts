@@ -34,6 +34,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_traces`,
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
+  `${internalNamespaces.observability}.get_apm_correlations`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
@@ -44,7 +45,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.get_entity`,
   `${internalNamespaces.security}.search_entities`,
 
-  // Streams
+  // Streams – read
   `${internalNamespaces.streams}.list_streams`,
   `${internalNamespaces.streams}.get_stream`,
   `${internalNamespaces.streams}.get_schema`,
@@ -52,6 +53,15 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.get_lifecycle_stats`,
   `${internalNamespaces.streams}.query_documents`,
   `${internalNamespaces.streams}.get_failed_documents`,
+
+  // Streams – write
+  `${internalNamespaces.streams}.set_retention`,
+  `${internalNamespaces.streams}.fork_stream`,
+  `${internalNamespaces.streams}.delete_stream`,
+  `${internalNamespaces.streams}.update_processors`,
+  `${internalNamespaces.streams}.map_fields`,
+  `${internalNamespaces.streams}.set_failure_store`,
+  `${internalNamespaces.streams}.update_stream_description`,
 
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
@@ -66,7 +76,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.workflow_modify_step_property`,
   `${internalNamespaces.workflows}.workflow_modify_property`,
   `${internalNamespaces.workflows}.workflow_delete_step`,
-  `${internalNamespaces.workflows}.workflow_replace_yaml`,
+  `${internalNamespaces.workflows}.workflow_set_yaml`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -76,10 +86,8 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
  * The intention is to force a code review from the Agent Builder team when any team adds a new agent.
  */
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
-  `${internalNamespaces.observability}.agent`,
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  'elasticsearch-onboarding',
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -106,7 +114,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'dashboard-management',
 
   // Platform – Streams
-  'streams-exploration',
+  'streams-management',
+  'significant-events-memory',
+  'knowledge-indicators-management',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -121,14 +131,16 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // O11Y
   'observability.rca',
+  'observability.investigation',
+  'observability.service-map',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
   `${internalNamespaces.search}.catalog-ecommerce`,
-  `${internalNamespaces.search}.vector-database`,
-  `${internalNamespaces.search}.semantic-search`,
-  `${internalNamespaces.search}.hybrid-search`,
+  `${internalNamespaces.search}.elasticsearch-onboarding`,
+  `${internalNamespaces.search}.vector-hybrid-search`,
   `${internalNamespaces.search}.rag-chatbot`,
+  `${internalNamespaces.search}.use-case-library`,
 ] as const;
 
 export type AgentBuilderBuiltinSkill = (typeof AGENT_BUILDER_BUILTIN_SKILLS)[number];

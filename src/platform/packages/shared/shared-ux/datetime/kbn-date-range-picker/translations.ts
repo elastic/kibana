@@ -94,7 +94,7 @@ export const calendarPanelTexts = {
 
 export const documentationPanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.heading', {
-    defaultMessage: 'Documentation',
+    defaultMessage: 'Shorthand syntax',
   }),
   intro: i18n.translate('sharedUXPackages.dateRangePicker.documentationPanel.intro', {
     defaultMessage:

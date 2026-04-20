@@ -43,6 +43,7 @@ import { useConnectorSelection } from '../../hooks/chat/use_connector_selection'
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
+import { SkillReferencedContentFieldArray } from './skill_referenced_content_field_array';
 import type { SkillFormData } from './skill_form_validation';
 import { SkillEvalSection } from './skill_eval_section';
 import { useSkillBrowserApiTools } from './use_skill_browser_api_tools';
@@ -279,6 +280,18 @@ const SkillFormContent: React.FC<SkillFormContentProps> = ({
             </EuiFormRow>
           )}
         />
+      </FormSection>
+
+      <EuiHorizontalRule />
+
+      {/* Section: Additional referenced files */}
+      <FormSection
+        id="skill-referenced-content-section-title"
+        icon="documents"
+        title={labels.skills.referencedContentLabel}
+        description={labels.skills.referencedFileSection.description}
+      >
+        <SkillReferencedContentFieldArray control={control} readOnly={isViewMode} />
       </FormSection>
 
       <EuiHorizontalRule />
@@ -541,6 +554,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
         description: skill.description,
         content: skill.content,
         tool_ids: skill.tool_ids ?? [],
+        referenced_content: skill.referenced_content ?? [],
       });
     }
   }, [skill, reset]);
@@ -589,6 +603,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           description: data.description,
           content: data.content,
           tool_ids: data.tool_ids,
+          referenced_content: data.referenced_content,
         });
       } else if (mode === SkillFormMode.Edit) {
         await (onSave as (d: UpdateSkillPayload) => Promise<unknown>)({
@@ -596,6 +611,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
           description: data.description,
           content: data.content,
           tool_ids: data.tool_ids,
+          referenced_content: data.referenced_content,
         });
       }
       reset(data, { keepDirty: false });
@@ -612,7 +628,7 @@ export const SkillForm: React.FC<SkillFormProps> = ({
 
   return (
     <FormProvider {...form}>
-      <KibanaPageTemplate panelled bottomBorder={false} data-test-subj="agentBuilderSkillFormPage">
+      <KibanaPageTemplate bottomBorder={false} data-test-subj="agentBuilderSkillFormPage">
         <KibanaPageTemplate.Header
           pageTitle={
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>

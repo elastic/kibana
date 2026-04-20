@@ -21,5 +21,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.esTestCluster,
       serverArgs: ['xpack.security.enabled=true'],
     },
+    kbnTestServer: {
+      ...functionalConfig.kbnTestServer,
+      serverArgs: [
+        ...functionalConfig.kbnTestServer.serverArgs,
+        '--feature_flags.overrides.discover.cascadeLayoutEnabled=false',
+      ],
+    },
   };
 }

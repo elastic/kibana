@@ -38,7 +38,7 @@ apiTest.describe(
       ];
 
       await testBed.ingest('ingest-e2e-test-trim-basic', docs, processors);
-      const ingestResult = await testBed.getDocs('ingest-e2e-test-trim-basic');
+      const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-trim-basic');
 
       await testBed.ingest('esql-e2e-test-trim-basic', docs);
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-trim-basic', query);
@@ -47,9 +47,9 @@ apiTest.describe(
       expect(ingestResult[0]?.message).toBe('test message 1');
       expect(ingestResult[1]?.message).toBe('test message 2');
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.message).toBe('test message 1');
-      expect(esqlResult.documents[1]?.message).toBe('test message 2');
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.message).toBe('test message 1');
+      expect(esqlResult.documentsOrdered[1]?.message).toBe('test message 2');
     });
 
     apiTest('should trim a field into a target field', async ({ testBed, esql }) => {
@@ -68,7 +68,7 @@ apiTest.describe(
 
       const docs = [{ message: '   test message 1   ' }, { message: '   test message 2   ' }];
       await testBed.ingest('ingest-e2e-test-trim-basic', docs, processors);
-      const ingestResult = await testBed.getDocs('ingest-e2e-test-trim-basic');
+      const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-trim-basic');
 
       await testBed.ingest('esql-e2e-test-trim-basic', docs);
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-trim-basic', query);
@@ -77,9 +77,9 @@ apiTest.describe(
       expect(ingestResult[0]?.message_trimmed).toBe('test message 1');
       expect(ingestResult[1]?.message_trimmed).toBe('test message 2');
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.message_trimmed).toBe('test message 1');
-      expect(esqlResult.documents[1]?.message_trimmed).toBe('test message 2');
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.message_trimmed).toBe('test message 1');
+      expect(esqlResult.documentsOrdered[1]?.message_trimmed).toBe('test message 2');
     });
 
     apiTest('should trim a field with a where condition', async ({ testBed, esql }) => {
@@ -104,7 +104,7 @@ apiTest.describe(
         { message: '   test message 2   ', should_trim: 'no' },
       ];
       await testBed.ingest('ingest-e2e-test-trim-basic', docs, processors);
-      const ingestResult = await testBed.getDocs('ingest-e2e-test-trim-basic');
+      const ingestResult = await testBed.getDocsOrdered('ingest-e2e-test-trim-basic');
 
       await testBed.ingest('esql-e2e-test-trim-basic', docs);
       const esqlResult = await esql.queryOnIndex('esql-e2e-test-trim-basic', query);
@@ -113,9 +113,9 @@ apiTest.describe(
       expect(ingestResult[0]?.message).toBe('test message 1');
       expect(ingestResult[1]?.message).toBe('   test message 2   ');
 
-      expect(esqlResult.documents).toHaveLength(2);
-      expect(esqlResult.documents[0]?.message).toBe('test message 1');
-      expect(esqlResult.documents[1]?.message).toBe('   test message 2   ');
+      expect(esqlResult.documentsOrdered).toHaveLength(2);
+      expect(esqlResult.documentsOrdered[0]?.message).toBe('test message 1');
+      expect(esqlResult.documentsOrdered[1]?.message).toBe('   test message 2   ');
     });
   }
 );

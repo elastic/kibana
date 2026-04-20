@@ -12,6 +12,7 @@ describe('notification policy form utils', () => {
   const state = {
     name: 'Policy',
     description: 'Description',
+    tags: [],
     matcher: '',
     groupingMode: 'per_episode' as const,
     groupBy: [],
@@ -67,6 +68,7 @@ describe('notification policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         groupingMode: 'per_episode',
+        tags: null,
         matcher: null,
         groupBy: null,
         throttle: { strategy: 'on_status_change' },
@@ -79,6 +81,7 @@ describe('notification policy form utils', () => {
         toUpdatePayload(
           {
             ...state,
+            tags: ['production'],
             matcher: 'event.severity: critical',
             groupingMode: 'per_field',
             groupBy: ['host.name'],
@@ -92,6 +95,7 @@ describe('notification policy form utils', () => {
         name: 'Policy',
         description: 'Description',
         groupingMode: 'per_field',
+        tags: ['production'],
         matcher: 'event.severity: critical',
         groupBy: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
@@ -109,6 +113,7 @@ describe('notification policy form utils', () => {
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name'],
+      tags: ['production'],
       groupingMode: 'per_field',
       throttle: { strategy: 'time_interval', interval: '5m' },
       snoozedUntil: null,
@@ -126,6 +131,7 @@ describe('notification policy form utils', () => {
       expect(toFormState(baseResponse)).toEqual({
         name: 'Test Policy',
         description: 'A test policy',
+        tags: ['production'],
         matcher: 'data.severity : "critical"',
         groupingMode: 'per_field',
         groupBy: ['host.name'],
@@ -137,10 +143,17 @@ describe('notification policy form utils', () => {
 
     it('applies defaults when groupingMode and throttle are null', () => {
       expect(
-        toFormState({ ...baseResponse, groupingMode: null, throttle: null, groupBy: null })
+        toFormState({
+          ...baseResponse,
+          groupingMode: null,
+          throttle: null,
+          groupBy: null,
+          tags: null,
+        })
       ).toEqual({
         name: 'Test Policy',
         description: 'A test policy',
+        tags: [],
         matcher: 'data.severity : "critical"',
         groupingMode: 'per_episode',
         groupBy: [],

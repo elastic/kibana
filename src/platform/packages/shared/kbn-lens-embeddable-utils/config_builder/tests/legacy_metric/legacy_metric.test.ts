@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { legacyMetricStateSchema } from '../../schema/charts/legacy_metric';
+import type { LegacyMetricState } from '../../schema/charts/legacy_metric';
+import { AUTO_COLOR } from '../../schema/color';
+import { LensConfigBuilder } from '../../config_builder';
+import type { LensApiState } from '../../schema';
 import { validateConverter, validateAPIConverter } from '../validate';
 import {
   customColorByValueAttributes,
@@ -54,8 +59,10 @@ describe('Legacy Metric', () => {
       validateAPIConverter(basicLegacyMetricWithDataView, legacyMetricStateSchema);
     });
 
-    it('should convert a ESQL-based legacy metric chart', () => {
-      validateAPIConverter(esqlLegacyMetric, legacyMetricStateSchema);
+    it('should reject a ESQL-based legacy metric chart', () => {
+      expect(() =>
+        validateAPIConverter(esqlLegacyMetric as unknown as LensApiState, legacyMetricStateSchema)
+      ).toThrow();
     });
 
     it('should convert a comprehensive legacy metric chart with ad hoc data view', () => {
@@ -66,8 +73,13 @@ describe('Legacy Metric', () => {
       validateAPIConverter(comprehensiveLegacyMetricWithDataView, legacyMetricStateSchema);
     });
 
-    it('should convert a comprehensive ESQL-based legacy metric chart', () => {
-      validateAPIConverter(comprehensiveEsqlLegacyMetric, legacyMetricStateSchema);
+    it('should reject a comprehensive ESQL-based legacy metric chart', () => {
+      expect(() =>
+        validateAPIConverter(
+          comprehensiveEsqlLegacyMetric as unknown as LensApiState,
+          legacyMetricStateSchema
+        )
+      ).toThrow();
     });
 
     it('should convert a legacy metric chart with apply_color_to, but without color', () => {
@@ -80,6 +92,59 @@ describe('Legacy Metric', () => {
       validateAPIConverter(legacyMetricWithColorWithoutApplyColorTo, legacyMetricStateSchema, [
         'metric.color',
       ]);
+    });
+  });
+
+  describe('color default application', () => {
+    it('should emit AUTO_COLOR when apply_color_to is set without color', () => {
+      const config = {
+        type: 'legacy_metric',
+        title: 'Color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+          apply_color_to: 'background',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies LegacyMetricState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricState;
+
+      expect(apiOutput.metric.color).toEqual(AUTO_COLOR);
+      expect(apiOutput.metric.apply_color_to).toBe('background');
+    });
+
+    it('should omit color when apply_color_to is not specified', () => {
+      const config = {
+        type: 'legacy_metric',
+        title: 'Color default test',
+        data_source: {
+          type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+          index_pattern: 'test-index',
+          time_field: '@timestamp',
+        },
+        metric: {
+          operation: 'count',
+          empty_as_null: false,
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+      } satisfies LegacyMetricState;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = builder.toAPIFormat(lensState) as LegacyMetricState;
+
+      expect(apiOutput.metric.color).not.toBeDefined();
+      expect(apiOutput.metric.apply_color_to).not.toBeDefined();
     });
   });
 });

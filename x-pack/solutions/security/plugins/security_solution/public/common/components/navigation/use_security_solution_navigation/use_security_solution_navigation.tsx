@@ -55,6 +55,5 @@ export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['soluti
     children: <SecuritySideNav />,
     closeFlyoutButtonPosition: 'inside',
     footer: solutionNavFooter,
-    ...(solutionNavFooter ? { hasPinnedBottomNavItems: true } : {}),
   };
 };

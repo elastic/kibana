@@ -93,6 +93,8 @@ const enabledActionTypes = [
   'test.connector-with-hooks',
   'test.deprecated',
   'test.single_file_connector',
+  'test.oauth-connector',
+  'test.oauth-executor',
 ];
 
 export const getPreConfiguredActions = (

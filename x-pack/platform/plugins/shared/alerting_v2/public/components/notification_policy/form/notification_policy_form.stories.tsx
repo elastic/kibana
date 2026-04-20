@@ -56,6 +56,7 @@ export const EditMode: Story = {
     defaultValues: {
       name: 'Critical production alerts',
       description: 'Routes critical production alerts to escalation workflows',
+      tags: ['production', 'critical'],
       matcher: 'data.severity : "critical" and data.env : "prod"',
       groupingMode: 'per_field',
       groupBy: ['host.name', 'service.name'],
@@ -71,6 +72,7 @@ export const PerEpisodeWithInterval: Story = {
     defaultValues: {
       name: 'Status change with reminders',
       description: 'Notifies on status change and repeats every hour',
+      tags: [],
       matcher: '',
       groupingMode: 'per_episode',
       groupBy: [],
@@ -86,6 +88,7 @@ export const DigestMode: Story = {
     defaultValues: {
       name: 'Digest summary',
       description: 'Bundles all episodes into a single digest',
+      tags: [],
       matcher: '',
       groupingMode: 'all',
       groupBy: [],

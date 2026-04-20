@@ -41,7 +41,7 @@ describe('CoverageOverviewMitreTechniquePanelPopover', () => {
       ...initialUserPrivilegesState(),
       rulesPrivileges: {
         ...initialUserPrivilegesState().rulesPrivileges,
-        rules: { read: true, edit: true },
+        enableDisable: { edit: true },
       },
     });
   });

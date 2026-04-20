@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -25,11 +25,10 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
-import { PageScope } from '../../data_view_manager/constants';
 import { useSpaceId } from '../../common/hooks/use_space_id';
+import { useStoredAssistantConnectorId } from '../../onboarding/components/hooks/use_stored_state';
 import { EntityAnalyticsRecentAnomalies } from '../components/home/anomalies_panel';
 import { WatchlistFilter } from '../components/watchlists/watchlist_filter';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
@@ -45,6 +44,11 @@ import {
   type URLQuery,
 } from '../components/home/entities_table';
 import { DynamicRiskLevelPanel } from '../components/home/dynamic_risk_level_panel';
+import { TopThreatHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads';
+import { ThreatHuntingLeadsFlyout } from '../components/threat_hunting/top_threat_hunting_leads/threat_hunting_leads_flyout';
+import { useHuntingLeads } from '../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads';
+import { useLeadAttachment } from '../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment';
+import type { HuntingLead } from '../components/threat_hunting/top_threat_hunting_leads/types';
 
 const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => ({
   query,
@@ -60,11 +64,40 @@ export const EntityAnalyticsHomePage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView(PageScope.explore);
+  const leadGenerationEnabled = useIsExperimentalFeatureEnabled('leadGenerationEnabled');
+  const spaceId = useSpaceId();
+  const { dataView: entityDataView, isLoading: entityDataViewLoading } =
+    useEntityStoreDataView(spaceId);
+
+  const resolvedSpaceId = spaceId ?? 'default';
+  const [storedConnectorId, setStoredConnectorId] = useStoredAssistantConnectorId(resolvedSpaceId);
+  const connectorId = spaceId ? storedConnectorId ?? '' : '';
+  const safeSetConnectorId = useCallback(
+    (id: string | undefined) => {
+      if (spaceId) {
+        setStoredConnectorId(id);
+      }
+    },
+    [spaceId, setStoredConnectorId]
+  );
+  const {
+    leads,
+    totalCount,
+    isLoading: isLeadsLoading,
+    isGenerating,
+    hasGenerated,
+    lastRunTimestamp,
+    generate,
+    isScheduled,
+    toggleSchedule,
+  } = useHuntingLeads(connectorId, leadGenerationEnabled);
+  const openAgentBuilderWithLead = useLeadAttachment();
+
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const isSourcererLoading = useMemo(
-    () => (newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading),
-    [newDataViewPickerEnabled, oldIsSourcererLoading, status]
+    () => (newDataViewPickerEnabled ? entityDataViewLoading : oldIsSourcererLoading),
+    [newDataViewPickerEnabled, oldIsSourcererLoading, entityDataViewLoading]
   );
 
   const location = useLocation();
@@ -99,14 +132,29 @@ export const EntityAnalyticsHomePage = () => {
   );
 
   const indicesExist = useMemo(
-    () => (newDataViewPickerEnabled ? !!dataView?.matchedIndices?.length : oldIndicesExist),
-    [dataView?.matchedIndices?.length, newDataViewPickerEnabled, oldIndicesExist]
+    () => (newDataViewPickerEnabled ? !entityDataViewLoading : oldIndicesExist),
+    [entityDataViewLoading, newDataViewPickerEnabled, oldIndicesExist]
   );
 
   const isXlScreen = useIsWithinBreakpoints(['l', 'xl']);
   const showEmptyPrompt = !indicesExist;
 
-  if (newDataViewPickerEnabled && status === 'pristine') {
+  const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+  const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
+  const handleOpenLeadInChat = useCallback(
+    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
+    [openAgentBuilderWithLead]
+  );
+
+  const handleHuntInChat = useCallback(() => {
+    const firstLead = leads[0];
+    if (firstLead) {
+      openAgentBuilderWithLead(firstLead);
+    }
+  }, [leads, openAgentBuilderWithLead]);
+
+  if (newDataViewPickerEnabled && entityDataViewLoading) {
     return <PageLoader />;
   }
 
@@ -118,7 +166,7 @@ export const EntityAnalyticsHomePage = () => {
     <>
       <FiltersGlobal>
         <SiemSearchBar
-          dataView={dataView}
+          dataView={entityDataView}
           id={InputsModelId.global}
           sourcererDataViewSpec={oldSourcererDataViewSpec}
         />
@@ -144,6 +192,27 @@ export const EntityAnalyticsHomePage = () => {
           <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsHomePageLoader" />
         ) : (
           <EuiFlexGroup direction="column" gutterSize="l">
+            {leadGenerationEnabled && (
+              <EuiFlexItem>
+                <TopThreatHuntingLeads
+                  leads={leads}
+                  totalCount={totalCount}
+                  isLoading={isLeadsLoading}
+                  isGenerating={isGenerating}
+                  hasGenerated={hasGenerated}
+                  lastRunTimestamp={lastRunTimestamp}
+                  isScheduled={isScheduled}
+                  onToggleSchedule={toggleSchedule}
+                  onSeeAll={handleOpenFlyout}
+                  onLeadClick={handleOpenLeadInChat}
+                  onHuntInChat={handleHuntInChat}
+                  onGenerate={generate}
+                  connectorId={connectorId}
+                  onConnectorIdSelected={safeSetConnectorId}
+                />
+              </EuiFlexItem>
+            )}
+
             <EuiFlexItem>
               <EuiFlexGroup
                 direction={isXlScreen ? 'row' : 'column'}
@@ -170,11 +239,17 @@ export const EntityAnalyticsHomePage = () => {
               <EntityAnalyticsEntitiesTable
                 watchlistId={selectedWatchlistId}
                 watchlistName={selectedWatchlistName}
+                entityDataView={entityDataView}
+                entityDataViewLoading={entityDataViewLoading}
               />
             </EuiPanel>
           </EuiFlexGroup>
         )}
       </SecuritySolutionPageWrapper>
+
+      {leadGenerationEnabled && isFlyoutOpen && (
+        <ThreatHuntingLeadsFlyout onClose={handleCloseFlyout} onSelectLead={handleOpenLeadInChat} />
+      )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
@@ -184,15 +259,15 @@ export const EntityAnalyticsHomePage = () => {
 const EntityAnalyticsEntitiesTable = ({
   watchlistId,
   watchlistName,
+  entityDataView,
+  entityDataViewLoading,
 }: {
   watchlistId?: string;
   watchlistName?: string;
+  entityDataView: ReturnType<typeof useEntityStoreDataView>['dataView'];
+  entityDataViewLoading: boolean;
 }) => {
-  const spaceId = useSpaceId();
-  const { dataView: entityDataView, isLoading: entityDataViewLoading } =
-    useEntityStoreDataView(spaceId);
-
-  if (entityDataViewLoading || !entityDataView) {
+  if (entityDataViewLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsEntitiesTableLoader" />;
   }
 

@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
 import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './mosaic';
 import { mosaicStateSchema } from './mosaic';
 
 describe('Mosaic Schema', () => {
   const baseMosaicConfig: Pick<
     MosaicStateNoESQL,
-    'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+    'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
   > = {
     type: 'mosaic',
-    dataset: {
-      type: 'dataView',
-      id: 'test-data-view',
+    data_source: {
+      type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+      ref_id: 'test-data-view',
     },
     ignore_global_filters: false,
     sampling: 0,
@@ -158,15 +159,17 @@ describe('Mosaic Schema', () => {
           visibility: 'visible',
           size: 's',
         },
-        values: {
-          visible: false,
+        styling: {
+          values: {
+            visible: false,
+          },
         },
       };
 
       const validated = mosaicStateSchema.validate(input);
       expect(validated.title).toBe('Sales Mosaic');
       expect(validated.legend?.nested).toBe(true);
-      expect(validated.values?.visible).toBe(false);
+      expect(validated.styling?.values?.visible).toBe(false);
     });
 
     it('throws on empty group_by array', () => {
@@ -565,10 +568,10 @@ describe('Mosaic Schema', () => {
   describe('ES|QL Schema', () => {
     const baseESQLMosaicConfig: Pick<
       MosaicStateESQL,
-      'type' | 'dataset' | 'ignore_global_filters' | 'sampling'
+      'type' | 'data_source' | 'ignore_global_filters' | 'sampling'
     > = {
       type: 'mosaic',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'FROM blah | KEEP foo, bar',
       },

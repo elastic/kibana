@@ -80,7 +80,7 @@ function createMatcherContext(episode: AlertEpisode, rule: Rule): MatcherContext
       id: rule.id,
       name: rule.name,
       description: rule.description,
-      labels: rule.labels,
+      tags: rule.tags,
       enabled: rule.enabled,
       createdAt: rule.createdAt,
       updatedAt: rule.updatedAt,

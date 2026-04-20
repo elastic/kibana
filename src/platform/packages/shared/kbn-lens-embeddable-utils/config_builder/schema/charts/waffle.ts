@@ -10,8 +10,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { esqlColumnWithFormatSchema } from '../metric_ops';
-import { colorMappingSchema, staticColorSchema } from '../color';
-import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
+import { colorMappingSchema, staticColorSchema, autoColorSchema, AUTO_COLOR } from '../color';
+import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
   collapseBySchema,
   dslOnlyPanelInfoSchema,
@@ -26,11 +26,9 @@ import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps,
 } from './shared';
+import { objectUnion } from './utils/object_union';
 
-/**
- * Shared visualization options for partition charts including legend and value display
- */
-export const waffleStateSharedSchema = {
+const waffleStateSharedSchema = {
   legend: schema.maybe(
     schema.object(
       {
@@ -58,8 +56,20 @@ export const waffleStateSharedSchema = {
       }
     )
   ),
-  values: valueDisplaySchema,
 };
+
+const waffleStylingSchema = schema.object(
+  {
+    values: valueDisplaySchema,
+  },
+  {
+    meta: {
+      id: 'waffleStyling',
+      title: 'Waffle styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
 
 /**
  * Color configuration for primary metric in waffle chart
@@ -68,7 +78,11 @@ const partitionStatePrimaryMetricOptionsSchema = {
   /**
    * Color configuration
    */
-  color: schema.maybe(staticColorSchema),
+  color: schema.maybe(
+    schema.oneOf([staticColorSchema, autoColorSchema], {
+      defaultValue: AUTO_COLOR,
+    })
+  ),
 };
 
 /**
@@ -87,10 +101,10 @@ export const waffleStateSchemaNoESQL = schema.object(
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetSchema,
+    ...dataSourceSchema,
     ...dslOnlyPanelInfoSchema,
     ...waffleStateSharedSchema,
-    ...dslOnlyPanelInfoSchema,
+    styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
         partitionStatePrimaryMetricOptionsSchema
@@ -130,8 +144,9 @@ export const waffleStateSchemaESQL = schema.object(
     type: schema.literal('waffle'),
     ...sharedPanelInfoSchema,
     ...layerSettingsSchema,
-    ...datasetEsqlTableSchema,
+    ...dataSourceEsqlTableSchema,
     ...waffleStateSharedSchema,
+    styling: schema.maybe(waffleStylingSchema),
     metrics: schema.arrayOf(
       esqlColumnWithFormatSchema.extends(partitionStatePrimaryMetricOptionsSchema),
       {
@@ -161,7 +176,7 @@ export const waffleStateSchemaESQL = schema.object(
 /**
  * Complete waffle chart configuration supporting both standard and ES|QL queries
  */
-export const waffleStateSchema = schema.oneOf([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
+export const waffleStateSchema = objectUnion([waffleStateSchemaNoESQL, waffleStateSchemaESQL], {
   meta: {
     id: 'waffleChart',
     title: 'Waffle Chart',

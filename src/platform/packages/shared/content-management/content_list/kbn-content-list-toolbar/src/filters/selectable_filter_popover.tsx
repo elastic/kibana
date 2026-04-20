@@ -88,6 +88,10 @@ export interface SelectableFilterPopoverProps<T extends object = Record<string, 
   panelMinWidth?: number;
   /** Optional footer content (rendered below {@link ModifierKeyTip}). */
   footerContent?: React.ReactNode;
+  /** Optional header content rendered above the selectable list (e.g. a search input). */
+  headerContent?: React.ReactNode;
+  /** Called when the popover opens or closes. */
+  onToggle?: (isOpen: boolean) => void;
   /** `data-test-subj` attribute for testing. */
   'data-test-subj'?: string;
 }
@@ -156,9 +160,23 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   panelWidth,
   panelMinWidth,
   footerContent,
+  headerContent,
+  onToggle: onToggleProp,
   'data-test-subj': dataTestSubj = 'selectableFilterPopover',
 }: SelectableFilterPopoverProps<T>) => {
-  const { isOpen, toggle, close } = useFilterPopover();
+  const { isOpen, toggle: rawToggle, close: rawClose } = useFilterPopover();
+
+  const toggle = useCallback(() => {
+    rawToggle();
+    onToggleProp?.(!isOpen);
+  }, [rawToggle, onToggleProp, isOpen]);
+
+  const close = useCallback(() => {
+    rawClose();
+    if (isOpen) {
+      onToggleProp?.(false);
+    }
+  }, [rawClose, onToggleProp, isOpen]);
   const {
     selection,
     toggle: toggleValue,
@@ -220,7 +238,8 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   // `lastModifierRef` to support Cmd/Ctrl+click for exclude.
   const handleSelectChange = useCallback(
     (updatedOptions: Array<InternalSelectableOption<T>>) => {
-      const filterType: FilterType = lastModifierRef.current ? 'exclude' : 'include';
+      const filterType: FilterType =
+        !singleSelection && lastModifierRef.current ? 'exclude' : 'include';
 
       if (singleSelection) {
         const newlyChecked = updatedOptions.find(
@@ -254,6 +273,7 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
   return (
     <FilterPopover
       title={title}
+      totalCount={isLoading ? undefined : options.length}
       activeCount={displayActiveCount}
       isOpen={isOpen}
       onToggle={toggle}
@@ -294,6 +314,11 @@ export const SelectableFilterPopover = <T extends object = Record<string, unknow
                 />
               )}
               <EuiHorizontalRule margin="none" />
+              {headerContent && (
+                <EuiPanel hasShadow={false} paddingSize="s" style={{ paddingBottom: 0 }}>
+                  {headerContent}
+                </EuiPanel>
+              )}
               {list}
             </>
           )}

@@ -121,7 +121,14 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/code-editor'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
+  - '@kbn/core-http-common'
+  - '@kbn/core-http-server-mocks'
   - '@kbn/core-http-browser'
+  - '@kbn/lens-common'
+  - '@kbn/dashboard-navigation-options-common'
+  - '@kbn/dashboard-navigation-options-components'
+  - '@kbn/dashboard-navigation-options-schema'
 tags:
   - plugin
   - prod

@@ -91,7 +91,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={undoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={'editorUndo'}
+            iconType={'undo'}
             size="xs"
             aria-label={undoButtonMsg}
             isDisabled={workspace.undoLog.length < 1}
@@ -103,7 +103,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={redoButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="editorRedo"
+            iconType="redo"
             size="xs"
             aria-label={redoButtonMsg}
             isDisabled={workspace.redoLog.length === 0}
@@ -152,7 +152,7 @@ export const ControlPanelToolBar = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={blocklistButtonMsg} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="eyeClosed"
+            iconType="eyeSlash"
             size="xs"
             aria-label={blocklistButtonMsg}
             isDisabled={workspace.selectedNodes.length === 0}
@@ -190,7 +190,7 @@ export const ControlPanelToolBar = ({
           <EuiToolTip content={runLayoutButtonMsg} disableScreenReaderOutput>
             <EuiButtonIcon
               data-test-subj="graphResumeLayout"
-              iconType="playFilled"
+              iconType="play"
               size="xs"
               aria-label={runLayoutButtonMsg}
               isDisabled={workspace.nodes.length === 0}

@@ -40,7 +40,7 @@ export const registerChatCompletionsRoute = ({
 }) => {
   router.post(
     {
-      path: '/internal/elastic_console/v1/chat/completions',
+      path: '/internal/elastic_ramen/v1/chat/completions',
       security: {
         authz: { enabled: false, reason: 'This route delegates to the inference plugin' },
       },

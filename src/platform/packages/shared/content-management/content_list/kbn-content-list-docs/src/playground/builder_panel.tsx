@@ -298,6 +298,20 @@ export const BuilderPanel = ({ state, dispatch }: BuilderPanelProps) => {
               onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'starred', value: v })}
             />
           </JsxPropDisplay>
+          <JsxPropDisplay name="tags">
+            <InlineCheckbox
+              id={`${idPrefix}-tags`}
+              checked={features.tags}
+              onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'tags', value: v })}
+            />
+          </JsxPropDisplay>
+          <JsxPropDisplay name="userProfiles">
+            <InlineCheckbox
+              id={`${idPrefix}-userProfiles`}
+              checked={features.userProfiles}
+              onChange={(v) => dispatch({ type: 'SET_FEATURE', key: 'userProfiles', value: v })}
+            />
+          </JsxPropDisplay>
         </JsxPropBlock>
       </JsxTag>
 

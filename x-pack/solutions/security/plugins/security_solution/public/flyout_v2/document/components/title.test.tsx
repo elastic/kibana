@@ -12,6 +12,17 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { Title } from './title';
 import { TITLE_LINK_TEST_ID, TITLE_TEST_ID } from './test_ids';
 
+jest.mock('../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {
+      application: {
+        getUrlForApp: (_appId: string, { path }: { path: string }) =>
+          `/app/securitySolutionUI${path}`,
+      },
+    },
+  }),
+}));
+
 jest.mock('../../shared/components/flyout_title', () => ({
   FlyoutTitle: ({
     title,
@@ -49,6 +60,11 @@ const alertHit = createMockHit({
   'kibana.alert.rule.uuid': 'rule-uuid-123',
 });
 
+const alertHitWithoutRuleId = createMockHit({
+  'event.kind': 'signal',
+  'kibana.alert.rule.name': 'Test Rule Name',
+});
+
 const alertHitWithoutRuleName = createMockHit({
   'event.kind': 'signal',
 });
@@ -80,7 +96,7 @@ describe('<Title />', () => {
 
     expect(getByTestId(TITLE_TEST_ID)).toHaveTextContent('Test Rule Name');
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-icon-type', 'warning');
-    expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'false');
+    expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'true');
   });
 
   it('should render default title when alert has no rule name', () => {
@@ -111,20 +127,20 @@ describe('<Title />', () => {
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-icon-type', 'analyzeEvent');
   });
 
-  it('should render as a link when titleHref is provided', () => {
-    const { getByTestId } = renderTitle({
-      hit: alertHit,
-      titleHref: 'https://example.com/rule/123',
-    });
+  it('should render as a link when the alert has a rule id', () => {
+    const { getByTestId } = renderTitle({ hit: alertHit });
 
     expect(getByTestId(TITLE_LINK_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveAttribute('href', 'https://example.com/rule/123');
+    expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveAttribute(
+      'href',
+      expect.stringContaining('rule-uuid-123')
+    );
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'true');
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-icon-type', 'warning');
   });
 
-  it('should render as plain text when titleHref is not provided', () => {
-    const { queryByTestId, getByTestId } = renderTitle({ hit: alertHit });
+  it('should render as plain text when the alert has no rule id', () => {
+    const { queryByTestId, getByTestId } = renderTitle({ hit: alertHitWithoutRuleId });
 
     expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'false');

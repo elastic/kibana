@@ -19,6 +19,10 @@ export const MOCK_IDP_UIAM_ORG_ADMIN_API_KEY =
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_API_KEYS = 'api-keys';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_USERS = 'users';
 export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_TOKEN_INVALIDATION = 'token-invalidation';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_CLIENTS = 'oauth-clients';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_AUTHORIZATION_CODES =
+  'oauth-authorization-codes';
+export const MOCK_IDP_UIAM_COSMOS_DB_COLLECTION_OAUTH_APP_CONNECTIONS = 'oauth-app-connections';
 export const MOCK_IDP_UIAM_COSMOS_DB_NAME = 'uiam-db';
 // Cosmos DB emulator uses a fixed key. For production, this should be retrieved from configuration.
 export const MOCK_IDP_UIAM_COSMOS_DB_ACCESS_KEY =
@@ -37,6 +41,13 @@ export const MOCK_IDP_UIAM_ORGANIZATION_ID = 'org1234567890';
 export const MOCK_IDP_UIAM_PROJECT_ID = 'abcdef12345678901234567890123456';
 export const MOCK_IDP_UIAM_PROJECT_ID2 = 'fedcba65432109876543210987654321';
 
+// cloud.id is decoded by the security plugin to obtain the ES endpoint for UIAM API key conversion.
+// CI:    decodes to https://es01:9220 (ES listens on port 9220 inside the Docker network)
+// Local: decodes to https://host.docker.internal:9220 (ES is on the host, reached via Docker bridge)
+export const MOCK_IDP_UIAM_CLOUD_ID = process.env.CI
+  ? 'ci:ZXMwMTo5MjIwJDo5MjIwJGtpYmFuYTo5MjIw'
+  : 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMjAkaG9zdDo5MjIwJGtpYmFuYTo5MjIw';
+
 // Sometimes it is useful or required to point local UIAM service clients, or clients operating within the same Docker
 // network (i.e., Elasticsearch), to a different UIAM service URL. For example, http://host.docker.internal:8080 can be
 // used to route requests through the host network, making it easier to capture traffic with a network analyzer running
@@ -45,6 +56,8 @@ export const MOCK_IDP_UIAM_SERVICE_INTERNAL_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_INTERNAL_URL || 'https://uiam:8443';
 export const MOCK_IDP_UIAM_SERVICE_URL =
   process.env.MOCK_IDP_UIAM_SERVICE_URL || 'https://localhost:8443';
+export const MOCK_IDP_UIAM_OAUTH_BASE_URL =
+  process.env.MOCK_IDP_UIAM_OAUTH_BASE_URL || `https://localhost:8444/oauth2`;
 
 export const MOCK_IDP_REALM_NAME = 'cloud-saml-kibana';
 export const MOCK_IDP_REALM_TYPE = 'saml';

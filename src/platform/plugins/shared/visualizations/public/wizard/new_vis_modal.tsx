@@ -20,7 +20,10 @@ import {
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
-import type { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import type {
+  EmbeddableStateTransfer,
+  EmbeddableEditorBreadcrumb,
+} from '@kbn/embeddable-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import { css } from '@emotion/react';
 import { SearchSelection } from './search_selection';
@@ -77,6 +80,7 @@ export interface TypeSelectionProps {
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
   originatingPath?: string;
+  breadcrumbs?: EmbeddableEditorBreadcrumb[];
   showAggsSelection?: boolean;
   selectedVisType?: BaseVisType;
 }
@@ -226,6 +230,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
         state: {
           originatingApp: this.props.originatingApp,
           originatingPath: this.props.originatingPath,
+          breadcrumbs: this.props.breadcrumbs,
         },
       });
     } else {

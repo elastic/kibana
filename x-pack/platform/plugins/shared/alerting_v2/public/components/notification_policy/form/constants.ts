@@ -139,6 +139,7 @@ export const DURATION_UNIT_LABELS: Record<string, string> = {
 export const DEFAULT_FORM_STATE: NotificationPolicyFormState = {
   name: '',
   description: '',
+  tags: [],
   matcher: '',
   groupingMode: 'per_episode',
   groupBy: [],

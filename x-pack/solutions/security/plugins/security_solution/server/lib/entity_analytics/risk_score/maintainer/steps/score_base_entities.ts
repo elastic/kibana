@@ -303,7 +303,7 @@ const enrichWithModifiers = async ({
     weights: [],
     page: {
       scores,
-      identifierField: 'entity_id',
+      identifierField: 'entity.id',
     },
     entities: entityMap,
     watchlistConfigs,

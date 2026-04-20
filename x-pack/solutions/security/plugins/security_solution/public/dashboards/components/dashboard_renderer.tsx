@@ -14,6 +14,7 @@ import type {
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import { toAsCodeQuery } from '@kbn/as-code-shared-transforms';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
@@ -115,6 +116,7 @@ const DashboardRendererComponent = ({
   const getCreationOptions: () => Promise<DashboardCreationOptions> = useCallback(() => {
     return Promise.resolve({
       useSessionStorageIntegration: true,
+      useControlsIntegration: false,
       getInitialInput: () => {
         return initialInput.value;
       },
@@ -173,7 +175,7 @@ const DashboardRendererComponent = ({
     initialInput.next({
       time_range: timeRange,
       viewMode,
-      query,
+      query: toAsCodeQuery(query),
       filters: fromStoredFilters(filters),
     });
   }, [timeRange, viewMode, query, filters]);

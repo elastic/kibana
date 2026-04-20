@@ -116,8 +116,10 @@ export const useDashboardListingTable = ({
       if (dashboard.status === 'error') {
         return;
       }
+      // `access_control` can not be specified as part of the update payload
+      const { access_control, ...restOfAttributes } = dashboard.attributes;
       await dashboardClient.update(id, {
-        ...dashboard.attributes,
+        ...restOfAttributes,
         ...updatedState,
       });
 

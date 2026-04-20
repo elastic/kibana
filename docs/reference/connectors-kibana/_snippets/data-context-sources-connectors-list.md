@@ -1,5 +1,6 @@
 **Third-party search**
 * [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
+* [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 * [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.

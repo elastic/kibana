@@ -13,11 +13,11 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiPanel,
+  EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as translations from '../../../common/translations';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { SubFeatureCard } from './sub_feature_card';
 
@@ -32,6 +32,7 @@ interface FeatureSectionProps {
   features: FeatureSettingItem[];
   onReset: () => void;
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
+  invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
   isBeta?: boolean;
 }
@@ -42,6 +43,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   features,
   onReset,
   onEndpointsChange,
+  invalidEndpointIds,
   isTechPreview = false,
   isBeta = false,
 }) => {
@@ -80,6 +82,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>{parentDescription}</p>
           </EuiText>
@@ -87,7 +90,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
         {features.length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
-              {translations.SETTINGS_RESET_DEFAULTS}
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.resetDefaults', {
+                defaultMessage: 'Reset all to defaults',
+              })}
             </EuiLink>
           </EuiFlexItem>
         )}
@@ -111,6 +116,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                   feature={feature}
                   endpointIds={endpointIds}
                   onEndpointsChange={onEndpointsChange}
+                  invalidEndpointIds={invalidEndpointIds}
                 />
               </EuiFlexItem>
             ))}

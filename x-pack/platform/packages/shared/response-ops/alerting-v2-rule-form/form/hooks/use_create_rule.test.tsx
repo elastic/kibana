@@ -41,7 +41,7 @@ describe('useCreateRule', () => {
     metadata: {
       name: 'Test Rule',
       enabled: true,
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -61,7 +61,7 @@ describe('useCreateRule', () => {
     kind: 'signal',
     metadata: {
       name: 'Test Rule',
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     time_field: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -217,6 +217,7 @@ describe('useCreateRule', () => {
       expect(body.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
+        recovering_count: 0,
       });
     });
   });
@@ -256,7 +257,7 @@ describe('useCreateRule', () => {
     });
   });
 
-  it('omits state_transition when kind is alert but state transition is empty', async () => {
+  it('emits pending_count: 0 and recovering_count: 0 when kind is alert and both modes are immediate', async () => {
     const { http, result } = setupUseCreateRule();
 
     http.post.mockResolvedValue({ id: 'rule-789', metadata: { name: 'Alert Rule' } });
@@ -285,7 +286,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       const body = getLastPostedBody(http);
-      expect(body.state_transition).toBeUndefined();
+      expect(body.state_transition).toEqual({ pending_count: 0, recovering_count: 0 });
     });
   });
 
@@ -320,7 +321,7 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       const body = getLastPostedBody(http);
-      expect(body.state_transition).toEqual({ pending_count: 5 });
+      expect(body.state_transition).toEqual({ pending_count: 5, recovering_count: 0 });
     });
   });
 
@@ -345,7 +346,7 @@ describe('useCreateRule', () => {
         name: 'Complex Rule',
         enabled: false,
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       timeField: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },
@@ -365,7 +366,7 @@ describe('useCreateRule', () => {
       metadata: {
         name: 'Complex Rule',
         description: 'A complex rule',
-        labels: ['production', 'critical'],
+        tags: ['production', 'critical'],
       },
       time_field: 'event.timestamp',
       schedule: { every: '1m', lookback: '1m' },

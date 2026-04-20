@@ -63,8 +63,8 @@ export const SearchInputSchema = z.object({
     .describe(
       "KQL query string. Use plain keywords for broad search, or field:value pairs for filtered search. Examples: 'budget report', 'FileExtension:docx', 'author:Jane AND project plan', 'ContentType:Document AND title:policy'"
     ),
-  from: z.number().optional().describe('Zero-based start row for pagination (default: 0)'),
-  size: z.number().optional().describe('Number of results to return (default: 10)'),
+  from: z.number().default(0).describe('Zero-based start row for pagination (default: 0)'),
+  size: z.number().default(10).describe('Number of results to return (default: 10)'),
 });
 
 export const CallRestApiInputSchema = z.object({

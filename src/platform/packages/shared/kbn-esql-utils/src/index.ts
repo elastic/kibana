@@ -8,6 +8,7 @@
  */
 
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export { getESQLTimeFieldFromQuery } from './utils/get_esql_time_field_from_query';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
@@ -23,6 +24,7 @@ export {
   getESQLQueryVariables,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
+  getSparklineColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
   getKqlSearchQueries,

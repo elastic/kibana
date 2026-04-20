@@ -6,6 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EvalsRouter } from '../types';
 import type { EvaluatorRegistry } from '../lib/evaluation_engine';
 import type { SkillMonitoringService } from '../lib/monitoring/skill_monitoring_service';
@@ -14,6 +16,7 @@ import { registerGetRunsRoute } from './runs/get_runs';
 import { registerGetRunRoute } from './runs/get_run';
 import { registerGetRunScoresRoute } from './runs/get_run_scores';
 import { registerGetRunDatasetExamplesRoute } from './runs/get_run_dataset_examples';
+import { registerCompareRunsRoute } from './runs/compare_runs';
 import { registerGetExampleScoresRoute } from './examples/get_example_scores';
 import { registerGetTraceRoute } from './traces/get_trace';
 import { registerListDatasetsRoute } from './datasets/list_datasets';
@@ -36,10 +39,16 @@ import { registerMonitoringRoutes } from './monitoring';
 import { registerAesopRoutes } from './aesop';
 import { registerSkillRoutes } from './skills';
 import { registerSuiteRoutes } from './suites';
+import { registerRemoteConfigsRoutes } from './remotes/register_routes';
+import { registerGetTracingProjectsRoute } from './tracing/get_projects';
+import { registerGetProjectTracesRoute } from './tracing/get_project_traces';
 
 export interface RouteDependencies {
   router: EvalsRouter;
   logger: Logger;
+  canEncrypt: boolean;
+  getEncryptedSavedObjectsStart: () => Promise<EncryptedSavedObjectsPluginStart>;
+  getInternalRemoteConfigsSoClient: () => Promise<SavedObjectsClientContract>;
 }
 
 interface AllRouteDependencies extends RouteDependencies {
@@ -56,8 +65,11 @@ export const registerRoutes = (dependencies: AllRouteDependencies) => {
   registerGetRunRoute(dependencies);
   registerGetRunScoresRoute(dependencies);
   registerGetRunDatasetExamplesRoute(dependencies);
+  registerCompareRunsRoute(dependencies);
   registerGetExampleScoresRoute(dependencies);
   registerGetTraceRoute(dependencies);
+  registerGetTracingProjectsRoute(dependencies);
+  registerGetProjectTracesRoute(dependencies);
   registerListDatasetsRoute(dependencies);
   registerCreateDatasetRoute(dependencies);
   registerGetDatasetRoute(dependencies);
@@ -72,12 +84,15 @@ export const registerRoutes = (dependencies: AllRouteDependencies) => {
   registerGetDatasetStatsRoute(dependencies);
   registerUpdateExampleSplitsRoute(dependencies);
   registerImportExamplesRoute(dependencies);
+  registerGetTracingProjectsRoute(dependencies);
+  registerGetProjectTracesRoute(dependencies);
 
   registerEvaluationRoutes(dependencies);
   registerEvaluatorRoutes(dependencies);
   registerMonitoringRoutes(dependencies);
   registerAesopRoutes(dependencies);
   registerSkillRoutes(dependencies);
+  registerRemoteConfigsRoutes(dependencies);
 
   if (dependencies.repoRoot) {
     registerSuiteRoutes({

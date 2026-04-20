@@ -252,7 +252,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.awaitKibanaChrome();
         await discover.waitUntilTabIsLoaded();
         const time = await timePicker.getTimeConfig();
-        expect(time.start).to.be('~ 15 minutes ago');
+        expect(
+          time.start === '~ 15 minutes ago' ||
+            time.start === 'now-15m' ||
+            time.start === 'now-15m/m'
+        ).to.be(true);
         expect(time.end).to.be('now');
       });
     });

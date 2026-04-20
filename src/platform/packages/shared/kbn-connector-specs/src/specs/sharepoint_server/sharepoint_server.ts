@@ -24,9 +24,6 @@
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
-import downloadWorkflow from './workflows/download.yaml';
-import listWorkflow from './workflows/list.yaml';
-import searchWorkflow from './workflows/search.yaml';
 import {
   CallRestApiInputSchema,
   DownloadFileInputSchema,
@@ -74,13 +71,8 @@ export const SharepointServer: ConnectorSpec = {
   actions: {
     getWeb: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.getWeb.description',
-        {
-          defaultMessage:
-            'Get metadata about the SharePoint site (title, URL, description, locale).',
-        }
-      ),
+      description:
+        'Get metadata about the SharePoint site (title, URL, description, locale). Use this as a starting point to confirm the site is reachable and to retrieve the site title before browsing lists or folders.',
       input: z.object({}).optional(),
       output: z.any(),
       handler: async (ctx) => {
@@ -95,10 +87,8 @@ export const SharepointServer: ConnectorSpec = {
 
     getLists: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.getLists.description',
-        { defaultMessage: 'List all lists and document libraries on the SharePoint site.' }
-      ),
+      description:
+        "List all lists and document libraries on the SharePoint site. Returns each list's Id, Title, ItemCount, Description, Created, and LastItemModifiedDate. Use the Title field as input to getListItems, and RootFolder.ServerRelativeUrl as the path input to getFolderContents.",
       input: z.object({}).optional(),
       output: ODataCollectionOutputSchema,
       handler: async (ctx) => {
@@ -107,7 +97,9 @@ export const SharepointServer: ConnectorSpec = {
         const response = await ctx.client.get(`${siteUrl}/_api/web/lists`, {
           headers: ODATA_HEADERS,
           params: {
-            $select: 'Id,Title,ItemCount,Description,Created,LastItemModifiedDate',
+            $select:
+              'Id,Title,ItemCount,Description,Created,LastItemModifiedDate,RootFolder/ServerRelativeUrl',
+            $expand: 'RootFolder',
           },
         });
         return response.data;
@@ -116,10 +108,8 @@ export const SharepointServer: ConnectorSpec = {
 
     getListItems: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.getListItems.description',
-        { defaultMessage: 'Get items from a list or document library by display name.' }
-      ),
+      description:
+        "Get items from a list or document library by its exact display name (Title). Call getLists first to discover available list titles. The listTitle must match the Title field exactly (case-sensitive). Examples of valid titles: 'Documents', 'Tasks', 'Site Pages'.",
       input: GetListItemsInputSchema,
       output: ODataCollectionOutputSchema,
       handler: async (ctx, input) => {
@@ -139,10 +129,8 @@ export const SharepointServer: ConnectorSpec = {
 
     getFolderContents: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.getFolderContents.description',
-        { defaultMessage: 'List files and subfolders at a given server-relative folder path.' }
-      ),
+      description:
+        "List files and subfolders at a given server-relative folder path. The path starts with '/' and contains no hostname. Obtain a starting path from getLists (RootFolder.ServerRelativeUrl) or navigate deeper using ServerRelativeUrl from a previous getFolderContents result. Example path: '/sites/mysite/Shared Documents'.",
       input: GetFolderContentsInputSchema,
       output: GetFolderContentsOutputSchema,
       handler: async (ctx, input) => {
@@ -169,10 +157,8 @@ export const SharepointServer: ConnectorSpec = {
 
     downloadFile: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.downloadFile.description',
-        { defaultMessage: 'Download a file by server-relative URL and return its content as text.' }
-      ),
+      description:
+        'Download a file by its server-relative URL and return its raw content as UTF-8 text. Use getFolderContents to discover file paths (ServerRelativeUrl field). For plain-text files the text field contains the content directly. For binary files (PDF, .docx, etc.) the raw bytes are returned as text and should be processed through an Elasticsearch attachment ingest pipeline to extract readable content.',
       input: DownloadFileInputSchema,
       output: DownloadFileOutputSchema,
       handler: async (ctx, input) => {
@@ -195,10 +181,8 @@ export const SharepointServer: ConnectorSpec = {
 
     getSitePageContents: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.getSitePageContents.description',
-        { defaultMessage: 'Get the content of a SharePoint site page by integer item ID.' }
-      ),
+      description:
+        "Get the content of a SharePoint site page by its integer item ID. To find the page ID, call getListItems with listTitle='Site Pages' and look for the Id field (an integer, not the GUID) on the desired page. Returns the page title and HTML content fields (CanvasContent1, WikiField).",
       input: GetSitePageContentsInputSchema,
       output: z.any(),
       handler: async (ctx, input) => {
@@ -220,10 +204,8 @@ export const SharepointServer: ConnectorSpec = {
 
     search: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.search.description',
-        { defaultMessage: 'Search SharePoint site content using Keyword Query Language (KQL).' }
-      ),
+      description:
+        "Search SharePoint site content using Keyword Query Language (KQL). Supports plain keyword search as well as field:value filters. Use 'from' and 'size' for pagination. Example queries: 'budget report', 'FileExtension:docx', 'author:Jane AND project plan', 'ContentType:Document AND title:policy'.",
       input: SearchInputSchema,
       output: z.any(),
       handler: async (ctx, input) => {
@@ -244,13 +226,8 @@ export const SharepointServer: ConnectorSpec = {
 
     callRestApi: {
       isTool: true,
-      description: i18n.translate(
-        'core.kibanaConnectorSpecs.sharepointServer.actions.callRestApi.description',
-        {
-          defaultMessage:
-            "Call a SharePoint Server REST API endpoint directly by path (must start with '_api/').",
-        }
-      ),
+      description:
+        "Call any SharePoint Server REST API endpoint directly. Use this for advanced queries not covered by the other actions. The path must start with '_api/' (for example, '_api/web/title' or '_api/web/lists/GetByTitle(\\'Documents\\')/items?$top=5'). Prefer the dedicated actions (getLists, getListItems, getFolderContents, etc.) when they cover your use case.",
       input: CallRestApiInputSchema,
       output: z.any(),
       handler: async (ctx, input) => {
@@ -278,6 +255,42 @@ export const SharepointServer: ConnectorSpec = {
     },
   },
 
+  skill: [
+    'SharePoint Server connector — usage guidance for LLM agents.',
+    '',
+    '## Navigation',
+    'Use these actions to explore the site structure before reading content:',
+    '1. `getWeb` — confirm the site is reachable and retrieve basic site metadata. No inputs required.',
+    '2. `getLists` — enumerate all lists and document libraries. No inputs required. Each result has a `Title` (use with `getListItems`) and `RootFolder.ServerRelativeUrl` (use with `getFolderContents`).',
+    '3. `getListItems` — retrieve items from a named list. Requires `listTitle` (exact `Title` value from `getLists`, case-sensitive). To find site pages, pass `listTitle: "Site Pages"`.',
+    '4. `getFolderContents` — list files and sub-folders at a path. Requires `path` (a `ServerRelativeUrl` starting with `/`, obtained from `getLists` or a previous `getFolderContents` result).',
+    '',
+    '## Downloading file content',
+    'Two strategies depending on the content type:',
+    '',
+    '### Text / plain files',
+    "- Call `downloadFile` with `path` set to the file's `ServerRelativeUrl`.",
+    '- The response `text` field contains the UTF-8 decoded content directly.',
+    '',
+    '### Binary files (PDF, .docx, .xlsx, etc.)',
+    '- Call `downloadFile` to retrieve the raw bytes.',
+    '- Pipe the result through the Elasticsearch attachment ingest pipeline (`/_ingest/pipeline/_simulate` with an `attachment` processor).',
+    '- The human-readable extracted text is available in `docs[0].doc._source.attachment.content`.',
+    '',
+    '### Site pages',
+    '- Call `getListItems` with `listTitle: "Site Pages"` to list pages. Note the integer `Id` field of the desired page (not the GUID).',
+    '- Call `getSitePageContents` with that `pageId` to retrieve the page HTML (`CanvasContent1`, `WikiField`).',
+    '',
+    '## Search',
+    '- Call `search` with a KQL `query` string.',
+    '- Use `from` and `size` for pagination (offset / page-size).',
+    '',
+    '## Escape hatch',
+    '- Use `callRestApi` for any SharePoint REST endpoint not covered by the dedicated actions.',
+    '- `path` must start with `_api/` (no leading slash), e.g. `_api/web/title`.',
+    '- Prefer the dedicated actions when they cover the use case.',
+  ].join('\n'),
+
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.sharepointServer.test.description', {
       defaultMessage: 'Verifies SharePoint Server connection by fetching the site title.',
@@ -300,6 +313,4 @@ export const SharepointServer: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [downloadWorkflow, listWorkflow, searchWorkflow],
 };

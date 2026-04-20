@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { findNotificationPoliciesResponseSchema } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -16,26 +17,40 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_NOTIFICATION_POLICY_API_PATH } from '../constants';
 
-const sortFieldSchema = z.enum([
-  'name',
-  'createdAt',
-  'updatedAt',
-  'createdByUsername',
-  'updatedByUsername',
-]);
+const sortFieldSchema = z
+  .enum(['name', 'createdAt', 'updatedAt', 'createdByUsername', 'updatedByUsername'])
+  .describe('The available fields to sort notification policies by.');
 
 const listNotificationPoliciesQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional(),
-  perPage: z.coerce.number().min(1).max(100).optional(),
-  search: z.string().optional(),
-  destinationType: z.string().optional(),
-  createdBy: z.string().optional(),
+  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  perPage: z.coerce
+    .number()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe('The number of notification policies to return per page.'),
+  search: z
+    .string()
+    .optional()
+    .describe('A text string to search across notification policy fields.'),
+  tags: z
+    .union([z.string(), z.array(z.string())])
+    .transform((v) => (Array.isArray(v) ? v : [v]).map((t) => t.trim()).filter(Boolean))
+    .pipe(z.array(z.string()).max(10))
+    .optional()
+    .describe('Filter by tags. Accepts a single string or an array.'),
+  destinationType: z.string().optional().describe('Filter by destination connector type.'),
+  createdBy: z
+    .string()
+    .optional()
+    .describe('Filter by the user ID who created the notification policy.'),
   enabled: z
     .enum(['true', 'false'])
     .transform((v) => v === 'true')
-    .optional(),
-  sortField: sortFieldSchema.optional(),
-  sortOrder: z.enum(['asc', 'desc']).optional(),
+    .optional()
+    .describe('Filter by enabled status. Accepts the strings true or false.'),
+  sortField: sortFieldSchema.optional().describe('The field to sort notification policies by.'),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe('The sort direction.'),
 });
 
 @injectable()
@@ -56,7 +71,16 @@ export class ListNotificationPoliciesRoute extends BaseAlertingRoute {
     request: {
       query: buildRouteValidationWithZod(listNotificationPoliciesQuerySchema),
     },
-  } as const;
+    response: {
+      200: {
+        body: () => findNotificationPoliciesResponseSchema,
+        description: 'Indicates a successful call.',
+      },
+      400: {
+        description: 'Indicates invalid query parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'list notification policies';
 
@@ -75,12 +99,22 @@ export class ListNotificationPoliciesRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { page, perPage, search, destinationType, createdBy, enabled, sortField, sortOrder } =
-      this.request.query ?? {};
+    const {
+      page,
+      perPage,
+      search,
+      tags,
+      destinationType,
+      createdBy,
+      enabled,
+      sortField,
+      sortOrder,
+    } = this.request.query ?? {};
     const result = await this.notificationPolicyClient.findNotificationPolicies({
       page,
       perPage,
       search,
+      tags,
       destinationType,
       createdBy,
       enabled,

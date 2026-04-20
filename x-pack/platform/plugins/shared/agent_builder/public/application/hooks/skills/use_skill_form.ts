@@ -18,6 +18,7 @@ const SKILL_FORM_DEFAULT_VALUES: SkillFormData = {
   description: '',
   content: '',
   tool_ids: [],
+  referenced_content: [],
 };
 
 export const useSkillForm = () => {

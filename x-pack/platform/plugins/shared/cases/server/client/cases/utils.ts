@@ -62,6 +62,9 @@ export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undef
   return uniqBy(assignees, 'uid');
 };
 
+export const getCloseReasonIfValid = (closeReason?: string): string | undefined =>
+  closeReason != null && closeReason.trim().length > 0 ? closeReason : undefined;
+
 type LatestPushInfo = { index: number; pushedInfo: ExternalService | null } | null;
 
 export const getLatestPushInfo = (
@@ -87,6 +90,8 @@ export const getLatestPushInfo = (
   return null;
 };
 
+// Only used for comment and action attachments.
+// TODO: https://github.com/elastic/kibana/issues/262574
 const getCommentContent = (comment: AttachmentV2): string => {
   if (isLegacyAttachmentRequest(comment)) {
     if (comment.type === AttachmentType.user) {

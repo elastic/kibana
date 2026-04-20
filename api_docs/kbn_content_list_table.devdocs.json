@@ -22,7 +22,7 @@
           ") => React.JSX.Element) & { Column: any; Action: any; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 186,
+        "lineNumber": 188,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,8 +45,62 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 119,
+            "lineNumber": 120,
             "columnNumber": 36,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.CreatedByCell",
+        "type": "Function",
+        "tags": [],
+        "label": "CreatedByCell",
+        "description": [
+          "\nCell renderer for `Column.CreatedBy`.\n\nSelf-loading: uses `useProfile(uid)` which triggers a batched load if the\nprofile is not yet cached. Multiple cells mounting in the same frame get\ntheir requests batched into a single `bulkResolve`.\n\nAll avatar types are clickable: clicking toggles an include filter,\nholding Cmd/Ctrl toggles exclude. Managed items use the `__managed__`\nsentinel, items without a creator use `__no_creator__`, and regular\nitems filter by their UID."
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.CreatedByCellProps",
+            "text": "CreatedByCellProps"
+          },
+          "> & { readonly type: ({ createdBy, managed }: ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.CreatedByCellProps",
+            "text": "CreatedByCellProps"
+          },
+          ") => React.JSX.Element; }"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_cell.tsx",
+        "lineNumber": 57,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.CreatedByCell.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -119,7 +173,7 @@
           "(id: string) => string"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 78,
+        "lineNumber": 79,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -137,7 +191,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 26,
             "deprecated": false,
             "trackAdoption": false,
@@ -1018,7 +1072,7 @@
           "\nNamespace interface for `Column` sub-components.\n\nThe base `Column` accepts {@link ColumnProps}; pre-built columns\nare properties (e.g., `Column.Name`, `Column.Actions`)."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-        "lineNumber": 48,
+        "lineNumber": 49,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1034,7 +1088,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1056,7 +1110,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-                "lineNumber": 55,
+                "lineNumber": 56,
                 "columnNumber": 4,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1084,7 +1138,7 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 56,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1106,7 +1160,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-                "lineNumber": 56,
+                "lineNumber": 57,
                 "columnNumber": 10,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1134,7 +1188,7 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 57,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1156,7 +1210,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-                "lineNumber": 57,
+                "lineNumber": 58,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1184,7 +1238,7 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1206,7 +1260,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-                "lineNumber": 58,
+                "lineNumber": 59,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1236,7 +1290,7 @@
               ") => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 59,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1260,8 +1314,62 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-                "lineNumber": 64,
+                "lineNumber": 65,
                 "columnNumber": 13,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.ColumnNamespace.CreatedBy",
+            "type": "Function",
+            "tags": [],
+            "label": "CreatedBy",
+            "description": [
+              "\nPre-built \"Created by\" avatar column.\n"
+            ],
+            "signature": [
+              "(props: ",
+              {
+                "pluginId": "@kbn/content-list-table",
+                "scope": "public",
+                "docId": "kibKbnContentListTablePluginApi",
+                "section": "def-public.CreatedByColumnProps",
+                "text": "CreatedByColumnProps"
+              },
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+            "lineNumber": 66,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.ColumnNamespace.CreatedBy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [
+                  "- {@link CreatedByColumnProps}"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-table",
+                    "scope": "public",
+                    "docId": "kibKbnContentListTablePluginApi",
+                    "section": "def-public.CreatedByColumnProps",
+                    "text": "CreatedByColumnProps"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
+                "lineNumber": 71,
+                "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1282,7 +1390,7 @@
           "\nProps for the `Column` component (custom columns).\n\nCustom columns are identified by `props.id` and provide their own\n`render` function. Pre-built columns (like `Column.Name`) have\ndedicated preset components with their own props interfaces."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1297,7 +1405,7 @@
               "Unique identifier for the column."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1315,7 +1423,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1333,7 +1441,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1351,7 +1459,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1369,7 +1477,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 36,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1387,7 +1495,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1413,7 +1521,7 @@
               "<Record<string, unknown>>) => React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-            "lineNumber": 44,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1436,7 +1544,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/part.ts",
-                "lineNumber": 45,
+                "lineNumber": 46,
                 "columnNumber": 12,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1458,7 +1566,7 @@
           "\nProps for ContentListTable component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1473,7 +1581,7 @@
               "Accessible title for the table (used as table caption for screen readers)."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 35,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1491,7 +1599,7 @@
               "\"fixed\" | \"auto\" | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1509,7 +1617,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1527,7 +1635,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1545,7 +1653,7 @@
               "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1571,7 +1679,7 @@
               "<Record<string, unknown>>) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 51,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1594,7 +1702,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-                "lineNumber": 67,
+                "lineNumber": 68,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1616,7 +1724,115 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-            "lineNumber": 68,
+            "lineNumber": 69,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.CreatedByCellProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreatedByCellProps",
+        "description": [
+          "Props for the {@link CreatedByCell} component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_cell.tsx",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.CreatedByCellProps.createdBy",
+            "type": "string",
+            "tags": [],
+            "label": "createdBy",
+            "description": [
+              "The user ID (`uid`) of the item's creator."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_cell.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.CreatedByCellProps.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [
+              "Whether the item is system-managed (e.g. part of a package)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_cell.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.CreatedByColumnProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreatedByColumnProps",
+        "description": [
+          "\nProps for the `Column.CreatedBy` preset component."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_builder.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.CreatedByColumnProps.width",
+            "type": "string",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "Column width (CSS value)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_builder.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.CreatedByColumnProps.columnTitle",
+            "type": "string",
+            "tags": [],
+            "label": "columnTitle",
+            "description": [
+              "Override column header text. Defaults to \"Created by\"."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_builder.tsx",
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1634,7 +1850,7 @@
           "\nProps for the `Action.Delete` preset component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-        "lineNumber": 80,
+        "lineNumber": 82,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1652,10 +1868,63 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
-            "lineNumber": 84,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.DeleteActionProps.enabled",
+            "type": "Function",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "Per-item guard. When provided, disables the action for items where this returns `false`."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.DeleteActionProps.enabled.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 89,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1692,6 +1961,59 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-table",
+            "id": "def-public.EditActionProps.enabled",
+            "type": "Function",
+            "tags": [],
+            "label": "enabled",
+            "description": [
+              "Per-item guard. When provided, disables the action for items where this returns `false`."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+            "lineNumber": 78,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-table",
+                "id": "def-public.EditActionProps.enabled.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/action/types.ts",
+                "lineNumber": 79,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2069,7 +2391,7 @@
             ],
             "label": "showTags",
             "description": [
-              "\nWhether to show tags below the title/description.\nRequires `item.tags` to contain tag IDs and a tags service\nto be configured on the `ContentListProvider`.\n"
+              "\nWhether to show tags below the title/description.\nRequires `item.tags` to contain tag IDs and a tags service\nto be configured on the `ContentListProvider`.\n\nAuto-enabled when the provider has `supports.tags === true`\n(i.e., a tags service is configured). Set to `false` to\nexplicitly disable tags even when the service is available.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -2095,7 +2417,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 56,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2121,7 +2443,7 @@
               ", withModifierKey: boolean) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 63,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2147,7 +2469,7 @@
               "<Record<string, unknown>>) => React.ReactNode) | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-            "lineNumber": 70,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2170,7 +2492,7 @@
                   "<Record<string, unknown>>"
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-                "lineNumber": 71,
+                "lineNumber": 75,
                 "columnNumber": 13,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2295,7 +2617,7 @@
           "\nProps for the `Column.Starred` preset component."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/starred/starred_builder.tsx",
-        "lineNumber": 38,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2313,7 +2635,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/starred/starred_builder.tsx",
-            "lineNumber": 42,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2488,7 +2810,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 181,
+        "lineNumber": 183,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2524,7 +2846,26 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/content_list_table.tsx",
-        "lineNumber": 173,
+        "lineNumber": 174,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-table",
+        "id": "def-public.CreatedByColumn",
+        "type": "Any",
+        "tags": [],
+        "label": "CreatedByColumn",
+        "description": [
+          "\nCreated By column specification component for `ContentListTable`.\n\nThis is a declarative component that doesn't render anything.\nIt specifies a column showing the item's creator as a clickable avatar.\n\nClicking the avatar toggles an include filter for that user. Hold\nCmd (Mac) or Ctrl (Windows/Linux) while clicking to exclude instead.\n"
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/created_by/created_by_builder.tsx",
+        "lineNumber": 81,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2581,7 +2922,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/name/name_builder.tsx",
-        "lineNumber": 145,
+        "lineNumber": 149,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2600,7 +2941,7 @@
           "any"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/column/starred/starred_builder.tsx",
-        "lineNumber": 93,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

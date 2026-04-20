@@ -85,6 +85,10 @@ jest.mock('../../hooks/use_fetch_data_fields', () => ({
   useFetchDataFields: () => ({ data: undefined, isLoading: false }),
 }));
 
+jest.mock('../../hooks/use_fetch_tags', () => ({
+  useFetchTags: () => ({ data: [], isLoading: false }),
+}));
+
 jest.mock('../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
@@ -121,6 +125,7 @@ const EXISTING_POLICY: NotificationPolicyResponse = {
   enabled: true,
   matcher: 'data.severity : "critical"',
   groupBy: ['host.name', 'service.name'],
+  tags: ['production'],
   groupingMode: 'per_field',
   throttle: { strategy: 'time_interval', interval: '5m' },
   snoozedUntil: null,
@@ -290,6 +295,7 @@ describe('NotificationPolicyFormPage', () => {
             name: 'Critical production alerts',
             description: 'Routes critical alerts',
             groupingMode: 'per_field',
+            tags: ['production'],
             matcher: 'data.severity : "critical"',
             groupBy: ['host.name', 'service.name'],
             throttle: { strategy: 'time_interval', interval: '5m' },

@@ -38,7 +38,7 @@ export class DiscoverServerPlugin
 {
   private readonly config: ConfigSchema;
   private subscriptions: Subscription[] = [];
-  private embeddableTransformsEnabled = false;
+  private embeddableTransformsEnabled = true;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = initializerContext.config.get();
@@ -71,6 +71,7 @@ export class DiscoverServerPlugin
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());
     plugins.embeddable.registerTransforms(SEARCH_EMBEDDABLE_TYPE, {
+      title: 'Discover session',
       getTransforms: (drilldownTransforms) =>
         getSearchEmbeddableTransforms(drilldownTransforms, () => this.embeddableTransformsEnabled),
       getSchema: (getDrilldownsSchema) =>
