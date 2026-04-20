@@ -38,6 +38,9 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/crypto'
   - '@kbn/es-errors'
+  - '@kbn/core-http-common'
+  - '@kbn/spaces-plugin'
+  - '@kbn/spaces-utils'
 tags:
   - plugin
   - prod
