@@ -256,7 +256,10 @@ function getConnectorParamsSchema(stepType: string): z.ZodType | null {
   return getAllConnectors().find((connector) => connector.type === stepType)?.paramsSchema ?? null;
 }
 
-function analyzeUnionSchema(unionSchema: z.ZodUnion): string[] {
+function analyzeUnionSchema(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  unionSchema: z.ZodUnion<any>
+): string[] {
   return unionSchema.def.options.map((option: z.ZodType) => analyzeUnionOption(option));
 }
 
@@ -356,7 +359,8 @@ function generateSchemaErrorMessage(fieldName: string, schema: z.ZodType): strin
   }
 }
 
-function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion): string | null {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion<any>): string | null {
   const optionDescriptions = analyzeUnionSchema(unionSchema);
   if (optionDescriptions.length === 0) {
     return null;
@@ -366,7 +370,8 @@ function generateUnionErrorMessage(fieldName: string, unionSchema: z.ZodUnion): 
   return `${fieldName} must be one of:\n${optionsList}`;
 }
 
-function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function generateArrayErrorMessage(fieldName: string, arraySchema: z.ZodArray<any>): string {
   const elementSchema = unwrapSchema(arraySchema.element);
 
   if (elementSchema instanceof z.ZodObject) {
