@@ -12,7 +12,6 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { once } from 'lodash';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import { getRouteConfig } from '../get_route_config';
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
@@ -28,8 +27,8 @@ export function registerUpdateRoute(
   const { basePath, routeConfig, routeVersion } = getRouteConfig(isDashboardAppRequest);
   const updateRoute = router.put({
     path: `${basePath}/{id}`,
-    summary: `Upsert dashboard`,
     ...routeConfig,
+    summary: `Upsert a dashboard`,
   });
 
   // Do not call getDashboardStateSchema when registering route.
@@ -45,7 +44,9 @@ export function registerUpdateRoute(
       validate: () => ({
         request: {
           params: schema.object({
-            id: asCodeIdSchema,
+            // Can not validate id at route level
+            // existing dashboards may have invalid "as code" ids
+            id: schema.string(),
           }),
           body: getUpdateRequestBodySchema(isDashboardAppRequest),
         },
