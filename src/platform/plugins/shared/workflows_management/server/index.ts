@@ -18,4 +18,8 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   return new WorkflowsPlugin(initializerContext);
 }
 
-export type { WorkflowsServerPluginSetup, WorkflowsServerPluginStart } from './types';
+export type {
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginStart,
+  WorkflowsApiRequestHandlerContext,
+} from './types';

@@ -16,8 +16,17 @@ describe('Internal Routes', () => {
   let mockGetWorkflowExecutionEngine: jest.Mock;
   let mockEngine: { isEventDrivenExecutionEnabled: jest.Mock };
   let mockApi: { disableAllWorkflows: jest.Mock };
+  let mockWorkflowsService: {
+    getWorkflowsExecutionEngine: () => {
+      triggerEvents: { isEnabled: jest.Mock };
+    };
+  };
 
   const mockContext = {
+    workflows: Promise.resolve({
+      isWorkflowsAvailable: true,
+      getWorkflowsClient: () => ({ emitEvent: jest.fn() }),
+    }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
@@ -35,6 +44,11 @@ describe('Internal Routes', () => {
     mockEngine = { isEventDrivenExecutionEnabled: jest.fn() };
     mockGetWorkflowExecutionEngine = jest.fn().mockResolvedValue(mockEngine);
     mockApi = { disableAllWorkflows: jest.fn() };
+    mockWorkflowsService = {
+      getWorkflowsExecutionEngine: jest.fn().mockResolvedValue({
+        triggerEvents: { isEnabled: jest.fn() },
+      }),
+    };
 
     const createVersionedRoute = (method: string, path: string) => ({
       addVersion: jest
@@ -60,16 +74,14 @@ describe('Internal Routes', () => {
       },
     } as unknown as jest.Mocked<IRouter>;
 
-    registerInternalRoutes(
-      {
-        router: mockRouter as any,
-        api: mockApi as any,
-        logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
-        spaces: {} as any,
-        audit: {} as any,
-      },
-      mockGetWorkflowExecutionEngine
-    );
+    registerInternalRoutes({
+      router: mockRouter as any,
+      api: mockApi as any,
+      service: mockWorkflowsService as any,
+      logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() } as any,
+      spaces: {} as any,
+      audit: {} as any,
+    });
   });
 
   it('should register the config route handler', () => {
