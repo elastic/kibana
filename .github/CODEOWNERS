@@ -1762,11 +1762,6 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/solutions/observability/plugins/infra/public/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/plugins/infra/server/lib/alerting @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/alerting/ @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_params_api.ts @elastic/actionable-obs-team
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/ @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.synthetics.index.ts @elastic/actionable-obs-team
 /x-pack/solutions/observability/test/ensemble @elastic/obs-ux-management-team
@@ -2115,6 +2110,10 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
 /x-pack/platform/test/api_integration_deployment_agnostic/*configs/ @elastic/appex-qa
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/ @elastic/appex-qa
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/alerting_api.ts @elastic/appex-qa @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/slo_api.ts @elastic/appex-qa @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_params_api.ts @elastic/appex-qa @elastic/actionable-obs-team
+/x-pack/solutions/observability/test/api_integration_deployment_agnostic/services/synthetics_private_location.ts @elastic/appex-qa @elastic/actionable-obs-team
 /x-pack/platform/test/api_integration_deployment_agnostic/README.md @elastic/appex-qa
 /x-pack/platform/test/api_integration_deployment_agnostic/services/ @elastic/appex-qa
 /x-pack/platform/test/api_integration_deployment_agnostic/ftr_provider_context.d.ts @elastic/appex-qa
