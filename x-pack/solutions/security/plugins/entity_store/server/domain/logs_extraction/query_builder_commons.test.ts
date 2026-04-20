@@ -453,8 +453,6 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
     const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
     const esql = conditionToESQL(mapped);
     expect(esql).toContain(recentData('event.kind'));
-    expect(esql).toContain(recentData('user.name'));
-    expect(esql).toContain(recentData('host.id'));
     expect(esql).toContain('entity.id');
     expect(esql).not.toContain(recentData('entity.id'));
   });

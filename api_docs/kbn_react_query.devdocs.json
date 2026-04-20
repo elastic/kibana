@@ -14765,6 +14765,14 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/threat_hunting/top_threat_hunting_leads/use_hunting_leads.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/threat_hunting/top_threat_hunting_leads/use_hunting_leads.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/siem_migrations/dashboards/logic/use_get_migration_dashboards.ts"
               },
               {
