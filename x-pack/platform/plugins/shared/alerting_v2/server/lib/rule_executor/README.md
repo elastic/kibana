@@ -1,83 +1,116 @@
 # Rule Executor
 
-> **Prerequisites:** Read the [server-level README](../../README.md) first for an overview of system concepts (rule events, series, episodes, rules) and how the components fit together.
+> **Prerequisite:** Read the [server-level README](../../README.md) first for the plugin-wide architecture and terminology.
 
-The Rule Executor runs v2 rules on a Task Manager schedule: load the rule saved object, execute ES|QL, materialize rule events, and persist rule events to `.rule-events`. For alert-type rules it coordinates recovery/no-data handling and alert episode fields.
+The rule executor is the hot path for alerting v2. It runs one rule on its Task Manager schedule, executes ES|QL, converts rows into rule events, enriches alert rules with episode state, and persists the final append-only documents into `.rule-events`.
 
-When a rule is scheduled to run, the Task Manager triggers the Rule Executor. The executor follows a pipeline pattern where execution flows through a series of discrete steps, each handling a specific responsibility.
+See also: [Director](../director/README.md) and [Dispatcher](../dispatcher/README.md).
 
-See also: [Director service](../director/README.md) and [server README](../../README.md).
+## What the rule executor owns
 
-## Role in the system
+- Running one rule execution from start to finish
+- Building the ES|QL request from rule configuration
+- Streaming result rows through the execution pipeline
+- Materializing breach / recovery / no-data rule events
+- Invoking the director for alert rules
+- Writing rule events to `.rule-events`
 
-```text
-Rule Executor                    Downstream
-(writes rule events)             (dispatcher, UIs, …)
-      |                                |
-      v                                v
- `.rule-events`  ---------------->  episodes, actions, search
-```
+## What the rule executor does not own
 
-- One Task Manager task per enabled rule.
-- The executor writes append-only documents to the `.rule-events` data stream (`StoreAlertEventsStep`).
-- The [dispatcher](../dispatcher/README.md) consumes alert-type episodes for notification gating.
+- Notification matching or dispatch
+- Policy throttling / suppression
+- Long-lived alert action history
 
-## Alert vs signal rules
+Those responsibilities belong to the dispatcher.
 
-Rules have a `kind` of `alert` or `signal` (see the rule saved object schema). Alert rules participate in episode lifecycle: the director attaches `episode.*` fields, recovery and grouping semantics apply, and the dispatcher matches only `type: alert` rule events. Signal rules are observation-focused. The director skips episode tracking, and those events are not processed by the notification pipeline described in the [dispatcher README](../dispatcher/README.md).
+## Signal vs alert rules
+
+Rules declare a `kind` of `signal` or `alert`.
+
+- `signal` rules are observation-only. They produce rule events but skip episode lifecycle and dispatcher processing.
+- `alert` rules participate in recovery semantics, episode lifecycle enrichment, and downstream notification dispatch.
+
+That split is the most important branch in the executor.
 
 ## Architecture
 
-The executor uses a hybrid architecture combining:
-- Pipeline Pattern for sequential step execution
-- Middleware for global cross-cutting concerns
-- Decorators for per-step operations
+The executor combines three mechanisms:
 
+- **steps** for domain work
+- **middleware** for global cross-cutting concerns
+- **decorators** for step-specific wrapping when needed
+
+```text
+Task Manager
+   |
+   v
+RuleExecutorTaskRunner
+   |
+   v
+RuleExecutionPipeline
+   |
+   +--> middleware chain wraps each step
+   |
+   +--> WaitForResourcesStep
+   +--> FetchRuleStep
+   +--> ValidateRuleStep
+   +--> ExecuteRuleQueryStep
+   +--> CreateAlertEventsStep
+   +--> CreateRecoveryEventsStep
+   +--> DirectorStep
+   +--> StoreAlertEventsStep
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              Task Manager                                   │
-│                         (triggers rule execution)                           │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                           RuleExecutorTaskRunner                            │
-│                    (translates task manager ↔ domain)                       │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                                      ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          RuleExecutionPipeline                              │
-│                    (orchestrates step execution)                            │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    ▼                                   ▼
-          ┌─────────────────┐                 ┌─────────────────┐
-          │   Middleware    │                 │     Steps       │
-          │ (global ops)    │    wraps each   │  (sequential    │
-          │                 │ ─────────────►  │   execution)    │
-          │ • Cancel / APM / │                 │                 │
-          │   errors        │                 │                 │
-          └─────────────────┘                 └─────────────────┘
-                                                      │
-    ┌──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┬──────────┐
-    ▼          ▼          ▼          ▼          ▼          ▼          ▼          ▼
-┌────────┐ ┌────────┐ ┌────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────┐ ┌────────┐ ┌────────┐
-│ Wait   │ │ Fetch  │ │Validate│ │ExecuteRule  │ │CreateAlert  │ │Create  │ │Director│ │ Store  │
-│For Res.│ │ Rule   │ │ Rule   │ │Query (ES|QL)│ │Events       │ │Recovery│ │ Step   │ │ Events │
-└────────┘ └────────┘ └────────┘ └─────────────┘ └─────────────┘ └────────┘ └────────┘ └────────┘
-                                      │
-                                      ▼
-                          ┌─────────────────────────┐
-                          │    RulePipelineState    │
-                          │   (merged per step)     │
-                          └─────────────────────────┘
-```
+
+## The most important design detail: streaming
+
+The executor pipeline is streaming. `ExecuteRuleQueryStep` may emit multiple result batches, and downstream steps see each batch as it flows through the pipeline.
+
+That means:
+
+- later steps must tolerate multiple `continue` emissions for one logical execution
+- `esqlRowBatch` and `alertEventsBatch` are per-batch, not global full-run accumulators
+- a step must not assume it will be called exactly once per rule run
+
+If you are adding a new step after `ExecuteRuleQueryStep`, design it with batch semantics in mind.
+
+## How one execution works
+
+Each run starts with Task Manager task params:
+
+- `ruleId`
+- `spaceId`
+- schedule metadata
+
+`RuleExecutorTaskRunner` turns that into `RuleExecutionInput` with:
+
+- `ruleId`
+- `spaceId`
+- `scheduledAt`
+- `executionContext` for cancellation and scoped cleanup
+
+`RuleExecutionPipeline` then:
+
+1. creates initial pipeline state
+2. wraps every step with the middleware chain
+3. streams state through the ordered steps
+4. halts early on domain reasons when appropriate
+5. refreshes `.rule-events` after the stream completes so freshly written documents become searchable
 
 ## Rule configuration
 
-Rules are persisted as saved objects. Attributes include `kind`, `metadata` (name, description, tags, etc), `time_field`, `schedule`, `evaluation` , optional `recovery_policy`, `state_transition`, `grouping`, `no_data`, optional `artifacts`, and server-managed fields such as `enabled` and audit timestamps. The persisted shape is defined in `saved_objects/schemas/rule_saved_object_attributes/`. HTTP/API schemas live in `@kbn/alerting-v2-schemas`.
+Rules are saved objects. Relevant attributes include:
+
+- `kind`
+- `metadata`
+- `schedule`
+- `evaluation`
+- `grouping`
+- `recovery_policy`
+- `state_transition`
+- `no_data`
+- server-managed flags such as `enabled`
+
+The persisted shape lives in `saved_objects/schemas/rule_saved_object_attributes/`. API schemas live in `@kbn/alerting-v2-schemas`.
 
 ## Operational parameters
 
@@ -85,144 +118,98 @@ Rules are persisted as saved objects. Attributes include `kind`, `metadata` (nam
 | --- | --- | --- |
 | Task type | `alerting_v2:rule_executor` | [`task_definition.ts`](task_definition.ts) |
 | Task timeout | `5m` | [`task_definition.ts`](task_definition.ts) |
-| Schedule | Per rule (interval from saved object) | [`schedule.ts`](schedule.ts) (`ensureRuleExecutorTaskScheduled`) |
+| Schedule | Per rule | [`schedule.ts`](schedule.ts) |
 
-## Pipeline shape
+## Pipeline state
 
-The rule executor follows a pipeline pattern where execution flows through a series of discrete steps, each handling a specific responsibility.
+`RulePipelineState` in `types.ts` is the data contract between steps.
 
-### What the Rule Executor Does
+| Field | Produced by | Meaning |
+| --- | --- | --- |
+| `input` | Pipeline / task runner | Rule id, space id, schedule, and execution context. |
+| `rule` | `FetchRuleStep` | Current rule document. |
+| `queryPayload` | `ExecuteRuleQueryStep` | ES|QL query/filter/params for the current run. |
+| `esqlRowBatch` | `ExecuteRuleQueryStep` | One streamed batch of ES|QL rows. |
+| `alertEventsBatch` | Event-creation steps and director | Materialized rule events for the current batch. |
 
-1. Waits for resources — Ensures required Elasticsearch resources (data streams, templates) are ready.
-2. Fetches the rule — Loads the rule saved object.
-3. Validates the rule — Ensures the rule can run (e.g. enabled).
-4. Executes ES|QL — Builds the query (time bounds, condition, recovery semantics) and runs it.
-5. Creates alert events — Maps query rows to alert event batches.
-6. Creates recovery events — Emits recovery for groups that disappeared from the breach set when the rule defines recovery behavior.
-7. Director — For alert-type rules, enriches batches with episode identity and status via `DirectorService`.
-8. Stores events — Persists rule events to the configured data stream.
+## Execution steps
 
-## How a rule execution works
+Step order is defined in `setup/bind_rule_executor.ts`.
 
-Each run is driven by Task Manager with `ruleId` and `spaceId` in the task params. `RuleExecutorTaskRunner` builds `RuleExecutionInput` with `scheduledAt` (from the task instance) and an `executionContext` that carries the abort signal and scope for downstream services. The pipeline streams immutable `RulePipelineState` values: steps emit `continue` with merged state or `halt` with a `HaltReason`. ES\|QL results arrive in batches so memory stays bounded for large queries.
+| # | Step | Responsibility |
+| --- | --- | --- |
+| 1 | `WaitForResourcesStep` | Ensure required Elasticsearch resources exist before doing work. |
+| 2 | `FetchRuleStep` | Load the current rule saved object. |
+| 3 | `ValidateRuleStep` | Halt early if the rule cannot run, for example because it is disabled. |
+| 4 | `ExecuteRuleQueryStep` | Build and run ES|QL, emitting streamed row batches. |
+| 5 | `CreateAlertEventsStep` | Turn a row batch into breached rule events. |
+| 6 | `CreateRecoveryEventsStep` | Append recovery events for alert rules when configured. |
+| 7 | `DirectorStep` | Enrich alert-type events with episode state. |
+| 8 | `StoreAlertEventsStep` | Persist the final batch into `.rule-events`. |
 
-## Recovery events
+## Recovery behavior
 
-Recovery is implemented in [`CreateRecoveryEventsStep`](steps/create_recovery_events_step.ts) after [`CreateAlertEventsStep`](steps/create_alert_events_step.ts), so `alertEventsBatch` already contains this run’s breach documents (`status: breached`, one `group_hash` per evaluated group). Recovery only applies to `kind: alert` rules. Signal rules skip this step. There are two strategies to produce recovery events: `no_breach` and `query` recovery.
+Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-### `no_breach` recovery (default)
+Recovery only applies to `kind: alert` rules.
 
-The executor needs the set of groups that still have an open episode (not yet inactive) in `.rule-events`. A query runs against the rule events data stream for the rule id and returns the episodes where that status is `pending`, `active`, or `recovering`. Those `group_hash` values are the **active** set. The breached events produced by the ES\|QL query is the breached set. The executor emits one **recovered** rule event per active group hash that is **not** in the breached set: the breach query no longer returns a row for that group, but the episode was still non-inactive in the index, so the group is treated as recovered.
+### `no_breach` recovery
+
+Default mode. The executor:
+
+1. queries `.rule-events` for group hashes that still have non-inactive episode state
+2. compares that active set to the current breach batch
+3. emits one recovered event for each active group missing from the current breached set
 
 ### `query` recovery
 
-When the rule defines `recovery_policy.query.base`, the step runs a **separate** ES\|QL recovery query with the same time-window plumbing as other rule queries. The executor walks the result rows: for each row it computes `group_hash` using the same grouping fields as breach events. Rows whose hash appears in the **active** set (compouted the same as above) become recovered events. If the recovery query returns no rows or none of the rows match an active group hash, no recovery documents are added.
+If `recovery_policy.query.base` is configured, the executor runs a separate recovery ES|QL query and only emits recovery events for rows whose computed `group_hash` matches the active set.
 
 ### Summary
 
-| Mode | When recovery rows are emitted |
+| Mode | Recovery is emitted when |
 | --- | --- |
-| `no_breach` | Active episode in the index, but this run’s breach batch does not include that `group_hash`. |
-| `query` | Active episode in the index, and the dedicated recovery query returns a row whose computed `group_hash` matches that group. |
+| `no_breach` | An active group is absent from the current breach batch. |
+| `query` | A recovery query row matches a currently active group. |
 
-Recovered documents are appended to `alertEventsBatch` before the director and store steps.
+Recovered documents are appended to `alertEventsBatch` before `DirectorStep` and storage.
 
-## Implementation overview
+## Halt reasons
 
-1. Task Manager invokes [`RuleExecutorTaskRunner`](task_runner.ts) (`RuleExecutorTaskDefinition` in [`task_definition.ts`](task_definition.ts)).
-2. [`RuleExecutionPipeline`](execution_pipeline.ts) runs ordered `RuleExecutionStep` implementations registered on `RuleExecutionStepsToken` in `setup/bind_rule_executor.ts`.
-3. Each step consumes a `PipelineStateStream` and yields `continue` (updated state) or `halt` with a `HaltReason`. Halt is control flow, not necessarily an application error (see Halt reasons below).
-4. Middleware on `RuleExecutionMiddlewaresToken` wraps every step (cancellation boundary, APM, error handling).
-
-### RuleExecutorTaskRunner
-
-Location: `task_runner.ts`
-
-The entry point for rule execution. It:
-- Receives task instance data from Task Manager
-- Extracts execution input (ruleId, spaceId, scheduledAt, abortSignal)
-- Delegates to `RuleExecutionPipeline`
-- Translates pipeline results back to Task Manager's `RunResult`
-
-### RuleExecutionPipeline
-
-Location: `execution_pipeline.ts`
-
-Orchestrates step execution with middleware support. It:
-- Maintains immutable pipeline state
-- Executes steps sequentially
-- Wraps each step with the middleware chain
-- Handles halt conditions (see Halt reasons below)
-
-### Pipeline state (`RulePipelineState`)
-
-Key fields (full type in `types.ts`):
-
-| Field | Set by | Purpose |
-| --- | --- | --- |
-| `input` | Pipeline / task runner | `ruleId`, `spaceId`, `scheduledAt`, `executionContext`. |
-| `rule` | Fetch rule | Rule document from saved objects (`FetchRuleStep`). |
-| `queryPayload` | Execute rule query | ES\|QL filter and params for the query (`ExecuteRuleQueryStep`). |
-| `esqlRowBatch` | Execute rule query | One batch of ES\|QL result rows (the query step may emit multiple continues as batches stream). |
-| `alertEventsBatch` | Create alert events, create recovery, director | Materialized `.rule-events` documents. Recovery appends rows, director enriches episode fields for `kind: alert` before store. |
-
-### Execution steps
-
-Steps are self-contained units of work that implement `RuleExecutionStep`. They are registered on `RuleExecutionStepsToken` in `setup/bind_rule_executor.ts`; binding order is execution order.
-
-| # | Step | Summary |
-| --- | --- | --- |
-| 1 | `WaitForResourcesStep` | The run waits until required Elasticsearch assets are ready so later steps do not fail on missing indices or templates. |
-| 2 | `FetchRuleStep` | It loads the current rule document. If the rule was deleted, the pipeline halts with a domain reason instead of throwing. |
-| 3 | `ValidateRuleStep` | If the rule is disabled, the pipeline halts. There is nothing further to do for this execution. |
-| 4 | `ExecuteRuleQueryStep` | It builds the ES\|QL request from the rule (including lookback and conditions) and streams result batches into state. Each batch updates `esqlRowBatch` for the next step. |
-| 5 | `CreateAlertEventsStep` | It converts each batch of result rows into breached rule-event documents. The results are written to the `alertEventsBatch` for the next step. |
-| 6 | `CreateRecoveryEventsStep` | For alert rules, it discovers which group hashes are still active in the index, compares that to the current breach batch, and appends recovery events (including query-based recovery when configured). Non-alert rules skip this step. |
-| 7 | `DirectorStep` | For alert rules, it runs the director to attach or update episode-related fields. Signal rules skip episode tracking and pass the batch through unchanged. |
-| 8 | `StoreAlertEventsStep` | It writes the final batches to the rule-events data stream so the rest of the platform can consume them. |
-
-### Halt reasons
-
-A step may return `halt` to stop a the execution of the pipeline. Reasons are defined on `HaltReason` in `types.ts`.
+`HaltReason` is defined in `types.ts`.
 
 | Reason | Meaning |
 | --- | --- |
-| `rule_deleted` | The rule saved object was not found (`FetchRuleStep`). |
-| `rule_disabled` | The rule exists but is disabled (`ValidateRuleStep`). |
-| `state_not_ready` | Required pipeline state is missing (for example rule or intermediate batches not present in state when a step runs). A defensive halt from stream wiring or ordering. |
-
-## Guarantees and limits
-
-- Streamed ES\|QL: `ExecuteRuleQueryStep` emits multiple batches. The steps must tolerate partial `esqlRowBatch` / `alertEventsBatch` updates.
-- Task timeout is `5m` per run (`task_definition.ts`). Long queries or stalls should respect `executionContext` cancellation where applicable.
-- Idempotency of side effects outside Kibana is the caller’s concern once events are written. The executor focuses on durable indexing of rule events.
-
-## Key design principles
-
-1. Immutable Stream State: Steps consume a `PipelineStateStream` and emit `StepStreamResult` objects. Never mutate incoming state directly. Always emit a new state object when updating fields.
-
-2. Domain-Driven: Steps work with domain concepts only.
-
-3. Single Responsibility: Each step handles one logical unit of work.
-
-4. Dependency Injection: Steps use Inversify for dependency injection. Dependencies are injected via constructor.
-
-5. Separation of Concerns: Global operations use middleware and step-specific operations use decorators.
+| `rule_deleted` | The saved object no longer exists. |
+| `rule_disabled` | The rule is present but disabled. |
+| `state_not_ready` | A step ran without required upstream state. Usually indicates ordering or stream wiring misuse. |
 
 ## Middleware vs decorators
 
-| Layer | Applies to | Purpose |
+| Mechanism | Use it for | Current examples |
 | --- | --- | --- |
-| Middleware | All steps | Global cross-cutting concerns (cancellation, APM, errors). |
-| Decorators | Selected steps | Step-specific behavior without editing the step class. |
+| Middleware | Global cross-cutting behavior for every step | cancellation, APM, error handling |
+| Decorators | Optional wrapping for selected steps | step-specific extensions without changing middleware scope |
 
----
+Choose the smallest tool that matches the concern.
+
+## When to add a new step
+
+Add a step when you need a new domain phase in the rule execution pipeline, especially if it:
+
+- introduces a new piece of pipeline state
+- needs to happen in a precise order relative to recovery or storage
+- should remain understandable as a standalone unit of work
+
+Do **not** add a step when:
+
+- the logic is really global middleware
+- the logic belongs inside the director
+- the logic is only about notifications after events are written
 
 ## Creating a new rule executor step
 
-### Step 1: Create the Step File
-
-Create a new file in `steps/` directory (e.g., `my_new_step.ts`):
+### Step 1: Create the step class
 
 ```typescript
 import { inject, injectable } from 'inversify';
@@ -251,90 +238,63 @@ export class MyNewStep implements RuleExecutionStep {
         return requiredState.result;
       }
 
-      // The helper narrows the type, so `rule` is guaranteed here
       const { rule } = requiredState.state;
-
-      // Perform your logic here
       const myResult = await this.doSomething(rule);
 
-      // Return one of two options:
-
-      // Option 1: Continue with new data merged into state
       return {
         type: 'continue',
         state: { ...requiredState.state, myNewField: myResult },
       };
-
-      // Option 2: Halt pipeline with a domain reason
-      // return { type: 'halt', reason: 'rule_disabled', state: requiredState.state };
     });
   }
 
-  private async doSomething(rule: RuleResponse): Promise<MyNewFieldType> {
+  private async doSomething(_rule: RuleResponse): Promise<Record<string, unknown>> {
     return {};
   }
 }
 ```
 
-### Step 2: Export from Index
-
-Add your step to `steps/index.ts`:
-
-```typescript
-export { WaitForResourcesStep } from './wait_for_resources_step';
-export { FetchRuleStep } from './fetch_rule_step';
-// ... existing exports ...
-export { MyNewStep } from './my_new_step'; // Add this
-```
-
-### Step 3: Update Pipeline State (if needed)
-
-If your step produces new data, add the field to `RulePipelineState` in `types.ts`:
+### Step 2: Extend pipeline state if needed
 
 ```typescript
 export interface RulePipelineState {
   readonly input: RuleExecutionInput;
   readonly rule?: RuleResponse;
   readonly queryPayload?: QueryPayload;
-  readonly esqlRowBatch?: Array<Record<string, unknown>>;
-  readonly alertEventsBatch?: AlertEvent[];
-  readonly myNewField?: MyNewFieldType; // Add your new field
+  readonly esqlRowBatch?: ReadonlyArray<Record<string, unknown>>;
+  readonly alertEventsBatch?: ReadonlyArray<AlertEvent>;
+  readonly myNewField?: Record<string, unknown>;
 }
 ```
 
-### Step 4: Register in DI Container
+### Step 3: Export and bind it in order
 
-Add your step to `setup/bind_rule_executor.ts`. Steps use multi-injection on `RuleExecutionStepsToken`: each `bind(RuleExecutionStepsToken).to(StepClass)` adds one step; file order is execution order.
+Add the export to `steps/index.ts`, then register it in `setup/bind_rule_executor.ts`.
 
 ```typescript
-import { MyNewStep } from '../lib/rule_executor/steps';
-
-export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
-  // ... middleware bindings ...
-
-  bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
-  bind(RuleExecutionStepsToken).to(MyNewStep).inSingletonScope(); // example insertion
-  bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
-  bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
-
-  bind(RuleExecutionPipeline).toSelf().inRequestScope();
-};
+bind(RuleExecutionStepsToken).to(WaitForResourcesStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
+bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
+bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(MyNewStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();
+bind(RuleExecutionStepsToken).to(DirectorStep).inSingletonScope();
+bind(RuleExecutionStepsToken).to(StoreAlertEventsStep).inSingletonScope();
 ```
 
-Use `inRequestScope()` vs `inSingletonScope()` consistently with neighboring steps (see existing bindings).
+Binding order is execution order. Match neighboring scope conventions unless you have a clear reason not to.
 
-### Step 5: Add Tests
-
-Create a test file `steps/my_new_step.test.ts`:
+### Step 4: Add focused tests
 
 ```typescript
 import { MyNewStep } from './my_new_step';
-import { createPipelineStream, collectStreamResults, createRuleExecutionInput, createRuleResponse } from '../test_utils';
+import {
+  collectStreamResults,
+  createPipelineStream,
+  createRuleExecutionInput,
+  createRuleResponse,
+} from '../test_utils';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyNewStep', () => {
@@ -342,54 +302,26 @@ describe('MyNewStep', () => {
     const { loggerService } = createLoggerService();
     const step = new MyNewStep(loggerService);
 
-    const inputState = {
-      input: createRuleExecutionInput(),
-      rule: createRuleResponse(),
-    };
+    const stream = step.executeStream(
+      createPipelineStream([
+        {
+          input: createRuleExecutionInput(),
+          rule: createRuleResponse(),
+        },
+      ])
+    );
 
-    const stream = step.executeStream(createPipelineStream([inputState]));
     const [result] = await collectStreamResults(stream);
 
     expect(result.type).toBe('continue');
     expect(result.state).toHaveProperty('myNewField');
   });
-
-  it('halts when required state is missing', async () => {
-    const { loggerService } = createLoggerService();
-    const step = new MyNewStep(loggerService);
-
-    const inputState = { input: createRuleExecutionInput() };
-    const stream = step.executeStream(createPipelineStream([inputState]));
-    const [result] = await collectStreamResults(stream);
-
-    expect(result).toEqual({
-      type: 'halt',
-      reason: 'state_not_ready',
-      state: inputState,
-    });
-  });
 });
 ```
 
----
+## Creating new middleware
 
-## Middleware
-
-Middleware applies to all steps and is ideal for global cross-cutting concerns like error handling, performance measurement, or request tracing.
-
-### Middleware Execution Flow
-
-```
-MiddlewareA.execute()
-  └─► MiddlewareB.execute()
-        └─► step.executeStream()
-        ◄── returns stream
-  ◄── returns stream
-```
-
-### Creating a New Middleware
-
-Create a new file in `middleware/` directory (e.g., `performance_middleware.ts`):
+Middleware is the right extension point for global concerns like tracing, timing, or cancellation-aware instrumentation.
 
 ```typescript
 import { inject, injectable } from 'inversify';
@@ -423,9 +355,8 @@ export class PerformanceMiddleware implements RuleExecutionMiddleware {
           yield result;
         }
       } finally {
-        const duration = performance.now() - start;
         logger.debug({
-          message: `Step [${ctx.step.name}] completed in ${duration.toFixed(2)}ms`,
+          message: `Step [${ctx.step.name}] took ${performance.now() - start}ms`,
         });
       }
     })();
@@ -433,207 +364,28 @@ export class PerformanceMiddleware implements RuleExecutionMiddleware {
 }
 ```
 
-### Registering Middleware
+Register middleware in `setup/bind_rule_executor.ts` on `RuleExecutionMiddlewaresToken`. Binding order defines wrapping order.
 
-Add your middleware class to `setup/bind_rule_executor.ts` and append it to `RuleExecutionMiddlewaresToken` in the order you want (same multi-injection pattern as steps: binding order = wrap order).
-
-```typescript
-import { PerformanceMiddleware } from '../lib/rule_executor/middleware';
-
-export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) => {
-  bind(PerformanceMiddleware).toSelf().inSingletonScope();
-
-  bind(RuleExecutionMiddlewaresToken).to(CancellationBoundaryMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(ApmMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(PerformanceMiddleware).inSingletonScope();
-  bind(RuleExecutionMiddlewaresToken).to(ErrorHandlingMiddleware).inSingletonScope();
-};
-```
-
-### Current Middleware
+## Current middleware
 
 | Middleware | Purpose |
-|------------|---------|
-| `CancellationBoundaryMiddleware` | Cooperative cancellation / abort integration |
-| `ApmMiddleware` | APM spans around step execution |
-| `ErrorHandlingMiddleware` | Centralized error logging for step failures |
-
----
-
-## Decorators
-
-Decorators wrap specific steps to add behavior without modifying the step implementation. Use decorators when you need per-step control without adding conditionals to middleware.
-
-### Creating a Decorator
-
-Create a new file in `steps/decorators/` directory (e.g., `audit_logging_decorator.ts`):
-
-```typescript
-import { RuleStepDecorator } from './step_decorator';
-import type { PipelineStateStream } from '../../types';
-
-export class AuditLoggingDecorator extends RuleStepDecorator {
-  constructor(
-    step: RuleExecutionStep,
-    private readonly auditService: AuditServiceContract
-  ) {
-    super(step);
-  }
-
-  public executeStream(input: PipelineStateStream): PipelineStateStream {
-    const stream = this.step.executeStream(input);
-    const auditService = this.auditService;
-
-    return (async function* () {
-      for await (const result of stream) {
-        await auditService.log({
-          action: `rule_execution.step.${result.type}`,
-          ruleId: result.state.input.ruleId,
-          spaceId: result.state.input.spaceId,
-        });
-
-        yield result;
-      }
-    })();
-  }
-}
-```
-
-## Testing
-
-### Test Utilities
-
-Test utilities are available in `test_utils.ts`:
-
-### Testing Steps
-
-```typescript
-import { MyStep } from './my_step';
-import {
-  collectStreamResults,
-  createPipelineStream,
-  createRuleExecutionInput,
-  createRuleResponse,
-} from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-
-describe('MyStep', () => {
-  it('executes successfully', async () => {
-    const { loggerService } = createLoggerService();
-    const step = new MyStep(loggerService);
-
-    const state = {
-      input: createRuleExecutionInput(),
-      rule: createRuleResponse(),
-    };
-
-    const stream = step.executeStream(createPipelineStream([state]));
-    const [result] = await collectStreamResults(stream);
-
-    expect(result.type).toBe('continue');
-  });
-});
-```
-
-### Testing Middleware
-
-```typescript
-import { ErrorHandlingMiddleware } from './error_handling_middleware';
-import { createPipelineStream, collectStreamResults, createRuleExecutionInput } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-
-describe('ErrorHandlingMiddleware', () => {
-  it('calls next and returns result on success', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
-    const middleware = new ErrorHandlingMiddleware(loggerService);
-
-    const next = jest.fn((input) => input);
-
-    const context = {
-      step: { name: 'test_step', executeStream: jest.fn() },
-    };
-    const inputState = { input: createRuleExecutionInput() };
-    const output = middleware.execute(context, next, createPipelineStream([inputState]));
-    const [result] = await collectStreamResults(output);
-
-    expect(result).toEqual({ type: 'continue', state: inputState });
-    expect(mockLogger.error).not.toHaveBeenCalled();
-  });
-
-  it('logs error and rethrows on failure', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
-    const middleware = new ErrorHandlingMiddleware(loggerService);
-
-    const next = jest.fn(() =>
-      (async function* () {
-        throw new Error('Step failed');
-      })()
-    );
-    const context = {
-      step: { name: 'failing_step', executeStream: jest.fn() },
-    };
-    const output = middleware.execute(context, next, createPipelineStream());
-
-    await expect(collectStreamResults(output)).rejects.toThrow('Step failed');
-    expect(mockLogger.error).toHaveBeenCalled();
-  });
-});
-```
-
-### Testing Decorators
-
-```typescript
-import { AuditLoggingDecorator } from './audit_logging_decorator';
-import { collectStreamResults, createPipelineStream, createRuleExecutionInput } from '../test_utils';
-
-describe('AuditLoggingDecorator', () => {
-  it('logs before and after step execution', async () => {
-    const mockStep = {
-      name: 'test_step',
-      executeStream: jest.fn((input) => input),
-    };
-    const mockAuditService = { log: jest.fn() };
-
-    const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
-    const state = { input: createRuleExecutionInput() };
-    const stream = decorator.executeStream(createPipelineStream([state]));
-
-    await collectStreamResults(stream);
-
-    expect(mockAuditService.log).toHaveBeenCalledTimes(1);
-  });
-
-  it('propagates errors from wrapped step', async () => {
-    const mockStep = {
-      name: 'failing_step',
-      executeStream: jest.fn(() =>
-        (async function* () {
-          throw new Error('Step failed');
-        })()
-      ),
-    };
-    const mockAuditService = { log: jest.fn() };
-
-    const decorator = new AuditLoggingDecorator(mockStep, mockAuditService);
-    const stream = decorator.executeStream(
-      createPipelineStream([{ input: createRuleExecutionInput() }])
-    );
-
-    await expect(collectStreamResults(stream)).rejects.toThrow('Step failed');
-  });
-});
-```
-
-## Related code
-
-| File | Role |
 | --- | --- |
-| `execution_pipeline.ts` | `RuleExecutionPipeline`, middleware wrapping, stream iteration. |
-| `task_runner.ts` / `task_definition.ts` | Task Manager integration and task type config. |
-| `schedule.ts` | Schedule / ensure task for a rule. |
-| `types.ts` | `RulePipelineState`, `HaltReason`, step/stream types. |
-| `setup/bind_rule_executor.ts` | Middleware and step order. |
-| `stream_utils.ts` | Helpers (`mapStep`, `guardedExpandStep`, …). |
-| `queries.ts` | ES\|QL for active group hashes used in recovery (`getActiveAlertGroupHashesQuery`). |
-| `build_alert_events.ts` | Breach batches, `buildRecoveryAlertEvents`, `buildQueryRecoveryAlertEvents`. |
-| `get_query_payload.ts` | Time filter / params for the recovery query path. |
+| `CancellationBoundaryMiddleware` | Cooperative cancellation / abort handling |
+| `ApmMiddleware` | APM spans around step execution |
+| `ErrorHandlingMiddleware` | Centralized logging for step failures |
+
+## Testing guidance
+
+Useful coverage points:
+
+- `steps/*.test.ts` for step-local logic
+- `execution_pipeline.test.ts` for pipeline ordering and halt semantics
+- middleware tests for cross-cutting behavior
+- `build_alert_events.test.ts`, `queries.test.ts`, and related helpers for event/query correctness
+
+## Safe contribution guidelines
+
+- Preserve the streaming contract. That is the easiest place to introduce subtle bugs.
+- Prefer `requireState(...)` and explicit halts over assuming a field exists.
+- Keep rule execution focused on event production. If a change is really about lifecycle transitions, move toward the director. If it is really about notifications, move toward the dispatcher.
+- If you change stored event shape, verify the resources schema and downstream readers together.

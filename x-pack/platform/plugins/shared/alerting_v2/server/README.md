@@ -1,162 +1,282 @@
-# Alerting V2 — System Architecture
+# Alerting V2 Architecture
 
-This document describes the Alerting V2 architecture. Implementation details and development documentation lives inside the folder on each component. 
+This is the main architecture document for the `alerting_v2` plugin. Read this file first if you want to understand the big picture before diving into one subsystem.
 
----
+The goal of the plugin is simple:
 
-## 1. Rule events
+1. Let users define ES|QL-based rules and notification policies.
+2. Evaluate rules on a schedule and persist immutable rule events.
+3. Derive alert lifecycle state for alert-type rules.
+4. Dispatch notifications asynchronously based on policies and action history.
+5. Expose APIs and UI for managing rules, alert actions, episodes, and notification policies.
 
-A rule event is the atomic unit of output from a single execution of a rule. Each rule event is an immutable, append-only document stored in the `.rule-events` data stream. The engine creates at most one rule event per row returned by the rule’s ES|QL evaluation for that run (plus additional events when the rule emits recovery or no-data outcomes according to configuration). Rule events are never updated in place. History is preserved by appending new documents. Colloquially the same documents are sometimes called alert events when discussing user-visible alerting.
+## Read this document when
 
-### 1.1 Types (`type`)
+- You are new to the plugin and need a mental model.
+- You want to know which subsystem owns a behavior.
+- You need to decide where a change belongs before editing code.
 
-Each rule event document carries a `type` field with one of two values:
-
-| Value | Meaning |
-| --- | --- |
-| `signal` | Observation-only: No alert lifecycle, no `episode.*` fields, no notifications. |
-| `alert` | Lifecycle-backed: Alert lifecycle, may carry `episode.*` fields after processing, support for notifications. |
-
-Rules declare a kind (`signal` or `alert`) on the rule definition. The written documents use `type` with the same two values.
-
-### 1.2 Statuses (`status`)
-
-Each rule event has a `status` describing the outcome of that evaluation for its series (see §2):
-
-| Status | Meaning |
-| --- | --- |
-| `breached` | The rule’s condition matched for this row / series (threshold or condition satisfied). |
-| `recovered` | The condition is no longer satisfied for a series that was previously breaching (typically inferred by comparing group membership across runs). |
-| `no_data` | The evaluation could not establish a normal breach/recovery outcome—e.g. no rows returned where the rule distinguishes “no data” from “recovered.” |
-
-Fields returned from the ES|QL query are stored under `data` (flattened).
-
-*Implementation:* [`resources/README.md`](resources/README.md).
-
----
-
-## 2. Series 
-
-A series is the logical stream of rule events for one rule that share the same grouping identity within that rule’s evaluation. It is the unit used for recovery detection, snooze scoping, and correlating alert lifecycle state.
-
-Each rule event includes `group_hash`: a stable digest, a cryptographic hash of a short canonical string, computed when breach and recovery documents are materialized from the rule’s ES|QL results. The digest encodes the grouping fields (configured in the rule) and the values from each result row for those columns, so each distinct combination of values maps to one series identifier and remains comparable across runs (including recovery). 
-
-*Implementation:* [`lib/rule_executor/README.md`](lib/rule_executor/README.md).
-
----
-
-## 3. Episodes
-
-An episode is the lifecycle construct for alert-type rule events only. It groups all rule events that share the same `episode.id` (a stable identifier for one breach-to-recovery lifecycle for that alert). signal-type rule events do not have episodes.
-
-### 3.1 Episode statuses
-
-Episode state is carried on rule events under `episode.status`:
-
-| Status | Meaning |
-| --- | --- |
-| `inactive` | Condition not met. Both the starting and ending state of an episode lifecycle. |
-| `pending` | Condition met but activation criteria (e.g. consecutive breaches or duration) not yet satisfied. |
-| `active` | Condition met and activation criteria satisfied. |
-| `recovering` | Condition no longer met, but recovery criteria not yet satisfied before returning to `inactive`. |
-
-`episode.status_count` records consecutive evaluations in the current status where count-based thresholds apply.
-
-### 3.2 Lifecycle
-
-An episode progresses along a finite state machine over time as new rule events are written: typically `inactive` → `pending` → `active` → `recovering` → `inactive`, with possible skips (e.g. zero pending threshold yields `inactive` → `active`). A series may see many episodes over time. A new episode is created when a new breach begins after the previous episode has fully closed.
-
-*Implementation:* [`lib/director/README.md`](lib/director/README.md).
-
----
-
-## 4. Rules
-
-A rule is a persisted configuration (saved object) that defines what to evaluate, how often, and how results map to rule events. V2 rules are ES|QL-powered: the core of evaluation is an ES|QL query (plus optional condition and time bounds) executed by Elasticsearch on each scheduled run.
-
-Rules include scheduling, evaluation query configuration, recovery policy, optional no-data behavior, grouping inputs that feed `group_hash`, and state-transition thresholds for alert rules. Rules are either of type `signal` or type `alert`. That choice controls whether episode lifecycle processing apply.
-
-*Implementation:* saved object schemas and HTTP APIs live under `saved_objects/` and `routes/`. Client-facing rule shapes under `lib/rules_client/`.
-
----
-
-## 5. Rule execution
-
-Rule execution is the process of running one rule once on its schedule. The Task Manager invokes a dedicated task per enabled rule. The execution path loads the rule, ensures the required datastreams exist, validates that the rule may run, builds and runs ES|QL, turns result rows into rule events (including recovery and no-data handling where configured), passes alert-type rule events batches through the Director to attach episode information, and bulk-indexes documents into `.rule-events` datastream.
-
-Execution is modeled as a pipeline of ordered steps with middlewares (e.g. cancellation, error handling). The pipeline is deterministic with respect to ordering: each step consumes and produces pipeline state. Halting conditions stop the execution without running the next step. The pipeline supports streaming meaning that each step can stream its output to the next step.
-
-*Implementation:* [`lib/rule_executor/README.md`](lib/rule_executor/README.md).
-
----
-
-## 6. Director
-
-The Director is the episode transition engine. Given alert-type rule events and prior state read from `.rule-events`, it resolves the next episode related fields per series according to configurable strategies (including count and time-based thresholds). It runs inside the rule execution pipeline as a dedicated step after breach/recovery events are formed. The Director does not schedule work and does not send notifications. It only assigns episode metadata for storage.
-
-*Implementation:* [`lib/director/README.md`](lib/director/README.md).
-
----
-
-## 7. Dispatcher
-
-The Dispatcher is a separate scheduled component (its own Task Manager task) that bridges episode-bearing data in `.rule-events` and downstream actions. On each run it loads candidate episodes (subject to lookback and prior fire / suppress / notified semantics on `.alert-actions`), applies notification policies attached to rules: KQL matchers, grouping, throttling, suppression (ack, deactivate, snooze, etc.), then dispatches matched notification groups to configured destinations (e.g. workflows). It records outcomes back to `.alert-actions` so future runs do not reprocess the same work incorrectly. The Dispatcher is asynchronous relative to any single rule run: it observes the shared indices after writes complete.
-
-*Implementation:* [`lib/dispatcher/README.md`](lib/dispatcher/README.md).
-
----
-
-## 8. How the pieces are connected
-
-The following invariant holds: rule execution and Director run on the hot path of scheduled evaluation and write `.rule-events` (and indirectly drive what the Dispatcher will later see). The Dispatcher runs on a schedule, reads `.rule-events` and `.alert-actions`, and writes `.alert-actions`. User and system actions (acknowledgements, snoozes, etc.) also append to `.alert-actions` and influence suppression and dispatch logic.
-
-```
-                    ┌─────────────────────┐
-                    │    Task Manager     │
-                    └──────────┬──────────┘
-           ┌───────────────────┴───────────────────┐
-           ▼                                       ▼
-┌──────────────────────┐                 ┌──────────────────────┐
-│  Per-rule executor   │                 │  Dispatcher task     │
-│  (rule schedule)     │                 │  (fixed interval)    │
-└──────────┬───────────┘                 └──────────┬───────────┘
-           │                                        │
-           ▼                                        ▼
-┌──────────────────────┐                 ┌──────────────────────┐
-│ ES|QL + rule events  │   append-only   │ Policies + dispatch  │
-│ + Director (episodes)│ ──────────────► │ + alert actions      │
-└──────────┬───────────┘   `.rule-events` └──────────┬───────────┘
-           │                      ▲                   │
-           │                      └───────────────────┘
-           │                         read / write
-           └────────────────── `.alert-actions`
-```
-
-Data dependency: Dispatchers and matchers operate on materialized episode rows and action history. They do not re-execute ES|QL for the rule. Recovery and no-data semantics are entirely resolved during rule execution.
-
-*Persistence and index definitions:* [`resources/README.md`](resources/README.md).
-
----
-
-## Related documentation
+If you already know the high-level flow and want subsystem detail, jump to:
 
 | Concern | Document |
 | --- | --- |
-| Rule execution pipeline, middleware, steps | [`lib/rule_executor/README.md`](lib/rule_executor/README.md) |
-| Director, transition strategies | [`lib/director/README.md`](lib/director/README.md) |
-| Dispatcher pipeline, steps, operational parameters | [`lib/dispatcher/README.md`](lib/dispatcher/README.md) |
-| Data streams, mappings, ES\|QL views | [`resources/README.md`](resources/README.md) |
+| Rule execution pipeline, middleware, streaming steps | [`lib/rule_executor/README.md`](lib/rule_executor/README.md) |
+| Episode lifecycle and transition strategies | [`lib/director/README.md`](lib/director/README.md) |
+| Notification matching, grouping, throttling, dispatch | [`lib/dispatcher/README.md`](lib/dispatcher/README.md) |
+| Data streams, mappings, and ES|QL views | [`resources/README.md`](resources/README.md) |
 
-## Repository layout
+## The mental model
+
+The plugin is easiest to understand as five cooperating layers:
+
+| Layer | What it owns | Main code |
+| --- | --- | --- |
+| Control plane | User-facing APIs, saved objects, privileges, UI, startup wiring | `public/`, `server/routes/`, `server/saved_objects/`, `server/setup/` |
+| Evaluation plane | Running rules and turning query results into rule events | `lib/rule_executor/` |
+| Lifecycle plane | Turning alert rule events into episode state transitions | `lib/director/` |
+| Delivery plane | Turning episodes into notification work and recording outcomes | `lib/dispatcher/` |
+| Persistence plane | Data streams and ES|QL views used by the other layers | `resources/` |
+
+Those layers deliberately do different jobs:
+
+- The **rule executor** answers "what happened when this rule ran?"
+- The **director** answers "what episode state should this alert series be in now?"
+- The **dispatcher** answers "should anything notify right now, and what should we record about that decision?"
+- The **resources** layer answers "where is all of that stored, and what is the durable document shape?"
+
+## Core domain concepts
+
+### Rule
+
+A rule is a saved object that defines:
+
+- what ES|QL to run
+- how often to run it
+- how results are grouped into a stable series identity
+- whether it behaves as a `signal` rule or an `alert` rule
+- optional recovery and no-data behavior
+- optional alert lifecycle thresholds for `alert` rules
+
+Rules are persisted under `saved_objects/` and managed through `routes/` plus `lib/rules_client/`.
+
+### Rule event
+
+A rule event is the immutable output document for one evaluated row or derived outcome from one rule run. Rule events are written to `.rule-events` and never updated in place.
+
+Each event has:
+
+- `type`: `signal` or `alert`
+- `status`: `breached`, `recovered`, or `no_data`
+- `group_hash`: the series identifier inside that rule
+- `data`: the flattened ES|QL row payload
+- optional `episode.*` fields for alert-type rules
+
+`signal` events stop here. `alert` events continue into lifecycle and notification processing.
+
+### Series
+
+A series is the per-rule stream of events sharing the same `group_hash`. It is the stable identity used to compare runs, detect recoveries, scope suppressions, and correlate lifecycle state over time.
+
+### Episode
+
+An episode is the lifecycle container for an alert series. Episodes exist only for `type: alert` events.
+
+- A single series can have many episodes over time.
+- A single episode covers one breach-to-recovery lifecycle.
+- The director assigns `episode.id`, `episode.status`, and `episode.status_count`.
+
+Episode statuses are:
+
+| Status | Meaning |
+| --- | --- |
+| `inactive` | The series is not currently active. |
+| `pending` | The series breached but has not yet met activation criteria. |
+| `active` | The series is actively alerting. |
+| `recovering` | The series stopped breaching but has not yet fully returned to inactive. |
+
+### Notification policy
+
+A notification policy is a saved object that is evaluated by the dispatcher, not embedded in the rule. Policies define:
+
+- an optional KQL matcher
+- grouping behavior
+- throttling behavior
+- destinations
+- optional snooze / API key state
+
+One policy can match episodes from many rules in the same space.
+
+### Alert action
+
+An alert action is an append-only document in `.alert-actions` describing something that happened to an alert or notification group, for example:
+
+- user actions such as `ack`, `snooze`, `activate`, `deactivate`
+- dispatcher outcomes such as fired, suppressed, throttled, unmatched, or notified
+
+This stream is the dispatcher's durable memory.
+
+## End-to-end flow
+
+The whole plugin revolves around two append-only streams:
+
+- `.rule-events`: what rule execution produced
+- `.alert-actions`: what users and the dispatcher did with those events
+
+### 1. Configuration and management
+
+- The UI in `public/` lets users manage rules, alerts/episodes, and notification policies.
+- HTTP routes in `server/routes/` expose the same capabilities on the server.
+- Saved object services and clients persist rules and notification policies.
+
+### 2. Rule scheduling
+
+- Each enabled rule gets its own Task Manager task.
+- The task runner hands the rule id, space id, and scheduling metadata to the rule executor pipeline.
+
+### 3. Rule execution
+
+- The executor waits for resources to be ready.
+- It loads and validates the rule.
+- It builds and runs ES|QL.
+- It materializes breached events and optional recovery / no-data events.
+- For alert rules, it invokes the director to attach episode metadata.
+- It writes the final event batch to `.rule-events`.
+
+### 4. Episode lifecycle enrichment
+
+- The director reads the latest known alert state for each `group_hash`.
+- It selects a transition strategy for the rule.
+- It calculates the next episode state and episode id for each alert event.
+- It does not dispatch notifications and does not schedule work itself.
+
+### 5. Asynchronous notification dispatch
+
+- The dispatcher runs on its own schedule, separate from per-rule execution.
+- It reads candidate episodes from `.rule-events`.
+- It reads suppression / throttle / notification history from `.alert-actions`.
+- It loads rules and enabled notification policies for the relevant space.
+- It evaluates policy matchers, builds groups, applies throttling, dispatches eligible groups, and stores outcomes back into `.alert-actions`.
+
+### 6. Subsequent runs reuse durable history
+
+- Future rule executions compare against `.rule-events` for recovery and lifecycle state.
+- Future dispatcher runs compare against `.alert-actions` for suppression and throttling semantics.
+
+## Architecture diagram
+
+```text
+                        ┌──────────────────────────────┐
+                        │     Management UI / APIs     │
+                        │ public/ + routes/ + clients  │
+                        └──────────────┬───────────────┘
+                                       │
+                                       ▼
+                        ┌──────────────────────────────┐
+                        │   Saved objects + services   │
+                        │   rules / notification       │
+                        │   policies / privileges      │
+                        └──────────────┬───────────────┘
+                                       │
+                  ┌────────────────────┴────────────────────┐
+                  ▼                                         ▼
+      ┌──────────────────────────┐              ┌──────────────────────────┐
+      │  Rule executor task      │              │    Dispatcher task       │
+      │  one task per enabled    │              │    fixed interval        │
+      │  rule                    │              │                          │
+      └─────────────┬────────────┘              └─────────────┬────────────┘
+                    │                                         │
+                    ▼                                         ▼
+      ┌──────────────────────────┐              ┌──────────────────────────┐
+      │ Rule executor pipeline   │              │ Dispatcher pipeline      │
+      │ ES|QL -> rule events     │              │ episodes -> groups ->    │
+      │ -> director -> store     │              │ dispatch -> action log   │
+      └─────────────┬────────────┘              └─────────────┬────────────┘
+                    │                                         │
+                    ▼                                         ▼
+              `.rule-events`                         `.alert-actions`
+                    ▲                                         ▲
+                    └─────────────── reads and writes ────────┘
+```
+
+## Important ownership boundaries
+
+These boundaries keep the architecture understandable. If a change crosses one of them, that is a signal to slow down and verify the design.
+
+### What the rule executor owns
+
+- Turning a rule run into rule events
+- Recovery and no-data semantics
+- Streaming large ES|QL result sets through the execution pipeline
+- Persisting final events to `.rule-events`
+
+### What the director owns
+
+- Converting alert events into episode state
+- Choosing transition strategies based on rule configuration
+- Generating or reusing episode ids
+
+### What the dispatcher owns
+
+- Matching episodes to notification policies
+- Grouping and throttling
+- Delivery to destinations
+- Recording durable dispatch decisions in `.alert-actions`
+
+### What the dispatcher does not own
+
+- It does not re-run the rule query
+- It does not infer recoveries
+- It does not calculate episode state transitions
+
+### What the resources layer owns
+
+- Datastream definitions and mappings
+- ES|QL views
+- Versioned schema evolution for stored documents
+
+## Plugin startup and wiring
+
+The plugin uses Inversify-based dependency injection and startup hooks:
 
 | Path | Role |
 | --- | --- |
-| `setup/` | Dependency injection: services, executors, tasks, routes |
-| `lib/rule_executor/` | Rule execution pipeline |
-| `lib/director/` | Episode transition engine |
-| `lib/dispatcher/` | Notification pipeline |
-| `resources/` | Elasticsearch data streams and views |
-| `routes/` | HTTP API |
-| `saved_objects/` | Rule and notification policy persistence models |
+| `server/index.ts` | Registers setup/start hooks, services, tasks, and subsystem bindings. |
+| `setup/bind_on_setup.ts` | Registers privileges, saved objects, UI settings, telemetry setup, and task definitions. |
+| `setup/bind_on_start.ts` | Initializes Elasticsearch resources and schedules background tasks. |
+| `setup/bind_routes.ts` | Registers HTTP routes. |
+| `setup/bind_services.ts` | Binds shared services, clients, dispatcher enablement, and director strategies. |
+| `setup/bind_rule_executor.ts` | Registers rule executor middleware and steps in execution order. |
+| `setup/bind_dispatcher_executor.ts` | Registers dispatcher steps in execution order. |
+| `setup/bind_tasks.ts` | Registers Task Manager definitions for rule execution, dispatcher, and support tasks. |
 
-Plugin packaging and dependencies: `kibana.jsonc` at the plugin root.
+## Repository map
+
+| Path | Role |
+| --- | --- |
+| `public/` | UI applications, hooks, API wrappers, and app mounting. |
+| `lib/rule_executor/` | Per-rule execution pipeline. |
+| `lib/director/` | Alert episode state engine. |
+| `lib/dispatcher/` | Notification pipeline. |
+| `lib/services/` | Shared ES, storage, logging, retry, user, and saved object services. |
+| `resources/` | Datastreams and ES|QL views. |
+| `routes/` | HTTP API surface. |
+| `saved_objects/` | Rule and notification policy persistence models. |
+
+## Where to make changes
+
+If your change is about...
+
+- **query construction, batching, recovery, or executor middleware**: start in [`lib/rule_executor/README.md`](lib/rule_executor/README.md)
+- **episode state transitions or new lifecycle semantics**: start in [`lib/director/README.md`](lib/director/README.md)
+- **matchers, grouping, throttling, suppression, or destinations**: start in [`lib/dispatcher/README.md`](lib/dispatcher/README.md)
+- **stored fields, mappings, or ES|QL views**: start in [`resources/README.md`](resources/README.md)
+- **routes, request validation, or client-facing contracts**: inspect `routes/`, `saved_objects/`, and the relevant subsystem together
+- **UI behavior**: inspect `public/` and confirm whether server route or saved object changes are needed too
+
+## Contribution rules of thumb
+
+- Prefer changing the smallest owning subsystem instead of threading behavior through multiple layers.
+- If you add fields to stored documents, update the resources definitions and any readers/writers that depend on them.
+- If you add pipeline state, add it to the relevant `types.ts`, update the step bindings, and add tests at the step and pipeline level.
+- If you are tempted to make the dispatcher understand rule execution internals, that logic probably belongs earlier in the rule executor.
+- If you are tempted to make the director send notifications, that logic probably belongs later in the dispatcher.
