@@ -60,9 +60,16 @@ export const createTemporalStateModule = ({
 });
 
 /**
+ * Prefix used to identify the privileged-user monitoring watchlist.
+ * Matches the constant in `utils.ts` — duplicated here to keep the
+ * snapshot-field check self-contained without adding a circular import.
+ */
+const PRIVILEGED_WATCHLIST_PREFIX = 'privileged-user-monitoring-watchlist';
+
+/**
  * For each currently-privileged entity, retrieves the earliest snapshot via a
- * top_hits aggregation. If the oldest snapshot had privileged=false, the entity
- * was escalated.
+ * top_hits aggregation. If the oldest snapshot's `entity.attributes.watchlists`
+ * did NOT include a privileged-user watchlist entry, the entity was escalated.
  */
 const fetchPrivilegeEscalations = async (
   esClient: ElasticsearchClient,
@@ -97,7 +104,7 @@ const fetchPrivilegeEscalations = async (
                   top_hits: {
                     size: 1,
                     sort: [{ '@timestamp': { order: 'asc' } }],
-                    _source: ['entity.attributes.privileged'],
+                    _source: ['entity.attributes.watchlists'],
                   },
                 },
               },
@@ -115,9 +122,13 @@ const fetchPrivilegeEscalations = async (
           const hit = bucket.oldest_snapshot.hits.hits[0];
           if (hit) {
             const entityField = hit._source?.entity as Record<string, unknown> | undefined;
-            const attrs = entityField?.attributes as { privileged?: boolean } | undefined;
+            const attrs = entityField?.attributes as { watchlists?: string[] } | undefined;
+            const watchlists = Array.isArray(attrs?.watchlists) ? attrs.watchlists : [];
+            const wasPrivileged = watchlists.some(
+              (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_WATCHLIST_PREFIX)
+            );
 
-            if (attrs !== undefined && attrs.privileged === false) {
+            if (!wasPrivileged) {
               escalated.add(`${entityType}:${bucket.key}`);
             }
           }

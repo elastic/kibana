@@ -24,11 +24,24 @@ export const makeObservation = (
 export const getEntityField = (entity: LeadEntity): Record<string, unknown> | undefined =>
   (entity.record as Record<string, unknown>).entity as Record<string, unknown> | undefined;
 
-/** Returns true if the entity currently has the Privileged attribute set. */
+/**
+ * Prefix used to identify the privileged-user monitoring watchlist.
+ * A space ID suffix may be appended (e.g. `privileged-user-monitoring-watchlist-default`),
+ * so callers should match with `startsWith` rather than strict equality.
+ */
+const PRIVILEGED_WATCHLIST_PREFIX = 'privileged-user-monitoring-watchlist';
+
+/** Returns true if the entity is on a privileged-user monitoring watchlist. */
 export const extractIsPrivileged = (entity: LeadEntity): boolean => {
-  const attrs = getEntityField(entity)?.attributes as { privileged?: boolean } | undefined;
-  return attrs?.privileged === true;
+  const attrs = getEntityField(entity)?.attributes as { watchlists?: string[] } | undefined;
+  const watchlists = attrs?.watchlists;
+  if (!Array.isArray(watchlists)) return false;
+  return watchlists.some((w) => typeof w === 'string' && w.startsWith(PRIVILEGED_WATCHLIST_PREFIX));
 };
+
+/** Extracts the EUID (`entity.id`) from a LeadEntity record, e.g. `"host:InnoDB"`. */
+export const getEntityId = (entity: LeadEntity): string | undefined =>
+  (getEntityField(entity) as { id?: string } | undefined)?.id;
 
 /** Capitalises the entity type for use in human-readable descriptions (e.g. "host" → "Host"). */
 export const entityTypeLabel = (entity: LeadEntity): string =>

@@ -10,6 +10,8 @@ import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_clien
 import { createRiskScoreModule } from './risk_score_module';
 import type { LeadEntity } from '../types';
 
+const PRIVILEGED_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
+
 const createEntityWithRisk = (
   type: string,
   name: string,
@@ -19,11 +21,11 @@ const createEntityWithRisk = (
 ): LeadEntity => ({
   record: {
     entity: {
-      id: `euid-${name}`,
+      id: `${type}:${name}`,
       name,
       type,
       risk: { calculated_score_norm: scoreNorm, calculated_level: level },
-      attributes: { privileged },
+      attributes: { watchlists: privileged ? [PRIVILEGED_WATCHLIST_ID] : [] },
     },
   } as never,
   type,
@@ -189,7 +191,7 @@ describe('RiskScoreModule', () => {
     it('detects a 24h escalation when delta >= 10', async () => {
       const entity = createEntityWithRisk('user', 'alice', 80, 'High');
       riskScoreDataClient.getDailyAverageRiskScoreNormSeries.mockResolvedValue(
-        new Map([['user:alice', [65, 70]]])
+        new Map([['user:user:alice', [65, 70]]])
       );
 
       const module = createRiskScoreModule({
@@ -220,7 +222,7 @@ describe('RiskScoreModule', () => {
 
   it('skips entities without risk data', async () => {
     const entity: LeadEntity = {
-      record: { entity: { id: 'euid-no-risk', name: 'no-risk', type: 'user' } } as never,
+      record: { entity: { id: 'user:no-risk', name: 'no-risk', type: 'user' } } as never,
       type: 'user',
       name: 'no-risk',
     };

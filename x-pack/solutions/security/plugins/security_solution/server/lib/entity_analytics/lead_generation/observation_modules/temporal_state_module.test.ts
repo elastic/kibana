@@ -10,9 +10,16 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTemporalStateModule } from './temporal_state_module';
 import type { LeadEntity } from '../types';
 
+const PRIVILEGED_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
+
 const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   record: {
-    entity: { id: `euid-${name}`, name, type, attributes: { privileged: true } },
+    entity: {
+      id: `${type}:${name}`,
+      name,
+      type,
+      attributes: { watchlists: [PRIVILEGED_WATCHLIST_ID] },
+    },
   } as never,
   type,
   name,
@@ -20,7 +27,7 @@ const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
 
 const createNonPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   record: {
-    entity: { id: `euid-${name}`, name, type, attributes: { privileged: false } },
+    entity: { id: `${type}:${name}`, name, type, attributes: { watchlists: [] } },
   } as never,
   type,
   name,
@@ -37,7 +44,12 @@ const mockSnapshotResponse = (buckets: Array<{ key: string; wasPrivileged: boole
             hits: [
               {
                 _source: {
-                  entity: { id: b.key, attributes: { privileged: b.wasPrivileged } },
+                  entity: {
+                    id: b.key,
+                    attributes: {
+                      watchlists: b.wasPrivileged ? [PRIVILEGED_WATCHLIST_ID] : [],
+                    },
+                  },
                 },
               },
             ],

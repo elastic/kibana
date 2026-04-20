@@ -16,4 +16,10 @@ export { ObservationModuleRegistry } from './observation_module_registry';
 export { createRiskScoreModule } from './risk_score_module';
 export { createTemporalStateModule } from './temporal_state_module';
 export { createBehavioralAnalysisModule } from './behavioral_analysis_module';
-export { entityToKey, extractIsPrivileged, groupEntitiesByType, makeObservation } from './utils';
+export {
+  entityToKey,
+  extractIsPrivileged,
+  getEntityId,
+  groupEntitiesByType,
+  makeObservation,
+} from './utils';
