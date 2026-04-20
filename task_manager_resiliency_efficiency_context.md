@@ -81,7 +81,7 @@ Logging:
 Primary files:
 - `x-pack/platform/plugins/shared/task_manager/server/lib/capacity_configuration_stream.ts`
 - `x-pack/platform/plugins/shared/task_manager/server/lib/capacity_configuration_stream.test.ts`
-- `x-pack/platform/plugins/shared/task_manager/server/lib/task_manager_capacity_console_log.ts`
+- `x-pack/platform/plugins/shared/task_manager/server/lib/dynamic_capacity_controller.ts` (dynamic capacity debug logging)
 - `x-pack/platform/plugins/shared/task_manager/server/polling_lifecycle.ts`
 - `x-pack/platform/plugins/shared/task_manager/server/plugin.ts`
 

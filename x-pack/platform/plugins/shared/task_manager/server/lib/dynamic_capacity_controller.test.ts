@@ -83,16 +83,16 @@ describe('DynamicCapacityController', () => {
 
     jest.advanceTimersByTime(1000);
     controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(11);
+    expect(controller.getCapacity()).toBe(10);
 
     controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(5000);
     controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(11);
+    expect(controller.getCapacity()).toBe(10);
 
     jest.advanceTimersByTime(30000);
     controller.evaluate(Date.now());
-    expect(controller.getCapacity()).toBe(12);
+    expect(controller.getCapacity()).toBe(11);
   });
 
   test('uses projection utilization for projected full-capacity health', () => {
@@ -118,6 +118,125 @@ describe('DynamicCapacityController', () => {
 
     // min_utilization_for_projection default is 30% => factor 3.33.
     expect(controller.getCapacity()).toBe(10);
+  });
+
+  test('uses minimum scale-down step when overshoot is small', () => {
+    const controller = new DynamicCapacityController({
+      config: createConfig({
+        capacity: 'auto',
+        dynamic_capacity: {
+          upper_bound: 20,
+          scale_up_step: 10,
+          scale_down_step: 2,
+          scale_down_max_step_fraction: 0.5,
+          scale_down_consecutive_unhealthy_readings: 1,
+          max_process_cpu_utilization: 100,
+        },
+      }),
+      logger,
+      startingCapacity: 10,
+    });
+    controller.setPostClaimUtilizationPct(100);
+    controller.setProjectionUtilizationPct(100);
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(20);
+
+    // ELU is only slightly above its threshold (0.85), so raw proportional step would be 1.
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.86 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(18);
+  });
+
+  test('scales down proportionally for moderate overshoot', () => {
+    const controller = new DynamicCapacityController({
+      config: createConfig({
+        capacity: 'auto',
+        dynamic_capacity: {
+          upper_bound: 20,
+          scale_up_step: 10,
+          scale_down_step: 1,
+          scale_down_max_step_fraction: 0.5,
+          scale_down_consecutive_unhealthy_readings: 1,
+          max_process_cpu_utilization: 100,
+        },
+      }),
+      logger,
+      startingCapacity: 10,
+    });
+    controller.setPostClaimUtilizationPct(100);
+    controller.setProjectionUtilizationPct(100);
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(20);
+
+    // heapUsedFraction=1.275 and max_heap_used_fraction=0.85 => 1.5x over threshold.
+    controller.setOpsMetrics(createOpsMetrics({ heapUsed: 1275, heapLimit: 1000 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(13);
+  });
+
+  test('caps scale-down step by max step fraction', () => {
+    const controller = new DynamicCapacityController({
+      config: createConfig({
+        capacity: 'auto',
+        dynamic_capacity: {
+          upper_bound: 20,
+          scale_up_step: 15,
+          scale_down_step: 1,
+          scale_down_max_step_fraction: 0.5,
+          scale_down_consecutive_unhealthy_readings: 1,
+          max_process_cpu_utilization: 100,
+        },
+      }),
+      logger,
+      startingCapacity: 5,
+    });
+    controller.setPostClaimUtilizationPct(100);
+    controller.setProjectionUtilizationPct(100);
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(20);
+
+    // eventLoopDelay ratio is 5x, but max step fraction limits reduction to 50% of current.
+    controller.setOpsMetrics(createOpsMetrics({ eventLoopDelayMs: 50000 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(10);
+  });
+
+  test('respects floor capacity even with a large proportional step', () => {
+    const controller = new DynamicCapacityController({
+      config: createConfig({
+        capacity: 'auto',
+        dynamic_capacity: {
+          upper_bound: 12,
+          scale_up_step: 4,
+          scale_down_step: 1,
+          scale_down_max_step_fraction: 1,
+          scale_down_consecutive_unhealthy_readings: 1,
+          max_process_cpu_utilization: 100,
+        },
+      }),
+      logger,
+      startingCapacity: 8,
+    });
+    controller.setPostClaimUtilizationPct(100);
+    controller.setProjectionUtilizationPct(100);
+    controller.setOpsMetrics(createOpsMetrics({ elu: 0.2 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(12);
+
+    controller.setOpsMetrics(createOpsMetrics({ eventLoopDelayMs: 100000 }));
+    jest.advanceTimersByTime(1000);
+    controller.evaluate(Date.now());
+    expect(controller.getCapacity()).toBe(8);
   });
 });
 
@@ -149,6 +268,7 @@ function createConfig(
       max_event_loop_delay_ms: 10000,
       scale_down_cooldown_ms: 30000,
       scale_down_consecutive_unhealthy_readings: 3,
+      scale_down_max_step_fraction: 0.5,
       ...(overrides.dynamic_capacity ?? {}),
     },
     event_loop_delay: {

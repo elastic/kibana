@@ -110,11 +110,11 @@ describe('createCapacityConfigurationStream', () => {
     expect(updates[updates.length - 1]).toBe(12);
 
     jest.advanceTimersByTime(1000);
-    expect(updates[updates.length - 1]).toBe(11);
+    expect(updates[updates.length - 1]).toBe(10);
 
     opsMetrics$.next(createOpsMetrics({ elu: 0.2 }));
     jest.advanceTimersByTime(5000);
-    expect(updates[updates.length - 1]).toBe(11);
+    expect(updates[updates.length - 1]).toBe(10);
 
     jest.advanceTimersByTime(30000);
     expect(updates[updates.length - 1]).toBe(12);
@@ -267,6 +267,7 @@ function createConfig(
       max_event_loop_delay_ms: 10000,
       scale_down_cooldown_ms: 30000,
       scale_down_consecutive_unhealthy_readings: 3,
+      scale_down_max_step_fraction: 0.5,
       ...(overrides.dynamic_capacity ?? {}),
     },
     event_loop_delay: {

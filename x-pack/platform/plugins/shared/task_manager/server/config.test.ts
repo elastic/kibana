@@ -30,6 +30,7 @@ describe('config validation', () => {
           "min_utilization_for_projection": 30,
           "scale_down_consecutive_unhealthy_readings": 3,
           "scale_down_cooldown_ms": 30000,
+          "scale_down_max_step_fraction": 0.5,
           "scale_down_step": 1,
           "scale_interval_ms": 10000,
           "scale_up_min_post_claim_utilization_pct": 90,
@@ -109,6 +110,7 @@ describe('config validation', () => {
           "min_utilization_for_projection": 30,
           "scale_down_consecutive_unhealthy_readings": 3,
           "scale_down_cooldown_ms": 30000,
+          "scale_down_max_step_fraction": 0.5,
           "scale_down_step": 1,
           "scale_interval_ms": 10000,
           "scale_up_min_post_claim_utilization_pct": 90,
@@ -186,6 +188,7 @@ describe('config validation', () => {
           "min_utilization_for_projection": 30,
           "scale_down_consecutive_unhealthy_readings": 3,
           "scale_down_cooldown_ms": 30000,
+          "scale_down_max_step_fraction": 0.5,
           "scale_down_step": 1,
           "scale_interval_ms": 10000,
           "scale_up_min_post_claim_utilization_pct": 90,
@@ -368,5 +371,17 @@ describe('config validation', () => {
     expect(result.dynamic_capacity.scale_interval_ms).toBe(10000);
     expect(result.dynamic_capacity.scale_down_step).toBe(1);
     expect(result.dynamic_capacity.max_event_loop_utilization).toBe(0.85);
+  });
+
+  test('allows overriding scale_down_max_step_fraction', () => {
+    const config: Record<string, unknown> = {
+      dynamic_capacity: {
+        scale_down_max_step_fraction: 0.25,
+      },
+    };
+
+    const result = configSchema.validate(config);
+    expect(result.dynamic_capacity.scale_down_max_step_fraction).toBe(0.25);
+    expect(result.dynamic_capacity.scale_down_step).toBe(1);
   });
 });
