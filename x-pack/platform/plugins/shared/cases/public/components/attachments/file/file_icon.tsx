@@ -67,7 +67,7 @@ export const FileIcon = React.memo(
             data-test-subj={`${commonDataTestSubj}-image`}
           />
         ) : (
-          <EuiIcon type={getIcon(file.mimeType)} size="xl" data-test-subj={commonDataTestSubj} />
+          <EuiIcon type={getIcon(file.mimeType)} size="xl" data-test-subj={commonDataTestSubj} aria-hidden={true} />
         )}
         {isPreviewVisible && <FilePreview closePreview={closePreview} selectedFile={file} />}
       </EuiFlexGroup>

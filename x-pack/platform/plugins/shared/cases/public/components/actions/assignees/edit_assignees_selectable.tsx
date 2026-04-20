@@ -163,7 +163,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
               responsive={false}
             >
               <EuiFlexItem grow={false}>
-                <EuiIcon type={icon} data-test-subj={dataTestSubj} />
+                <EuiIcon type={icon} data-test-subj={dataTestSubj} aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SmallUserAvatar userInfo={userInfo} />
