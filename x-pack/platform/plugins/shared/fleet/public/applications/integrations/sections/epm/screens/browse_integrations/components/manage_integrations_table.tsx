@@ -114,8 +114,8 @@ export const ManageIntegrationsTable: React.FC<{
     () =>
       new Map(
         (packagesData?.items ?? [])
-          .filter((item) => item.installationInfo?.install_status === 'installed')
-          .map((item) => [item.installationInfo!.name, item.installationInfo!.version])
+          .filter((item) => item.status === 'installed')
+          .map((item) => [item.name, item.version])
       ),
     [packagesData]
   );
