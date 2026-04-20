@@ -99,12 +99,11 @@ describe('AIAssistantHeaderButton', () => {
       expect(screen.getByText('Security AI Assistant')).toBeInTheDocument();
     });
 
-    it('should render AI Agent card with BETA badge', async () => {
+    it('should render AI Agent card', async () => {
       await waitFor(() => {
         expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
       });
       expect(screen.getByText('AI Agent')).toBeInTheDocument();
-      expect(screen.getByText('BETA')).toBeInTheDocument();
     });
 
     it('should close modal when Cancel button is clicked', () => {
