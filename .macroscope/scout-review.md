@@ -45,19 +45,36 @@ This review is experimental. Share your feedback in the #appex-qa channel.
 All detailed findings must go in **inline GitHub PR comments** on the specific line where each issue occurs. For each inline comment:
 
 - Start with the severity emoji (🔴 Blocker, 🟡 Major, 🔵 Minor, or ⚪ Nit)
-- State the rule violated (use the section heading from the matching best-practices document: `docs/extend/scout/best-practices.md`, `docs/extend/scout/ui-best-practices.md`, or `docs/extend/scout/api-best-practices.md`)
+- State the rule violated as a **Markdown link** whose text is the section heading from the matching best-practices document and whose URL is the section-scoped URL (see routing below). The link is required, not optional.
 - Explain the issue in 1–2 sentences
 - Suggest a concrete fix
 
-### Link to specific sections of the Best Practices documents when possible
+### Pick the right best-practices document (required)
 
-Scout best practices are split across three pages; pick the one that matches the rule you’re citing:
+Scout best practices live in three files. Don't guess from keywords — read the actual headings to find the matching section:
 
-- General: `docs/extend/scout/best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
 - UI tests: `docs/extend/scout/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices`
 - API tests: `docs/extend/scout/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/api-best-practices`
+- General (applies to both UI and API): `docs/extend/scout/best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
 
-A section-scoped link looks like this: `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#avoid-conditional-logic-in-page-objects`. You can infer the `#anchor` from the explicit heading id in the corresponding markdown file (e.g., `[avoid-conditional-logic-in-page-objects]`).
+**Selection rule:**
+
+1. Start from the file being reviewed. If it lives under `test/scout*/ui/**` (or is a UI page object / fixture), check `ui-best-practices.md` first. If it lives under `test/scout*/api/**` (or is an API service / client fixture), check `api-best-practices.md` first.
+2. Scan that doc's headings for one that matches the rule you're about to cite. If found, use it.
+3. Otherwise, scan the general `best-practices.md`. Use it only when the rule genuinely applies to both UI and API tests (test naming, suite independence, hooks, cleanup, etc.).
+4. When a section with the same intent exists in both the specific doc and the general doc, prefer the specific one.
+
+### Always include the section anchor
+
+Every finding must link to a **section-scoped URL**, not the doc root. Infer the `#anchor` from the explicit heading id in the markdown source (e.g., the heading `## Use Playwright auto-waiting [leverage-playwright-auto-waiting]` yields `#leverage-playwright-auto-waiting`). Only fall back to the doc root URL if the rule genuinely has no matching section (rare — re-read the doc first).
+
+Format the citation as a Markdown link using the section heading text as the link label:
+
+```
+🔵 [Use Playwright auto-waiting](https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#leverage-playwright-auto-waiting)
+```
+
+Do **not** use bare parenthetical labels like `(best practices)` or `(ui best practices)` — the citation must be a real link that takes the reader to the specific section. If you cannot identify a specific section, state the rule in plain text rather than linking to the wrong document.
 
 ### Updates to the PR
 
