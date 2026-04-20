@@ -9,33 +9,35 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { streamExplorationSkill } from './skills/stream_exploration_skill';
 import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
+import { registerAgentBuilderSkills } from './skills/register_skills';
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
   server,
   logger,
+  telemetry,
   isMemoryEnabled,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
+  telemetry: EbtTelemetryClient;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger });
+  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  registerAgentBuilderSkills({ agentBuilder });
 
   const getMemoryService = () =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
       esClient: server.core.elasticsearch.client.asInternalUser,
     });
-
-  agentBuilder.skills.register(streamExplorationSkill);
 
   // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
   // This avoids exposing the skill to the agent when memory is not configured.
