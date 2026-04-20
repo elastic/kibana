@@ -656,6 +656,10 @@ describe('StorageIndexAdapter', () => {
         is_write_index: true,
       },
     });
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.auto_expand_replicas).toEqual('0-1');
+
+    expect(getIndexResponse[writeIndexName].settings?.index?.number_of_shards).toEqual('1');
   }
 
   async function verifyClean() {
