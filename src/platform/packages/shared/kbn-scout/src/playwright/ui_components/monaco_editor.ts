@@ -220,12 +220,15 @@ export class KibanaCodeEditorWrapper {
   async toggleSuggestDetails(editorIndex: number = 0): Promise<void> {
     await this.page.evaluate((index) => {
       const monacoEnv = (window as any).MonacoEnvironment;
-      if (!monacoEnv?.monaco?.editor) return;
+      if (!monacoEnv?.monaco?.editor) {
+        throw new Error('MonacoEnvironment.monaco.editor is not available');
+      }
       const editors = monacoEnv.monaco.editor.getEditors() as MonacoEditorInstance[];
       const editor = editors[index] ?? editors[0];
-      if (editor) {
-        editor.trigger('scout-test', 'toggleSuggestionDetails', {});
+      if (!editor) {
+        throw new Error('No Monaco editor instance found');
       }
+      editor.trigger('scout-test', 'toggleSuggestionDetails', {});
     }, editorIndex);
   }
 }
