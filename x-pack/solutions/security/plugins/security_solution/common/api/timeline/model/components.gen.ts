@@ -335,9 +335,9 @@ export type BareNote = z.infer<typeof BareNote>;
 export const BareNote = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query
-     * parameter when fetching notes via GET /api/note.
-     */
+      * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
+
+      */
     eventId: z.string().nullable().optional(),
     /**
      * The text of the note
@@ -491,9 +491,9 @@ export type BareNoteWithoutExternalRefs = z.infer<typeof BareNoteWithoutExternal
 export const BareNoteWithoutExternalRefs = NoteCreatedAndUpdatedMetadata.merge(
   z.object({
     /**
-     * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query
-     * parameter when fetching notes via GET /api/note.
-     */
+      * Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
+
+      */
     eventId: z.string().nullable().optional(),
     /**
      * The text of the note
