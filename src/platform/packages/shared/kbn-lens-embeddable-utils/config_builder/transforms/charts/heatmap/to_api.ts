@@ -53,7 +53,7 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapSta
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig'],
   xAxisScale?: XScaleSchemaType
-): HeatmapState['axes'] {
+): HeatmapState['axis'] {
   return {
     x: {
       labels: {
@@ -104,7 +104,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axes: getGridConfigProps(visualization.gridConfig, xAxisScale),
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
     styling: {
       cells: {
         labels: { visible: visualization.gridConfig.isCellLabelVisible },
