@@ -26,6 +26,7 @@ const defaultContext: ActionBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 

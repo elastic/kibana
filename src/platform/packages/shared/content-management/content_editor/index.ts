@@ -11,7 +11,6 @@ export { ContentEditorProvider, ContentEditorKibanaProvider, useOpenContentEdito
 export type {
   OpenContentEditorParams,
   ContentEditorItem,
-  ContentEditorItemTags,
   ContentEditorCustomValidators,
 } from './src';
 export type { SavedObjectsReference } from './src/services';
