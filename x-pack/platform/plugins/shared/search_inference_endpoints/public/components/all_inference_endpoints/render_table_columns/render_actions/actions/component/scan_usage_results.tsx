@@ -16,11 +16,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 import { RenderMessageWithIcon } from './render_message_with_icon';
-import * as i18n from '../delete/confirm_delete_endpoint/translations';
 import { ListUsageResults } from './list_usage_results';
 
 interface ScanUsageResultsProps {
@@ -52,7 +52,10 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
         <RenderMessageWithIcon
           icon="warning"
           color="danger"
-          label={i18n.POTENTIAL_FAILURE_LABEL}
+          label={i18n.translate(
+            'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.potentialFailure',
+            { defaultMessage: 'Potential Failures' }
+          )}
           labelColor="danger"
         />
       </EuiFlexItem>
@@ -68,7 +71,16 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                       font-weight: ${euiTheme.font.weight.bold};
                     `}
                   >
-                    <p>{i18n.COUNT_USAGE_LABEL(list.length)}</p>
+                    <p>
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.countUsage',
+                        {
+                          defaultMessage:
+                            'Found {count} {count, plural, =1 {usage} other {usages}}',
+                          values: { count: list.length },
+                        }
+                      )}
+                    </p>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -79,10 +91,18 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                     iconSize="s"
                     flush="both"
                     color="text"
-                    aria-label={i18n.OPEN_INDEX_MANAGEMENT}
+                    aria-label={i18n.translate(
+                      'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.openIndexManagement',
+                      { defaultMessage: 'Open Index Management' }
+                    )}
                     data-test-subj="inferenceManagementOpenIndexManagement"
                   >
-                    <EuiText size="xs">{i18n.OPEN_INDEX_MANAGEMENT}</EuiText>
+                    <EuiText size="xs">
+                      {i18n.translate(
+                        'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.openIndexManagement',
+                        { defaultMessage: 'Open Index Management' }
+                      )}
+                    </EuiText>
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -101,7 +121,10 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
           <EuiCheckbox
             data-test-subj="warningCheckbox"
             id={'ignoreWarningCheckbox'}
-            label={i18n.IGNORE_POTENTIAL_ERRORS_LABEL}
+            label={i18n.translate(
+              'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.ignoreErrors',
+              { defaultMessage: 'Ignore errors and force deletion' }
+            )}
             checked={ignoreWarningCheckbox}
             onChange={(e) => onIgnoreWarningCheckboxChange(e.target.checked)}
           />

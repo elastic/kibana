@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReqOptions } from '@kbn/kbn-client';
 import { type KbnClient } from '@kbn/scout';
-import type { WorkflowExecutionDto } from '@kbn/workflows';
+import type { WorkflowAggsDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
 import { waitForConditionOrThrow } from '../utils/wait_for_condition';
 
@@ -68,11 +69,15 @@ export class WorkflowsApiService {
   }
 
   /** GET /api/workflows/workflow/{id} — fetch a workflow by ID, with response status. */
-  async rawGetWorkflow(workflowId: string): Promise<{
+  async rawGetWorkflow(
+    workflowId: string,
+    options?: Partial<ReqOptions>
+  ): Promise<{
     data: WorkflowDetailDto;
     status: number;
   }> {
     const response = await this.kbnClient.request<WorkflowDetailDto>({
+      ...options,
       method: 'GET',
       path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}`,
     });
@@ -116,6 +121,14 @@ export class WorkflowsApiService {
     }
   }
 
+  /** DELETE /api/workflows/workflow/{id}?force=true — permanently delete a single workflow. */
+  async hardDelete(workflowId: string): Promise<void> {
+    await this.kbnClient.request({
+      method: 'DELETE',
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true`,
+    });
+  }
+
   /** GET /api/workflows + DELETE — delete all workflows in a space. */
   async deleteAll(): Promise<void> {
     const response = await this.kbnClient.request<{ results?: Array<{ id: string }> }>({
@@ -133,11 +146,16 @@ export class WorkflowsApiService {
     }
   }
 
-  async run(id: string, inputs: Record<string, unknown>): Promise<{ workflowExecutionId: string }> {
+  async run(
+    id: string,
+    inputs: Record<string, unknown>,
+    headers?: Record<string, string>
+  ): Promise<{ workflowExecutionId: string }> {
     const response = await this.kbnClient.request<{ workflowExecutionId: string }>({
       method: 'POST',
       path: `/s/${this.spaceId}/api/workflows/workflow/${id}/run`,
       body: { inputs },
+      headers,
     });
     return response.data;
   }
@@ -182,5 +200,19 @@ export class WorkflowsApiService {
       timeout: 20_000,
       errorMessage: `Execution with id ${workflowExecutionId} did not reach a terminal status`,
     });
+  }
+
+  /** GET /api/workflows/workflow/aggs —  */
+  async rawGetAggs(fields: string | string[]): Promise<{
+    data: WorkflowAggsDto;
+    status: number;
+  }> {
+    const response = await this.kbnClient.request<WorkflowAggsDto>({
+      method: 'GET',
+      path: `/s/${this.spaceId}/api/workflows/aggs`,
+      query: { fields },
+      ignoreErrors: [400, 404], // allow 400 & 404 responses through for assertion in tests
+    });
+    return response;
   }
 }
