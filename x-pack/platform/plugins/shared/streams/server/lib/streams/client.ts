@@ -799,6 +799,37 @@ export class StreamsClient {
     };
   }
 
+  async getPrivilegesPerStream(
+    names: string[]
+  ): Promise<Record<string, { read_failure_store: boolean }>> {
+    if (!this.dependencies.isSecurityEnabled) {
+      // Security disabled - all streams have all privileges
+      const result: Record<string, { read_failure_store: boolean }> = {};
+      names.forEach((name) => {
+        result[name] = { read_failure_store: true };
+      });
+      return result;
+    }
+
+    const privileges = await this.dependencies.esClient.security.hasPrivileges({
+      index: [
+        {
+          names,
+          privileges: ['read_failure_store'],
+        },
+      ],
+    });
+
+    const result: Record<string, { read_failure_store: boolean }> = {};
+    names.forEach((name) => {
+      result[name] = {
+        read_failure_store: privileges.index[name]?.read_failure_store ?? false,
+      };
+    });
+
+    return result;
+  }
+
   /**
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
