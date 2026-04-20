@@ -450,6 +450,17 @@ export class StorageIndexAdapter<
         ];
       }
 
+      if ('create' in operation) {
+        return [
+          {
+            create: {
+              _id: operation.create._id,
+            },
+          },
+          operation.create.document as {},
+        ];
+      }
+
       return [operation];
     });
 
