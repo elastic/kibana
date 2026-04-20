@@ -33,8 +33,10 @@ const UserActionTitleLinkComponent: React.FC<UserActionTitleLinkProps> = ({
 }) => {
   const onLinkClick = useCallback(
     (ev: React.MouseEvent) => {
-      ev.preventDefault();
-      if (onClick) onClick(targetId, ev);
+      if (onClick) {
+        ev.preventDefault();
+        onClick(targetId, ev);
+      }
     },
     [targetId, onClick]
   );
