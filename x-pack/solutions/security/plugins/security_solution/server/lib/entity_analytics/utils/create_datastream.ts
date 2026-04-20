@@ -39,6 +39,16 @@ interface UpdateIndexOpts {
   index: string;
 }
 
+const getErrorStatusCode = (error: unknown): number | undefined =>
+  (error as { statusCode?: number; meta?: { statusCode?: number } })?.statusCode ??
+  (error as { statusCode?: number; meta?: { statusCode?: number } })?.meta?.statusCode;
+
+const getErrorType = (error: unknown): string | undefined =>
+  (error as { meta?: { body?: { error?: { type?: string } } } })?.meta?.body?.error?.type;
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 const updateTotalFieldLimitSetting = async ({
   logger,
   esClient,
@@ -177,13 +187,13 @@ export const createDataStream = async ({
           dataStreams
         )}`
     );
-  } catch (error) {
+  } catch (error: unknown) {
     // 404 is expected if no datastream have been created
-    if (error.statusCode !== 404) {
+    if (getErrorStatusCode(error) !== 404) {
       logger.error(
-        `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${
-          (error as Error).message
-        }`
+        `Error fetching concrete indices for ${indexPatterns.alias} pattern - ${getErrorMessage(
+          error
+        )}`
       );
       throw error;
     }
@@ -207,18 +217,17 @@ export const createDataStream = async ({
         { logger }
       );
     } catch (error: unknown) {
-      const err = error as { meta?: { body?: { error?: { type?: string } } } };
+      const errorType = getErrorType(error);
+      const message = getErrorMessage(error);
       if (
-        err?.meta?.body?.error?.type === 'resource_already_exists_exception' ||
-        err?.meta?.body?.error?.type === 'illegal_state_exception'
+        errorType === 'resource_already_exists_exception' ||
+        errorType === 'illegal_state_exception'
       ) {
         logger.debug(
-          `Datastream ${indexPatterns.alias} creation skipped (${err?.meta?.body?.error?.type}): ${
-            (error as Error).message
-          }`
+          `Datastream ${indexPatterns.alias} creation skipped (${errorType}): ${message}`
         );
       } else {
-        logger.error(`Error creating datastream - ${(error as Error).message}`);
+        logger.error(`Error creating datastream - ${message}`);
         throw error;
       }
     }

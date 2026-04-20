@@ -64,6 +64,12 @@ interface EuidPageResult {
 }
 
 /**
+ * Aligns maintainer resolution-member fetch bounds with entity_store resolution APIs,
+ * which cap resolution search responses at 10k and treat larger groups as truncated.
+ */
+const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
+
+/**
  * Computes base risk scores for one entity type and streams paginated results.
  *
  * Each page is scored from alert inputs, enriched with entity-derived modifiers,
@@ -330,7 +336,7 @@ const enrichWithModifiers = async ({
  *
  * Fixes behavior reported in https://github.com/elastic/security-team/issues/16838
  *
- * Remove this helper once https://github.com/elastic/security-team/issues/16839 implmented
+ * Remove this helper once https://github.com/elastic/security-team/issues/16839 implemented
  */
 const findResolutionTargetIdsForPage = async ({
   page,
@@ -354,21 +360,43 @@ const findResolutionTargetIdsForPage = async ({
   const confirmedTargetIds = new Set<string>();
 
   try {
+    const fetchPageSize = candidateTargetIds.length * 10;
+    const maxIterations = Math.max(
+      1,
+      Math.ceil(MAX_RESOLUTION_MEMBER_FETCH_COUNT / Math.max(fetchPageSize, 1))
+    );
     let searchAfter: Array<string | number> | undefined;
+    let iterations = 0;
+    let fetchedCount = 0;
     do {
+      iterations += 1;
+      if (iterations > maxIterations) {
+        logger.warn(
+          `findResolutionTargetIdsForPage exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
+      }
+
       const { entities, nextSearchAfter } = await crudClient.listEntities({
         filter: {
           terms: { 'entity.relationships.resolution.resolved_to': candidateTargetIds },
         },
-        size: candidateTargetIds.length * 10,
+        size: fetchPageSize,
         searchAfter,
         source: ['entity.relationships.resolution.resolved_to'],
       });
+      fetchedCount += entities.length;
       for (const entity of entities) {
         const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
         if (typeof resolvedTo === 'string' && candidateSet.has(resolvedTo)) {
           confirmedTargetIds.add(resolvedTo);
         }
+      }
+      if (fetchedCount >= MAX_RESOLUTION_MEMBER_FETCH_COUNT) {
+        logger.warn(
+          `findResolutionTargetIdsForPage fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
       }
       searchAfter = nextSearchAfter;
     } while (searchAfter !== undefined);

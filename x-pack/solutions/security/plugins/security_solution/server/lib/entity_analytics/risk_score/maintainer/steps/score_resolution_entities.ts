@@ -42,6 +42,12 @@ interface ResolutionPageResult {
   afterKey: Record<string, string> | undefined;
 }
 
+/**
+ * Aligns maintainer resolution-member fetch bounds with entity_store resolution APIs,
+ * which cap resolution search responses at 10k and treat larger groups as truncated.
+ */
+const MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT = 10_000;
+
 export const calculateResolutionEntityScores = async function* ({
   esClient,
   crudClient,
@@ -228,21 +234,43 @@ export const fetchResolutionGroupMemberIds = async ({
   }
 
   try {
+    const fetchPageSize = resolutionTargetIds.length * 10;
+    const maxIterations = Math.max(
+      1,
+      Math.ceil(MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT / Math.max(fetchPageSize, 1))
+    );
     let searchAfter: Array<string | number> | undefined;
+    let iterations = 0;
+    let fetchedCount = 0;
     do {
+      iterations += 1;
+      if (iterations > maxIterations) {
+        logger.warn(
+          `fetchResolutionGroupMemberIds exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
+      }
+
       const { entities, nextSearchAfter } = await crudClient.listEntities({
         filter: {
           terms: { 'entity.relationships.resolution.resolved_to': resolutionTargetIds },
         },
-        size: resolutionTargetIds.length * 10,
+        size: fetchPageSize,
         searchAfter,
         source: ['entity.id'],
       });
+      fetchedCount += entities.length;
       for (const entity of entities) {
         const id = entity.entity?.id;
         if (typeof id === 'string') {
           memberIds.add(id);
         }
+      }
+      if (fetchedCount >= MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT) {
+        logger.warn(
+          `fetchResolutionGroupMemberIds fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT}), returning partial results`
+        );
+        break;
       }
       searchAfter = nextSearchAfter;
     } while (searchAfter !== undefined);
@@ -270,17 +298,24 @@ const applyResolutionModifiers = ({
   calculationRunId: string;
   watchlistConfigs: Map<string, WatchlistObject>;
 }): EntityRiskScoreRecord[] => {
-  const allEntities = [...memberEntities.entries()];
+  const membersByResolutionTarget = new Map<string, string[]>();
+  for (const [entityId, entity] of memberEntities) {
+    const resolvedTo = entity.entity?.relationships?.resolution?.resolved_to;
+    if (typeof resolvedTo === 'string' && entityId !== resolvedTo) {
+      const members = membersByResolutionTarget.get(resolvedTo) ?? [];
+      members.push(entityId);
+      membersByResolutionTarget.set(resolvedTo, members);
+    }
+  }
+
   const mergedModifierEntities = new Map(
     parsedScores.map((score) => {
-      const storeOnlyMembers = allEntities
-        .filter(
-          ([entityId, entity]) =>
-            entityId !== score.resolution_target_id &&
-            entity.entity?.relationships?.resolution?.resolved_to === score.resolution_target_id &&
-            !score.related_entities.some((relatedEntity) => relatedEntity.entity_id === entityId)
-        )
-        .map(([entityId]) => ({
+      const relatedEntityIds = new Set(
+        score.related_entities.map((relatedEntity) => relatedEntity.entity_id)
+      );
+      const storeOnlyMembers = (membersByResolutionTarget.get(score.resolution_target_id) ?? [])
+        .filter((entityId) => !relatedEntityIds.has(entityId))
+        .map((entityId) => ({
           entity_id: entityId,
           relationship_type: 'entity.relationships.resolution.resolved_to',
         }));
