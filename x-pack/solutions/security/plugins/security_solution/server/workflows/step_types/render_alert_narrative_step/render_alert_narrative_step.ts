@@ -5,25 +5,12 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
+import { renderAlertNarrativeStepCommonDefinition } from '../../../../common/workflows/step_types/render_alert_narrative_step/render_alert_narrative_step_common';
 import type { AlertSource } from './narrative_utils';
 import { buildNarrative } from './narrative_registry';
-
-const inputSchema = z.object({
-  alertId: z.string().describe('The alert ID'),
-  alertIndex: z.string().describe('The index that contains the alert'),
-});
-
-const outputSchema = z.object({
-  alert_id: z.string(),
-  alert_index: z.string(),
-  timeline_string: z.string(),
-  message: z.string(),
-});
 
 const SOURCE_INCLUDES = [
   // Core event fields
@@ -136,13 +123,7 @@ const getAlertSource = async ({
 };
 
 export const renderAlertNarrativeStepDefinition = createServerStepDefinition({
-  id: 'security.renderAlertNarrative',
-  label: 'Render Alert Narrative',
-  description:
-    'Render a human-readable narrative string for an alert based on its event, process, network, and host fields',
-  category: StepCategory.Elasticsearch,
-  inputSchema,
-  outputSchema,
+  ...renderAlertNarrativeStepCommonDefinition,
   handler: async (context) => {
     try {
       const { alertId, alertIndex } = context.input;
