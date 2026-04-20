@@ -376,8 +376,8 @@ The `--force` flag allows intentional override of read-only protection for testi
 - When `force=true` and the workflow is managed, the mutation proceeds but:
   - The operation is logged (audit trail) with the requesting user and reason.
   - The `managed` flag remains `true` on the document (force-updating a managed workflow does not "unmanage" it).
-  - On next Kibana restart, the provisioning reconciliation will overwrite the user's changes (create-if-absent, update-if-changed). This is by design — the force override is temporary.
-- When `force=true` and `delete` is used, the workflow is removed. On next restart, provisioning will re-create it. Users should understand this.
+  - The `definitionHash` is **not recalculated** after the force edit. It retains the hash of the last platform-provisioned version. This means the startup reconciliation sees the hash as matching and **skips the workflow** — the user's force edits survive restarts. The next time the plugin ships a new YAML version (new hash), the reconciliation will detect the hash mismatch and update to the new version.
+- When `force=true` and `delete` is used, the workflow is **soft-deleted** (e.g., a `deleted: true` flag or equivalent marker). The `definitionHash` is preserved. On restart, reconciliation sees the workflow exists with a matching hash and skips it — the deletion survives. When the plugin ships a new version (new hash), reconciliation detects the mismatch and re-provisions the workflow, clearing the soft-delete marker.
 - The force flag is **API-only** — the UI does not expose it.
 
 **Enablement toggle (`enabled` field):**
