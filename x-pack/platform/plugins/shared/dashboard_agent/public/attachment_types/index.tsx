@@ -128,7 +128,6 @@ export const registerDashboardAttachmentUiDefinition = ({
                 attachment,
                 dashboardApi,
                 checkSavedDashboardExist,
-                updateOrigin,
               });
             }
             // sidebar preview - open dashboard in sidebar if possible, otherwise open canvas preview
