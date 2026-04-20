@@ -160,24 +160,12 @@ describe('Outlook', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should throw when using app-only auth without userId', async () => {
-      await expect(
-        Outlook.actions.searchMessages.handler(appOnlyContext, {
-          query: 'is:unread',
-          from: 0,
-          size: 10,
-        })
-      ).rejects.toThrow('searchMessages requires a userId when using app-only');
-      expect(mockClient.post).not.toHaveBeenCalled();
-    });
-
-    it('should not throw when using app-only auth with userId', async () => {
+    it('should work with app-only auth (searches across tenant)', async () => {
       mockClient.post.mockResolvedValue({ data: { value: [] } });
 
       await expect(
         Outlook.actions.searchMessages.handler(appOnlyContext, {
           query: 'subject:invoice',
-          userId: 'alice@contoso.com',
           from: 0,
           size: 10,
         })

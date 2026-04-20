@@ -19,12 +19,6 @@ export const SearchMessagesInputSchema = z.object({
     .describe(
       'Keyword Query Language (KQL) search query for mail content. Examples: "subject:budget Q4", "from:alice@contoso.com", "hasAttachments:true AND subject:report". Supports standard KQL operators (AND, OR, NOT) and property restrictions (from, subject, body, hasAttachments, sent, received).'
     ),
-  userId: z
-    .string()
-    .optional()
-    .describe(
-      "User ID or UPN (e.g. user@contoso.com) for app-only auth (client credentials). Omit when using delegated auth (bearer token) to search the signed-in user's mailbox."
-    ),
   from: z
     .number()
     .min(0)

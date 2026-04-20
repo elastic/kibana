@@ -109,17 +109,10 @@ export const Outlook: ConnectorSpec = {
     searchMessages: {
       isTool: true,
       description:
-        "Search Outlook emails using the Microsoft Graph Search API with KQL syntax. Supports filtering by sender, subject, body content, attachment presence, and date ranges. With delegated auth (bearer token), searches the signed-in user's mailbox. With app-only auth (client credentials), a userId is required. Returns hits with message ID, subject, sender, received date, and a short summary.",
+        "Search Outlook emails using the Microsoft Graph Search API with KQL syntax. Supports filtering by sender, subject, body content, attachment presence, and date ranges. With delegated auth (bearer token), searches the signed-in user's mailbox. With app-only auth (client credentials), searches across the entire tenant. Returns hits with message ID, subject, sender, received date, and a short summary.",
       input: SearchMessagesInputSchema,
       output: z.any(),
       handler: async (ctx, input: SearchMessagesInput) => {
-        if (ctx.secrets?.authType === 'oauth_client_credentials' && !input.userId) {
-          throw new Error(
-            'searchMessages requires a userId when using app-only (client credentials) auth. ' +
-              'Provide the userId or UPN of the user whose mailbox you want to search.'
-          );
-        }
-
         const searchRequest = {
           requests: [
             {
@@ -355,7 +348,7 @@ export const Outlook: ConnectorSpec = {
     '',
     '### Auth mode differences',
     '- **Delegated auth (bearer token):** Operates as the signed-in user. Omit `userId` on all actions.',
-    '- **App-only auth (client credentials):** No signed-in user context. `userId` (UPN or GUID) is REQUIRED on all actions.',
+    '- **App-only auth (client credentials):** No signed-in user context. `userId` (UPN or GUID) is REQUIRED on all actions except `searchMessages`, which searches across the entire tenant.',
     '',
     '### Useful OData filters for listMessages',
     '- Unread only: `isRead eq false`',
