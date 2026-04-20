@@ -385,13 +385,11 @@ const materializeResolvedVisualizationPanels = ({
   return successfulPanels;
 };
 
-
 const createEmptyDashboardData = (): DashboardAttachmentData => ({
   title: 'User Dashboard',
   description: undefined,
   panels: [],
 });
-
 
 export const executeDashboardOperations = async ({
   dashboardData,

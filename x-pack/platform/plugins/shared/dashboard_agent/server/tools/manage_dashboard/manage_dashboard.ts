@@ -11,11 +11,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
-import {
-  DASHBOARD_ATTACHMENT_TYPE,
-  isSection,
-  type DashboardAttachmentData,
-} from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isSection } from '@kbn/dashboard-agent-common';
 
 import { dashboardTools } from '../../../common';
 import {
