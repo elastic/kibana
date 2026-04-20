@@ -233,10 +233,10 @@ export const ReviewApproveModal: React.FC<{
   const handleCancelClick = useCallback(() => {
     (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_approve_modal_cancel_clicked',
-      {}
+      { integrationId }
     );
     closeModal();
-  }, [automaticImport, closeModal]);
+  }, [automaticImport, closeModal, integrationId]);
 
   const normalizedVersion = reviewVersion.trim();
   const isZeroVersion = normalizedVersion.startsWith(INVALID_VERSION);
@@ -293,7 +293,11 @@ export const ReviewApproveModal: React.FC<{
 
     (automaticImport?.telemetry as AutomaticImportTelemetry)?.reportEvent(
       'automatic_import_approve_modal_approve_clicked',
-      {}
+      {
+        integrationId,
+        version: reviewVersion.trim(),
+        dataStreamCount: reviewDetails?.dataStreams.length ?? 0,
+      }
     );
     setIsApproving(true);
     setReviewError(null);
@@ -316,6 +320,7 @@ export const ReviewApproveModal: React.FC<{
     integrationId,
     onApproveAndDeploy,
     onClose,
+    reviewDetails,
     reviewVersion,
     selectedCategories,
   ]);

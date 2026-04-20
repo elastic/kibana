@@ -348,6 +348,9 @@ src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
+src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
+src/platform/packages/private/dashboard/dashboard-navigation-options-components @elastic/kibana-presentation
+src/platform/packages/private/dashboard/dashboard-navigation-options-schema @elastic/kibana-presentation
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
@@ -3150,11 +3153,11 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inven
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/contextual-security-apps
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/contextual-security-apps
 
-# Security Service Integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
+# Security integrations
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/integration-experience
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -3177,7 +3180,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/platform/test/functional/services/pipeline_* @elastic/logstash
 /x-pack/platform/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/platform/test/functional/apps/logstash @elastic/logstash
-/x-pack/platform/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
 # EUI team
@@ -3243,6 +3245,9 @@ oas_docs/output                               @elastic/ski-docs
 # Documentation settings files
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
+
+# Side navigation title glossary
+src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
 
 /x-pack/platform/test/serverless/functional/test_suites/strip_unknown_config_workaround @elastic/kibana-core
 
