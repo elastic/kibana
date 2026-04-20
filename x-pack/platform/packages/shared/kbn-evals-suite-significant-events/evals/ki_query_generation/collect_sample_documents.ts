@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
+  type KIQueryGenerationScenario,
 } from '../../src/datasets';
 
 const SAMPLE_DOCS_SIZE = 500;
@@ -44,23 +45,26 @@ const addUniqueHits = ({
 
 /**
  * Collects sample documents for KI query generation evaluation using
- * criteria-driven sampling from the matching feature extraction scenario.
+ * criteria-driven sampling from both the feature extraction and query
+ * generation scenarios.
  *
- * For each `sampling_filter` in the extraction scenario's criteria,
- * fetches a small number of docs to ensure coverage of every
- * entity/service/dependency. Remaining slots are filled with general
- * docs up to `SAMPLE_DOCS_SIZE`.
+ * For each `sampling_filter` across both scenarios' criteria, fetches a
+ * small number of docs to ensure coverage of every entity/service/dependency
+ * and error pattern. Remaining slots are filled with general docs up to
+ * `SAMPLE_DOCS_SIZE`.
  *
- * Falls back to a plain recency-based search when no extraction scenario
- * or no `sampling_filters` are available.
+ * Falls back to a plain recency-based search when no scenarios or no
+ * `sampling_filters` are available.
  */
 export const collectSampleDocuments = async ({
   esClient,
   extractionScenario,
+  queryGenerationScenario,
   log,
 }: {
   esClient: Client;
   extractionScenario?: KIFeatureExtractionScenario;
+  queryGenerationScenario?: KIQueryGenerationScenario;
   log: ToolingLog;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
   const baseQuery: QueryDslQueryContainer[] = extractionScenario?.input.log_query_filter ?? [
@@ -70,7 +74,12 @@ export const collectSampleDocuments = async ({
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const seen = new Set<string>();
 
-  const criteriaWithFilters = (extractionScenario?.output.criteria ?? []).filter(
+  const allCriteria = [
+    ...(extractionScenario?.output.criteria ?? []),
+    ...(queryGenerationScenario?.output.criteria ?? []),
+  ];
+
+  const criteriaWithFilters = allCriteria.filter(
     (criterion) => (criterion.sampling_filters?.length ?? 0) > 0
   );
 

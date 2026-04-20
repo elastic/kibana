@@ -148,6 +148,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
           const sampleHits = await collectSampleDocuments({
             esClient,
             extractionScenario,
+            queryGenerationScenario: scenario,
             log,
           });
 

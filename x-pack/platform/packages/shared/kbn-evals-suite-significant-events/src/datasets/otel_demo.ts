@@ -118,26 +118,6 @@ export const otelDemoDataset: DatasetConfig = {
             text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo, deployment/pod/container metadata on all docs)',
             score: 1,
           },
-          {
-            id: 'otel-collector-errors',
-            text: 'Should identify OTel collector connection errors present even in healthy baseline (evidence: Java agent HttpExporter failures for spans/logs, gRPC OTLP exporter failures, "context deadline exceeded" with otel-collector IP)',
-            score: 1,
-            sampling_filters: [
-              { match_phrase: { 'body.text': 'otel.javaagent' } },
-              { match_phrase: { 'body.text': 'OTLP' } },
-              { match_phrase: { 'body.text': 'context deadline exceeded' } },
-            ],
-          },
-          {
-            id: 'k8s-pod-events',
-            text: 'Should identify Kubernetes pod startup events during initial deployment (evidence: 47 K8s events with reasons Started, Created, Pulled, ScalingReplicaSet, SuccessfulCreate, Scheduled across all service pods)',
-            score: 1,
-            sampling_filters: [
-              { match: { 'body.structured.object.reason': 'Started' } },
-              { match: { 'body.structured.object.reason': 'ScalingReplicaSet' } },
-              { match: { 'body.structured.object.reason': 'Scheduled' } },
-            ],
-          },
         ],
         min_features: 8,
         max_features: 25,
@@ -439,26 +419,6 @@ export const otelDemoDataset: DatasetConfig = {
             ],
           },
           {
-            id: 'k8s-pod-events',
-            text: 'Should identify Kubernetes pod lifecycle events related to cart container restart after Valkey disconnection (evidence: K8s events with BackOff, Started, Killing reasons for cart pod)',
-            score: 1,
-            sampling_filters: [
-              { match: { 'body.structured.object.reason': 'BackOff' } },
-              { match: { 'body.structured.object.reason': 'Killing' } },
-              { match: { 'body.structured.object.reason': 'Started' } },
-            ],
-          },
-          {
-            id: 'otel-collector-errors',
-            text: 'Should identify OTel collector connection errors (evidence: Java agent HttpExporter failures, gRPC OTLP exporter failures, "context deadline exceeded" with otel-collector IP)',
-            score: 1,
-            sampling_filters: [
-              { match_phrase: { 'body.text': 'otel.javaagent' } },
-              { match_phrase: { 'body.text': 'OTLP' } },
-              { match_phrase: { 'body.text': 'context deadline exceeded' } },
-            ],
-          },
-          {
             id: 'tech-kubernetes',
             text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo)',
             score: 1,
@@ -581,26 +541,6 @@ export const otelDemoDataset: DatasetConfig = {
             ],
           },
           {
-            id: 'k8s-pod-events',
-            text: 'Should identify Kubernetes pod lifecycle events showing checkout rolling update (evidence: 15 checkout-specific K8s events; reason=Killing "Stopping container checkout" for old pod checkout-78684c5ffd-cbbfc, then new replica set checkout-5766978597 scaled up with full pod lifecycle: Scheduled → Created → Pulled → Started)',
-            score: 1,
-            sampling_filters: [
-              { match: { 'body.structured.object.reason': 'Killing' } },
-              { match: { 'body.structured.object.reason': 'ScalingReplicaSet' } },
-              { match: { 'body.structured.object.reason': 'Started' } },
-            ],
-          },
-          {
-            id: 'otel-collector-errors',
-            text: 'Should identify OTel collector connection errors (evidence: Java agent HttpExporter failures, gRPC OTLP exporter failures, "context deadline exceeded" with otel-collector IP)',
-            score: 1,
-            sampling_filters: [
-              { match_phrase: { 'body.text': 'otel.javaagent' } },
-              { match_phrase: { 'body.text': 'OTLP' } },
-              { match_phrase: { 'body.text': 'context deadline exceeded' } },
-            ],
-          },
-          {
             id: 'tech-kubernetes',
             text: 'Must identify Kubernetes as infrastructure (evidence: resource.attributes.k8s.node.name=minikube, resource.attributes.k8s.namespace.name=otel-demo)',
             score: 1,
@@ -611,7 +551,7 @@ export const otelDemoDataset: DatasetConfig = {
         required_types: ['entity', 'dependency'],
         expect_entity_filters: true,
         expected_ground_truth:
-          'entities=[cart, checkout, shipping, email, payment, ad, recommendation, quote, valkey], deps=[cart->valkey, checkout->payment, checkout->email, checkout->shipping, shipping->quote], infra=[kubernetes/minikube, otel-demo namespace, otel-collector, arm64 architecture], k8s_events=[checkout rolling update: old pod checkout-78684c5ffd-cbbfc killed (reason=Killing), new replica set checkout-5766978597 created; 60 total K8s events across all services]',
+          'entities=[cart, checkout, shipping, email, payment, ad, recommendation, quote, valkey], deps=[cart->valkey, checkout->payment, checkout->email, checkout->shipping, shipping->quote], infra=[kubernetes/minikube, otel-demo namespace, otel-collector, arm64 architecture]',
       },
       metadata: {
         difficulty: 'hard',
@@ -666,6 +606,11 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'error-monitoring',
             text: 'Should generate proactive error detection queries (e.g., generic error/exception patterns, connection failures, dependency errors) even though this is healthy traffic — the model should set up error monitoring based on entity and dependency features',
             score: 2,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+            ],
           },
           {
             id: 'multi-service-coverage',
@@ -752,6 +697,14 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'cart-service-error-query',
             text: 'Should generate a query detecting cart service errors or crash signals (evidence: cart logs show "Application is shutting down"; the cart crash then causes gRPC code 14 UNAVAILABLE errors with "ECONNREFUSED 10.105.181.182:7070" in frontend logs)',
             score: 2,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+              { match: { 'body.structured.object.reason': 'BackOff' } },
+              { match: { 'body.structured.object.reason': 'Killing' } },
+              { match: { 'body.structured.object.reason': 'Started' } },
+            ],
           },
           {
             id: 'upstream-impact-query',
@@ -788,6 +741,14 @@ export const otelDemoDataset: DatasetConfig = {
             id: 'multi-service-error-monitoring',
             text: 'Should generate error detection queries targeting multiple services (e.g., checkout, cart, payment) either by scoping with resource.attributes.app or by filtering on service-specific log patterns in body.text',
             score: 3,
+            sampling_filters: [
+              { match_phrase: { 'body.text': 'otel.javaagent' } },
+              { match_phrase: { 'body.text': 'OTLP' } },
+              { match_phrase: { 'body.text': 'context deadline exceeded' } },
+              { match: { 'body.structured.object.reason': 'Killing' } },
+              { match: { 'body.structured.object.reason': 'ScalingReplicaSet' } },
+              { match: { 'body.structured.object.reason': 'Started' } },
+            ],
           },
           {
             id: 'dependency-aware-queries',

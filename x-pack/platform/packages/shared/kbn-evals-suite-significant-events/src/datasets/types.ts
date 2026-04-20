@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { EvaluationCriterion, EvaluationCriterionStructured } from '@kbn/evals';
+import type { EvaluationCriterionStructured } from '@kbn/evals';
 import type { GcsConfig } from '../data_generators/replay';
 import type { ValidKIFeatureType } from '../evaluators/ki_feature_extraction';
 
@@ -34,7 +34,7 @@ export interface KIQueryGenerationScenario {
     stream_description: string;
   };
   output: {
-    criteria: EvaluationCriterion[];
+    criteria: SamplingCriterion[];
     expected_categories: string[];
     expected_ground_truth: string;
     expect_stats?: boolean;
