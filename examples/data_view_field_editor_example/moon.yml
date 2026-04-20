@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-view-field-editor-example-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-data-discovery'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/data-view-field-editor-example-plugin'
+  title: '@kbn/data-view-field-editor-example-plugin'
   description: Moon project for @kbn/data-view-field-editor-example-plugin
   channel: ''
   owner: '@elastic/kibana-data-discovery'
-  metadata:
-    sourceRoot: examples/data_view_field_editor_example
+  sourceRoot: examples/data_view_field_editor_example
 dependsOn:
   - '@kbn/core'
   - '@kbn/data-plugin'

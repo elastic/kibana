@@ -14,11 +14,13 @@ import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
+import { useHostAttachmentConfig } from '../hooks/use_host_attachment_config';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
+import { DEFAULT_SCHEMA } from '../../../../common/constants';
 import { InfraPageTemplate } from '../../shared/templates/infra_page_template';
 import { OnboardingFlow } from '../../shared/templates/no_data_config';
 import { HostHeaderTitle } from '../header/host_header_title';
@@ -32,6 +34,9 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+
+  // Configure agent builder global flyout with the host attachment
+  useHostAttachmentConfig();
 
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
   const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(entity.type);
@@ -58,7 +63,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
         assetType: entity.type,
         tabId: activeTabId,
-        schema_selected: schema || 'ecs',
+        schema_selected: schema || DEFAULT_SCHEMA,
       };
 
       telemetry.reportAssetDetailsPageViewed(

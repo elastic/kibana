@@ -582,15 +582,7 @@
             "label": "props",
             "description": [],
             "signature": [
-              "{ query?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | QT | undefined; filters?: ",
+              "{ filters?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -598,7 +590,15 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; onCancel?: (() => void) | undefined; refreshInterval?: number | undefined; indexPatterns?: ",
+              "[] | undefined; onCancel?: (() => void) | undefined; refreshInterval?: number | undefined; query?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Query",
+                "text": "Query"
+              },
+              " | QT | undefined; indexPatterns?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -616,7 +616,7 @@
                 "section": "def-common.SavedQuery",
                 "text": "SavedQuery"
               },
-              " | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; additionalQueryBarMenuItems?: ",
+              " | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSaveQuery?: boolean | undefined; customSubmitButton?: React.ReactNode; dataViewPickerOverride?: React.ReactNode; screenTitle?: string | undefined; showQueryMenu?: boolean | undefined; showFilterBar?: boolean | undefined; showDatePicker?: boolean | undefined; showAutoRefreshOnly?: boolean | undefined; enableDateRangePicker?: boolean | undefined; additionalQueryBarMenuItems?: ",
               "AdditionalQueryBarMenuItems",
               " | undefined; filtersForSuggestions?: ",
               {
@@ -716,7 +716,7 @@
                 "section": "def-public.DataViewPickerProps",
                 "text": "DataViewPickerProps"
               },
-              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"auto\" | \"full\" | \"iconOnly\" | undefined; suggestionsSize?: ",
+              " | undefined; textBasedLanguageModeErrors?: Error[] | undefined; textBasedLanguageModeWarning?: string | undefined; showSubmitButton?: boolean | undefined; submitButtonStyle?: \"full\" | \"auto\" | \"iconOnly\" | undefined; suggestionsSize?: ",
               {
                 "pluginId": "kql",
                 "scope": "public",
@@ -2089,7 +2089,7 @@
           "SearchBarInjectedDeps"
         ],
         "path": "src/platform/plugins/shared/unified_search/public/search_bar/search_bar.tsx",
-        "lineNumber": 177,
+        "lineNumber": 181,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

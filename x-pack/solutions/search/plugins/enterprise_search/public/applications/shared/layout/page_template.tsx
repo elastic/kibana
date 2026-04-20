@@ -67,12 +67,19 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
   ...pageTemplateProps
 }) => {
   const { readOnlyMode } = useValues(HttpLogic);
-  const { renderHeaderActions, consolePlugin } = useValues(KibanaLogic);
+  const { renderHeaderActions, consolePlugin, capabilities, notifications, spaces } =
+    useValues(KibanaLogic);
 
   const hasCustomEmptyState = !!emptyState;
   const showCustomEmptyState = hasCustomEmptyState && isEmptyState;
 
   const navIcon = solutionNavIcon ?? 'logoElasticsearch';
+
+  const SolutionViewSwitchCallout = spaces?.ui?.components?.getSolutionViewSwitchCallout;
+  const solutionNavFooter =
+    notifications.tours.isEnabled() && capabilities.spaces?.manage && SolutionViewSwitchCallout ? (
+      <SolutionViewSwitchCallout currentSolution="es" />
+    ) : undefined;
 
   useLayoutEffect(() => {
     if (useEndpointHeaderActions) {
@@ -94,7 +101,11 @@ export const EnterpriseSearchPageTemplateWrapper: React.FC<PageTemplateProps> = 
         ),
       }}
       isEmptyState={isEmptyState && !isLoading}
-      solutionNav={solutionNav && solutionNav.items ? { icon: navIcon, ...solutionNav } : undefined}
+      solutionNav={
+        solutionNav && solutionNav.items
+          ? { icon: navIcon, ...solutionNav, footer: solutionNavFooter }
+          : undefined
+      }
     >
       {setPageChrome}
       {readOnlyMode && (

@@ -32,7 +32,7 @@
           "\nSchema for categorization API request body."
         ],
         "signature": [
-          "{ readonly query?: any; readonly intervalMs?: number | undefined; readonly index: string; readonly from: number; readonly to: number; readonly field: string; readonly timeField: string; }"
+          "{ readonly query?: any; readonly intervalMs?: number | undefined; readonly index: string; readonly field: string; readonly from: number; readonly to: number; readonly timeField: string; }"
         ],
         "path": "x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis/schema.ts",
         "lineNumber": 56,

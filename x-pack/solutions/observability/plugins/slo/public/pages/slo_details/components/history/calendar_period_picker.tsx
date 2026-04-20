@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
@@ -15,9 +15,18 @@ interface Props {
   period: 'week' | 'month';
   range: TimeBounds;
   onChange: (range: TimeBounds) => void;
+  onReset?: () => void;
+  isResetDisabled?: boolean;
 }
 
-export function CalendarPeriodPicker({ period, range, onChange }: Props) {
+export function CalendarPeriodPicker({
+  period,
+  range,
+  onChange,
+  onReset,
+  isResetDisabled = true,
+}: Props) {
+  const { euiTheme } = useEuiTheme();
   const isWeeklyPeriod = period === 'week';
   const durationUnit = isWeeklyPeriod ? 'week' : 'month';
   const unit = isWeeklyPeriod ? 'isoWeek' : 'month';
@@ -44,31 +53,62 @@ export function CalendarPeriodPicker({ period, range, onChange }: Props) {
   }
 
   return (
-    <EuiFlexGroup direction="row" justifyContent="spaceEvenly" alignItems="center">
+    <EuiFlexGroup
+      direction="row"
+      justifyContent="spaceBetween"
+      alignItems="center"
+      responsive={false}
+      wrap={false}
+      gutterSize="s"
+      css={{ paddingRight: euiTheme.size.s }}
+    >
       <EuiButton
         size="s"
         data-test-subj="sloSloDetailsHistoryPreviousButton"
         onClick={() => handlePrevious()}
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
       >
         {i18n.translate('xpack.slo.sloDetailsHistory.previousPeriodButtonLabel', {
           defaultMessage: 'Previous',
         })}
       </EuiButton>
-      <EuiText size="s" textAlign="center">
+
+      <EuiText size="s" textAlign="center" css={{ whiteSpace: 'nowrap' }}>
         <p>{getCalendarPeriodLabel()}</p>
       </EuiText>
-      <EuiButton
-        size="s"
-        data-test-subj="sloSloDetailsHistoryNextButton"
-        onClick={() => handleNext()}
-        iconType="arrowRight"
-        iconSide="right"
+
+      <EuiFlexGroup
+        direction="row"
+        alignItems="center"
+        responsive={false}
+        wrap={false}
+        gutterSize="xs"
       >
-        {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
-          defaultMessage: 'Next',
-        })}
-      </EuiButton>
+        <EuiButton
+          size="s"
+          data-test-subj="sloSloDetailsHistoryNextButton"
+          onClick={() => handleNext()}
+          iconType="chevronSingleRight"
+          iconSide="right"
+        >
+          {i18n.translate('xpack.slo.sloDetailsHistory.nextPeriodButtonLabel', {
+            defaultMessage: 'Next',
+          })}
+        </EuiButton>
+        {onReset ? (
+          <EuiButtonEmpty
+            size="s"
+            data-test-subj="sloSloDetailsHistoryResetButton"
+            iconType="refresh"
+            onClick={onReset}
+            isDisabled={isResetDisabled}
+          >
+            {i18n.translate('xpack.slo.sloDetailsHistory.resetPeriodButtonLabel', {
+              defaultMessage: 'Reset',
+            })}
+          </EuiButtonEmpty>
+        ) : null}
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

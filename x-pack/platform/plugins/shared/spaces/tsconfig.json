@@ -20,6 +20,7 @@
     "@kbn/config-schema",
     "@kbn/utility-types",
     "@kbn/std",
+    "@kbn/ai-assistant-common",
     "@kbn/core-saved-objects-server",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
@@ -58,6 +59,11 @@
     "@kbn/licensing-types",
     "@kbn/react-query",
     "@kbn/scout",
+    "@kbn/es-query",
+    "@kbn/cps",
+    "@kbn/cps-common",
+    "@kbn/cps-utils",
+    "@kbn/tour-queue",
   ],
   "exclude": ["target/**/*"]
 }

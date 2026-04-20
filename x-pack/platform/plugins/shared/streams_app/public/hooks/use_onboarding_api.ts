@@ -6,11 +6,24 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
+import type { OnboardingStep } from '@kbn/streams-schema';
 import { useMemo } from 'react';
 import { useKibana } from './use_kibana';
 import { getLast24HoursTimeRange } from '../util/time_range';
 
-export function useOnboardingApi(connectorId?: string) {
+export interface UseOnboardingApiOptions {
+  saveQueries?: boolean;
+}
+
+export interface ScheduleOnboardingOptions {
+  steps?: OnboardingStep[];
+  connectors?: {
+    features?: string;
+    queries?: string;
+  };
+}
+
+export function useOnboardingApi({ saveQueries = true }: UseOnboardingApiOptions = {}) {
   const {
     dependencies: {
       start: {
@@ -23,20 +36,22 @@ export function useOnboardingApi(connectorId?: string) {
 
   return useMemo(
     () => ({
-      scheduleOnboardingTask: async (streamName: string) => {
+      scheduleOnboardingTask: async (streamName: string, options?: ScheduleOnboardingOptions) => {
         const { from, to } = getLast24HoursTimeRange();
 
-        await streamsRepositoryClient.fetch(
+        return streamsRepositoryClient.fetch(
           'POST /internal/streams/{streamName}/onboarding/_task',
           {
             signal,
             params: {
               path: { streamName },
+              query: { saveQueries },
               body: {
-                action: 'schedule',
+                action: 'schedule' as const,
                 from,
                 to,
-                connectorId,
+                ...(options?.steps !== undefined && { steps: options.steps }),
+                ...(options?.connectors !== undefined && { connectors: options.connectors }),
               },
             },
           }
@@ -49,6 +64,7 @@ export function useOnboardingApi(connectorId?: string) {
             signal,
             params: {
               path: { streamName },
+              query: { saveQueries },
             },
           }
         );
@@ -60,14 +76,30 @@ export function useOnboardingApi(connectorId?: string) {
             signal,
             params: {
               path: { streamName },
+              query: { saveQueries },
               body: {
-                action: 'cancel',
+                action: 'cancel' as const,
+              },
+            },
+          }
+        );
+      },
+      acknowledgeOnboardingTask: async (streamName: string) => {
+        await streamsRepositoryClient.fetch(
+          'POST /internal/streams/{streamName}/onboarding/_task',
+          {
+            signal,
+            params: {
+              path: { streamName },
+              query: { saveQueries },
+              body: {
+                action: 'acknowledge' as const,
               },
             },
           }
         );
       },
     }),
-    [connectorId, signal, streamsRepositoryClient]
+    [saveQueries, signal, streamsRepositoryClient]
   );
 }

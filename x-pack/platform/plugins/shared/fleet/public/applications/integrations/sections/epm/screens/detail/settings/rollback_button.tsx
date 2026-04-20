@@ -66,7 +66,7 @@ export function RollbackButton({ packageInfo, isCustomPackage }: RollbackButtonP
   const rollbackButton = (
     <EuiButton
       data-test-subj="rollbackButton"
-      iconType={'returnKey'}
+      iconType={'return'}
       isLoading={isRollingBack}
       onClick={openRollbackModal}
       color="primary"

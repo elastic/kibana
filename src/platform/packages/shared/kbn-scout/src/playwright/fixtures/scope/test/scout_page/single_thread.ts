@@ -102,11 +102,6 @@ export function extendPlaywrightPage({
   // Method to navigate to specific Kibana apps
   extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
     page.goto(kbnUrl.app(appName, { pathOptions }));
-  // Method to wait for global loading indicator to be hidden
-  extendedPage.waitForLoadingIndicatorHidden = () =>
-    extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
-      state: 'attached',
-    });
   // Method to press a key until an element with the provided selector is in focus.
   extendedPage.keyTo = async (
     selector: string,

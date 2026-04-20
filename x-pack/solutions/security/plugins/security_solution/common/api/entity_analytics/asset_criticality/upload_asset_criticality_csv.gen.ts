@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export type AssetCriticalityCsvUploadErrorItem = z.infer<typeof AssetCriticalityCsvUploadErrorItem>;
 export const AssetCriticalityCsvUploadErrorItem = z.object({
@@ -29,12 +29,24 @@ export const AssetCriticalityCsvUploadStats = z.object({
   total: z.number().int(),
 });
 
-export type InternalUploadAssetCriticalityRecordsResponse = z.infer<
-  typeof InternalUploadAssetCriticalityRecordsResponse
+export type AssetCriticalityCsvUploadV2ResponseItem = z.infer<
+  typeof AssetCriticalityCsvUploadV2ResponseItem
 >;
-export const InternalUploadAssetCriticalityRecordsResponse = z.object({
-  errors: z.array(AssetCriticalityCsvUploadErrorItem),
-  stats: AssetCriticalityCsvUploadStats,
+export const AssetCriticalityCsvUploadV2ResponseItem = z.object({
+  status: z.enum(['success', 'failure', 'unmatched']),
+  matchedEntities: z.number().int(),
+  error: z.string().optional(),
+});
+
+export type InternalUploadAssetCriticalityV2CsvResponse = z.infer<
+  typeof InternalUploadAssetCriticalityV2CsvResponse
+>;
+export const InternalUploadAssetCriticalityV2CsvResponse = z.object({
+  successful: z.number().int(),
+  failed: z.number().int(),
+  total: z.number().int(),
+  unmatched: z.number().int(),
+  items: z.array(AssetCriticalityCsvUploadV2ResponseItem),
 });
 
 export type UploadAssetCriticalityRecordsResponse = z.infer<

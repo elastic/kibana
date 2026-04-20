@@ -10,6 +10,9 @@
 import type { ReactNode } from 'react';
 import { filtersPart } from './part';
 import { SortFilter } from './sort';
+import { TagFilter } from './tags';
+import { StarredFilter } from './starred';
+import { CreatedByFilter } from './created_by';
 
 /**
  * Props for the {@link Filters} container component.
@@ -36,6 +39,7 @@ export interface FiltersProps {
  *
  * <ContentListToolbar>
  *   <Filters>
+ *     <Filters.Tags />
  *     <Filters.Sort />
  *   </Filters>
  * </ContentListToolbar>
@@ -46,4 +50,7 @@ const FiltersComponent = filtersPart.createComponent<FiltersProps>();
 // Attach sub-components via Object.assign for compound component pattern.
 export const Filters = Object.assign(FiltersComponent, {
   Sort: SortFilter,
+  Tags: TagFilter,
+  Starred: StarredFilter,
+  CreatedBy: CreatedByFilter,
 });

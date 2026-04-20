@@ -553,7 +553,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const noConnectorContent = useMemo(() => {
     return (
       <EuiEmptyPrompt
-        iconType="magnifyWithExclamation"
+        iconType="magnifyExclamation"
         title={<h2>{ACTION_UNABLE_TO_LOAD_CONNECTOR_TITLE}</h2>}
         body={ACTION_UNABLE_TO_LOAD_CONNECTOR_DESCRIPTION}
       />

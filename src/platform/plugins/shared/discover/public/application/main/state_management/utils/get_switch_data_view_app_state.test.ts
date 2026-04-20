@@ -144,6 +144,5 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
-
   // TODO: add tests
 });

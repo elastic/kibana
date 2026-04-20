@@ -22,12 +22,7 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should filter workflows by enabling state', async ({
-    page,
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should filter workflows by enabling state', async ({ page, pageObjects, apiServices }) => {
     const enabledWorkflow = {
       name: 'FilterSortSearch Enabled Workflow 1',
       description: 'Enabled workflow for filter test',
@@ -39,7 +34,6 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
       enabled: false,
     };
     await apiServices.workflows.bulkCreate(
-      scoutSpace.id,
       [enabledWorkflow, disabledWorkflow].map(getListTestWorkflowYaml)
     );
 
@@ -56,12 +50,7 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
     await expect(pageObjects.workflowList.getWorkflowRow(enabledWorkflow.name)).toBeVisible();
   });
 
-  test('should filter workflows by disabling state', async ({
-    page,
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should filter workflows by disabling state', async ({ page, pageObjects, apiServices }) => {
     const enabledWorkflow = {
       name: 'FilterSortSearch Enabled Workflow 2',
       description: 'Enabled workflow for disable filter test',
@@ -73,7 +62,6 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
       enabled: false,
     };
     await apiServices.workflows.bulkCreate(
-      scoutSpace.id,
       [enabledWorkflow, disabledWorkflow].map(getListTestWorkflowYaml)
     );
 
@@ -90,11 +78,7 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
     await expect(pageObjects.workflowList.getWorkflowRow(disabledWorkflow.name)).toBeVisible();
   });
 
-  test('should search by name and description', async ({
-    pageObjects,
-    apiServices,
-    scoutSpace,
-  }) => {
+  test('should search by name and description', async ({ pageObjects, apiServices }) => {
     const workflows = [
       {
         name: 'Search Test Apple Workflow',
@@ -112,7 +96,7 @@ test.describe('WorkflowsList/FilterSortSearch', { tag: [...tags.stateful.classic
         enabled: false,
       },
     ];
-    await apiServices.workflows.bulkCreate(scoutSpace.id, workflows.map(getListTestWorkflowYaml));
+    await apiServices.workflows.bulkCreate(workflows.map(getListTestWorkflowYaml));
 
     await pageObjects.workflowList.navigate();
 

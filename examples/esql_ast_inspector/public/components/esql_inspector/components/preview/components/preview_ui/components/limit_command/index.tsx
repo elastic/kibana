@@ -17,7 +17,7 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
-import { Builder } from '@kbn/esql-language';
+import { Builder } from '@elastic/esql';
 import { useEsqlInspector } from '../../../../../../context';
 import { useBehaviorSubject } from '../../../../../../../../hooks/use_behavior_subject';
 

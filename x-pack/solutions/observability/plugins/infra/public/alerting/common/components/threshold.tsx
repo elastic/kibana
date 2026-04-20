@@ -92,7 +92,7 @@ export const Threshold = ({
                 value: value ?? NO_DATA_VALUE,
                 valueFormatter,
                 icon: ({ width, height, color: iconColor }) => (
-                  <EuiIcon width={width} height={height} color={iconColor} type="alert" />
+                  <EuiIcon width={width} height={height} color={iconColor} type="warning" />
                 ),
               },
             ],

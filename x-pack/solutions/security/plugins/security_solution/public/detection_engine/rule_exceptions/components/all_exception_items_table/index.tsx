@@ -29,6 +29,10 @@ import {
   buildShowExpiredExceptionsFilter,
   getSavedObjectTypes,
 } from '@kbn/securitysolution-list-utils';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EndpointExceptionsMovedCallout } from '../../../../exceptions/components/endpoint_exceptions_moved_callout';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -480,6 +484,76 @@ const ExceptionsViewerComponent = ({
     [allReferences, exceptionToEdit]
   );
 
+  const isEndpointExceptionListLinked: boolean = useMemo(
+    () =>
+      rule?.exceptions_list?.some(
+        (list) => list.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+      ) ?? false,
+    [rule]
+  );
+
+  const isEndpointSecurityRule: boolean = useMemo(
+    () =>
+      rule != null &&
+      rule.immutable &&
+      rule.rule_source.type === 'external' &&
+      rule.related_integrations.some(({ package: pkg }) => pkg === 'endpoint'),
+    [rule]
+  );
+  const isDetectionRuleWithEndpointExceptions =
+    isEndpointExceptionListLinked && !isEndpointSecurityRule;
+
+  const isEndpointExceptionsMovedFFEnabled = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
+  const { data: endpointPerPolicyOptIn } = useGetEndpointExceptionsPerPolicyOptIn();
+
+  const endpointExceptionsMovedCallout = useMemo(() => {
+    if (!isEndpointExceptionsMovedFFEnabled) {
+      return null;
+    }
+
+    if (
+      isEndpointSecurityRule &&
+      (endpointPerPolicyOptIn?.status === false || endpointPerPolicyOptIn?.reason === 'userOptedIn')
+    ) {
+      return (
+        <EndpointExceptionsMovedCallout
+          id="exceptionsViewer-EndpointSecurityRule"
+          dismissable={false}
+          title="moved"
+        />
+      );
+    }
+
+    if (isDetectionRuleWithEndpointExceptions) {
+      if (endpointPerPolicyOptIn?.status === false) {
+        return (
+          <EndpointExceptionsMovedCallout
+            id="exceptionsViewer-rulesWithEndpointExceptions-NotOptedIn"
+            dismissable={false}
+            title="moved"
+          />
+        );
+      } else if (endpointPerPolicyOptIn?.reason === 'userOptedIn') {
+        return (
+          <EndpointExceptionsMovedCallout
+            id={`exceptionsViewer-rulesWithEndpointExceptions-UserOptedIn`}
+            dismissable={true}
+            title="noLongerEvaluatedOnRules"
+          />
+        );
+      }
+    }
+
+    return null;
+  }, [
+    isEndpointExceptionsMovedFFEnabled,
+    isEndpointSecurityRule,
+    endpointPerPolicyOptIn,
+    isDetectionRuleWithEndpointExceptions,
+  ]);
+
   return (
     <>
       {currenFlyout === 'editException' &&
@@ -511,6 +585,8 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          {endpointExceptionsMovedCallout}
+
           <StyledText size="s">
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
           </StyledText>

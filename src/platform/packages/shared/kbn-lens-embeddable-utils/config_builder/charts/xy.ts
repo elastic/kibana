@@ -16,7 +16,7 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-  XYState,
+  XYVisualizationState,
 } from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
@@ -38,7 +38,7 @@ function normalizeBreakdown(
   return breakdown ? (Array.isArray(breakdown) ? breakdown : [breakdown]) : [];
 }
 
-function buildVisualizationState(config: LensXYConfig): XYState {
+function buildVisualizationState(config: LensXYConfig): XYVisualizationState {
   return {
     axisTitlesVisibilitySettings: {
       x: config.axisTitleVisibility?.showXAxisTitle ?? true,

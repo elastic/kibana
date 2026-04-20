@@ -3098,7 +3098,7 @@
         "label": "dedot",
         "description": [],
         "signature": [
-          "(source: Record<string, any>, target: Record<string, any>) => Record<string, any>"
+          "(source: Record<string, unknown>, target: Record<string, unknown>) => Record<string, unknown>"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
         "lineNumber": 12,
@@ -3114,7 +3114,7 @@
             "label": "source",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
             "lineNumber": 12,
@@ -3131,11 +3131,11 @@
             "label": "target",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/utils/dedot.ts",
             "lineNumber": 12,
-            "columnNumber": 52,
+            "columnNumber": 56,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3976,7 +3976,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"unknown\" | \"cell\" | \"wifi\" | \"wired\" | \"unavailable\""
+              "\"unknown\" | \"cell\" | \"wifi\" | \"unavailable\" | \"wired\""
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_device.ts",
             "lineNumber": 33,
@@ -4349,10 +4349,12 @@
           " | ",
           "AWSRdsMetricsDocument",
           " | ",
-          "K8sNodeMetricsDocument"
+          "K8sNodeMetricsDocument",
+          " | ",
+          "SemconvHostMetricsDocument"
         ],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-        "lineNumber": 23,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4558,7 +4560,49 @@
             "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.service.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/service.ts",
+                "lineNumber": 28,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.service.$2",
+                "type": "string",
+                "tags": [],
+                "label": "environment",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/service.ts",
+                "lineNumber": 29,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.service.$3",
+                "type": "string",
+                "tags": [],
+                "label": "agentName",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/service.ts",
+                "lineNumber": 30,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/synthtrace-client",
@@ -4616,7 +4660,52 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.mobileApp.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_app.ts",
+                "lineNumber": 28,
+                "columnNumber": 27,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.mobileApp.$2",
+                "type": "string",
+                "tags": [],
+                "label": "environment",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_app.ts",
+                "lineNumber": 28,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.apm.mobileApp.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "agentName",
+                "description": [],
+                "signature": [
+                  "\"iOS/swift\" | \"android/java\""
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/apm/mobile_app.ts",
+                "lineNumber": 28,
+                "columnNumber": 62,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           },
           {
             "parentPluginId": "@kbn/synthtrace-client",
@@ -4773,7 +4862,7 @@
         "label": "infra",
         "description": [],
         "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-        "lineNumber": 31,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -4790,7 +4879,7 @@
               "Host"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 32,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4823,7 +4912,7 @@
               "Host"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4846,6 +4935,39 @@
           },
           {
             "parentPluginId": "@kbn/synthtrace-client",
+            "id": "def-common.infra.semconvHost",
+            "type": "Function",
+            "tags": [],
+            "label": "semconvHost",
+            "description": [],
+            "signature": [
+              "(name: string) => ",
+              "SemconvHost"
+            ],
+            "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/synthtrace-client",
+                "id": "def-common.infra.semconvHost.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/semconv_host.ts",
+                "lineNumber": 138,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/synthtrace-client",
             "id": "def-common.infra.pod",
             "type": "Function",
             "tags": [],
@@ -4856,7 +4978,7 @@
               "Pod"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 34,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4902,7 +5024,7 @@
               "DockerContainer"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 35,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4935,7 +5057,7 @@
               "K8sContainer"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 36,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4994,7 +5116,7 @@
               "AWSRds"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 37,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5040,7 +5162,7 @@
               "K8sNode"
             ],
             "path": "src/platform/packages/shared/kbn-synthtrace-client/src/lib/infra/index.ts",
-            "lineNumber": 38,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

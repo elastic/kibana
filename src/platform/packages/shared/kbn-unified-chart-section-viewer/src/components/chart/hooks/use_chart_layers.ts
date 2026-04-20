@@ -8,17 +8,19 @@
  */
 
 import { useMemo } from 'react';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
-import type { Dimension, MetricField } from '../../../types';
+import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils';
+import type { Dimension, ParsedMetricItem } from '../../../types';
 import {
   createMetricAggregation,
   createTimeBucketAggregation,
   getLensMetricFormat,
+  firstNonNullable,
+  resolveMetricUnit,
 } from '../../../common/utils';
 
 interface UseChartLayersParams {
   dimensions?: Dimension[];
-  metric: MetricField;
+  metricItem: ParsedMetricItem;
   color?: string;
   seriesType?: LensSeriesLayer['seriesType'];
   customFunction?: string;
@@ -26,24 +28,29 @@ interface UseChartLayersParams {
 
 /**
  * A hook that computes the Lens series layer configuration for the metrics chart.
- *
- * @param dimensions - An array of dimension fields to break down the series by.
- * @param metric - The metric field to be visualized.
- * @param color - The color to apply to the series.
- * @returns An array of LensSeriesLayer configurations.
+ * Properly normalizes metric units to ensure they are displayed correctly in the chart
+ * (e.g., 'byte' -> 'bytes', handling multiple units over time).
  */
 export const useChartLayers = ({
   dimensions = [],
-  metric,
+  metricItem,
   color,
   seriesType,
   customFunction,
 }: UseChartLayersParams): LensSeriesLayer[] => {
   return useMemo((): LensSeriesLayer[] => {
+    const fieldTypes = metricItem.fieldTypes;
+    const instrument = firstNonNullable(metricItem.metricTypes);
+    const resolvedUnit = resolveMetricUnit(metricItem.metricName, metricItem.units);
+
+    if (fieldTypes.length === 0 || !instrument) {
+      return [];
+    }
+
     const metricField = createMetricAggregation({
-      type: metric.type,
-      instrument: metric.instrument,
-      metricName: metric.name,
+      types: fieldTypes,
+      instrument,
+      metricName: metricItem.metricName,
       customFunction,
     });
     const hasDimensions = dimensions.length > 0;
@@ -62,7 +69,7 @@ export const useChartLayers = ({
             label: metricField,
             compactValues: true,
             seriesColor: color,
-            ...(metric.unit ? getLensMetricFormat(metric.unit) : {}),
+            ...(resolvedUnit ? getLensMetricFormat(resolvedUnit) : {}),
           },
         ],
         breakdown: hasDimensions ? dimensions.map((dim) => dim.name) : undefined,
@@ -72,10 +79,10 @@ export const useChartLayers = ({
     color,
     customFunction,
     dimensions,
-    metric.type,
-    metric.instrument,
-    metric.name,
-    metric.unit,
+    metricItem.fieldTypes,
+    metricItem.metricTypes,
+    metricItem.metricName,
+    metricItem.units,
     seriesType,
   ]);
 };

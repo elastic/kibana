@@ -284,7 +284,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
         'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
-        'xpack.automatic_import.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          */

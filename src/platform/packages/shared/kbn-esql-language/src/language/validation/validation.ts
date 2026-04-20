@@ -8,20 +8,21 @@
  */
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLCallbacks, ESQLFieldWithMetadata } from '@kbn/esql-types';
-import type { ESQLCommand, ESQLMessage } from '../../types';
-import { EsqlQuery } from '../../composer';
+import type { ESQLCommand } from '@elastic/esql/types';
+import { EsqlQuery } from '@elastic/esql';
+import { walk } from '@elastic/esql';
+import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands/registry';
-import { walk } from '../../ast';
 import type { ICommandCallbacks } from '../../commands/registry/types';
 import { UnmappedFieldsStrategy } from '../../commands/registry/types';
 import { getMessageFromId } from '../../commands/definitions/utils';
-import type { ESQLAstAllCommands } from '../../types';
 import { QueryColumns } from '../../query_columns_service';
 import { retrievePolicies, retrieveSources } from './resources';
 import type { ReferenceMaps, ValidationOptions, ValidationResult } from './types';
 import { getSubqueriesToValidate } from './subqueries';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
 import { areNewUnmappedFieldsAllowed } from '../../query_columns_service/helpers';
+import type { ESQLMessage } from '../../commands';
 
 /**
  * ES|QL validation public API
@@ -162,7 +163,7 @@ async function validateAst(
 
     const unmappedFieldsStrategy = areNewUnmappedFieldsAllowed(subqueryForColumns.commands)
       ? unmappedFieldsStrategyFromHeader
-      : UnmappedFieldsStrategy.FAIL;
+      : UnmappedFieldsStrategy.DEFAULT;
 
     const commandMessages = validateCommand(
       currentCommand,

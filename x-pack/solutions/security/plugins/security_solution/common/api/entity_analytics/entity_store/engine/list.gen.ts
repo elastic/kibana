@@ -14,12 +14,18 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { EngineDescriptor } from '../common.gen';
 
 export type ListEntityEnginesResponse = z.infer<typeof ListEntityEnginesResponse>;
 export const ListEntityEnginesResponse = z.object({
+  /**
+   * The total number of entity engines.
+   */
   count: z.number().int().optional(),
+  /**
+   * An array of engine descriptors.
+   */
   engines: z.array(EngineDescriptor).optional(),
 });

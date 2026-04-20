@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   ContentListProvider,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
+import type { ContentManagementTagsServices } from '@kbn/content-management-tags';
 import { ContentListToolbar } from './content_list_toolbar';
 
 const mockFindItems = jest.fn(
@@ -24,17 +25,52 @@ const mockFindItems = jest.fn(
   })
 );
 
+const mockTags = [
+  { id: 'tag-1', name: 'Production', description: '', color: '#FF0000', managed: false },
+  { id: 'tag-2', name: 'Development', description: '', color: '#00FF00', managed: false },
+  { id: 'tag-3', name: 'New World', description: '', color: '#0000FF', managed: false },
+];
+
+const mockParseSearchQuery = jest.fn((queryText: string) => {
+  // Simple mock: extract `tag:Name` and `tag:"Multi Word"` patterns, resolve names
+  // to IDs via `mockTags`, and return the remaining text as `searchQuery`.
+  // This mirrors the real `parseSearchQueryCore` which resolves names to IDs.
+  const tagPattern = /tag:(?:"([^"]+)"|(\S+))/g;
+  const resolvedIds: string[] = [];
+  let match = tagPattern.exec(queryText);
+  while (match) {
+    const name = match[1] ?? match[2];
+    const tag = mockTags.find((t) => t.name === name);
+    if (tag) {
+      resolvedIds.push(tag.id);
+    }
+    match = tagPattern.exec(queryText);
+  }
+  const searchQuery = queryText.replace(/tag:(?:"[^"]+?"|\S+)\s*/g, '').trim();
+  return {
+    searchQuery,
+    tagIds: resolvedIds.length > 0 ? resolvedIds : undefined,
+    tagIdsToExclude: undefined,
+  };
+});
+
+const mockTagsService: ContentManagementTagsServices = {
+  getTagList: () => mockTags,
+  parseSearchQuery: mockParseSearchQuery,
+};
+
 interface CreateWrapperOptions {
   sortingDisabled?: boolean;
   searchDisabled?: boolean;
   searchPlaceholder?: string;
   sortFields?: Array<{ field: string; name: string }>;
+  tagsService?: ContentManagementTagsServices;
 }
 
 const createWrapper =
   (options: CreateWrapperOptions = {}) =>
   ({ children }: { children: React.ReactNode }) => {
-    const { sortingDisabled, searchDisabled, searchPlaceholder, sortFields } = options;
+    const { sortingDisabled, searchDisabled, searchPlaceholder, sortFields, tagsService } = options;
 
     const features = {
       sorting: sortingDisabled ? (false as const) : sortFields ? { fields: sortFields } : true,
@@ -51,6 +87,7 @@ const createWrapper =
         }}
         dataSource={{ findItems: mockFindItems }}
         features={features}
+        services={tagsService ? { tags: tagsService } : undefined}
       >
         {children}
       </ContentListProvider>
@@ -156,6 +193,46 @@ describe('ContentListToolbar', () => {
 
       await waitFor(() => {
         expect(searchBox).toHaveValue('test query');
+      });
+    });
+
+    it('does not crash and remains operable after a parse error', async () => {
+      // EuiSearchBar fires onChange with { error, query: null, queryText } when
+      // the user types a syntactically invalid query (e.g. an unclosed paren).
+      // The handler must NOT pass the raw error text to the controlled `query`
+      // prop: EuiSearchBar's getDerivedStateFromProps calls parseQuery on any
+      // new prop value and would throw if the string is unparseable, crashing
+      // the component. Instead, we return early and let EuiSearchBar maintain
+      // the error text in its own internal state.
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+
+      // Type a valid query so there is a known good state.
+      fireEvent.change(searchBox, { target: { value: 'hello' } });
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('hello');
+      });
+
+      // Type a query with a parse error (unclosed paren).
+      // EuiSearchBar fires onChange with { error, query: null }; the handler
+      // returns early to avoid passing the unparseable string back to the prop.
+      fireEvent.change(searchBox, { target: { value: 'hello (unclosed' } });
+
+      // The search bar must still be in the DOM — the component did not crash.
+      expect(screen.getByTestId('contentListToolbar-searchBox')).toBeInTheDocument();
+
+      // Subsequent valid typing must continue to work normally.
+      fireEvent.change(searchBox, { target: { value: 'hello again' } });
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('hello again');
       });
     });
 
@@ -279,6 +356,118 @@ describe('ContentListToolbar', () => {
       );
 
       expect(screen.getByTestId('contentListSortRenderer')).toBeInTheDocument();
+    });
+  });
+
+  describe('tag filter integration with query model', () => {
+    it('parses tag syntax and passes resolved tag IDs to findItems', async () => {
+      const Wrapper = createWrapper({ tagsService: mockTagsService });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+
+      // Use fireEvent.change to set the full query at once, avoiding
+      // EuiSearchBar's controlled-component round-trip on intermediate states
+      // (e.g., `tag:P` would be unresolvable and clear the input).
+      fireEvent.change(searchBox, { target: { value: 'tag:Production my query' } });
+
+      // Verify that `findItems` receives the parsed search query and tag filters.
+      // The generic parser uses field definitions (derived from tags service) to
+      // resolve "Production" → "tag-1".
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('my query');
+        expect(lastCall[0].filters.tag).toEqual({
+          include: ['tag-1'],
+          exclude: [],
+        });
+      });
+    });
+
+    it('passes search text without tags when no tag syntax is used', async () => {
+      const Wrapper = createWrapper({ tagsService: mockTagsService });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      await userEvent.type(searchBox, 'plain search');
+
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('plain search');
+        expect(lastCall[0].filters.tag).toBeUndefined();
+      });
+    });
+
+    it('falls back to simple search when no tags service is provided', async () => {
+      const Wrapper = createWrapper();
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      await userEvent.type(searchBox, 'tag:Production my query');
+
+      // Without tags service, the entire text is treated as the search query.
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toContain('tag:Production my query');
+        expect(lastCall[0].filters.tag).toBeUndefined();
+      });
+    });
+
+    it('parses quoted multi-word tag names and resolves them to IDs', async () => {
+      const Wrapper = createWrapper({ tagsService: mockTagsService });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+      fireEvent.change(searchBox, { target: { value: 'tag:"New World" my query' } });
+
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('my query');
+        expect(lastCall[0].filters.tag).toEqual({
+          include: ['tag-3'],
+          exclude: [],
+        });
+      });
+    });
+
+    it('passes unresolvable tag values through as raw filter values', async () => {
+      const Wrapper = createWrapper({ tagsService: mockTagsService });
+      render(
+        <Wrapper>
+          <ContentListToolbar />
+        </Wrapper>
+      );
+
+      const searchBox = screen.getByTestId('contentListToolbar-searchBox');
+
+      // Set a tag name that doesn't match any known tag.
+      fireEvent.change(searchBox, { target: { value: 'tag:Unknown my query' } });
+
+      // The tag clause is still extracted from search text (not leaked as
+      // raw `tag:Unknown`). The unresolvable display value is passed through
+      // as a raw filter value — it won't match any item but prevents the
+      // field syntax from appearing in the free-text search.
+      await waitFor(() => {
+        const lastCall = mockFindItems.mock.calls[mockFindItems.mock.calls.length - 1];
+        expect(lastCall[0].searchQuery).toBe('my query');
+        expect(lastCall[0].filters.tag).toEqual({ include: ['Unknown'], exclude: [] });
+      });
     });
   });
 });

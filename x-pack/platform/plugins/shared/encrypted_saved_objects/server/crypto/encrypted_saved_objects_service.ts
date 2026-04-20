@@ -186,6 +186,16 @@ export class EncryptedSavedObjectsService {
   }
 
   /**
+   * Returns the set of attribute names that are encrypted for the given type.
+   * Returns undefined if the type is not registered.
+   * @param type Saved object type.
+   */
+  public getEncryptedAttributes(type: string): ReadonlySet<string> | undefined {
+    const attributes = this.typeDefinitions.get(type)?.attributesToEncrypt;
+    return attributes ? new Set(attributes) : undefined;
+  }
+
+  /**
    * Takes saved object attributes for the specified type and, depending on the type definition,
    * either decrypts or strips encrypted attributes (e.g. in case AAD or encryption key has changed
    * and decryption is no longer possible).
@@ -671,5 +681,43 @@ export class EncryptedSavedObjectsService {
       ...(this.options.primaryCrypto ? [this.options.primaryCrypto] : []),
       ...(this.options.decryptionOnlyCryptos ?? []),
     ];
+  }
+
+  public __dangerousClone(
+    typeRegistrationOverrides?: EncryptedSavedObjectTypeRegistration[]
+  ): EncryptedSavedObjectsService {
+    const dangerouslyExposeAttributes = (
+      registration: EncryptedSavedObjectTypeRegistration
+    ): EncryptedSavedObjectTypeRegistration => {
+      const attributesToEncrypt = new Set<string | AttributeToEncrypt>(
+        [...registration.attributesToEncrypt].map((attr) => {
+          const key = typeof attr === 'string' ? attr : attr.key;
+          return { key, dangerouslyExposeValue: true };
+        })
+      );
+      return { ...registration, attributesToEncrypt };
+    };
+
+    const clone = new EncryptedSavedObjectsService(this.options);
+
+    for (const registration of typeRegistrationOverrides ?? []) {
+      clone.registerType(dangerouslyExposeAttributes(registration));
+    }
+
+    for (const [type, { attributesToEncrypt, attributesToIncludeInAAD, enforceRandomId }] of this
+      .typeDefinitions) {
+      if (!clone.isRegistered(type)) {
+        clone.registerType(
+          dangerouslyExposeAttributes({
+            type,
+            attributesToEncrypt,
+            attributesToIncludeInAAD,
+            enforceRandomId,
+          })
+        );
+      }
+    }
+
+    return clone;
   }
 }

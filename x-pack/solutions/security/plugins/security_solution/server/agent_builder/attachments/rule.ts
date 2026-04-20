@@ -8,15 +8,17 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID } from '../tools';
+import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../tools';
 
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
 export const ruleAttachmentDataSchema = securityAttachmentDataSchema.extend({
   text: z.string(),
 });
+
+const DETECTION_RULE_SKILL_NAME_ID = 'detection-rule-edit';
 
 type RuleAttachmentData = z.infer<typeof ruleAttachmentDataSchema>;
 
@@ -55,16 +57,20 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       platformCoreTools.generateEsql,
       platformCoreTools.productDocumentation,
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
+      SECURITY_LABS_SEARCH_TOOL_ID,
     ],
+
     getAgentDescription: () => {
-      const description = `You have access to a rule, query, or migration rule.
+      const description = `You have access to a security detection rule stored as stringified JSON in the "text" field. It may be an existing rule or an empty placeholder for a new rule.
 
-      If this is a migration rule, it includes both the old rule and the new rule.
-
+SECURITY RULE DATA:
 {ruleData}
 
-1. Extract the query or topic from the rule attachment.
-2. Use the appropriate tools to provide a response`;
+---
+Complete in order:
+
+1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
+2. Use the available tools to research, create, or edit the rule and provide a response.`;
       return description;
     },
   };

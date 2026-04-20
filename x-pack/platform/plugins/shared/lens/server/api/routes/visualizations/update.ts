@@ -7,18 +7,25 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
-import { LENS_VIS_API_PATH, LENS_API_VERSION, LENS_API_ACCESS } from '../../../../common/constants';
+
+import {
+  LENS_VIS_API_PATH,
+  LENS_API_VERSION,
+  LENS_API_ACCESS,
+  LENS_API_TAG,
+} from '../../../../common/constants';
 import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
-import type { LensUpdateResponseBody, RegisterAPIRouteFn } from '../../types';
+
+import type { RegisterAPIRouteFn } from '../../types';
+import type { LensUpdateResponseBody } from './types';
 import {
   lensUpdateRequestBodySchema,
   lensUpdateRequestParamsSchema,
-  lensUpdateRequestQuerySchema,
   lensUpdateResponseBodySchema,
 } from './schema';
-import { getLensRequestConfig, getLensResponseItem } from '../utils';
+import { getLensRequestConfig, getLensResponseItem } from './utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -27,13 +34,20 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    enableQueryVersion: true,
-    summary: 'Update Lens visualization',
-    description: 'Update an existing Lens visualization.',
+    summary: 'Update visualization',
+    description: [
+      'Replaces the full configuration of an existing Lens visualization. Partial updates are not supported.',
+      'To make incremental changes, retrieve the visualization first, modify the fields you need, then send the complete object back.',
+      '',
+      'If no visualization exists with the specified ID, a new one is created.',
+      '',
+      'ES|QL visualizations cannot be updated through this endpoint.',
+    ].join('\n'),
     options: {
-      tags: ['oas-tag:Lens'],
+      tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {
@@ -51,12 +65,15 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
         request: {
           params: lensUpdateRequestParamsSchema,
           body: lensUpdateRequestBodySchema,
-          query: lensUpdateRequestQuerySchema,
         },
         response: {
           200: {
             body: () => lensUpdateResponseBodySchema,
             description: 'Ok',
+          },
+          201: {
+            body: () => lensUpdateResponseBodySchema,
+            description: 'Created',
           },
           400: {
             description: 'Malformed request',
@@ -66,9 +83,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
           },
           403: {
             description: 'Forbidden',
-          },
-          404: {
-            description: 'Resource not found',
           },
           500: {
             description: 'Internal Server Error',
@@ -89,31 +103,33 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
       // Note: these types are to enforce loose param typings of client methods
       const { references, ...data } = getLensRequestConfig(builder, req.body);
-      const options: LensUpdateIn['options'] = { ...req.query, references };
+      const options: LensUpdateIn['options'] = { references };
+
+      let createdNew = false;
+      try {
+        await client.get(req.params.id);
+      } catch (error) {
+        if (isBoom(error) && error.output.statusCode === 404) {
+          createdNew = true;
+        }
+      }
 
       try {
         const { result } = await client.update(req.params.id, data, options);
+        const responseItem = getLensResponseItem(builder, result.item);
 
-        if (result.item.error) {
-          throw result.item.error;
+        if (createdNew) {
+          return res.created<LensUpdateResponseBody>({
+            body: responseItem,
+          });
         }
 
-        const responseItem = getLensResponseItem(builder, result.item);
         return res.ok<LensUpdateResponseBody>({
           body: responseItem,
         });
       } catch (error) {
-        if (isBoom(error)) {
-          if (error.output.statusCode === 404) {
-            return res.notFound({
-              body: {
-                message: `A Lens visualization with id [${req.params.id}] was not found.`,
-              },
-            });
-          }
-          if (error.output.statusCode === 403) {
-            return res.forbidden();
-          }
+        if (isBoom(error) && error.output.statusCode === 403) {
+          return res.forbidden();
         }
 
         return boomify(error); // forward unknown error

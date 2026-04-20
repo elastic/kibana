@@ -7,6 +7,7 @@
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
+  coreFeatureFlagsMock,
   savedObjectsClientMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
@@ -68,6 +69,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 describe('bulkUntrackAlerts()', () => {

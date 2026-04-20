@@ -13,6 +13,8 @@ export const journey = setupDashboardJourney({
   journey: new Journey({
     esArchives: ['x-pack/performance/es_archives/sample_data_logs_many_fields'],
     kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard_long_running'],
+    // FLAKY: https://github.com/elastic/kibana/issues/252060
+    skipped: true,
   }),
   dashboardName: 'Web Logs Dashboard',
   dashboardLinkSubj: 'dashboardListingTitleLink-[Logs]-Web-Traffic',

@@ -14,6 +14,7 @@
       "_application/analytics/{name}"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-search-application-get-behavioral-analytics",
+    "documentation_serverless": "https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-search-application-get-behavioral-analytics",
     "availability": {
       "stack": true,
       "serverless": true

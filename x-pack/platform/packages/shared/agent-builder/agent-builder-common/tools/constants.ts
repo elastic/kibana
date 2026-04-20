@@ -27,16 +27,30 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
+  resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   productDocumentation: platformCoreTool('product_documentation'),
   cases: platformCoreTool('cases'),
   integrationKnowledge: platformCoreTool('integration_knowledge'),
-  // Attachment tools
-  attachmentRead: platformCoreTool('attachment_read'),
-  attachmentUpdate: platformCoreTool('attachment_update'),
-  attachmentAdd: platformCoreTool('attachment_add'),
-  attachmentList: platformCoreTool('attachment_list'),
-  attachmentDiff: platformCoreTool('attachment_diff'),
+  // SML tools
+  smlSearch: platformCoreTool('sml_search'),
+  smlAttach: platformCoreTool('sml_attach'),
+  // Connector tools
+  executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
 } as const;
+
+export const platformStreamsSigEventsTools = {
+  searchKnowledgeIndicators: `${internalNamespaces.platformStreams}.sig_events.search_kis`,
+  createFeatureKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_feature_create`,
+  createQueryKnowledgeIndicator: `${internalNamespaces.platformStreams}.sig_events.ki_query_create`,
+} as const;
+
+export const attachmentTools = {
+  read: `${internalNamespaces.attachments}.read`,
+  update: `${internalNamespaces.attachments}.update`,
+  add: `${internalNamespaces.attachments}.add`,
+  list: `${internalNamespaces.attachments}.list`,
+  diff: `${internalNamespaces.attachments}.diff`,
+};
 
 export const filestoreTools = {
   read: `${internalNamespaces.filestore}.read`,
@@ -44,6 +58,17 @@ export const filestoreTools = {
   grep: `${internalNamespaces.filestore}.grep`,
   glob: `${internalNamespaces.filestore}.glob`,
 };
+
+export const isAttachmentTool = (toolName: string) =>
+  Object.values(attachmentTools).includes(toolName);
+
+export const isFilestoreTool = (toolName: string) =>
+  Object.values(filestoreTools).includes(toolName);
+
+export const isInternalTool = (toolName: string) =>
+  isAttachmentTool(toolName) || isFilestoreTool(toolName);
+
+export const isExcludedFromFilestore = (toolName: string) => isInternalTool(toolName);
 
 /**
  * List of tool types which can be created / edited by a user.
@@ -61,6 +86,10 @@ export const defaultAgentToolIds = [
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
   platformCoreTools.getWorkflowExecutionStatus,
+  platformCoreTools.resumeWorkflowExecution,
+  platformCoreTools.smlSearch,
+  platformCoreTools.smlAttach,
+  platformCoreTools.executeConnectorSubAction,
 ];
 
 /**

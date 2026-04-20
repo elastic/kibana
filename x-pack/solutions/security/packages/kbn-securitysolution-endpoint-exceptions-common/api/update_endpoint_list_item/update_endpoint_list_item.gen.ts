@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemId,
@@ -48,6 +48,9 @@ export const UpdateEndpointListItemRequestBody = z.object({
   tags: ExceptionListItemTags.optional(),
   meta: ExceptionListItemMeta.optional(),
   comments: ExceptionListItemCommentArray.optional().default([]),
+  /**
+   * The version id, normally returned by the API when the item is retrieved. Use it ensure updates are made against the latest version.
+   */
   _version: z.string().optional(),
 });
 export type UpdateEndpointListItemRequestBodyInput = z.input<

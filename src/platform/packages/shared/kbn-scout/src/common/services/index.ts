@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getEsClient, getKbnClient } from './clients';
+export { getEsClient, getLinkedEsClient, getKbnClient } from './clients';
 export { createScoutConfig } from './config';
-export { getEsArchiver } from './es_archiver';
+export { getEsArchiver, getLinkedEsArchiver } from './es_archiver';
 export { createKbnUrl } from './kibana_url';
 export { createSamlSessionManager } from './saml_auth';
 
 export type { KibanaUrl } from './kibana_url';
-export type { SamlSessionManager } from '@kbn/test';
+export type { SamlSessionManager } from '@kbn/test-saml-auth';
 export { ScoutLogger } from './logger';
-export type { KbnClient } from '@kbn/test';
+export type { KbnClient } from '@kbn/kbn-client';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export {
   createCustomRole,

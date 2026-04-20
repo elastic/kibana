@@ -62,7 +62,7 @@ const connectorClientPopoverPanels = [
     icons: [
       <EuiIcon size="l" type="plugs" />,
       <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="launch" />,
+      <EuiIcon size="l" type="rocket" />,
     ],
     id: 'client-deploy',
   },

@@ -17,6 +17,7 @@ import {
   type ServiceMapNode,
   type ServiceMapEdge,
 } from '../../../../../common/service_map';
+import { ServiceMapPopoverTitleBadges } from '../service_map_popover_title_badges';
 import { isEdge, type ServiceMapSelection } from './utils';
 import { POPOVER_WIDTH } from './constants';
 import { DependencyContents } from './dependency_contents';
@@ -105,7 +106,7 @@ export function PopoverContent({
   onOpenDiagnostic,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
-  const isDiagnosticModeEnabled = core.uiSettings.get(enableDiagnosticMode);
+  const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
 
   const selection = selectedEdge ?? selectedNode;
   if (selection == null) {
@@ -125,20 +126,29 @@ export function PopoverContent({
       data-test-subj="serviceMapPopoverContent"
     >
       <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
-            {getPopoverTitle(selection)}
-            {kuery && (
-              <EuiIconTip
-                position="bottom"
-                content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
-                  defaultMessage: 'The KQL filter is not applied in the displayed stats.',
-                })}
-                type="info"
-              />
-            )}
-          </h3>
-        </EuiTitle>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiTitle size="xxs">
+              <h3 style={{ wordBreak: 'break-all' }} data-test-subj="serviceMapPopoverTitle">
+                {getPopoverTitle(selection)}
+                {kuery && (
+                  <EuiIconTip
+                    position="bottom"
+                    content={i18n.translate('xpack.apm.serviceMap.kqlFilterInfo', {
+                      defaultMessage: 'The KQL filter is not applied in the displayed stats.',
+                    })}
+                    type="info"
+                  />
+                )}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {!isEdge(selection) && selection.data != null && isServiceNodeData(selection.data) && (
+            <EuiFlexItem grow={false}>
+              <ServiceMapPopoverTitleBadges nodeData={selection.data} />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
         <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
       <ContentsComponent

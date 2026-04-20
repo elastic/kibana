@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import { globalSetupHook, tags } from '@kbn/scout-oblt';
-import {
-  createDataView,
-  generateLogsData,
-  generateMetricsData,
-  generateRulesData,
-} from '../fixtures/generators';
+import { mergeTests, globalSetupHook as obltGlobalSetupHook, tags } from '@kbn/scout-oblt';
+import { synthtraceFixture } from '@kbn/scout-synthtrace';
+
+const globalSetupHook = mergeTests(obltGlobalSetupHook, synthtraceFixture);
+import { generateLogsData, generateMetricsData, generateRulesData } from '../fixtures/generators';
+
 import { GENERATED_METRICS } from '../fixtures/constants';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({
-    apiServices,
-    log,
-    logsSynthtraceEsClient,
-    kbnClient,
-    infraSynthtraceEsClient,
-    esClient,
-  }) => {
+  async ({ apiServices, log, logsSynthtraceEsClient, infraSynthtraceEsClient, esClient }) => {
     log.info('Generating Observability data...');
     await generateRulesData(apiServices);
 
@@ -40,10 +32,11 @@ globalSetupHook(
     });
 
     log.info('Creating default data view for .alerts-* pattern...');
-    await createDataView(kbnClient, {
+    await apiServices.dataViews.create({
       name: 'Default Alerts Data View',
       id: 'default-alerts-data-view',
       title: '.alerts-*',
+      override: true,
     });
 
     await generateLogsData({

@@ -264,6 +264,7 @@ export const AgentResponseSchema = schema.object({
       schema.literal('degraded'),
       schema.literal('updating'),
       schema.literal('starting'),
+      schema.literal('disconnected'),
     ])
   ),
   last_checkin_message: schema.maybe(schema.string()),
@@ -784,6 +785,7 @@ export const GetActionStatusResponseSchema = schema.object({
         schema.literal('INPUT_ACTION'),
         schema.literal('MIGRATE'),
         schema.literal('PRIVILEGE_LEVEL_CHANGE'),
+        schema.literal('ROLLBACK'),
       ]),
       nbAgentsActioned: schema.number({
         meta: {

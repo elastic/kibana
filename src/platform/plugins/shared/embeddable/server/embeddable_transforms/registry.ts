@@ -22,10 +22,19 @@ export function getTransformsRegistry(drilldownRegistry: ReturnType<typeof getDr
 
       transformsRegistry[type] = transforms;
     },
-    getAllEmbeddableSchemas: () =>
-      Object.values(transformsRegistry)
-        .map((transformsSetup) => transformsSetup?.getSchema?.(drilldownRegistry.getSchema))
-        .filter((schema) => Boolean(schema)) as ObjectType[],
+    getAllEmbeddableSchemas: () => {
+      const schemas: { [key: string]: { schema: ObjectType; title: string } } = {};
+      Object.entries(transformsRegistry).forEach(([type, transformsSetup]) => {
+        const schema = transformsSetup?.getSchema?.(drilldownRegistry.getSchema);
+        if (schema) {
+          schemas[type] = {
+            schema: schema as ObjectType,
+            title: transformsSetup.title,
+          };
+        }
+      });
+      return schemas;
+    },
     getEmbeddableTransforms: (type: string) => {
       const { getTransforms, getSchema, throwOnUnmappedPanel } = transformsRegistry[type] ?? {};
       return {

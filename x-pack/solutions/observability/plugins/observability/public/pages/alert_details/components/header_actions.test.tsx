@@ -21,7 +21,7 @@ import { HeaderActions } from './header_actions';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_BASE_PATH, RULES_PATH } from '../../../../common/locators/paths';
+import { paths } from '../../../../common/locators/paths';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../hooks/use_fetch_rule');
@@ -241,7 +241,7 @@ describe('Header Actions', () => {
         fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
         expect(queryByTestId('view-rule-details-button')).toHaveProperty(
           'href',
-          `http://localhost/wow${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(mockRuleId)}`
+          `http://localhost/wow${paths.observability.ruleDetails(mockRuleId)}`
         );
         expect(queryByTestId('view-rule-details-button')).toHaveProperty('target', '_blank');
       });

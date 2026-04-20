@@ -12,6 +12,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
+  coreFeatureFlagsMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -71,6 +72,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   isSystemAction: jest.fn(),
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 beforeEach(() => {
@@ -234,6 +237,26 @@ describe('updateRuleApiKey()', () => {
       expect.any(Object),
       expect.any(Object)
     );
+  });
+
+  test('does not leak stale uiamApiKey when new API key set has no UIAM key', async () => {
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+      ...existingEncryptedAlert,
+      attributes: {
+        ...existingEncryptedAlert.attributes,
+        uiamApiKey: Buffer.from('stale-uiam:stale-key').toString('base64'),
+      },
+    });
+
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(false);
+    rulesClientParams.createAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: '234', name: '123', api_key: 'abc' },
+    });
+    await rulesClient.updateRuleApiKey({ id: '1' });
+
+    const writtenAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+    expect(writtenAttributes).not.toHaveProperty('uiamApiKey');
   });
 
   test('updates the API key for the alert and does not invalidate the old api key if created by a user authenticated using an api key', async () => {

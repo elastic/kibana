@@ -38,11 +38,11 @@ export type EvaluateObservabilityAIAssistantDataset = ({
 
 export function createEvaluateObservabilityAIAssistantDataset({
   evaluators,
-  phoenixClient,
+  executorClient,
   chatClient,
 }: {
   evaluators: DefaultEvaluators;
-  phoenixClient: EvalsExecutorClient;
+  executorClient: EvalsExecutorClient;
   chatClient: ChatClient;
 }): EvaluateObservabilityAIAssistantDataset {
   return async function evaluateObservabilityAIAssistantDataset({
@@ -66,7 +66,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
      */
     const useQualitativeEvaluators = process.env.USE_QUALITATIVE_EVALUATORS === 'true';
 
-    await phoenixClient.runExperiment(
+    await executorClient.runExperiment(
       {
         dataset,
         task: async ({ input, output, metadata }) => {

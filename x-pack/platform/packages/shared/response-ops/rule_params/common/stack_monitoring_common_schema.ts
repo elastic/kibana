@@ -15,8 +15,11 @@ export const baseSchema = schema.object({
   filterQueryText: schema.maybe(schema.string({})),
 });
 
-export const stackMonitoringCommonSchema = baseSchema.extends({
-  limit: schema.maybe(schema.string()),
-});
+export const stackMonitoringCommonSchema = baseSchema.extends(
+  {
+    limit: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
 
 export type StackMonitoringType = TypeOf<typeof stackMonitoringCommonSchema>;

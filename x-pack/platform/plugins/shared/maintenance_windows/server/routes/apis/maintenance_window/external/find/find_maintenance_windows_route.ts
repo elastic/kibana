@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import path from 'node:path';
 import type { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import type { MaintenanceWindowRequestHandlerContext } from '../../../../../types';
@@ -24,6 +25,9 @@ import {
   transformFindMaintenanceWindowParamsV1,
   transformFindMaintenanceWindowResponseV1,
 } from './transforms';
+
+const findMaintenanceWindowsExamples = () =>
+  path.join(__dirname, 'find_maintenance_windows_examples.yaml');
 
 export const findMaintenanceWindowsRoute = (
   router: IRouter<MaintenanceWindowRequestHandlerContext>,
@@ -58,6 +62,7 @@ export const findMaintenanceWindowsRoute = (
         access: 'public',
         summary: 'Search for a maintenance window.',
         tags: ['oas-tag:maintenance-window'],
+        oasOperationObject: findMaintenanceWindowsExamples,
         availability: {
           since: '9.2.0',
           stability: 'stable',

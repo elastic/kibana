@@ -178,7 +178,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               <EuiToolTip content={filterForLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   onClick={() => onAddFilter(field, fieldValue, '+')}
                   aria-label={filterForLabel}
                   data-test-subj={`plus-${fieldLabel}-${fieldValue}`}
@@ -195,7 +195,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
               <EuiToolTip content={filterOutLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconSize="s"
-                  iconType="minusInCircle"
+                  iconType="minusCircle"
                   onClick={() => onAddFilter(field, fieldValue, '-')}
                   aria-label={filterOutLabel}
                   data-test-subj={`minus-${fieldLabel}-${fieldValue}`}

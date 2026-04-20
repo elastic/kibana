@@ -76,6 +76,8 @@ export interface IntegrationCardItem {
   url: string;
   version: string;
   type?: string;
+  supportsAgentless?: boolean;
+  signalTypes?: string[];
 }
 
 export const mapToCard = ({
@@ -118,9 +120,17 @@ export const mapToCard = ({
     }
 
     // Extract deprecation information
+    // officially deprecated items have a `deprecated` field
     if ('deprecated' in item && item.deprecated) {
       isDeprecated = true;
       deprecationInfo = item.deprecated;
+    } else if (
+      // bwc: unofficially deprecated items are marked as such in their title, description or name
+      (item.title && /deprecated/i.test(item.title)) ||
+      (item.description && /deprecated/i.test(item.description)) ||
+      ('name' in item && item.name && /deprecated/i.test(item.name))
+    ) {
+      isDeprecated = true;
     }
 
     const url = getHref('integration_details_overview', {
@@ -161,6 +171,17 @@ export const mapToCard = ({
 
   if (item.type === 'integration') {
     cardResult.installStatus = item.installationInfo?.install_status;
+  }
+
+  if ('supportsAgentless' in item && item.supportsAgentless) {
+    cardResult.supportsAgentless = true;
+  }
+
+  if ('data_streams' in item && Array.isArray(item.data_streams)) {
+    const types = [...new Set(item.data_streams.map((ds) => ds.type))];
+    if (types.length > 0) {
+      cardResult.signalTypes = types;
+    }
   }
 
   return cardResult;

@@ -85,7 +85,7 @@ export function getManageSlosUrl(
 
 export function useManageSlosUrl(overrides?: ManageSlosUrlParams): string | undefined {
   const { share } = useApmPluginContext();
-  const sloListLocator = share.url.locators.get<SloListLocatorParams>(sloListLocatorID);
+  const sloListLocator = share?.url?.locators?.get<SloListLocatorParams>(sloListLocatorID);
 
   const routeServiceName = useServiceName();
   const { query } = useApmParams('/*');

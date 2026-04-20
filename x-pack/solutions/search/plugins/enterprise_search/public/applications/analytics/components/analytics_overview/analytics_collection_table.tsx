@@ -195,7 +195,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       <AddAnalyticsCollection
         render={(onClick) => (
           <EuiButton
-            iconType="plusInCircleFilled"
+            iconType="plusCircle"
             css={analyticsCollectionTableStyles.newCollection}
             onClick={onClick}
           >

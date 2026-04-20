@@ -90,7 +90,7 @@ describe('AWSReusableConnectorForm', () => {
       expect(screen.getByText(/To streamline your AWS integration process/i)).toBeInTheDocument();
 
       // Verify the combo box label is present
-      expect(screen.getByText('Cloud Connector Name')).toBeInTheDocument();
+      expect(screen.getByText('Federated Identity Name')).toBeInTheDocument();
 
       // Verify combo box is rendered
       const comboBox = screen.getByTestId(AWS_CLOUD_CONNECTOR_SUPER_SELECT_TEST_SUBJ);
@@ -205,6 +205,8 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: undefined,
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -214,6 +216,8 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: 'single-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 
@@ -225,6 +229,8 @@ describe('AWSReusableConnectorForm', () => {
       expect(mockUseGetCloudConnectors).toHaveBeenCalledWith({
         cloudProvider: 'aws',
         accountType: 'organization-account',
+        packageName: undefined,
+        policyTemplate: undefined,
       });
     });
 

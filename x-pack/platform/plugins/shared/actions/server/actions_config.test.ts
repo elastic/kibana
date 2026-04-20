@@ -42,6 +42,15 @@ const defaultActionsConfig: ActionsConfig = {
   microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
   microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
   microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
+  auth: {
+    oauth_authorization_code: {
+      rate_limits: {
+        authorize: { lookbackWindow: '1h', limit: 100 },
+        callback: { lookbackWindow: '1h', limit: 100 },
+      },
+    },
+  },
+  ears: { enabled: false },
 };
 
 describe('ensureUriAllowed', () => {
@@ -759,6 +768,21 @@ describe('getAwsSesConfig()', () => {
       port: 1234,
       secure: true,
     });
+  });
+});
+
+describe('getEarsUrl()', () => {
+  test('returns undefined when ears.url is not set in config', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.getEarsUrl()).toBeUndefined();
+  });
+
+  test('returns the configured URL when ears.url is set in config', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      ears: { enabled: false, url: 'https://ears.example.com' },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
   });
 });
 

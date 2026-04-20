@@ -6,11 +6,12 @@
  */
 
 import { EuiDescriptionList } from '@elastic/eui';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import moment from 'moment';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { transformTimeRangeOut } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { memoize } from 'lodash';
 import React from 'react';
@@ -23,11 +24,13 @@ export const initComponent = memoize(
     SingleMetricViewerComponent: SingleMetricViewerSharedComponent
   ) => {
     return React.memo(
-      (props: PersistableStateAttachmentViewProps) => {
-        const { persistableStateAttachmentState, caseData } = props;
+      (props: UnifiedValueAttachmentViewProps) => {
+        const { caseData } = props;
+        const attachmentState = props.data.state as Record<string, unknown>;
 
-        const inputProps =
-          persistableStateAttachmentState as unknown as SingleMetricViewerEmbeddableState;
+        const inputProps = transformTimeRangeOut(
+          attachmentState as unknown as SingleMetricViewerEmbeddableState
+        );
 
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
@@ -51,8 +54,8 @@ export const initComponent = memoize(
               />
             ),
             description: `${dataFormatter.convert(
-              inputProps.timeRange!.from
-            )} - ${dataFormatter.convert(inputProps.timeRange!.to)}`,
+              inputProps.time_range!.from
+            )} - ${dataFormatter.convert(inputProps.time_range!.to)}`,
           },
         ];
 
@@ -68,7 +71,7 @@ export const initComponent = memoize(
           });
         }
 
-        const { jobIds, timeRange, ...rest } = inputProps;
+        const { jobIds, time_range: timeRange, ...rest } = inputProps;
         const selectedJobId = jobIds[0];
 
         return (
@@ -84,11 +87,7 @@ export const initComponent = memoize(
           </>
         );
       },
-      (prevProps, nextProps) =>
-        deepEqual(
-          prevProps.persistableStateAttachmentState,
-          nextProps.persistableStateAttachmentState
-        )
+      (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
     );
   }
 );

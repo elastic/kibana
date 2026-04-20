@@ -56,6 +56,12 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsEndpointRunScript: false,
 
   /**
+   * Support for Automated Endpoint `runscript` (from rules)
+   * Release: 9.4
+   */
+  responseActionsEndpointAutomatedRunScript: false,
+
+  /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
@@ -80,16 +86,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
+  /**
+   * Enables the new Entity Analytics home page experience.
+   */
+  entityAnalyticsNewHomePageEnabled: false,
 
   /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
+   * Enables the lead generation pipeline for Entity Analytics.
+   * When enabled, the lead generation engine, observation modules,
+   * API routes, and persistence indices are activated.
    */
-  entityDetailsHighlightsEnabled: true,
-
-  /**
-   * Enables the experimental Threat Hunting home experience.
-   */
-  entityThreatHuntingEnabled: false,
+  leadGenerationEnabled: false,
 
   /**
    * disables ES|QL rules
@@ -97,14 +104,9 @@ export const allowedExperimentalValues = Object.freeze({
   esqlRulesDisabled: false,
 
   /**
-   * Enables experimental Microsoft Defender for Endpoint integration data to be available in Analyzer
+   * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  microsoftDefenderEndpointDataInAnalyzerEnabled: true,
-
-  /**
-   * Enables the storing of gaps in the event log
-   */
-  storeGapsInEventLogEnabled: true,
+  gapReasonDetectionEnabled: false,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -120,7 +122,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -168,10 +170,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   automaticDashboardsMigration: true,
 
-  /**
-   * Enables the SIEM Readiness Dashboard feature
-   */
-  siemReadinessDashboard: false,
   /**
    * Enables Microsoft Defender for Endpoint's Cancel command
    * Release: 9.2.0
@@ -230,6 +228,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
+
+  /**
+   * Uses entity store v2 for entity analytics skill
+   */
+  entityAnalyticsEntityStoreV2: false,
+
+  /**
+   * Enables the deprecated prebuilt rules UI
+   * Release: 9.4
+   */
+  prebuiltRulesDeprecationUIEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

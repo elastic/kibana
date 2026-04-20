@@ -32,4 +32,3 @@ export { retryCallCluster, migrationRetryCallCluster } from './src/retry_call_cl
 export { isInlineScriptingEnabled } from './src/is_scripting_enabled';
 export { getCapabilitiesFromClient } from './src/get_capabilities';
 export type { ClusterInfo } from './src/get_cluster_info';
-export { getRequestHandlerFactory } from './src/cps_request_handler_factory';

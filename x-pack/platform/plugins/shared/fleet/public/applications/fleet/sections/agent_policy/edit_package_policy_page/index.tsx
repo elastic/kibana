@@ -52,7 +52,7 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
 
 import {
   getInheritedNamespace,
@@ -67,11 +67,12 @@ import { StepsWithLessPadding } from '../create_package_policy_page/single_page_
 
 import { useAgentless } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
+import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
+
 import { UpgradeStatusCallout } from './components';
 import { usePackagePolicyWithRelatedData, useHistoryBlock } from './hooks';
 import { getNewSecrets } from './utils';
 import { usePackagePolicySteps } from './hooks';
-import { useIncompatibleAgentVersionStatus } from '../../../hooks/use_incompatible_agent_version_status';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -153,12 +154,15 @@ export const EditPackagePolicyForm = memo<{
   );
 
   // Derive var_group_selections from policy for edit mode
+  const { enableVarGroups } = ExperimentalFeaturesService.get();
+  const varGroups =
+    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
     }
-    return computeDefaultVarGroupSelections(packageInfo?.var_groups, hasAgentlessAgentPolicy);
-  }, [packagePolicy.var_group_selections, packageInfo?.var_groups, hasAgentlessAgentPolicy]);
+    return computeDefaultVarGroupSelections(varGroups, hasAgentlessAgentPolicy);
+  }, [packagePolicy.var_group_selections, varGroups, hasAgentlessAgentPolicy]);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -459,6 +463,7 @@ export const EditPackagePolicyForm = memo<{
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
+              agentPolicies={agentPolicies}
             />
           )}
 
@@ -471,6 +476,7 @@ export const EditPackagePolicyForm = memo<{
               validationResults={validationResults}
               submitAttempted={formState === 'INVALID'}
               isEditPage={true}
+              isUpgrade={isUpgrade}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               varGroupSelections={varGroupSelections}
             />
@@ -510,6 +516,7 @@ export const EditPackagePolicyForm = memo<{
       selectedTab,
       tabsViews,
       updatePackagePolicy,
+      isUpgrade,
       validationResults,
       varGroupSelections,
     ]

@@ -51,6 +51,7 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * On read, transformOut is used to convert StoredEmbeddableState and inject references into EmbeddableState.
    * On write, transformIn is used to extract references and convert EmbeddableState into StoredEmbeddableState.
    */
+  // TODO rename to registerEmbeddableSchema
   registerTransforms: (type: string, transforms: EmbeddableTransformsSetup<any, any>) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
@@ -59,7 +60,7 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType> &
   /**
    * Returns all embeddable schemas registered with registerTransforms.
    */
-  getAllEmbeddableSchemas: () => ObjectType[];
+  getAllEmbeddableSchemas: () => { [key: string]: { schema: ObjectType; title: string } };
 
   getTransforms: (type: string) =>
     | (EmbeddableTransforms & {
@@ -75,7 +76,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private drilldownRegistry = getDrilldownRegistry();
   private transformsRegistry = getTransformsRegistry(this.drilldownRegistry);
 
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup): EmbeddableSetup {
     this.migrateFn = getMigrateFunction(this.getEmbeddableFactory);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
@@ -90,7 +91,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): EmbeddableStart {
     return {
       getAllEmbeddableSchemas: this.transformsRegistry.getAllEmbeddableSchemas,
       getTransforms: this.transformsRegistry.getEmbeddableTransforms,

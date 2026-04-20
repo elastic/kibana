@@ -14,7 +14,7 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { Replacements } from '../conversations/common_attributes.gen';
 import { NonEmptyTimestamp, User } from '../common_attributes.gen';
@@ -124,4 +124,8 @@ export const AttackDiscoveryApiAlert = z.object({
    * The optional array of tags assigned the attack
    */
   tags: z.array(z.string()).optional(),
+  /**
+   * The concrete Elasticsearch index where this attack discovery is stored
+   */
+  index: z.string().optional(),
 });

@@ -19,7 +19,7 @@ import {
   TRACE_FIELDS,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { getAvailableTraceFields, escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
+import { getAvailableTraceFields, getHighlightedFieldValue } from '@kbn/discover-utils';
 import { Resource } from './resource';
 import { Content } from './content';
 import {
@@ -166,11 +166,14 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(row.flattened, {
     includeFormattedValue: true,
   });
+  const highlights = field ? row.raw.highlight?.[field] : undefined;
   const messageCodeBlockProps = formattedValue
     ? { language: 'json', children: formattedValue }
     : {
         language: 'txt',
-        dangerouslySetInnerHTML: { __html: escapeAndPreserveHighlightTags(value ?? '') },
+        dangerouslySetInnerHTML: {
+          __html: getHighlightedFieldValue(value ?? '', highlights),
+        },
       };
   const shouldRenderContent = Boolean(field && value);
 

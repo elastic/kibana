@@ -79,7 +79,7 @@ export async function getToolHandler({
     index: allObservabilityIndices,
     startTime: traceTimeWindow.start,
     endTime: traceTimeWindow.end,
-    size: maxDocsPerTrace,
+    maxDocsPerTrace,
     fields,
   });
 

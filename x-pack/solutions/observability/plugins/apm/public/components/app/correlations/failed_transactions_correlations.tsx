@@ -306,7 +306,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.filterDescription',
               { defaultMessage: 'Filter by value' }
             ),
-            icon: 'plusInCircle',
+            icon: 'plusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -323,7 +323,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               'xpack.apm.correlations.correlationsTable.excludeDescription',
               { defaultMessage: 'Filter out value' }
             ),
-            icon: 'minusInCircle',
+            icon: 'minusCircle',
             type: 'icon',
             onClick: ({ fieldName, fieldValue }: FailedTransactionsCorrelation) =>
               onAddFilter({
@@ -403,7 +403,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
           h.fieldValue === selectedSignificantTerm.fieldValue
       );
     } else if (pinnedSignificantTerm) {
-      return correlationTerms.find(
+      return correlationTerms?.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
           h.fieldValue === pinnedSignificantTerm.fieldValue
@@ -451,7 +451,10 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
         <EuiFlexItem grow={false}>
           <OpenInDiscover
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
-            variant="button"
+            label={i18n.translate('xpack.apm.failedTransactionsCorrelations.openInDiscover', {
+              defaultMessage: 'Open in Discover',
+            })}
+            variant="emptyButton"
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -463,6 +466,7 @@ export function FailedTransactionsCorrelations({ onFilter }: { onFilter: () => v
               transactionType,
               sampleRangeFrom,
               sampleRangeTo,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

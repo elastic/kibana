@@ -24,7 +24,6 @@ import type {
   ContentManagementServerSetupDependencies,
   ContentManagementServerStartDependencies,
 } from './types';
-import type { EventStreamService } from './event_stream';
 import { procedureNames } from '../common/rpc';
 
 export class ContentManagementPlugin
@@ -38,33 +37,16 @@ export class ContentManagementPlugin
 {
   private readonly logger: Logger;
   private readonly core: Core;
-  readonly #eventStream?: EventStreamService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
 
-    // TODO: Enable Event Stream once we ready to log events.
-    // const kibanaVersion = initializerContext.env.packageInfo.version;
-    // this.#eventStream = new EventStreamService({
-    //   logger: this.logger,
-    //   clientFactory: new EsEventStreamClientFactory({
-    //     baseName: '.kibana',
-    //     kibanaVersion,
-    //     logger: this.logger,
-    //   }),
-    // });
-
     this.core = new Core({
       logger: this.logger,
-      eventStream: this.#eventStream,
     });
   }
 
   public setup(core: CoreSetup, plugins: ContentManagementServerSetupDependencies) {
-    if (this.#eventStream) {
-      this.#eventStream.setup({ core });
-    }
-
     const { api: coreApi, contentRegistry } = this.core.setup();
 
     const rpc = new RpcService<RpcContext>();
@@ -89,20 +71,6 @@ export class ContentManagementPlugin
   }
 
   public start(core: CoreStart) {
-    if (this.#eventStream) {
-      this.#eventStream.start();
-    }
-
     return {};
-  }
-
-  public async stop(): Promise<void> {
-    if (this.#eventStream) {
-      try {
-        await this.#eventStream.stop();
-      } catch (e) {
-        this.logger.error(`Error during event stream stop: ${e}`);
-      }
-    }
   }
 }

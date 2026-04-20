@@ -14,7 +14,6 @@ import type {
   ESQLFieldWithMetadata,
   InferenceEndpointAutocompleteItem,
 } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { METADATA_FIELDS } from '../../..';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
@@ -71,17 +70,17 @@ export const policies = [
 export const joinIndices: IndexAutocompleteItem[] = [
   {
     name: 'join_index',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: [],
   },
   {
     name: 'join_index_with_alias',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: ['join_index_alias_1', 'join_index_alias_2'],
   },
   {
     name: 'lookup_index',
-    mode: 'lookup',
+    mode: 'Lookup',
     aliases: [],
   },
 ];
@@ -89,17 +88,17 @@ export const joinIndices: IndexAutocompleteItem[] = [
 export const timeseriesIndices: IndexAutocompleteItem[] = [
   {
     name: 'timeseries_index',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: [],
   },
   {
     name: 'timeseries_index_with_alias',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: ['timeseries_index_alias_1', 'timeseries_index_alias_2'],
   },
   {
     name: 'time_series_index',
-    mode: 'time_series',
+    mode: 'Timeseries',
     aliases: [],
   },
 ];
@@ -188,7 +187,9 @@ export function getCallbackMocks(): ESQLCallbacks {
       }
       return { recommendedQueries: [], recommendedFields: [] };
     }),
-    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
+    getInferenceEndpoints: jest.fn(async (taskType: string) => ({
+      inferenceEndpoints,
+    })),
   };
 }
 

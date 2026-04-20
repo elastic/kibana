@@ -80,7 +80,7 @@ export const DatasetFilter: React.FunctionComponent<{
       button={
         <EuiFilterButton
           data-test-subj="agentList.datasetFilterBtn"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={togglePopover}
           isSelected={isOpen}
           isLoading={isLoading}

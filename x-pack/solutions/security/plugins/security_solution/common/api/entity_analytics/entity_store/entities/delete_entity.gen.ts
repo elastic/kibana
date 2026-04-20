@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { EntityType } from '../common.gen';
 
@@ -35,5 +35,8 @@ export type DeleteSingleEntityRequestBodyInput = z.input<typeof DeleteSingleEnti
 
 export type DeleteSingleEntityResponse = z.infer<typeof DeleteSingleEntityResponse>;
 export const DeleteSingleEntityResponse = z.object({
+  /**
+   * Whether the entity was successfully deleted.
+   */
   deleted: z.boolean().optional(),
 });

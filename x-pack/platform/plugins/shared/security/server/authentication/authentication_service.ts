@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { errors } from '@elastic/elasticsearch';
+import { ErrorCode } from '@modelcontextprotocol/sdk/types.js';
+
 import type { BuildFlavor } from '@kbn/config';
 import type {
   CustomBrandingSetup,
@@ -17,6 +20,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType } from '@kbn/core-security-server';
+import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type {
@@ -39,7 +43,7 @@ import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
-import { ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { Session } from '../session_management';
 import type { UiamServicePublic } from '../uiam';
 import type { UserProfileServiceStartInternal } from '../user_profile';
@@ -70,6 +74,7 @@ interface AuthenticationServiceStartParams {
   isElasticCloudDeployment: () => boolean;
   customLogoutURL?: string;
   buildFlavor?: BuildFlavor;
+  userActivity: UserActivityServiceStart;
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -211,6 +216,35 @@ export class AuthenticationService {
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);
 
+      // For routes that accept UIAM OAuth tokens, return a 401 with a WWW-Authenticate header
+      // containing the resource_metadata URL instead of redirecting to the login page.
+      // https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response
+      if (
+        preResponse.statusCode === 401 &&
+        config.mcp?.oauth2 &&
+        request.route.options.tags.includes(ROUTE_TAG_ACCEPT_UIAM_OAUTH)
+      ) {
+        const baseUrl =
+          http.basePath.publicBaseUrl ??
+          `${request.url.protocol}//${request.url.host}${http.basePath.serverBasePath}`;
+        const resourceMetadataUrl = `${baseUrl}/.well-known/oauth-protected-resource`;
+
+        return toolkit.render({
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: null,
+            // TODO: In MCP SDK v2, ErrorCode is renamed to ProtocolErrorCode, and ConnectionClosed moves to
+            // SdkErrorCode (local-only, string-valued). Update this import when upgrading to SDK v2.
+            // https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration.md#error-hierarchy-refactoring
+            error: { code: ErrorCode.ConnectionClosed, message: 'Unauthorized' },
+          }),
+          headers: {
+            'WWW-Authenticate': `Bearer resource_metadata="${resourceMetadataUrl}"`,
+            'Content-Type': 'application/json',
+          },
+        });
+      }
+
       // Let API responses or <400 responses pass through as we can let their handlers deal with them.
       if (preResponse.statusCode < 400 || !canRedirectRequest(request)) {
         return toolkit.next();
@@ -279,8 +313,8 @@ export class AuthenticationService {
         return toolkit.notHandled();
       }
 
-      // In theory, this should never happen since Core calls this handler only for `401` ("unauthorized") errors.
-      if (getErrorStatusCode(error) !== 401) {
+      // We can only re-authenticate if the original request failed because of the expired access token.
+      if (!isTokenExpiredError(error)) {
         this.logger.error(
           `Re-authentication is not possible for the following error: ${getDetailedErrorMessage(
             error
@@ -352,6 +386,7 @@ export class AuthenticationService {
     customLogoutURL,
     buildFlavor = 'traditional',
     uiam,
+    userActivity,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
@@ -394,6 +429,7 @@ export class AuthenticationService {
       config: {
         authc: config.authc,
         accessAgreement: config.accessAgreement,
+        uiam: config.uiam,
       },
       getCurrentUser,
       featureUsageService,
@@ -404,6 +440,7 @@ export class AuthenticationService {
       isElasticCloudDeployment,
       customLogoutURL,
       uiam,
+      userActivity,
     }));
 
     return {
@@ -420,6 +457,7 @@ export class AuthenticationService {
           ? {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
+              convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
             }
           : null,
       },
@@ -472,4 +510,25 @@ export class AuthenticationService {
       getCurrentUser,
     };
   }
+}
+
+/**
+ * Checks if the provided error is caused by expired access token. The logic is based on the error
+ * reason set by the Elasticsearch and error code set by the UIAM service and is covered by the FTR
+ * and Scout API integration tests.
+ * @param error Error returned by the Elasticsearch client when authentication fails.
+ */
+function isTokenExpiredError(error: errors.ResponseError) {
+  // If the request failed because of expired access token it should always have 401 status code.
+  if (getErrorStatusCode(error) !== 401) {
+    return false;
+  }
+
+  // If expired the Elasticsearch native access token, it should properly set `reason` property.
+  if (error.body?.error?.reason === 'token expired') {
+    return true;
+  }
+
+  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
+  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
 }

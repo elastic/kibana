@@ -19,7 +19,6 @@ import {
   cleanupSavedQuery,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
-import { CREATE_PACKAGE_POLICY_SAVE_BTN } from '../../screens/integrations';
 import {
   createOldOsqueryPath,
   FLEET_AGENT_POLICIES,
@@ -29,6 +28,7 @@ import {
 } from '../../tasks/navigation';
 import {
   addCustomIntegration,
+  closeFleetTourIfVisible,
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
@@ -39,7 +39,7 @@ import {
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/170593
+// Failing: See https://github.com/elastic/kibana/issues/255381
 describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
   let savedQueryId: string;
 
@@ -91,21 +91,20 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
     });
 
     it('should add the old integration and be able to upgrade it', { tags: '@ess' }, () => {
-      cy.visit(createOldOsqueryPath(oldVersion));
+      navigateTo(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);
       checkDataStreamsInPolicyDetails();
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
-      cy.getBySel('PackagePoliciesTableUpgradeButton').click();
+      cy.getBySel('integrationPolicyUpgradeBtn').click();
       cy.getBySel('saveIntegration').click();
       cy.contains(`Successfully updated '${integrationName}'`);
       policyContainsIntegration(integrationName, policyName);
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/170593
-  describe.skip('Add integration to policy', () => {
+  describe('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
     beforeEach(() => {
@@ -118,31 +117,40 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cleanupAgentPolicy(policyId);
     });
 
-    it('add integration', () => {
-      cy.visit(FLEET_AGENT_POLICIES);
-      cy.getBySel('createAgentPolicyButton').click();
-      cy.getBySel('createAgentPolicyNameField').type(policyName);
-      cy.getBySel('createAgentPolicyFlyoutBtn').click();
-      cy.getBySel('agentPolicyNameLink').contains(policyName).click();
-      cy.getBySel('addPackagePolicyButton').click();
-      cy.getBySel('epmList.searchBar').type('osquery');
-      cy.getBySel('integration-card:epr:osquery_manager').click();
-      cy.getBySel('addIntegrationPolicyButton').click();
-      cy.getBySel('globalLoadingIndicator').should('not.exist');
+    it(
+      'add integration',
+      { tags: ['@ess', '@brokenInServerless'] },
 
-      cy.getBySel('agentPolicySelect').within(() => {
-        cy.contains(policyName);
-      });
-      cy.getBySel('packagePolicyNameInput').clear().wait(500);
-      cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
-      cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
-      cy.getBySel('confirmModalCancelButton').click();
-      cy.get(`[title="${integrationName}"]`).should('exist');
-      policyContainsIntegration(integrationName, policyName);
-      checkDataStreamsInPolicyDetails();
-      cy.visit(OSQUERY);
-      cy.contains('Live queries history');
-    });
+      () => {
+        cy.visit(FLEET_AGENT_POLICIES);
+        closeFleetTourIfVisible();
+        cy.getBySel('createAgentPolicyButton').click();
+        cy.getBySel('createAgentPolicyNameField').type(policyName);
+        cy.getBySel('createAgentPolicyFlyoutBtn').click();
+        closeFleetTourIfVisible();
+        cy.getBySel('agentPolicyNameLink').contains(policyName).click();
+        closeFleetTourIfVisible();
+        cy.getBySel('addPackagePolicyButton').click();
+        cy.getBySel('addIntegrationFlyout').should('exist');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('comboBoxInput').type('osquery manager{downArrow}{enter}');
+        cy.get('body').then(($body) => {
+          if ($body.find('[role="option"]').length > 0) {
+            cy.get('[role="option"]').first().click();
+          }
+        });
+
+        cy.getBySel('packagePolicyNameInput').clear();
+        cy.getBySel('packagePolicyNameInput').should('have.value', '');
+        cy.getBySel('packagePolicyNameInput').type(`${integrationName}`);
+        cy.getBySel('addIntegrationFlyout.submitBtn').should('be.enabled').click();
+        cy.get(`[title="${integrationName}"]`, { timeout: 60000 }).should('exist');
+        policyContainsIntegration(integrationName, policyName);
+        checkDataStreamsInPolicyDetails();
+        cy.visit(OSQUERY);
+        cy.contains('History');
+      }
+    );
   });
 
   describe('Upgrade policy with existing packs', () => {
@@ -170,11 +178,12 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       addCustomIntegration(integrationName, policyName);
       cy.getBySel('integrationPolicyUpgradeBtn');
       cy.get(`[title="${policyName}"]`).click();
+      closeFleetTourIfVisible();
       cy.get(`[title="${integrationName}"]`)
         .parents('tr')
         .within(() => {
           cy.contains('Osquery Manager');
-          cy.getBySel('PackagePoliciesTableUpgradeButton');
+          cy.getBySel('integrationPolicyUpgradeBtn');
           cy.contains(`v${oldVersion}`);
           cy.getBySel('agentActionsBtn').click();
         });
@@ -198,20 +207,22 @@ describe.skip('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => 
       cy.contains(/^Save pack$/).click();
       cy.contains(`Successfully created "${packName}" pack`).click();
       cy.visit('app/fleet/policies');
+      closeFleetTourIfVisible();
       cy.get(`[title="${policyName}"]`).click();
-      cy.getBySel('PackagePoliciesTableUpgradeButton').click();
+      closeFleetTourIfVisible();
+      cy.getBySel('integrationPolicyUpgradeBtn').click();
       cy.contains(/^Advanced$/).click();
-      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
+      cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.getBySel('saveIntegration').click();
       cy.get(`a[title="${integrationName}"]`).click();
       cy.contains(/^Advanced$/).click();
-      cy.get('.kibanaCodeEditor').should('contain', `"${packName}":`);
+      cy.get('.kibanaCodeEditor', { timeout: 30000 }).should('contain', `"default--${packName}":`);
       cy.contains('Cancel').click();
       closeModalIfVisible();
       cy.get(`[title="${integrationName}"]`)
         .parents('tr')
         .within(() => {
-          cy.getBySel('PackagePoliciesTableUpgradeButton').should('not.exist');
+          cy.getBySel('integrationPolicyUpgradeBtn').should('not.exist');
           cy.contains('Osquery Manager').and('not.contain', `v${oldVersion}`);
         });
       integrationExistsWithinPolicyDetails(integrationName);

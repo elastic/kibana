@@ -1,5 +1,5 @@
 ---
-navigation_title: Scout testing framework
+navigation_title: Testing framework
 ---
 
 # Scout [scout]
@@ -9,13 +9,14 @@ Scout is Kibana’s **modern UI and API test framework** built on [Playwright](h
 ## Start here [scout-start-here]
 
 - [Getting started](./scout/getting-started.md)
-- [Best practices](./scout/best-practices.md)
+- [Best practices](./scout/best-practices.md) (see also [UI test best practices](./scout/ui-best-practices.md) and [API test best practices](./scout/api-best-practices.md))
 - [UI testing](./scout/ui-testing.md)
 - [API testing](./scout/api-testing.md)
 
-## Why Scout? [scout-main-features]
+## Scout benefits [scout-main-features]
 
 - **Parallel execution**: run UI suites in [parallel](./scout/parallelism.md) against the same deployment.
+- **Selective testing**: PR builds run only the Scout tests scoped to changed modules, cutting CI time.
 - **Co-located tests**: keep tests close to [plugin code](./scout/setup-plugin.md) for easier iteration and maintenance.
 - **Deployment-agnostic**: write tests once, then use [tags](./scout/deployment-tags.md) to declare where they should run (stateful/serverless).
 - **Fixture-based**: [fixtures](./scout/fixtures.md) cover auth, data setup, clients, and common workflows.
@@ -74,16 +75,24 @@ No. Scout supports both UI and API testing with Playwright.
 
 #### Q: Are test runs going to be faster? [scout-faq-faster]
 
-Often, yes—especially with [parallel test execution](./scout/parallelism.md).
+Often yes, especially with [parallel test execution](./scout/parallelism.md) and selective testing.
+
+#### Q: What is selective testing? [scout-faq-selective-testing]
+
+In PR builds, Scout automatically detects which modules changed and runs only the relevant tests, reducing CI time. You can confirm your tests ran by looking for the `affected Scout:` prefix on Buildkite steps. See PR [#261510](https://github.com/elastic/kibana/pull/261510) for details.
 
 #### Q: Why is it a good idea for tests to be close to the plugin code? [scout-faq-colocation]
 
-It’s easier to iterate and maintain, and it can enable smarter test selection in the future.
+It’s easier to iterate and maintain, and it enables selective testing: PR builds automatically run only the Scout tests for affected modules.
 
 #### Q: Can I use FTR services in Scout (for example, `esArchiver`)? [scout-faq-ftr-services]
 
 Not directly—use Scout [fixtures](./scout/fixtures.md) instead.
 
+#### Q: What happens to FTR tests? [scout-faq-ftr-tests]
+
+Existing FTR tests continue to run, and teams can migrate them to Scout incrementally over time.
+
 #### Q: Does Scout support feature flags? [scout-faq-feature-flags]
 
-If your feature is behind a feature flag, you can use the `coreApi` [fixture](https://github.com/elastic/kibana/blob/e4f12d39154fe286ce92217e00a7d8bd758ee02d/src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/core/index.ts#L17-L30) to enable it during test execution (recommended). Alternatively, you can create a [custom config directory](https://github.com/elastic/kibana/pull/244306) and link your Scout tests (reach out for more info).
+Yes. See [Feature flags](./scout/feature-flags.md) for details on enabling flags at runtime with `apiServices.core.settings()` or using custom server configurations.

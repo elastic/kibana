@@ -50,7 +50,6 @@ describe('SelectionBar', () => {
 
   const createWrapper = (options?: { withOnDelete?: boolean }) => {
     const { withOnDelete = true } = options ?? {};
-
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider
         id="test-list"
@@ -161,6 +160,33 @@ describe('SelectionBar', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('contentListDeleteConfirmation')).toBeInTheDocument();
+    });
+  });
+
+  it('clears the selection after successful delete', async () => {
+    const Wrapper = createWrapper();
+    render(
+      <Wrapper>
+        <SelectionBarWithSetup itemsToSelect={[mockItems[0], mockItems[1]]} />
+      </Wrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contentListSelectionBar-deleteButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('contentListSelectionBar-deleteButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('contentListDeleteConfirmation')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Delete'));
+
+    await waitFor(() => {
+      expect(mockOnDelete).toHaveBeenCalledWith([mockItems[0], mockItems[1]]);
+      expect(screen.queryByTestId('contentListDeleteConfirmation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('contentListSelectionBar-deleteButton')).not.toBeInTheDocument();
     });
   });
 

@@ -7,7 +7,12 @@
 import { EuiCallOut } from '@elastic/eui';
 import type moment from 'moment';
 import React, { useMemo } from 'react';
-import { MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { gapReasonType } from '@kbn/alerting-plugin/common';
+import {
+  MAX_BULK_FILL_RULE_GAPS_LOOKBACK_WINDOW_DAYS,
+  EXCLUDED_GAP_REASONS_KEY,
+} from '../../../../../common/constants';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import * as i18n from './translations';
 import { ScheduleBulkActionModal } from '../../../common/components/schedule_bulk_action_modal';
@@ -37,6 +42,10 @@ const BulkFillRuleGapsModalComponent = ({
   onConfirm,
   rulesCount,
 }: BulkFillRuleGapsModalProps) => {
+  const { services } = useKibana();
+  const excludedReasons = services.uiSettings.get<string[]>(EXCLUDED_GAP_REASONS_KEY);
+  const hasExcludedDisabledGaps = excludedReasons?.includes(gapReasonType.RULE_DISABLED);
+
   const callouts = useMemo(() => {
     const components = [
       <EuiCallOut
@@ -55,9 +64,19 @@ const BulkFillRuleGapsModalComponent = ({
         />
       );
     }
+    if (hasExcludedDisabledGaps) {
+      components.push(
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          iconType="info"
+          title={i18n.BULK_FILL_RULE_GAPS_EXCLUDED_REASONS}
+        />
+      );
+    }
 
     return components;
-  }, [rulesCount]);
+  }, [rulesCount, hasExcludedDisabledGaps]);
   return (
     <ScheduleBulkActionModal
       onCancel={onCancel}

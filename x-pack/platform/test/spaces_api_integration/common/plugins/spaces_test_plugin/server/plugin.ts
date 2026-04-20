@@ -17,7 +17,7 @@ export class Plugin {
       hidden: false,
       namespaceType: 'multiple',
       management: {
-        icon: 'beaker',
+        icon: 'flask',
         importableAndExportable: true,
         getTitle(obj) {
           return obj.attributes.title;
@@ -34,7 +34,7 @@ export class Plugin {
       hidden: false,
       namespaceType: 'single',
       management: {
-        icon: 'beaker',
+        icon: 'flask',
         importableAndExportable: true,
         getTitle(obj) {
           return obj.attributes.title;

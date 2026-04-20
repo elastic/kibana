@@ -16,7 +16,7 @@ test.describe(
     test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await page.addInitScript(() => {
-        window.localStorage.setItem('gettingStartedVisited', 'true');
+        window.sessionStorage.setItem('gettingStartedVisited', 'true');
       });
       await pageObjects.homepage.goto();
     });
@@ -71,6 +71,12 @@ test.describe(
     test('API keys button should be disabled', async ({ pageObjects }) => {
       const apiKeysButton = await pageObjects.homepage.getApiKeyButton();
       await expect(apiKeysButton).toBeDisabled();
+    });
+
+    // === Kibana Version Badge Tests ===
+    test('should display kibana version badge', async ({ pageObjects }) => {
+      const versionBadge = await pageObjects.homepage.getKibanaVersionBadge();
+      await expect(versionBadge).toBeVisible();
     });
 
     // === Embedded Console Tests ===

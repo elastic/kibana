@@ -61,7 +61,7 @@ export function Selector({
   const button = (
     <EuiFilterButton
       data-test-subj={`${dataTestSubj}Button`}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}

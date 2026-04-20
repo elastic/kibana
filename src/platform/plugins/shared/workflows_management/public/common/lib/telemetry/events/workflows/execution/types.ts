@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type {
+  WorkflowStepTriggerTab,
+  WorkflowTriggerTab,
+} from '../../../../../../features/run_workflow/ui/types';
 import type { BaseResultActionParams, WorkflowEditorType } from '../types';
 
 export enum WorkflowExecutionEventTypes {
@@ -30,14 +34,11 @@ export enum WorkflowExecutionEventTypes {
    * This event tracks cancellation request attempts.
    */
   WorkflowRunCancelled = 'workflows_workflow_run_cancelled',
+  /**
+   * When bulk cancellation of all non-terminal executions for a workflow is requested from the UI.
+   */
+  WorkflowExecutionsCancelled = 'workflows_workflow_executions_cancelled',
 }
-
-export type WorkflowTriggerType = 'manual' | 'alert' | 'scheduled';
-
-/**
- * Trigger tab types available in the Test Workflow modal
- */
-export type WorkflowTriggerTab = 'manual' | 'alert' | 'index';
 
 /**
  * Parameters for workflow test run initiation telemetry.
@@ -61,7 +62,7 @@ export interface ReportWorkflowTestRunInitiatedActionParams extends BaseResultAc
    */
   editorType?: WorkflowEditorType;
   /**
-   * The trigger tab selected in the Test Workflow modal: 'manual', 'alert', or 'index'
+   * The trigger tab selected in the Test Workflow modal
    */
   triggerTab?: WorkflowTriggerTab;
 }
@@ -91,6 +92,10 @@ export interface ReportWorkflowStepTestRunInitiatedActionParams extends BaseResu
    * Editor context if step test was initiated from workflow detail page
    */
   editorType?: WorkflowEditorType;
+  /**
+   * The trigger tab selected in the Test Workflow modal
+   */
+  triggerTab?: WorkflowStepTriggerTab;
 }
 
 /**
@@ -137,4 +142,15 @@ export interface ReportWorkflowRunCancelledActionParams extends BaseResultAction
    * Time in milliseconds from execution start to cancellation request
    */
   timeToCancellation?: number;
+}
+
+/**
+ * Parameters for bulk workflow execution cancellation telemetry (all active executions for a workflow).
+ */
+export interface ReportWorkflowExecutionsCancelledActionParams extends BaseResultActionParams {
+  eventName: string;
+  /**
+   * The workflow whose non-terminal executions were cancelled in bulk.
+   */
+  workflowId: string;
 }

@@ -112,6 +112,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const wiredPutBody: Streams.WiredStream.UpsertRequest = {
       stream: {
+        type: 'wired',
         description: '',
         ingest: {
           lifecycle: { inherit: {} },
@@ -128,12 +129,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('updates lifecycle', async () => {
         const rootDefinition = (await getStream(
           apiClient,
-          'logs'
+          'logs.otel'
         )) as Streams.WiredStream.GetResponse;
 
-        const response = await putStream(apiClient, 'logs', {
+        const response = await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...rootDefinition.stream.ingest,
@@ -144,7 +146,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
         expect(response).to.have.property('acknowledged', true);
 
-        const updatedRootDefinition = await getStream(apiClient, 'logs');
+        const updatedRootDefinition = await getStream(apiClient, 'logs.otel');
         expect(
           (updatedRootDefinition as Streams.WiredStream.GetResponse).stream.ingest.lifecycle
         ).to.eql({
@@ -154,22 +156,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           (updatedRootDefinition as Streams.WiredStream.GetResponse).effective_lifecycle
         ).to.eql({
           dsl: { data_retention: '999d' },
-          from: 'logs',
+          from: 'logs.otel',
         });
       });
 
       it('does not allow inherit lifecycle on root', async () => {
         const rootDefinition = (await getStream(
           apiClient,
-          'logs'
+          'logs.otel'
         )) as Streams.WiredStream.GetResponse;
 
         await putStream(
           apiClient,
-          'logs',
+          'logs.otel',
           {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...rootDefinition.stream.ingest,
@@ -185,12 +188,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('inherits on creation', async () => {
         const rootDefinition = (await getStream(
           apiClient,
-          'logs'
+          'logs.otel'
         )) as Streams.WiredStream.GetResponse;
 
-        await putStream(apiClient, 'logs', {
+        await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...rootDefinition.stream.ingest,
@@ -199,28 +203,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.inheritsatcreation', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.inheritsatcreation', wiredPutBody);
 
-        await expectLifecycle(['logs.inheritsatcreation'], {
+        await expectLifecycle(['logs.otel.inheritsatcreation'], {
           dsl: { data_retention: '50d' },
-          from: 'logs',
+          from: 'logs.otel',
         });
       });
 
       it('inherits dsl', async () => {
         // create two branches, one that inherits from root and
         // another one that overrides the root lifecycle
-        await putStream(apiClient, 'logs.inherits.lifecycle', wiredPutBody);
-        await putStream(apiClient, 'logs.overrides.lifecycle', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.inherits.lifecycle', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.overrides.lifecycle', wiredPutBody);
 
         const rootDefinition = (await getStream(
           apiClient,
-          'logs'
+          'logs.otel'
         )) as Streams.WiredStream.GetResponse;
 
-        await putStream(apiClient, 'logs', {
+        await putStream(apiClient, 'logs.otel', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...rootDefinition.stream.ingest,
@@ -229,9 +234,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.overrides', {
+        await putStream(apiClient, 'logs.otel.overrides', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -239,7 +245,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [
                   {
-                    destination: 'logs.overrides.lifecycle',
+                    destination: 'logs.otel.overrides.lifecycle',
                     where: { never: {} },
                     status: 'disabled',
                   },
@@ -250,21 +256,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectLifecycle(['logs.inherits', 'logs.inherits.lifecycle'], {
+        await expectLifecycle(['logs.otel.inherits', 'logs.otel.inherits.lifecycle'], {
           dsl: { data_retention: '10m' },
-          from: 'logs',
+          from: 'logs.otel',
         });
 
-        await expectLifecycle(['logs.overrides', 'logs.overrides.lifecycle'], {
+        await expectLifecycle(['logs.otel.overrides', 'logs.otel.overrides.lifecycle'], {
           dsl: { data_retention: '1d' },
-          from: 'logs.overrides',
+          from: 'logs.otel.overrides',
         });
       });
 
       it('applies the nearest parent lifecycle when deleted', async () => {
-        await putStream(apiClient, 'logs.10d', {
+        await putStream(apiClient, 'logs.otel.10d', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -272,9 +279,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.10d.20d', {
+        await putStream(apiClient, 'logs.otel.10d.20d', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -282,12 +290,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           },
         });
-        await putStream(apiClient, 'logs.10d.20d.inherits', wiredPutBody);
+        await putStream(apiClient, 'logs.otel.10d.20d.inherits', wiredPutBody);
 
         // delete lifecycle of the 20d override
-        await putStream(apiClient, 'logs.10d.20d', {
+        await putStream(apiClient, 'logs.otel.10d.20d', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -295,7 +304,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 fields: {},
                 routing: [
                   {
-                    destination: 'logs.10d.20d.inherits',
+                    destination: 'logs.otel.10d.20d.inherits',
                     where: { never: {} },
                     status: 'disabled',
                   },
@@ -305,16 +314,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectLifecycle(['logs.10d', 'logs.10d.20d', 'logs.10d.20d.inherits'], {
-          dsl: { data_retention: '10d' },
-          from: 'logs.10d',
-        });
+        await expectLifecycle(
+          ['logs.otel.10d', 'logs.otel.10d.20d', 'logs.otel.10d.20d.inherits'],
+          {
+            dsl: { data_retention: '10d' },
+            from: 'logs.otel.10d',
+          }
+        );
       });
 
       it('handles no retention dsl', async () => {
-        await putStream(apiClient, 'logs.no', {
+        await putStream(apiClient, 'logs.otel.no', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -323,9 +336,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await putStream(apiClient, 'logs.no.retention', {
+        await putStream(apiClient, 'logs.otel.no.retention', {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -334,9 +348,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         });
 
-        await expectLifecycle(['logs.no.retention'], {
+        await expectLifecycle(['logs.otel.no.retention'], {
           dsl: {},
-          from: 'logs.no.retention',
+          from: 'logs.otel.no.retention',
         });
       });
 
@@ -344,10 +358,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         it('does not support ilm', async () => {
           await putStream(
             apiClient,
-            'logs.ilm',
+            'logs.otel.ilm',
             {
               ...emptyAssets,
               stream: {
+                type: 'wired',
                 description: '',
                 ingest: {
                   ...wiredPutBody.stream.ingest,
@@ -360,17 +375,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       } else {
         it('inherits ilm', async () => {
-          await putStream(apiClient, 'logs.ilm.stream', wiredPutBody);
-          await putStream(apiClient, 'logs.ilm', {
+          await putStream(apiClient, 'logs.otel.ilm.stream', wiredPutBody);
+          await putStream(apiClient, 'logs.otel.ilm', {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
                 wired: {
                   fields: {},
                   routing: [
-                    { destination: 'logs.ilm.stream', where: { never: {} }, status: 'disabled' },
+                    {
+                      destination: 'logs.otel.ilm.stream',
+                      where: { never: {} },
+                      status: 'disabled',
+                    },
                   ],
                 },
                 lifecycle: { ilm: { policy: 'my-policy' } },
@@ -378,17 +398,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
           });
 
-          await expectLifecycle(['logs.ilm', 'logs.ilm.stream'], {
+          await expectLifecycle(['logs.otel.ilm', 'logs.otel.ilm.stream'], {
             ilm: { policy: 'my-policy' },
-            from: 'logs.ilm',
+            from: 'logs.otel.ilm',
           });
         });
 
         it('updates when transitioning from ilm to dsl', async () => {
-          const name = 'logs.ilm-with-backing-indices';
+          const name = 'logs.otel.ilm-with-backing-indices';
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -403,6 +424,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -419,10 +441,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('updates when transitioning from dsl to ilm', async () => {
-          const name = 'logs.dsl-with-backing-indices';
+          const name = 'logs.otel.dsl-with-backing-indices';
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -441,6 +464,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, name, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -461,6 +485,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('Classic streams update', () => {
       const classicPutBody: Streams.ClassicStream.UpsertRequest = {
         stream: {
+          type: 'classic',
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
@@ -523,6 +548,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               ...classicPutBody.stream.ingest,
@@ -544,6 +570,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
+            type: 'classic',
             description: '',
             ingest: {
               ...classicPutBody.stream.ingest,
@@ -566,6 +593,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             {
               ...emptyAssets,
               stream: {
+                type: 'wired',
                 description: '',
                 ingest: {
                   ...wiredPutBody.stream.ingest,
@@ -584,6 +612,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -602,6 +631,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -627,6 +657,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -670,6 +701,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -683,6 +715,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'classic',
               description: '',
               ingest: {
                 ...classicPutBody.stream.ingest,
@@ -701,10 +734,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('ilm stats', () => {
       it('is not enabled for streams with dsl', async () => {
-        const indexName = 'logs.dslnostats';
+        const indexName = 'logs.otel.dslnostats';
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
+            type: 'wired',
             description: '',
             ingest: {
               ...wiredPutBody.stream.ingest,
@@ -722,10 +756,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       if (!isServerless) {
         it('returns not found when the policy does not exist', async () => {
-          const indexName = 'logs.ilmpolicydontexists';
+          const indexName = 'logs.otel.ilmpolicydontexists';
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -742,7 +777,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('returns the effective ilm phases', async () => {
-          const indexName = 'logs.ilmwithphases';
+          const indexName = 'logs.otel.ilmwithphases';
           const policyName = 'streams_ilm_hotwarmdelete';
           await esClient.ilm.putLifecycle({
             name: policyName,
@@ -758,6 +793,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, indexName, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,
@@ -905,7 +941,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('ilm policies endpoint', () => {
-        const streamName = 'logs.ilm-policy-usage';
+        const streamName = 'logs.otel.ilm-policy-usage';
         const policyName = `streams_ilm_policy_usage_${Date.now()}`;
 
         before(async () => {
@@ -921,6 +957,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           await putStream(apiClient, streamName, {
             ...emptyAssets,
             stream: {
+              type: 'wired',
               description: '',
               ingest: {
                 ...wiredPutBody.stream.ingest,

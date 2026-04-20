@@ -10,9 +10,12 @@ import {
   OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID,
   OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID,
+  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
 } from '../../common/constants';
 import { registerAttachmentUiDefinitions } from '.';
 
@@ -26,14 +29,17 @@ describe('registerAttachmentUiDefinitions', () => {
     jest.clearAllMocks();
   });
 
-  it('registers all six attachment types', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
-
-    expect(mockAddAttachmentType).toHaveBeenCalledTimes(6);
+  it('registers all nine attachment types', () => {
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
+    expect(mockAddAttachmentType).toHaveBeenCalledTimes(9);
   });
 
   it('registers AI Insight attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const aiInsightCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_AI_INSIGHT_ATTACHMENT_TYPE_ID
@@ -46,7 +52,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('registers alert attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
@@ -59,7 +67,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('registers error attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const errorCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ERROR_ATTACHMENT_TYPE_ID
@@ -72,7 +82,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('registers log attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const logCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_LOG_ATTACHMENT_TYPE_ID
@@ -80,12 +92,14 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(logCall).toBeDefined();
 
     const config = logCall![1];
-    expect(config.getIcon()).toBe('logPatternAnalysis');
+    expect(config.getIcon()).toBe('pattern');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Log entry');
   });
 
   it('returns attachmentLabel when provided in attachment data', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
@@ -101,7 +115,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachmentLabel is not provided', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
@@ -117,7 +133,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('returns default label when attachment data is undefined', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const alertCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_ALERT_ATTACHMENT_TYPE_ID
@@ -133,7 +151,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('registers SLO attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const sloCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_SLO_ATTACHMENT_TYPE_ID
@@ -146,7 +166,9 @@ describe('registerAttachmentUiDefinitions', () => {
   });
 
   it('registers service attachment type with correct config', () => {
-    registerAttachmentUiDefinitions({ attachments: mockAttachments });
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
 
     const serviceCall = mockAddAttachmentType.mock.calls.find(
       (call) => call[0] === OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID
@@ -156,5 +178,50 @@ describe('registerAttachmentUiDefinitions', () => {
     const config = serviceCall![1];
     expect(config.getIcon()).toBe('gear');
     expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Service');
+  });
+
+  it('registers host attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
+
+    const hostCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_HOST_ATTACHMENT_TYPE_ID
+    );
+    expect(hostCall).toBeDefined();
+
+    const config = hostCall![1];
+    expect(config.getIcon()).toBe('storage');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Host');
+  });
+
+  it('registers transaction attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
+
+    const transactionCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_TRANSACTION_ATTACHMENT_TYPE_ID
+    );
+    expect(transactionCall).toBeDefined();
+
+    const config = transactionCall![1];
+    expect(config.getIcon()).toBe('merge');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Transaction');
+  });
+
+  it('registers monitor attachment type with correct config', () => {
+    registerAttachmentUiDefinitions({
+      attachments: mockAttachments,
+    });
+
+    const monitorCall = mockAddAttachmentType.mock.calls.find(
+      (call) => call[0] === OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID
+    );
+    expect(monitorCall).toBeDefined();
+
+    const config = monitorCall![1];
+    expect(config.getIcon()).toBe('online');
+    expect(config.getLabel({ id: 'test', type: 'test', data: {} })).toBe('Monitor');
   });
 });

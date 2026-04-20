@@ -4,19 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { AddToCaseWrapper } from '../../cases/add_to_cases';
+import { AddTagsFlyout } from '../../actions/components/add_tags_flyout';
+import { useLiveQueryDetails } from '../../actions/use_live_query_details';
+import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { useKibana } from '../../common/lib/kibana';
 import type { AddToTimelineHandler } from '../../types';
+
+const ADD_TAGS_LABEL = i18n.translate('xpack.osquery.packResultsHeader.addTagsLabel', {
+  defaultMessage: 'Add tags',
+});
+
+const SCHEDULED_TAGS_DISABLED_LABEL = i18n.translate(
+  'xpack.osquery.packResultsHeader.scheduledTagsDisabledLabel',
+  { defaultMessage: 'Tags are not supported for scheduled queries' }
+);
+
+const EMPTY_TAGS: string[] = [];
 
 interface PackResultsHeadersProps {
   actionId?: string;
   queryIds: string[];
   agentIds?: string[];
   addToTimeline?: AddToTimelineHandler;
+  isScheduled?: boolean;
+  onSaveQuery?: () => void;
 }
 
 const resultsHeadingCss = ({ euiTheme }: UseEuiTheme) => ({
@@ -30,9 +57,113 @@ const iconsListCss = {
   paddingLeft: '10px',
 };
 
+const actionsGroupCss = {
+  alignItems: 'center',
+};
+
 export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
-  ({ actionId, agentIds, queryIds, addToTimeline }) => {
+  ({ actionId, agentIds, queryIds, addToTimeline, isScheduled, onSaveQuery }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' } as const), []);
+    const isHistoryEnabled = useIsExperimentalFeatureEnabled('queryHistoryRework');
+    const permissions = useKibana().services.application.capabilities.osquery;
+    const canEditTags = !!permissions.writeLiveQueries;
+    const showAddTags = isHistoryEnabled && canEditTags && !!actionId;
+
+    const { data: liveQueryDetails } = useLiveQueryDetails({
+      actionId,
+      skip: !showAddTags || !!isScheduled,
+    });
+
+    const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+    const handleOpenFlyout = useCallback(() => setIsFlyoutOpen(true), []);
+    const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
+
+    if (isHistoryEnabled) {
+      return (
+        <>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="m"
+            justifyContent="spaceBetween"
+            alignItems="center"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                <h1>
+                  <FormattedMessage
+                    id="xpack.osquery.liveQueryActionResults.results"
+                    defaultMessage="Query results"
+                  />
+                </h1>
+              </EuiText>
+            </EuiFlexItem>
+            {actionId && (
+              <EuiFlexItem grow={false} css={actionsGroupCss}>
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <AddToCaseWrapper
+                      actionId={actionId}
+                      agentIds={agentIds}
+                      isIcon={false}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <AddToTimelineButton
+                      field="action_id"
+                      value={queryIds}
+                      addToTimeline={addToTimeline}
+                      size="m"
+                    />
+                  </EuiFlexItem>
+                  {showAddTags && (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}
+                      >
+                        <EuiButtonEmpty
+                          size="m"
+                          iconType="tag"
+                          color="primary"
+                          onClick={handleOpenFlyout}
+                          isDisabled={isScheduled}
+                          data-test-subj="add-tags-button"
+                        >
+                          {ADD_TAGS_LABEL}
+                        </EuiButtonEmpty>
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
+                  {onSaveQuery && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        fill
+                        size="m"
+                        onClick={onSaveQuery}
+                        data-test-subj="save-query-button"
+                      >
+                        <FormattedMessage
+                          id="xpack.osquery.packResultsHeader.saveQueryButtonLabel"
+                          defaultMessage="Save query"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size={'l'} />
+          {isFlyoutOpen && actionId && (
+            <AddTagsFlyout
+              actionId={actionId}
+              currentTags={liveQueryDetails?.tags ?? EMPTY_TAGS}
+              onClose={handleCloseFlyout}
+            />
+          )}
+        </>
+      );
+    }
 
     return (
       <>
@@ -42,7 +173,7 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
             <EuiText>
               <h2>
                 <FormattedMessage
-                  id="xpack.osquery.liveQueryActionResults.results"
+                  id="xpack.osquery.liveQueryActionResults.resultsHeading"
                   defaultMessage="Results"
                 />
               </h2>
@@ -69,6 +200,24 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                       addToTimeline={addToTimeline}
                     />
                   </EuiFlexItem>
+                  {showAddTags && (
+                    <EuiFlexItem>
+                      <EuiToolTip
+                        content={isScheduled ? SCHEDULED_TAGS_DISABLED_LABEL : ADD_TAGS_LABEL}
+                      >
+                        <EuiButtonIcon
+                          iconType="tag"
+                          color="text"
+                          iconSize="l"
+                          size="xs"
+                          aria-label={ADD_TAGS_LABEL}
+                          onClick={handleOpenFlyout}
+                          isDisabled={isScheduled}
+                          data-test-subj="add-tags-button"
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  )}
                 </EuiFlexGroup>
               )}
             </span>

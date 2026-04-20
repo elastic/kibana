@@ -160,7 +160,7 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
                             .join(' ')}
                           color="text"
                           display="empty"
-                          iconType={toggleStatus ? 'arrowDown' : 'arrowRight'}
+                          iconType={toggleStatus ? 'chevronSingleDown' : 'chevronSingleRight'}
                           onClick={toggle}
                           size="s"
                           title={i18n.QUERY_BUTTON_TITLE(toggleStatus)}

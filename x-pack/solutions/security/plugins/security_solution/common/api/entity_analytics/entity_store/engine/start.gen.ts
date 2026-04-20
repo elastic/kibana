@@ -14,14 +14,14 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { EntityType } from '../common.gen';
 
 export type StartEntityEngineRequestParams = z.infer<typeof StartEntityEngineRequestParams>;
 export const StartEntityEngineRequestParams = z.object({
   /**
-   * The entity type of the engine
+   * The entity type of the engine to start.
    */
   entityType: EntityType,
 });
@@ -29,5 +29,8 @@ export type StartEntityEngineRequestParamsInput = z.input<typeof StartEntityEngi
 
 export type StartEntityEngineResponse = z.infer<typeof StartEntityEngineResponse>;
 export const StartEntityEngineResponse = z.object({
+  /**
+   * Whether the engine was successfully started.
+   */
   started: z.boolean().optional(),
 });

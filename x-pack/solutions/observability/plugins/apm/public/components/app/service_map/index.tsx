@@ -7,41 +7,49 @@
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
+import useWindowSize from 'react-use/lib/useWindowSize';
+import { cx } from '@emotion/css';
+import {
+  useServiceMapFullScreen,
+  applyServiceMapFullScreenBodyClasses,
+} from './use_service_map_fullscreen';
+import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
+import {
+  invalidLicenseMessage,
+  isServiceNodeData,
+  SERVICE_MAP_TIMEOUT_ERROR,
+} from '../../../../common/service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
 import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
+import { SloOverviewFlyout } from '../../shared/slo_overview_flyout';
+import { mergeServiceMapNodesWithBadges } from './merge_service_map_nodes_with_badges';
 import { useServiceMap } from './use_service_map';
+import { useServiceMapBadges } from './use_service_map_badges';
 import { ServiceMapGraph } from './graph';
+import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceAround"
-        // Set the height to give it some top margin
-        style={{ height: '60vh' }}
-      >
-        <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
-          {children}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ height: '60vh' }}>
+      <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
+        {children}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -92,6 +100,27 @@ export function ServiceMap({
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
+  const apmRouter = useApmRouter();
+  const { query } = useAnyOfApmParams(
+    '/service-map',
+    '/services/{serviceName}/service-map',
+    '/mobile-services/{serviceName}/service-map'
+  );
+
+  const fullMapHref =
+    serviceName && 'rangeFrom' in query && 'rangeTo' in query && query.rangeFrom && query.rangeTo
+      ? apmRouter.link('/service-map', {
+          query: {
+            rangeFrom: query.rangeFrom,
+            rangeTo: query.rangeTo,
+            environment: query.environment,
+            kuery: query.kuery,
+            comparisonEnabled: query.comparisonEnabled,
+            offset: query.offset,
+            serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',
+          },
+        })
+      : undefined;
 
   const { config } = useApmPluginContext();
   const { onPageReady } = usePerformanceContext();
@@ -106,11 +135,94 @@ export function ServiceMap({
   });
 
   const { ref, height } = useRefDimensions();
+  const windowHeight = useWindowSize().height;
   const { euiTheme } = useEuiTheme();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const { styles, bodyClassesToToggle } = useServiceMapFullScreen();
+  const fullScreenContainerStyles = styles[SERVICE_MAP_FULL_SCREEN_CLASS];
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
   const heightWithPadding = height - PADDING_BOTTOM;
+
+  /** Store height when entering fullscreen; use it when exiting so zoom/actions don't corrupt measurement */
+  const heightBeforeFullscreenRef = useRef(heightWithPadding);
+  const [useStoredHeight, setUseStoredHeight] = useState(false);
+
+  if (!isFullscreen && !useStoredHeight) {
+    heightBeforeFullscreenRef.current = heightWithPadding;
+  }
+
+  const mapHeight = isFullscreen
+    ? windowHeight - PADDING_BOTTOM
+    : useStoredHeight
+    ? heightBeforeFullscreenRef.current
+    : heightWithPadding;
+
+  const onToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => {
+      if (prev) {
+        setUseStoredHeight(true);
+      }
+      return !prev;
+    });
+  }, []);
+
+  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
+    serviceName: string;
+    agentName?: AgentName;
+  } | null>(null);
+
+  const openSloOverviewFlyout = useCallback((name: string, agent?: AgentName) => {
+    setSloOverviewFlyout({ serviceName: name, agentName: agent });
+  }, []);
+
+  const closeSloOverviewFlyout = useCallback(() => {
+    setSloOverviewFlyout(null);
+  }, []);
+
+  useLayoutEffect(() => {
+    if (isFullscreen) {
+      applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
+      return () => {
+        applyServiceMapFullScreenBodyClasses(false, bodyClassesToToggle);
+        setUseStoredHeight(false);
+      };
+    }
+  }, [isFullscreen, bodyClassesToToggle]);
+
+  const serviceNamesForBadges = useMemo(() => {
+    const names = new Set<string>();
+    for (const node of data.nodes) {
+      if (isServiceNodeData(node.data)) {
+        names.add(node.data.label);
+      }
+    }
+    return [...names].sort();
+  }, [data.nodes]);
+
+  const badgesFetchEnabled =
+    !!license &&
+    isActivePlatinumLicense(license) &&
+    config.serviceMapEnabled &&
+    status === FETCH_STATUS.SUCCESS &&
+    serviceNamesForBadges.length > 0;
+
+  const { data: badgesData, status: badgesStatus } = useServiceMapBadges({
+    serviceNames: serviceNamesForBadges,
+    environment,
+    start,
+    end,
+    kuery,
+    enabled: badgesFetchEnabled ?? false,
+  });
+
+  const nodesForGraph = useMemo(() => {
+    if (badgesStatus !== FETCH_STATUS.SUCCESS || !badgesData) {
+      return data.nodes;
+    }
+    return mergeServiceMapNodesWithBadges(data.nodes, badgesData);
+  }, [badgesData, badgesStatus, data.nodes]);
 
   if (!license) {
     return null;
@@ -169,30 +281,48 @@ export function ServiceMap({
   }
 
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div
-          data-test-subj="serviceMap"
-          style={{
-            height: heightWithPadding,
-            zIndex: Number(euiTheme.levels.content) + 1,
-          }}
-          ref={ref}
-        >
-          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-          <ServiceMapGraph
-            height={heightWithPadding}
-            nodes={data.nodes}
-            edges={data.edges}
-            serviceName={serviceName}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
+    <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
+      <div
+        className={cx({
+          [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
+        })}
+        css={isFullscreen ? fullScreenContainerStyles : undefined}
+      >
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div
+            data-test-subj="serviceMap"
+            style={{
+              height: isFullscreen ? '100%' : mapHeight,
+              zIndex: Number(euiTheme.levels.content) + 1,
+              ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
+            }}
+            ref={ref}
+          >
+            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            <ServiceMapGraph
+              height={mapHeight}
+              nodes={nodesForGraph}
+              edges={data.edges}
+              serviceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={onToggleFullscreen}
+              fullMapHref={fullMapHref}
+            />
+          </div>
+        </EuiPanel>
+        {sloOverviewFlyout && (
+          <SloOverviewFlyout
+            serviceName={sloOverviewFlyout.serviceName}
+            agentName={sloOverviewFlyout.agentName}
+            onClose={closeSloOverviewFlyout}
           />
-        </div>
-      </EuiPanel>
-    </>
+        )}
+      </div>
+    </ServiceMapSloFlyoutProvider>
   );
 }

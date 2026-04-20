@@ -19,9 +19,13 @@ import {
   AI_CHAT_EXPERIENCE_TYPE,
 } from '@kbn/management-settings-ids';
 
-jest.mock('../../icons/assistant_icon/assistant_icon', () => ({
-  AssistantIcon: 'assistant-icon',
-}));
+// workaround because of JSDOM not supporting :focus-visible
+// https://github.com/jsdom/jsdom/issues/3426
+const matchesOriginal = HTMLElement.prototype.matches;
+HTMLElement.prototype.matches = function (query: string) {
+  if (query === ':focus-visible') return false;
+  return matchesOriginal.call(this, query);
+};
 
 describe('AIAssistantHeaderButton', () => {
   const mockCoreStart = coreMock.createStart();
@@ -95,12 +99,11 @@ describe('AIAssistantHeaderButton', () => {
       expect(screen.getByText('Security AI Assistant')).toBeInTheDocument();
     });
 
-    it('should render AI Agent card with BETA badge', async () => {
+    it('should render AI Agent card', async () => {
       await waitFor(() => {
         expect(screen.getByTestId('aiAssistantAgentCard')).toBeInTheDocument();
       });
       expect(screen.getByText('AI Agent')).toBeInTheDocument();
-      expect(screen.getByText('BETA')).toBeInTheDocument();
     });
 
     it('should close modal when Cancel button is clicked', () => {

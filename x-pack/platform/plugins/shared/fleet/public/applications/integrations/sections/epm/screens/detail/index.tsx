@@ -51,7 +51,7 @@ import {
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
-import { pkgKeyFromPackageInfo } from '../../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
 import type { PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
 import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
@@ -76,7 +76,7 @@ import {
   AddIntegrationButton,
   EditIntegrationButton,
 } from './components';
-import { AlertingPage } from './alerting';
+import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
 import { AssetsPage } from './assets';
 import { OverviewPage } from './overview';
 import { PackagePoliciesPage } from './policies';
@@ -288,6 +288,14 @@ export function Detail() {
     !HIDDEN_API_REFERENCE_PACKAGES.includes(pkgName) &&
     packageInfo &&
     hasDocumentation({ packageInfo, integration });
+
+  const { enableIntegrationInactivityAlerting } = ExperimentalFeaturesService.get();
+  const hasArchiveAlertingAssets = Object.keys(packageInfo?.assets?.kibana ?? {}).some((type) =>
+    (ALERTING_ASSET_TYPES as string[]).includes(type)
+  );
+  const showAlertingTab =
+    hasArchiveAlertingAssets ||
+    (isInstalled && packageInfo?.type === 'integration' && enableIntegrationInactivityAlerting);
 
   // Track install status state
   useEffect(() => {
@@ -705,7 +713,7 @@ export function Detail() {
       });
     }
 
-    if (isInstalled && packageInfo.type === 'integration') {
+    if (isInstalled && showAlertingTab) {
       tabs.push({
         id: 'alerting',
         name: (
@@ -796,6 +804,7 @@ export function Detail() {
     showCustomTab,
     showDocumentationTab,
     numOfDeferredInstallations,
+    showAlertingTab,
   ]);
 
   const securityCallout = missingSecurityConfiguration ? (

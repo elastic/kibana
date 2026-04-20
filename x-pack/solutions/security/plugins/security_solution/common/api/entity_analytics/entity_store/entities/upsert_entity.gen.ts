@@ -14,14 +14,17 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
-import { BooleanFromString } from '@kbn/zod-helpers';
+import { z } from '@kbn/zod/v4';
+import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { EntityType } from '../common.gen';
 import { Entity } from './common.gen';
 
 export type UpsertEntityRequestQuery = z.infer<typeof UpsertEntityRequestQuery>;
 export const UpsertEntityRequestQuery = z.object({
+  /**
+   * When true, allows updating protected fields.
+   */
   force: BooleanFromString.optional().default(false),
 });
 export type UpsertEntityRequestQueryInput = z.input<typeof UpsertEntityRequestQuery>;

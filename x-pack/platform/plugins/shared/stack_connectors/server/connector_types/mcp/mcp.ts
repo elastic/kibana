@@ -17,7 +17,7 @@ import {
 import { SUB_ACTION } from '@kbn/connector-schemas/mcp';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type { AxiosError } from 'axios';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import {
   McpClient,
   type McpClientOptions,
@@ -31,6 +31,7 @@ import {
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import { MCP_CLIENT_VERSION, MAX_RETRIES } from '@kbn/connector-schemas/mcp/constants';
 import { buildHeadersFromSecrets } from './auth_helpers';
+import { buildCustomFetch } from './build_custom_fetch';
 import { retryWithRecovery, type RetryOptions } from './retry_utils';
 
 // TTL for list_tools cache: 15 minutes
@@ -74,10 +75,17 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
       ...this.authHeaders,
     };
 
+    // Build a custom fetch that applies the actions plugin's SSL/proxy settings
+    const customFetch = buildCustomFetch(
+      this.configurationUtilities,
+      this.logger,
+      this.config.serverUrl
+    );
+
     // Build client options
     const clientOptions: McpClientOptions = {
       headers,
-      // Use default reconnection options from McpClient
+      fetch: customFetch,
     };
 
     // Create client details using connector ID and server URL

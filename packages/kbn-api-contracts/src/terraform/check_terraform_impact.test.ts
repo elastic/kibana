@@ -23,16 +23,19 @@ describe('check_terraform_impact', () => {
         path: '/api/spaces/space',
         methods: ['GET', 'POST'],
         resource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       },
       {
         path: '/api/spaces/space/{id}',
         methods: ['GET', 'PUT', 'DELETE'],
         resource: 'elasticstack_kibana_space',
+        owners: ['@elastic/kibana-security'],
       },
       {
         path: '/api/fleet/agent_policies',
         methods: ['GET', 'POST'],
         resource: 'elasticstack_fleet_agent_policy',
+        owners: ['@elastic/fleet'],
       },
     ],
   };
@@ -66,6 +69,7 @@ describe('check_terraform_impact', () => {
     expect(result.hasImpact).toBe(true);
     expect(result.impactedChanges).toHaveLength(1);
     expect(result.impactedChanges[0].terraformResource).toBe('elasticstack_kibana_space');
+    expect(result.impactedChanges[0].owners).toEqual(['@elastic/kibana-security']);
   });
 
   it('matches breaking changes by method', () => {
@@ -81,6 +85,7 @@ describe('check_terraform_impact', () => {
     const result = checkTerraformImpact(breakingChanges, testConfigPath);
     expect(result.hasImpact).toBe(true);
     expect(result.impactedChanges[0].terraformResource).toBe('elasticstack_kibana_space');
+    expect(result.impactedChanges[0].owners).toEqual(['@elastic/kibana-security']);
   });
 
   it('does not match non-terraform APIs', () => {

@@ -30,25 +30,32 @@ interface ClassicStreamTestable {
 }
 
 describe('ClassicStream', () => {
-  const createMockDependencies = (): StateDependencies =>
+  const createMockDependencies = (
+    overrides?: Partial<{ replicated: boolean }>
+  ): StateDependencies =>
     ({
       logger: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
       isServerless: false,
+      isWiredStreamViewsEnabled: true,
       isDev: false,
-      scopedClusterClient: {
-        asCurrentUser: {
-          indices: {
-            getDataStreamSettings: jest.fn().mockResolvedValue({
-              data_streams: [
-                {
-                  name: 'logs-test-default',
-                  effective_settings: {
-                    index: {},
-                  },
+      streamsClient: {
+        getDataStream: jest.fn().mockResolvedValue({
+          name: 'logs-test-default',
+          replicated: overrides?.replicated ?? false,
+        }),
+      },
+      esClient: {
+        indices: {
+          getDataStreamSettings: jest.fn().mockResolvedValue({
+            data_streams: [
+              {
+                name: 'logs-test-default',
+                effective_settings: {
+                  index: {},
                 },
-              ],
-            }),
-          },
+              },
+            ],
+          }),
         },
       },
     } as unknown as StateDependencies);
@@ -65,6 +72,7 @@ describe('ClassicStream', () => {
   const createBaseClassicStreamDefinition = (
     overrides: Partial<Streams.ClassicStream.Definition> = {}
   ): Streams.ClassicStream.Definition => ({
+    type: 'classic',
     name: 'logs-test-default',
     description: 'Test stream',
     updated_at: new Date().toISOString(),
@@ -542,6 +550,60 @@ describe('ClassicStream', () => {
       );
 
       expect((stream as unknown as ClassicStreamTestable)._changes.field_overrides).toBe(false);
+    });
+  });
+
+  describe('getEffectiveSettings - replicated streams', () => {
+    it('returns empty settings for replicated data streams without calling getDataStreamSettings', async () => {
+      const deps = createMockDependencies({ replicated: true });
+      const definition = createBaseClassicStreamDefinition({
+        ingest: {
+          lifecycle: { inherit: {} },
+          processing: { steps: [], updated_at: new Date().toISOString() },
+          settings: { 'index.refresh_interval': { value: '5s' } },
+          classic: { field_overrides: undefined },
+          failure_store: { inherit: {} },
+        },
+      });
+
+      const stream = new ClassicStream(definition, deps);
+      const existingState = createMockState(new Map([['logs-test-default', { definition }]]));
+
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        existingState,
+        existingState
+      );
+
+      // getDataStreamSettings should NOT have been called for replicated streams
+      expect(
+        (deps.esClient as unknown as { indices: { getDataStreamSettings: jest.Mock } }).indices
+          .getDataStreamSettings
+      ).not.toHaveBeenCalled();
+
+      // settings should be detected as changed since effective settings are empty
+      // for replicated streams but definition has settings
+      expect((stream as unknown as ClassicStreamTestable)._changes.settings).toBe(true);
+    });
+
+    it('calls getDataStreamSettings for non-replicated data streams', async () => {
+      const deps = createMockDependencies({ replicated: false });
+      const definition = createBaseClassicStreamDefinition();
+
+      const stream = new ClassicStream(definition, deps);
+      const existingState = createMockState(new Map([['logs-test-default', { definition }]]));
+
+      await (stream as unknown as ClassicStreamTestable).doHandleUpsertChange(
+        definition,
+        existingState,
+        existingState
+      );
+
+      // getDataStreamSettings SHOULD have been called for non-replicated streams
+      expect(
+        (deps.esClient as unknown as { indices: { getDataStreamSettings: jest.Mock } }).indices
+          .getDataStreamSettings
+      ).toHaveBeenCalled();
     });
   });
 });

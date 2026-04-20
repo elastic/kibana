@@ -42,7 +42,7 @@ exports[`ColorFormatEditor should render boolean type normally 1`] = `
   />
   <EuiButton
     data-test-subj="colorEditorAddColor"
-    iconType="plusInCircle"
+    iconType="plusCircle"
     onClick={[Function]}
     size="s"
   >
@@ -116,7 +116,7 @@ exports[`ColorFormatEditor should render multiple colors 1`] = `
   />
   <EuiButton
     data-test-subj="colorEditorAddColor"
-    iconType="plusInCircle"
+    iconType="plusCircle"
     onClick={[Function]}
     size="s"
   >
@@ -173,7 +173,7 @@ exports[`ColorFormatEditor should render other type normally (range field) 1`] =
   />
   <EuiButton
     data-test-subj="colorEditorAddColor"
-    iconType="plusInCircle"
+    iconType="plusCircle"
     onClick={[Function]}
     size="s"
   >
@@ -230,7 +230,7 @@ exports[`ColorFormatEditor should render string type normally (regex field) 1`] 
   />
   <EuiButton
     data-test-subj="colorEditorAddColor"
-    iconType="plusInCircle"
+    iconType="plusCircle"
     onClick={[Function]}
     size="s"
   >

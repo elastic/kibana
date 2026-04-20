@@ -14,14 +14,14 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 import { EntityType, EngineDescriptor } from '../common.gen';
 
 export type GetEntityEngineRequestParams = z.infer<typeof GetEntityEngineRequestParams>;
 export const GetEntityEngineRequestParams = z.object({
   /**
-   * The entity type of the engine (either 'user' or 'host').
+   * The entity type of the engine.
    */
   entityType: EntityType,
 });
