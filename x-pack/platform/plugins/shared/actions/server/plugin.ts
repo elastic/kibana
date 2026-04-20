@@ -205,6 +205,15 @@ export interface PluginStartContract {
    * @returns boolean indicating whether the connector was added or not
    */
   registerDynamicConnector: (connector: InMemoryConnector) => boolean;
+
+  /**
+   * Remove a previously registered dynamic InMemoryConnector from the inMemoryConnectors list.
+   * Only connectors flagged as dynamic (via registerDynamicConnector) can be removed this way;
+   * preconfigured or system connectors are left untouched.
+   * @param connectorId id of the dynamic connector to remove
+   * @returns boolean indicating whether the connector was removed or not
+   */
+  unregisterDynamicConnector: (connectorId: string) => boolean;
 }
 
 export interface ActionsPluginsSetup {
@@ -789,6 +798,8 @@ export class ActionsPlugin
       },
       registerDynamicConnector: (connector: InMemoryConnector) =>
         this.registerDynamicConnector(connector),
+      unregisterDynamicConnector: (connectorId: string) =>
+        this.unregisterDynamicConnector(connectorId),
     };
   }
 
@@ -1053,6 +1064,18 @@ export class ActionsPlugin
       return true;
     }
     return false;
+  };
+
+  private unregisterDynamicConnector = (connectorId: string): boolean => {
+    const index = this.inMemoryConnectors.findIndex(
+      (c) => c.id === connectorId && c.isDynamic === true
+    );
+    if (index === -1) {
+      return false;
+    }
+    this.inMemoryConnectors.splice(index, 1);
+    this.logger.info(`Unregistered dynamic connector with id ${connectorId}`);
+    return true;
   };
 
   public stop() {

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { waitForAlertsToPopulate } from '@kbn/test-suites-xpack-security/security_solution_cypress/cypress/tasks/create_new_rule';
 import { login } from '../../tasks/login';
 import { waitForEndpointListPageToBeLoaded } from '../../tasks/response_console';
 import type { PolicyData } from '../../../../../common/endpoint/types';
@@ -14,14 +13,13 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { changeAlertsFilter } from '../../tasks/alerts';
+import { waitForAlertsToPopulate } from '../../tasks/alerts';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// Failing: See https://github.com/elastic/kibana/issues/207773
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -52,7 +50,7 @@ describe.skip(
           })
         )
         .then(() => {
-          loadRule({ query: `agent.id: ${createdHost.agentId}` }).then((data) => {
+          loadRule({ query: `agent.id: "${createdHost.agentId}"` }).then((data) => {
             ruleId = data.id;
             ruleName = data.name;
           });
@@ -83,9 +81,7 @@ describe.skip(
 
       visitRuleAlerts(ruleName);
       closeAllToasts();
-
-      changeAlertsFilter(`process.name: "sshd" and agent.id: "${createdHost.agentId}"`);
-      waitForAlertsToPopulate();
+      waitForAlertsToPopulate(1, 2000, 120000);
 
       cy.getByTestSubj('expand-event').first().click();
       cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();

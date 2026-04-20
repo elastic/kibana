@@ -13,7 +13,6 @@ import {
   isBuiltInStepType,
   type SelectionContext,
   type StepPropertyHandler,
-  type StepSelectionValues,
 } from '@kbn/workflows';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
 import {
@@ -37,7 +36,6 @@ export function collectAllCustomPropertyItems(
   for (const step of steps) {
     // Only collect custom properties for non-built-in step types
     if (!isBuiltInStepType(step.stepType)) {
-      let stepSelectionValues: StepSelectionValues | undefined;
       for (const [propKey, prop] of Object.entries(step.propInfos)) {
         if (
           prop.keyNode.range &&
@@ -50,20 +48,20 @@ export function collectAllCustomPropertyItems(
           const key = scope === 'config' ? propKey : propKey.split('.').slice(1).join('.');
           const propertyHandler = getPropertyHandler(step.stepType, scope, key);
           if (propertyHandler && propertyHandler.selection) {
+            const selection = propertyHandler.selection;
             const [startOffset, endOffset] = prop.valueNode.range;
             const startPos = lineCounter.linePos(startOffset);
             const endPos = lineCounter.linePos(endOffset);
-            if (!stepSelectionValues) {
-              stepSelectionValues = buildStepSelectionValues(step);
-            }
+            const contextValues = buildStepSelectionValues(step, selection.dependsOnValues);
             const context: SelectionContext = {
               stepType: step.stepType,
               scope,
               propertyKey: key,
-              values: stepSelectionValues,
+              values: contextValues,
             };
             customPropertyItems.push({
               id: `${step.stepId}-${key}-${startPos.line}-${startPos.col}-${endPos.line}-${endPos.col}`,
+              stepId: step.stepId,
               startLineNumber: startPos.line,
               startColumn: startPos.col,
               endLineNumber: endPos.line,
