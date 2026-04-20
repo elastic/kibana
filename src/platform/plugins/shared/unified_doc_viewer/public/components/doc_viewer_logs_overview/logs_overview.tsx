@@ -16,6 +16,7 @@ import {
   TRACE_ID_FIELD,
   TRANSACTION_ID_FIELD,
   getLogDocumentOverview,
+  getFieldValue,
 } from '@kbn/discover-utils';
 import type {
   ObservabilityLogsAIAssistantFeature,
@@ -86,13 +87,19 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     ref
   ) => {
     const { fieldFormats } = getUnifiedDocViewerServices();
-    const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
+    const formattedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
     const LogsOverviewAIAssistant = renderAIAssistant;
     const LogsOverviewAIInsight = renderAIInsight;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
-    const traceId = parsedDoc[TRACE_ID_FIELD];
-    const showSimilarErrors = traceId && hasErrorFields(parsedDoc);
+
+    // Get raw string values for ID fields (not formatted ReactNode)
+    const traceId = getFieldValue(hit, TRACE_ID_FIELD) as string | undefined;
+    const transactionId = getFieldValue(hit, TRANSACTION_ID_FIELD) as string | undefined;
+    const spanId = getFieldValue(hit, SPAN_ID_FIELD) as string | undefined;
+    const serviceName = getFieldValue(hit, SERVICE_NAME_FIELD) as string | undefined;
+
+    const showSimilarErrors = traceId && hasErrorFields(formattedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -135,7 +142,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         >
           <EuiSpacer size="m" />
           <LogsOverviewHeader
-            formattedDoc={parsedDoc}
+            formattedDoc={formattedDoc}
             hit={hit}
             renderFlyoutStreamProcessingLink={renderFlyoutStreamProcessingLink}
             renderCpsWarning={renderCpsWarning}
@@ -162,8 +169,8 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               {traceId && showTraceWaterfall ? (
                 <TraceWaterfall
                   traceId={traceId}
-                  docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
-                  serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                  docId={transactionId || spanId}
+                  serviceName={serviceName}
                   dataView={dataView}
                   initialState={initialState}
                   onInitialStateChange={onInitialStateChange}

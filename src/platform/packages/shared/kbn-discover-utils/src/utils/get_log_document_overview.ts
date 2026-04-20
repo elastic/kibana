@@ -7,25 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, LogDocumentOverview } from '../..';
-import { fieldConstants, formatFieldValue } from '../..';
+import { fieldConstants, formatFieldValueReact } from '../..';
 import { getFieldValueWithFallback } from './get_field_value_with_fallback';
 
 export function getLogDocumentOverview(
   doc: DataTableRecord,
   { dataView, fieldFormats }: { dataView: DataView; fieldFormats: FieldFormatsStart }
 ): LogDocumentOverview {
-  const formatField = <T extends keyof LogDocumentOverview>(field: T) => {
+  const formatField = <T extends keyof LogDocumentOverview>(field: T): ReactNode => {
     // Use fallback to check both ECS and OTel field names
     const result = getFieldValueWithFallback(doc.flattened, field);
     const value = result.value;
-    return (
-      value !== undefined && value !== null
-        ? formatFieldValue(value, doc.raw, fieldFormats, dataView, dataView.fields.getByName(field))
-        : undefined
-    ) as LogDocumentOverview[T];
+    return value !== undefined && value !== null
+      ? formatFieldValueReact(
+          value,
+          doc.raw,
+          fieldFormats,
+          dataView,
+          dataView.fields.getByName(field)
+        )
+      : undefined;
   };
 
   const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];

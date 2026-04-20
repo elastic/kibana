@@ -81,65 +81,65 @@ export interface LogDocumentOverview
     LogOtelStackTraceFields,
     Partial<ApmErrorLogFields>,
     Partial<OtelExceptionLogFields> {
-  '@timestamp': string;
-  'log.level'?: string;
-  message?: string;
-  'body.text'?: string;
-  'error.message'?: string;
-  'event.original'?: string;
-  'trace.id'?: string;
-  'transaction.id'?: string;
-  'span.id'?: string;
-  'log.file.path'?: string;
-  'data_stream.namespace': string;
-  'data_stream.dataset': string;
-  'exception.message'?: string;
+  '@timestamp': ReactNode;
+  'log.level'?: ReactNode;
+  message?: ReactNode;
+  'body.text'?: ReactNode;
+  'error.message'?: ReactNode;
+  'event.original'?: ReactNode;
+  'trace.id'?: ReactNode;
+  'transaction.id'?: ReactNode;
+  'span.id'?: ReactNode;
+  'log.file.path'?: ReactNode;
+  'data_stream.namespace': ReactNode;
+  'data_stream.dataset': ReactNode;
+  'exception.message'?: ReactNode;
 }
 
 export interface ApmErrorLogFields {
-  'processor.event': string;
-  'error.log.level'?: string;
-  'error.exception.type'?: string;
-  'error.exception.message'?: string;
-  'error.culprit'?: string;
-  'error.grouping_name'?: string;
+  'processor.event': ReactNode;
+  'error.log.level'?: ReactNode;
+  'error.exception.type'?: ReactNode;
+  'error.exception.message'?: ReactNode;
+  'error.culprit'?: ReactNode;
+  'error.grouping_name'?: ReactNode;
 }
 
 export interface OtelExceptionLogFields {
-  event_name: string; // OTEL-specific field
-  'exception.type'?: string;
+  event_name: ReactNode; // OTEL-specific field
+  'exception.type'?: ReactNode;
 }
 
 export interface LogResourceFields {
-  'host.name'?: string;
-  'service.name'?: string;
-  'agent.name'?: string;
-  'orchestrator.cluster.name'?: string;
-  'orchestrator.cluster.id'?: string;
-  'orchestrator.resource.id'?: string;
-  'orchestrator.namespace'?: string;
-  'container.name'?: string;
-  'container.id'?: string;
+  'host.name'?: ReactNode;
+  'service.name'?: ReactNode;
+  'agent.name'?: ReactNode;
+  'orchestrator.cluster.name'?: ReactNode;
+  'orchestrator.cluster.id'?: ReactNode;
+  'orchestrator.resource.id'?: ReactNode;
+  'orchestrator.namespace'?: ReactNode;
+  'container.name'?: ReactNode;
+  'container.id'?: ReactNode;
 }
 
 export interface LogStackTraceFields {
-  'error.stack_trace'?: string;
-  'error.exception.stacktrace'?: string;
-  'error.log.stacktrace'?: string;
+  'error.stack_trace'?: ReactNode;
+  'error.exception.stacktrace'?: ReactNode;
+  'error.log.stacktrace'?: ReactNode;
 }
 
 export interface LogOtelStackTraceFields {
-  'attributes.exception.stacktrace'?: string;
-  'attributes.exception.type'?: string;
-  'attributes.exception.message'?: string;
+  'attributes.exception.stacktrace'?: ReactNode;
+  'attributes.exception.type'?: ReactNode;
+  'attributes.exception.message'?: ReactNode;
 }
 
 export interface LogCloudFields {
-  'cloud.provider'?: string;
-  'cloud.region'?: string;
-  'cloud.availability_zone'?: string;
-  'cloud.project.id'?: string;
-  'cloud.instance.id'?: string;
+  'cloud.provider'?: ReactNode;
+  'cloud.region'?: ReactNode;
+  'cloud.availability_zone'?: ReactNode;
+  'cloud.project.id'?: ReactNode;
+  'cloud.instance.id'?: ReactNode;
 }
 
 export interface TraceDocumentOverview
