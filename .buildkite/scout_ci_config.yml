@@ -24,6 +24,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process
