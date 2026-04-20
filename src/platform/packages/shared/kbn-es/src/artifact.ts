@@ -432,9 +432,7 @@ export class Artifact {
               const elapsed = now - lastBarUpdate;
               if (elapsed >= PROGRESS_BAR_RENDER_INTERVAL_MS) {
                 const speed =
-                  elapsed > 0
-                    ? Math.round(((contentLength - lastBarBytes) / elapsed) * 1000)
-                    : 0;
+                  elapsed > 0 ? Math.round(((contentLength - lastBarBytes) / elapsed) * 1000) : 0;
                 lastBarUpdate = now;
                 lastBarBytes = contentLength;
                 progressBar.update(contentLength, {
@@ -447,9 +445,7 @@ export class Artifact {
               const elapsed = now - lastLogTime;
               if (elapsed >= PROGRESS_LOG_INTERVAL_MS) {
                 const speed =
-                  elapsed > 0
-                    ? Math.round(((contentLength - lastLogBytes) / elapsed) * 1000)
-                    : 0;
+                  elapsed > 0 ? Math.round(((contentLength - lastLogBytes) / elapsed) * 1000) : 0;
                 lastLogTime = now;
                 lastLogBytes = contentLength;
                 log.info(
