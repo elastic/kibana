@@ -12,11 +12,13 @@ This fixes two resolution scoring gaps when resolution groups include members wi
 Before this change, two incorrect behaviors were possible:
 
 - A silent alias could be part of the same resolution group but its watchlists and criticality would be ignored.
-- A resolution group could fail to produce a resolved score row when alerts existed only on the canonical target.
+- A resolution group could fail to produce a resolved score when alerts existed only on the canonical target.
 
 ## Test coverage
 
 - Added focused unit coverage for resolution lookup sync and resolution-group modifier merging.
+- Added an API integration baseline test that verifies alerts on both a target and alias aggregate into a single resolved score.
+- Added an API integration baseline test that verifies no resolved score is produced when no resolution relationship exists.
 - Added an API integration regression test that verifies a canonical target still gets a resolved score when only the canonical target has alerts.
 - Added an API integration regression test that verifies silent group members still contribute watchlists and highest criticality to the resolved output.
 
@@ -45,10 +47,10 @@ Expected behavior on this branch:
 1. Start from Kibana `main` with the SDG branch from [elastic/security-documents-generator#366](https://github.com/elastic/security-documents-generator/pull/366).
 2. Run the scenario command above against a local stack.
 3. Confirm the broken behavior on `main`:
-   - `group-a-target` only reflects one watchlist and no criticality.
-   - `group-b-target-with-alerts` has no resolved score.
+	- `group-a-target` only reflects one watchlist and no criticality.
+	- `group-b-target-with-alerts` has no resolved score.
 4. Switch back to this Kibana branch and restart Kibana.
 5. Re-run the same SDG scenario command.
 6. Confirm the fixed behavior:
-   - `group-a-target` reflects both watchlists and `high_impact` criticality.
-   - `group-b-target-with-alerts` now has a resolved score.
+	- `group-a-target` reflects both watchlists and `high_impact` criticality.
+	- `group-b-target-with-alerts` now has a resolved score.

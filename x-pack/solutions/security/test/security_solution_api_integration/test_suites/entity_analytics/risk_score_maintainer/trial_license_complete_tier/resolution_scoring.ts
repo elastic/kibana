@@ -101,52 +101,66 @@ export default ({ getService }: FtrProviderContext): void => {
         await es.indices.refresh({ index: entityStoreIndex });
       };
 
-      const getBestResolutionScore = ({
+      const getBestScore = ({
         scores,
         entityId,
+        scoreType,
       }: {
         scores: ReturnType<typeof normalizeScores>;
         entityId: string;
+        scoreType: 'base' | 'resolution';
       }) =>
         scores
-          .filter((score) => score.id_value === entityId && score.score_type === 'resolution')
+          .filter((score) => score.id_value === entityId && score.score_type === scoreType)
           .sort(
             (left, right) =>
-              (right.related_entities?.length ?? 0) - (left.related_entities?.length ?? 0) ||
+              (scoreType === 'resolution'
+                ? (right.related_entities?.length ?? 0) - (left.related_entities?.length ?? 0)
+                : 0) ||
               String(right.calculation_run_id ?? '').localeCompare(
                 String(left.calculation_run_id ?? '')
               )
           )[0];
 
-      const waitForResolutionScore = async ({
+      const waitForScore = async ({
         entityId,
+        scoreType,
         waitLabel,
         predicate,
       }: {
         entityId: string;
+        scoreType: 'base' | 'resolution';
         waitLabel: string;
         predicate?: (score: ReturnType<typeof normalizeScores>[number]) => boolean;
       }) => {
-        let bestResolutionScore: ReturnType<typeof normalizeScores>[number] | undefined;
+        let bestScore: ReturnType<typeof normalizeScores>[number] | undefined;
 
         await retry.waitForWithTimeout(waitLabel, 60_000, async () => {
           const scores = normalizeScores(await readRiskScores(es));
-          const resolutionScore = getBestResolutionScore({ scores, entityId });
-          if (!resolutionScore) {
+          const score = getBestScore({ scores, entityId, scoreType });
+          if (!score) {
             return false;
           }
 
-          if (predicate && !predicate(resolutionScore)) {
+          if (predicate && !predicate(score)) {
             return false;
           }
 
-          bestResolutionScore = resolutionScore;
+          bestScore = score;
           return true;
         });
 
-        expect(bestResolutionScore).to.not.be(undefined);
-        return bestResolutionScore!;
+        expect(bestScore).to.not.be(undefined);
+        return bestScore!;
       };
+
+      const waitForResolutionScore = async (
+        params: Omit<Parameters<typeof waitForScore>[0], 'scoreType'>
+      ) => waitForScore({ ...params, scoreType: 'resolution' });
+
+      const waitForBaseScore = async (
+        params: Omit<Parameters<typeof waitForScore>[0], 'scoreType'>
+      ) => waitForScore({ ...params, scoreType: 'base' });
 
       before(async () => {
         await setupMaintainerLogsDataStream({
@@ -182,6 +196,105 @@ export default ({ getService }: FtrProviderContext): void => {
         await cleanUpRiskScoreMaintainer({ log, es });
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+      });
+
+      it('aggregates alerts from both target and alias into a single resolved score', async () => {
+        const shortId = uuidv4().slice(0, 8);
+        const { testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `res-target-${shortId}` }),
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `res-alias-${shortId}` }),
+        ]);
+        const [targetUser, aliasUser] = testEntities;
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [targetUser.documentId, aliasUser.documentId],
+          alerts: 2,
+          riskScore: 40,
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreEntities({ es, log, count: 2 });
+
+        await maintainerScenario.setEntityResolutionTarget({
+          testEntity: aliasUser,
+          resolvedToEntityId: targetUser.expectedEuid,
+        });
+        await waitForResolutionRelationship(aliasUser.expectedEuid, targetUser.expectedEuid);
+        await refreshResolutionLookup();
+
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const resolutionScore = await waitForResolutionScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `resolved score for target and alias ${targetUser.expectedEuid}`,
+          predicate: (score) => {
+            const relatedEntityIds =
+              score.related_entities?.map((entity) => entity.entity_id) ?? [];
+            return (
+              score.calculated_score_norm > 0 && relatedEntityIds.includes(aliasUser.expectedEuid)
+            );
+          },
+        });
+
+        const baseScore = await waitForBaseScore({
+          entityId: targetUser.expectedEuid,
+          waitLabel: `base score for ${targetUser.expectedEuid}`,
+          predicate: (score) =>
+            score.calculation_run_id === resolutionScore.calculation_run_id &&
+            score.calculated_score_norm > 0,
+        });
+
+        expect(resolutionScore.score_type).to.eql('resolution');
+        expect(resolutionScore.related_entities).to.be.an('array');
+        expect(resolutionScore.related_entities!.map((entity) => entity.entity_id)).to.eql([
+          aliasUser.expectedEuid,
+        ]);
+        expect(resolutionScore.related_entities![0].relationship_type).to.eql(
+          'entity.relationships.resolution.resolved_to'
+        );
+        expect(baseScore.score_type).to.eql('base');
+        expect(resolutionScore.calculated_score_norm).to.be.greaterThan(
+          baseScore.calculated_score_norm!
+        );
+      });
+
+      it('does not produce resolved scores when no resolution relationships exist', async () => {
+        const shortId = uuidv4().slice(0, 8);
+        const { testEntities } = await maintainerScenario.seedEntities([
+          riskScoreMaintainerEntityBuilders.idpUser({ userName: `no-res-${shortId}` }),
+        ]);
+        const [user] = testEntities;
+
+        await maintainerScenario.createAlertsForDocumentIds({
+          documentIds: [user.documentId],
+          alerts: 1,
+          riskScore: 35,
+        });
+
+        await entityStoreUtils.installEntityStoreV2({
+          entityTypes: ['user', 'host'],
+          dataViewPattern: testLogsIndex,
+        });
+        await waitForEntityStoreEntities({ es, log, count: 1 });
+
+        await maintainerRoutes.runMaintainerSync('risk-score');
+
+        const baseScore = await waitForBaseScore({
+          entityId: user.expectedEuid,
+          waitLabel: `base score for ${user.expectedEuid}`,
+          predicate: (score) => score.calculated_score_norm > 0,
+        });
+        expect(baseScore.score_type).to.eql('base');
+
+        const allScores = normalizeScores(await readRiskScores(es));
+        expect(
+          allScores.some(
+            (score) => score.id_value === user.expectedEuid && score.score_type === 'resolution'
+          )
+        ).to.be(false);
       });
 
       it('writes resolved risk to the canonical target when only the canonical target has alerts', async () => {
