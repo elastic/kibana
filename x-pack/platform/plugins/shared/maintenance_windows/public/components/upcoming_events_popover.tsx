@@ -23,6 +23,7 @@ import {
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { recurringSummary } from '@kbn/response-ops-recurring-schedule-form/utils/recurring_summary';
 import { getPresets } from '@kbn/response-ops-recurring-schedule-form/utils/get_presets';
+import { i18n as i18nTranslate } from '@kbn/i18n';
 import type { MaintenanceWindowUI } from '../../common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../common';
 import * as i18n from '../translations';
@@ -70,6 +71,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
 
     return (
       <EuiPopover
+        aria-label={i18nTranslate.translate('xpack.maintenanceWindows.upcomingEventsPopover.ariaLabel', { defaultMessage: 'Upcoming events' })}
         button={
           <EuiButtonIcon
             data-test-subj="upcoming-events-icon-button"

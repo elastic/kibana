@@ -18,6 +18,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { BulkActionsPanelConfig, RowSelection, TimelineItem } from '../types';
 import { BulkActionsVerbs } from '../types';
+import { i18n as i18nTranslate } from '@kbn/i18n';
 import * as i18n from '../translations';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 
@@ -222,6 +223,7 @@ const BulkActionsComponent: React.FC<BulkActionsProps> = ({
   return (
     <div style={containerStyles} data-test-subj="bulk-actions-button-container" aria-hidden>
       <EuiPopover
+        aria-label={i18nTranslate.translate('xpack.triggersActionsUI.alertsTable.bulkActionsAriaLabel', { defaultMessage: 'Bulk actions' })}
         isOpen={isActionsPopoverOpen}
         anchorPosition="upCenter"
         panelPaddingSize="none"
