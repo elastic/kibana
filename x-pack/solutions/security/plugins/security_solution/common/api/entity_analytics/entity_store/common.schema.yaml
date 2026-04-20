@@ -8,13 +8,16 @@ components:
   schemas:
     EntityType:
       type: string
+      description: The type of entity.
       enum:
         - user
         - host
         - service
 
+
     EngineDescriptor:
       type: object
+      description: Describes a single entity engine, including its configuration and current status.
       required:
         - type
         - indexPattern
@@ -29,43 +32,62 @@ components:
           $ref: '#/components/schemas/EngineStatus'
         filter:
           type: string
+          description: An optional Kibana Query Language (KQL) filter applied to source documents before aggregation.
+          example: 'host.name: "my-host"'
         fieldHistoryLength:
           type: integer
+          description: The number of historical values retained per field.
+          example: 10
         lookbackPeriod:
           type: string
           default: 24h
           pattern: '[smdh]$'
+          description: How far back the transform looks when calculating aggregations.
+          example: '24h'
         timestampField:
           type: string
+          description: The field used as the timestamp for source documents.
+          example: '@timestamp'
         timeout:
           type: string
           default: 180s
           pattern: '[smdh]$'
+          description: The timeout for initializing the aggregating transform.
+          example: '180s'
         frequency:
           type: string
           default: 1m
           pattern: '[smdh]$'
+          description: How often the transform runs.
+          example: '1m'
         delay:
           type: string
           default: 1m
           pattern: '[smdh]$'
+          description: The delay before the transform processes new data, allowing late-arriving documents to be included.
+          example: '1m'
         docsPerSecond:
           type: integer
+          description: Throttle value for the number of documents processed per second. Use -1 for no throttle.
         error:
           type: object
+          description: Present when the engine status is `error`. Describes the failure.
           required:
             - message
             - action
           properties:
             message:
               type: string
+              description: A human-readable error message.
             action:
               type: string
+              description: The lifecycle action that caused the error.
               enum:
                 - init
 
     EngineStatus:
       type: string
+      description: The current operational status of an entity engine.
       enum:
         - installing
         - started
@@ -75,6 +97,7 @@ components:
 
     EngineComponentStatus:
       type: object
+      description: Status of an individual Elasticsearch or Kibana resource backing an engine.
       required:
           - id
           - installed
@@ -82,12 +105,15 @@ components:
       properties:
         id:
           type: string
+          description: Unique identifier for the component.
         installed:
           type: boolean
+          description: Whether the component is currently installed.
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
         health:
           type: string
+          description: The health status of the component.
           enum:
             - green
             - yellow
@@ -96,16 +122,20 @@ components:
             - unknown
         errors:
           type: array
+          description: Errors reported by this component, if any.
           items:
             type: object
             properties:
               title:
                 type: string
+                description: Short error title.
               message:
                 type: string
+                description: Detailed error message.
 
     EngineComponentResource:
       type: string
+      description: The type of Elasticsearch or Kibana resource backing an engine component.
       enum:
         - entity_engine
         - entity_definition
@@ -119,6 +149,7 @@ components:
 
     StoreStatus:
       type: string
+      description: The overall operational status of the Entity Store.
       enum:
         - not_installed
         - installing
@@ -128,16 +159,21 @@ components:
 
     IndexPattern:
       type: string
+      description: An additional Elasticsearch index pattern to include as a source for entity data. Merged with the default data view indices when the engine runs.
+      example: 'logs-*'
 
     InspectQuery:
       type: object
+      description: Debug information about the Elasticsearch query executed.
       properties:
         response:
           type: array
+          description: Raw Elasticsearch responses.
           items:
             type: string
         dsl:
           type: array
+          description: Elasticsearch query DSL that was executed.
           items:
             type: string
       required:

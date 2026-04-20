@@ -31,7 +31,8 @@ paths:
             application/json:
               schema:
                 type: object
-                properties:      
+                properties:
                   deleted:
                     type: boolean
+                    description: Whether the engine was successfully deleted.
                  
