@@ -179,6 +179,11 @@ components:
               type: string
 
     UnifiedHistoryRow:
+      discriminator:
+        propertyName: sourceType
+        mapping:
+          live: '#/components/schemas/LiveHistoryRow'
+          scheduled: '#/components/schemas/ScheduledHistoryRow'
       oneOf:
         - $ref: '#/components/schemas/LiveHistoryRow'
         - $ref: '#/components/schemas/ScheduledHistoryRow'
