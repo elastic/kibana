@@ -21,6 +21,7 @@
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/workflows",
+    "@kbn/workflows-management-plugin",
   ]
 }
 
