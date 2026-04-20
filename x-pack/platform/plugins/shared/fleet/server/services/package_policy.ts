@@ -4081,6 +4081,13 @@ export function updatePackageInputs(
     originalInput.deprecated = update.deprecated;
     originalInput.migrate_from = update.migrate_from;
 
+    // Snapshot the stored input-level vars before deepMergeVars mutates them (it modifies the
+    // vars object in place via a shared reference). Used later by the Path B stream migration
+    // block to determine which vars the user actually configured on this input vs package defaults.
+    const storedInputVars = originalInput.vars
+      ? Object.fromEntries(Object.entries(originalInput.vars).map(([k, v]) => [k, { ...v }]))
+      : undefined;
+
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -4161,13 +4168,48 @@ export function updatePackageInputs(
           originalStream = originalInput.streams[indexOfStream];
         }
       }
-      // When stream-level migrate_from succeeded, enable the new input if the old input
-      // was enabled. This mirrors the logic in applyStreamLevelMigration for Path A,
-      // covering the partial-migration case where the new input already existed in the
-      // old policy (e.g., cel existed alongside httpjson) but was disabled.
-      if (pathBStreamMigrationOccurred && !limitedPackage && pathBOldInputForStream?.enabled) {
+      // When stream-level migrate_from succeeded: mirror what applyStreamLevelMigration does
+      // for Path A — carry the old source input's enabled state and input-level vars to the
+      // existing input. This covers the partial-migration case where the new input (cel) already
+      // existed in the old policy alongside the old input (httpjson), but was disabled and had
+      // empty vars because the user only ever configured the httpjson side.
+      if (pathBStreamMigrationOccurred && pathBOldInputForStream) {
         const indexOfInput = inputs.indexOf(originalInput);
-        inputs[indexOfInput] = { ...originalInput, enabled: true };
+        let updatedInput = originalInput;
+
+        if (!limitedPackage && pathBOldInputForStream.enabled) {
+          updatedInput = { ...updatedInput, enabled: true };
+        }
+
+        // Seed cel input-level vars with httpjson values where cel's own stored values are null.
+        // Build a merged vars map that gives priority (highest → lowest):
+        //   1. cel's own stored value (non-null) — user explicitly set it on the cel side
+        //   2. httpjson's value (non-null) — user set it on the old input
+        //   3. new package default — neither side had a value
+        // `storedInputVars` holds a snapshot of the cel input's vars taken before deepMergeVars
+        // mutated them above (deepMergeVars modifies the vars object via a shared reference,
+        // so by the time we get here the original null values have been overwritten by package
+        // defaults). Then re-apply the new package schema via deepMergeVars + removeStaleVars so
+        // any vars absent from the new schema are stripped and schema metadata is current.
+        if (pathBOldInputForStream.vars && (update.vars || updatedInput.vars)) {
+          const oldSourceVars = pathBOldInputForStream.vars;
+          const storedCelVars = storedInputVars ?? {};
+          const seededVars: typeof storedCelVars = { ...oldSourceVars };
+          for (const [key, celEntry] of Object.entries(storedCelVars)) {
+            seededVars[key] =
+              celEntry?.value != null
+                ? celEntry // cel's stored value is set — it wins
+                : oldSourceVars[key] ?? celEntry; // fall back to httpjson or cel schema entry
+          }
+          const merged = deepMergeVars(
+            { ...updatedInput, vars: seededVars },
+            update,
+            true
+          ) as NewPackagePolicyInput;
+          updatedInput = removeStaleVars<NewPackagePolicyInput>(merged, update);
+        }
+
+        inputs[indexOfInput] = updatedInput;
         originalInput = inputs[indexOfInput];
       }
     }

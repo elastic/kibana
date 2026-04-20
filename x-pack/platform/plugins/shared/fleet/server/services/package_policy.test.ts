@@ -10220,6 +10220,102 @@ describe('Package policy service', () => {
         expect(celInput?.enabled).toBe(false);
       });
 
+      it('seeds httpjson input-level vars into cel input-level vars where cel values are null (partial migration)', () => {
+        // Issue #261398: cel existed alongside httpjson but the user only configured httpjson.
+        // After upgrade, cel's url/api_token must be filled from httpjson, not left as defaults.
+        const basePolicyWithEmptyCelVars: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://httpjson-configured.com' },
+                api_token: { type: 'password', value: 'httpjson-secret' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: false,
+              // User never configured cel — vars are null/empty
+              vars: {
+                url: { type: 'text', value: null },
+                api_token: { type: 'password', value: null },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithEmptyCelVars,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // httpjson values must be seeded into cel where cel's own values were null
+        expect(celInput?.vars?.url?.value).toBe('http://httpjson-configured.com');
+        expect(celInput?.vars?.api_token?.value).toBe('httpjson-secret');
+      });
+
+      it('preserves cel input-level vars when they are already set, even if httpjson has different values', () => {
+        const basePolicyWithBothConfigured: NewPackagePolicy = {
+          ...makePartialMigrationBasePolicy(),
+          inputs: [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                url: { type: 'text', value: 'http://httpjson-url.com' },
+                api_token: { type: 'password', value: 'httpjson-token' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.activity', type: 'logs' },
+                  vars: { interval: { type: 'text', value: '5m' } },
+                },
+              ],
+            },
+            {
+              type: 'cel',
+              policy_template: 'template_1',
+              enabled: true,
+              // User already set cel vars explicitly — must not be overwritten
+              vars: {
+                url: { type: 'text', value: 'http://cel-url.com' },
+                api_token: { type: 'password', value: 'cel-token' },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const result = updatePackageInputs(
+          basePolicyWithBothConfigured,
+          makePartialMigrationPackageInfo(),
+          makePartialMigrationOverride(),
+          false
+        );
+
+        const celInput = result.inputs.find((i) => i.type === 'cel');
+        // cel's own non-null values must win over httpjson values
+        expect(celInput?.vars?.url?.value).toBe('http://cel-url.com');
+        expect(celInput?.vars?.api_token?.value).toBe('cel-token');
+      });
+
       it('migrates old httpjson input-level vars to new cel stream-level vars when going through packageToPackagePolicyInputs end-to-end', () => {
         // 2.5.0 packageInfo: only cel input remains; activity stream declares migrate_from: httpjson
         const packageInfo250: PackageInfo = {
