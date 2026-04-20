@@ -1,5 +1,5 @@
 {
-  "sha1": "622ec6cab4c9ef0491fa06a49837bf591eb71802",
+  "sha1": "4fa6a89dc177494782fe1fe04f22fd9d590e7a5b",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -479,6 +479,136 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
         "line": 227,
         "column": 14
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-2b23b1395333b73",
+      "title": "GET /api/workflows/aggs returns buckets for valid mapped fields (tags, createdBy)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 73,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-ced00798be93baf",
+      "title": "GET /api/workflows/aggs returns buckets when a single field is passed as a string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-f0c74254168c72c",
+      "title": "GET /api/workflows/aggs returns 200 with absent or empty buckets for a non-existent field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-8626790a407be44",
+      "title": "GET /api/workflows/aggs rejects or returns empty buckets for the ES metadata field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 115,
+        "column": 12
+      }
+    },
+    {
+      "id": "7dde3dbc6d34e64-91f38d0c70ef22e",
+      "title": "GET /api/workflows/aggs rejects requests with more than 25 fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_management/get_aggs.spec.ts",
+        "line": 121,
+        "column": 12
       }
     },
     {

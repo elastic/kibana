@@ -546,6 +546,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               onVarGroupSelectionChange={handleInputVarGroupSelectionChange}
               showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
+              sections={packageInput.sections}
             />
             {hasInputStreams &&
             !shouldConsolidateAdvancedSections &&

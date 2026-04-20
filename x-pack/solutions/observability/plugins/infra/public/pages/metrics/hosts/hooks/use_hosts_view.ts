@@ -16,6 +16,7 @@ import { useMemo } from 'react';
 import createContainer from 'constate';
 import type { BoolQuery } from '@kbn/es-query';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from './use_unified_search';
@@ -51,7 +52,7 @@ export const useHostsView = () => {
           dateRange: parsedDateRange,
           esQuery: buildQuery(),
           limit: searchCriteria.limit,
-          schema: searchCriteria?.preferredSchema || 'ecs',
+          schema: searchCriteria?.preferredSchema || DEFAULT_SCHEMA,
         })
       ),
     [buildQuery, parsedDateRange, searchCriteria.limit, searchCriteria.preferredSchema]
