@@ -41,12 +41,10 @@ const mapToRuntimeType = (esType: string): RuntimeType =>
   ES_TYPE_TO_RUNTIME_TYPE[esType] ?? 'keyword';
 
 const CHECKBOX_GROUP = 'CHECKBOX_GROUP';
+const USER_PICKER = 'USER_PICKER';
+const DATE_PICKER = 'DATE_PICKER';
 
-// flattened fields do not support doc_values per subfield, so doc[] access always
-// returns an empty value. We must use params._source to read the actual stored value.
-//
-// Kibana SO _source structure: { "<SO_type>": { <attributes> }, "type": "...", "references": [...] }
-// So the path to extended_fields is: params._source[CASE_SO_TYPE][CASE_EXTENDED_FIELDS][storageKey]
+// Flattened fields require params._source access; doc[] is always empty for subfields.
 const buildPainlessScript = (
   storageKey: string,
   runtimeType: RuntimeType,
@@ -66,22 +64,31 @@ const buildPainlessScript = (
     `if (rawVal == null) { return; }` +
     `def raw = rawVal.toString();`;
 
-  // Strip JSON array punctuation using Painless regex literals (avoids Java String.replaceAll
-  // escaping issues with \s and character classes across JSON serialisation boundaries).
+  // Strip JSON array punctuation, split on comma, emit each trimmed token.
   const splitArrayScript =
     `def cleaned = /[\\[\\]"]/.matcher(raw).replaceAll('').trim();` +
     `def arr = /,/.split(cleaned);` +
     `for (def item : arr) { if (!item.trim().isEmpty()) { emit(item.trim()); } }`;
 
+  if (control === USER_PICKER) {
+    // Values are stored as '[{"uid":"...","name":"..."}]'; extract only the name via regex.
+    return (
+      `${readRaw}` +
+      `def m = /"name":"([^"]*)"/.matcher(raw);` +
+      `while (m.find()) { emit(m.group(1)); }`
+    );
+  }
+
+  if (control === DATE_PICKER) {
+    // Emit the raw ISO string as keyword; the query layer uses a range query for date matching.
+    return `${readRaw}emit(raw);`;
+  }
+
   if (control === CHECKBOX_GROUP) {
-    // Checkbox values are stored as a JSON-stringified array, e.g. '["api","ui"]'.
-    // Strip JSON punctuation, split on comma, emit each item individually.
-    // Note: Painless does not support the ?. null-safe operator — explicit null checks required.
     return `${readRaw}${splitArrayScript}`;
   }
 
-  // For keyword fields, auto-detect JSON arrays (e.g. from CHECKBOX_GROUP fields on templates
-  // created before the 'control' field was added to fieldNames).
+  // Auto-detect JSON arrays for keyword fields (e.g. legacy templates without a control type).
   if (runtimeType === 'keyword') {
     return `${readRaw}if (raw.startsWith('[')) { ${splitArrayScript} } else { emit(raw); }`;
   }
@@ -91,8 +98,6 @@ const buildPainlessScript = (
       return `${readRaw} emit(Long.parseLong(raw));`;
     case 'double':
       return `${readRaw} emit(Double.parseDouble(raw));`;
-    case 'date':
-      return `${readRaw} emit(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").parse(raw).getTime());`;
     default:
       return `${readRaw} emit(raw);`;
   }
@@ -128,18 +133,46 @@ export const resolveExtendedFieldFilters = (
     .filter((f): f is ResolvedExtendedFieldFilter => f !== null);
 };
 
-/**
- * Builds ES runtime field mappings for the resolved extended field filters.
- * Each runtime field extracts the value from the flattened extended_fields
- * attribute and casts it to the correct ES type.
- */
+/** Parses a date string (MM/DD/YYYY, YYYY-MM-DD, or ISO 8601) into a full-day UTC range [gte, lt). */
+export const parseDateFilterToRange = (value: string): { gte: string; lt: string } | undefined => {
+  let year: number;
+  let month: number;
+  let day: number;
+
+  const mdyMatch = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (mdyMatch) {
+    month = parseInt(mdyMatch[1], 10);
+    day = parseInt(mdyMatch[2], 10);
+    year = parseInt(mdyMatch[3], 10);
+  } else {
+    const isoPart = value.slice(0, 10);
+    const isoMatch = isoPart.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!isoMatch) return undefined;
+    year = parseInt(isoMatch[1], 10);
+    month = parseInt(isoMatch[2], 10);
+    day = parseInt(isoMatch[3], 10);
+  }
+
+  if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1000 || year > 9999) {
+    return undefined;
+  }
+
+  const start = new Date(Date.UTC(year, month - 1, day));
+  if (isNaN(start.getTime())) return undefined;
+
+  const end = new Date(start.getTime() + 86_400_000);
+  return { gte: start.toISOString(), lt: end.toISOString() };
+};
+
+/** Builds ES runtime field mappings for each resolved extended field filter. */
 export const buildExtendedFieldRuntimeMappings = (
   resolvedFilters: ResolvedExtendedFieldFilter[]
 ): Record<string, estypes.MappingRuntimeField> => {
   const runtimeMappings: Record<string, estypes.MappingRuntimeField> = {};
 
   for (const { storageKey, esType, control } of resolvedFilters) {
-    const runtimeType = mapToRuntimeType(esType);
+    // DATE_PICKER emits a raw ISO string, so use keyword (not date) to avoid epoch-ms conversion.
+    const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
     runtimeMappings[`ef_${storageKey}`] = {
       type: runtimeType,
       script: {
@@ -151,20 +184,19 @@ export const buildExtendedFieldRuntimeMappings = (
   return runtimeMappings;
 };
 
-/**
- * Builds AND-combined filter clauses that query the runtime fields
- * for the resolved extended field filters.
- */
+/** Builds filter clauses for each resolved extended field filter (range for dates, term otherwise). */
 export const buildExtendedFieldFilterClauses = (
   resolvedFilters: ResolvedExtendedFieldFilter[]
 ): estypes.QueryDslQueryContainer[] =>
-  resolvedFilters.map(({ storageKey, value, esType }) => {
+  resolvedFilters.flatMap(({ storageKey, value, esType, control }) => {
+    const fieldName = `ef_${storageKey}`;
+
+    if (control === DATE_PICKER) {
+      const range = parseDateFilterToRange(value);
+      return range ? [{ range: { [fieldName]: range } }] : [];
+    }
+
     const runtimeType = mapToRuntimeType(esType);
     const typedValue = runtimeType === 'long' ? Number(value) : value;
-
-    return {
-      term: {
-        [`ef_${storageKey}`]: { value: typedValue },
-      },
-    };
+    return [{ term: { [fieldName]: { value: typedValue } } }];
   });

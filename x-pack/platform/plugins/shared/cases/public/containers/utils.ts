@@ -270,7 +270,7 @@ export const parseExtendedFieldSearch = (search: string): ParsedExtendedFieldSea
   //   "quoted label":"quoted value"
   //   unquoted_label:value
   //   unquoted_label:"quoted value"
-  const FIELD_VALUE_REGEX = /(?:"([^"]+)"|(\w+)):(?:"([^"]*)"|([\S]+))/g;
+  const FIELD_VALUE_REGEX = /(?:"([^"]+)"|(\w+)):\s*(?:"([^"]*)"|([\S]+))/g;
 
   const freeText = search
     .replace(
