@@ -35,7 +35,6 @@ export class DashboardApp {
 
   // Add panel flow
   private readonly addTopNavButton;
-  private readonly openAddPanelFlyoutButton;
   private readonly panelSelectionFlyout;
   private readonly panelSelectionList;
   private readonly panelSelectionSearchInput;
@@ -84,7 +83,6 @@ export class DashboardApp {
 
     // Add panel flow
     this.addTopNavButton = this.page.testSubj.locator('dashboardAddTopNavButton');
-    this.openAddPanelFlyoutButton = this.page.testSubj.locator('dashboardOpenAddPanelFlyoutButton');
     this.panelSelectionFlyout = this.page.testSubj.locator('dashboardPanelSelectionFlyout');
     this.panelSelectionList = this.page.testSubj.locator('dashboardPanelSelectionList');
     this.panelSelectionSearchInput = this.page.testSubj.locator(
@@ -212,14 +210,8 @@ export class DashboardApp {
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
   async openAddPanelFlyout() {
-    // Click top nav add menu button and wait for menu to appear
     await this.addTopNavButton.click();
-    await expect(this.openAddPanelFlyoutButton).toBeVisible();
-
-    // Click to open the panel selection flyout and wait for it to appear
-    await this.openAddPanelFlyoutButton.click();
     await expect(this.panelSelectionFlyout).toBeVisible();
-    await expect(this.panelSelectionList).toBeVisible();
   }
 
   async openNewLensPanel() {
@@ -242,7 +234,7 @@ export class DashboardApp {
 
   async addPanelFromLibrary(...names: string[]) {
     await this.page.testSubj.click('dashboardAddTopNavButton');
-    await this.page.testSubj.click('dashboardAddFromLibraryButton');
+    await this.page.testSubj.click('addToDashboardTab-library');
     for (let i = 0; i < names.length; i++) {
       if (i > 0) {
         await this.page.testSubj.clearInput('savedObjectFinderSearchInput');
@@ -283,7 +275,7 @@ export class DashboardApp {
    */
   private async openLibraryFlyout() {
     await this.addTopNavButton.click();
-    await this.page.testSubj.click('dashboardAddFromLibraryButton');
+    await this.page.testSubj.click('addToDashboardTab-library');
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
       timeout: 30_000,
@@ -910,7 +902,7 @@ export class DashboardApp {
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */
   async addNewPanel(panelType: 'ES|QL' | 'Lens' | 'Custom visualization' | 'Maps' | 'Links') {
     await this.addTopNavButton.click();
-    await this.openAddPanelFlyoutButton.click();
+    await expect(this.panelSelectionFlyout).toBeVisible();
     await this.page.testSubj.click(`create-action-${panelType}`);
     await expect(this.panelSelectionFlyout).toBeHidden();
   }

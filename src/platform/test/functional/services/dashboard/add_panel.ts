@@ -41,17 +41,16 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickAddFromLibrary() {
     this.log.debug('DashboardAddPanel.clickAddFromLibrary');
-    await this.clickTopNavAddMenu();
-    await this.testSubjects.click('dashboardAddFromLibraryButton');
+    await this.openAddPanelFlyout();
+    await this.testSubjects.click('addToDashboardTab-library');
     await this.testSubjects.existOrFail('savedObjectsFinderTable');
     await this.savedObjectsFinder.waitForListLoading();
   }
 
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
-    await this.clickTopNavAddMenu();
-    await this.testSubjects.click('dashboardCreateNewVisButton');
-    await this.testSubjects.waitForDeleted('dashboardCreateNewVisButton');
+    await this.openAddPanelFlyout();
+    await this.testSubjects.click('dashboardAddPanelFeatured-visualization');
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('lnsApp', {
       timeout: 5000,
@@ -101,12 +100,8 @@ export class DashboardAddPanelService extends FtrService {
   async openAddPanelFlyout() {
     this.log.debug('DashboardAddPanel.openAddPanelFlyout');
     await this.clickTopNavAddMenu();
-    await this.testSubjects.click('dashboardOpenAddPanelFlyoutButton');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
-    });
-    await this.retry.try(async () => {
-      return await this.testSubjects.exists('dashboardPanelSelectionList');
     });
   }
 

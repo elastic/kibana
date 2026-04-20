@@ -19,6 +19,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { MenuItemGroup } from '../types';
+import { VegaIcon } from './vega_icon';
+
+const VEGA_ACTION_ID = 'addVegaPanelAction';
 
 export function Group({ group }: { group: MenuItemGroup }) {
   const listItems: EuiListGroupProps['listItems'] = useMemo(
@@ -34,7 +37,7 @@ export function Group({ group }: { group: MenuItemGroup }) {
         showToolTip: true,
         label: item.name,
         onClick: item.onClick,
-        iconType: item.icon,
+        iconType: item.id === VEGA_ACTION_ID ? VegaIcon : item.icon,
         isDisabled: item.isDisabled,
         'data-test-subj': item['data-test-subj'],
         role: 'menuitem',

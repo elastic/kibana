@@ -16,9 +16,122 @@ import type { DashboardApi } from '../../../../dashboard_api/types';
 
 jest.mock('../get_menu_item_groups', () => ({}));
 
+jest.mock('../../../../services/kibana_services', () => {
+  const ReactActual = jest.requireActual('react');
+  return {
+    embeddableService: {
+      getAddFromLibraryContentComponent: jest
+        .fn()
+        .mockResolvedValue(() =>
+          ReactActual.createElement(
+            'div',
+            { 'data-test-subj': 'mockLibraryContent' },
+            'Library content'
+          )
+        ),
+    },
+  };
+});
+
 const mockDashboardApi = {} as unknown as DashboardApi;
 
 describe('AddPanelFlyout', () => {
+  describe('tabs', () => {
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../get_menu_item_groups').getMenuItemGroups = async () => [];
+    });
+
+    test('renders "New" and "From library" tabs', async () => {
+      render(
+        <IntlProvider locale="en">
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
+        </IntlProvider>
+      );
+
+      expect(screen.getByTestId('addToDashboardTab-new')).toBeInTheDocument();
+      expect(screen.getByTestId('addToDashboardTab-library')).toBeInTheDocument();
+    });
+
+    test('defaults to "New" tab', async () => {
+      render(
+        <IntlProvider locale="en">
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
+        </IntlProvider>
+      );
+
+      const newTab = screen.getByTestId('addToDashboardTab-new');
+      expect(newTab).toHaveAttribute('aria-selected', 'true');
+    });
+
+    test('switches to "From library" tab on click', async () => {
+      render(
+        <IntlProvider locale="en">
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
+        </IntlProvider>
+      );
+
+      await userEvent.click(screen.getByTestId('addToDashboardTab-library'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockLibraryContent')).toBeInTheDocument();
+      });
+    });
+
+    test('opens to "From library" tab when initialTab is "library"', async () => {
+      render(
+        <IntlProvider locale="en">
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+            initialTab="library"
+          />
+        </IntlProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockLibraryContent')).toBeInTheDocument();
+      });
+
+      const libraryTab = screen.getByTestId('addToDashboardTab-library');
+      expect(libraryTab).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  describe('header', () => {
+    beforeEach(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../get_menu_item_groups').getMenuItemGroups = async () => [];
+    });
+
+    test('displays "Add to dashboard" heading', async () => {
+      render(
+        <IntlProvider locale="en">
+          <AddPanelFlyout
+            dashboardApi={mockDashboardApi}
+            ariaLabelledBy="addPanelFlyout"
+            closeFlyout={jest.fn()}
+          />
+        </IntlProvider>
+      );
+
+      expect(screen.getByText('Add to dashboard')).toBeInTheDocument();
+    });
+  });
+
   describe('getMenuItemGroups throws', () => {
     beforeEach(() => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires

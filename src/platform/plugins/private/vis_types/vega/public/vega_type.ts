@@ -35,7 +35,8 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
   icon: 'code',
   group: VisGroups.PROMOTED,
   titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
-    defaultMessage: 'Custom visualization',
+    defaultMessage: 'Vega',
+    description: 'Vega is a product name and should not be translated',
   }),
   visConfig: { defaults: { spec: getDefaultSpec() } },
   editorConfig: {
