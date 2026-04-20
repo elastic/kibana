@@ -26,8 +26,8 @@ import { isSection } from '../types';
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
-    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config.attributes);
+  if (type === LENS_EMBEDDABLE_TYPE && isLensAPIFormat(config)) {
+    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config);
     configObject = {
       ...config,
       attributes: lensAttributes,

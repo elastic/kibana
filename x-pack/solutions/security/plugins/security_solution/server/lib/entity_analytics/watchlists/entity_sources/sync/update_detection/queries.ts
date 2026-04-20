@@ -66,14 +66,20 @@ export const buildEntitiesSearchBody = (
   afterKey?: AfterKey,
   pageSize: number = 100,
   syncMarker?: string,
-  allowedEntityIds?: string[]
+  allowedEntityIds?: string[],
+  queryRule?: string
 ): Omit<estypes.SearchRequest, 'index'> => {
-  const must = [euid.dsl.getEuidDocumentsContainsIdFilter(entityType)];
+  const must: estypes.QueryDslQueryContainer[] = [
+    euid.dsl.getEuidDocumentsContainsIdFilter(entityType),
+  ];
   if (allowedEntityIds && allowedEntityIds.length > 0) {
     must.push({ terms: { [EUID_RUNTIME_FIELD]: allowedEntityIds } });
   }
   if (syncMarker) {
     must.push({ range: { '@timestamp': { gte: syncMarker, lte: 'now' } } });
+  }
+  if (queryRule) {
+    must.push(toElasticsearchQuery(fromKueryExpression(queryRule)));
   }
 
   const entitiesComposite = {
