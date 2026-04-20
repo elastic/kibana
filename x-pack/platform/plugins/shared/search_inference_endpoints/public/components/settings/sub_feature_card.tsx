@@ -28,18 +28,42 @@ import {
   euiDragDropReorder,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { css } from '@emotion/react';
 import * as translations from '../../../common/translations';
-import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
-import { getModelId } from '../../utils/get_model_id';
+import { getProviderKeyForCreator } from '../../utils/eis_utils';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
+import { useConnectors } from '../../hooks/use_connectors';
 
 const COLLAPSED_COUNT = 5;
+
+const getConnectorIcon = (connector: InferenceConnector): string => {
+  let key: string | undefined;
+  switch (connector.type) {
+    case InferenceConnectorType.OpenAI:
+      key = connector.config?.apiProvider === 'Azure OpenAI' ? 'azureopenai' : 'openai';
+      break;
+    case InferenceConnectorType.Bedrock:
+      key = 'amazonbedrock';
+      break;
+    case InferenceConnectorType.Gemini:
+      key = 'googlevertexai';
+      break;
+    case InferenceConnectorType.Inference:
+      key =
+        getProviderKeyForCreator(connector.config?.modelCreator) ??
+        connector.config?.service ??
+        connector.config?.provider;
+      break;
+  }
+  return SERVICE_PROVIDERS[key as ServiceProviderKeys]?.icon ?? 'compute';
+};
 
 interface SubFeatureCardProps {
   featureId: string;
@@ -56,7 +80,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   onEndpointsChange,
   invalidEndpointIds,
 }) => {
-  const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
+  const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
@@ -75,15 +99,15 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const endpointDisplayMap = useMemo(
     () =>
       new Map(
-        inferenceEndpoints.map((ep) => [
-          ep.inference_id,
+        connectors.map((connector) => [
+          connector.connectorId,
           {
-            icon: SERVICE_PROVIDERS[ep.service as ServiceProviderKeys]?.icon ?? 'compute',
-            label: getModelId(ep) ?? ep.inference_id,
+            icon: getConnectorIcon(connector),
+            label: connector.name,
           },
         ])
       ),
-    [inferenceEndpoints]
+    [connectors]
   );
 
   const hasOtherSubFeatures = registeredFeatures.some(
