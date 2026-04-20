@@ -26,7 +26,7 @@ import type {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
@@ -75,16 +75,6 @@ export type EntityStoreRequestHandlerContext = CustomRequestHandlerContext<{
 export type EntityStorePluginRouter = IRouter<EntityStoreRequestHandlerContext>;
 
 export type RegisterEntityMaintainer = (config: RegisterEntityMaintainerConfig) => void;
-export interface EntityStorePostInstallHookContext {
-  request: KibanaRequest;
-  namespace: string;
-  core: CoreRequestHandlerContext;
-  logger: Logger;
-}
-export type EntityStorePostInstallHook = (
-  context: EntityStorePostInstallHookContext
-) => Promise<void>;
-export type RegisterPostInstallHook = (hook: EntityStorePostInstallHook) => void;
 
 export type EntityStoreCRUDClient = Omit<CRUDClient, 'createEntity'>;
 
@@ -95,7 +85,6 @@ export interface EntityStoreStartContract {
 
 export interface EntityStoreSetupContract {
   registerEntityMaintainer: RegisterEntityMaintainer;
-  registerPostInstallHook: RegisterPostInstallHook;
 }
 
 export type EntityStoreCoreSetup = CoreSetup<EntityStoreStartPlugins, EntityStoreStartContract>;

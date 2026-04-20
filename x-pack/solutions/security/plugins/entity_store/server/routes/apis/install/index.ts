@@ -8,16 +8,13 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
-import type { EntityStorePluginRouter, EntityStorePostInstallHook } from '../../../types';
+import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { BodySchema } from './validator';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { getMissingPrivileges } from '../utils/get_missing_privileges';
 
-export function registerInstall(
-  router: EntityStorePluginRouter,
-  postInstallHooks: EntityStorePostInstallHook[] = []
-) {
+export function registerInstall(router: EntityStorePluginRouter) {
   router.versioned
     .post({
       path: ENTITY_STORE_ROUTES.public.INSTALL,
@@ -63,16 +60,6 @@ export function registerInstall(
         }
 
         await assetManager.init(req, toInstall, logExtraction, historySnapshot);
-        if (postInstallHooks.length > 0) {
-          for (const hook of postInstallHooks) {
-            await hook({
-              request: req,
-              namespace: entityStoreCtx.namespace,
-              core: entityStoreCtx.core,
-              logger,
-            });
-          }
-        }
 
         return res.created({ body: { ok: true } });
       })

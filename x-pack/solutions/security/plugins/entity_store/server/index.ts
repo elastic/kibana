@@ -11,7 +11,6 @@ export type {
   EntityStoreSetupContract,
   EntityStoreStartContract,
   EntityStoreCRUDClient,
-  EntityStorePostInstallHookContext,
 } from './types';
 export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
