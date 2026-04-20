@@ -138,6 +138,7 @@ export async function runDockerGenerator(
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
     fips: flags.fips,
+    opikApiKey: process.env.OPIK_API_KEY,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
