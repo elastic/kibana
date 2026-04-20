@@ -227,7 +227,7 @@
               "<TApplicationType>"
             ],
             "path": "src/platform/packages/shared/kbn-storage-adapter/src/index_adapter/index.ts",
-            "lineNumber": 646,
+            "lineNumber": 652,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
