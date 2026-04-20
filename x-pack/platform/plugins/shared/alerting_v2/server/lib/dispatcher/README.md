@@ -62,6 +62,19 @@ The pipeline then moves through these phases:
 9. Dispatch eligible groups
 10. Store final actions and reasons
 
+### Decision outcomes written to `.alert-actions`
+
+By the end of a dispatcher run, every episode that reached the later pipeline stages falls into one of these buckets:
+
+| Outcome | What happened | Action documents written |
+| --- | --- | --- |
+| `dispatch` | The episode matched a policy, survived suppression and throttling, and was selected for delivery. | `fire` per episode, plus `notified` per notification group |
+| `throttled` | The episode matched a policy, but the notification group was held back by throttling. | `suppress` with a throttle-related reason |
+| `suppressed` | The episode was explicitly filtered out by suppression logic such as ack, snooze, or deactivate semantics. | `suppress` with the suppression reason |
+| `unmatched` | The episode remained dispatchable but matched no enabled notification policy. | `unmatched` |
+
+The full action taxonomy, including user-written actions such as `ack` and `snooze`, is documented in [`../../resources/README.md`](../../resources/README.md).
+
 ## Architecture
 
 The dispatcher combines:

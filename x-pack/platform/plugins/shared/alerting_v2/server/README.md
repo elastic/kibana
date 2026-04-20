@@ -69,9 +69,9 @@ Each event has:
 - `status`: `breached`, `recovered`, or `no_data`
 - `group_hash`: the series identifier inside that rule
 - `data`: the flattened ES|QL row payload
-- optional `episode.*` fields for alert-type rules
+- `episode.*` fields for persisted alert-type rules
 
-`signal` events stop here. `alert` events continue into lifecycle and notification processing.
+`signal` events stop here. Persisted `alert` events continue into lifecycle and notification processing and are expected to carry `episode.*` after `DirectorStep` enriches them.
 
 ### Series
 

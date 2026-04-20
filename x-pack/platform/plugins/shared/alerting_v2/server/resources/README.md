@@ -98,6 +98,44 @@ Readers:
 
 Runtime schema: `alertActionSchema` in `datastreams/alert_actions.ts`
 
+## Alert action taxonomy
+
+`action_type` is the main vocabulary carried by `.alert-actions`. In practice the current system writes two broad categories of actions.
+
+### User or API initiated actions
+
+These actions are created through the alert action routes and clients. They change how later dispatcher runs interpret an alert or episode.
+
+| Action type | Written by | Meaning |
+| --- | --- | --- |
+| `ack` | User/API | Marks an alert or episode as acknowledged. |
+| `unack` | User/API | Clears a previous acknowledgement. |
+| `snooze` | User/API | Temporarily suppresses notification handling, usually with an expiry. |
+| `unsnooze` | User/API | Clears an active snooze. |
+| `deactivate` | User/API | Disables the alert or episode from active notification handling. |
+| `activate` | User/API | Reverses a previous deactivation. |
+| `tag` | User/API | Attaches tags/metadata to the alert action history. |
+
+### Dispatcher outcome actions
+
+These actions are written by `StoreActionsStep` to record what the dispatcher decided during a run.
+
+| Action type | Written by | Meaning |
+| --- | --- | --- |
+| `fire` | Dispatcher | This episode was eligible for dispatch in the current run. |
+| `notified` | Dispatcher | A notification group was actually scheduled/sent. This is group-level history used for throttling. |
+| `suppress` | Dispatcher | The episode was intentionally not fired in this run, for example because suppression logic or throttling held it back. |
+| `unmatched` | Dispatcher | The episode stayed dispatchable but matched no enabled notification policy. |
+
+### Why both `fire` and `notified` exist
+
+The dispatcher records both per-episode and per-group outcomes:
+
+- `fire` means an individual episode reached the dispatch stage
+- `notified` means a notification group was actually sent and is the durable record later throttling queries look at
+
+That distinction is why `.alert-actions` stores both episode-scoped and notification-group-scoped fields.
+
 ## ES|QL views
 
 ES|QL views are registered as `optional: true`, which lets Kibana start even on clusters without ES|QL view support.
