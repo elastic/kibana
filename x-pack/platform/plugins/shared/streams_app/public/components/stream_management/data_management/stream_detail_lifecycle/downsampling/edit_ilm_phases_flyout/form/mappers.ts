@@ -12,7 +12,8 @@ import type {
   IlmPolicyPhase,
   IlmPolicyPhases,
 } from '@kbn/streams-schema';
-import type { IlmPhasesFlyoutFormInternal } from './types';
+import type { IlmPhasesFlyoutFormInternal, PreservedTimeUnit } from './types';
+import { parseInterval } from './utils';
 
 type AnyRecord = Record<string, unknown>;
 type DownsampleOutput = { after: string; fixed_interval: string } & AnyRecord;
@@ -35,13 +36,95 @@ const formatDownsampleInterval = (
   return `${value}${unit}`;
 };
 
-export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases = {}) => {
+/**
+ * Maps the saved ILM phases shape into RHF `defaultValues` (internal form model).
+ */
+export const mapIlmPolicyPhasesToFormValues = (
+  phases: IlmPolicyPhases
+): IlmPhasesFlyoutFormInternal => {
+  const withMillis = (duration: string | undefined) => {
+    const parsed = parseInterval(duration);
+    const minAgeValue = parsed?.value ?? '';
+    const minAgeUnit = (parsed?.unit ?? 'd') as PreservedTimeUnit;
+    return {
+      minAgeValue,
+      minAgeUnit,
+    };
+  };
+
+  const withDownsampleDefaults = (fixedInterval: string | undefined) => {
+    const parsed = parseInterval(fixedInterval);
+    return {
+      fixedIntervalValue: parsed?.value ?? '1',
+      fixedIntervalUnit: (parsed?.unit ?? 'd') as PreservedTimeUnit,
+    };
+  };
+
+  const searchableSnapshotRepository =
+    phases.cold?.searchable_snapshot ?? phases.frozen?.searchable_snapshot ?? '';
+
+  return {
+    _meta: {
+      hot: {
+        enabled: Boolean(phases.hot),
+        sizeInBytes: phases.hot?.size_in_bytes ?? 0,
+        rollover: phases.hot?.rollover ?? {},
+        readonlyEnabled: Boolean(phases.hot?.readonly),
+        downsampleEnabled: Boolean(phases.hot?.downsample),
+        downsample: {
+          ...withDownsampleDefaults(phases.hot?.downsample?.fixed_interval),
+        },
+      },
+      warm: {
+        enabled: Boolean(phases.warm),
+        sizeInBytes: phases.warm?.size_in_bytes ?? 0,
+        readonlyEnabled: Boolean(phases.warm?.readonly),
+        downsampleEnabled: Boolean(phases.warm?.downsample),
+        downsample: {
+          ...withDownsampleDefaults(phases.warm?.downsample?.fixed_interval),
+        },
+        ...withMillis(phases.warm?.min_age ?? phases.warm?.downsample?.after),
+      },
+      cold: {
+        enabled: Boolean(phases.cold),
+        sizeInBytes: phases.cold?.size_in_bytes ?? 0,
+        readonlyEnabled: Boolean(phases.cold?.readonly),
+        downsampleEnabled: Boolean(phases.cold?.downsample),
+        downsample: {
+          ...withDownsampleDefaults(phases.cold?.downsample?.fixed_interval),
+        },
+        searchableSnapshotEnabled: Boolean(phases.cold?.searchable_snapshot),
+        ...withMillis(phases.cold?.min_age ?? phases.cold?.downsample?.after),
+      },
+      frozen: {
+        enabled: Boolean(phases.frozen),
+        ...withMillis(phases.frozen?.min_age),
+      },
+      delete: {
+        enabled: Boolean(phases.delete),
+        deleteSearchableSnapshotEnabled: phases.delete
+          ? phases.delete?.delete_searchable_snapshot == null
+            ? true
+            : Boolean(phases.delete?.delete_searchable_snapshot)
+          : true,
+        ...withMillis(phases.delete?.min_age),
+      },
+      searchableSnapshot: {
+        repository: searchableSnapshotRepository,
+      },
+    },
+  };
+};
+
+/**
+ * Maps RHF form values into the saved ILM phases shape, preserving unknown fields by
+ * cloning and overlaying onto an initial baseline.
+ */
+export const createMapFormValuesToIlmPolicyPhases = (baselinePhases: IlmPolicyPhases = {}) => {
   return (data: IlmPhasesFlyoutFormInternal): IlmPolicyPhases => {
-    const next: IlmPolicyPhases = cloneDeep(initialPhases);
+    const next: IlmPolicyPhases = cloneDeep(baselinePhases);
     const meta = data._meta;
 
-    // During initial mount, hook-form may call the serializer with partial data.
-    // In that case, keep the initial phases unchanged.
     if (!meta) {
       return next;
     }
@@ -203,12 +286,24 @@ export const createIlmPhasesFlyoutSerializer = (initialPhases: IlmPolicyPhases =
       delete next.delete;
     } else {
       const previous = (next.delete ?? {}) as Partial<IlmPolicyDeletePhase>;
+      const deleteSearchableSnapshotEnabled = Boolean(meta.delete.deleteSearchableSnapshotEnabled);
       const del: IlmPolicyDeletePhase = {
         ...previous,
         name: 'delete',
         min_age: formatDuration(meta.delete.minAgeValue, meta.delete.minAgeUnit) ?? '',
-        delete_searchable_snapshot: Boolean(meta.delete.deleteSearchableSnapshotEnabled),
       };
+
+      if (!deleteSearchableSnapshotEnabled) {
+        del.delete_searchable_snapshot = false;
+      } else if (previous.delete_searchable_snapshot === true) {
+        del.delete_searchable_snapshot = true;
+      } else if (previous.delete_searchable_snapshot === false) {
+        // Preserve explicit `false` -> `true` transitions (user enabled the default behavior).
+        del.delete_searchable_snapshot = true;
+      } else {
+        // Preserve omission when the baseline omits the field and the UI is in the default "enabled" state.
+        delete del.delete_searchable_snapshot;
+      }
 
       next.delete = del;
     }

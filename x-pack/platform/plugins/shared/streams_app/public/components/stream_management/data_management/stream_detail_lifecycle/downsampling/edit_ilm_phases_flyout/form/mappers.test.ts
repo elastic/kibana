@@ -8,17 +8,16 @@
 import { cloneDeep } from 'lodash';
 import type { IlmPolicyPhases } from '@kbn/streams-schema';
 
-import { createIlmPhasesFlyoutDeserializer } from './deserializer';
-import { createIlmPhasesFlyoutSerializer } from './serializer';
+import { createMapFormValuesToIlmPolicyPhases, mapIlmPolicyPhasesToFormValues } from './mappers';
 import type { IlmPhasesFlyoutFormInternal } from './types';
 
 const unknownValue = { some: 'value' };
 
-describe('streams ILM phases flyout deserializer and serializer', () => {
-  const deserializer = createIlmPhasesFlyoutDeserializer();
+describe('streams ILM phases flyout mappers', () => {
+  const toFormValues = mapIlmPolicyPhasesToFormValues;
 
   let phases: IlmPolicyPhases;
-  let serializer: ReturnType<typeof createIlmPhasesFlyoutSerializer>;
+  let toPhases: ReturnType<typeof createMapFormValuesToIlmPolicyPhases>;
   let formInternal: IlmPhasesFlyoutFormInternal;
 
   beforeEach(() => {
@@ -81,29 +80,29 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
       } as any,
     };
 
-    formInternal = deserializer(phases);
-    // clone here so we can mutate `phases` while serializer keeps original reference semantics
-    serializer = createIlmPhasesFlyoutSerializer(cloneDeep(phases));
+    formInternal = toFormValues(phases);
+    // clone here so we can mutate `phases` while the mapper keeps baseline reference semantics
+    toPhases = createMapFormValuesToIlmPolicyPhases(cloneDeep(phases));
   });
 
   it('does not mutate the input phases object', () => {
     const input = cloneDeep(phases);
     const copy = cloneDeep(input);
 
-    deserializer(input);
+    toFormValues(input);
     expect(input).toEqual(copy);
   });
 
-  it('preserves unknown properties by serializing onto initialPhases', () => {
+  it('preserves unknown properties by mapping onto initialPhases', () => {
     const input = cloneDeep(phases);
     // Assert round trip keeps unknown fields.
-    const internal = deserializer(input);
-    const out = createIlmPhasesFlyoutSerializer(input)(internal);
+    const internal = toFormValues(input);
+    const out = createMapFormValuesToIlmPolicyPhases(input)(internal);
     expect(out).toEqual(input);
 
-    // Assert that the initial object passed to createIlmPhasesFlyoutSerializer() is not mutated.
+    // Assert that the baseline object passed to createMapFormValuesToIlmPolicyPhases() is not mutated.
     const copy = cloneDeep(input);
-    createIlmPhasesFlyoutSerializer(input)(internal);
+    createMapFormValuesToIlmPolicyPhases(input)(internal);
     expect(input).toEqual(copy);
   });
 
@@ -117,7 +116,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     internal._meta.warm.downsample.fixedIntervalUnit = 'd';
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const out = serializer(internal) as any;
+    const out = toPhases(internal) as any;
     expect(out.warm.downsample).toEqual({
       after: '20d',
       fixed_interval: '6d',
@@ -131,13 +130,13 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     formInternal._meta.frozen.enabled = false;
     formInternal._meta.delete.enabled = false;
 
-    expect(serializer(formInternal)).toEqual({
+    expect(toPhases(formInternal)).toEqual({
       hot: phases.hot,
     });
   });
 
-  it('deserializes empty phases into schema-compatible defaults', () => {
-    const internal = deserializer({});
+  it('maps empty phases into schema-compatible defaults', () => {
+    const internal = toFormValues({});
 
     expect(internal._meta.hot.enabled).toBe(false);
     expect(internal._meta.hot.downsample).toEqual({
@@ -147,7 +146,6 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     expect(internal._meta.warm.enabled).toBe(false);
     expect(internal._meta.warm.minAgeUnit).toBe('d');
     expect(internal._meta.warm.minAgeValue).toBe('');
-    expect(internal._meta.warm.minAgeToMilliSeconds).toBe(-1);
     expect(internal._meta.cold.enabled).toBe(false);
     expect(internal._meta.frozen.enabled).toBe(false);
     expect(internal._meta.delete.enabled).toBe(false);
@@ -156,17 +154,30 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
   });
 
   it('defaults delete_searchable_snapshot to true when delete phase omits it', () => {
-    const internal = deserializer({
+    const internal = toFormValues({
       delete: { name: 'delete', min_age: '1d' } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     });
     expect(internal._meta.delete.deleteSearchableSnapshotEnabled).toBe(true);
 
-    const internal2 = deserializer({});
+    const internal2 = toFormValues({});
     expect(internal2._meta.delete.deleteSearchableSnapshotEnabled).toBe(true);
   });
 
-  it('deserializes searchable snapshot repository from cold first, then frozen', () => {
-    const internal = deserializer({
+  it('preserves delete_searchable_snapshot omission when enabled and baseline omitted it', () => {
+    const baseline: IlmPolicyPhases = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete: { name: 'delete', min_age: '1d' } as any,
+    };
+
+    const internal = toFormValues(baseline);
+    expect(internal._meta.delete.deleteSearchableSnapshotEnabled).toBe(true);
+
+    const out = createMapFormValuesToIlmPolicyPhases(cloneDeep(baseline))(internal);
+    expect(out).toEqual(baseline);
+  });
+
+  it('maps searchable snapshot repository from cold first, then frozen', () => {
+    const internal = toFormValues({
       cold: {
         name: 'cold',
         searchable_snapshot: 'coldRepo',
@@ -180,7 +191,7 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     });
     expect(internal._meta.searchableSnapshot.repository).toBe('coldRepo');
 
-    const internal2 = deserializer({
+    const internal2 = toFormValues({
       frozen: {
         name: 'frozen',
         min_age: '1d',
@@ -191,13 +202,12 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     expect(internal2._meta.searchableSnapshot.repository).toBe('fRepo');
   });
 
-  it('computes minAgeToMilliSeconds from min_age when parsing succeeds', () => {
-    const internal = deserializer({
+  it('parses min_age into value + unit when parsing succeeds', () => {
+    const internal = toFormValues({
       warm: { name: 'warm', min_age: '2d' } as any, // eslint-disable-line @typescript-eslint/no-explicit-any
     });
     expect(internal._meta.warm.minAgeValue).toBe('2');
     expect(internal._meta.warm.minAgeUnit).toBe('d');
-    expect(internal._meta.warm.minAgeToMilliSeconds).toBe(2 * 86_400_000);
   });
 
   it('round-trips preserved units like ms for min_age and downsample fixed_interval', () => {
@@ -215,18 +225,17 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
 
-    const internal = deserializer(input);
+    const internal = toFormValues(input);
     expect(internal._meta.warm.minAgeValue).toBe('1500');
     expect(internal._meta.warm.minAgeUnit).toBe('ms');
-    expect(internal._meta.warm.minAgeToMilliSeconds).toBe(1500);
     expect(internal._meta.warm.downsample.fixedIntervalValue).toBe('1500');
     expect(internal._meta.warm.downsample.fixedIntervalUnit).toBe('ms');
 
-    const out = createIlmPhasesFlyoutSerializer(cloneDeep(input))(internal);
+    const out = createMapFormValuesToIlmPolicyPhases(cloneDeep(input))(internal);
     expect(out).toEqual(input);
   });
 
-  it('serializes searchable_snapshot for cold only when enabled; frozen always when enabled', () => {
+  it('maps searchable_snapshot for cold only when enabled; frozen always when enabled', () => {
     const internal: IlmPhasesFlyoutFormInternal = cloneDeep(formInternal);
     internal._meta.searchableSnapshot.repository = 'repo1';
 
@@ -234,13 +243,13 @@ describe('streams ILM phases flyout deserializer and serializer', () => {
     internal._meta.frozen.enabled = true;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const out = serializer(internal) as any;
+    const out = toPhases(internal) as any;
     expect(out.cold.searchable_snapshot).toBeUndefined();
     expect(out.frozen.searchable_snapshot).toEqual('repo1');
 
     internal._meta.cold.searchableSnapshotEnabled = true;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const out2 = serializer(internal) as any;
+    const out2 = toPhases(internal) as any;
     expect(out2.cold.searchable_snapshot).toEqual('repo1');
     expect(out2.frozen.searchable_snapshot).toEqual('repo1');
   });
