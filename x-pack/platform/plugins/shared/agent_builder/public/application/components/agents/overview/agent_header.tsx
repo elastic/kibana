@@ -19,6 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -47,7 +48,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
   `;
 
   let createdByUsername = agent.created_by?.username;
-  if (createdByUsername === 'system') {
+  if (createdByUsername === SYSTEM_USER_ID) {
     createdByUsername = overviewLabels.createdByElastic;
   }
   const byAuthorLabel = createdByUsername && overviewLabels.byAuthor(createdByUsername);
