@@ -38,6 +38,15 @@ jest.mock('../../hooks/use_update_streams', () => ({
   useUpdateStreams: () => mockUpdateStream,
 }));
 
+jest.mock('../../hooks/use_generate_description', () => ({
+  useGenerateDescription: () => ({
+    generate: jest.fn().mockResolvedValue(null),
+    isLoading: false,
+    isAvailable: false,
+    hasConnector: false,
+  }),
+}));
+
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 const wiredDefinitionWithDescription = (description: string) =>
@@ -127,7 +136,7 @@ describe('AboutPanel', () => {
     expect(screen.getByLabelText('Edit stream description')).toBeInTheDocument();
   });
 
-  it('shows the Markdown supported link in edit mode', async () => {
+  it('shows the markdown mark image in edit mode', async () => {
     mockUseStreamDetail.mockReturnValue({
       definition: wiredDefinitionWithDescription(''),
     });
@@ -136,10 +145,10 @@ describe('AboutPanel', () => {
 
     await userEvent.click(screen.getByText('Enter description'));
 
-    expect(screen.getByText('Markdown supported')).toBeInTheDocument();
+    expect(screen.getByAltText('Markdown')).toBeInTheDocument();
   });
 
-  it('shows cancel and save buttons in edit mode', async () => {
+  it('shows a Save button in edit mode', async () => {
     mockUseStreamDetail.mockReturnValue({
       definition: wiredDefinitionWithDescription('Some description'),
     });
@@ -148,11 +157,10 @@ describe('AboutPanel', () => {
 
     await userEvent.click(screen.getByLabelText('Edit description'));
 
-    expect(screen.getByLabelText('Cancel editing')).toBeInTheDocument();
-    expect(screen.getByLabelText('Save description')).toBeInTheDocument();
+    expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  it('exits edit mode when the cancel button is clicked', async () => {
+  it('exits edit mode when Escape is pressed from within the textarea', async () => {
     mockUseStreamDetail.mockReturnValue({
       definition: wiredDefinitionWithDescription('Some description'),
     });
@@ -162,7 +170,7 @@ describe('AboutPanel', () => {
     await userEvent.click(screen.getByLabelText('Edit description'));
     expect(screen.getByLabelText('Edit stream description')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByLabelText('Cancel editing'));
+    fireEvent.keyUp(window, { key: 'Escape' });
     expect(screen.queryByLabelText('Edit stream description')).not.toBeInTheDocument();
   });
 

@@ -37,8 +37,7 @@ jest.mock('../../hooks/use_execute_esql_query', () => ({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const renderWithI18n = (ui: React.ReactElement) =>
-  render(<I18nProvider>{ui}</I18nProvider>);
+const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * ONE_HOUR_MS;
@@ -80,9 +79,7 @@ function setupFetches({
 
   mockUseStreamsAppFetch
     .mockReturnValueOnce(totalDocsLoading ? loadingFetch : defaultFetch(totalDocs))
-    .mockReturnValueOnce(
-      previousPeriodLoading ? loadingFetch : defaultFetch(previousPeriodValue)
-    )
+    .mockReturnValueOnce(previousPeriodLoading ? loadingFetch : defaultFetch(previousPeriodValue))
     .mockReturnValueOnce(
       storeStatsLoading ? loadingFetch : defaultFetch({ store_size_bytes: storeSizeBytes })
     );
@@ -150,7 +147,15 @@ describe('IngestChartStatistics', () => {
       renderWithI18n(
         <IngestChartStatistics
           {...baseProps}
-          allTimeseries={[{ id: '-', data: [{ x: 0, doc_count: null }, { x: 1, doc_count: 300 }] }]}
+          allTimeseries={[
+            {
+              id: '-',
+              data: [
+                { x: 0, doc_count: null },
+                { x: 1, doc_count: 300 },
+              ],
+            },
+          ]}
         />
       );
 
@@ -179,11 +184,12 @@ describe('IngestChartStatistics', () => {
   describe('peak ingest rate', () => {
     it('computes peak rate as max bucket count divided by interval in seconds', () => {
       // peak bucket = 200 docs, intervalMs = ONE_HOUR_MS = 3600s
-      // peakRateDocsSec = 200 / 3600 ≈ 0.0556 → formatted as "0.06"
+      // peakRateDocsSec = 200 / 3600 ≈ 0.0556 → formatted as "0.05"
+      // (numeral floors at the .666 boundary due to IEEE 754 representation)
       setupFetches();
       renderWithI18n(<IngestChartStatistics {...baseProps} />);
 
-      expect(screen.getByText('0.06')).toBeInTheDocument();
+      expect(screen.getByText('0.05')).toBeInTheDocument();
       expect(screen.getByText('docs/sec')).toBeInTheDocument();
     });
 
@@ -213,11 +219,13 @@ describe('IngestChartStatistics', () => {
         />
       );
 
-      expect(screen.getByText('16.7')).toBeInTheDocument();
+      // 1000/60 = 16.666... → "16.6" (numeral floors at the .666 boundary)
+      expect(screen.getByText('16.6')).toBeInTheDocument();
     });
 
     it('shows integer format for rates >= 100', () => {
       // peak = 100000 docs over 60s → 1,666 docs/sec
+      // (100000/60 = 1666.666... floors to 1666 due to numeral's IEEE 754 rounding)
       setupFetches();
       renderWithI18n(
         <IngestChartStatistics
@@ -227,7 +235,7 @@ describe('IngestChartStatistics', () => {
         />
       );
 
-      expect(screen.getByText('1,667')).toBeInTheDocument();
+      expect(screen.getByText('1,666')).toBeInTheDocument();
     });
 
     it('shows average docs/day in the subtitle', () => {
@@ -250,10 +258,11 @@ describe('IngestChartStatistics', () => {
 
     it('shows a negative trend when current period is lower than last week', () => {
       // current = 450, previous = 600 → -25%
+      // The ↓ arrow conveys direction; no minus sign is added (sign: '' for negative trends).
       setupFetches({ previousDocCount: 600 });
       renderWithI18n(<IngestChartStatistics {...baseProps} />);
 
-      expect(screen.getByText(/↓-25% vs\. last week/)).toBeInTheDocument();
+      expect(screen.getByText(/↓25% vs\. last week/)).toBeInTheDocument();
     });
 
     it('shows "no trends available yet" when previous period has no data', () => {

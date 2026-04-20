@@ -37,8 +37,15 @@ jest.mock('../../hooks/use_time_range', () => ({
   useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
 }));
 
+jest.mock('./top_failure_reasons', () => ({
+  TopFailureReasons: () => null,
+}));
+
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: {
+      application: { navigateToUrl: jest.fn() },
+    },
     dependencies: {
       start: {
         data: { search: { search: jest.fn() } },
