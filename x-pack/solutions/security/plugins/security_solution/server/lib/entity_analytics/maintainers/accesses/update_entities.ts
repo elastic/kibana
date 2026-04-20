@@ -6,24 +6,52 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import type { EntityUpdateClient, BulkObject } from '@kbn/entity-store/server';
 import type { EntityType } from '@kbn/entity-store/common';
 import type { Entity } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 
+import { groupByEntityId } from '../group_by_entity_id';
 import type { ProcessedEntityRecord } from './types';
 
-function buildEntityDoc(record: ProcessedEntityRecord): Entity {
+type ValidRecord = ProcessedEntityRecord & { entityId: string };
+
+interface MergedEntity {
+  frequently: Set<string>;
+  infrequently: Set<string>;
+}
+
+function filterValid(records: ProcessedEntityRecord[]): ValidRecord[] {
+  return records.filter(
+    (r): r is ValidRecord =>
+      r.entityId !== null &&
+      (r.accesses_frequently.ids.length > 0 || r.accesses_infrequently.ids.length > 0)
+  );
+}
+
+function seed(r: ValidRecord): MergedEntity {
   return {
-    entity: {
-      id: record.entityId,
-      relationships: {
-        accesses_frequently:
-          record.accesses_frequently.length > 0 ? record.accesses_frequently : undefined,
-        accesses_infrequently:
-          record.accesses_infrequently.length > 0 ? record.accesses_infrequently : undefined,
-      },
-    },
-  } as Entity;
+    frequently: new Set(r.accesses_frequently.ids),
+    infrequently: new Set(r.accesses_infrequently.ids),
+  };
+}
+
+function merge(acc: MergedEntity, r: ValidRecord): MergedEntity {
+  for (const id of r.accesses_frequently.ids) acc.frequently.add(id);
+  for (const id of r.accesses_infrequently.ids) acc.infrequently.add(id);
+  return acc;
+}
+
+function applyPrecedence(grouped: Map<string, MergedEntity>): Map<string, MergedEntity> {
+  for (const entity of grouped.values()) {
+    for (const id of entity.frequently) entity.infrequently.delete(id);
+  }
+  return grouped;
+}
+
+function mergeRecordsByEntityId(records: ProcessedEntityRecord[]): Map<string, MergedEntity> {
+  const valid = filterValid(records);
+  const grouped = groupByEntityId(valid, seed, merge);
+  return applyPrecedence(grouped);
 }
 
 export async function updateEntityRelationships(
@@ -34,13 +62,32 @@ export async function updateEntityRelationships(
   if (records.length === 0) return 0;
 
   const entityType: EntityType = 'user';
+  const merged = mergeRecordsByEntityId(records);
 
-  const entities = records.map((r) => ({ type: entityType, doc: buildEntityDoc(r) }));
+  const objects: BulkObject[] = Array.from(merged, ([entityId, { frequently, infrequently }]) => {
+    const frequentlyIds = Array.from(frequently);
+    const infrequentlyIds = Array.from(infrequently);
+    return {
+      type: entityType,
+      doc: {
+        entity: {
+          id: entityId,
+          relationships: {
+            accesses_frequently: frequentlyIds.length > 0 ? { ids: frequentlyIds } : undefined,
+            accesses_infrequently:
+              infrequentlyIds.length > 0 ? { ids: infrequentlyIds } : undefined,
+          },
+        },
+      } satisfies Entity,
+    };
+  });
 
-  logger.info(`Updating ${entities.length} entity relationship records via CRUD bulk API`);
-  const errors = await crudClient.bulkUpdateEntity({ objects: entities, force: true });
+  if (objects.length === 0) return 0;
 
-  const updatedCount = records.length - errors.length;
+  logger.info(`Updating ${objects.length} entity relationship records via CRUD bulk API`);
+  const errors = await crudClient.bulkUpdateEntity({ objects, force: true });
+
+  const updatedCount = objects.length - errors.length;
   if (errors.length > 0) {
     logger.error(`Failed to update ${errors.length} entity records: ${JSON.stringify(errors)}`);
   }

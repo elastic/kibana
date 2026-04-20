@@ -23,6 +23,15 @@ export interface ApiClientOptions {
   headers?: Record<string, string>;
   responseType?: 'json' | 'text' | 'buffer';
   body?: any;
+  /**
+   * Pass an AbortSignal to cancel the request mid-flight.
+   * @example
+   * const controller = new AbortController();
+   * const promise = apiClient.post(url, { signal: controller.signal, headers, body });
+   * setTimeout(() => controller.abort(), 2000);
+   * await expect(promise).rejects.toThrow();
+   */
+  signal?: AbortSignal;
 }
 
 export interface ApiClientResponse {
@@ -108,6 +117,24 @@ export const apiClientFixture = coreWorkerFixtures.extend<{}, { apiClient: ApiCl
             }
 
             req = req.send(options.body);
+          }
+
+          if (options.signal) {
+            if (options.signal.aborted) {
+              req.abort();
+            } else {
+              options.signal.addEventListener(
+                'abort',
+                () => {
+                  try {
+                    req.abort();
+                  } catch {
+                    // Swallow — the abort rejection propagates via the awaited request
+                  }
+                },
+                { once: true }
+              );
+            }
           }
 
           const res = await req;
