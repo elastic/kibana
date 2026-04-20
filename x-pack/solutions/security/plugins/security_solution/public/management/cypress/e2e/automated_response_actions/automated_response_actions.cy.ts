@@ -13,7 +13,7 @@ import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
-import { waitForAlertsToPopulate } from '../../tasks/alerts';
+import { changeAlertsFilter, waitForAlertsToPopulate } from '../../tasks/alerts';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
@@ -81,6 +81,9 @@ describe(
 
       visitRuleAlerts(ruleName);
       closeAllToasts();
+      waitForAlertsToPopulate(1, 2000, 120000);
+      // .first() must land on a Defend process alert; response actions are only linked to agent.type=endpoint with process.pid.
+      changeAlertsFilter(`agent.type: "endpoint" and process.pid: *`);
       waitForAlertsToPopulate(1, 2000, 120000);
 
       cy.getByTestSubj('expand-event').first().click();
