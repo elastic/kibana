@@ -66,7 +66,7 @@ test.describe(
         await serviceMapMenuItem.click();
 
         await expect(
-          page.getByRole('heading', { name: 'Add service map panel', level: 2 })
+          page.getByRole('heading', { name: 'Create service map panel', level: 2 })
         ).toBeVisible();
 
         // Select service name from dropdown

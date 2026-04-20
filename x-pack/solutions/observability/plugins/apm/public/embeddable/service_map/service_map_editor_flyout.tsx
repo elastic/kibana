@@ -255,7 +255,7 @@ export function ServiceMapEditorFlyout({
             ) : (
               <FormattedMessage
                 id="xpack.apm.serviceMapEditor.addTitle"
-                defaultMessage="Add service map panel"
+                defaultMessage="Create service map panel"
               />
             )}
           </h2>

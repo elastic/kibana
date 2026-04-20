@@ -96,7 +96,7 @@ describe('<ServiceMapEditorFlyout/>', () => {
   describe('when adding a new panel', () => {
     it('displays the add panel title', async () => {
       await renderFlyout();
-      expect(screen.getByText('Add service map panel')).toBeInTheDocument();
+      expect(screen.getByText('Create service map panel')).toBeInTheDocument();
     });
 
     it('displays the add panel button', async () => {
