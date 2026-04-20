@@ -342,7 +342,7 @@ The UI additionally disables edit/delete/disable controls for managed workflows 
 
 | Capability | Plugin | Rationale |
 |------------|--------|-----------|
-| **Registration API** (`registerManagedWorkflow`) | `workflows_management` (setup contract) | Registration is about workflow lifecycle (create, update, provision) — this is management's domain. Extends the existing `WorkflowsManagementApi` exposed on setup. |
+| **Registration API** (`registerManagedWorkflow`) | TBD — see [Open Questions > Registration #1](#registration) | Three candidates: `workflows_management`, `workflows_extensions`, or a dedicated package. Each has different dependency and responsibility tradeoffs. |
 | **Read-only enforcement** | `workflows_management` (service layer) | All mutation routes live in management. The guards go in `WorkflowsManagementService.updateWorkflow` / `deleteWorkflows`. |
 | **Execution** (`executeWorkflow`, `scheduleWorkflow`) | `workflows_execution_engine` (start contract) | No changes needed. The engine executes workflow definitions by ID or inline — it doesn't care if the workflow is managed. |
 | **Provisioning** (startup reconciliation, new space hook) | `workflows_management` (internal) | Management owns the workflow index and CRUD. Provisioning is a write path. |
@@ -396,7 +396,7 @@ A separate consideration from full mutation. Options:
 
 ### 3. Registration
 
-**Decision: New `registerManagedWorkflow` API on `workflows_management` setup contract.**
+**New `registerManagedWorkflow` API.** The hosting plugin/package is an open question — see [Open Questions > Registration #1](#registration). The contract and lifecycle are the same regardless of where the API lives.
 
 This is distinct from `workflows_extensions.registerStepDefinition()`:
 
