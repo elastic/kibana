@@ -223,7 +223,7 @@ export const createLeadDataClient = ({
       await esClient.deleteByQuery({
         index: indexName,
         query: {
-          bool: { must_not: [{ term: { 'execution_uuid.keyword': executionId } }] },
+          bool: { must_not: [{ term: { execution_uuid: executionId } }] },
         },
         refresh: true,
         conflicts: 'proceed',
@@ -248,7 +248,7 @@ export const createLeadDataClient = ({
     const from = (page - 1) * perPage;
     const filters: estypes.QueryDslQueryContainer[] = [];
     if (status) {
-      filters.push({ term: { 'status.keyword': status } });
+      filters.push({ term: { status } });
     }
     const query: estypes.QueryDslQueryContainer =
       filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
@@ -309,7 +309,7 @@ export const createLeadDataClient = ({
 
       const resp = await esClient.updateByQuery({
         index: allIndices,
-        query: { term: { 'id.keyword': id } },
+        query: { term: { id } },
         script: {
           source: scriptParts.join('; '),
           lang: 'painless',
@@ -344,7 +344,7 @@ export const createLeadDataClient = ({
 
     const resp = await esClient.updateByQuery({
       index: allIndices,
-      query: { terms: { 'id.keyword': [...ids] } },
+      query: { terms: { id: [...ids] } },
       script: {
         source: `ctx._source['status'] = params.status`,
         lang: 'painless',

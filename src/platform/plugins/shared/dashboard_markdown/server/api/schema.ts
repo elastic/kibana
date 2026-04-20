@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MarkdownAttributes } from '../../server/markdown_saved_object';
-import { markdownClient } from './markdown_client';
+import { schema } from '@kbn/config-schema';
+import { markdownAttributesSchema } from '../markdown_saved_object';
+import { markdownByValueStateSchema } from '../embeddable/schemas';
 
-export async function loadFromLibrary(libraryId: string): Promise<MarkdownAttributes> {
-  const { data } = await markdownClient.get(libraryId);
-  return data as MarkdownAttributes;
-}
+export const markdownLibraryItemSchema = schema.object({
+  ...markdownAttributesSchema.getPropSchemas(),
+  ...markdownByValueStateSchema.getPropSchemas(),
+});
