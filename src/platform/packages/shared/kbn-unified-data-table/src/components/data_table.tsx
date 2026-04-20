@@ -78,7 +78,7 @@ import type {
   DataGridPaginationMode,
   CustomBulkActions,
 } from '../types';
-import { getDisplayedColumns } from '../utils/columns';
+import { getDisplayedColumns, SOURCE_COLUMN } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
@@ -601,7 +601,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
-    const defaultColumns = !isPlainRecord && displayedColumns.includes('_source');
+    const defaultColumns =
+      displayedColumns.length === 1 && displayedColumns.includes(SOURCE_COLUMN);
     const docMap = useMemo(
       () =>
         new Map<string, { doc: DataTableRecord; docIndex: number }>(
