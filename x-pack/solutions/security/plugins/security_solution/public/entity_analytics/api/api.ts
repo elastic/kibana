@@ -857,12 +857,12 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params?: { maxLeads?: number };
+      params: { connectorId: string; maxLeads?: number };
     }) =>
       http.fetch<GenerateLeadsResponse>(GENERATE_LEADS_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
-        body: JSON.stringify(params ?? {}),
+        body: JSON.stringify(params),
         signal,
       });
 
@@ -887,10 +887,11 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
-    const enableLeadGeneration = () =>
+    const enableLeadGeneration = ({ connectorId }: { connectorId: string }) =>
       http.fetch<{ success: boolean }>(ENABLE_LEAD_GENERATION_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
+        body: JSON.stringify({ connectorId }),
       });
 
     const disableLeadGeneration = () =>
