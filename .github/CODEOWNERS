@@ -774,6 +774,7 @@ src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizations
 src/platform/plugins/private/files_management @elastic/appex-sharedux
 src/platform/plugins/private/ftr_apis @elastic/kibana-core
+src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
 src/platform/plugins/private/image_embeddable @elastic/appex-sharedux
 src/platform/plugins/private/input_control_vis @elastic/kibana-presentation
 src/platform/plugins/private/inspect_component @elastic/appex-sharedux

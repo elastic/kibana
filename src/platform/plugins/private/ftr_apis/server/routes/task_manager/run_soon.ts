@@ -34,7 +34,11 @@ export const registerTaskManagerRunSoonRoute = (
         }),
       },
     },
-    async (_context: RequestHandlerContext, req: KibanaRequest, res: KibanaResponseFactory) => {
+    async (
+      _context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ) => {
       const startContract = getStartContract();
       if (!startContract) {
         return res.customError({
@@ -43,7 +47,7 @@ export const registerTaskManagerRunSoonRoute = (
         });
       }
 
-      const { taskId } = req.params as { taskId: string };
+      const { taskId } = req.params;
 
       try {
         return res.ok({ body: await startContract.runSoon(taskId) });

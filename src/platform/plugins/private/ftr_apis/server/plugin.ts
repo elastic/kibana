@@ -13,7 +13,7 @@ import { registerRoutes } from './routes';
 import type { ConfigType } from './config';
 
 interface FtrApisStartDeps {
-  taskManager?: TaskManagerStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 export class FtrApisPlugin implements Plugin<void, void, {}, FtrApisStartDeps> {
