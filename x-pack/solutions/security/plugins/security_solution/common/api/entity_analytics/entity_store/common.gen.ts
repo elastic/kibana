@@ -16,85 +16,190 @@
 
 import { z } from '@kbn/zod/v4';
 
+/**
+ * The type of entity.
+ */
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
+/**
+ * The top-level Elastic Common Schema (ECS) field group that the entity maps to.
+ */
 export type BaseECSEntityField = z.infer<typeof BaseECSEntityField>;
 export const BaseECSEntityField = z.enum(['user', 'host', 'service', 'entity']);
 export type BaseECSEntityFieldEnum = typeof BaseECSEntityField.enum;
 export const BaseECSEntityFieldEnum = BaseECSEntityField.enum;
 
+/**
+ * An additional Elasticsearch index pattern to include as a source for entity data. Merged with the default data view indices when the engine runs.
+ */
 export type IndexPattern = z.infer<typeof IndexPattern>;
 export const IndexPattern = z.string();
 
+/**
+ * The current operational status of an entity engine.
+ */
 export type EngineStatus = z.infer<typeof EngineStatus>;
 export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updating', 'error']);
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 
+/**
+ * Describes a single entity engine, including its configuration and current status.
+ */
 export type EngineDescriptor = z.infer<typeof EngineDescriptor>;
 export const EngineDescriptor = z.object({
   type: EntityType,
   indexPattern: IndexPattern,
   status: EngineStatus,
+  /**
+   * An optional Kibana Query Language (KQL) filter applied to source documents before aggregation.
+   */
   filter: z.string().optional(),
+  /**
+   * The number of historical values retained per field.
+   */
   fieldHistoryLength: z.number().int(),
+  /**
+   * How far back the transform looks when calculating aggregations.
+   */
   lookbackPeriod: z
     .string()
     .regex(/[smdh]$/)
     .optional()
     .default('24h'),
+  /**
+   * The field used as the timestamp for source documents.
+   */
   timestampField: z.string().optional(),
+  /**
+   * The timeout for initializing the aggregating transform.
+   */
   timeout: z
     .string()
     .regex(/[smdh]$/)
     .optional()
     .default('180s'),
+  /**
+   * How often the transform runs.
+   */
   frequency: z
     .string()
     .regex(/[smdh]$/)
     .optional()
     .default('1m'),
+  /**
+   * The delay before the transform processes new data, allowing late-arriving documents to be included.
+   */
   delay: z
     .string()
     .regex(/[smdh]$/)
     .optional()
     .default('1m'),
+  /**
+   * Throttle value for the number of documents processed per second. Use -1 for no throttle.
+   */
   docsPerSecond: z.number().int().optional(),
+  /**
+   * Present when the engine status is `error`. Describes the failure.
+   */
   error: z
     .object({
+      /**
+       * A human-readable error message.
+       */
       message: z.string(),
+      /**
+       * The lifecycle action that caused the error.
+       */
       action: z.literal('init'),
     })
     .optional(),
 });
 
+/**
+ * Statistics from the underlying Elasticsearch transform.
+ */
 export type TransformStatsMetadata = z.infer<typeof TransformStatsMetadata>;
 export const TransformStatsMetadata = z.object({
+  /**
+   * Number of composite aggregation pages processed.
+   */
   pages_processed: z.number().int(),
+  /**
+   * Total number of source documents processed.
+   */
   documents_processed: z.number().int(),
+  /**
+   * Total number of documents written to the destination index.
+   */
   documents_indexed: z.number().int(),
+  /**
+   * Total number of documents deleted from the destination index.
+   */
   documents_deleted: z.number().int().optional(),
+  /**
+   * Number of times the transform has been triggered.
+   */
   trigger_count: z.number().int(),
+  /**
+   * Total time spent indexing documents, in milliseconds.
+   */
   index_time_in_ms: z.number().int(),
+  /**
+   * Total number of index operations.
+   */
   index_total: z.number().int(),
+  /**
+   * Total number of failed index operations.
+   */
   index_failures: z.number().int(),
+  /**
+   * Total time spent on search queries, in milliseconds.
+   */
   search_time_in_ms: z.number().int(),
+  /**
+   * Total number of search operations.
+   */
   search_total: z.number().int(),
+  /**
+   * Total number of failed search operations.
+   */
   search_failures: z.number().int(),
+  /**
+   * Total time spent processing results, in milliseconds.
+   */
   processing_time_in_ms: z.number().int(),
+  /**
+   * Total number of processing operations.
+   */
   processing_total: z.number().int(),
+  /**
+   * Total time spent deleting documents, in milliseconds.
+   */
   delete_time_in_ms: z.number().int().optional(),
+  /**
+   * Exponential moving average of checkpoint duration, in milliseconds.
+   */
   exponential_avg_checkpoint_duration_ms: z.number().int(),
+  /**
+   * Exponential moving average of documents indexed per checkpoint.
+   */
   exponential_avg_documents_indexed: z.number().int(),
+  /**
+   * Exponential moving average of documents processed per checkpoint.
+   */
   exponential_avg_documents_processed: z.number().int(),
 });
 
 export type Metadata = z.infer<typeof Metadata>;
 export const Metadata = TransformStatsMetadata;
 
+/**
+ * The type of Elasticsearch or Kibana resource backing an engine component.
+ */
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
 export const EngineComponentResource = z.enum([
   'entity_engine',
@@ -112,31 +217,64 @@ export const EngineComponentResource = z.enum([
 export type EngineComponentResourceEnum = typeof EngineComponentResource.enum;
 export const EngineComponentResourceEnum = EngineComponentResource.enum;
 
+/**
+ * Status of an individual Elasticsearch or Kibana resource backing an engine.
+ */
 export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
 export const EngineComponentStatus = z.object({
+  /**
+   * Unique identifier for the component.
+   */
   id: z.string(),
+  /**
+   * Whether the component is currently installed.
+   */
   installed: z.boolean(),
   metadata: Metadata.optional(),
   resource: EngineComponentResource,
+  /**
+   * The health status of the component.
+   */
   health: z.enum(['green', 'yellow', 'red', 'unavailable', 'unknown']).optional(),
+  /**
+   * Errors reported by this component, if any.
+   */
   errors: z
     .array(
       z.object({
+        /**
+         * Short error title.
+         */
         title: z.string().optional(),
+        /**
+         * Detailed error message.
+         */
         message: z.string().optional(),
       })
     )
     .optional(),
 });
 
+/**
+ * The overall operational status of the Entity Store.
+ */
 export type StoreStatus = z.infer<typeof StoreStatus>;
 export const StoreStatus = z.enum(['not_installed', 'installing', 'running', 'stopped', 'error']);
 export type StoreStatusEnum = typeof StoreStatus.enum;
 export const StoreStatusEnum = StoreStatus.enum;
 
+/**
+ * Debug information about the Elasticsearch query executed.
+ */
 export type InspectQuery = z.infer<typeof InspectQuery>;
 export const InspectQuery = z.object({
+  /**
+   * Raw Elasticsearch responses.
+   */
   response: z.array(z.string()),
+  /**
+   * Elasticsearch query DSL that was executed.
+   */
   dsl: z.array(z.string()),
 });
 
