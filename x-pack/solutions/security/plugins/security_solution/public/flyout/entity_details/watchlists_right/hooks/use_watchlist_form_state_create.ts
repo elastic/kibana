@@ -10,7 +10,7 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/
 import type { WatchlistFormState } from './use_watchlist_form_state';
 import {
   getDefaultWatchlist,
-  getWatchlistNameValidation,
+  getWatchlistFieldLengthValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
 
@@ -40,11 +40,8 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     setWatchlist(defaultWatchlist);
   }, [defaultWatchlist, hasUserEdits]);
 
-  const { trimmedName, isNameInvalid } = getWatchlistNameValidation(
-    watchlist.name,
-    watchlist.name.length > 0
-  );
-  const isDisabled = isNameInvalid || !trimmedName;
+  const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
+  const isDisabled = !watchlist.name.trim() || isNameTooLong || isDescriptionTooLong;
 
   return {
     watchlist,
@@ -52,7 +49,8 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     ruleBasedSourceIds: {},
     isEditMode: false,
     isDisabled,
-    isNameInvalid,
+    isNameTooLong,
+    isDescriptionTooLong,
     setWatchlistField,
   };
 };
