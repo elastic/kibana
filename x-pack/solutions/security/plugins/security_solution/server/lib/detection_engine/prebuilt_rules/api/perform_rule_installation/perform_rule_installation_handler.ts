@@ -99,7 +99,7 @@ export const performRuleInstallationHandler = async (
       ruleInstallQueue.push(...(await excludeLicenseRestrictedRules(allInstallableRules, mlAuthz)));
     }
 
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 20;
     while (ruleInstallQueue.length > 0) {
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
       const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
