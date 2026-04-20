@@ -3200,7 +3200,7 @@
           "<{}, {}>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-        "lineNumber": 21,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3222,7 +3222,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/config/create_config.ts",
-            "lineNumber": 21,
+            "lineNumber": 22,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -4332,6 +4332,38 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/scope/worker/apis/index.ts",
             "lineNumber": 39,
             "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-search",
+        "id": "def-common.ApiServicesFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiServicesFixture",
+        "description": [],
+        "path": "x-pack/platform/plugins/private/logstash/test/scout/api/fixtures/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 3,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-search",
+            "id": "def-common.ApiServicesFixture.logstash",
+            "type": "Object",
+            "tags": [],
+            "label": "logstash",
+            "description": [],
+            "signature": [
+              "LogstashApiService"
+            ],
+            "path": "x-pack/platform/plugins/private/logstash/test/scout/api/fixtures/index.ts",
+            "lineNumber": 15,
+            "columnNumber": 5,
             "deprecated": false,
             "trackAdoption": false
           }
@@ -11872,7 +11904,7 @@
             "label": "esServerlessOptions",
             "description": [],
             "signature": [
-              "{ uiam: boolean; cps?: boolean | undefined; } | undefined"
+              "{ uiam: boolean; uiamOAuth?: boolean | undefined; cps?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/server_config.d.ts",
             "lineNumber": 29,
