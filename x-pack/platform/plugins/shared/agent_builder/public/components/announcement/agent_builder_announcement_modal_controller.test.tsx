@@ -12,8 +12,9 @@ import { BehaviorSubject, of } from 'rxjs';
 import { EuiProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
+import { AI_CHAT_EXPERIENCE_TYPE, HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { Capabilities } from '@kbn/core/public';
 
 import { AgentBuilderAnnouncementModalController } from './agent_builder_announcement_modal_controller';
@@ -37,30 +38,33 @@ function buildServices({
   userProfileEnabled = true,
   agentBuilderSeenJson,
   chatExperienceCapabilities = capabilitiesAllowRevert,
+  chatExperience = AIChatExperience.Agent,
 }: {
   hideAnnouncements?: boolean;
   announcementSeenInProfile?: boolean;
   spaceId?: string;
   userProfileEnabled?: boolean;
-  /** Overrides the JSON stored in user profile for per-space dismissal (default derives from announcementSeenInProfile). */
+  /** Overrides legacy per-space JSON in user profile (when set, takes precedence over announcementSeenInProfile). */
   agentBuilderSeenJson?: string;
   chatExperienceCapabilities?: Capabilities;
+  chatExperience?: AIChatExperience;
 } = {}) {
   const space$ = new BehaviorSubject({ id: spaceId, name: spaceId });
   const reportEvent = jest.fn();
   const navigateToApp = jest.fn();
   const partialUpdate = jest.fn().mockResolvedValue(undefined);
-  const seenJson =
-    agentBuilderSeenJson ??
-    (announcementSeenInProfile ? JSON.stringify({ [spaceId]: true }) : JSON.stringify({}));
+  const userSettings =
+    agentBuilderSeenJson !== undefined
+      ? { agentBuilderAnnouncementModalSeenBySpaceJson: agentBuilderSeenJson }
+      : announcementSeenInProfile
+      ? { agentBuilderAnnouncementModalSeen: true as const }
+      : { agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({}) };
 
   const userProfile = {
     getEnabled$: () => of(userProfileEnabled),
     getCurrent: jest.fn().mockResolvedValue({
       data: {
-        userSettings: {
-          agentBuilderAnnouncementModalSeenBySpaceJson: seenJson,
-        },
+        userSettings,
       },
     }),
     partialUpdate,
@@ -70,7 +74,9 @@ function buildServices({
     settings: {
       client: {
         get: jest.fn(),
-        get$: jest.fn(),
+        get$: jest.fn((key: string) =>
+          key === AI_CHAT_EXPERIENCE_TYPE ? of(chatExperience) : of(undefined)
+        ),
         set: jest.fn(),
       },
       globalClient: {
@@ -117,6 +123,28 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
+  it('does not render the modal when running in an automated browser (navigator.webdriver)', async () => {
+    Object.defineProperty(navigator, 'webdriver', {
+      value: true,
+      writable: true,
+      configurable: true,
+    });
+    const { services } = buildServices();
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+
+    Object.defineProperty(navigator, 'webdriver', {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+  });
+
   it('does not render the modal when the user has already seen it in their profile', async () => {
     const { services } = buildServices({ announcementSeenInProfile: true });
     renderController(services);
@@ -139,6 +167,17 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
+  it('does not render the modal when the chat experience is set to classic', async () => {
+    const { services } = buildServices({ chatExperience: AIChatExperience.Classic });
+    renderController(services);
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renders the modal when the space is loaded and the modal has not been seen', async () => {
     const { services } = buildServices();
     renderController(services);
@@ -148,7 +187,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
   });
 
-  it('shows the modal after switching to a space where the announcement was not dismissed', async () => {
+  it('does not show the modal again after switching space when dismissal was recorded for another space (legacy profile)', async () => {
     const spaceA = 'space-a';
     const spaceB = 'space-b';
     const { services, space$ } = buildServices({
@@ -168,7 +207,9 @@ describe('AgentBuilderAnnouncementModalController', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('agentBuilderAnnouncementContinueButton')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -186,7 +227,7 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await waitFor(() => {
       expect(partialUpdate).toHaveBeenCalledWith({
         userSettings: {
-          agentBuilderAnnouncementModalSeenBySpaceJson: JSON.stringify({ [SPACE_ID]: true }),
+          agentBuilderAnnouncementModalSeen: true,
         },
       });
     });
@@ -209,7 +250,11 @@ describe('AgentBuilderAnnouncementModalController', () => {
     await user.click(screen.getByTestId('agentBuilderAnnouncementRevertButton'));
 
     await waitFor(() => {
-      expect(partialUpdate).toHaveBeenCalled();
+      expect(partialUpdate).toHaveBeenCalledWith({
+        userSettings: {
+          agentBuilderAnnouncementModalSeen: true,
+        },
+      });
     });
     expect(reportEvent).toHaveBeenCalledWith(AGENT_BUILDER_EVENT_TYPES.OptOut, {
       source: 'agent_builder_nav_control',
@@ -231,8 +276,11 @@ describe('AgentBuilderAnnouncementModalController', () => {
       expect(screen.getByTestId('agentBuilderAnnouncementContinueButton')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('agentBuilderAnnouncementRevertButton')).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/Only a user with permission to change space-level Gen AI settings/i)
-    ).toBeInTheDocument();
+    expect(screen.queryByText('Need your history?')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementLearnMoreCallout')).toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderAnnouncementDocumentationLink')).toHaveAttribute(
+      'href',
+      'https://www.elastic.co/docs/explore-analyze/ai-features/elastic-agent-builder'
+    );
   });
 });

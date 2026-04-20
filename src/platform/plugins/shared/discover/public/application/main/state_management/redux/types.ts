@@ -137,6 +137,7 @@ export enum TabInitializationStatus {
   InProgress = 'InProgress',
   Complete = 'Complete',
   NoData = 'NoData',
+  Disconnected = 'Disconnected',
   Error = 'Error',
 }
 
