@@ -732,6 +732,8 @@ paths:
                           KQL query used to filter data from the provided index
                           patterns
                         type: string
+                      range:
+                        $ref: '#/components/schemas/DateRange'
                       type:
                         $ref: '#/components/schemas/EntitySourceType'
                     required:
@@ -2470,6 +2472,21 @@ components:
               $ref: '#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality_level
+    DateRange:
+      description: Defines the lookback period for filtering source data by timestamp.
+      type: object
+      properties:
+        end:
+          description: End of the lookback period (date math or ISO string, e.g. "now")
+          type: string
+        start:
+          description: >-
+            Start of the lookback period (date math or ISO string, e.g.
+            "now-10d")
+          type: string
+      required:
+        - start
+        - end
     EngineComponentResource:
       description: >-
         The type of Elasticsearch or Kibana resource backing an engine
@@ -3324,8 +3341,6 @@ components:
           properties:
             managed:
               type: boolean
-            type:
-              $ref: '#/components/schemas/EntitySourceType'
     MonitoringLabel:
       type: object
       properties:
@@ -3591,6 +3606,10 @@ components:
         queryRule:
           description: KQL query used to filter data from the provided index patterns
           type: string
+        range:
+          $ref: '#/components/schemas/DateRange'
+        type:
+          $ref: '#/components/schemas/EntitySourceType'
     UserEntity:
       additionalProperties: false
       description: >-
