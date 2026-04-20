@@ -59,9 +59,7 @@ export const registerCreateRoute = (
         { maxSize: 1000 }
       )
     ),
-    initialNamespaces: schema.maybe(
-      schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })
-    ),
+    initialNamespaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 100 })),
   });
 
   type CreateBody = TypeOf<typeof createBodySchema>;
@@ -145,7 +143,14 @@ export const registerCreateRoute = (
       });
       const { type } = request.params;
       const { overwrite } = request.query;
-      const result = await executeCreate(context, request, type, undefined, overwrite, request.body);
+      const result = await executeCreate(
+        context,
+        request,
+        type,
+        undefined,
+        overwrite,
+        request.body
+      );
       return response.ok({ body: result });
     })
   );
