@@ -36,12 +36,14 @@ export const installPrebuiltWatchlistsRoute = (
       },
       async (context, _request, response): Promise<IKibanaResponse<{ acknowledged: boolean }>> => {
         const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
-        const core = await context.core;
-        const namespace = secSol.getSpaceId();
-        const soClient = getRequestSavedObjectClient(core);
-
+    
         try {
+
+          const secSol = await context.securitySolution;
+          const core = await context.core;
+          const namespace = secSol.getSpaceId();
+          const soClient = getRequestSavedObjectClient(core);
+          
           const watchlistClient = new WatchlistConfigClient({
             namespace,
             soClient,
