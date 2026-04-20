@@ -62,7 +62,7 @@ export type EmbeddableServerDefinition<
   getTransforms?: (
     drilldownTransforms: DrilldownTransforms
   ) => EmbeddableTransforms<StoredEmbeddableState, EmbeddableState>;
-  
+
   /**
    * Embeddable containers that include embeddable state in REST APIs, such as dashboard,
    * use schemas to
@@ -74,7 +74,7 @@ export type EmbeddableServerDefinition<
    */
   // TODO - make required once all embeddables have schemas
   getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
-  
+
   /**
    * Throws error when panel config is not supported.
    */
