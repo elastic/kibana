@@ -67,6 +67,7 @@ describe('AlertActionsClient', () => {
         rule_id: 'test-rule-id',
         last_series_event_timestamp: '2025-01-01T00:00:00.000Z',
         actor: 'test-uid',
+        space_id: 'default',
       });
       expect(docs[0]).toHaveProperty('@timestamp');
     });

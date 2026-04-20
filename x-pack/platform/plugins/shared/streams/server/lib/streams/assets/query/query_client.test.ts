@@ -75,6 +75,7 @@ const createQueryClient = ({
 
 const createQuery = (overrides: Partial<StreamQuery> = {}): StreamQuery => ({
   id: 'test-query-id',
+  type: 'match',
   title: 'SSH Brute Force Detection',
   description: 'Detects repeated failed SSH login attempts from a single source IP',
   esql: { query: 'FROM logs-* | WHERE event.action == "ssh_login" AND event.outcome == "failure"' },
@@ -192,6 +193,7 @@ describe('QueryClient backward compatibility', () => {
         rule_id: 'rule-old-1',
         query: {
           id: 'query-old-1',
+          type: 'match',
           title: 'SSH Failed Logins',
           description: 'Detects failed SSH login attempts',
           esql: {
@@ -467,6 +469,175 @@ describe('QueryClient backward compatibility', () => {
       const { client } = createQueryClient({ storageClient, inferenceAvailable: false });
 
       await expect(client.findQueries(['logs.test'], 'SSH')).rejects.toThrow('index not found');
+    });
+  });
+
+  describe('severity filtering via minSeverityScore', () => {
+    describe('getQueryLinks with minSeverityScore', () => {
+      it('includes a range filter when minSeverityScore is provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getQueryLinks(['logs.test'], { minSeverityScore: 60 });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
+      });
+
+      it('excludes the range filter when minSeverityScore is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getQueryLinks(['logs.test']);
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+      });
+    });
+
+    describe('getUnbackedQueriesCount with minSeverityScore', () => {
+      it('includes a range filter when minSeverityScore is provided', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: { hits: [], total: { value: 5 } },
+        });
+        const { client } = createQueryClient({ storageClient });
+
+        const count = await client.getUnbackedQueriesCount({ minSeverityScore: 60 });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
+        expect(count).toBe(5);
+      });
+
+      it('excludes the range filter when minSeverityScore is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({
+          hits: { hits: [], total: { value: 10 } },
+        });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getUnbackedQueriesCount();
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+      });
+    });
+
+    describe('getAllUnbackedQueries with minSeverityScore', () => {
+      it('passes minSeverityScore through to the underlying search', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getAllUnbackedQueries({ minSeverityScore: 60 });
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        expect(filter).toContainEqual({ range: { [QUERY_SEVERITY_SCORE]: { gte: 60 } } });
+        // Must also restrict to unbacked-only
+        expect(filter).toContainEqual({ term: { [RULE_BACKED]: false } });
+      });
+
+      it('does not include a range filter when minSeverityScore is omitted', async () => {
+        const storageClient = createMockStorageClient();
+        storageClient.search.mockResolvedValue({ hits: { hits: [] } });
+        const { client } = createQueryClient({ storageClient });
+
+        await client.getAllUnbackedQueries();
+
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+      });
+    });
+
+    describe('per-row promote regression — promoteQueries ignores severity', () => {
+      it('fetches unbacked queries without a severity range filter', async () => {
+        const storageClient = createMockStorageClient();
+        // Return one unbacked query for the stream
+        storageClient.search.mockResolvedValue({
+          hits: {
+            hits: [
+              toSearchHit(
+                createOldShapeStoredDoc({
+                  [RULE_BACKED]: false,
+                  [QUERY_SEVERITY_SCORE]: 20, // Low severity — should still be promotable per-row
+                  [RULE_ID]: 'rule-old-1',
+                })
+              ),
+            ],
+          },
+        });
+        const rulesClient = {
+          create: jest.fn().mockResolvedValue({}),
+          update: jest.fn().mockResolvedValue({}),
+          bulkDeleteRules: jest.fn().mockResolvedValue({}),
+        };
+        const client = new QueryClient(
+          {
+            storageClient: storageClient as unknown as IStorageClient<
+              QueryStorageSettings,
+              StoredQueryLink
+            >,
+            soClient: {} as SavedObjectsClientContract,
+            rulesClient: rulesClient as unknown as RulesClient,
+            logger: createMockLogger() as unknown as Logger,
+          },
+          true,
+          false
+        );
+
+        await client.promoteQueries(createMockDefinition(), ['query-old-1']);
+
+        // First search call is for getUnbackedQueries — verify no severity range filter
+        const searchArgs = storageClient.search.mock.calls[0][0];
+        const filter: unknown[] = searchArgs.query.bool.filter;
+        const rangeFilter = filter.find(
+          (f) =>
+            typeof f === 'object' &&
+            f !== null &&
+            'range' in f &&
+            QUERY_SEVERITY_SCORE in ((f as Record<string, unknown>).range as object)
+        );
+        expect(rangeFilter).toBeUndefined();
+        // Rule creation should proceed for the low-severity query
+        expect(rulesClient.create).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

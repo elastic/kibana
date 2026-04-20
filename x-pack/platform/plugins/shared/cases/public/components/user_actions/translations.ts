@@ -36,13 +36,6 @@ export const ALERT_COMMENT_LABEL_TITLE = i18n.translate(
   }
 );
 
-export const EVENT_COMMENT_LABEL_TITLE = i18n.translate(
-  'xpack.cases.caseView.eventCommentLabelTitle',
-  {
-    defaultMessage: 'added an event',
-  }
-);
-
 export const SHOW_EVENT_TOOLTIP = i18n.translate('xpack.cases.caseView.showEventTooltip', {
   defaultMessage: 'Show event details',
 });

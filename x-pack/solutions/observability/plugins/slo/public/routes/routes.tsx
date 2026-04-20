@@ -6,6 +6,7 @@
  */
 
 import {
+  SLOS_COMPOSITE_PATH,
   SLOS_MANAGEMENT_PATH,
   SLOS_MANAGEMENT_TEMPLATES_PATH,
   SLOS_PATH,
@@ -89,6 +90,13 @@ export const getRoutes = (
       exact: true,
     },
     ...(isCompositeSloEnabled && {
+      [SLOS_COMPOSITE_PATH]: {
+        handler: () => {
+          return <SlosPage />;
+        },
+        params: {},
+        exact: true,
+      },
       [SLO_COMPOSITE_CREATE_PATH]: {
         handler: () => {
           return <CompositeSloEditPage />;

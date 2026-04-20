@@ -21,6 +21,10 @@ import {
   isConversationCreatedEvent,
   createBadRequestError,
 } from '@kbn/agent-builder-common';
+import {
+  ConnectorOrInferenceIdConflictError,
+  resolveConnectorOrInferenceId,
+} from '../../common/resolve_connector_or_inference_id';
 import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -47,11 +51,24 @@ export function registerChatRoutes({
       },
     }),
     connector_id: schema.maybe(
-      schema.string({
-        meta: {
-          description: 'Optional connector ID for the agent to use for external integrations.',
-        },
-      })
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional connector ID for the agent to use for model routing. Mutually exclusive with `inference_id`; omit or use only one.',
+          },
+        })
+      )
+    ),
+    inference_id: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description:
+              'Optional inference endpoint ID for model routing (public alias for the same internal identifier as `connector_id`). Mutually exclusive with `connector_id`.',
+          },
+        })
+      )
     ),
     conversation_id: schema.maybe(
       schema.string({
@@ -210,6 +227,20 @@ export function registerChatRoutes({
     }
   };
 
+  const resolveConnectorIdFromPayload = (payload: ChatRequestBodyPayload): string | undefined => {
+    try {
+      return resolveConnectorOrInferenceId({
+        connectorId: payload.connector_id,
+        inferenceId: payload.inference_id,
+      });
+    } catch (e) {
+      if (e instanceof ConnectorOrInferenceIdConflictError) {
+        throw createBadRequestError(e.message);
+      }
+      throw e;
+    }
+  };
+
   const validateConfigurationOverrides = async ({
     payload,
     request,
@@ -244,7 +275,6 @@ export function registerChatRoutes({
   }) => {
     const {
       agent_id: agentId,
-      connector_id: connectorId,
       conversation_id: conversationId,
       input,
       prompts,
@@ -255,6 +285,8 @@ export function registerChatRoutes({
       action,
       _execution_mode: executionMode,
     } = payload;
+
+    const connectorId = resolveConnectorIdFromPayload(payload);
 
     const useTaskManager =
       executionMode === 'task_manager' ? true : executionMode === 'local' ? false : undefined;

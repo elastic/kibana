@@ -12,6 +12,7 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
 export const WORKFLOW_YAML_CHANGED_EVENT = 'workflow:yaml_changed';
+export const WORKFLOW_SML_TYPE = 'workflow';
 
 const workflowTool = <TName extends string>(
   toolName: TName
@@ -29,8 +30,6 @@ export const workflowTools = {
   getStepDefinitions: workflowTool('get_step_definitions'),
   getTriggerDefinitions: workflowTool('get_trigger_definitions'),
   validateWorkflow: workflowTool('validate_workflow'),
-  listWorkflows: workflowTool('list_workflows'),
-  getWorkflow: workflowTool('get_workflow'),
   getExamples: workflowTool('get_examples'),
   getConnectors: workflowTool('get_connectors'),
 } as const;

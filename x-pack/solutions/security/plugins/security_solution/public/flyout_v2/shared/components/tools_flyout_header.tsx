@@ -6,29 +6,17 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { memo, useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useHistory } from 'react-router-dom';
-import { useStore } from 'react-redux';
 import { Timestamp } from '../../document/components/timestamp';
-import { Title } from '../../document/components/title';
 import { DocumentSeverity } from '../../document/components/severity';
-import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
-import { flyoutProviders } from './flyout_provider';
-import { DocumentFlyout } from '../../document';
-import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
-import { TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID, TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
+import { ToolsFlyoutTitle } from './tools_flyout_title';
+import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
 
 const noop = () => {};
-
-const EXPAND_BUTTON_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.toolsFlyoutHeader.expandButtonAriaLabel',
-  { defaultMessage: 'Open document details' }
-);
 
 export interface ToolsFlyoutHeaderProps {
   /**
@@ -55,29 +43,6 @@ export interface ToolsFlyoutHeaderProps {
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
   ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
-    const { services } = useKibana();
-    const store = useStore();
-    const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-
-    const onShowDocument = useCallback(() => {
-      services.overlays?.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <DocumentFlyout
-              hit={hit}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
-          ),
-        }),
-        { ...defaultFlyoutProperties, session: 'inherit' }
-      );
-    }, [defaultFlyoutProperties, history, hit, onAlertUpdated, renderCellActions, services, store]);
-
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -92,21 +57,15 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="xs">
+          <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">
             <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false} wrap={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="expand"
-                    onClick={onShowDocument}
-                    aria-label={EXPAND_BUTTON_ARIA_LABEL}
-                    size="xs"
-                    color="primary"
-                    data-test-subj={TOOLS_FLYOUT_HEADER_EXPAND_BUTTON_TEST_ID}
+                  <ToolsFlyoutTitle
+                    hit={hit}
+                    renderCellActions={renderCellActions}
+                    onAlertUpdated={onAlertUpdated}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <Title hit={hit} isCompact={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <DocumentSeverity hit={hit} />

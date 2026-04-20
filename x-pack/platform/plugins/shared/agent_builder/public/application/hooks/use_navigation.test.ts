@@ -8,8 +8,8 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import {
-  MANAGEMENT_APP_ID,
-  MANAGEMENT_LLM_CONNECTORS_PATH,
+  INFERENCE_MANAGEMENT_APP_ID,
+  INFERENCE_MANAGEMENT_PATH,
   useIsOnManagementLlmConnectorsPage,
 } from './use_navigation';
 
@@ -42,7 +42,7 @@ describe('useIsOnManagementLlmConnectorsPage', () => {
   });
 
   it('returns false when on management but not on LLM connectors path', () => {
-    currentAppId$.next(MANAGEMENT_APP_ID);
+    currentAppId$.next(INFERENCE_MANAGEMENT_APP_ID);
     currentLocation$.next('/app/management/kibana/settings');
 
     const { result } = renderHook(() => useIsOnManagementLlmConnectorsPage());
@@ -52,7 +52,7 @@ describe('useIsOnManagementLlmConnectorsPage', () => {
 
   it('returns false when location matches path but app is not management', () => {
     currentAppId$.next('discover');
-    currentLocation$.next(`/app/management${MANAGEMENT_LLM_CONNECTORS_PATH}`);
+    currentLocation$.next(`/app/management${INFERENCE_MANAGEMENT_PATH}`);
 
     const { result } = renderHook(() => useIsOnManagementLlmConnectorsPage());
 
@@ -60,8 +60,8 @@ describe('useIsOnManagementLlmConnectorsPage', () => {
   });
 
   it('returns true when on management app and URL includes connectors path', () => {
-    currentAppId$.next(MANAGEMENT_APP_ID);
-    currentLocation$.next(`/s/default/app/management${MANAGEMENT_LLM_CONNECTORS_PATH}`);
+    currentAppId$.next(INFERENCE_MANAGEMENT_APP_ID);
+    currentLocation$.next(`/s/default/app/management${INFERENCE_MANAGEMENT_PATH}`);
 
     const { result } = renderHook(() => useIsOnManagementLlmConnectorsPage());
 
@@ -69,14 +69,14 @@ describe('useIsOnManagementLlmConnectorsPage', () => {
   });
 
   it('updates when observables emit new values', async () => {
-    currentAppId$.next(MANAGEMENT_APP_ID);
+    currentAppId$.next(INFERENCE_MANAGEMENT_APP_ID);
     currentLocation$.next('/app/management/kibana/settings');
 
     const { result } = renderHook(() => useIsOnManagementLlmConnectorsPage());
 
     expect(result.current).toBe(false);
 
-    currentLocation$.next(`/app/management${MANAGEMENT_LLM_CONNECTORS_PATH}#tab`);
+    currentLocation$.next(`/app/management${INFERENCE_MANAGEMENT_PATH}#tab`);
 
     await waitFor(() => {
       expect(result.current).toBe(true);

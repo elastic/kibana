@@ -244,3 +244,112 @@ export const DashboardEditModeConfig: Story = {
     config: dashboardEditModeConfig,
   },
 };
+
+const standaloneForcedOverflowConfig: AppMenuConfig = {
+  items: [
+    {
+      run: action('only-overflow-item-clicked'),
+      id: 'standaloneOverflowItem',
+      order: 1,
+      overflow: true,
+      label: 'Overflow item',
+      testId: 'standaloneOverflowItemButton',
+      iconType: 'gear',
+    },
+  ],
+};
+
+export const StandaloneForcedOverflow: Story = {
+  name: 'Forced overflow',
+  args: {
+    config: standaloneForcedOverflowConfig,
+  },
+};
+
+const overflowAndOrderingConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'item6',
+      order: 6,
+      label: 'Item 6 (order 6)',
+      run: action('item-6-clicked'),
+      iconType: 'gear',
+      testId: 'item6Button',
+    },
+    {
+      id: 'item1ForcedOverflow',
+      order: 1,
+      overflow: true,
+      label: 'Item 1 forced overflow (order 1)',
+      run: action('item-1-forced-overflow-clicked'),
+      iconType: 'gear',
+      testId: 'item1ForcedOverflowButton',
+    },
+    {
+      id: 'item4',
+      order: 4,
+      label: 'Item 4 (order 4)',
+      run: action('item-4-clicked'),
+      iconType: 'gear',
+      testId: 'item4Button',
+    },
+    {
+      id: 'item2',
+      order: 2,
+      label: 'Item 2 (order 2)',
+      run: action('item-2-clicked'),
+      iconType: 'gear',
+      testId: 'item2Button',
+    },
+    {
+      id: 'item5',
+      order: 5,
+      label: 'Item 5 (order 5)',
+      run: action('item-5-clicked'),
+      iconType: 'gear',
+      testId: 'item5Button',
+      separator: 'below',
+    },
+    {
+      id: 'item3',
+      order: 3,
+      label: 'Item 3 (order 3)',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+  ],
+};
+
+export const OverflowAndOrdering: Story = {
+  name: 'Overflow and ordering',
+  args: {
+    config: overflowAndOrderingConfig,
+  },
+};
+
+const staticItem: AppMenuWrapperProps['staticItems'] = [
+  {
+    id: 'feedback',
+    order: 1,
+    label: 'Feedback',
+    run: action('feedback-clicked'),
+    iconType: 'comment',
+    testId: 'feedbackButton',
+  },
+];
+
+export const StandaloneStaticItem: Story = {
+  name: 'Static items - standalone',
+  args: {
+    staticItems: staticItem,
+  },
+};
+
+export const DashboardEditModeWithStaticItems: Story = {
+  name: 'Dashboard edit mode with static items',
+  args: {
+    config: dashboardEditModeConfig,
+    staticItems: staticItem,
+  },
+};

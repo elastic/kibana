@@ -44,6 +44,10 @@ export {
   type StarredColumnProps,
   type StarredCellProps,
   type StarButtonProps,
+  CreatedByColumn,
+  CreatedByCell,
+  type CreatedByColumnProps,
+  type CreatedByCellProps,
 } from './src/column';
 export type { ColumnNamespace, ColumnProps } from './src/column';
 

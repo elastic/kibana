@@ -8,7 +8,6 @@
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
-  checkActionItemsInResults,
   checkResults,
   selectAllAgents,
   submitQuery,
@@ -68,7 +67,7 @@ describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('should run live pack', () => {
-    cy.contains('New live query').click();
+    cy.contains('Run query').click();
     cy.contains('Run a set of queries in a pack.').click();
     cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
     cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
@@ -79,17 +78,11 @@ describe('ALL - Live Query Packs', { tags: ['@ess', '@serverless'] }, () => {
     submitQuery();
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     checkResults();
-    checkActionItemsInResults({
-      lens: true,
-      discover: true,
-      cases: true,
-      timeline: false,
-    });
     cy.contains('Status').click();
-    cy.getBySel('tableHeaderCell_status_0').should('exist');
-    cy.getBySel('tableHeaderCell_fields.agent_id[0]_1').should('exist');
-    cy.getBySel('tableHeaderCell__source.action_response.osquery.count_2').should('exist');
-    cy.getBySel('tableHeaderCell_fields.error[0]_3').should('exist');
+    cy.getBySel('dataGridHeaderCell-status').should('exist');
+    cy.getBySel('dataGridHeaderCell-agent_id').should('exist');
+    cy.getBySel('dataGridHeaderCell-action_response.osquery.count').should('exist');
+    cy.getBySel('dataGridHeaderCell-error').should('exist');
 
     cy.getBySel('toggleIcon-system_memory_linux_elastic').click();
     cy.getBySel('toggleIcon-failingQuery').click();

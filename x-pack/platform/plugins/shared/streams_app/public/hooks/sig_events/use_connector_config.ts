@@ -11,15 +11,13 @@ import {
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   STREAMS_SIG_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
-import { useMemo, useState } from 'react';
-import type { OnboardingConfig } from '../../components/sig_events/significant_events_discovery/components/streams_view/onboarding_config_popover';
-import {
-  GENERATE_FEATURES_BUTTON_LABEL,
-  GENERATE_QUERIES_BUTTON_LABEL,
-  RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL,
-} from '../../components/sig_events/significant_events_discovery/components/streams_view/translations';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { useEffect, useState } from 'react';
+import type { OnboardingConfig } from '../../components/sig_events/significant_events_discovery/components/streams_view/types';
 import { useAIFeatures } from '../use_ai_features';
 import { useInferenceFeatureConnectors } from './use_inference_feature_connectors';
+
+const EMPTY_CONNECTORS: InferenceConnector[] = [];
 
 export function useConnectorConfig() {
   const featuresConnectors = useInferenceFeatureConnectors(
@@ -34,8 +32,10 @@ export function useConnectorConfig() {
 
   const aiFeatures = useAIFeatures();
   const genAiConnectors = aiFeatures?.genAiConnectors;
+  const allConnectors = genAiConnectors?.connectors ?? EMPTY_CONNECTORS;
+  const connectorError = genAiConnectors?.error;
   const isConnectorCatalogUnavailable =
-    !genAiConnectors?.connectors?.length || !!genAiConnectors?.loading || !!genAiConnectors?.error;
+    !allConnectors.length || !!genAiConnectors?.loading || !!connectorError;
 
   const [discoveryConnectorOverride, setDiscoveryConnectorOverride] = useState<
     string | undefined
@@ -48,39 +48,28 @@ export function useConnectorConfig() {
     connectors: {},
   });
 
-  const displayConnectors = useMemo(
-    () => ({
-      features: onboardingConfig.connectors.features ?? featuresConnectors.resolvedConnectorId,
-      queries: onboardingConfig.connectors.queries ?? queriesConnectors.resolvedConnectorId,
-    }),
-    [
-      onboardingConfig.connectors,
-      featuresConnectors.resolvedConnectorId,
-      queriesConnectors.resolvedConnectorId,
-    ]
-  );
-
-  const { steps: selectedSteps } = onboardingConfig;
-  const dynamicButtonLabel = useMemo(() => {
-    const hasFeatures = selectedSteps.includes(OnboardingStep.FeaturesIdentification);
-    const hasQueries = selectedSteps.includes(OnboardingStep.QueriesGeneration);
-    if (hasFeatures && !hasQueries) return GENERATE_FEATURES_BUTTON_LABEL;
-    if (hasQueries && !hasFeatures) return GENERATE_QUERIES_BUTTON_LABEL;
-    return RUN_BULK_STREAM_ONBOARDING_BUTTON_LABEL;
-  }, [selectedSteps]);
+  useEffect(() => {
+    setOnboardingConfig((prev) => {
+      const features = prev.connectors.features ?? featuresConnectors.resolvedConnectorId;
+      const queries = prev.connectors.queries ?? queriesConnectors.resolvedConnectorId;
+      if (features === prev.connectors.features && queries === prev.connectors.queries) {
+        return prev;
+      }
+      return { ...prev, connectors: { features, queries } };
+    });
+  }, [featuresConnectors.resolvedConnectorId, queriesConnectors.resolvedConnectorId]);
 
   return {
     featuresConnectors,
     queriesConnectors,
     discoveryConnectors,
-    genAiConnectors,
+    allConnectors,
+    connectorError,
     isConnectorCatalogUnavailable,
     discoveryConnectorOverride,
     setDiscoveryConnectorOverride,
     displayDiscoveryConnectorId,
     onboardingConfig,
     setOnboardingConfig,
-    displayConnectors,
-    dynamicButtonLabel,
   };
 }

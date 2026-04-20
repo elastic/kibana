@@ -6,7 +6,81 @@
  */
 
 import { validateStreamlang } from './validate_streamlang';
+import { validateStreamlangModeCompatibility } from './ui';
 import type { StreamlangDSL } from '../../types/streamlang';
+
+describe('validateStreamlangModeCompatibility', () => {
+  it('should detect deeply nested conditions in else branches', () => {
+    // Build a DSL that nests 4 levels deep via else branches
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'a',
+            eq: '1',
+            steps: [],
+            else: [
+              {
+                condition: {
+                  field: 'b',
+                  eq: '2',
+                  steps: [],
+                  else: [
+                    {
+                      condition: {
+                        field: 'c',
+                        eq: '3',
+                        steps: [],
+                        else: [
+                          {
+                            condition: {
+                              field: 'd',
+                              eq: '4',
+                              steps: [],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const result = validateStreamlangModeCompatibility(dsl);
+    expect(result.canBeRepresentedInInteractiveMode).toBe(false);
+  });
+
+  it('should allow conditions nested within depth limit in else branches', () => {
+    const dsl: StreamlangDSL = {
+      steps: [
+        {
+          condition: {
+            field: 'a',
+            eq: '1',
+            steps: [],
+            else: [
+              {
+                condition: {
+                  field: 'b',
+                  eq: '2',
+                  steps: [],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+
+    const result = validateStreamlangModeCompatibility(dsl);
+    expect(result.canBeRepresentedInInteractiveMode).toBe(true);
+  });
+});
 
 describe('validateStreamlang', () => {
   describe('non-namespaced field validation for wired streams', () => {
@@ -2255,6 +2329,147 @@ describe('validateStreamlang', () => {
 
       const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
       expect(placementErrors).toHaveLength(0);
+    });
+  });
+
+  describe('else branch validation', () => {
+    it('should validate fields in else branches', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 200,
+              steps: [
+                {
+                  action: 'set',
+                  to: 'attributes.ok',
+                  value: 'yes',
+                },
+              ],
+              else: [
+                {
+                  action: 'set',
+                  to: 'invalid_field',
+                  value: 'no',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors.some((e) => e.field === 'invalid_field')).toBe(true);
+    });
+
+    it('should reject remove_by_prefix in else branch of a where block', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 200,
+              steps: [],
+              else: [
+                {
+                  action: 'remove_by_prefix',
+                  from: 'attributes.',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+      });
+
+      expect(result.isValid).toBe(false);
+      const placementErrors = result.errors.filter((e) => e.type === 'invalid_processor_placement');
+      expect(placementErrors).toHaveLength(1);
+    });
+
+    it('should detect forbidden processors inside else branches for wired streams', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'a',
+              eq: '1',
+              steps: [],
+              else: [
+                {
+                  action: 'manual_ingest_pipeline',
+                  processors: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'wired' });
+      expect(result.errors.some((e) => e.type === 'forbidden_processor')).toBe(true);
+    });
+
+    it('should detect remove_by_prefix inside else branches', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'a',
+              eq: '1',
+              steps: [],
+              else: [
+                {
+                  action: 'remove_by_prefix',
+                  from: 'test_',
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, { reservedFields: [], streamType: 'classic' });
+      expect(result.errors.some((e) => e.type === 'invalid_processor_placement')).toBe(true);
+    });
+
+    it('should reject forbidden processors in else branches for wired streams', () => {
+      const dsl: StreamlangDSL = {
+        steps: [
+          {
+            condition: {
+              field: 'status',
+              eq: 200,
+              steps: [],
+              else: [
+                {
+                  action: 'manual_ingest_pipeline' as const,
+                  processors: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      const result = validateStreamlang(dsl, {
+        reservedFields: [],
+        streamType: 'wired',
+      });
+
+      expect(result.isValid).toBe(false);
+      const forbiddenErrors = result.errors.filter((e) => e.type === 'forbidden_processor');
+      expect(forbiddenErrors).toHaveLength(1);
     });
   });
 });

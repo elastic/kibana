@@ -86,5 +86,12 @@ export const metricInventoryThresholdRuleParamsSchema = schema.object(
     alertOnNoData: schema.maybe(schema.boolean()),
     schema: schema.maybe(oneOfLiterals(dataSchemaFormats)),
   },
-  { unknowns: 'allow' }
+  {
+    unknowns: 'allow',
+    meta: {
+      title: 'Metric Inventory Threshold Rule Params',
+      description:
+        'The parameters for the metric inventory threshold rule. These parameters are appropriate when `rule_type_id` is `metrics.alert.inventory.threshold`.',
+    },
+  }
 );
