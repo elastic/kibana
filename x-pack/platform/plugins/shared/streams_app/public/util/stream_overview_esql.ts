@@ -24,6 +24,16 @@ export function buildDataQualityIgnoredFieldsCountEsql(source: string): string {
     .pipe`STATS ignored_fields_count = COUNT_DISTINCT(_ignored)`.print('basic');
 }
 
+/**
+ * Top failure reasons: count of failure-store documents grouped by `error.type`,
+ * sorted descending, capped at `limit` rows.
+ */
+export function buildTopFailureReasonsEsql(streamName: string, limit = 5): string {
+  // Plain string query — the backtick-quoted `error.type` field and LIMIT clause
+  // are not easily expressed via the typed builder.
+  return `FROM ${streamName}::failures | STATS count = COUNT(*) BY error_type = \`error.type\` | SORT count DESC | LIMIT ${limit}`;
+}
+
 /** Ingest histogram: doc_count by @timestamp bucket (`minIntervalMs` from time range / bucket count). */
 export function buildStreamIngestHistogramEsql(source: string, minIntervalMs: number): string {
   return esql.from(source)

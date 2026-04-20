@@ -33,6 +33,7 @@ import {
   buildDataQualityTotalDocCountEsql,
 } from '../../util/stream_overview_esql';
 import { OverviewStat } from './overview_stat';
+import { TopFailureReasons } from './top_failure_reasons';
 
 export function DataQualityCard() {
   const { definition } = useStreamDetail();
@@ -48,6 +49,7 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const router = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
   const {
+    core: { application },
     dependencies: {
       start: {
         data,
@@ -161,15 +163,10 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
   const isQualityLoading =
     totalDocsResult.loading || degradedDocsResult.loading || failedDocsResult.loading;
 
-  const dataQualityManagementLinkArgs = [
-    '/{key}/management/{tab}',
-    {
-      path: { key: streamName, tab: 'dataQuality' as const },
-      query: { rangeFrom, rangeTo },
-    },
-  ] as const;
-
-  const dataQualityTabHref = router.link(...dataQualityManagementLinkArgs);
+  const dataQualityTabHref = router.link('/{key}/management/{tab}', {
+    path: { key: streamName, tab: 'dataQuality' as const },
+    query: { rangeFrom, rangeTo },
+  });
 
   const formatPct = (value: number) => `${formatNumber(value, '0.[00]')}%`;
 
@@ -195,67 +192,81 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         </EuiFlexItem>
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          {
-            // eslint-disable-next-line @elastic/eui/href-or-on-click -- client-side navigation via router.push; href for a11y / new tab
-            <EuiLink
-              href={dataQualityTabHref}
-              data-test-subj="streamsOverviewDataQualityLink"
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault();
-                router.push(...dataQualityManagementLinkArgs);
-              }}
-            >
-              {i18n.translate('xpack.streams.streamOverview.dataQualityCard.viewAll', {
-                defaultMessage: 'View all',
-              })}
-            </EuiLink>
-          }
+          <EuiLink
+            href={dataQualityTabHref}
+            data-test-subj="streamsOverviewDataQualityLink"
+            onMouseDown={(e: React.MouseEvent) => {
+              // Only handle plain left clicks; let modifier combos (Ctrl/Cmd+click etc.) use the href.
+              if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+              // Prevent focus-on-mousedown. Without this, focus triggers a connector
+              // re-fetch → React re-render → inner scroll container resets → mouseup
+              // lands on a different element → the browser never fires the click event.
+              e.preventDefault();
+              application.navigateToUrl(dataQualityTabHref);
+            }}
+          >
+            {i18n.translate('xpack.streams.streamOverview.dataQualityCard.viewAll', {
+              defaultMessage: 'View all',
+            })}
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup
-        justifyContent="spaceBetween"
-        alignItems="flexStart"
-        responsive
-        gutterSize="none"
-      >
-        <EuiFlexItem grow>
-          <OverviewStat
-            title={formatPct(degradedPercentage)}
-            description={i18n.translate(
-              'xpack.streams.streamOverview.dataQualityCard.degradedDocs',
-              { defaultMessage: 'Degraded docs' }
-            )}
-            isLoading={isQualityLoading}
-            titleColor="warning"
-            dataTestSubj="streamsOverviewDegradedDocs"
-          />
-        </EuiFlexItem>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="flexStart"
+            responsive
+            gutterSize="none"
+          >
+            <EuiFlexItem grow>
+              <OverviewStat
+                title={formatPct(degradedPercentage)}
+                description={i18n.translate(
+                  'xpack.streams.streamOverview.dataQualityCard.degradedDocs',
+                  { defaultMessage: 'Degraded docs' }
+                )}
+                isLoading={isQualityLoading}
+                titleColor="warning"
+                dataTestSubj="streamsOverviewDegradedDocs"
+              />
+            </EuiFlexItem>
 
-        <EuiFlexItem grow>
-          <OverviewStat
-            title={canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />}
-            description={i18n.translate('xpack.streams.streamOverview.dataQualityCard.failedDocs', {
-              defaultMessage: 'Failed docs',
-            })}
-            isLoading={canReadFailureStore ? failedDocsResult.loading : false}
-            titleColor={canReadFailureStore ? 'danger' : undefined}
-            dataTestSubj="streamsOverviewFailedDocs"
-          />
-        </EuiFlexItem>
+            <EuiFlexItem grow>
+              <OverviewStat
+                title={
+                  canReadFailureStore ? formatPct(failedPercentage) : <FailedDocsNoPrivilege />
+                }
+                description={i18n.translate(
+                  'xpack.streams.streamOverview.dataQualityCard.failedDocs',
+                  {
+                    defaultMessage: 'Failed docs',
+                  }
+                )}
+                isLoading={canReadFailureStore ? failedDocsResult.loading : false}
+                titleColor={canReadFailureStore ? 'danger' : undefined}
+                dataTestSubj="streamsOverviewFailedDocs"
+              />
+            </EuiFlexItem>
 
-        <EuiFlexItem grow>
-          <OverviewStat
-            title={formatNumber(ignoredFieldsResult.value ?? 0, '0,0')}
-            description={i18n.translate(
-              'xpack.streams.streamOverview.dataQualityCard.ignoredFields',
-              { defaultMessage: 'Ignored fields' }
-            )}
-            isLoading={ignoredFieldsResult.loading}
-            dataTestSubj="streamsOverviewIgnoredFields"
-          />
+            <EuiFlexItem grow>
+              <OverviewStat
+                title={formatNumber(ignoredFieldsResult.value ?? 0, '0,0')}
+                description={i18n.translate(
+                  'xpack.streams.streamOverview.dataQualityCard.ignoredFields',
+                  { defaultMessage: 'Ignored fields' }
+                )}
+                isLoading={ignoredFieldsResult.loading}
+                dataTestSubj="streamsOverviewIgnoredFields"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TopFailureReasons streamName={streamName} canReadFailureStore={canReadFailureStore} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

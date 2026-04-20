@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useIsWithinBreakpoints } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useIsWithinBreakpoints } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
@@ -79,6 +79,7 @@ export function StreamOverview() {
               </EuiFlexItem>
             ))}
         </EuiFlexGroup>
+        <EuiSpacer size="xxl" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
