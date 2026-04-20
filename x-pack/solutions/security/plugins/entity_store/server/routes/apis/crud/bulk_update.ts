@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { BooleanFromString, buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -17,16 +18,20 @@ import { BadCRUDRequestError, EntityStoreNotInstalledError } from '../../../doma
 import { Entity } from '../../../../common/domain/definitions/entity.gen';
 
 const bodySchema = z.object({
-  entities: z.array(
-    z.object({
-      type: z.enum(ALL_ENTITY_TYPES),
-      doc: z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity),
-    })
-  ),
+  entities: z
+    .array(
+      z.object({
+        type: z.enum(ALL_ENTITY_TYPES).describe('The entity type of this record.'),
+        doc: z.preprocess((val) => unflattenObject(val as Record<string, unknown>), Entity),
+      })
+    )
+    .describe('The entities to update.'),
 });
 
 const querySchema = z.object({
-  force: BooleanFromString.optional().default(false),
+  force: BooleanFromString.optional()
+    .default(false)
+    .describe('When true, allows updating protected fields.'),
 });
 
 export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
@@ -34,6 +39,11 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
     .put({
       path: ENTITY_STORE_ROUTES.public.CRUD_BULK_UPDATE,
       access: 'public',
+      summary: 'Bulk update entities',
+      description: 'Update multiple entity records in the Entity Store in a single request.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -47,6 +57,9 @@ export function registerCRUDBulkUpdate(router: EntityStorePluginRouter) {
             body: buildRouteValidationWithZod(bodySchema),
             query: buildRouteValidationWithZod(querySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, '../examples/entities_bulk_update.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
