@@ -93,7 +93,7 @@ export class PrivateLocationTestService {
   private supertest: ReturnType<typeof KibanaSupertestProvider>;
   private readonly getService: FtrProviderContext['getService'];
   private readonly retry: RetryService;
-  public installedVersion: string = DEFAULT_SYNTHETICS_VERSION;
+  public installedVersion: string = installedVersionCache ?? DEFAULT_SYNTHETICS_VERSION;
 
   constructor(getService: FtrProviderContext['getService']) {
     this.supertest = getService('supertest');
