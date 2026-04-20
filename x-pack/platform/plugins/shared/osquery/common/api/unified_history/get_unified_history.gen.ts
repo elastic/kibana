@@ -201,7 +201,10 @@ export const ScheduledHistoryRow = UnifiedHistoryRowBase.merge(
 );
 
 export type UnifiedHistoryRow = z.infer<typeof UnifiedHistoryRow>;
-export const UnifiedHistoryRow = z.union([LiveHistoryRow, ScheduledHistoryRow]);
+export const UnifiedHistoryRow = z.discriminatedUnion('sourceType', [
+  LiveHistoryRow,
+  ScheduledHistoryRow,
+]);
 
 export type GetUnifiedHistoryResponse = z.infer<typeof GetUnifiedHistoryResponse>;
 export const GetUnifiedHistoryResponse = z.object({
