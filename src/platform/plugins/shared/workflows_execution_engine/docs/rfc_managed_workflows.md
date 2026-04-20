@@ -56,10 +56,10 @@ A first-class **managed workflow** concept where plugins can declare bundled wor
 
 | # | Requirement | Details |
 |---|-------------|---------|
-| **R11** | **Auto-provisioning across spaces** | At startup, managed workflows are provisioned into all existing spaces and into newly created spaces, without requiring the consuming plugin to trigger provisioning via request-scoped logic. |
-| **R12** | **Privileged update path** | The platform supports updating managed workflows on plugin upgrades (system update) while still blocking user edits. Without this, read-only enforcement prevents plugins from evolving their workflows. Pattern: create-if-absent, update-if-changed. |
-| **R13** | **Cleanup on plugin uninstall** | When a plugin is uninstalled, all managed workflows it owns (identified by `managedBy`) are removed from all spaces. |
-| **R14** | **Cleanup on unregistration** | When a managed workflow is no longer registered in code (i.e., the plugin removes the registration in a new release), the platform removes it from all spaces during startup reconciliation. |
+| **R11** | **Auto-provisioning across spaces** | At startup, managed workflows are provisioned into all existing spaces and into newly created spaces, without requiring the consuming plugin to trigger provisioning via request-scoped logic. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R12** | **Privileged update path** | The platform supports updating managed workflows on plugin upgrades (system update) while still blocking user edits. Without this, read-only enforcement prevents plugins from evolving their workflows. Pattern: create-if-absent, update-if-changed. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R13** | **Cleanup on plugin uninstall** | When a plugin is uninstalled, all managed workflows it owns (identified by `managedBy`) are removed from all spaces. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
+| **R14** | **Cleanup on unregistration** | When a managed workflow is no longer registered in code (i.e., the plugin removes the registration in a new release), the platform removes it from all spaces during startup reconciliation. See [Lifecycle](#4-lifecycle-provisioning-updates-cleanup) in the technical design. |
 
 #### UI
 
@@ -527,13 +527,11 @@ Integrations (Fleet packages) are a future distribution channel. The integration
 
 ---
 
-### 4. Versioning
+### 4. Lifecycle (Provisioning, Updates, Cleanup)
 
-**Interim approach: SHA-256 hash of YAML definition, stored in `definitionHash`.**
+On startup, the platform reconciles the in-memory registry (what plugins declared) against storage (what's persisted per space). This covers R11 (auto-provisioning), R12 (privileged updates), R13 (plugin uninstall cleanup), and R14 (unregistration cleanup).
 
-Today, `WorkflowProperties` has no version or hash field. Updates are full document overwrites via `workflowStorage.getClient().index()`. There is no change detection.
-
-Once workflow versioning lands (#15776), managed workflows should adopt it. Until then:
+**Change detection** uses a SHA-256 hash of the YAML definition, stored in `definitionHash`. Today, `WorkflowProperties` has no version or hash field — updates are full document overwrites with no change detection. Once workflow versioning lands (#15776), managed workflows should adopt it. Until then:
 
 **Hash computation:**
 
@@ -555,9 +553,23 @@ For each registered managed workflow, for each space:
 4. If found and `definitionHash` differs → **update** the `yaml`, `definition`, `definitionHash`, `lastUpdatedBy: 'system'`. This is the privileged update path — it bypasses the managed read-only check because it's an internal operation, not a user request.
 5. If found but `managed: false` → This shouldn't happen (ID collision between user workflow and managed workflow). Log a warning and skip. The caller-provided deterministic ID (R17) makes this unlikely but not impossible.
 
+**Cleanup on unregistration (R14):**
+
+After provisioning, a second pass handles orphans — managed workflows that exist in storage but are no longer in the in-memory registry (the plugin removed the registration in a new release):
+
+1. For each space, query `.workflows-workflows` for documents where `managed: true` (or `managedBy` is set).
+2. For each result, check if the `id` + `managedBy` pair exists in the in-memory registry.
+3. If not found in the registry → **delete** the orphaned workflow from that space.
+
+This can be combined with the provisioning pass (step 1 already loads existing managed workflows per space) to avoid extra queries.
+
+**Cleanup on plugin uninstall (R13):**
+
+When a plugin is uninstalled (removed from the Kibana deployment), it no longer calls `registerManagedWorkflow()` at `setup()`. Its workflows are absent from the in-memory registry, so the unregistration cleanup above handles removal automatically — no separate mechanism needed. The `managedBy` field identifies which workflows belonged to the removed plugin.
+
 **Performance consideration:**
 
-With N managed workflows and M spaces, reconciliation performs up to N*M queries on startup. For the expected scale (single-digit workflows, tens of spaces), this is acceptable. If scale grows, a bulk `mget` per space reduces to M queries total.
+With N managed workflows and M spaces, reconciliation performs up to N*M queries on startup. For the expected scale (single-digit workflows, tens of spaces), this is acceptable. If scale grows, a bulk `mget` per space reduces to M queries total. The orphan cleanup adds one query per space (fetch all managed workflows), which can be merged with the provisioning query.
 
 ---
 
