@@ -42,7 +42,7 @@ type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVS
 /**
  * Builds share options for both share modal and export integrations
  */
-const buildShareOptions = async ({
+export const buildShareOptions = async ({
   discoverParams,
   services,
   currentTab,

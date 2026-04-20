@@ -51,7 +51,7 @@ export const getCsvReportParams: ReportParamsGetter<
     useAbsoluteTime?: boolean;
   },
   CsvSearchModeParams
-> = ({ sharingData, forShareUrl = false, useAbsoluteTime = true }) => {
+> = ({ sharingData, forShareUrl = false, useAbsoluteTime = false }) => {
   const getSearchSource = sharingData.getSearchSource;
 
   if (sharingData.isTextBased) {
@@ -101,10 +101,10 @@ export const getShareMenuItems =
         useAbsoluteTime,
       });
 
-    const generateReportingJobCSV = ({ intl, useAbsoluteTime }: ExportGenerationOpts) => {
+    const generateReportingJobCSV = ({ intl }: ExportGenerationOpts) => {
       const { reportType, decoratedJobParams } = getSearchCsvJobParams({
         apiClient,
-        searchModeParams: getSearchModeParams({ useAbsoluteTime }),
+        searchModeParams: getSearchModeParams({ useAbsoluteTime: true }),
         title: sharingData.title,
       });
 
@@ -175,7 +175,6 @@ export const getShareMenuItems =
         apiClient,
         searchModeParams: getSearchModeParams({
           forShareUrl: true,
-          useAbsoluteTime: false,
         }),
         title: sharingData.title,
       });

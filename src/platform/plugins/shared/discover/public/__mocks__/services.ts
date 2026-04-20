@@ -263,6 +263,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     metadata: {
       branch: 'test',
+      version: 'major.minor.patch',
     },
     theme,
     storage: new LocalStorageMock({}) as unknown as Storage,

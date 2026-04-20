@@ -229,7 +229,6 @@ export function ManagedExportFlyout({
                         {exportIntegration.config.copyAssetURIConfig.generateAssetURIValue({
                           intl,
                           optimizedForPrinting: usePrintLayout,
-                          useAbsoluteTime: false,
                         })}
                       </EuiCodeBlock>
                     </EuiFlexItem>

@@ -418,7 +418,6 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
 export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
-  useAbsoluteTime?: boolean;
 }
 
 interface UrlParamExtensionProps {
