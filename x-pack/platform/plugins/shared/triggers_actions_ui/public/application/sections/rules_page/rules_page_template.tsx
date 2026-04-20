@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiPageSectionProps } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { useEuiTheme, type EuiPageSectionProps } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 
@@ -35,10 +35,19 @@ export const RulesPageTemplate: React.FunctionComponent<RulesPageTemplateProps> 
   pageHeader,
   ...restProps
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const rulesMainPaddingStyle = useMemo(
+    () =>
+      ({
+        paddingInline: euiTheme.size.m,
+        paddingBlock: euiTheme.size.m,
+      }) as const,
+    [euiTheme.size.m]
+  );
   const templateProps: KibanaPageTemplatePropsWithPadding = {
     restrictWidth: false,
     panelled: true,
-    mainProps: { paddingSize: 'l' },
+    mainProps: { paddingSize: 'none', style: rulesMainPaddingStyle },
     pageHeader,
     ...restProps,
   };

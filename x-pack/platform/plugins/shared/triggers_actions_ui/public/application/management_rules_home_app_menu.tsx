@@ -13,7 +13,7 @@ import { AppMenu } from '@kbn/core-chrome-app-menu';
 import type {
   AppMenuConfig,
   AppMenuHeaderTab,
-  AppMenuItemType,
+  AppMenuSecondaryActionItem,
 } from '@kbn/core-chrome-app-menu-components';
 import type { Section } from './constants';
 import { useKibana } from '../common/lib/kibana';
@@ -29,8 +29,9 @@ export interface ManagementRulesHomeAppMenuProps {
 }
 
 /**
- * Project chrome: registers Stack Management Rules header actions (Create rule, Settings,
- * Documentation) in the shared AppMenuBar. Classic chrome keeps actions on EuiPageTemplate.Header.
+ * Project chrome: registers Stack Management Rules in the shared AppMenuBar — header tabs,
+ * inline Settings (when permitted), Create rule primary, and overflow (⋯) for global items.
+ * Classic chrome keeps actions on EuiPageTemplate.Header.
  */
 export const ManagementRulesHomeAppMenu: React.FC<ManagementRulesHomeAppMenuProps> = ({
   activeSection,
@@ -41,7 +42,7 @@ export const ManagementRulesHomeAppMenu: React.FC<ManagementRulesHomeAppMenuProp
   openRuleTypeModal,
   openSettingsFlyout,
 }) => {
-  const { chrome, docLinks } = useKibana().services;
+  const { chrome } = useKibana().services;
   const chromeStyle = useObservable(chrome.getChromeStyle$(), chrome.getChromeStyle());
   const isProjectChrome = chromeStyle === 'project';
 
@@ -50,34 +51,21 @@ export const ManagementRulesHomeAppMenu: React.FC<ManagementRulesHomeAppMenuProp
       return undefined;
     }
 
-    const overflowOnlyItems: AppMenuItemType[] = [];
-
-    if (showRulesSettingsInMenu) {
-      overflowOnlyItems.push({
-        order: 10,
-        id: 'management-rules-settings',
-        label: i18n.translate('xpack.triggersActionsUI.rulesSettings.link.title', {
-          defaultMessage: 'Settings',
-        }),
-        iconType: 'gear',
-        run: () => {
-          openSettingsFlyout();
-        },
-        testId: 'rulesSettingsLink',
-      });
-    }
-
-    overflowOnlyItems.push({
-      order: 20,
-      id: 'management-rules-documentation',
-      label: i18n.translate('xpack.triggersActionsUI.home.docsLinkText', {
-        defaultMessage: 'Documentation',
-      }),
-      iconType: 'question',
-      href: docLinks.links.alerting.guide,
-      target: '_blank',
-      testId: 'documentationLink',
-    });
+    const secondaryActionItems: AppMenuSecondaryActionItem[] | undefined = showRulesSettingsInMenu
+      ? [
+          {
+            id: 'management-rules-settings',
+            label: i18n.translate('xpack.triggersActionsUI.rulesSettings.link.title', {
+              defaultMessage: 'Settings',
+            }),
+            iconType: 'gear',
+            run: () => {
+              openSettingsFlyout();
+            },
+            testId: 'rulesSettingsLink',
+          },
+        ]
+      : undefined;
 
     const headerTabs: AppMenuHeaderTab[] = [
       {
@@ -115,8 +103,9 @@ export const ManagementRulesHomeAppMenu: React.FC<ManagementRulesHomeAppMenuProp
 
     const menuConfig: AppMenuConfig = {
       layout: 'chromeBarV2',
-      overflowOnlyItems,
+      hideProjectHeaderBackButton: true,
       headerTabs,
+      ...(secondaryActionItems ? { secondaryActionItems } : {}),
     };
 
     if (authorizedToCreateAnyRules) {
@@ -125,7 +114,7 @@ export const ManagementRulesHomeAppMenu: React.FC<ManagementRulesHomeAppMenuProp
         label: i18n.translate('xpack.triggersActionsUI.sections.rulesList.addRuleButtonLabel', {
           defaultMessage: 'Create rule',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plus',
         run: () => {
           openRuleTypeModal();
         },
@@ -138,7 +127,6 @@ export const ManagementRulesHomeAppMenu: React.FC<ManagementRulesHomeAppMenuProp
     activeSection,
     authorizedToCreateAnyRules,
     authorizedToReadAnyRules,
-    docLinks.links.alerting.guide,
     isProjectChrome,
     onSectionChange,
     openRuleTypeModal,

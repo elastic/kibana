@@ -277,7 +277,14 @@ export const RuleTagFilter = memo((props: RuleTagFilterProps) => {
   }, [isGrouped]);
 
   return (
-    <Container {...(isGrouped ? {} : { 'data-test-subj': 'ruleTagFilterUngrouped' })}>
+    <Container
+      {...(isGrouped
+        ? {}
+        : {
+            compressed: true,
+            'data-test-subj': 'ruleTagFilterUngrouped',
+          })}
+    >
       <EuiPopover
         data-test-subj={dataTestSubj}
         isOpen={isPopoverOpen}

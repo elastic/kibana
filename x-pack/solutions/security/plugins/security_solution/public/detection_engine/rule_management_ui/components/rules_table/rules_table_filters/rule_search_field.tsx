@@ -12,7 +12,7 @@ import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`
-  min-width: 200px;
+  min-width: 160px;
   & .euiPopover {
     // This is needed to "cancel" styles passed down from EuiTourStep that
     // interfere with EuiFieldSearch and don't allow it to take the full width
@@ -45,6 +45,7 @@ export function RuleSearchField({
     <SearchBarWrapper grow>
       <EuiFieldSearch
         aria-label={i18n.SEARCH_RULES}
+        compressed
         fullWidth
         incremental={false}
         placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}

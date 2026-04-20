@@ -59,7 +59,10 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }) => {
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
+  navTabs,
+  tabsBottomBorder = true,
+}) => {
   const [{ tabName }] = useRouteSpy();
   const mapLocationToTab = useCallback(
     (): string =>
@@ -103,13 +106,20 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }
     [navTabs, selectedTabId, search]
   );
 
-  return <EuiTabs data-test-subj="navigation-container">{renderTabs}</EuiTabs>;
+  return (
+    <EuiTabs data-test-subj="navigation-container" bottomBorder={tabsBottomBorder}>
+      {renderTabs}
+    </EuiTabs>
+  );
 };
 
 TabNavigationComponent.displayName = 'TabNavigationComponent';
 
-export const TabNavigation = React.memo(TabNavigationComponent, (prevProps, nextProps) =>
-  deepEqual(prevProps.navTabs, nextProps.navTabs)
+export const TabNavigation = React.memo(
+  TabNavigationComponent,
+  (prevProps, nextProps) =>
+    deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+    prevProps.tabsBottomBorder === nextProps.tabsBottomBorder
 );
 
 TabNavigation.displayName = 'TabNavigation';

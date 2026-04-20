@@ -122,6 +122,7 @@ const RulesPageContent = () => {
     };
     return {
       layout: 'chromeBarV2',
+      hideProjectHeaderBackButton: true,
       secondaryActionItems: [
         {
           id: 'security-detection-rules-add-elastic',
@@ -140,7 +141,7 @@ const RulesPageContent = () => {
                 ),
               }
             : {}),
-          iconType: 'plusInCircle',
+          iconType: 'plus',
           testId: 'addElasticRulesButton',
           href: addElasticRulesLinkProps.href,
           target: '_self',
@@ -183,7 +184,7 @@ const RulesPageContent = () => {
             primaryActionItem: {
               id: 'security-detection-rules-create-new',
               label: i18n.ADD_NEW_RULE,
-              iconType: 'plusInCircle',
+              iconType: 'plus',
               testId: 'create-new-rule',
               href: addCreateRuleLinkProps.href,
               target: '_self',
@@ -296,7 +297,7 @@ const RulesPageContent = () => {
                     <SecuritySolutionLinkButton
                       data-test-subj="create-new-rule"
                       fill
-                      iconType="plusInCircle"
+                      iconType="plus"
                       isDisabled={!canEditRules || loading}
                       deepLinkId={SecurityPageName.rulesCreate}
                     >

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
@@ -20,6 +21,15 @@ export enum AllRulesTabs {
 }
 
 export const RulesTableToolbar = React.memo(() => {
+  const { euiTheme } = useEuiTheme();
+  const rulesTabsOuterCss = useMemo(
+    () => css`
+      inline-size: 100%;
+      min-inline-size: 0;
+      border-block-end: ${euiTheme.border.thin};
+    `,
+    [euiTheme.border.thin]
+  );
   const { data: ruleManagementFilters } = useRuleManagementFilters();
   const { data: prebuiltRulesStatus } = usePrebuiltRulesStatus();
 
@@ -73,9 +83,11 @@ export const RulesTableToolbar = React.memo(() => {
   );
 
   return (
-    <EuiFlexGroup justifyContent={'spaceBetween'}>
-      <EuiFlexItem grow={false}>
-        <TabNavigation navTabs={ruleTabs} />
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem>
+        <div css={rulesTabsOuterCss}>
+          <TabNavigation navTabs={ruleTabs} tabsBottomBorder={false} />
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

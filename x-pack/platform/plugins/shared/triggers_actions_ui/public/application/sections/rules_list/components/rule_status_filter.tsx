@@ -97,7 +97,7 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
   );
 
   return (
-    <EuiFilterGroup data-test-subj={dataTestSubj}>
+    <EuiFilterGroup compressed data-test-subj={dataTestSubj}>
       <EuiPopover
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}

@@ -47,7 +47,7 @@ export const UPLOAD_VALUE_LISTS_PRIVILEGES_TOOLTIP = i18n.translate(
 export const ADD_NEW_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.addNewRuleTitle',
   {
-    defaultMessage: 'Create new rule',
+    defaultMessage: 'Create a rule',
   }
 );
 

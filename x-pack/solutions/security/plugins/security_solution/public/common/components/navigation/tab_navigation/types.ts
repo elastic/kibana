@@ -9,6 +9,8 @@ import type { NavTab } from '../types';
 
 export interface TabNavigationProps {
   navTabs: Record<string, NavTab>;
+  /** Forwarded to `EuiTabs`; set false when an ancestor provides the tab row border. */
+  tabsBottomBorder?: boolean;
 }
 
 export interface TabNavigationItemProps {

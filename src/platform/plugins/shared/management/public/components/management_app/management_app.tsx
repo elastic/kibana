@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import type { BehaviorSubject, Observable } from 'rxjs';
 
+import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -53,6 +54,15 @@ export interface ManagementAppDependencies {
 }
 
 export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {
+  const { euiTheme } = useEuiTheme();
+  const managementMainPaddingStyle = useMemo(
+    () =>
+      ({
+        paddingInline: euiTheme.size.m,
+        paddingBlock: euiTheme.size.m,
+      }) as const,
+    [euiTheme.size.m]
+  );
   const { coreStart, setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$, chromeStyle$ } =
     dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
@@ -129,9 +139,10 @@ export const ManagementApp = ({ dependencies, history, appBasePath }: Management
           <KibanaPageTemplate
             restrictWidth={false}
             solutionNav={solution}
-            // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-            // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-            mainProps={{ paddingSize: 'l' }}
+            mainProps={{
+              paddingSize: 'none',
+              style: managementMainPaddingStyle,
+            }}
             panelled
           >
             <ManagementRouter

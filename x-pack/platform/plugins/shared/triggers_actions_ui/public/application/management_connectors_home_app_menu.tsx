@@ -102,7 +102,7 @@ export const ManagementConnectorsHomeAppMenu: React.FC<ManagementConnectorsHomeA
         label: i18n.translate('xpack.triggersActionsUI.connectors.home.createConnector', {
           defaultMessage: 'Create connector',
         }),
-        iconType: 'plusInCircle',
+        iconType: 'plus',
         run: () => {
           onCreateConnectorClick();
         },

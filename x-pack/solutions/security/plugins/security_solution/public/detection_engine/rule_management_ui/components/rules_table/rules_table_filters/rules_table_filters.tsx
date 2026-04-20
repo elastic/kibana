@@ -114,10 +114,10 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
   );
 
   return (
-    <FilterWrapper gutterSize="m" justifyContent="flexEnd" wrap>
+    <FilterWrapper gutterSize="s" justifyContent="flexEnd" wrap alignItems="center">
       <RuleSearchField initialValue={filterOptions.filter} onSearch={handleOnSearch} />
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <TagsFilterPopover
             onSelectedTagsChanged={handleSelectedTags}
             selectedTags={selectedTags}
@@ -129,7 +129,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
 
       {selectedTab === AllRulesTabs.monitoring && (
         <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
+          <EuiFilterGroup compressed>
             <GapFillStatusSelector
               selectedStatuses={gapFillStatuses ?? []}
               onSelectedStatusesChanged={handleSelectedGapStatuses}
@@ -139,7 +139,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
       )}
 
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <RuleExecutionStatusSelector
             onSelectedStatusChanged={handleSelectedExecutionStatus}
             selectedStatus={selectedRuleExecutionStatus}
@@ -148,7 +148,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <EuiFilterButton
             isToggle
             isSelected={showElasticRules}
@@ -174,7 +174,7 @@ const RulesTableFiltersComponent = ({ selectedTab }: RulesTableFiltersProps) => 
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
+        <EuiFilterGroup compressed>
           <EuiFilterButton
             isToggle
             isSelected={enabled === true}

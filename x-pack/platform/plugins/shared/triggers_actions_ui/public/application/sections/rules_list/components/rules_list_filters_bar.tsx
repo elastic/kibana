@@ -170,10 +170,11 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           onQuerySubmit={(kueryNode) => updateFilters({ filter: 'kueryNode', value: kueryNode })}
         />
       )}
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>
           <EuiFieldSearch
             data-test-subj="ruleSearchField"
+            compressed
             fullWidth
             isClearable
             placeholder={i18n.translate(
@@ -187,7 +188,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>{renderRuleStatusFilter()}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFilterGroup>
+          <EuiFilterGroup compressed>
             {toolsRight.map((tool, index: number) => (
               <React.Fragment key={index}>{tool}</React.Fragment>
             ))}
@@ -197,6 +198,7 @@ export const RulesListFiltersBar = React.memo((props: RulesListFiltersBarProps) 
           <EuiButton
             data-test-subj="refreshRulesButton"
             iconType="refresh"
+            size="s"
             onClick={() => {
               onClearSelection();
               onRefreshRules();
