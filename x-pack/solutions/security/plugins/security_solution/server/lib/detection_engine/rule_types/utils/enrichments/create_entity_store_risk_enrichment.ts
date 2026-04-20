@@ -6,7 +6,6 @@
  */
 
 import { chunk } from 'lodash';
-import { asyncForEach } from '@kbn/std';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
@@ -67,33 +66,31 @@ export const createEntityStoreEnrichment = async <T extends DetectionAlertLatest
     }
 
     const eventsMapById: EventsMapByEnrichments = {};
-    // Query the entity store in chunks
-    const euidChunks = chunk(euids, CHUNK_SIZE);
 
-    await asyncForEach(euidChunks, async (euidChunk) => {
+    for (const euidChunk of chunk(euids, CHUNK_SIZE)) {
       const chunkResults = await entityStoreCrudClient.listEntities({
         filter: { terms: { 'entity.id': euidChunk } },
         size: euidChunk.length,
         fields: ['entity.id', ...enrichmentFields],
       });
 
-      for (let i = 0; i < chunkResults.entities.length; i++) {
-        const rawEntity = chunkResults.entities[i];
-        const fields = chunkResults.fields?.[i] ?? {};
-        const entityId = rawEntity?.entity?.id;
-        if (entityId) {
+      const enrichableEntities: Array<{ entityId: string; fields: Record<string, unknown[]> }> =
+        chunkResults.entities.flatMap((entity, i) => {
+          const entityId = entity?.entity?.id;
+          if (!entityId) return [];
+          return [{ entityId, fields: chunkResults.fields?.[i] ?? {} }];
+        });
+
+      enrichableEntities
+        .flatMap(({ entityId, fields }) => {
           const enrichmentFn = createEnrichmentFunction(fields);
-          if (enrichmentFn) {
-            const matchedEvents = eventsMapByEuid[entityId];
-            if (matchedEvents?.length) {
-              matchedEvents.forEach((event) => {
-                eventsMapById[event._id] = [enrichmentFn];
-              });
-            }
-          }
-        }
-      }
-    });
+          if (!enrichmentFn) return [];
+          return (eventsMapByEuid[entityId] ?? []).map((event) => ({ event, enrichmentFn }));
+        })
+        .forEach(({ event, enrichmentFn }) => {
+          eventsMapById[event._id] = [enrichmentFn];
+        });
+    }
 
     logger.debug(
       `Enrichment ${name}: return ${Object.keys(eventsMapById).length} events ready to be enriched`
