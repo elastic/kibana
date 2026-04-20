@@ -47,8 +47,6 @@ ess_auth('Authentication', async ({ page }) => {
     log.error('Username or password is incorrect.');
     throw new Error('Authentication is failed.');
   }
-
-  await suppressGlobalAnnouncements();
 });
 
 async function loginStateful(page: import('@playwright/test').Page) {
@@ -84,24 +82,4 @@ async function loginServerless(page: import('@playwright/test').Page) {
 
   await expect(loginBtn).toBeEnabled();
   await loginBtn.click();
-}
-
-async function suppressGlobalAnnouncements() {
-  const response = await fetch(`${process.env.KIBANA_BASE_URL}/internal/kibana/global_settings`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'kbn-xsrf': 'true',
-      'x-elastic-internal-origin': 'kibana',
-      Authorization: `Basic ${Buffer.from(
-        `${process.env.KIBANA_USERNAME}:${process.env.KIBANA_PASSWORD}`
-      ).toString('base64')}`,
-    },
-    body: JSON.stringify({ changes: { hideAnnouncements: true } }),
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Failed to suppress global announcements: ${response.status} ${response.statusText}`
-    );
-  }
 }
