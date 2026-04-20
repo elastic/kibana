@@ -25,6 +25,7 @@ const RANGE_SLIDER_LEGACY_REF_NAMES = [
 
 export const registerRangeSliderControlTransforms = (embeddable: EmbeddableSetup) => {
   embeddable.registerTransforms(RANGE_SLIDER_CONTROL, {
+    title: 'Range slider control',
     getSchema: () => rangeSliderControlSchema,
     getTransforms: () => ({
       transformIn: (state: RangeSliderControlState) => {
