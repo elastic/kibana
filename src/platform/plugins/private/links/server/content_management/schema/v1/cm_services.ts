@@ -17,7 +17,7 @@ import {
   createOptionsSchemas,
   objectTypeToGetResultSchema,
 } from '@kbn/content-management-utils';
-import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-plugin/server';
+import { dashboardNavigationOptionsSchema } from '@kbn/dashboard-navigation-options-schema';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../../../common/content_management/v1';
 import {
   LINKS_HORIZONTAL_LAYOUT,
