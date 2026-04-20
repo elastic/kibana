@@ -80,16 +80,37 @@ export class EngineDescriptorClient {
     entityType: EntityType,
     updater: (current: EngineDescriptor) => EngineDescriptor
   ): Promise<EngineDescriptor> {
-    const current = await this.findOrThrow(entityType);
-    const updated = updater(current);
-    const id = this.getSavedObjectId(entityType);
-    const { attributes } = await this.soClient.update<EngineDescriptor>(
-      EngineDescriptorTypeName,
-      id,
-      updated,
-      { refresh: 'wait_for', mergeAttributes: false }
-    );
-    return attributes as EngineDescriptor;
+    const maxRetries = 3;
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const currentSo = await this.getSOByType(entityType);
+      if (!currentSo) {
+        throw SavedObjectsErrorHelpers.createGenericNotFoundError(
+          `No engine descriptor found for entity type ${entityType}`
+        );
+      }
+      const updated = updater(currentSo.attributes);
+      const id = this.getSavedObjectId(entityType);
+      try {
+        const { attributes } = await this.soClient.update<EngineDescriptor>(
+          EngineDescriptorTypeName,
+          id,
+          updated,
+          { refresh: 'wait_for', mergeAttributes: false, version: currentSo.version }
+        );
+        return attributes as EngineDescriptor;
+      } catch (e) {
+        if (SavedObjectsErrorHelpers.isConflictError(e) && attempt < maxRetries - 1) {
+          this.logger.debug(
+            `Version conflict updating engine descriptor for ${entityType}, retrying (attempt ${
+              attempt + 1
+            })`
+          );
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw new Error(`updateWith exceeded max retries for entity type ${entityType}`);
   }
 
   async update(
@@ -126,13 +147,14 @@ export class EngineDescriptorClient {
   }
 
   private async getByType(entityType: EntityType): Promise<EngineDescriptor | null> {
+    const so = await this.getSOByType(entityType);
+    return so ? so.attributes : null;
+  }
+
+  private async getSOByType(entityType: EntityType) {
     const id = this.getSavedObjectId(entityType);
     try {
-      const { attributes } = await this.soClient.get<EngineDescriptor>(
-        EngineDescriptorTypeName,
-        id
-      );
-      return attributes;
+      return await this.soClient.get<EngineDescriptor>(EngineDescriptorTypeName, id);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         return null;
