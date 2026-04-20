@@ -132,6 +132,8 @@ export function AlertDetailsAppSection({ rule, alert, timeZone }: AlertDetailsAp
         end={to}
         comparisonChartTheme={comparisonChartTheme}
         timeZone={timeZone}
+        comparisonEnabled={false}
+        offset={''}
         threshold={isPrimary ? thresholdComponent : undefined}
         ruleTypeId={alertRuleTypeId}
       />

@@ -61,6 +61,8 @@ export function APMAlertingFailedTransactionsChart({
       end={rangeTo}
       comparisonChartTheme={comparisonChartTheme}
       timeZone={timeZone}
+      comparisonEnabled={false}
+      offset={''}
       kuery={kuery}
       filters={filters}
     />

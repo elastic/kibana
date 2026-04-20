@@ -56,6 +56,8 @@ export function FailedTransactionChart({
   end,
   comparisonChartTheme,
   timeZone,
+  comparisonEnabled,
+  offset,
   kuery = '',
   filters,
   customAlertEvaluationThreshold,
@@ -73,6 +75,8 @@ export function FailedTransactionChart({
   end: string;
   comparisonChartTheme: RecursivePartial<Theme>;
   timeZone: string;
+  comparisonEnabled: boolean;
+  offset: string;
   kuery?: string;
   filters?: BoolQuery;
   customAlertEvaluationThreshold?: number;
@@ -218,7 +222,8 @@ export function FailedTransactionChart({
               timeseries={timeseriesErrorRate}
               yLabelFormat={yLabelFormat}
               yDomain={{ min: 0, max: 1 }}
-              comparisonEnabled={false}
+              comparisonEnabled={comparisonEnabled}
+              offset={offset}
               customTheme={comparisonChartTheme}
               timeZone={timeZone}
               settings={CHART_SETTINGS}
