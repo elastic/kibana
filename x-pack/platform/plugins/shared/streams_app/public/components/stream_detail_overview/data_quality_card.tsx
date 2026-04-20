@@ -34,32 +34,6 @@ import {
 } from '../../util/stream_overview_esql';
 import { OverviewStat } from './overview_stat';
 
-function FailedDocsNoPrivilege() {
-  return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-      <span>{'—'}</span>
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilege',
-          { defaultMessage: 'You do not have the required privilege to view failure store data.' }
-        )}
-      >
-        <EuiButtonIcon
-          iconType="warning"
-          color="text"
-          size="xs"
-          href="https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store"
-          target="_blank"
-          aria-label={i18n.translate(
-            'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilegeAriaLabel',
-            { defaultMessage: 'Insufficient privilege — learn more about failure store' }
-          )}
-        />
-      </EuiToolTip>
-    </EuiFlexGroup>
-  );
-}
-
 export function DataQualityCard() {
   const { definition } = useStreamDetail();
 
@@ -285,5 +259,31 @@ function DataQualityCardContent({ definition }: { definition: Streams.ingest.all
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
+  );
+}
+
+function FailedDocsNoPrivilege() {
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <span>{'—'}</span>
+      <EuiToolTip
+        content={i18n.translate(
+          'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilege',
+          { defaultMessage: 'You do not have the required privilege to view failure store data.' }
+        )}
+      >
+        <EuiButtonIcon
+          iconType="warning"
+          color="text"
+          size="xs"
+          href="https://www.elastic.co/docs/manage-data/data-store/data-streams/failure-store"
+          target="_blank"
+          aria-label={i18n.translate(
+            'xpack.streams.streamOverview.dataQualityCard.failedDocsNoPrivilegeAriaLabel',
+            { defaultMessage: 'Insufficient privilege — learn more about failure store' }
+          )}
+        />
+      </EuiToolTip>
+    </EuiFlexGroup>
   );
 }
