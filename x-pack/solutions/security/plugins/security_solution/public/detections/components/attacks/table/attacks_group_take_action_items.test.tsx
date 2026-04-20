@@ -286,5 +286,18 @@ describe('AttacksGroupTakeActionItems', () => {
       const { queryByText } = renderAttack(mockAttack);
       expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
     });
+
+    it('should not render the action item when showAiAssistantAction is false', () => {
+      const { queryByText } = render(
+        <TestProviders>
+          <AttacksGroupTakeActionItems
+            attack={mockAttack}
+            showAiAssistantAction={false}
+            telemetrySource="attacks_page_group_take_action"
+          />
+        </TestProviders>
+      );
+      expect(queryByText('View in AI Assistant')).not.toBeInTheDocument();
+    });
   });
 });

@@ -1326,7 +1326,7 @@
           ") => string"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-        "lineNumber": 50,
+        "lineNumber": 81,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1342,7 +1342,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 51,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1365,7 +1365,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 52,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1883,7 +1883,7 @@
           " | undefined"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-        "lineNumber": 42,
+        "lineNumber": 69,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1899,7 +1899,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 42,
+            "lineNumber": 69,
             "columnNumber": 40,
             "deprecated": false,
             "trackAdoption": false,
@@ -1938,6 +1938,51 @@
             "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema_from_connectors.ts",
             "lineNumber": 41,
             "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.getStepPrefixDeprecationInfo",
+        "type": "Function",
+        "tags": [],
+        "label": "getStepPrefixDeprecationInfo",
+        "description": [],
+        "signature": [
+          "(stepType: string) => ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.StepDeprecationInfo",
+            "text": "StepDeprecationInfo"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+        "lineNumber": 60,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.getStepPrefixDeprecationInfo.$1",
+            "type": "string",
+            "tags": [],
+            "label": "stepType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+            "lineNumber": 60,
+            "columnNumber": 46,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2562,7 +2607,7 @@
           "(stepType: string) => boolean"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-        "lineNumber": 46,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2578,7 +2623,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 46,
+            "lineNumber": 77,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -4354,7 +4399,7 @@
         "label": "ChildWorkflowExecutionItem",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 679,
+        "lineNumber": 685,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4367,7 +4412,7 @@
             "label": "parentStepExecutionId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 680,
+            "lineNumber": 686,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4380,7 +4425,7 @@
             "label": "workflowId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 681,
+            "lineNumber": 687,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4393,7 +4438,7 @@
             "label": "workflowName",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 682,
+            "lineNumber": 688,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4406,7 +4451,7 @@
             "label": "executionId",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 683,
+            "lineNumber": 689,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4428,7 +4473,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 684,
+            "lineNumber": 690,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4451,7 +4496,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 685,
+            "lineNumber": 691,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5790,7 +5835,7 @@
         "label": "GetAvailableConnectorsResponse",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 674,
+        "lineNumber": 680,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5814,7 +5859,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 675,
+            "lineNumber": 681,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5827,7 +5872,7 @@
             "label": "totalConnectors",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 676,
+            "lineNumber": 682,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5947,11 +5992,29 @@
           "<T, TConfig, TInput>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 528,
+        "lineNumber": 529,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.PropertySelectionHandler.dependsOnValues",
+            "type": "Array",
+            "tags": [],
+            "label": "dependsOnValues",
+            "description": [
+              "\nDot paths (e.g. `config.proxy.ssl`, `input.owner`) whose values are passed in `context.values`\nand included in the selection cache key. If omitted or empty, `context.values` is `{ config: {}, input: {} }`."
+            ],
+            "signature": [
+              "DependsOnValuePath[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "lineNumber": 534,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.PropertySelectionHandler.search",
@@ -5981,7 +6044,7 @@
               "<T>[]>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 533,
+            "lineNumber": 539,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -5997,7 +6060,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 538,
+                "lineNumber": 544,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6021,7 +6084,7 @@
                   "<TConfig, TInput>"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 539,
+                "lineNumber": 545,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6059,7 +6122,7 @@
               "<T> | null>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 542,
+            "lineNumber": 548,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6075,7 +6138,7 @@
                   "T"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 548,
+                "lineNumber": 554,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6099,7 +6162,7 @@
                   "<TConfig, TInput>"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 549,
+                "lineNumber": 555,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6145,7 +6208,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 552,
+            "lineNumber": 558,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -6161,7 +6224,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 558,
+                "lineNumber": 564,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6185,7 +6248,7 @@
                   "<TConfig, TInput>"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 559,
+                "lineNumber": 565,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6209,7 +6272,7 @@
                   "<T> | null"
                 ],
                 "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-                "lineNumber": 560,
+                "lineNumber": 566,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -6379,7 +6442,7 @@
         "label": "RequestOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 650,
+        "lineNumber": 656,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6392,7 +6455,7 @@
             "label": "method",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 651,
+            "lineNumber": 657,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6405,7 +6468,7 @@
             "label": "path",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 652,
+            "lineNumber": 658,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6421,7 +6484,7 @@
               "Record<string, unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 653,
+            "lineNumber": 659,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6437,7 +6500,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 654,
+            "lineNumber": 660,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6453,7 +6516,7 @@
               "Record<string, string> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 655,
+            "lineNumber": 661,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6471,7 +6534,7 @@
               "Record<string, unknown>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 656,
+            "lineNumber": 662,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6497,7 +6560,7 @@
           "<TConfig, TInput>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 604,
+        "lineNumber": 610,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6512,7 +6575,7 @@
               "The step type ID (e.g., \"onechat.runAgent\")"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 608,
+            "lineNumber": 614,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6530,7 +6593,7 @@
               "\"config\" | \"input\""
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 610,
+            "lineNumber": 616,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6545,7 +6608,7 @@
               "The property key (e.g., \"agent_id\")"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 612,
+            "lineNumber": 618,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6557,7 +6620,7 @@
             "tags": [],
             "label": "values",
             "description": [
-              "Sibling values of the current step, keyed by scope."
+              "Sibling values of the current step, keyed by scope (only paths listed in `dependsOnValues` are populated)."
             ],
             "signature": [
               {
@@ -6570,7 +6633,7 @@
               "<TConfig, TInput>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 614,
+            "lineNumber": 620,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6586,7 +6649,7 @@
         "label": "SelectionDetails",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 575,
+        "lineNumber": 581,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6601,7 +6664,7 @@
               "Message to display (e.g., \"✓ Agent connected\" or \"Agent not found\")"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 576,
+            "lineNumber": 582,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6619,7 +6682,7 @@
               "{ text: string; path: string; }[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 578,
+            "lineNumber": 584,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6645,7 +6708,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 564,
+        "lineNumber": 570,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6663,7 +6726,7 @@
               "T"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 565,
+            "lineNumber": 571,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6678,7 +6741,7 @@
               "The label displayed in the UI"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 567,
+            "lineNumber": 573,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6696,7 +6759,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 569,
+            "lineNumber": 575,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6714,7 +6777,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 571,
+            "lineNumber": 577,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6967,6 +7030,59 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.StepPrefixDeprecationInfo",
+        "type": "Interface",
+        "tags": [],
+        "label": "StepPrefixDeprecationInfo",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.StepPrefixDeprecationInfo.prefix",
+            "type": "string",
+            "tags": [],
+            "label": "prefix",
+            "description": [
+              "Prefix to match against step type (e.g., 'inference.' matches 'inference.completion')"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.StepPrefixDeprecationInfo.deprecation",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows",
+                "scope": "common",
+                "docId": "kibKbnWorkflowsPluginApi",
+                "section": "def-common.StepDeprecationInfo",
+                "text": "StepDeprecationInfo"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.StepPropertyHandler",
         "type": "Interface",
         "tags": [],
@@ -7055,7 +7171,7 @@
           "<TConfig, TInput>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 587,
+        "lineNumber": 593,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7063,17 +7179,57 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.StepSelectionValues.config",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "config",
             "description": [
               "Root-level step properties (everything outside the `with` block)."
             ],
             "signature": [
-              "TConfig"
+              "{ [P in keyof TConfig]?: (TConfig[P] extends NonAny[] ? TConfig[P] : TConfig[P] extends readonly NonAny[] ? TConfig[P] : TConfig[P] extends (infer U)[] ? ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<U>[] : TConfig[P] extends readonly (infer U)[] ? readonly ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<U>[] : TConfig[P] extends Set<infer V> ? Set<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<V>> : TConfig[P] extends Map<infer K, infer V> ? Map<K, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<V>> : TConfig[P] extends NonAny ? TConfig[P] : ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<TConfig[P]>) | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 598,
+            "lineNumber": 604,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7081,17 +7237,57 @@
           {
             "parentPluginId": "@kbn/workflows",
             "id": "def-common.StepSelectionValues.input",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "input",
             "description": [
               "Properties nested under the `with` block."
             ],
             "signature": [
-              "TInput"
+              "{ [P in keyof TInput]?: (TInput[P] extends NonAny[] ? TInput[P] : TInput[P] extends readonly NonAny[] ? TInput[P] : TInput[P] extends (infer U)[] ? ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<U>[] : TInput[P] extends readonly (infer U)[] ? readonly ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<U>[] : TInput[P] extends Set<infer V> ? Set<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<V>> : TInput[P] extends Map<infer K, infer V> ? Map<K, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<V>> : TInput[P] extends NonAny ? TInput[P] : ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.RecursivePartial",
+                "text": "RecursivePartial"
+              },
+              "<TInput[P]>) | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 600,
+            "lineNumber": 606,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7289,7 +7485,7 @@
         "label": "ValidateWorkflowResponseDto",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 668,
+        "lineNumber": 674,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7302,7 +7498,7 @@
             "label": "valid",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 669,
+            "lineNumber": 675,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7319,7 +7515,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 670,
+            "lineNumber": 676,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7335,7 +7531,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 671,
+            "lineNumber": 677,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9797,7 +9993,7 @@
         "label": "WorkflowsSearchParams",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 641,
+        "lineNumber": 647,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -9813,7 +10009,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 642,
+            "lineNumber": 648,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9829,7 +10025,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 643,
+            "lineNumber": 649,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9845,7 +10041,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 644,
+            "lineNumber": 650,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9861,7 +10057,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 645,
+            "lineNumber": 651,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9877,7 +10073,7 @@
               "boolean[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 646,
+            "lineNumber": 652,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -9893,7 +10089,7 @@
               "string[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-            "lineNumber": 647,
+            "lineNumber": 653,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10396,7 +10592,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
-        "lineNumber": 636,
+        "lineNumber": 642,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -10465,6 +10661,32 @@
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "lineNumber": 131,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.DEPRECATED_STEP_PREFIX_METADATA",
+        "type": "Array",
+        "tags": [],
+        "label": "DEPRECATED_STEP_PREFIX_METADATA",
+        "description": [
+          "\nPrefix-based deprecation for step types. Any step type starting with one of these\nprefixes is treated as deprecated. This avoids enumerating every sub-action when an\nentire connector family is superseded by a purpose-built step."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.StepPrefixDeprecationInfo",
+            "text": "StepPrefixDeprecationInfo"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12403,7 +12625,7 @@
         "label": "DEPRECATED_STEP_METADATA",
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-        "lineNumber": 15,
+        "lineNumber": 21,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -12416,62 +12638,6 @@
             "label": "'kibana.createCase'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.createCase.replacementStepType",
-                "type": "string",
-                "tags": [],
-                "label": "replacementStepType",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-                "lineNumber": 17,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/workflows",
-            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCase",
-            "type": "Object",
-            "tags": [],
-            "label": "'kibana.getCase'",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCase.replacementStepType",
-                "type": "string",
-                "tags": [],
-                "label": "replacementStepType",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-                "lineNumber": 20,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "@kbn/workflows",
-            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCase",
-            "type": "Object",
-            "tags": [],
-            "label": "'kibana.updateCase'",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
@@ -12479,7 +12645,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCase.replacementStepType",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.createCase.replacementStepType",
                 "type": "string",
                 "tags": [],
                 "label": "replacementStepType",
@@ -12494,10 +12660,10 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.addCaseComment",
+            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCase",
             "type": "Object",
             "tags": [],
-            "label": "'kibana.addCaseComment'",
+            "label": "'kibana.getCase'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
             "lineNumber": 25,
@@ -12507,7 +12673,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.addCaseComment.replacementStepType",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCase.replacementStepType",
                 "type": "string",
                 "tags": [],
                 "label": "replacementStepType",
@@ -12522,10 +12688,10 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.createCaseDefaultSpace",
+            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCase",
             "type": "Object",
             "tags": [],
-            "label": "'kibana.createCaseDefaultSpace'",
+            "label": "'kibana.updateCase'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
             "lineNumber": 28,
@@ -12535,7 +12701,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.createCaseDefaultSpace.replacementStepType",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCase.replacementStepType",
                 "type": "string",
                 "tags": [],
                 "label": "replacementStepType",
@@ -12550,10 +12716,10 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCaseDefaultSpace",
+            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.addCaseComment",
             "type": "Object",
             "tags": [],
-            "label": "'kibana.getCaseDefaultSpace'",
+            "label": "'kibana.addCaseComment'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
             "lineNumber": 31,
@@ -12563,7 +12729,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCaseDefaultSpace.replacementStepType",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.addCaseComment.replacementStepType",
                 "type": "string",
                 "tags": [],
                 "label": "replacementStepType",
@@ -12578,10 +12744,10 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCaseDefaultSpace",
+            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.createCaseDefaultSpace",
             "type": "Object",
             "tags": [],
-            "label": "'kibana.updateCaseDefaultSpace'",
+            "label": "'kibana.createCaseDefaultSpace'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
             "lineNumber": 34,
@@ -12591,7 +12757,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/workflows",
-                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCaseDefaultSpace.replacementStepType",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.createCaseDefaultSpace.replacementStepType",
                 "type": "string",
                 "tags": [],
                 "label": "replacementStepType",
@@ -12606,13 +12772,69 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCaseDefaultSpace",
+            "type": "Object",
+            "tags": [],
+            "label": "'kibana.getCaseDefaultSpace'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+            "lineNumber": 37,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.getCaseDefaultSpace.replacementStepType",
+                "type": "string",
+                "tags": [],
+                "label": "replacementStepType",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+                "lineNumber": 38,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCaseDefaultSpace",
+            "type": "Object",
+            "tags": [],
+            "label": "'kibana.updateCaseDefaultSpace'",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/workflows",
+                "id": "def-common.DEPRECATED_STEP_METADATA.kibana.updateCaseDefaultSpace.replacementStepType",
+                "type": "string",
+                "tags": [],
+                "label": "replacementStepType",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.DEPRECATED_STEP_METADATA.kibana.addCaseCommentDefaultSpace",
             "type": "Object",
             "tags": [],
             "label": "'kibana.addCaseCommentDefaultSpace'",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-            "lineNumber": 37,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -12625,7 +12847,7 @@
                 "label": "replacementStepType",
                 "description": [],
                 "path": "src/platform/packages/shared/kbn-workflows/spec/deprecated_step_metadata.ts",
-                "lineNumber": 38,
+                "lineNumber": 44,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false

@@ -39,6 +39,7 @@ import { ChatExperience } from './chat_experience/chat_experience';
 import { PrePromptWorkflowSection } from './pre_prompt_workflow_section';
 import { DocumentationSection } from './documentation';
 import { AnonymizationProfilesSection } from './anonymization_profiles_section';
+import { TokenUsageTracking } from './token_usage_tracking/token_usage_tracking';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -437,6 +438,9 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   <AIAssistantVisibility />
                 </EuiFlexItem>
               )}
+              <EuiFlexItem>
+                <TokenUsageTracking />
+              </EuiFlexItem>
             </EuiSplitPanel.Inner>
           </EuiSplitPanel.Outer>
 

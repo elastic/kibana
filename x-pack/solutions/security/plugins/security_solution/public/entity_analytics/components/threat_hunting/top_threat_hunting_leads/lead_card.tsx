@@ -5,36 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiText,
-  EuiTextTruncate,
-  useEuiTheme,
-} from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { css } from '@emotion/react';
+import React, { useCallback, useMemo } from 'react';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { HuntingLead } from './types';
-import { getEntityIcon } from './utils';
-
-const MAX_VISIBLE_TAGS = 3;
-
-const getCardStyles = (euiTheme: EuiThemeComputed) => css`
-  position: relative;
-  cursor: pointer;
-  min-width: 260px;
-  max-width: 360px;
-  transition: transform ${euiTheme.animation.normal} ease,
-    box-shadow ${euiTheme.animation.normal} ease;
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px ${euiTheme.colors.shadow};
-  }
-`;
+import { MAX_VISIBLE_TAGS } from './utils';
+import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
 
 interface LeadCardProps {
   lead: HuntingLead;
@@ -42,67 +17,43 @@ interface LeadCardProps {
 }
 
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
-  const { euiTheme } = useEuiTheme();
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
-
+  const renderedByline = useMemo(
+    () => renderTextWithEntities(lead.byline, lead.entities),
+    [lead.byline, lead.entities]
+  );
   return (
     <EuiPanel
       hasBorder
+      hasShadow={false}
       paddingSize="m"
-      css={getCardStyles(euiTheme)}
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiText
-            size="s"
-            css={css`
-              font-weight: 600;
-              padding-right: 24px;
-            `}
-          >
-            <EuiTextTruncate text={lead.title} />
-          </EuiText>
+          <EuiTitle size="xs">
+            <h5>{lead.title}</h5>
+          </EuiTitle>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            <EuiTextTruncate text={lead.byline} />
+            {renderedByline}
           </EuiText>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            {lead.entities.map((entity) => (
-              <EuiFlexItem grow={false} key={`${entity.type}-${entity.name}`}>
-                <EuiBadge color="hollow">
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="xs"
-                    responsive={false}
-                    component="span"
-                  >
-                    <EuiIcon type={getEntityIcon(entity.type)} size="s" aria-hidden={true} />
-                    <span>{entity.name}</span>
-                  </EuiFlexGroup>
-                </EuiBadge>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
         </EuiFlexItem>
 
         {lead.tags.length > 0 && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
               {lead.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
                 <EuiFlexItem grow={false} key={tag}>
-                  <EuiBadge color="default">{tag}</EuiBadge>
+                  <EuiBadge color="hollow">{tag}</EuiBadge>
                 </EuiFlexItem>
               ))}
               {lead.tags.length > MAX_VISIBLE_TAGS && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="default">{`+${lead.tags.length - MAX_VISIBLE_TAGS}`}</EuiBadge>
+                  <TagsPopover tags={lead.tags} />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

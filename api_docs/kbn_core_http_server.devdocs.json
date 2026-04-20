@@ -16713,6 +16713,10 @@
               },
               {
                 "plugin": "evals",
+                "path": "x-pack/platform/plugins/shared/evals/server/routes/runs/compare_runs.ts"
+              },
+              {
+                "plugin": "evals",
                 "path": "x-pack/platform/plugins/shared/evals/server/routes/examples/get_example_scores.ts"
               },
               {

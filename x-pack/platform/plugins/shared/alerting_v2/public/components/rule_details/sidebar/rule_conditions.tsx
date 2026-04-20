@@ -10,14 +10,10 @@ import { formatDuration } from '@kbn/alerting-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { RuleApiResponse } from '../../../services/rules_api';
 import { ItemValueRuleSummary } from '../item_value_rule_summary';
 import { RecoveryPolicy } from '../recovery_policy';
+import { useRule } from '../rule_context';
 import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
-
-export interface RuleConditionsProps {
-  rule: RuleApiResponse;
-}
 
 const MODE_LABELS: Record<string, string> = {
   signal: i18n.translate('xpack.alertingV2.ruleDetails.modeSignal', {
@@ -40,7 +36,8 @@ const NO_DATA_BEHAVIOR_LABELS: Record<string, string> = {
   }),
 };
 
-export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({ rule }) => {
+export const RuleConditions: React.FunctionComponent = () => {
+  const rule = useRule();
   const isAlertMode = rule.kind === 'alert';
   const dataSource = getIndexPatternFromESQLQuery(rule.evaluation?.query?.base) || EMPTY_VALUE;
 

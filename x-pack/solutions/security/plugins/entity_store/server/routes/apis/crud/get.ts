@@ -25,6 +25,7 @@ const querySchema = z
     size: z.coerce.number().int().positive().optional(),
     searchAfter: z.string().optional(),
     source: z.array(z.string()).optional(),
+    fields: ArrayFromString(z.string()).optional(),
     sort_field: z.string().optional(),
     sort_order: z.enum(['asc', 'desc']).optional(),
     page: z.coerce.number().int().min(1).optional(),
@@ -144,10 +145,13 @@ export function registerCRUDGet(router: EntityStorePluginRouter) {
               'searchAfter'
             ),
             source: req.query.source,
+            fields: req.query.fields,
           };
 
-          const { entities, nextSearchAfter } = await crudClient.listEntities(listParams);
-          return res.ok({ body: { entities, nextSearchAfter } });
+          const { entities, nextSearchAfter, fields } = await crudClient.listEntities(listParams);
+          return res.ok({
+            body: { entities, nextSearchAfter, ...(fields ? { fields } : {}) },
+          });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
           if (message.startsWith('Invalid filterQuery')) {

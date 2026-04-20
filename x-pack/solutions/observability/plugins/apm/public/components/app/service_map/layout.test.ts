@@ -6,7 +6,7 @@
  */
 
 import Dagre from '@dagrejs/dagre';
-import type { Node, Edge } from '@xyflow/react';
+import { Position, type Node, type Edge } from '@xyflow/react';
 import { applyDagreLayout } from './layout';
 import {
   NODE_WIDTH,
@@ -55,6 +55,8 @@ describe('applyDagreLayout', () => {
       expect(result[0]).toEqual(
         expect.objectContaining({
           id: 'a',
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
           position: expect.objectContaining({
             x: expect.any(Number),
             y: expect.any(Number),
@@ -83,6 +85,8 @@ describe('applyDagreLayout', () => {
       const nodeC = result.find((n) => n.id === 'c')!;
 
       expect(nodeA.position.x < nodeB.position.x && nodeB.position.x < nodeC.position.x).toBe(true);
+      expect(nodeA.sourcePosition).toBe(Position.Right);
+      expect(nodeA.targetPosition).toBe(Position.Left);
     });
 
     it('positions nodes in a vertical line (TB layout)', () => {
@@ -103,6 +107,8 @@ describe('applyDagreLayout', () => {
       const nodeC = result.find((n) => n.id === 'c')!;
 
       expect(nodeA.position.y < nodeB.position.y && nodeB.position.y < nodeC.position.y).toBe(true);
+      expect(nodeA.sourcePosition).toBe(Position.Bottom);
+      expect(nodeA.targetPosition).toBe(Position.Top);
     });
   });
 
