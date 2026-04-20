@@ -21,8 +21,7 @@ import {
   normalizeKeywordList,
 } from '../fixtures/helpers';
 
-// Failing: See https://github.com/elastic/kibana/issues/256862
-apiTest.describe.skip('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
