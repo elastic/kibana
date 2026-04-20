@@ -400,7 +400,7 @@ Scout uses Playwright's [projects concept](https://playwright.dev/docs/test-proj
 
 ```json
 {
-  "serverless": true
+  "serverless": true,
   "projectType": "es",
   "isCloud": true,
   "cloudHostName": "elastic_cloud_hostname_qa_staging_prod",
@@ -426,6 +426,7 @@ node scripts/scout start-server --arch <arch> --domain <domain>
 
 - **`--arch`**: `stateful` or `serverless`.
 - **`--domain`**: e.g. `classic`, `search`, `observability_complete`, `security_complete`. Use `node scripts/scout start-server --help` for the full list.
+- **`--preserveEsData`**: Reuse existing serverless ES object store data on startup instead of cleaning it (useful when restarting after crashes).
 
 This command is useful for manual testing or running tests via an IDE.
 
@@ -472,6 +473,20 @@ The `linkedProject` fixture provides:
 
 - `esArchiver` -- data-only archiver that rejects `.kibana*` indices (use `kbnArchiver` for saved objects)
 - `esClient` -- Elasticsearch client connected to the linked cluster
+
+#### HTTP/2 Mode
+
+Scout can start Kibana with **HTTP/2 over TLS** enabled. From 9.0 onward Kibana defaults to HTTP/2 whenever TLS is configured, so production-like deployments increasingly run on HTTP/2 rather than HTTP/1.1. Some behaviors differ between the two protocols (e.g. search strategies and other streaming response paths), so use this mode to validate plugin behavior under HTTP/2 or to reproduce TLS-only issues locally.
+
+Enable it via the `http2` server config set; tests don't need any changes.
+
+```bash
+node scripts/scout start-server --arch stateful --domain classic --serverConfigSet http2
+node scripts/scout run-tests --arch stateful --domain classic --serverConfigSet http2 \
+  --config <plugin-path>/test/scout/ui/playwright.config.ts
+```
+
+Supported `--arch`/`--domain` combinations are the ones defined under `src/servers/configs/config_sets/http2/`.
 
 #### Running Servers and Tests Locally
 

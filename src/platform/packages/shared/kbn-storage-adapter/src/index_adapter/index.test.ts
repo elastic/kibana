@@ -76,6 +76,7 @@ const createMockEsClient = () => {
         template: { mappings: {} },
       }),
       putMapping: jest.fn().mockResolvedValue({}),
+      putSettings: jest.fn().mockResolvedValue({}),
     },
   } as unknown as jest.Mocked<ElasticsearchClient>;
   return client;
@@ -162,6 +163,24 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     );
   });
 
+  it('includes settings in the index template', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        template: expect.objectContaining({
+          settings: expect.objectContaining({
+            auto_expand_replicas: '0-1',
+            number_of_shards: 1,
+          }),
+        }),
+      })
+    );
+  });
+
   it('works without transport options (backward compatible)', async () => {
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -169,5 +188,30 @@ describe('StorageIndexAdapter - transport options forwarding', () => {
     await client.search({ track_total_hits: false, size: 10, query: { match_all: {} } });
 
     expect(esClient.search).toHaveBeenCalledWith(expect.objectContaining({ index: 'test_index' }));
+  });
+
+  it('forwards transport options to esClient.bulk for create operations', async () => {
+    esClient.bulk.mockResolvedValueOnce({
+      errors: false,
+      items: [{ create: { _id: 'doc1', result: 'created', status: 201, _index: 'test_index' } }],
+      took: 1,
+    });
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+    const client = adapter.getClient();
+
+    await client.bulk(
+      {
+        operations: [{ create: { _id: 'doc1', document: { foo: 'bar' } } }],
+      },
+      transportOptions
+    );
+
+    expect(esClient.bulk).toHaveBeenCalledWith(
+      expect.objectContaining({
+        require_alias: true,
+        operations: [{ create: { _id: 'doc1' } }, { foo: 'bar' }],
+      }),
+      transportOptions
+    );
   });
 });

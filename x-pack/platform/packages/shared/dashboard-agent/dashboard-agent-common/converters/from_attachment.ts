@@ -10,8 +10,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   AttachmentPanel,
@@ -26,8 +25,8 @@ import { isSection } from '../types';
  */
 const buildPanelFromConfig = ({ config, type, id, grid }: AttachmentPanel): DashboardPanel => {
   let configObject = config;
-  if (type === LENS_EMBEDDABLE_TYPE && config.attributes && isLensAPIFormat(config.attributes)) {
-    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config.attributes);
+  if (type === LENS_EMBEDDABLE_TYPE && isLensAPIFormat(config)) {
+    const lensAttributes = new LensConfigBuilder().fromAPIFormat(config);
     configObject = {
       ...config,
       attributes: lensAttributes,

@@ -7286,6 +7286,18 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/partition.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
               },
@@ -7308,18 +7320,6 @@
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               }
             ]
           }
@@ -7928,6 +7928,18 @@
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/transforms/charts/tagcloud.ts"
               },
               {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
+                "plugin": "@kbn/lens-embeddable-utils",
+                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/entity_analytics/lens_attributes/risk_score_summary.ts"
               },
@@ -7974,18 +7986,6 @@
               {
                 "plugin": "@kbn/lens-embeddable-utils",
                 "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/dynamic_colors.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
-              },
-              {
-                "plugin": "@kbn/lens-embeddable-utils",
-                "path": "src/platform/packages/shared/kbn-lens-embeddable-utils/config_builder/tests/metric/lens_state_config.mock.ts"
               }
             ]
           },
