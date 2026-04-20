@@ -30,6 +30,7 @@ import {
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
+import { getSourceValue } from '../utils/get_source_value';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
 
@@ -61,10 +62,7 @@ export function SourceDocument({
   columnsMeta: DataTableColumnsMeta | undefined;
 }) {
   const styles = useMemoCss(componentStyles);
-  const esqlSourceValue =
-    isPlainRecord && columnId === '_source' && typeof row.flattened?.[columnId] === 'object'
-      ? (row.flattened[columnId] as Record<string, unknown>)
-      : undefined;
+  const esqlSourceValue = getSourceValue({ row, columnId, isPlainRecord });
 
   const effectiveRow = useMemo(
     () => (esqlSourceValue ? buildDataTableRecord({ _source: esqlSourceValue }, dataView) : row),
@@ -73,7 +71,7 @@ export function SourceDocument({
 
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(
-        row.raw,
+        effectiveRow.raw,
         columnId,
         dataView,
         shouldShowFieldHandler,

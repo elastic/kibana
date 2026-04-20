@@ -13,6 +13,7 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
+import { getSourceValue } from './get_source_value';
 
 interface ConvertedResult {
   formattedString: string;
@@ -55,9 +56,13 @@ export const convertValueToString = ({
     columnMeta: columnsMeta?.[columnId],
   });
 
-  if (columnId === '_source' && !field && value && typeof value === 'object') {
+  const sourceValue = getSourceValue({ row: rows[rowIndex], columnId, isPlainRecord: !field });
+
+  if (sourceValue) {
     return {
-      formattedString: disableMultiline ? JSON.stringify(value) : JSON.stringify(value, null, 2),
+      formattedString: disableMultiline
+        ? JSON.stringify(sourceValue)
+        : JSON.stringify(sourceValue, null, 2),
       withFormula: false,
     };
   }

@@ -14,18 +14,21 @@ import { css } from '@emotion/react';
 import JsonCodeEditor from './json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from '../constants';
 import { getInnerColumns } from '../utils/columns';
+import { getSourceValue } from '../utils/get_source_value';
 
 export const SourcePopoverContent = ({
   closeButton,
   columnId,
   row,
   useTopLevelObjectColumns,
+  isPlainRecord,
   dataTestSubj = 'dataTableExpandCellActionJsonPopover',
 }: {
   closeButton: JSX.Element;
   columnId: string;
   row: DataTableRecord;
   useTopLevelObjectColumns: boolean;
+  isPlainRecord?: boolean;
   dataTestSubj?: string;
 }) => {
   return (
@@ -44,7 +47,7 @@ export const SourcePopoverContent = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <JsonCodeEditor
-          json={getJSON(columnId, row, useTopLevelObjectColumns)}
+          json={getJSON(columnId, row, useTopLevelObjectColumns, isPlainRecord)}
           width={defaultMonacoEditorWidth}
           height={200}
         />
@@ -53,10 +56,16 @@ export const SourcePopoverContent = ({
   );
 };
 
-function getJSON(columnId: string, row: DataTableRecord, useTopLevelObjectColumns: boolean) {
+function getJSON(
+  columnId: string,
+  row: DataTableRecord,
+  useTopLevelObjectColumns: boolean,
+  isPlainRecord?: boolean
+) {
+  const sourceValue = getSourceValue({ row, columnId, isPlainRecord });
   const json = useTopLevelObjectColumns
     ? getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId)
-    : row.raw;
+    : sourceValue ?? row.raw;
   return json as Record<string, unknown>;
 }
 

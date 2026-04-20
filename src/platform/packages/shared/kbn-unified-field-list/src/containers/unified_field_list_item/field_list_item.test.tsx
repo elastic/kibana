@@ -15,6 +15,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { getServicesMock } from '../../../__mocks__/services.mock';
+import type { SearchMode } from '../../types';
 import type { UnifiedFieldListItemProps } from './field_list_item';
 import { UnifiedFieldListItem } from './field_list_item';
 import { FieldItemButton } from '../../components/field_item_button';

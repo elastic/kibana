@@ -220,6 +220,7 @@ function renderPopoverContent({
         row={row}
         columnId={columnId}
         useTopLevelObjectColumns={useTopLevelObjectColumns}
+        isPlainRecord={isPlainRecord}
         closeButton={closeButton}
       />
     );
