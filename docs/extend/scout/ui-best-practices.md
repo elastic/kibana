@@ -47,26 +47,6 @@ await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
 
 :::::
 
-## Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
-
-Use `test.step()` to structure a multi-step flow while keeping one browser context (faster, clearer reporting). Group closely related actions into a single step when it keeps the report readable without hiding intent.
-
-:::::{dropdown} Example
-
-```ts
-test('navigates through pages', async ({ pageObjects }) => {
-  await test.step('go to Dashboards', async () => {
-    await pageObjects.navigation.clickDashboards();
-  });
-
-  await test.step('go to Overview', async () => {
-    await pageObjects.navigation.clickOverview();
-  });
-});
-```
-
-:::::
-
 ## Prefer realistic in-app navigation for user flows [prefer-realistic-in-app-navigation]
 
 When a test asserts **user flow** (not just “land on a page”), prefer navigation the way a user would: follow links and buttons, and use browser history (`page.goBack()`) instead of direct URL jumps where it matters for the scenario. Reserve `page.goto` / deep links for cheap setup when the test is not about navigation.
@@ -321,23 +301,6 @@ async createIndexAndVerify(name: string) {
 ```ts
 await pageObjects.indexManagement.clickCreateIndexSaveButton();
 await expect(page.testSubj.locator('indicesTable')).toContainText(testIndexName);
-```
-
-:::::
-
-## Use `expect.soft` for independent checks [use-expect-soft-for-independent-checks]
-
-When a test verifies multiple independent items (KPI tiles, chart counts, table columns), use `expect.soft()` so the test continues checking everything instead of stopping at the first failure. Playwright still fails the test at the end if any soft assertion failed.
-
-:::::{dropdown} Example
-
-```ts
-test('Overview tab shows all KPI values', async ({ pageObjects }) => {
-  await pageObjects.nodeDetails.clickOverviewTab();
-  await expect.soft(pageObjects.nodeDetails.getKPI('cpuUsage')).toHaveText('50.0%');
-  await expect.soft(pageObjects.nodeDetails.getKPI('memoryUsage')).toHaveText('35.0%');
-  await expect.soft(pageObjects.nodeDetails.getKPI('diskUsage')).toHaveText('80.0%');
-});
 ```
 
 :::::

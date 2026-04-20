@@ -42,6 +42,28 @@ Prefer doing this locally first (faster feedback), and use the Flaky Test Runner
 - Don’t rely on test file execution order (it’s [not guaranteed](https://playwright.dev/docs/test-parallel#control-test-order)).
 - Don’t assume a previous test in the suite already set up the data you need (if that test fails or is skipped, the test will break with a misleading error).
 
+## Use `test.step` for multi-step flows [use-teststep-for-multi-step-flows]
+
+Use `test.step()` (or `apiTest.step()` in API tests) to structure a multi-step flow within a single test. It keeps the test in one context (faster, clearer reporting) and produces labelled entries in the test report that make failures easier to diagnose. Group closely related actions into a single step when it keeps the report readable without hiding intent.
+
+:::::{dropdown} Example
+
+```ts
+test('navigates through pages', async ({ pageObjects }) => {
+  await test.step('go to Dashboards', async () => {
+    await pageObjects.navigation.clickDashboards();
+  });
+
+  await test.step('go to Overview', async () => {
+    await pageObjects.navigation.clickOverview();
+  });
+});
+```
+
+The same pattern works in API tests with `apiTest.step()`.
+
+:::::
+
 ## Write descriptive test names [write-descriptive-test-names]
 
 Test names should read like a sentence describing expected behavior. Clear names make failures self-explanatory and test suites scannable.
@@ -203,6 +225,56 @@ test.afterAll(async ({ apiServices }) => {
 ```ts
 test.afterAll(async ({ apiServices }) => {
   await apiServices.cases.cleanup.deleteAllCases();
+});
+```
+
+Inside the helper, handle the expected error — either by treating 404 as success, or by accepting an `ignoreErrors` option:
+
+```ts
+async function deleteCase(caseId: string, { ignoreErrors = false } = {}) {
+  const response = await apiClient.delete(`api/cases/${caseId}`, {
+    headers: { ...COMMON_HEADERS, ...adminCredentials.apiKeyHeader },
+  });
+
+  // already gone — nothing to do
+  if (response.status === 404) return;
+  if (!ignoreErrors && response.status >= 400) {
+    throw new Error(`Failed to delete case ${caseId}: ${response.status}`);
+  }
+}
+```
+
+:::::
+
+## Use `expect.soft` for independent checks [use-expect-soft-for-independent-checks]
+
+When a test verifies multiple independent items (KPI tiles, chart counts, table columns, several response fields), you can optionally use `expect.soft()` so the test continues checking everything instead of stopping at the first failure (to facilitate troubleshooting). Playwright still fails the test at the end if any soft assertion failed.
+
+:::::{dropdown} Examples
+
+UI test:
+
+```ts
+test('Overview tab shows all KPI values', async ({ pageObjects }) => {
+  await pageObjects.nodeDetails.clickOverviewTab();
+  await expect.soft(pageObjects.nodeDetails.getKPI('cpuUsage')).toHaveText('50.0%');
+  await expect.soft(pageObjects.nodeDetails.getKPI('memoryUsage')).toHaveText('35.0%');
+  await expect.soft(pageObjects.nodeDetails.getKPI('diskUsage')).toHaveText('80.0%');
+});
+```
+
+API test:
+
+```ts
+apiTest('returns expected summary fields', async ({ apiClient }) => {
+  const response = await apiClient.get('api/my-feature/summary', {
+    headers: { ...COMMON_HEADERS, ...viewerCredentials.apiKeyHeader },
+  });
+
+  expect(response).toHaveStatusCode(200);
+  expect.soft(response.body.total).toBe(42);
+  expect.soft(response.body.active).toBe(10);
+  expect.soft(response.body.archived).toBe(32);
 });
 ```
 
