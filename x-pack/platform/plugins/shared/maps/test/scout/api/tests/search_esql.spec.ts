@@ -64,6 +64,6 @@ apiTest.describe('Maps - search ES|QL', { tag: [...tags.stateful.classic] }, () 
     expect(rawResponse.values).toStrictEqual([
       ['POINT (-120.9871642 38.68407028)', '2015-09-20T00:00:00.000Z'],
     ]);
-    expect(rawResponse.values_loaded).toBe(4);
+    expect(rawResponse.values_loaded).toBe(6);
   });
 });
