@@ -27,6 +27,7 @@ const defaultContext: ColumnBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 
@@ -79,6 +80,7 @@ describe('name column builder', () => {
           selection: true,
           tags: false,
           starred: false,
+          userProfiles: false,
         },
       };
 

@@ -28,17 +28,21 @@ export type {
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
 export {
+  isFilterFacetConfig,
   useContentListSort,
   useContentListSearch,
   useContentListPagination,
   useContentListSelection,
-  useFilterDisplay,
   useContentListFilters,
+  useFilterToggle,
   useTagFilterToggle,
+  useCreatedByFilterToggle,
+  useFilterFacets,
   isSortingConfig,
   isPaginationConfig,
   isSearchConfig,
   TAG_FILTER_ID,
+  CREATED_BY_FILTER_ID,
   DEFAULT_SORT_FIELDS,
   DEFAULT_INITIAL_SORT,
   DeleteConfirmationModal,
@@ -47,7 +51,7 @@ export {
 } from './src/features';
 
 // State.
-export { CONTENT_LIST_ACTIONS, DEFAULT_FILTERS } from './src/state';
+export { CONTENT_LIST_ACTIONS } from './src/state';
 export type { ContentListAction } from './src/state';
 
 // Types.
@@ -55,6 +59,9 @@ export type { ContentListItem, ContentListItemConfig } from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,
+  FilterFacet,
+  FilterFacetParams,
+  FilterFacetConfig,
   SortField,
   SortOption,
   SortingConfig,
@@ -64,7 +71,6 @@ export type {
   SearchConfig,
   UseContentListSearchReturn,
   UseContentListSelectionReturn,
-  FilterDisplayState,
   UseContentListFiltersReturn,
   DeleteConfirmationModalProps,
   DeleteConfirmationComponentProps,
@@ -74,12 +80,42 @@ export type {
 export type {
   ActiveFilters,
   IncludeExcludeFilter,
-  FilterCounts,
+  IncludeExcludeFlag,
   FindItemsFn,
   FindItemsParams,
   FindItemsResult,
   DataSourceConfig,
 } from './src/datasource';
+export { getIncludeExcludeFlag } from './src/datasource';
+
+// Query model.
+export type {
+  ContentListQueryModel,
+  QueryFilterValue,
+  FieldDefinition,
+  FlagDefinition,
+} from './src/query_model';
+export { EMPTY_MODEL, toFindItemsFilters, useQueryModel } from './src/query_model';
+
+// Services.
+export {
+  ProfileCache,
+  ProfileCacheContext,
+  useProfileCache,
+  useProfileCacheVersion,
+  useProfile,
+} from './src/services';
+export type { ContentListUserProfilesServices, UserProfileEntry } from './src/services';
+
+// Item constants (sentinel keys, labels, and utilities).
+export {
+  MANAGED_USER_FILTER,
+  NO_CREATOR_USER_FILTER,
+  MANAGED_USER_LABEL,
+  NO_CREATOR_USER_LABEL,
+  SENTINEL_KEYS,
+  getCreatorKey,
+} from './src/item';
 
 // Utilities.
 export { contentListKeys } from './src/query';

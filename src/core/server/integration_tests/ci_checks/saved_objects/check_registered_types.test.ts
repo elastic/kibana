@@ -10,36 +10,25 @@
 import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { getMigrationHash, getTypeHashes } from '@kbn/core-test-helpers-so-type-serializer';
 import type { Root } from '@kbn/core-root-server-internal';
-import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { InternalCoreSetup } from '@kbn/core-lifecycle-server-internal';
+import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 import { sortBy } from 'lodash';
 import { getVirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
-  let esServer: TestElasticsearchUtils;
   let root: Root;
   let typeRegistry: ISavedObjectTypeRegistry;
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-    });
-
-    esServer = await startES();
     root = createRootWithCorePlugins({}, { oss: false });
     await root.preboot();
-    await root.setup();
-    const coreStart = await root.start();
-    typeRegistry = coreStart.savedObjects.getTypeRegistry();
+    const coreSetup: InternalCoreSetup = await root.setup();
+    typeRegistry = coreSetup.savedObjects.getTypeRegistry();
   });
 
   afterAll(async () => {
     await root?.shutdown();
-    await esServer?.stop();
   });
 
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
@@ -134,7 +123,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "498c2ba7abd4329a0d8b40efd98b4b16991107512d38141707f9f2e10521b367",
         "ingest-agent-policies": "ce61ba4808deecd27dce770799be59f212ebe1c0d76bcc4298aafa4cfce7aa15",
         "ingest-download-sources": "c87e062ef293585e85fccec0c865d7cef48e0ff9a919d7781d5f7627d275484b",
-        "ingest-outputs": "b5c8354ebfb71f5d50322c19787bbee2c5bb8fff5bfff46dc5683d19e94797a3",
+        "ingest-outputs": "8ea9ade69e9ced03cf5700086f454adf3fc46918317b6150e127fdd5829a56a6",
         "ingest-package-policies": "7817460ef093393f7fce067f91186003e41246a69f32344b1cd68fe19f43a24e",
         "ingest_manager_settings": "6cd91fe6c52c516676d99021f51a4b3a162686880198ba3c556983f5fffbb5a3",
         "integration-config": "5f95ba3784d5d50d04d8ad3489fc4c0a50db34da049a69e754a48c80172ee948",
@@ -142,6 +131,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "intercept_trigger_record": "141c827f6553a4b758290690e9ac3ec26f4e6aeedc05a8fc9e0ea163ebfcd8db",
         "inventory-view": "0583a6777ec2687968aa10e9a184670402a61f30478e8c944f7353e1488ad51e",
         "kql-telemetry": "348e73949f6a751bbfcbc96f6cf3ed2793ee521ef3079dfc1085d04feccf50b1",
+        "lead-generation-config": "d2898f730434dcdef595311d6cfbc63f12abe02fb84a8a4433b88308f2849e8f",
         "legacy-url-alias": "a3c430a3bd271bdf83034db890cc691bea82aa94b546b1088a234899a95666c0",
         "lens": "29efa8813637e7129582b3206783c06c7c588a2751ba1feae3541ad878f86840",
         "lens-ui-telemetry": "9e0ba2dd36440fcaf97368f118cf51094bd62a47a45e1be9728b92d469d80d83",
@@ -194,7 +184,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "f5efabeefafbb12ed0809db3cd04f893ff9099ead8f526be82a9b0348e444f65",
         "synthetics-privates-locations": "42aebb3aa4f3710a3e270d54bf33718a4d1d7a983556a51f75bd96b1e4fdf048",
         "tag": "03a522e92aed789a4bbf1a5dd19159c3ec061cb052337df9270728def4b3bbe0",
-        "task": "52bb9355724d6546a8e485c161c7f039493acb79e913b31ce1d0b9839fe38117",
+        "task": "4e6f0a8e825e3159959f1dc0fd4d6c5d9b15707863a741905b183dc6d1144f44",
         "telemetry": "fb5e3ce0b2955f10aa8cd75fdafdd0559bf5d77eaf6e2c228079684f01f28fbd",
         "threshold-explorer-view": "9b0a770f5444531f92dd50832dcf655cb0c9cd7f18af205338e0c9d73c6df6a6",
         "trial-companion-nba-milestone": "83f29f99e2ffaf00ed8e05f3366ed0df1fb36a77193aeb151e13bae8b1d9692f",
@@ -852,8 +842,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "ingest-download-sources|10.1.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "================================================================================================",
         "ingest-outputs|global: 3e72116f17fda6ec9c5269cb42eb42e3f686b313",
-        "ingest-outputs|mappings: bdde67dc29cfd86a1195ed34a4417073728691c4",
+        "ingest-outputs|mappings: a48fa4cb62d321c8ed0ffe84c80db2cbf7f7258b",
         "ingest-outputs|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "ingest-outputs|10.10.0: 25066fec2f6c80607e652ddd82d32976ec25492c26e18fec0b22b1c01c0eae65",
         "ingest-outputs|10.9.0: 50a325af05e7b9b3f7383f1e525388c9cecf00a14b9924409a262f6c3058840b",
         "ingest-outputs|10.8.0: 7fce3be244f92bb99b17c8757c39a49aec078ff90cae70971e42e202a574348c",
         "ingest-outputs|10.7.0: 2f5dfca42d489deaa60da45c020e92fdae21e5e3d0e5e60153c0d18039715bd7",
@@ -950,6 +941,11 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "kql-telemetry|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "kql-telemetry|schemas: 8d6477e08dfdf20335752a69994646f9da90741f",
         "===============================================================",
+        "lead-generation-config|global: 9214fc6b463c04cd8ae1254844c0554e51a11bc9",
+        "lead-generation-config|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
+        "lead-generation-config|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "lead-generation-config|10.1.0: e39d0d079d4d5cc138b6c9cec4f920c0327ec9ac6c63e5fcf6cec5f86ba8dac1",
+        "===============================================================================================",
         "legacy-url-alias|global: 75ba31d71f16b30f2af93e89a5a4d2e4337bd39d",
         "legacy-url-alias|mappings: 3fab23423850717103cdd4cbbc53bc55b0a7f884",
         "legacy-url-alias|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
@@ -1285,8 +1281,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "tag|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "=====================================================",
         "task|global: 8277e4031824bb161fa73897294701786c15eb9a",
-        "task|mappings: 02ff4224787d1516899101bacf1c411fa0149383",
+        "task|mappings: a4616c952ab46648bba6f807a339d76b1388078e",
         "task|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        "task|10.9.0: 2c8f74c9a9d07540f767ad8e99174474da9bec93ab858ae1e005a301f620c39b",
         "task|10.8.0: deed2eb105aa3f19fa1827868c6b5569523624614fb73a8fcb8600d86c0dface",
         "task|10.7.0: 6afacb50669e4a3ebd48d5790d1677c138885b1540acf5e832dbe8dc82e7cd5c",
         "task|10.6.0: a554a701424daf84a260b61390464deb9296c7372ac3438301c2fb046ded11f9",
@@ -1488,7 +1485,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "10.0.0",
         "ingest-agent-policies": "10.10.0",
         "ingest-download-sources": "10.1.0",
-        "ingest-outputs": "10.9.0",
+        "ingest-outputs": "10.10.0",
         "ingest-package-policies": "10.22.0",
         "ingest_manager_settings": "10.8.0",
         "integration-config": "10.3.0",
@@ -1496,6 +1493,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "intercept_trigger_record": "10.1.0",
         "inventory-view": "10.2.0",
         "kql-telemetry": "10.0.0",
+        "lead-generation-config": "10.1.0",
         "legacy-url-alias": "10.0.0",
         "lens": "10.1.0",
         "lens-ui-telemetry": "10.0.0",
@@ -1548,7 +1546,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "10.0.0",
         "synthetics-privates-locations": "10.1.0",
         "tag": "10.0.0",
-        "task": "10.8.0",
+        "task": "10.9.0",
         "telemetry": "10.0.0",
         "threshold-explorer-view": "10.0.0",
         "trial-companion-nba-milestone": "10.1.0",
@@ -1653,7 +1651,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infrastructure-ui-source": "7.16.2",
         "ingest-agent-policies": "10.10.0",
         "ingest-download-sources": "10.1.0",
-        "ingest-outputs": "10.9.0",
+        "ingest-outputs": "10.10.0",
         "ingest-package-policies": "10.22.0",
         "ingest_manager_settings": "10.8.0",
         "integration-config": "10.3.0",
@@ -1661,6 +1659,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "intercept_trigger_record": "10.1.0",
         "inventory-view": "10.2.0",
         "kql-telemetry": "0.0.0",
+        "lead-generation-config": "10.1.0",
         "legacy-url-alias": "8.2.0",
         "lens": "10.1.0",
         "lens-ui-telemetry": "0.0.0",
@@ -1713,7 +1712,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "0.0.0",
         "synthetics-privates-locations": "10.1.0",
         "tag": "0.0.0",
-        "task": "10.8.0",
+        "task": "10.9.0",
         "telemetry": "0.0.0",
         "threshold-explorer-view": "0.0.0",
         "trial-companion-nba-milestone": "10.1.0",

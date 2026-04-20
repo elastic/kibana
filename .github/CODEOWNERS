@@ -71,6 +71,7 @@ packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-
 packages/kbn-find-used-node-modules @elastic/kibana-operations
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/kibana-management
+packages/kbn-heap-snapshot-analyzer-cli @elastic/kibana-core
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-json-ast @elastic/kibana-operations
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
@@ -348,6 +349,9 @@ src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
+src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
+src/platform/packages/private/dashboard/dashboard-navigation-options-components @elastic/kibana-presentation
+src/platform/packages/private/dashboard/dashboard-navigation-options-schema @elastic/kibana-presentation
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
@@ -1726,11 +1730,19 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-presentation-team @elastic/obs-exploration-team
 /x-pack/platform/test/common/utils/server_route_repository @elastic/obs-onboarding-team @elastic/obs-sig-events-team
 
-## Streams parts owned by Logs UX
+## Streams parts owned by Obs Onboarding
 /x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management @elastic/obs-onboarding-team
+/x-pack/platform/plugins/shared/streams/test/scout/api/tests/streams @elastic/obs-onboarding-team
 
-# Streams parts owned by Kibana Management
-x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle/downsampling @elastic/kibana-management
+# Streams - Data retention overrides (owned by Kibana Management)
+x-pack/platform/plugins/shared/streams_app/public/components/stream_management/data_management/stream_detail_lifecycle @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/failure_store @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/routes/internal/streams/failure_store @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/routes/internal/streams/lifecycle @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_policies.test.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.ts @elastic/kibana-management
+x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
 
 # Streams — sig events overrides (obs-sig-events-team owns these subtrees)
 x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team
@@ -1738,6 +1750,7 @@ x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-
 x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
 
 # Infra Monitoring tests
 /x-pack/solutions/observability/test/functional/apps/infra @elastic/obs-presentation-team
@@ -1931,7 +1944,6 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
-/x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
@@ -2428,6 +2440,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @el
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/azure_blob/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gcp_cloud_functions/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/brave_search/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/gmail/** @elastic/workchat-eng
@@ -3149,11 +3162,11 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inven
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/contextual-security-apps
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/contextual-security-apps
 
-# Security Service Integrations
-x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
-x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
+# Security integrations
+x-pack/solutions/security/plugins/security_solution/common/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/integration-experience
+x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/integration-experience
 
 # Kibana design
 # scss overrides should be below this line for specificity
@@ -3176,7 +3189,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/platform/test/functional/services/pipeline_* @elastic/logstash
 /x-pack/platform/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/platform/test/functional/apps/logstash @elastic/logstash
-/x-pack/platform/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
 # EUI team
@@ -3243,6 +3255,9 @@ oas_docs/output                               @elastic/ski-docs
 docs/settings-gen                             @elastic/experience-docs
 docs/reference                                @elastic/experience-docs
 
+# Side navigation title glossary
+src/platform/packages/shared/shared-ux/label_formatter/src/to_sentence_case.ts @elastic/experience-docs
+
 /x-pack/platform/test/serverless/functional/test_suites/strip_unknown_config_workaround @elastic/kibana-core
 
 # Plugin manifests for test plugins
@@ -3274,6 +3289,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 # Appex QA to own auto-generated scout metadata
 /**/scout/.meta/**
 /**/scout_*/.meta/**
+
+# Macroscope Check Run Agents
+/.macroscope/scout-review.md @elastic/appex-qa
+/.macroscope/flaky-test-runner-nudge.md @elastic/appex-qa
 
 # These files influence agent behavior and are loaded into every new agent session.
 # Changes here can have repo-wide impact (what instructions/tools/context an agent sees), so require

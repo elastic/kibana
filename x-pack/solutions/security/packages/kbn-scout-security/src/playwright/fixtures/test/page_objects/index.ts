@@ -14,6 +14,7 @@ import { EntityAnalyticsManagementPage } from './entity_analytics_management';
 import { CspmIntegrationPage } from './cspm_integration_page';
 import { TimelinePage } from './timeline';
 import { DetectionsAttackDiscoveryPage } from './detections_attack_discovery';
+import { AttackDetailsRightPanelPage } from './attack_details_right_panel';
 
 export interface SecurityPageObjects extends PageObjects {
   alertsTablePage: AlertsTablePage;
@@ -23,6 +24,7 @@ export interface SecurityPageObjects extends PageObjects {
   cspmIntegrationPage: CspmIntegrationPage;
   timelinePage: TimelinePage;
   detectionsAttackDiscoveryPage: DetectionsAttackDiscoveryPage;
+  attackDetailsRightPanelPage: AttackDetailsRightPanelPage;
 }
 
 export function extendPageObjects(
@@ -43,5 +45,6 @@ export function extendPageObjects(
       page,
       config
     ),
+    attackDetailsRightPanelPage: createLazyPageObject(AttackDetailsRightPanelPage, page),
   };
 }

@@ -22,14 +22,14 @@ export const TYPE_COLUMN_LABEL = i18n.translate(
   { defaultMessage: 'Type' }
 );
 
-export const QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicators.columns.queryTypeLabel',
-  { defaultMessage: 'Query' }
+export const MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.matchQueryTypeLabel',
+  { defaultMessage: 'Match query' }
 );
 
-export const CONFIDENCE_COLUMN_LABEL = i18n.translate(
-  'xpack.streams.knowledgeIndicators.columns.confidenceLabel',
-  { defaultMessage: 'Confidence' }
+export const STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.columns.statsQueryTypeLabel',
+  { defaultMessage: 'Stats query' }
 );
 
 export const STREAM_COLUMN_LABEL = i18n.translate(
@@ -166,3 +166,34 @@ export const DELETE_MODAL_TITLE = (count: number) =>
       'Are you sure you want to delete {count, plural, one {this knowledge indicator} other {these knowledge indicators}}?',
     values: { count },
   });
+
+export const CREATE_RULES_BUTTON = i18n.translate(
+  'xpack.streams.knowledgeIndicators.createRulesButton',
+  { defaultMessage: 'Create rules' }
+);
+
+export const getRuleCountLabel = (count: number) =>
+  i18n.translate('xpack.streams.knowledgeIndicators.ruleCountLabel', {
+    defaultMessage: '{count, plural, one {# new rule} other {# new rules}}',
+    values: { count },
+  });
+
+export const PROMOTE_ALL_ERROR_TOAST_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.promoteAllErrorTitle',
+  { defaultMessage: 'Failed to promote queries' }
+);
+
+export const PROMOTE_SELECTED_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicators.promoteSelectedLabel',
+  { defaultMessage: 'Promote selected' }
+);
+
+export const BULK_PROMOTE_SUCCESS_TOAST_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.bulkPromoteSuccessToastTitle',
+  { defaultMessage: 'Queries promoted' }
+);
+
+export const BULK_PROMOTE_ERROR_TITLE = i18n.translate(
+  'xpack.streams.knowledgeIndicators.bulkPromoteErrorTitle',
+  { defaultMessage: 'Failed to promote selected queries' }
+);

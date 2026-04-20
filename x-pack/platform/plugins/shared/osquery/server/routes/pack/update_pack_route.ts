@@ -60,6 +60,7 @@ import type { PackQueryInput } from './utils';
 import { updatePacksRequestBodySchema, updatePacksRequestParamsSchema } from '../../../common/api';
 import { getUserInfo } from '../../lib/get_user_info';
 import { escapeFilterValue } from '../utils/generate_copy_name';
+import { updatePackResponseSchema } from './response_schemas';
 
 export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -85,6 +86,11 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               typeof updatePacksRequestBodySchema,
               UpdatePacksRequestBodySchema
             >(updatePacksRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => updatePackResponseSchema,
+            },
           },
         },
       },

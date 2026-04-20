@@ -25,11 +25,6 @@ export interface TitleProps {
    */
   hit: DataTableRecord;
   /**
-   * Optional boolean to render the title in a smaller font size.
-   * Should be used when the component is displayed in a tools flyout header.
-   */
-  isCompact?: boolean;
-  /**
    * Optional boolean to suppress the rule details link even when a rule ID is present.
    * Should be used when the component is displayed in a rule preview context.
    */
@@ -41,7 +36,7 @@ export interface TitleProps {
  * For alerts: shows the rule name with a warning icon, linked to the rule details page.
  * For events: shows the event title with an analyzeEvent icon.
  */
-export const Title: FC<TitleProps> = memo(({ hit, isCompact = false, hideLink = false }) => {
+export const Title: FC<TitleProps> = memo(({ hit, hideLink = false }) => {
   const { services } = useKibana();
 
   const isAlert = useMemo(
@@ -73,25 +68,12 @@ export const Title: FC<TitleProps> = memo(({ hit, isCompact = false, hideLink = 
         external={false}
         data-test-subj={TITLE_LINK_TEST_ID}
       >
-        <FlyoutTitle
-          title={title}
-          iconType={iconType}
-          isLink
-          isCompact={isCompact}
-          data-test-subj={TITLE_TEST_ID}
-        />
+        <FlyoutTitle title={title} iconType={iconType} isLink data-test-subj={TITLE_TEST_ID} />
       </EuiLink>
     );
   }
 
-  return (
-    <FlyoutTitle
-      title={title}
-      iconType={iconType}
-      isCompact={isCompact}
-      data-test-subj={TITLE_TEST_ID}
-    />
-  );
+  return <FlyoutTitle title={title} iconType={iconType} data-test-subj={TITLE_TEST_ID} />;
 });
 
 Title.displayName = 'Title';

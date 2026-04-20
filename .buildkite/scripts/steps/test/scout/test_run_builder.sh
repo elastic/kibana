@@ -5,6 +5,10 @@ set -euo pipefail
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
+if should_enable_fips; then
+  export NODE_OPTIONS="${NODE_OPTIONS:-} --enable-fips --openssl-config=$HOME/nodejs.cnf"
+fi
+
 echo '--- Verify Playwright CLI is functional'
 node scripts/scout run-playwright-test-check
 
@@ -80,7 +84,8 @@ else
     SELECTIVE_SCOUT_DISCOVERY_FLAG=(--selective-testing)
     echo "Selective testing: enabled (--selective-testing flag will be passed to discover-playwright-configs)"
   else
-    echo "Selective testing: disabled — reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, scout:run-all-tests label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no), critical files touched=${SCOUT_CRITICAL_FILES_TOUCHED}"
+    echo "Selective testing is disabled"
+    echo "Reason: SELECTIVE_TESTING_ENABLED=${SELECTIVE_TESTING_ENABLED:-false}, 'scout:run-all-tests' label=$(is_pr_with_label "scout:run-all-tests" && echo yes || echo no), 'critical files touched'=${SCOUT_CRITICAL_FILES_TOUCHED}"
   fi
   node scripts/scout discover-playwright-configs \
     --include-custom-servers \
@@ -91,13 +96,6 @@ else
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
 fi
-
-echo '--- Running Scout API Integration Tests (against Kibana source code)'
-node scripts/scout.js run-tests \
-  --location local \
-  --arch stateful \
-  --domain classic \
-  --config src/platform/packages/shared/kbn-scout/test/scout/api/parallel.playwright.config.ts \
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 

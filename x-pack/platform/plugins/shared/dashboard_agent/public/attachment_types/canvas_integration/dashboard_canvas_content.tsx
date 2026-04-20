@@ -70,6 +70,7 @@ export const DashboardCanvasContent = ({
   searchBarComponent: SearchBar,
   filterManager,
   checkSavedDashboardExist,
+  canWriteDashboards,
 }: AttachmentRenderProps<DashboardAttachment> & {
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
@@ -79,6 +80,7 @@ export const DashboardCanvasContent = ({
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
   filterManager: DataPublicPluginStart['query']['filterManager'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  canWriteDashboards: boolean;
 }) => {
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
   const styles = useMemoCss(dashboardCanvasContentStyles);
@@ -156,6 +158,7 @@ export const DashboardCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     openSidebarConversation,
+    canWriteDashboards,
     dashboardLocatorParams,
     getExistingDashboardId,
     closeCanvas,
