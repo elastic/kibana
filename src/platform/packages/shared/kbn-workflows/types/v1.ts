@@ -260,11 +260,28 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-export const WORKFLOW_ID_PATTERN = /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,254}$/;
+// IDs must start and end with a lowercase alphanumeric character, contain only lowercase
+// alphanumeric chars and hyphens in the middle. Length is enforced separately via
+// WORKFLOW_ID_MIN_LENGTH (3) and WORKFLOW_ID_MAX_LENGTH (255).
+// This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
+// plain UUIDs, while rejecting leading/trailing separators, snake case and
+// special characters like spaces, dots, or '@'.
+//
+// NOTE: The regex intentionally allows 1-2 char IDs (the inner group is optional).
+// The 3-char minimum is enforced by WORKFLOW_ID_MIN_LENGTH at the Zod schema
+// level so that the pattern and length constraints remain independently testable.
+export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
+export const WORKFLOW_ID_MAX_LENGTH = 255;
+export const WORKFLOW_ID_MIN_LENGTH = 3;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
-  id: z.string().max(255).regex(WORKFLOW_ID_PATTERN).optional(),
+  id: z
+    .string()
+    .min(WORKFLOW_ID_MIN_LENGTH)
+    .max(WORKFLOW_ID_MAX_LENGTH)
+    .regex(WORKFLOW_ID_PATTERN)
+    .optional(),
 });
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
