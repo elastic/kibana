@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'node:path';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import {
   API_VERSIONS,
@@ -21,6 +22,12 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
     .get({
       path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
       access: 'internal',
+      summary: 'Check Entity Store privileges',
+      description:
+        'Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -30,6 +37,10 @@ export function registerCheckPrivileges(router: EntityStorePluginRouter) {
       {
         version: API_VERSIONS.internal.v2,
         validate: false,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/entity_store_check_privileges.yaml'),
+        },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
