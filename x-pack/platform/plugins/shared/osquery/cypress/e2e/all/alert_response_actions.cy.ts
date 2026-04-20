@@ -98,7 +98,7 @@ describe(
         // other enrolled-but-offline agents in CI, which makes the response action
         // wait indefinitely ("Some selected agents are offline or have unhealthy
         // Osquery components and may not respond to queries").
-        cy.contains(/1 agent selected/);
+        cy.contains(/^1 agent selected/);
         inputQueryInFlyout('select * from uptime;');
         submitQuery();
         checkResults();
