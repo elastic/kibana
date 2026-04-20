@@ -227,7 +227,9 @@ describe('test_connector_form', () => {
       />
     );
 
-    expect(screen.getByTestId('executionResultCodeBlock')).toHaveTextContent(
+    const result = screen.getByTestId('executionResultCodeBlock');
+    expect(result).toBeInTheDocument();
+    expect(result.textContent).toEqual(
       JSON.stringify(
         {
           actionId: '1234',
