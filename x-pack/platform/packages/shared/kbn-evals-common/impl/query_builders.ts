@@ -404,10 +404,12 @@ export const buildLatestBaselineRunQuery = (
   return {
     query: {
       bool: {
-        filter: [
-          { term: { 'suite.id': suiteId } },
+        filter: [{ term: { 'suite.id': suiteId } }],
+        should: [
+          { term: { 'ci.buildkite.branch': branch } },
           { term: { 'run_metadata.git_branch': branch } },
         ],
+        minimum_should_match: 1,
         must_not: mustNot,
       },
     },

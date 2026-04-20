@@ -458,10 +458,12 @@ describe('query_builders', () => {
 
       expect(query).toEqual({
         bool: {
-          filter: [
-            { term: { 'suite.id': 'my-suite' } },
+          filter: [{ term: { 'suite.id': 'my-suite' } }],
+          should: [
+            { term: { 'ci.buildkite.branch': 'main' } },
             { term: { 'run_metadata.git_branch': 'main' } },
           ],
+          minimum_should_match: 1,
           must_not: [{ term: { run_id: 'kbn-evals-preflight' } }],
         },
       });
@@ -482,10 +484,12 @@ describe('query_builders', () => {
 
       expect(query).toEqual({
         bool: {
-          filter: [
-            { term: { 'suite.id': 'my-suite' } },
+          filter: [{ term: { 'suite.id': 'my-suite' } }],
+          should: [
+            { term: { 'ci.buildkite.branch': 'main' } },
             { term: { 'run_metadata.git_branch': 'main' } },
           ],
+          minimum_should_match: 1,
           must_not: [{ term: { run_id: 'kbn-evals-preflight' } }, { term: { run_id: 'bk-12345' } }],
         },
       });
