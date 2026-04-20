@@ -63,6 +63,7 @@ const previewSignificantEventsRoute = createServerRoute({
     request,
     getScopedClients,
     server,
+    logger,
   }): Promise<SignificantEventsPreviewResponse> => {
     const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
@@ -87,6 +88,7 @@ const previewSignificantEventsRoute = createServerRoute({
       },
       {
         scopedClusterClient,
+        logger,
       }
     );
   },
@@ -128,7 +130,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsGetResponse> => {
-    const { streamsClient, queryClient, scopedClusterClient, licensing, uiSettingsClient } =
+    const { streamsClient, getQueryClient, scopedClusterClient, licensing, uiSettingsClient } =
       await getScopedClients({
         request,
       });
@@ -138,6 +140,7 @@ const readStreamSignificantEventsRoute = createServerRoute({
     const { name } = params.path;
     const { from, to, bucketSize, query, searchMode } = params.query;
 
+    const queryClient = await getQueryClient();
     return readSignificantEventsFromAlertsIndices(
       {
         streamNames: [name],
@@ -204,7 +207,8 @@ const generateSignificantEventsRoute = createServerRoute({
       inferenceClient,
       uiSettingsClient,
       soClient,
-      featureClient,
+      getFeatureClient,
+      getQueryClient,
       scopedClusterClient,
     } = await getScopedClients({ request });
 
@@ -227,25 +231,26 @@ const generateSignificantEventsRoute = createServerRoute({
         })
       : undefined;
 
-    // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }] = await Promise.all([
-      inferenceClient.getConnectorById(connectorId),
-      streamsClient.getStream(params.path.name),
-      new PromptsConfigService({ soClient, logger }).getPrompt(),
-    ]);
+    const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
+      await Promise.all([
+        inferenceClient.getConnectorById(connectorId),
+        streamsClient.getStream(params.path.name),
+        new PromptsConfigService({ soClient, logger }).getPrompt(),
+        getFeatureClient(),
+        getQueryClient(),
+      ]);
 
     return fromRxjs(
       generateSignificantEventDefinitions(
         {
           definition,
           connectorId,
-          start: params.query.from.valueOf(),
-          end: params.query.to.valueOf(),
           systemPrompt: significantEventsPromptOverride,
         },
         {
           inferenceClient,
           featureClient,
+          queryClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,

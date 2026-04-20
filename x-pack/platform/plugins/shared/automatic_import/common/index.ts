@@ -60,6 +60,7 @@ export type {
 export {
   AutomaticImportTelemetryEventType,
   type CreateIntegrationPageLoadedPayload,
+  type EditIntegrationPageLoadedPayload,
   type DataStreamFlyoutOpenedPayload,
   type EditDataStreamFlyoutOpenedPayload,
   type AnalyzeLogsTriggeredPayload,
@@ -69,7 +70,10 @@ export {
   type IntegrationInstalledPayload,
   type ManageIntegrationsTableViewedPayload,
   type UploadIntegrationClickedPayload,
+  type CancelButtonClickedPayload,
+  type DoneButtonClickedPayload,
   type ReviewApproveMenuClickedPayload,
+  type IntegrationDownloadZipClickedPayload,
   type ApproveModalCancelClickedPayload,
   type ApproveModalApproveClickedPayload,
   type DataStreamDeleteConfirmedPayload,

@@ -103,7 +103,7 @@ describe('LeadDataClient', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: adhocIndex,
-          query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': 'exec-1' } }] } },
+          query: { bool: { must_not: [{ term: { execution_uuid: 'exec-1' } }] } },
         })
       );
     });
@@ -237,7 +237,7 @@ describe('LeadDataClient', () => {
       const searchCall = esClient.search.mock.calls[0];
       expect(searchCall).toBeDefined();
       expect((searchCall[0] as Record<string, unknown>).query).toEqual({
-        bool: { filter: [{ term: { 'status.keyword': 'dismissed' } }] },
+        bool: { filter: [{ term: { status: 'dismissed' } }] },
       });
     });
 
@@ -246,60 +246,6 @@ describe('LeadDataClient', () => {
 
       const result = await client.findLeads({});
       expect(result).toEqual({ leads: [], total: 0, page: 1, perPage: 20 });
-    });
-  });
-
-  describe('getLeadById', () => {
-    it('returns the lead when found', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: {
-          total: { value: 1, relation: 'eq' },
-          hits: [
-            {
-              _id: 'lead-1',
-              _index: adhocIndex,
-              _source: {
-                id: 'lead-1',
-                title: 'Found Lead',
-                byline: '',
-                description: '',
-                entities: [],
-                tags: [],
-                priority: 5,
-                chat_recommendations: [],
-                timestamp: new Date().toISOString(),
-                staleness: 'fresh',
-                status: 'active',
-                observations: [],
-                execution_uuid: 'e-1',
-                source_type: 'adhoc',
-              },
-            },
-          ],
-        },
-      } as never);
-
-      const lead = await client.getLeadById('lead-1');
-
-      expect(lead).not.toBeNull();
-      expect(lead!.id).toBe('lead-1');
-      expect(lead!.title).toBe('Found Lead');
-    });
-
-    it('returns null when lead is not found', async () => {
-      esClient.search.mockResolvedValueOnce({
-        hits: { total: { value: 0, relation: 'eq' }, hits: [] },
-      } as never);
-
-      const lead = await client.getLeadById('nonexistent');
-      expect(lead).toBeNull();
-    });
-
-    it('returns null on search error', async () => {
-      esClient.search.mockRejectedValueOnce(new Error('index_not_found'));
-
-      const lead = await client.getLeadById('lead-1');
-      expect(lead).toBeNull();
     });
   });
 
@@ -319,7 +265,7 @@ describe('LeadDataClient', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: allIndices,
-          query: { term: { 'id.keyword': 'lead-1' } },
+          query: { term: { id: 'lead-1' } },
         })
       );
     });
@@ -352,7 +298,7 @@ describe('LeadDataClient', () => {
       expect(count).toBe(3);
 
       const [call] = esClient.updateByQuery.mock.calls;
-      expect(call[0].query).toEqual({ terms: { 'id.keyword': ['a', 'b', 'c'] } });
+      expect(call[0].query).toEqual({ terms: { id: ['a', 'b', 'c'] } });
       expect(call[0].script).toEqual(
         expect.objectContaining({
           params: { status: 'dismissed' },
