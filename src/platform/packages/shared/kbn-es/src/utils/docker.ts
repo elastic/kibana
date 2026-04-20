@@ -1470,11 +1470,38 @@ async function runDockerContainerInSnapshotMode(
   await verifyDockerInstalled(log);
   await maybeCreateDockerNetwork(log);
 
-  const tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+  let tag = options.tag || (options.version ? `${options.version}-SNAPSHOT` : DOCKER_TAG);
+
+  // When ES_SNAPSHOT_MANIFEST is set, use the commit-pinned docker tag from kibana-ci
+  let repo = DOCKER_REPO;
+  const manifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
+  if (!options.tag && !options.image && manifestUrl) {
+    const resp = await fetch(manifestUrl);
+    if (resp.ok) {
+      const manifest = await resp.json();
+      const { version, sha } = manifest;
+
+      if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
+        throw createCliError(`Invalid version format in manifest: ${version}`);
+      }
+      if (!/^[0-9a-f]{40}$/.test(sha)) {
+        throw createCliError(`Invalid sha format in manifest: ${sha}`);
+      }
+
+      tag = `${version}-SNAPSHOT-${sha}`;
+      repo = `${DOCKER_REGISTRY}/kibana-ci/elasticsearch`;
+      log.info(`Using commit-pinned docker tag from manifest: ${repo}:${tag}`);
+    } else {
+      log.warning(
+        `Failed to fetch ES_SNAPSHOT_MANIFEST (${resp.status}), falling back to default image`
+      );
+    }
+  }
+
   const image = resolveDockerImage({
     image: options.image,
     tag,
-    repo: DOCKER_REPO,
+    repo,
     defaultImg: DOCKER_IMG,
   });
   await setupDockerImage({ log, image });

@@ -20,7 +20,6 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
-import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
@@ -276,9 +275,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
-    registerAgents(agentBuilder, core, logger).catch((error) => {
-      this.logger.error(`Error registering security agent: ${error}`);
-    });
     registerSkills({
       agentBuilder,
       experimentalFeatures,
@@ -478,6 +474,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
+
+      if (experimentalFeatures.leadGenerationEnabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: 'security_search_inference_parent',
+          featureId: 'lead_generation',
+          featureName: 'Threat Hunting Lead Generation',
+          featureDescription: 'Lead generation inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
     }
 
     const requestContextFactory = new RequestContextFactory({
