@@ -40,6 +40,8 @@ export interface ChatResponseInjectedMemory {
   type: string;
   summary: string;
   created_at: string;
+  score?: number;
+  relevance_score?: number;
 }
 
 export type ChatResponse = Omit<

@@ -83,6 +83,8 @@ export interface CognitiveExtractorDeps {
   connectorId: string;
   request: KibanaRequest;
   logger: Logger;
+  /** If provided, called with the full LLM request and raw response for debugging. */
+  onRawExchange?: (exchange: { system: string; userContent: string; rawResponse: string }) => void;
 }
 
 /**
@@ -95,12 +97,14 @@ export class CognitiveExtractor {
   private readonly connectorId: string;
   private readonly request: KibanaRequest;
   private readonly logger: Logger;
+  private readonly onRawExchange?: CognitiveExtractorDeps['onRawExchange'];
 
-  constructor({ inference, connectorId, request, logger }: CognitiveExtractorDeps) {
+  constructor({ inference, connectorId, request, logger, onRawExchange }: CognitiveExtractorDeps) {
     this.inference = inference;
     this.connectorId = connectorId;
     this.request = request;
     this.logger = logger;
+    this.onRawExchange = onRawExchange;
   }
 
   async extract(input: ExtractionInput): Promise<ExtractionResult> {
@@ -117,7 +121,12 @@ export class CognitiveExtractor {
         system: COGNITIVE_SYSTEM_PROMPT,
       });
 
-      const raw = response.content;
+      const raw = response.content ?? '';
+
+      if (this.onRawExchange) {
+        this.onRawExchange({ system: COGNITIVE_SYSTEM_PROMPT, userContent, rawResponse: raw });
+      }
+
       if (!raw) {
         this.logger.debug('CognitiveExtractor: empty response from LLM');
         return { semantic: [], episodic: [], procedural: [] };

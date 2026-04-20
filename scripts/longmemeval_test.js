@@ -26,6 +26,7 @@
  *   --no-cleanup       Don't wipe memories between questions
  *   --consolidate      Run consolidation task after feeding, before questioning
  *   --consolidate-wait Seconds to wait for consolidation (default: 30)
+ *   --bad-only         Path to previous results JSON; re-runs only failed (score < 1) questions
  */
 
 const fs = require('fs');
@@ -55,6 +56,8 @@ const SKIP_FEEDING = hasFlag(args, 'skip-feeding');
 const NO_CLEANUP = hasFlag(args, 'no-cleanup');
 const CONSOLIDATE = hasFlag(args, 'consolidate');
 const CONSOLIDATE_WAIT = parseInt(getArg(args, 'consolidate-wait', '30'), 10);
+const BAD_ONLY = getArg(args, 'bad-only', null);
+const FULL_LOG = hasFlag(args, 'full-log');
 
 async function downloadJson(url) {
   return new Promise((resolve, reject) => {
@@ -115,6 +118,23 @@ async function main() {
     filtered = dataset.filter((q) => types.includes(q.question_type));
   }
 
+  // Filter to only failed questions from a previous report
+  if (BAD_ONLY) {
+    try {
+      const prevReport = JSON.parse(fs.readFileSync(BAD_ONLY, 'utf-8'));
+      const failedIds = new Set(
+        (prevReport.results || [])
+          .filter((r) => r.score < 0.5)
+          .map((r) => r.question_id)
+      );
+      filtered = filtered.filter((q) => failedIds.has(q.question_id));
+      console.log(`Bad-only mode: ${failedIds.size} failed questions from ${BAD_ONLY}, ${filtered.length} matched in dataset`);
+    } catch (err) {
+      console.error(`Failed to load bad-only report: ${err.message}`);
+      process.exit(1);
+    }
+  }
+
   const selected = filtered.slice(START_IDX, START_IDX + COUNT);
   console.log(`Dataset: ${dataset.length} total, selected: ${selected.length}`);
   console.log(`Extraction method: ${EXTRACTION_METHOD}\n`);
@@ -144,8 +164,11 @@ async function main() {
       } catch {}
     }
 
-    // Step 2: Feed sessions via extract API (20 concurrent requests)
+    // Step 2: Feed sessions via extract API
+    let feedingMs = 0;
+    let memoriesCreated = 0;
     if (!SKIP_FEEDING) {
+      const feedStart = Date.now();
       const { totalMemories } = await feedSessions(api, FEED_MODE, sessionsToFeed, {
         method: EXTRACTION_METHOD,
         conversationIdPrefix: `longmemeval-${item.question_id}`,
@@ -154,18 +177,33 @@ async function main() {
         timestamps: datesToFeed,
         logger: console,
       });
+      feedingMs = Date.now() - feedStart;
+      memoriesCreated = totalMemories;
+      console.log(`  Feeding complete: ${totalMemories} memories in ${(feedingMs / 1000).toFixed(1)}s`);
       await new Promise((r) => setTimeout(r, 2000));
     }
 
-    // Step 2.5: Optionally trigger consolidation and wait for it to complete
-    if (CONSOLIDATE && !SKIP_FEEDING) {
+    // Step 2.5: Optionally run consolidation (synchronous — waits for completion)
+    if (CONSOLIDATE) {
       try {
-        console.log(`  Triggering consolidation (waiting ${CONSOLIDATE_WAIT}s)...`);
-        await api.triggerConsolidation();
-        await new Promise((r) => setTimeout(r, CONSOLIDATE_WAIT * 1000));
-        console.log(`  Consolidation wait complete`);
+        console.log(`  Running consolidation...`);
+        const consolidationResult = await api.triggerConsolidation({ fullLog: FULL_LOG });
+        const stepSummary = Object.entries(consolidationResult.step_stats || {})
+          .map(([step, s]) => {
+            const parts = [];
+            if (s.memories_processed != null) parts.push(`${s.memories_processed} processed`);
+            if (s.memories_created != null) parts.push(`+${s.memories_created} created`);
+            if (s.memories_deleted != null) parts.push(`-${s.memories_deleted} deleted`);
+            if (s.memories_merged != null) parts.push(`${s.memories_merged} merged`);
+            if (s.contradictions_resolved != null) parts.push(`${s.contradictions_resolved} contradictions`);
+            if (s.links_created != null) parts.push(`${s.links_created} links`);
+            if (s.llm_calls != null) parts.push(`${s.llm_calls} LLM calls`);
+            return `${step}(${parts.join(', ')})`;
+          })
+          .join(', ');
+        console.log(`  Consolidation complete: ${consolidationResult.duration_ms}ms — ${stepSummary || 'no changes'}`);
       } catch (err) {
-        console.log(`  ✗ Consolidation error: ${err.message?.slice(0, 80)}`);
+        console.log(`  ✗ Consolidation error: ${err.message?.slice(0, 120)}`);
       }
     }
 
@@ -181,12 +219,15 @@ async function main() {
     let inputTokens = 0;
     let outputTokens = 0;
     let llmCalls = 0;
+    let answerMs = 0;
     try {
       const questionDate = item.question_date;
       const questionWithDate = questionDate
         ? `Today is ${questionDate}. ${item.question}`
         : item.question;
+      const answerStart = Date.now();
       const result = await api.converse(questionWithDate, null);
+      answerMs = Date.now() - answerStart;
       predicted = result.response?.message || '';
 
       // Count tool calls from steps and capture memory tool details
@@ -215,7 +256,7 @@ async function main() {
       }
 
       console.log(`  Pred: ${predicted.slice(0, 120)}${predicted.length > 120 ? '...' : ''}`);
-      console.log(`  Stats: ${injectedMemoryCount} memories (~${injectedMemoryTokens} tokens, retrieval ${retrievalMs}ms), ${toolCallCount} tool calls (${memoryToolCalls} memory), ${inputTokens}/${outputTokens} in/out tokens, ${llmCalls} LLM calls`);
+      console.log(`  Stats: ${injectedMemoryCount} memories (~${injectedMemoryTokens} tokens, retrieval ${retrievalMs}ms), ${toolCallCount} tool calls (${memoryToolCalls} memory), ${inputTokens}/${outputTokens} in/out tokens, ${llmCalls} LLM calls, answer ${(answerMs / 1000).toFixed(1)}s`);
     } catch (err) {
       console.log(`  ✗ Error: ${err.message.slice(0, 80)}`);
     }
@@ -236,6 +277,9 @@ async function main() {
       question: item.question, gold_answer: item.answer,
       predicted_answer: predicted, score,
       sessions_fed: sessionsToFeed.length,
+      feeding_ms: feedingMs,
+      memories_created: memoriesCreated,
+      answer_ms: answerMs,
       injected_memory_count: injectedMemoryCount,
       injected_memory_tokens: injectedMemoryTokens,
       injected_memories: injectedMemoriesList,

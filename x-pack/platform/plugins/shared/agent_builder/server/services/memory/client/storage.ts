@@ -184,17 +184,30 @@ export const ensureMemoryIndexMappings = async ({
     const indexMappings = mappings[memoryIndexName]?.mappings?.properties ?? {};
 
     // Update semantic_text field with inference endpoint if configured
-    if (inferenceEndpointId && !('full_semantic' in indexMappings)) {
-      logger.info(`Adding semantic_text mapping with inference_id=${inferenceEndpointId} to ${memoryIndexName}`);
-      await esClient.indices.putMapping({
-        index: memoryIndexName,
-        properties: {
-          full_semantic: {
-            type: 'semantic_text',
-            inference_id: inferenceEndpointId,
-          } as MappingProperty,
-        },
-      });
+    if (inferenceEndpointId) {
+      const existing = indexMappings.full_semantic as any;
+      const currentEndpoint = existing?.inference_id;
+
+      if (!existing) {
+        logger.info(`Adding semantic_text mapping with inference_id=${inferenceEndpointId} to ${memoryIndexName}`);
+        await esClient.indices.putMapping({
+          index: memoryIndexName,
+          properties: {
+            full_semantic: {
+              type: 'semantic_text',
+              inference_id: inferenceEndpointId,
+            } as MappingProperty,
+          },
+        });
+      } else if (currentEndpoint && currentEndpoint !== inferenceEndpointId) {
+        logger.info(`Inference endpoint changed from ${currentEndpoint} to ${inferenceEndpointId} — deleting and recreating ${memoryIndexName}`);
+        try {
+          await esClient.indices.delete({ index: memoryIndexName });
+          logger.info(`Deleted ${memoryIndexName}, it will be recreated on next write with inference_id=${inferenceEndpointId}`);
+        } catch (deleteErr) {
+          logger.warn(`Could not delete ${memoryIndexName} for re-creation: ${(deleteErr as Error).message}`);
+        }
+      }
     }
   } catch (err) {
     logger.warn(`Failed to ensure memory index mappings on ${memoryIndexName}: ${err.message}`);

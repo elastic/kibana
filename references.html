@@ -204,7 +204,7 @@
 <body>
   <header>
     <div class="header-top">
-      <h1>Long-Term Memory in LLMs <span class="count-badge">31 papers</span></h1>
+      <h1>Long-Term Memory in LLMs <span class="count-badge">32 papers</span></h1>
     </div>
     <p>Research paper index — arXiv collection 2024–2026 &mdash; click any paper to expand</p>
   </header>
@@ -1077,8 +1077,37 @@
 <p><b>TL;DR:</b> Nano-Memory demonstrates that simple, well-designed retrieval and generation with turn-level max-activation and query-driven context pruning outperforms complex hierarchical memory architectures for long-term conversational agents, while being substantially faster and more token-efficient.</p>
       </div>
     </article>
+
+    <article class="card" id="paper-32">
+      <div class="card-header" onclick="toggleCard(this)" role="button" tabindex="0" aria-expanded="false">
+        <span class="paper-number">#32</span>
+        <div class="card-meta">
+          <h2 class="paper-title">APEX-MEM: Agentic Semi-Structured Memory with Temporal Reasoning for Long-Term Conversational AI</h2>
+          <div class="paper-info">
+            <span class="year-badge">2026</span>
+            <span class="authors">Pratyay Banerjee, Masud Moshtaghi, Shivashankar Subramanian, Amita Misra, Ankit Chadha (Amazon AGI, Sunnyvale)</span>
+          </div>
+          <div class="paper-file">
+            <code>2604.14362.pdf</code>
+            <a class="pdf-link" href="2604.14362.pdf" target="_blank" rel="noopener" onclick="event.stopPropagation()">Local PDF ↗</a>
+            <a class="arxiv-link" href="https://export.arxiv.org/pdf/2604.14362" target="_blank" rel="noopener" onclick="event.stopPropagation()">arXiv ↗</a>
+          </div>
+        </div>
+        <span class="toggle-icon" aria-hidden="true">▸</span>
+      </div>
+      <div class="card-description">
+        <p class="description">APEX-MEM combines a property graph with a domain-agnostic 35-class ontology, append-only event storage, and a ReAct multi-tool retrieval agent to achieve temporal conflict resolution at query time rather than write time. By never overwriting stored facts, the full evolution of information is preserved and contradictions are resolved lazily by the agent when answering. Achieves 88.88% on LoCoMo and 86.2% on LongMemEval.</p>
+      </div>
+      <div class="card-body" hidden>
+        <p><b>Problem being solved:</b> Existing structured memory systems either use limited entity-centric graphs (Mem0) that struggle to capture temporal evolution, or eagerly consolidate/overwrite information at write time (MIRIX, A-MEM), risking loss of nuanced contextual detail needed for temporal reasoning and conflict resolution. Both approaches sacrifice information fidelity for storage cleanliness.</p>
+<p><b>Approach:</b> Three combined innovations: (1) A directed property graph backed by a domain-agnostic ontology with 35 entity classes (Person, Animal, Place, Event, Product, Software, CreativeWork, Disease, etc., analogous to YAGO taxonomies). Facts are represented as temporally-grounded subject-property-value assertions with validity intervals [t_from, t_to], confidence scores, and evidence links. (2) Append-only event storage — new information is never used to overwrite or delete existing facts; instead all versions coexist anchored to their conversation timestamp. (3) A ReAct-style QnA agent with four tools: SchemaViewer (meta-level planning aid, returns DB schema + query strategy guidance), EntityLookup (hybrid dense+lexical entity retrieval returning time-aware fact snapshots), GraphSQL (read-only SQL over SQLite graph tables for temporal aggregation and multi-hop traversal), and Search (hybrid semantic+lexical retrieval across the full graph).</p>
+<p><b>Methodology:</b> Graph construction uses Claude Sonnet 4.5 for fact extraction and Claude Haiku 4.5 for entity/property resolution to balance cost. Entity resolution is RAG-based: top-k candidate entities retrieved by cosine similarity, then an LLM chooses choose_existing / propose_new / none with a rationale. Temporal expressions are normalized to ISO 8601 relative to the conversation anchor timestamp. For very long conversations (&gt;10³ sessions), APEX-MEM Online mode first filters relevant sessions by semantic/lexical relevance (threshold 0.2) before graph construction. QnA agent is capped at 40 ReAct tool invocations. Evaluated on LoCoMo, LongMemEval, and SealQA-Hard.</p>
+<p><b>Results:</b> APEX-MEM + GPT5 achieves 88.88% overall on LoCoMo, surpassing previous SOTA MIRIX (85.38%) by 3.5pp, with particularly strong temporal reasoning (90.63%) and open-domain (91.68%). On LongMemEval, 86.2% with Claude Sonnet 4.5. Ablation shows GraphSQL adds the largest single gain (+7.8pp over SchemaViewer+EntityLookup alone), confirming that structured SQL-based temporal reasoning is the critical differentiator over pure retrieval approaches. Construction quality: Claude Sonnet 4.5 achieves 97.3% fact extraction precision, 91.1% schema coverage, 98.2% entity resolution accuracy.</p>
+<p><b>TL;DR:</b> APEX-MEM's key insight is to defer conflict resolution from write time to query time: store everything append-only in a rich property graph, then let a ReAct agent with SQL access resolve temporal contradictions lazily when a question actually requires it. This preserves full conversational history while delivering SOTA accuracy, especially on temporal and multi-hop reasoning.</p>
+      </div>
+    </article>
   </main>
-  <footer>Generated from PDF summaries &mdash; 31 papers</footer>
+  <footer>Generated from PDF summaries &mdash; 32 papers</footer>
   <script>
     function toggleCard(header) {
       const card = header.closest('.card');

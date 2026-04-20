@@ -208,7 +208,13 @@ const runSemanticRetrieval = async (
       },
     });
 
-    return (response.hits.hits as any[]).map((hit) => docToNode(hit));
+    const hits = response.hits.hits as any[];
+    const maxScore = hits.length > 0 ? Math.max(...hits.map((h) => h._score ?? 0)) : 1;
+    return hits.map((hit) => {
+      const node = docToNode(hit);
+      node._relevance_score = maxScore > 0 ? (hit._score ?? 0) / maxScore : 0;
+      return node;
+    });
   } catch (err) {
     logger.warn(`semantic retrieval failed: ${(err as Error).message}`);
     return [];
@@ -266,9 +272,12 @@ const runHybridRetrieval = async (
 
   scored.sort((a, b) => b.rrfScore - a.rrfScore);
 
-  return scored.map(({ node }) => {
+  // Normalize RRF scores to [0, 1] relative to the top result
+  const maxRrf = scored.length > 0 ? scored[0].rrfScore : 1;
+
+  return scored.map(({ node, rrfScore }) => {
     const { _bm25Rank, _semanticRank, ...clean } = node;
-    return clean;
+    return { ...clean, _relevance_score: maxRrf > 0 ? rrfScore / maxRrf : 0 };
   });
 };
 
@@ -295,5 +304,6 @@ const docToNode = (hit: any): MemoryNode => {
     space: src.space ?? '',
     user_id: src.user_id,
     user_name: src.user_name ?? '',
+    _relevance_score: hit._score ?? undefined,
   };
 };

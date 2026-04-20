@@ -13,6 +13,8 @@ import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import * as fs from 'fs';
+import * as nodePath from 'path';
 import type { MemoryNode, MemoryEdgeType } from '@kbn/agent-builder-common';
 import { VALID_EDGE_TYPES } from '@kbn/agent-builder-common';
 import type { MemoryClient } from '../client';
@@ -166,13 +168,32 @@ export const scheduleMemoryConsolidationTask = async ({
  * Each step is independently error-handled so a failure in one pair
  * does not prevent processing of others.
  */
-const runConsolidation = async ({
+export interface ConsolidationStepStats {
+  memories_created?: number;
+  memories_deleted?: number;
+  memories_merged?: number;
+  memories_processed?: number;
+  llm_calls?: number;
+  contradictions_resolved?: number;
+  links_created?: number;
+}
+
+export interface ConsolidationResult {
+  pairs_processed: number;
+  duration_ms: number;
+  steps_run: string[];
+  step_stats: Record<string, ConsolidationStepStats>;
+}
+
+export const runConsolidation = async ({
   elasticsearch,
   logger,
   config,
   inference,
   conversations,
   abortSignal,
+  request,
+  fullLog,
 }: {
   elasticsearch: ElasticsearchServiceStart;
   logger: Logger;
@@ -180,8 +201,12 @@ const runConsolidation = async ({
   inference?: import('@kbn/inference-plugin/server').InferenceServerStart;
   conversations?: import('../../../services/conversation').ConversationService;
   abortSignal: AbortSignal;
-}): Promise<void> => {
+  request?: import('@kbn/core-http-server').KibanaRequest;
+  fullLog?: boolean;
+}): Promise<ConsolidationResult> => {
+  const startTime = Date.now();
   const esClient = elasticsearch.client.asInternalUser;
+  const stepsRun: string[] = [];
 
   // Step 1: Discover all (space, user_name) pairs
   let pairs: Array<{ space: string; userName: string }>;
@@ -191,15 +216,17 @@ const runConsolidation = async ({
     logger.error(
       `MemoryConsolidationTask: failed to discover space/user pairs — ${(err as Error).message}`
     );
-    return;
+    return { pairs_processed: 0, duration_ms: Date.now() - startTime, steps_run: stepsRun };
   }
 
   if (pairs.length === 0) {
     logger.info('MemoryConsolidationTask: no memory data to consolidate');
-    return;
+    return { pairs_processed: 0, duration_ms: Date.now() - startTime, steps_run: stepsRun };
   }
 
   logger.info(`MemoryConsolidationTask: consolidating ${pairs.length} space/user pairs`);
+
+  const stepStats: Record<string, ConsolidationStepStats> = {};
 
   for (const { space, userName } of pairs) {
     if (abortSignal.aborted) {
@@ -208,7 +235,19 @@ const runConsolidation = async ({
     }
 
     try {
-      await consolidateForUser({ esClient, space, userName, logger, config, inference, conversations });
+      const pairStats = await consolidateForUser({ esClient, space, userName, logger, config, inference, conversations, request, fullLog });
+      for (const [step, stats] of Object.entries(pairStats)) {
+        const existing = stepStats[step] ?? {};
+        stepStats[step] = {
+          memories_created: (existing.memories_created ?? 0) + (stats.memories_created ?? 0),
+          memories_deleted: (existing.memories_deleted ?? 0) + (stats.memories_deleted ?? 0),
+          memories_merged: (existing.memories_merged ?? 0) + (stats.memories_merged ?? 0),
+          memories_processed: (existing.memories_processed ?? 0) + (stats.memories_processed ?? 0),
+          llm_calls: (existing.llm_calls ?? 0) + (stats.llm_calls ?? 0),
+          contradictions_resolved: (existing.contradictions_resolved ?? 0) + (stats.contradictions_resolved ?? 0),
+          links_created: (existing.links_created ?? 0) + (stats.links_created ?? 0),
+        };
+      }
     } catch (err) {
       logger.warn(
         `MemoryConsolidationTask: failed for space='${space}' user='${userName}' — ${
@@ -217,6 +256,17 @@ const runConsolidation = async ({
       );
     }
   }
+
+  const steps = config.memory.nightly.steps;
+  if (steps.reextract.enabled) stepsRun.push('reextract');
+  if (steps.deduplicate.enabled) stepsRun.push('deduplicate');
+  if (steps.formMemories.enabled) stepsRun.push('formMemories');
+  if (steps.formMemoriesNoLlm.enabled) stepsRun.push('formMemoriesNoLlm');
+  if (steps.organize.enabled) stepsRun.push('organize');
+  if (steps.prune.enabled) stepsRun.push('prune');
+  if (steps.organizeNoLlm.enabled) stepsRun.push('organizeNoLlm');
+
+  return { pairs_processed: pairs.length, duration_ms: Date.now() - startTime, steps_run: stepsRun, step_stats: stepStats };
 };
 
 /**
@@ -231,6 +281,8 @@ const consolidateForUser = async ({
   config,
   inference,
   conversations,
+  request,
+  fullLog,
 }: {
   esClient: ElasticsearchClient;
   space: string;
@@ -239,7 +291,10 @@ const consolidateForUser = async ({
   config: AgentBuilderConfig;
   inference?: import('@kbn/inference-plugin/server').InferenceServerStart;
   conversations?: import('../../../services/conversation').ConversationService;
-}): Promise<void> => {
+  request?: import('@kbn/core-http-server').KibanaRequest;
+  fullLog?: boolean;
+}): Promise<Record<string, ConsolidationStepStats>> => {
+  const stats: Record<string, ConsolidationStepStats> = {};
   const memoryClient: MemoryClient = createMemoryClient({
     esClient,
     space,
@@ -251,7 +306,7 @@ const consolidateForUser = async ({
   let memories = await loadMemoriesBatch(memoryClient);
 
   if (memories.length === 0) {
-    return;
+    return stats;
   }
 
   logger.info(
@@ -285,8 +340,7 @@ const consolidateForUser = async ({
         const { CandidatePipeline } = await import('../extraction/candidate_pipeline');
         const { createEmbeddingService } = await import('../embeddings');
 
-        // We need a fake request for the scoped clients — use internal user
-        const convClient = await conversations.getScopedClient({ request: { headers: {} } as any });
+        const convClient = await conversations.getScopedClient({ request: request ?? ({ headers: {} } as any) });
 
         let reextracted = 0;
         for (const convId of conversationIds) {
@@ -299,7 +353,7 @@ const consolidateForUser = async ({
               logger: logger.get('reextract'),
               inference,
               connectorId,
-              request: { headers: {} } as any,
+              request: request ?? ({ headers: {} } as any),
             });
 
             const input = buildExtractionInputFromConversation(conversation);
@@ -349,6 +403,7 @@ const consolidateForUser = async ({
     try {
       const merger = new DuplicateMerger({ esClient, memoryClient, logger });
       const mergeResult = await merger.mergeDuplicates(memories);
+      stats.deduplicate = { memories_merged: mergeResult.mergedCount };
       logger.info(`consolidation[deduplicate]: merged ${mergeResult.mergedCount} duplicates`);
       memories = await loadMemoriesBatch(memoryClient);
     } catch (err) {
@@ -356,27 +411,204 @@ const consolidateForUser = async ({
     }
   }
 
-  // Step 3: Form memories — promote episodic patterns into semantic memories
+  // Step 3: Form memories (LLM) — extract structured memories from new episodic content
   if (steps.formMemories.enabled) {
+    try {
+      const connectorId = config.memory.extraction.connectorId;
+      if (!inference || !connectorId || !request) {
+        logger.info('consolidation[formMemories]: skipping — inference, connectorId, or request not available');
+      } else {
+        // Load ALL episodic memories directly from ES (not limited by BATCH_SIZE)
+        const allEpisodics = await loadAllMemoriesByType(esClient, space, userName, 'episodic', logger);
+
+        // Find cutoff: most recent 'formed_from_episodic' semantic memory
+        const formedMemories = memories.filter(
+          (m) => m.type === 'semantic' && m.subtype === 'formed_from_episodic'
+        );
+        const lastFormedAt = formedMemories.length > 0
+          ? formedMemories.reduce((latest, m) =>
+              m.created_at > latest ? m.created_at : latest, '')
+          : '';
+
+        const newEpisodics = lastFormedAt
+          ? allEpisodics.filter((m) => m.created_at > lastFormedAt)
+          : allEpisodics;
+
+        if (newEpisodics.length === 0) {
+          logger.info('consolidation[formMemories]: no new episodic memories to process');
+        } else {
+          logger.info(`consolidation[formMemories]: found ${newEpisodics.length} episodic memories to process`);
+
+          // Group by conversation ID, sort each group chronologically
+          const byConversation = new Map<string, MemoryNode[]>();
+          for (const mem of newEpisodics) {
+            const convId = mem.source_refs?.[0]?.conversation_id ?? '_unknown';
+            const group = byConversation.get(convId) ?? [];
+            group.push(mem);
+            byConversation.set(convId, group);
+          }
+          for (const group of byConversation.values()) {
+            group.sort((a, b) => (a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0));
+          }
+
+          // Process in batches that fit the context window, making multiple LLM calls
+          const maxTokens = steps.formMemories.maxContextTokens;
+          let totalProcessed = 0;
+          let totalCreated = 0;
+          let llmCalls = 0;
+
+          const { CognitiveExtractor } = await import('../extraction/cognitive_extractor');
+          const { CandidatePipeline } = await import('../extraction/candidate_pipeline');
+          const { createEmbeddingService } = await import('../embeddings');
+
+          const noopEmbedding = createEmbeddingService({
+            esClient,
+            config: { inferenceEndpointId: undefined },
+            logger: logger.get('embedding'),
+          });
+
+          // Build a flat list of (convId, memories) maintaining conversation grouping
+          const conversationEntries = [...byConversation.entries()];
+          let convIdx = 0;
+          let memIdxInConv = 0;
+
+          while (convIdx < conversationEntries.length) {
+            let tokenCount = 0;
+            const contentParts: string[] = [];
+            let batchMemCount = 0;
+
+            // Fill one batch
+            while (convIdx < conversationEntries.length) {
+              const [convId, group] = conversationEntries[convIdx];
+
+              // If we haven't started this conversation yet, add the header
+              if (memIdxInConv === 0) {
+                const header = `\n--- Conversation: ${convId} ---`;
+                const headerTokens = Math.ceil(header.length / 4);
+                if (tokenCount + headerTokens > maxTokens && batchMemCount > 0) break;
+                contentParts.push(header);
+                tokenCount += headerTokens;
+              }
+
+              // Add memories from this conversation
+              while (memIdxInConv < group.length) {
+                const mem = group[memIdxInConv];
+                const text = `[${mem.created_at}] ${mem.full || mem.summary}`;
+                const tokens = Math.ceil(text.length / 4);
+                if (tokenCount + tokens > maxTokens && batchMemCount > 0) break;
+                contentParts.push(text);
+                tokenCount += tokens;
+                batchMemCount++;
+                memIdxInConv++;
+              }
+
+              if (memIdxInConv >= group.length) {
+                convIdx++;
+                memIdxInConv = 0;
+              } else {
+                break;
+              }
+            }
+
+            if (batchMemCount === 0) break;
+
+            logger.info(
+              `consolidation[formMemories]: batch ${llmCalls + 1} — ${batchMemCount} memories (~${tokenCount} tokens)`
+            );
+
+            let rawExchange: { system: string; userContent: string; rawResponse: string } | undefined;
+
+            const extractor = new CognitiveExtractor({
+              inference,
+              connectorId,
+              request: request ?? ({ headers: {} } as any),
+              logger: logger.get('formMemories'),
+              ...(fullLog ? {
+                onRawExchange: (exchange) => { rawExchange = exchange; },
+              } : {}),
+            });
+
+            const aggregatedText = contentParts.join('\n\n');
+
+            const extraction = await extractor.extract({ message: aggregatedText });
+            llmCalls++;
+            totalProcessed += batchMemCount;
+
+            if (fullLog) {
+              const logDir = nodePath.join(process.cwd(), 'tmp', 'fulllog');
+              if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
+              const logFile = nodePath.join(logDir, `${new Date().toISOString().replace(/[:.]/g, '-')}_batch${llmCalls}.log`);
+              const logContent =
+                `=== BATCH ${llmCalls} ===\n` +
+                `Memories in batch: ${batchMemCount}\n` +
+                `Tokens (est): ~${Math.ceil(aggregatedText.length / 4)}\n\n` +
+                `=== SYSTEM PROMPT ===\n${rawExchange?.system ?? '(not captured)'}\n\n` +
+                `=== USER MESSAGE ===\n${rawExchange?.userContent ?? aggregatedText}\n\n` +
+                `=== RAW LLM RESPONSE ===\n${rawExchange?.rawResponse ?? '(not captured)'}\n`;
+              fs.writeFileSync(logFile, logContent);
+              logger.info(`consolidation[formMemories]: full log written to ${logFile}`);
+            }
+
+            const totalCandidates =
+              extraction.semantic.length + extraction.episodic.length + extraction.procedural.length;
+
+            if (totalCandidates > 0) {
+              const pipeline = new CandidatePipeline({
+                memoryClient,
+                esClient,
+                embeddingService: noopEmbedding,
+                logger: logger.get('pipeline'),
+              });
+
+              const result = await pipeline.run(
+                extraction,
+                { conversationId: 'consolidation-form', roundId: `formMemories-${llmCalls}`, space, userName },
+                []
+              );
+              totalCreated += result.created;
+
+              logger.info(
+                `consolidation[formMemories]: batch ${llmCalls} created ${result.created} memories (semantic=${extraction.semantic.length}, episodic=${extraction.episodic.length}, procedural=${extraction.procedural.length})`
+              );
+            }
+          }
+
+          stats.formMemories = {
+            memories_processed: totalProcessed,
+            memories_created: totalCreated,
+            llm_calls: llmCalls,
+          };
+
+          logger.info(
+            `consolidation[formMemories]: total — ${totalCreated} memories created from ${totalProcessed} episodic in ${llmCalls} LLM calls`
+          );
+        }
+
+        memories = await loadMemoriesBatch(memoryClient);
+      }
+    } catch (err) {
+      logger.warn(`consolidation[formMemories]: failed — ${(err as Error).message}`);
+    }
+  }
+
+  // Step 3b: Form memories (no-LLM) — cluster similar episodics into semantic memories
+  if (steps.formMemoriesNoLlm.enabled) {
     try {
       const episodic = memories.filter((m) => m.type === 'episodic');
       const semantic = memories.filter((m) => m.type === 'semantic');
 
-      // Group episodic memories by similar summaries (naive word overlap)
       const clusters = clusterBySimilarity(episodic, 0.6);
 
       let formed = 0;
       for (const cluster of clusters) {
         if (cluster.length < 2) continue;
 
-        // Check if a semantic memory already covers this cluster
         const clusterText = cluster.map((m) => m.summary).join(' ');
         const alreadyCovered = semantic.some((s) =>
           computeJaccard(s.summary, clusterText) > 0.5
         );
         if (alreadyCovered) continue;
 
-        // Create a new semantic memory from the cluster
         const combined = cluster.map((m) => m.summary).join('. ');
         await memoryClient.create({
           type: 'semantic',
@@ -397,10 +629,11 @@ const consolidateForUser = async ({
         formed++;
       }
 
-      logger.info(`consolidation[formMemories]: formed ${formed} semantic memories from ${episodic.length} episodic`);
+      stats.formMemoriesNoLlm = { memories_created: formed, memories_processed: episodic.length };
+      logger.info(`consolidation[formMemoriesNoLlm]: formed ${formed} semantic memories from ${episodic.length} episodic`);
       memories = await loadMemoriesBatch(memoryClient);
     } catch (err) {
-      logger.warn(`consolidation[formMemories]: failed — ${(err as Error).message}`);
+      logger.warn(`consolidation[formMemoriesNoLlm]: failed — ${(err as Error).message}`);
     }
   }
 
@@ -409,6 +642,7 @@ const consolidateForUser = async ({
     try {
       const resolver = new ContradictionResolver({ memoryClient, logger });
       const resolveResult = await resolver.resolveContradictions(memories);
+      stats.organize = { contradictions_resolved: resolveResult.resolved.length };
       logger.info(`consolidation[organize]: resolved ${resolveResult.resolved.length} contradictions`);
       memories = await loadMemoriesBatch(memoryClient);
     } catch (err) {
@@ -461,6 +695,7 @@ const consolidateForUser = async ({
         }
       }
 
+      stats.prune = { memories_deleted: pruned };
       logger.info(`consolidation[prune]: pruned ${pruned} memories (maxAge=${steps.prune.maxAgeDays}d, maxCount=${steps.prune.maxMemories})`);
       memories = await loadMemoriesBatch(memoryClient);
     } catch (err) {
@@ -532,11 +767,14 @@ const consolidateForUser = async ({
         }
       }
 
+      stats.organizeNoLlm = { links_created: linked };
       logger.info(`consolidation[organizeNoLlm]: created ${linked} links from subtypes and conversations`);
     } catch (err) {
       logger.warn(`consolidation[organizeNoLlm]: failed — ${(err as Error).message}`);
     }
   }
+
+  return stats;
 };
 
 // ---------------------------------------------------------------------------
@@ -548,6 +786,77 @@ const consolidateForUser = async ({
  */
 const loadMemoriesBatch = async (memoryClient: MemoryClient): Promise<MemoryNode[]> => {
   return memoryClient.list({ size: BATCH_SIZE });
+};
+
+/**
+ * Load all memories of a given type for a (space, user) pair using scroll-like pagination.
+ * Not limited by BATCH_SIZE — loads everything.
+ */
+const loadAllMemoriesByType = async (
+  esClient: ElasticsearchClient,
+  space: string,
+  userName: string,
+  type: string,
+  logger: Logger
+): Promise<MemoryNode[]> => {
+  const allNodes: MemoryNode[] = [];
+  const pageSize = 500;
+  let searchAfter: any[] | undefined;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const response = await esClient.search({
+      index: memoryIndexName,
+      size: pageSize,
+      query: {
+        bool: {
+          filter: [
+            { term: { space } },
+            { term: { user_name: userName } },
+            { term: { type } },
+          ],
+        },
+      },
+      sort: [{ created_at: { order: 'asc' } }],
+      ...(searchAfter ? { search_after: searchAfter } : {}),
+    });
+
+    const hits = response.hits.hits;
+    if (hits.length === 0) break;
+
+    for (const hit of hits) {
+      const src = (hit as any)._source;
+      if (!src) continue;
+      allNodes.push({
+        id: hit._id as string,
+        type: src.type ?? 'episodic',
+        subtype: src.subtype,
+        summary: src.summary ?? '',
+        full: src.full ?? '',
+        confidence: src.confidence ?? 0.5,
+        salience: src.salience ?? 0.5,
+        recency: src.recency ?? '',
+        utility: src.utility ?? 0.5,
+        stability: src.stability ?? 0.1,
+        access_count: src.access_count ?? 0,
+        reinforcement_score: src.reinforcement_score ?? 0,
+        status: src.status ?? 'candidate',
+        source_refs: src.source_refs ?? [],
+        links: src.links ?? [],
+        created_at: src.created_at ?? '',
+        updated_at: src.updated_at ?? '',
+        space: src.space ?? '',
+        user_id: src.user_id,
+        user_name: src.user_name ?? '',
+      });
+    }
+
+    searchAfter = (hits[hits.length - 1] as any).sort;
+    if (hits.length < pageSize) break;
+  }
+
+  logger.debug(`loadAllMemoriesByType: loaded ${allNodes.length} ${type} memories for space=${space} user=${userName}`);
+  return allNodes;
 };
 
 /**

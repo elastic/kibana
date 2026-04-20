@@ -398,14 +398,18 @@ export class AgentBuilderPlugin
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
 
-    // Schedule nightly memory consolidation task
-    scheduleMemoryConsolidationTask({
-      taskManager,
-      logger: this.logger.get('services.memory.consolidation'),
-      interval: this.config.memory.nightly.interval,
-    }).catch((error) => {
-      this.logger.error(`Failed to schedule memory consolidation task: ${error.message}`);
-    });
+    // Schedule nightly memory consolidation task (if enabled)
+    if (this.config.memory.nightly.enabled) {
+      scheduleMemoryConsolidationTask({
+        taskManager,
+        logger: this.logger.get('services.memory.consolidation'),
+        interval: this.config.memory.nightly.interval,
+      }).catch((error) => {
+        this.logger.error(`Failed to schedule memory consolidation task: ${error.message}`);
+      });
+    } else {
+      this.logger.info('Memory consolidation nightly task disabled via config');
+    }
 
     const smlService = startServices.sml;
 

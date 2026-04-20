@@ -140,10 +140,14 @@ export const createRememberTool = ({
       }
 
       const anchorTime = anchorMemory.created_at;
+      const anchorConvId = anchorMemory.source_refs?.[0]?.conversation_id;
 
       const services = getInternalServices();
       const esClient = services.elasticsearch.client.asInternalUser;
       const { memoryIndexName } = await import('../client/storage');
+
+      // Build conversation filter — scope to the same conversation when available
+      const convFilter = anchorConvId ? [{ term: { conversation_id: anchorConvId } }] : [];
 
       try {
         // When a query is provided, run semantic/hybrid retrieval scoped to the
@@ -166,18 +170,18 @@ export const createRememberTool = ({
             }
           );
 
-          // Also fetch timestamp-based neighbors for context
+          // Also fetch timestamp-based neighbors within the same conversation
           const [beforeRes, afterRes] = await Promise.all([
             esClient.search({
               index: memoryIndexName,
               size: hops,
-              query: { bool: { filter: [{ range: { created_at: { lt: anchorTime } } }] } },
+              query: { bool: { filter: [...convFilter, { range: { created_at: { lt: anchorTime } } }] } },
               sort: [{ created_at: { order: 'desc' } }],
             }),
             esClient.search({
               index: memoryIndexName,
               size: hops,
-              query: { bool: { filter: [{ range: { created_at: { gt: anchorTime } } }] } },
+              query: { bool: { filter: [...convFilter, { range: { created_at: { gt: anchorTime } } }] } },
               sort: [{ created_at: { order: 'asc' } }],
             }),
           ]);
@@ -231,18 +235,18 @@ export const createRememberTool = ({
           };
         }
 
-        // No query — pure timestamp-based proximity search
+        // No query — browse memories within the same conversation
         const [beforeRes, afterRes] = await Promise.all([
           esClient.search({
             index: memoryIndexName,
             size: hops,
-            query: { bool: { filter: [{ range: { created_at: { lt: anchorTime } } }] } },
+            query: { bool: { filter: [...convFilter, { range: { created_at: { lt: anchorTime } } }] } },
             sort: [{ created_at: { order: 'desc' } }],
           }),
           esClient.search({
             index: memoryIndexName,
             size: hops,
-            query: { bool: { filter: [{ range: { created_at: { gt: anchorTime } } }] } },
+            query: { bool: { filter: [...convFilter, { range: { created_at: { gt: anchorTime } } }] } },
             sort: [{ created_at: { order: 'asc' } }],
           }),
         ]);

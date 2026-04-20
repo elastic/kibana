@@ -63,7 +63,7 @@
 
 # The maximum number of sockets that can be used for communications with elasticsearch.
 # Defaults to `800`.
-#elasticsearch.maxSockets: 1024
+elasticsearch.maxSockets: 1024
 
 # Specifies whether Kibana should use compression for communications with elasticsearch
 # Defaults to `false`.
@@ -180,3 +180,22 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+server.socketTimeout: 600000
+xpack.agentBuilder.memory.enabled: true
+xpack.agentBuilder.memory.showToolCalls: true
+xpack.agentBuilder.memory.retrieval.roundStartEnabled: true
+xpack.agentBuilder.memory.retrieval.method: "hybrid"
+xpack.agentBuilder.memory.retrieval.inferenceEndpointId: ".jina-embeddings-v5-text-small"
+xpack.agentBuilder.memory.retrieval.reranking: "nothing"
+xpack.agentBuilder.memory.retrieval.postRetrieval.deduplicate: true
+xpack.agentBuilder.memory.retrieval.postRetrieval.lowConfidenceRejection.enabled: true
+xpack.agentBuilder.memory.retrieval.postRetrieval.lowConfidenceRejection.threshold: 0.5
+xpack.agentBuilder.memory.retrieval.postRetrieval.minRelevanceScore: 0
+xpack.agentBuilder.memory.extraction.method: "cognitive"
+xpack.agentBuilder.memory.extraction.connectorId: "gemini-2-5-pro"
+xpack.agentBuilder.memory.extraction.chunking.method: "embedding_similarity"
+xpack.agentBuilder.memory.extraction.chunking.embeddingSimilarity.similarity: "inference"
+xpack.agentBuilder.memory.extraction.chunking.embeddingSimilarity.similarityThreshold: 0.5
+xpack.agentBuilder.memory.nightly.enabled: false
+xpack.agentBuilder.memory.nightly.steps.reextract.enabled: false
+xpack.agentBuilder.memory.nightly.steps.formMemories.enabled: true

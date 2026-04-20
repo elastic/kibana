@@ -15,6 +15,7 @@ import { GraphTraversalService } from '../services/memory/graph/graph_traversal'
 import { ReviewQueue, reviewQueueIndexName } from '../services/memory/lifecycle/review_queue';
 import {
   scheduleMemoryConsolidationTask,
+  runConsolidation,
   MEMORY_CONSOLIDATION_TASK_ID,
 } from '../services/memory/consolidation';
 import { getMemoryPreloader } from '../services/memory/preload/memory_preloader';
@@ -406,41 +407,44 @@ export function registerMemoryRoutes({
   // Story 8.4 — Admin routes
   // ---------------------------------------------------------------------------
 
-  // POST /internal/agent_builder/memory/consolidate — trigger manual consolidation
+  // POST /internal/agent_builder/memory/consolidate — run consolidation synchronously
   router.post(
     {
       path: `${MEMORY_BASE_PATH}/consolidate`,
-      validate: false,
-      options: { access: 'internal' },
+      validate: {
+        body: schema.maybe(schema.object({
+          full_log: schema.maybe(schema.boolean()),
+        })),
+      },
+      options: {
+        access: 'internal',
+        timeout: { idleSocket: 10 * 60 * 1000, payload: 10 * 60 * 1000 },
+      },
       security: AGENT_BUILDER_WRITE_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const [, pluginDeps] = await coreSetup.getStartServices();
-      const { taskManager } = pluginDeps;
+      const services = getInternalServices();
+      const abortController = new AbortController();
+      request.events.aborted$.subscribe(() => abortController.abort());
+      const fullLog = (request.body as any)?.full_log ?? false;
 
       try {
-        // Run the consolidation task soon (manual trigger)
-        await taskManager.runSoon(MEMORY_CONSOLIDATION_TASK_ID);
-        return response.ok({ body: { success: true, task_id: MEMORY_CONSOLIDATION_TASK_ID } });
-      } catch (err) {
-        // If the task doesn't exist yet, schedule it first then inform caller
-        logger.warn(
-          `Memory consolidation trigger failed (may not be scheduled yet): ${
-            (err as Error).message
-          }`
-        );
-
-        await scheduleMemoryConsolidationTask({
-          taskManager,
-          logger,
+        const result = await runConsolidation({
+          elasticsearch: services.elasticsearch,
+          logger: logger.get('consolidation'),
+          config: pluginConfig as any,
+          inference: services.inference,
+          conversations: services.conversations,
+          abortSignal: abortController.signal,
+          request,
+          fullLog,
         });
 
-        return response.ok({
-          body: {
-            success: true,
-            task_id: MEMORY_CONSOLIDATION_TASK_ID,
-            message: 'Consolidation task scheduled and will run at next interval',
-          },
+        return response.ok({ body: { success: true, ...result } });
+      } catch (err) {
+        return response.customError({
+          statusCode: 500,
+          body: { message: `Consolidation failed: ${(err as Error).message}` },
         });
       }
     })

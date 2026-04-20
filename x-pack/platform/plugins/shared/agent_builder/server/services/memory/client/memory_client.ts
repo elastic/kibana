@@ -21,6 +21,7 @@ import type {
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import {
   createStorage,
+  memoryIndexName,
   linksToStorage,
   sourceRefsToStorage,
 } from './storage';
@@ -215,68 +216,47 @@ class MemoryClientImpl implements MemoryClient {
   }
 
   async update(req: MemoryUpdateRequest): Promise<MemoryNode> {
-    const existing = await this.get(req.id);
+    await this.get(req.id);
     const now = new Date().toISOString();
 
-    const updatedDoc: Partial<MemoryProperties> = {
+    const partialDoc: Partial<MemoryProperties> = {
       updated_at: now,
     };
 
-    if (req.summary !== undefined) updatedDoc.summary = req.summary;
-    if (req.full !== undefined) updatedDoc.full = req.full;
-    if (req.confidence !== undefined) updatedDoc.confidence = req.confidence;
-    if (req.salience !== undefined) updatedDoc.salience = req.salience;
-    if (req.recency !== undefined) updatedDoc.recency = req.recency;
-    if (req.utility !== undefined) updatedDoc.utility = req.utility;
-    if (req.stability !== undefined) updatedDoc.stability = req.stability;
-    if (req.access_count !== undefined) updatedDoc.access_count = req.access_count;
+    if (req.summary !== undefined) {
+      partialDoc.summary = req.summary;
+      partialDoc.full_semantic = req.summary;
+    }
+    if (req.full !== undefined) {
+      partialDoc.full = req.full;
+      partialDoc.full_semantic = req.full;
+    }
+    if (req.confidence !== undefined) partialDoc.confidence = req.confidence;
+    if (req.salience !== undefined) partialDoc.salience = req.salience;
+    if (req.recency !== undefined) partialDoc.recency = req.recency;
+    if (req.utility !== undefined) partialDoc.utility = req.utility;
+    if (req.stability !== undefined) partialDoc.stability = req.stability;
+    if (req.access_count !== undefined) partialDoc.access_count = req.access_count;
     if (req.reinforcement_score !== undefined)
-      updatedDoc.reinforcement_score = req.reinforcement_score;
-    if (req.status !== undefined) updatedDoc.status = req.status;
+      partialDoc.reinforcement_score = req.reinforcement_score;
+    if (req.status !== undefined) partialDoc.status = req.status;
     if (req.source_refs !== undefined)
-      updatedDoc.source_refs = sourceRefsToStorage(req.source_refs);
-    if (req.links !== undefined) updatedDoc.links = linksToStorage(req.links);
-    if (req.last_used_at !== undefined) updatedDoc.last_used_at = req.last_used_at;
+      partialDoc.source_refs = sourceRefsToStorage(req.source_refs);
+    if (req.links !== undefined) partialDoc.links = linksToStorage(req.links);
+    if (req.last_used_at !== undefined) partialDoc.last_used_at = req.last_used_at;
     if (req.last_reinforced_at !== undefined)
-      updatedDoc.last_reinforced_at = req.last_reinforced_at;
-    if (req.conflict_refs !== undefined) updatedDoc.conflict_refs = req.conflict_refs;
+      partialDoc.last_reinforced_at = req.last_reinforced_at;
+    if (req.conflict_refs !== undefined) partialDoc.conflict_refs = req.conflict_refs;
     if (req.retrieval_stats_by_stage !== undefined)
-      updatedDoc.retrieval_stats_by_stage = req.retrieval_stats_by_stage;
-    if (req.params !== undefined) updatedDoc.params = req.params;
+      partialDoc.retrieval_stats_by_stage = req.retrieval_stats_by_stage;
+    if (req.params !== undefined) partialDoc.params = req.params;
 
-    // Merge the update into the existing document
-    const mergedDoc: MemoryProperties = {
-      space: existing.space,
-      user_id: existing.user_id,
-      user_name: existing.user_name,
-      type: existing.type,
-      subtype: existing.subtype,
-      summary: updatedDoc.summary ?? existing.summary,
-      full: updatedDoc.full ?? existing.full,
-      confidence: updatedDoc.confidence ?? existing.confidence,
-      salience: updatedDoc.salience ?? existing.salience,
-      recency: updatedDoc.recency ?? existing.recency,
-      utility: updatedDoc.utility ?? existing.utility,
-      stability: updatedDoc.stability ?? existing.stability,
-      access_count: updatedDoc.access_count ?? existing.access_count,
-      reinforcement_score: updatedDoc.reinforcement_score ?? existing.reinforcement_score,
-      status: updatedDoc.status ?? existing.status,
-      created_at: existing.created_at,
-      updated_at: now,
-      last_used_at: updatedDoc.last_used_at ?? existing.last_used_at,
-      last_reinforced_at: updatedDoc.last_reinforced_at ?? existing.last_reinforced_at,
-      links: updatedDoc.links !== undefined ? updatedDoc.links : linksToStorage(existing.links),
-      source_refs:
-        updatedDoc.source_refs !== undefined
-          ? updatedDoc.source_refs
-          : sourceRefsToStorage(existing.source_refs),
-      conflict_refs: updatedDoc.conflict_refs ?? existing.conflict_refs,
-      params: updatedDoc.params ?? existing.params,
-      retrieval_stats_by_stage:
-        updatedDoc.retrieval_stats_by_stage ?? existing.retrieval_stats_by_stage,
-    };
-
-    await this.storage.getClient().index({ id: req.id, document: mergedDoc });
+    await this.esClient.update({
+      index: memoryIndexName,
+      id: req.id,
+      doc: partialDoc,
+      refresh: 'wait_for',
+    });
 
     return this.get(req.id);
   }
@@ -384,7 +364,16 @@ class MemoryClientImpl implements MemoryClient {
       query: bm25Query,
     });
 
-    return (response.hits.hits as Document[]).map(fromDoc);
+    const maxScore = response.hits.hits.length > 0
+      ? Math.max(...response.hits.hits.map((h) => (h as any)._score ?? 0))
+      : 1;
+
+    return (response.hits.hits as Document[]).map((doc) => {
+      const node = fromDoc(doc);
+      const rawScore = (doc as any)._score ?? 0;
+      node._relevance_score = maxScore > 0 ? rawScore / maxScore : 0;
+      return node;
+    });
   }
 
   async addLink(fromId: string, link: MemoryLink): Promise<void> {

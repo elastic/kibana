@@ -8,10 +8,11 @@
 export {
   registerMemoryConsolidationTaskDefinition,
   scheduleMemoryConsolidationTask,
+  runConsolidation,
   MEMORY_CONSOLIDATION_TASK_TYPE,
   MEMORY_CONSOLIDATION_TASK_ID,
 } from './consolidation_task';
-export type { ConsolidationDepsProvider } from './consolidation_task';
+export type { ConsolidationDepsProvider, ConsolidationResult, ConsolidationStepStats } from './consolidation_task';
 
 export { DuplicateMerger } from './duplicate_merger';
 export type { DuplicatePair, MergeResult } from './duplicate_merger';

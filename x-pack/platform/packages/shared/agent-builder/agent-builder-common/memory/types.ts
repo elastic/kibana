@@ -195,6 +195,9 @@ export interface MemoryNode {
   /** When a reinforcement signal was last applied (ISO 8601 string) */
   last_reinforced_at?: string;
 
+  /** Transient search relevance score from the last retrieval (not persisted). */
+  _relevance_score?: number;
+
   /** IDs of memory nodes that contradict this memory */
   conflict_refs?: string[];
 

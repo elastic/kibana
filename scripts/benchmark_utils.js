@@ -30,7 +30,7 @@ async function resolveBasePath(kibanaUrl, username, password) {
   return basePath;
 }
 
-async function kibanaRequest(kibanaUrl, username, password, method, apiPath, body) {
+async function kibanaRequest(kibanaUrl, username, password, method, apiPath, body, timeoutMs = 180000) {
   return new Promise((resolve, reject) => {
     const url = new URL(apiPath, kibanaUrl);
     const client = url.protocol === 'https:' ? https : http;
@@ -53,7 +53,7 @@ async function kibanaRequest(kibanaUrl, username, password, method, apiPath, bod
       });
     });
     req.on('error', reject);
-    req.setTimeout(180000, () => { req.destroy(); reject(new Error('Timeout')); });
+    req.setTimeout(timeoutMs, () => { req.destroy(); reject(new Error('Timeout')); });
     if (body) req.write(JSON.stringify(body));
     req.end();
   });
@@ -91,8 +91,9 @@ function createApiClient(kibanaUrl, username, password, connectorId) {
       return req('GET', `${basePath}/internal/agent_builder/conversations/${conversationId}`);
     },
 
-    async triggerConsolidation() {
-      return req('POST', `${basePath}/internal/agent_builder/memory/consolidate`);
+    async triggerConsolidation(opts = {}) {
+      const body = { full_log: !!opts.fullLog };
+      return kibanaRequest(kibanaUrl, username, password, 'POST', `${basePath}/internal/agent_builder/memory/consolidate`, body, 10 * 60 * 1000);
     },
   };
 }
@@ -241,8 +242,9 @@ async function feedSessions(api, feedMode, sessions, options = {}) {
         const idx = si;
         const ts = timestamps?.[si];
         tasks.push(async () => {
+          const t0 = Date.now();
           await extract(sessionText, `${conversationIdPrefix}-session-${idx}`, ts);
-          logger.log(`    ✓ session ${idx + 1}/${sessions.length} (${totalMemories} memories total)`);
+          logger.log(`    ✓ session ${idx + 1}/${sessions.length} (${totalMemories} memories, ${((Date.now() - t0) / 1000).toFixed(1)}s)`);
         });
       }
       await runWithConcurrency(tasks, concurrency);

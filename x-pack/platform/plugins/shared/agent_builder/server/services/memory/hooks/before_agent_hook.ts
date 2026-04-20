@@ -26,6 +26,8 @@ export interface InjectedMemory {
   type: string;
   summary: string;
   created_at: string;
+  score?: number;
+  relevance_score?: number;
 }
 
 /**
@@ -133,11 +135,14 @@ export interface RegisterMemoryBeforeAgentHookDeps {
  * ```
  */
 const MEMORY_INSTRUCTIONS =
-  'You can explore these memories further:\n' +
-  '- Read full memory (only useful when +N chars is shown): remember(memory_id, full=true)\n' +
-  '- Search memories by keyword: remember(query="keyword")\n' +
-  '- Search around a specific memory: remember(query="keyword", around_id="memory_id", hops=10)\n' +
-  '- Browse nearby memories without search: remember(around_id="memory_id", hops=10)';
+  'These are your personal memories from past interactions. Treat them as things you genuinely remember — ' +
+  'not as records or data you looked up. Speak naturally: "I remember you mentioned..." not "I found a record that...". ' +
+  'If nothing relevant comes to mind, that is perfectly fine — simply say you don\'t remember.\n\n' +
+  'You can explore your memories further:\n' +
+  '- Recall full details (only useful when +N chars is shown): remember(memory_id, full=true)\n' +
+  '- Search your memories by keyword: remember(query="keyword")\n' +
+  '- Browse memories around a specific one: remember(query="keyword", around_id="memory_id", hops=10)\n' +
+  '- Browse nearby memories: remember(around_id="memory_id", hops=10)';
 
 export const formatMemoryInjection = (nodes: ScoredMemoryNode[]): string => {
   if (nodes.length === 0) {
@@ -200,14 +205,14 @@ const scoreAndBudgetNodes = (
   const result: ScoredMemoryNode[] = [];
   let usedTokens = 0;
 
-  const scored = nodes.map((node, idx) => {
-    const positionRelevance = maxScore > 0 ? Math.max(0, 1 - idx * 0.05) : 0.5;
+  const scored = nodes.map((node) => {
+    const relevance = node._relevance_score ?? 0.5;
     return scoreMemoryNode({
       node,
-      relevanceScore: positionRelevance,
+      relevanceScore: relevance,
       stage,
       now,
-      selectedSummaries: [...selectedSummaries],
+      selectedSummaries: [],
       config: DEFAULT_RETRIEVAL_CONFIG,
     });
   });
@@ -371,11 +376,13 @@ export const runMemoryBeforeAgentHook = async (
   const corrKey = activeCorrelationId ?? context.request.id;
   injectedMemoriesStore.set(
     corrKey,
-    scoredNodes.map(({ node }) => ({
+    scoredNodes.map(({ node, score, relevanceScore }) => ({
       id: node.id,
       type: node.type,
       summary: node.summary,
       created_at: node.created_at,
+      score: Math.round(score * 1000) / 1000,
+      relevance_score: Math.round(relevanceScore * 1000) / 1000,
     }))
   );
   retrievalDurationStore.set(corrKey, totalDuration);

@@ -281,15 +281,27 @@ export const scoreMemoryNode = ({
   // Normalize relevance score to [0, 1] (clamp, since BM25 scores can vary)
   const normalizedRelevance = Math.min(1, Math.max(0, relevanceScore));
 
-  const score =
+  // Weighted sum of all positive components (each in [0,1])
+  const rawScore =
     weights.relevance * normalizedRelevance +
     weights.typeWeight * typeWeight +
     weights.utility * utility +
     weights.recency * recency +
     weights.reinforcement * reinforcement +
     weights.graphProximity * graphProximityBonus +
-    weights.confidence * confidence -
-    weights.redundancy * redundancy;
+    weights.confidence * confidence;
+
+  // Normalize to [0,1] by dividing by the sum of positive weights
+  const maxPossible =
+    weights.relevance +
+    weights.typeWeight +
+    weights.utility +
+    weights.recency +
+    weights.reinforcement +
+    weights.graphProximity +
+    weights.confidence;
+
+  const score = maxPossible > 0 ? rawScore / maxPossible : 0;
 
   return {
     node,
