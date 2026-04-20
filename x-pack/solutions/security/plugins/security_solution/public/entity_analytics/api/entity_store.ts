@@ -68,7 +68,7 @@ export const useEntityStoreRoutes = () => {
     const installEntityStore = async (options?: InitEntityStoreRequestBodyInput) => {
       if (isV2Enabled) {
         await tryInstallPrebuiltWatchlistsWithToast();
-        await http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
+        return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
           method: 'POST',
           version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
@@ -84,7 +84,7 @@ export const useEntityStoreRoutes = () => {
     const startEntityStore = async (entityTypes?: EntityType[]) => {
       if (isV2Enabled) {
         await tryInstallPrebuiltWatchlistsWithToast();
-        await http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
+        return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
           method: 'PUT',
           version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
