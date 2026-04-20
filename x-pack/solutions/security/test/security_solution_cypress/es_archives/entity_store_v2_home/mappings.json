@@ -1,8 +1,10 @@
 {
   "type": "index",
   "value": {
-    "aliases": {},
-    "index": ".entities.v2.latest.security_default",
+    "aliases": {
+      "entities-latest-default": {}
+    },
+    "index": ".entities.v2.latest.security_default-00001",
     "settings": {
       "index": {
         "mode": "lookup"

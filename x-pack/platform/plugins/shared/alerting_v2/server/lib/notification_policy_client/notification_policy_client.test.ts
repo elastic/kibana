@@ -1544,6 +1544,36 @@ describe('NotificationPolicyClient', () => {
         output: { statusCode: 404 },
       });
     });
+
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-enable-update-404'
+        )
+      );
+
+      await expect(
+        client.enableNotificationPolicy({ id: 'policy-id-enable-update-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+
+    it('throws 409 when update rejects with ConflictError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-enable-conflict'
+        )
+      );
+
+      await expect(
+        client.enableNotificationPolicy({ id: 'policy-id-enable-conflict' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+    });
   });
 
   describe('disableNotificationPolicy', () => {
@@ -1596,6 +1626,21 @@ describe('NotificationPolicyClient', () => {
 
       expect(res.id).toBe('policy-id-disable');
       expect(res.auth).not.toHaveProperty('apiKey');
+    });
+
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-disable-404'
+        )
+      );
+
+      await expect(
+        client.disableNotificationPolicy({ id: 'policy-id-disable-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
   });
 
@@ -1665,6 +1710,41 @@ describe('NotificationPolicyClient', () => {
       });
 
       expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-snooze-404'
+        )
+      );
+
+      await expect(
+        client.snoozeNotificationPolicy({
+          id: 'policy-id-snooze-404',
+          snoozedUntil: '2025-06-01T12:00:00.000Z',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+    });
+  });
+
+  describe('unsnoozeNotificationPolicy', () => {
+    it('throws 404 when update rejects with NotFoundError', async () => {
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          NOTIFICATION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-unsnooze-404'
+        )
+      );
+
+      await expect(
+        client.unsnoozeNotificationPolicy({ id: 'policy-id-unsnooze-404' })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
     });
   });
 

@@ -31,6 +31,7 @@ export class DashboardsTab extends ServiceDetailsTab {
   }
 
   public async linkDashboardByTitle(dashboardTitle: string) {
+    await this.addServiceDashboardButton.waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.addServiceDashboardButton.click();
     await this.dashboardComboBox.selectSingleOption(dashboardTitle);
     await this.page.getByTestId('apmSelectDashboardButton').click();

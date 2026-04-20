@@ -78,7 +78,7 @@ describe('common attributes schemas', () => {
 
   describe('DataStream', () => {
     const validDataStream = {
-      dataStreamId: 'ds-123',
+      dataStreamId: 'ds_123',
       title: 'Logs',
       description: 'Application logs',
       inputTypes: [{ name: 'filestream' as const }],
@@ -156,7 +156,6 @@ describe('common attributes schemas', () => {
 
       const result = DataStream.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toContain('No empty strings allowed');
     });
 
     it('strips unknown properties', () => {
@@ -169,12 +168,12 @@ describe('common attributes schemas', () => {
 
   describe('Integration', () => {
     const validIntegration = {
-      integrationId: 'int-123',
+      integrationId: 'int_123',
       title: 'Test Integration',
       description: 'Integration for testing',
       dataStreams: [
         {
-          dataStreamId: 'ds-123',
+          dataStreamId: 'ds_123',
           title: 'Logs',
           description: 'Log stream',
           inputTypes: [{ name: 'filestream' as const }],
@@ -252,13 +251,13 @@ describe('common attributes schemas', () => {
         ...validIntegration,
         dataStreams: [
           {
-            dataStreamId: 'ds-1',
+            dataStreamId: 'ds_1',
             title: 'Logs',
             description: 'Log stream',
             inputTypes: [{ name: 'filestream' as const }],
           },
           {
-            dataStreamId: 'ds-2',
+            dataStreamId: 'ds_2',
             title: 'Metrics',
             description: 'Metric stream',
             inputTypes: [{ name: 'http_endpoint' as const }],
@@ -269,6 +268,33 @@ describe('common attributes schemas', () => {
       const result = Integration.safeParse(payload);
       expectParseSuccess(result);
       expect(result.data.dataStreams).toHaveLength(2);
+    });
+
+    it('rejects integrationId with hyphens', () => {
+      const payload = {
+        ...validIntegration,
+        integrationId: 'int-123',
+      };
+
+      const result = Integration.safeParse(payload);
+      expectParseError(result);
+    });
+
+    it('rejects dataStreamId with hyphens', () => {
+      const payload = {
+        ...validIntegration,
+        dataStreams: [
+          {
+            dataStreamId: 'ds-123',
+            title: 'Logs',
+            description: 'Log stream',
+            inputTypes: [{ name: 'filestream' as const }],
+          },
+        ],
+      };
+
+      const result = Integration.safeParse(payload);
+      expectParseError(result);
     });
   });
 
