@@ -34,13 +34,13 @@ test.describe(
         const ingestHub = nav.navItemInFooterByDeepLinkId('ingestHub');
         const item = addData.or(ingestHub);
         await expect(item).toBeVisible();
-        await nav.expectNavItemHasHref(item);
+        await expect(item).toHaveAttribute('href', /.+/);
       });
 
       await test.step('Developer tools is visible and linked', async () => {
         const item = nav.navItemInFooterById('devTools');
         await expect(item).toBeVisible();
-        await nav.expectNavItemHasHref(item);
+        await expect(item).toHaveAttribute('href', /.+/);
       });
 
       await test.step('Data management panel opener is visible', async () => {
@@ -59,10 +59,8 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Developer tools navigates to the console app', async () => {
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInFooterById('devTools'),
-          page.testSubj.locator('console')
-        );
+        await nav.navItemInFooterById('devTools').click();
+        await expect(page.testSubj.locator('console')).toBeVisible();
       });
 
       await test.step('Data management opens its side panel', async () => {

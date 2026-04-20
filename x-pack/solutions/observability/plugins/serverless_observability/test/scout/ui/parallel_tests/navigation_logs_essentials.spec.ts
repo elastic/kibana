@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/expect-expect -- `nav.expectNavItemNavigatesTo` is our assertion helper. */
-
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
@@ -41,7 +39,7 @@ test.describe(
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
-          await nav.expectNavItemHasHref(item);
+          await expect(item).toHaveAttribute('href', /.+/);
         }
       });
 
@@ -62,26 +60,20 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Discover', async () => {
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('discover'),
-          nav.pageOrNoData('dscPage')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('discover').click();
+        await expect(nav.pageOrNoData('dscPage')).toBeVisible();
       });
 
       await test.step('Dashboards', async () => {
         await nav.goto();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('dashboards'),
-          nav.pageOrNoData('dashboardLandingPage')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
+        await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
       });
 
       await test.step('Alerts', async () => {
         await nav.goto();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts'),
-          page.testSubj.locator('alertsPageWithData')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+        await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
       });
     });
   }

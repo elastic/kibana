@@ -39,7 +39,7 @@ test.describe(
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
-          await nav.expectNavItemHasHref(item);
+          await expect(item).toHaveAttribute('href', /.+/);
         }
       });
 
@@ -53,7 +53,7 @@ test.describe(
         for (const deepLinkId of moreDeepLinks) {
           const item = nav.navItemInMoreByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
-          await nav.expectNavItemHasHref(item);
+          await expect(item).toHaveAttribute('href', /.+/);
         }
       });
 
@@ -75,46 +75,38 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Discover', async () => {
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('discover'),
-          nav.pageOrNoData('dscPage')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('discover').click();
+        await expect(nav.pageOrNoData('dscPage')).toBeVisible();
       });
 
       await test.step('Dashboards', async () => {
         await nav.goto();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('dashboards'),
-          nav.pageOrNoData('dashboardLandingPage')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('dashboards').click();
+        await expect(nav.pageOrNoData('dashboardLandingPage')).toBeVisible();
       });
 
       await test.step('Workflows', async () => {
         await nav.goto();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('workflows'),
-          page.testSubj.locator('workflowsPage')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('workflows').click();
+        await expect(page.testSubj.locator('workflowsPage')).toBeVisible();
       });
 
       await test.step('Alerts', async () => {
         await nav.goto();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts'),
-          page.testSubj.locator('alertsPageWithData')
-        );
+        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+        await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
       });
 
       await test.step('SLOs (via More menu)', async () => {
         await nav.goto();
         await page.testSubj.click('kbnChromeNav-moreMenuTrigger');
         await expect(nav.morePopover).toBeVisible();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInMoreByDeepLinkId('slo'),
+        await nav.navItemInMoreByDeepLinkId('slo').click();
+        await expect(
           page.testSubj
             .locator('slosPage')
             .or(page.testSubj.locator('o11ySloListWelcomePromptCreateSloButton'))
-        );
+        ).toBeVisible();
       });
 
       await test.step('Infrastructure opens its nested panel inside the More menu', async () => {

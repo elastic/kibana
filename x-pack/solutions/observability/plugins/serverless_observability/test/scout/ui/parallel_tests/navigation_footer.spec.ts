@@ -25,13 +25,13 @@ test.describe(
       await test.step('Add data (observabilityOnboarding) is visible and linked', async () => {
         const item = nav.navItemInFooterByDeepLinkId('observabilityOnboarding');
         await expect(item).toBeVisible();
-        await nav.expectNavItemHasHref(item);
+        await expect(item).toHaveAttribute('href', /.+/);
       });
 
       await test.step('Developer tools is visible and linked', async () => {
         const item = nav.navItemInFooterById('devTools');
         await expect(item).toBeVisible();
-        await nav.expectNavItemHasHref(item);
+        await expect(item).toHaveAttribute('href', /.+/);
       });
 
       await test.step('Data management panel opener is visible', async () => {
@@ -50,18 +50,14 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('Add data navigates to onboarding home', async () => {
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInFooterByDeepLinkId('observabilityOnboarding'),
-          page.testSubj.locator('obltOnboardingHomeTitle')
-        );
+        await nav.navItemInFooterByDeepLinkId('observabilityOnboarding').click();
+        await expect(page.testSubj.locator('obltOnboardingHomeTitle')).toBeVisible();
       });
 
       await test.step('Developer tools navigates to the console app', async () => {
         await nav.goto();
-        await nav.expectNavItemNavigatesTo(
-          nav.navItemInFooterById('devTools'),
-          page.testSubj.locator('console')
-        );
+        await nav.navItemInFooterById('devTools').click();
+        await expect(page.testSubj.locator('console')).toBeVisible();
       });
 
       await test.step('Data management opens its side panel', async () => {
