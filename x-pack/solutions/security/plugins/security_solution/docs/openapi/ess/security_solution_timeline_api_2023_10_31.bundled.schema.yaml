@@ -49,7 +49,7 @@ paths:
         - Security Timeline API
         - access:securitySolution
     get:
-      descripdescription: Get all notes for a given document.
+      description: Get all notes for a given document.
       operationId: GetNotes
       parameters:
         - in: query
