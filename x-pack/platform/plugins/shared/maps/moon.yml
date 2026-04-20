@@ -98,6 +98,8 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/react-kibana-mount'
   - '@kbn/scout'
+  - '@kbn/bfetch-plugin'
+  - '@kbn/expect'
 tags:
   - plugin
   - prod
