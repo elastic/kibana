@@ -213,8 +213,8 @@ const InternalDocViewerTable = ({
   );
 
   const fieldsFromColumns = useMemo(
-    () => columns?.filter((column) => column !== '_source') || [],
-    [columns]
+    () => columns?.filter((column) => isEsqlMode || column !== '_source') || [],
+    [columns, isEsqlMode]
   );
 
   const isShowOnlySelectedFieldsDisabled = !fieldsFromColumns?.length;
