@@ -31,11 +31,20 @@ export const useCreateWatchlist = ({
   return useMutation({
     mutationFn: () => createWatchlist(watchlist),
     onSuccess: async () => {
-      toasts.addSuccess(
-        i18n.translate('xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccess', {
-          defaultMessage: 'Watchlist created successfully',
-        })
-      );
+      toasts.addSuccess({
+        title: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccessTitle',
+          {
+            defaultMessage: 'Watchlist created successfully',
+          }
+        ),
+        text: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.watchlists.flyout.createSuccessText',
+          {
+            defaultMessage: 'Entities in the Watchlist may take a few minutes to synchronize.',
+          }
+        ),
+      });
       if (spaceId) {
         await queryClient.invalidateQueries({
           queryKey: ['watchlists-management-table', spaceId],

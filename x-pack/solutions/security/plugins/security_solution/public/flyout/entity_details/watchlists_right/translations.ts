@@ -52,6 +52,11 @@ export const WATCHLIST_INDEX_PATTERN_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Search for an index pattern' }
 );
 
+export const WATCHLIST_LOOKBACK_PERIOD_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlists.flyout.lookbackPeriodLabel',
+  { defaultMessage: 'Lookback period' }
+);
+
 export const WATCHLIST_CSV_DATA_SOURCE_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.watchlists.flyout.csvDataSourceTitle',
   { defaultMessage: 'CSV Data Source' }

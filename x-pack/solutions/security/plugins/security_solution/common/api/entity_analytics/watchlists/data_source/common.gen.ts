@@ -59,10 +59,26 @@ export const Integrations = z.object({
     .optional(),
 });
 
+/**
+ * Defines the lookback period for filtering source data by timestamp.
+ */
+export type DateRange = z.infer<typeof DateRange>;
+export const DateRange = z.object({
+  /**
+   * Start of the lookback period (date math or ISO string, e.g. "now-10d")
+   */
+  start: z.string(),
+  /**
+   * End of the lookback period (date math or ISO string, e.g. "now")
+   */
+  end: z.string(),
+});
+
 export type UpdateableMonitoringEntitySourceProperties = z.infer<
   typeof UpdateableMonitoringEntitySourceProperties
 >;
 export const UpdateableMonitoringEntitySourceProperties = z.object({
+  type: EntitySourceType.optional(),
   name: z.string().optional(),
   indexPattern: z.string().optional(),
   integrationName: z.string().optional(),
@@ -78,6 +94,7 @@ export const UpdateableMonitoringEntitySourceProperties = z.object({
   matchers: z.array(Matcher).optional(),
   filter: Filter.optional(),
   integrations: Integrations.optional(),
+  range: DateRange.optional(),
 });
 
 export type UpdateEntitySourceNoadditionalProps = z.infer<
@@ -90,7 +107,6 @@ export const UpdateEntitySourceNoadditionalProps = UpdateableMonitoringEntitySou
 export type MonitoringEntitySourceProperties = z.infer<typeof MonitoringEntitySourceProperties>;
 export const MonitoringEntitySourceProperties = UpdateableMonitoringEntitySourceProperties.merge(
   z.object({
-    type: EntitySourceType.optional(),
     managed: z.boolean().optional(),
   })
 );

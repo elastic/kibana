@@ -58,6 +58,7 @@ const indexSource: WatchlistDataSources.MonitoringEntitySource = {
   indexPattern: 'logs-*',
   identifierField: 'user.name',
   enabled: true,
+  range: { start: 'now-10d', end: 'now' },
 };
 
 const integrationSource: WatchlistDataSources.MonitoringEntitySource = {
@@ -145,6 +146,9 @@ describe('Watchlist update detection service', () => {
       expect(sourceSearchParams.index).toBe('logs-*');
       expect(sourceSearchParams.query?.bool?.must).toContainEqual({
         terms: { 'user.name': ['jdoe'] },
+      });
+      expect(sourceSearchParams.query?.bool?.must).toContainEqual({
+        range: { '@timestamp': { gte: 'now-10d', lte: 'now' } },
       });
       expect(esClient.bulk).toHaveBeenCalled();
     });

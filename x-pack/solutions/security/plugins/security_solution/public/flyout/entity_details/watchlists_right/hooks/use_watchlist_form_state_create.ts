@@ -21,6 +21,7 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
   );
   const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [hasUserEdits, setHasUserEdits] = useState(false);
+  const [isSourceValid, setSourceValid] = useState(true);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -41,7 +42,8 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
   }, [defaultWatchlist, hasUserEdits]);
 
   const { isNameTooLong, isDescriptionTooLong } = getWatchlistFieldLengthValidation(watchlist);
-  const isDisabled = !watchlist.name.trim() || isNameTooLong || isDescriptionTooLong;
+  const isDisabled =
+    !watchlist.name.trim() || isNameTooLong || isDescriptionTooLong || !isSourceValid;
 
   return {
     watchlist,
@@ -52,5 +54,6 @@ export const useCreateWatchlistFormState = (): WatchlistFormState => {
     isNameTooLong,
     isDescriptionTooLong,
     setWatchlistField,
+    setSourceValid,
   };
 };

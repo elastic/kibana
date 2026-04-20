@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import {
   EuiFieldText,
+  EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -42,6 +43,7 @@ export interface WatchlistFormProps {
     key: K,
     value: CreateWatchlistRequestBodyInput[K]
   ) => void;
+  onSourceValidationChange: (valid: boolean) => void;
 }
 
 const getTooLongError = (isTooLong: boolean, maxLength: number, fieldId: string) =>
@@ -61,13 +63,14 @@ export const WatchlistForm = ({
   isNameTooLong,
   isDescriptionTooLong,
   onFieldChange,
+  onSourceValidationChange,
 }: WatchlistFormProps) => {
   const isManaged = watchlist.managed === true;
   const isNameDisabled = isEditMode && !canUpdateWatchlistField('name', isManaged);
   const isDescriptionDisabled = isEditMode && !canUpdateWatchlistField('description', isManaged);
 
   return (
-    <EuiForm component="form" fullWidth>
+    <EuiForm component="form" fullWidth onSubmit={(e) => e.preventDefault()}>
       <EuiFormRow
         label={WATCHLIST_NAME_LABEL}
         isInvalid={isNameTooLong}
@@ -141,13 +144,18 @@ export const WatchlistForm = ({
         </>
       )}
       <EuiSpacer size="m" />
-      {watchlist.managed && <ManagedWatchlistSourceInput watchlist={watchlist} />}
+      {watchlist.managed && (
+        <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+          <ManagedWatchlistSourceInput watchlist={watchlist} />
+        </Suspense>
+      )}
       <RuleBasedSourceInput
         watchlistName={watchlist.name}
         isEditMode={isEditMode}
         isManaged={watchlist.managed}
         onFieldChange={onFieldChange}
         initialEntitySources={watchlist.entitySources}
+        onSourceValidationChange={onSourceValidationChange}
       />
     </EuiForm>
   );

@@ -27,6 +27,7 @@ export interface WatchlistsFlyoutContentProps {
   onSave: () => void;
   isLoading: boolean;
   isDisabled: boolean;
+  onSourceValidationChange: (valid: boolean) => void;
 }
 
 export const WatchlistsFlyoutContent = ({
@@ -40,6 +41,7 @@ export const WatchlistsFlyoutContent = ({
   onSave,
   isLoading,
   isDisabled,
+  onSourceValidationChange,
 }: WatchlistsFlyoutContentProps) => {
   return (
     <>
@@ -53,6 +55,7 @@ export const WatchlistsFlyoutContent = ({
           onFieldChange={onFieldChange}
           isNameTooLong={isNameTooLong}
           isDescriptionTooLong={isDescriptionTooLong}
+          onSourceValidationChange={onSourceValidationChange}
         />
       </FlyoutBody>
       <WatchlistsFlyoutFooter onSave={onSave} isLoading={isLoading} isDisabled={isDisabled} />
