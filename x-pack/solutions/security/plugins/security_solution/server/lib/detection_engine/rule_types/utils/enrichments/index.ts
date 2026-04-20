@@ -46,7 +46,7 @@ const resolveV2Enrichments = async <T extends DetectionAlertLatest>(
 ): Promise<Array<Promise<EventsMapByEnrichments>>> => {
   const { services, spaceId, logger, entityStoreCrudClient } = opts;
 
-  if (entityStoreCrudClient === null || entityStoreCrudClient === undefined) {
+  if (entityStoreCrudClient === undefined) {
     logger.warn(
       'Enrichments: entityStoreCrudClient is not available, skipping entity store enrichments'
     );

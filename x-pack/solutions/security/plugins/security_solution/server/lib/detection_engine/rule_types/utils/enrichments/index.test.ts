@@ -342,7 +342,7 @@ describe('enrichEvents', () => {
       );
     });
 
-    it('return the same events, if entityStoreCrudClient is null', async () => {
+    it('return the same events, if entityStoreCrudClient is undefined', async () => {
       mockIsIndexExist.mockImplementation(() => true);
       const events = [
         createAlert('1', createEntity('host', 'host name')),
@@ -356,7 +356,6 @@ describe('enrichEvents', () => {
         experimentalFeatures: {
           entityAnalyticsEntityStoreV2: true,
         } as unknown as ExperimentalFeatures,
-        entityStoreCrudClient: null,
       });
 
       expect(enrichedEvents).toEqual(events);

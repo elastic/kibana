@@ -47,7 +47,7 @@ export interface BasedEnrichParameters<T extends DetectionAlertLatest> {
   services: SecurityRuleServices;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
-  entityStoreCrudClient?: EntityStoreCRUDClient | null;
+  entityStoreCrudClient?: EntityStoreCRUDClient;
 }
 
 export type EnrichmentOptions<T extends DetectionAlertLatest> = BasedEnrichParameters<T> & {
@@ -121,7 +121,7 @@ export type EnrichEvents = <T extends DetectionAlertLatest>(
   params: BasedEnrichParameters<T> & {
     spaceId: string;
     experimentalFeatures: ExperimentalFeatures;
-    entityStoreCrudClient?: EntityStoreCRUDClient | null;
+    entityStoreCrudClient?: EntityStoreCRUDClient;
   }
 ) => Promise<Array<EventsForEnrichment<T>>>;
 
