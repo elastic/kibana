@@ -30,7 +30,7 @@ import { role } from '../common/role';
 
 // TODO: https://github.com/elastic/kibana/issues/228940 remove @skipInServerlessMKI tag when privileges issue is fixed
 describe(
-  'Rule Migrations - Translated Rules Page (securityClassicNavUpdate enabled)',
+  'Rule Migrations - Translated Rules Page',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
