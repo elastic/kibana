@@ -17,10 +17,10 @@
 Embeddables require registration in both server and public.
 
 ### registerEmbeddableServerDefinition
-Server registration defines the embeddable schema and other information required to include embeddables in container public REST API like "dashboards as code". 
+Server registration defines the embeddable schema and other information required to include embeddables in public REST API like "dashboards as code". 
 
 ### registerEmbeddablePublicDefinition
-Public registration defines embeddable UI. Embeddable UI exposes state in the shape defined by the embeddable schema registered in the server. 
+Public registration defines embeddable UI. Embeddable UI consumes and returns state in the shape defined by the embeddable schema registered in the server. 
 
 
 ## Public
