@@ -14,7 +14,10 @@ import {
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import type { SupertestWithRoleScopeType } from '../../services';
 
 const runTests = (
@@ -74,7 +77,7 @@ const runTests = (
   };
 
   before(async () => {
-    await kibanaServer.savedObjects.cleanStandardList();
+    await cleanSyntheticsTestData(kibanaServer);
     supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
       withInternalHeaders: true,
     });
@@ -87,7 +90,7 @@ const runTests = (
 
   after(async () => {
     await supertestEditorWithApiKey.destroy();
-    await kibanaServer.savedObjects.cleanStandardList();
+    await cleanSyntheticsTestData(kibanaServer);
     await Promise.all(spacesToDeleteIds.map((id) => kibanaServer.spaces.delete(id)));
   });
 
