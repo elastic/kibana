@@ -39,7 +39,7 @@ export const registerBulkDeleteRoute = (
       options: {
         summary: `Delete saved objects`,
         description:
-          'Deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.\n\nThere is currently no complete replacement for deleting arbitrary saved objects via an HTTP API.',
+          'WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.\n\nThere is currently no complete replacement for deleting arbitrary saved objects via an HTTP API.',
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,

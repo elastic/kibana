@@ -41,7 +41,7 @@ export const registerBulkResolveRoute = (
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,
-        description: `Deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
 
 Retrieve multiple Kibana saved objects by ID, using any legacy URL aliases if they exist.
 
