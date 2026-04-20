@@ -22,6 +22,7 @@ import { getHostsCount } from './lib/host/get_hosts_count';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { withInspect } from '../../lib/helpers/with_inspect';
 import { getApmDataAccessClient } from '../../lib/helpers/get_apm_data_access_client';
+import { DEFAULT_SCHEMA } from '../../../common/constants';
 import type { InfraEntityMetricType } from '../../../common/http_api/infra';
 
 const InspectQueryRT = rt.exact(rt.partial({ _inspect: jsonRt.pipe(rt.boolean) }));
@@ -101,7 +102,7 @@ export const initInfraAssetRoutes = (libs: InfraBackendLibs) => {
     withInspect(async (context, request) => {
       const { body, params } = request;
       const { entityType } = params;
-      const { query, from, to, schema = 'ecs' } = body;
+      const { query, from, to, schema = DEFAULT_SCHEMA } = body;
 
       const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
 
