@@ -787,9 +787,7 @@ export const getEndpointConsoleCommands = ({
         process: {
           about:
             CONSOLE_COMMANDS.memoryDump.processArgAbout +
-            (endpointSupportsProcessDump
-              ? ''
-              : ` (${CONSOLE_COMMANDS.memoryDump.argNotSupported})`),
+            (endpointSupportsProcessDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
@@ -805,7 +803,7 @@ export const getEndpointConsoleCommands = ({
         kernel: {
           about:
             CONSOLE_COMMANDS.memoryDump.kernelArgAbout +
-            (endpointSupportsKernelDump ? '' : ` (${CONSOLE_COMMANDS.memoryDump.argNotSupported})`),
+            (endpointSupportsKernelDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
