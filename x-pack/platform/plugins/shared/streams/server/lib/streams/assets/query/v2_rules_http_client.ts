@@ -177,12 +177,21 @@ export class V2RulesHttpClient implements IRulesManagementClient {
   }
 }
 
+/**
+ * v1 tags arrive as `['streams', '<streamName>']`. v2 uses a single structured tag
+ * `sigevents:stream:<streamName>` so the read side can filter `.rule-events` by stream.
+ */
+function toV2Tags(v1Tags: string[]): string[] {
+  const streamName = v1Tags.find((t) => t !== 'streams');
+  return streamName ? [`sigevents:stream:${streamName}`] : v1Tags;
+}
+
 function toV2CreateBody(body: CreateRuleBody) {
   return {
     kind: 'signal' as const,
     metadata: {
       name: body.name,
-      tags: body.tags,
+      tags: toV2Tags(body.tags),
     },
     time_field: body.params.timestampField,
     schedule: { every: body.schedule.interval },
@@ -194,7 +203,7 @@ function toV2UpdateBody(body: UpdateRuleBody) {
   return {
     metadata: {
       name: body.name,
-      tags: body.tags,
+      tags: toV2Tags(body.tags),
     },
     schedule: { every: body.schedule.interval },
     evaluation: { query: { base: body.params.query } },

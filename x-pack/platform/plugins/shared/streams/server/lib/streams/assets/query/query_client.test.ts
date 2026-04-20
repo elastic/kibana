@@ -1025,6 +1025,22 @@ describe('rule lifecycle — syncQueries', () => {
       );
       expect(rc.updateRule).not.toHaveBeenCalled();
     });
+
+    it('treats whitespace-only ES|QL changes as non-breaking (no rule churn)', async () => {
+      const rc = rulesManagementClientMock();
+      const sc = createMockStorageClient();
+      sc.search.mockResolvedValue({
+        hits: { hits: [toSearchHit(existingStoredDoc('q1', MATCH_ESQL))] },
+      });
+      const { client } = makeClient(rc, sc);
+
+      const reformatted = '  FROM  logs-*   METADATA   _id  |  WHERE  http.status  >=  500  ';
+      await client.syncQueries(def, [{ ...matchQuery('q1'), esql: { query: reformatted } }]);
+
+      expect(rc.updateRule).toHaveBeenCalledTimes(1);
+      expect(rc.createRule).not.toHaveBeenCalled();
+      expect(rc.bulkDeleteRules).not.toHaveBeenCalled();
+    });
   });
 
   describe('removed query', () => {
