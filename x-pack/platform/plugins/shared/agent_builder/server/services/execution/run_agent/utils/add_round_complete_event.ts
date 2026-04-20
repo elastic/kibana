@@ -57,6 +57,19 @@ type SourceEvents = ConvertedEvents;
 
 type StepEvents = ReasoningEvent | ToolCallEvent;
 
+/**
+ * Strip the [Memory Context]...[/Memory Context] block that was prepended by the beforeAgent hook.
+ * The enriched message is what the LLM sees, but only the original user message
+ * should be persisted in the conversation round.
+ */
+const stripMemoryContext = (message: string): string => {
+  const endTag = '[/Memory Context]';
+  if (!message.startsWith('[Memory Context]\n')) return message;
+  const endIdx = message.indexOf(endTag);
+  if (endIdx === -1) return message;
+  return message.slice(endIdx + endTag.length).replace(/^\n+/, '');
+};
+
 const isStepEvent = (event: SourceEvents): event is StepEvents => {
   return isReasoningEvent(event) || isToolCallEvent(event);
 };
@@ -334,6 +347,7 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
+      message: stripMemoryContext(input.message),
       ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
     },
     steps,

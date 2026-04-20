@@ -177,11 +177,13 @@ export const formatMemoryInjection = (nodes: ScoredMemoryNode[]): string => {
  * <original message>
  * ```
  */
+const MEMORY_CONTEXT_END = '[/Memory Context]';
+
 export const injectMemoryIntoMessage = (message: string, memoryBundle: string): string => {
   if (!memoryBundle) {
     return message;
   }
-  return `[Memory Context]\n${memoryBundle}\n\n${message}`;
+  return `[Memory Context]\n${memoryBundle}\n${MEMORY_CONTEXT_END}\n\n${message}`;
 };
 
 /**
