@@ -228,6 +228,9 @@ export const fetchResolutionGroupMemberIds = async ({
   resolutionTargetIds: string[];
   logger: ScopedLogger;
 }): Promise<Set<string>> => {
+  // ES|QL only tells us which members contributed alerts to a resolved score.
+  // This helper expands that to the full resolution group from entity store so
+  // silent aliases can still contribute modifiers like watchlists and criticality.
   const memberIds = new Set<string>();
   if (resolutionTargetIds.length === 0) {
     return memberIds;
