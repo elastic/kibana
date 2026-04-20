@@ -12,10 +12,12 @@ conclusion: neutral
 
 Review this PR for compliance with Kibana Scout test best practices.
 
+**Scope**: Focus on **Scout test behavior and best practices** — things that affect test reliability, coverage, and maintainability. Do NOT flag general code quality issues (unused imports/exports, naming conventions, code style) unless they directly impact test behavior. The goal is actionable feedback on tests, not code correctness nitpicks.
+
 Only review files that are:
 
 1. **Scout test code**: files under `**/test/scout*/**` paths (spec files, fixtures, page objects, API services, constants, global setup hooks).
-2. **Scout packages**: files under `**/kbn-scout*/**` (the core framework and solution-specific Scout packages).
+2. **Scout packages**: files under `**/kbn-scout*/**`, but only page objects, API services, fixtures, and test utilities that tests consume. Skip internal framework implementation files.
 
 Skip all other changed files entirely. If no matching files were changed in this PR, conclude with no comments.
 
@@ -23,22 +25,26 @@ Do NOT post flaky test runner nudges. A separate agent handles this.
 
 ## Review instructions
 
-Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules, and migration parity. The output format below applies to this agent; ignore any output formatting instructions in the skill file. You can use the `browse_code` tool to explore the codebase.
+Follow the skill at `.agents/skills/scout-best-practices-reviewer/SKILL.md` for scope, checklist, reuse rules, and migration parity. You can use the `browse_code` tool to explore the codebase. Use the output instructions below to format the review:
 
 ## Output
 
-Post findings as **GitHub PR comments**.
+Post a **brief summary comment** — a few lines with count, severity, and optionally a one-liner per finding. Keep it scannable; detailed explanations and fixes go in inline comments.
 
-Group findings by severity: 🔴 Blocker → 🟡 Major → 🔵 Minor → ⚪ Nit. For each finding:
+```
+## Scout Test Review
 
+Found 2 issues (1 major, 1 minor). See inline comments for details.
+
+This review is experimental. Share your feedback in the #appex-qa channel.
+```
+
+All detailed findings must go in **inline GitHub PR comments** on the specific line where each issue occurs. For each inline comment:
+
+- Start with the severity emoji (🔴 Blocker, 🟡 Major, 🔵 Minor, or ⚪ Nit)
 - State the rule violated (use the section heading from `docs/extend/scout/best-practices.md`)
-- Quote the file and line
 - Explain the issue in 1–2 sentences
 - Suggest a concrete fix
-
-### Positive reinforcement
-
-If a PR adds or updates Scout tests that follow our best practices particularly well, post a single extra comment highlighting what it does right.
 
 ### Link to specific sections of the Best Practices document when possible
 
