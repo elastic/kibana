@@ -1934,7 +1934,6 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
-/x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
