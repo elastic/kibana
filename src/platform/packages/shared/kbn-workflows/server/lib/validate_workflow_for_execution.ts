@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowDetailDto } from '@kbn/workflows';
+import type { WorkflowDetailDto } from '../..';
 
 /**
  * Validates that a workflow is in a runnable state before execution.
