@@ -12,10 +12,13 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
+
+const searchInferenceEndpoints = {} as SearchInferenceEndpointsPluginStart;
 
 const setupCoreMocks = (values: Record<string, any>) => {
   const savedObjects = savedObjectsServiceMock.createStartContract();
@@ -46,6 +49,7 @@ describe('resolveSelectedConnectorId', () => {
         request,
         connectorId: 'explicit-id',
         inference,
+        searchInferenceEndpoints,
       })
     ).rejects.toThrow(
       'Connector ID [explicit-id] does not match the configured default connector ID [default-id].'
@@ -67,6 +71,7 @@ describe('resolveSelectedConnectorId', () => {
       request,
       connectorId: 'default-id',
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('default-id');
@@ -87,6 +92,7 @@ describe('resolveSelectedConnectorId', () => {
       request,
       connectorId: 'explicit-id',
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('explicit-id');
@@ -106,6 +112,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('default-id');
@@ -128,6 +135,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('inference-default-id');
@@ -155,6 +163,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('Google-Gemini-2-5-Pro');
@@ -181,6 +190,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe(PREFERRED_DEFAULT_CONNECTOR_ID);
@@ -204,6 +214,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('inference-id');
@@ -226,6 +237,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('openai-id');
@@ -248,6 +260,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBe('first-id');
@@ -267,6 +280,7 @@ describe('resolveSelectedConnectorId', () => {
       savedObjects,
       request,
       inference,
+      searchInferenceEndpoints,
     });
 
     expect(result).toBeUndefined();

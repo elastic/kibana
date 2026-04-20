@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import {
@@ -80,12 +81,14 @@ export const resolveSelectedConnectorId = async ({
   request,
   connectorId,
   inference,
+  searchInferenceEndpoints,
 }: {
   uiSettings: UiSettingsServiceStart;
   savedObjects: SavedObjectsServiceStart;
   request: KibanaRequest;
   connectorId?: string;
   inference: InferenceServerStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }): Promise<string | undefined> => {
   const soClient = savedObjects.getScopedClient(request);
   const uiSettingsClient = uiSettings.asScopedToClient(soClient);
