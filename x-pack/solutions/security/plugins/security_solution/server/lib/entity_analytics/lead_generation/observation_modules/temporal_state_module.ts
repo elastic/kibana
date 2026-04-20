@@ -8,7 +8,12 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
-import { makeObservation, extractIsPrivileged, entityTypeLabel } from './utils';
+import {
+  PRIVILEGED_USER_WATCHLIST_ID,
+  makeObservation,
+  extractIsPrivileged,
+  entityTypeLabel,
+} from './utils';
 import type { EntityType as EntityTypeOpenAPI } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
 
 const MODULE_ID = 'temporal_state_analysis';
@@ -58,13 +63,6 @@ export const createTemporalStateModule = ({
     return observations;
   },
 });
-
-/**
- * Prefix used to identify the privileged-user monitoring watchlist.
- * Matches the constant in `utils.ts` — duplicated here to keep the
- * snapshot-field check self-contained without adding a circular import.
- */
-const PRIVILEGED_WATCHLIST_PREFIX = 'privileged-user-monitoring-watchlist';
 
 /**
  * For each currently-privileged entity, retrieves the earliest snapshot via a
@@ -125,7 +123,7 @@ const fetchPrivilegeEscalations = async (
             const attrs = entityField?.attributes as { watchlists?: string[] } | undefined;
             const watchlists = Array.isArray(attrs?.watchlists) ? attrs.watchlists : [];
             const wasPrivileged = watchlists.some(
-              (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_WATCHLIST_PREFIX)
+              (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
             );
 
             if (!wasPrivileged) {

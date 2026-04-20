@@ -25,18 +25,20 @@ export const getEntityField = (entity: LeadEntity): Record<string, unknown> | un
   (entity.record as Record<string, unknown>).entity as Record<string, unknown> | undefined;
 
 /**
- * Prefix used to identify the privileged-user monitoring watchlist.
- * A space ID suffix may be appended (e.g. `privileged-user-monitoring-watchlist-default`),
- * so callers should match with `startsWith` rather than strict equality.
+ * Watchlist ID prefix for privileged-user monitoring.
+ * A space-scoped suffix may be appended (e.g. `...-default`),
+ * so consumers should match with `startsWith`.
  */
-const PRIVILEGED_WATCHLIST_PREFIX = 'privileged-user-monitoring-watchlist';
+export const PRIVILEGED_USER_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
 
 /** Returns true if the entity is on a privileged-user monitoring watchlist. */
 export const extractIsPrivileged = (entity: LeadEntity): boolean => {
   const attrs = getEntityField(entity)?.attributes as { watchlists?: string[] } | undefined;
   const watchlists = attrs?.watchlists;
   if (!Array.isArray(watchlists)) return false;
-  return watchlists.some((w) => typeof w === 'string' && w.startsWith(PRIVILEGED_WATCHLIST_PREFIX));
+  return watchlists.some(
+    (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
+  );
 };
 
 /** Extracts the EUID (`entity.id`) from a LeadEntity record, e.g. `"host:InnoDB"`. */

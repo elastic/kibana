@@ -9,8 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { createRiskScoreModule } from './risk_score_module';
 import type { LeadEntity } from '../types';
-
-const PRIVILEGED_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
+import { PRIVILEGED_USER_WATCHLIST_ID } from './utils';
 
 const createEntityWithRisk = (
   type: string,
@@ -25,7 +24,7 @@ const createEntityWithRisk = (
       name,
       type,
       risk: { calculated_score_norm: scoreNorm, calculated_level: level },
-      attributes: { watchlists: privileged ? [PRIVILEGED_WATCHLIST_ID] : [] },
+      attributes: { watchlists: privileged ? [PRIVILEGED_USER_WATCHLIST_ID] : [] },
     },
   } as never,
   type,

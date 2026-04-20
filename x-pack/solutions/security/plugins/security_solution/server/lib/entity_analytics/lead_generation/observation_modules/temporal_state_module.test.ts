@@ -9,8 +9,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTemporalStateModule } from './temporal_state_module';
 import type { LeadEntity } from '../types';
-
-const PRIVILEGED_WATCHLIST_ID = 'privileged-user-monitoring-watchlist-id';
+import { PRIVILEGED_USER_WATCHLIST_ID } from './utils';
 
 const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   record: {
@@ -18,7 +17,7 @@ const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
       id: `${type}:${name}`,
       name,
       type,
-      attributes: { watchlists: [PRIVILEGED_WATCHLIST_ID] },
+      attributes: { watchlists: [PRIVILEGED_USER_WATCHLIST_ID] },
     },
   } as never,
   type,
@@ -47,7 +46,7 @@ const mockSnapshotResponse = (buckets: Array<{ key: string; wasPrivileged: boole
                   entity: {
                     id: b.key,
                     attributes: {
-                      watchlists: b.wasPrivileged ? [PRIVILEGED_WATCHLIST_ID] : [],
+                      watchlists: b.wasPrivileged ? [PRIVILEGED_USER_WATCHLIST_ID] : [],
                     },
                   },
                 },
