@@ -42,6 +42,7 @@ export const registerRiskScoreMaintainer = ({
     id: 'risk-score',
     description: 'Entity Analytics Risk Score Maintainer',
     interval: INTERVAL,
+    timeout: '45m',
     initialState: {},
     setup: maintainer.setup,
     run: maintainer.run,
