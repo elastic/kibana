@@ -25,13 +25,14 @@ import {
   getSingleColorConfig,
 } from './reference_line_helpers';
 import type { XYDataLayerConfig, XYLayerConfig } from './types';
+import { getDefaultPalette } from './default_palette';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 
 export const getLayerPaletteName = (layer: XYDataLayerConfig): string =>
-  layer.colorMapping?.paletteId ?? layer.palette?.name ?? 'default';
+  layer.colorMapping?.paletteId ?? layer.palette?.name ?? getDefaultPalette(layer.seriesType);
 
 const getPaletteDefinition = (paletteService: PaletteRegistry, paletteName: string) =>
   paletteService.get(paletteName) ?? paletteService.get('default');

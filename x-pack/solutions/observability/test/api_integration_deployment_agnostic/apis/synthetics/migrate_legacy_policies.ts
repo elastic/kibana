@@ -13,7 +13,10 @@ import type { PrivateLocation, HTTPFields } from '@kbn/synthetics-plugin/common/
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { SupertestWithRoleScopeType } from '../../services';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 
 /**
@@ -85,11 +88,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
       });
 
-      // Fleet's create API drops is_managed, but the cleanup task filters on it.
-      // We need to set it manually.
-      await supertestAdmin.put(`/api/fleet/package_policies/${legacyPolicyId}`).send({
-        is_managed: true,
-        force: true,
+      await retry.tryForTime(60_000, async () => {
+        const updateResponse = await supertestAdmin
+          .put(`/api/fleet/package_policies/${legacyPolicyId}`)
+          .send({
+            is_managed: true,
+            force: true,
+          });
+        expect(updateResponse.status).to.eql(
+          200,
+          `Failed to set is_managed on legacy policy: ${JSON.stringify(updateResponse.body)}`
+        );
       });
 
       return legacyPolicyId;
@@ -128,7 +137,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
       });
 
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await testPrivateLocations.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
@@ -152,7 +161,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await supertestAdmin.destroy();
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     describe('Migration on monitor edit', () => {
