@@ -21,7 +21,10 @@ Only review files that are:
 
 Skip all other changed files entirely. If no matching files were changed in this PR, conclude with no comments.
 
-Do NOT post flaky test runner nudges. A separate agent handles this.
+IMPORTANT:
+
+- Do NOT review backport PRs (these usually merge changes into branches that aren't `main`)
+- Do NOT post flaky test runner nudges. A separate agent handles this.
 
 ## Review instructions
 
@@ -42,13 +45,19 @@ This review is experimental. Share your feedback in the #appex-qa channel.
 All detailed findings must go in **inline GitHub PR comments** on the specific line where each issue occurs. For each inline comment:
 
 - Start with the severity emoji (🔴 Blocker, 🟡 Major, 🔵 Minor, or ⚪ Nit)
-- State the rule violated (use the section heading from `docs/extend/scout/best-practices.md`)
+- State the rule violated (use the section heading from the matching best-practices document: `docs/extend/scout/best-practices.md`, `docs/extend/scout/ui-best-practices.md`, or `docs/extend/scout/api-best-practices.md`)
 - Explain the issue in 1–2 sentences
 - Suggest a concrete fix
 
-### Link to specific sections of the Best Practices document when possible
+### Link to specific sections of the Best Practices documents when possible
 
-Where applicable, link to a specific section of the [Best Practices for Scout Tests](https://www.elastic.co/docs/extend/kibana/scout/best-practices) document so developers can learn more. A section-scoped link looks like this: `https://www.elastic.co/docs/extend/kibana/scout/best-practices#avoid-conditional-logic-in-page-objects`. You can infer the `#anchor` from the `docs/extend/scout/best-practices.md` file (e.g., `[avoid-conditional-logic-in-page-objects]`).
+Scout best practices are split across three pages; pick the one that matches the rule you’re citing:
+
+- General: `docs/extend/scout/best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/best-practices`
+- UI tests: `docs/extend/scout/ui-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices`
+- API tests: `docs/extend/scout/api-best-practices.md` → `https://www.elastic.co/docs/extend/kibana/scout/api-best-practices`
+
+A section-scoped link looks like this: `https://www.elastic.co/docs/extend/kibana/scout/ui-best-practices#avoid-conditional-logic-in-page-objects`. You can infer the `#anchor` from the explicit heading id in the corresponding markdown file (e.g., `[avoid-conditional-logic-in-page-objects]`).
 
 ### Updates to the PR
 
