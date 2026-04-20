@@ -21,7 +21,7 @@ Understanding `LensHeatmapConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-<Dataset />
+See [Dataset configuration](dataset.md) for details on configuring the data source.
 
 ### `breakdown`
 
@@ -41,7 +41,7 @@ Understanding `LensHeatmapConfig` in detail
 - **Description:** Configures the legend for the heatmap. The legend settings include options to show or hide the legend and to specify its position ('top', 'left', 'bottom', 'right'). This is crucial for interpreting the colors and gradients used in the heatmap, as it provides a reference scale for the data values represented.
 
 
-<Breakdown />
+See [Breakdown configuration](breakdown.md) for details on configuring data segmentation.
 
 ## Example
 

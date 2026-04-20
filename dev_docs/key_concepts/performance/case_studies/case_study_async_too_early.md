@@ -4,7 +4,9 @@ description: Learn how we were able to improve page load by identifying and fixi
 
 # Case Study - Async too early
 
-<DocCallOut>The following case study is derived from [kibana#179175](https://github.com/elastic/kibana/pull/179175).</DocCallOut>
+:::{note}
+The following case study is derived from [kibana#179175](https://github.com/elastic/kibana/pull/179175).
+:::
 
 ## Summary
 

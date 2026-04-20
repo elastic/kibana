@@ -31,7 +31,7 @@ Kibana should also not have the ability to modify system/hidden indices for whic
 | System indices owned by Kibana | `all` | `.kibana*`, '.fleet*' |
 
 #### Decision tree
-<DocWhimsical id="kibana-system-privilege-decision-tree-VTTGaTtjs9SnpbRNSg2Ptp" title="Decision tree" />
+<!-- Decision tree diagram was previously hosted on Whimsical (id: kibana-system-privilege-decision-tree-VTTGaTtjs9SnpbRNSg2Ptp) -->
 
 ##### Exceptions for telemetry
 Exceptions to this rule have been made in the past to aid in telemetry collection. This is not something we want to support long-term, but there aren't viable alternatives at the moment without a significant redesign. 

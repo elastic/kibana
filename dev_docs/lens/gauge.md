@@ -21,7 +21,7 @@ Understanding `LensGaugeConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-<Dataset />
+See [Dataset configuration](dataset.md) for details on configuring the data source.
 
 ### `value`
 
@@ -55,7 +55,7 @@ Understanding `LensGaugeConfig` in detail
 - **Type:** `'arc' | 'circle' | 'horizontalBullet' | 'verticalBullet'`
 - **Description:** Controls the appearance of the gauge by defining its shape. Each shape can convey the data differently, offering various stylistic and functional approaches to data presentation.
 
-<Breakdown />
+See [Breakdown configuration](breakdown.md) for details on configuring data segmentation.
 
 ## Example
 

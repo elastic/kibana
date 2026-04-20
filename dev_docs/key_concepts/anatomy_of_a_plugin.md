@@ -83,9 +83,9 @@ plugins/
 
 `visibility` - [Optional] Determines plugin accessibility: "private": The plugin is only accessible from plugins that belong to the same group or "shared": The plugin is accessible from plugins from any group. This only applies to plugins with group: 'platform', as solution plugins are private by definition.
 
-<DocCallOut>
-  You don't need to declare a dependency on a plugin if you only wish to access its types.
-</DocCallOut>
+:::{note}
+You don't need to declare a dependency on a plugin if you only wish to access its types.
+:::
 
 ### tsconfig.json
 
@@ -140,7 +140,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 ```
 
-<DocCallOut title="Best practices for every top level index.ts file">
+:::{note} Best practices for every top level index.ts file
 
 1. When possible, use
 
@@ -158,7 +158,7 @@ Using the non-`type` variation will increase the bundle size unnecessarily and m
 
 2. Don't use `export *` in these top level index.ts files
 
-</DocCallOut>
+:::
 
 ### public/plugin.ts
 

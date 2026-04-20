@@ -22,7 +22,7 @@ Understanding `LensMetricConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-<Dataset />
+See [Dataset configuration](dataset.md) for details on configuring the data source.
 
 ### `value`
 
@@ -46,7 +46,7 @@ Understanding `LensMetricConfig` in detail
 - **Type:** `LensLayerQuery`
 - **Description:** Used to define a query for calculating a maximum value, same as value it should be the name of field or lens formula.
 
-<Breakdown />
+See [Breakdown configuration](breakdown.md) for details on configuring data segmentation.
 
 ### `trendLine`
 

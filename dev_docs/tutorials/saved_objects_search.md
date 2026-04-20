@@ -8,9 +8,9 @@ description: Learn how to use the `search` method to search for Saved Objects.
 
 It is an alternative to the safer but more limited `SavedObjectsClientContract.find` method. If you plan to use aggregations, be sure to review the [Aggregations to avoid](#aggregations-to-avoid) section.
 
-<DocCallOut title="With great power comes great responsibility">
-  While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
-</DocCallOut>
+:::{warning} With great power comes great responsibility
+While the `search` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Take care to ensure it is implemented correctly for your use case and appropriately stress tested. Carefully consider how you would like to use this method in your plugin to unlock value for users.
+:::
 
 ## See it in code
 

@@ -15,9 +15,9 @@ The service allows plugins to:
 - execute custom logic on an incoming request or server response.
 - implement custom authentication and authorization strategy.
 
-<DocCallOut>
-  See [the server-side HTTP service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
-</DocCallOut>
+:::{note}
+See [the server-side HTTP service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md)
+:::
 
 ### The client-side HTTP service
 
@@ -26,9 +26,9 @@ The client-side `HttpService` is a preconfigured wrapper around `window.fetch` t
 
 **The service should only be used for access to backend endpoints registered by the same plugin.** Feel free to use another HTTP client library to request 3rd party services.
 
-<DocCallOut>
-  See [the client-side HTTP service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httpsetup.md)
-</DocCallOut>
+:::{note}
+See [the client-side HTTP service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.httpsetup.md)
+:::
 
 ## Registering an endpoint
 
@@ -47,11 +47,11 @@ the request.
 - `request` contains information related to the request, such as the path and query parameter
 - `response` contains factory helpers to create the response to return from the endpoint
 
-<DocCallOut>
-  See the [request](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.kibanarequest.md)
-  and [response](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.kibanaresponsefactory.md)
-  documentation
-</DocCallOut>
+:::{note}
+See the [request](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.kibanarequest.md)
+and [response](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.kibanaresponsefactory.md)
+documentation
+:::
 
 ## Basic examples
 
@@ -436,6 +436,6 @@ export class MyPlugin implements Plugin {
 
 ## More examples
 
-<DocCallOut>
-  See [the routing example plugin](https://github.com/elastic/kibana/blob/main/examples/routing_example) for more route registration examples.
-</DocCallOut>
+:::{note}
+See [the routing example plugin](https://github.com/elastic/kibana/blob/main/examples/routing_example) for more route registration examples.
+:::

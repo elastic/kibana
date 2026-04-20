@@ -10,4 +10,4 @@ Core is a set of systems (frontend, backend etc.) that Kibana and its plugins ar
 `core` has its own [logging system](key_concepts/audit_logging.md) and will output log records directly (e.g. to file or terminal) when configured. When no specific configuration is provided, logs are forwarded to the "legacy" Kibana so that they look the same as the rest of the
 log records throughout Kibana.
 
-<DocBadgeComingSoon tipTitle="Other core components" tipContent="I will be content on the other components offered by core">Other components</DocBadgeComingSoon>
+*Other components — coming soon. More content on the other components offered by core will be added here.*

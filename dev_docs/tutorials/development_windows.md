@@ -9,35 +9,37 @@ description: Learn how to setup a Windows development environment using WSL
 Development on Windows is only supported through WSL2.  WSL lets users run a Linux environment on Windows, providing a supported development environment for Kibana with a much better experience and 
 performance than the native one.
 
-<DocCallOut title="Prerequisites">
-  
-  This guide allows you to achieve two different kind of experiences (Basic and Default each with their specifics). While we fully advise for upgrading into Windows 11 to use the much better Default experience (and will eventually remove the basic one from this guide), 
-  for now both have a common prerequisite on enabling the hardware virtualization. 
-  
-  Get that feature to work will highly depend on your hardware, as it should be enabled on your UEFI (or BIOS). Please check the official Microsoft documentation on 
-  [How to Enable Virtualization on Windows](https://support.microsoft.com/en-us/windows/enable-virtualization-on-windows-11-pcs-c5578302-6e43-4b4b-a449-8ced115f58e1).
-  
-  After successfully achieve the previous step there is a second good guide describing [How to Enable Hyper-V Platform Feature on Windows](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v#enable-the-hyper-v-role-through-settings).
-  
-  Once hardware virtualization is enabled on Windows, please pay attention to the specific prerequisites for each type of experience listed below.
-  
-  ### Basic Experience
-  For a basic WSL usage you must be running **Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11**. Note that in a basic setup you won't be able to use 
-  the browser GUI to visually run and/or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below.
-  
-  **Note:** For a normal development cycle we really advise to use the default experience setup within Windows 11. However if you have an explicit need for using a browser GUI 
-  while using Windows 10, please follow each step of the guide below applicable for the Basic Experience setup and then check our [short term workaround for Windows 10 GUI support](development_windows.md#short-term-workaround-for-windows-10-gui-support).
-  
-  ### Default Experience
-  For a default experience and a completion of the entire guide which will make you able to run GUI apps you must be running **Windows 11 (Build 22000 and higher)**.
-  In addition to that, installing a **vGPU driver** is also required. Please choose the one compatible with your hardware: 
+:::{note} Prerequisites
 
-  - [Intel GPU driver for WSL](https://www.intel.com/content/www/us/en/download/19344/intel-graphics-windows-dch-drivers.html?)
-  - [AMD GPU driver for WSL](https://www.amd.com/en/support/kb/release-notes/rn-rad-win-wsl-support)
-  - [NVIDIA GPU driver for WSL](https://developer.nvidia.com/cuda/wsl) (**Note:** NVIDIA does now includes the vGPU driver in their common gpu drivers. Please make sure you have your latest available drivers installed or refer to the previous link for official documentation)
-  
-  More information for that could be found in the [official guide for GUI apps on WSL](https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#install-support-for-linux-gui-apps).
-</DocCallOut>
+This guide allows you to achieve two different kind of experiences (Basic and Default each with their specifics). While we fully advise for upgrading into Windows 11 to use the much better Default experience (and will eventually remove the basic one from this guide), 
+for now both have a common prerequisite on enabling the hardware virtualization. 
+
+Get that feature to work will highly depend on your hardware, as it should be enabled on your UEFI (or BIOS). Please check the official Microsoft documentation on 
+[How to Enable Virtualization on Windows](https://support.microsoft.com/en-us/windows/enable-virtualization-on-windows-11-pcs-c5578302-6e43-4b4b-a449-8ced115f58e1).
+
+After successfully achieve the previous step there is a second good guide describing [How to Enable Hyper-V Platform Feature on Windows](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/quick-start/enable-hyper-v#enable-the-hyper-v-role-through-settings).
+
+Once hardware virtualization is enabled on Windows, please pay attention to the specific prerequisites for each type of experience listed below.
+
+**Basic Experience**
+
+For a basic WSL usage you must be running **Windows 10 version 2004 and higher (Build 19041 and higher) or Windows 11**. Note that in a basic setup you won't be able to use 
+the browser GUI to visually run and/or debug functional tests. It's highly advisable to make sure you install the prerequisites for a default usage listed below.
+
+**Note:** For a normal development cycle we really advise to use the default experience setup within Windows 11. However if you have an explicit need for using a browser GUI 
+while using Windows 10, please follow each step of the guide below applicable for the Basic Experience setup and then check our [short term workaround for Windows 10 GUI support](development_windows.md#short-term-workaround-for-windows-10-gui-support).
+
+**Default Experience**
+
+For a default experience and a completion of the entire guide which will make you able to run GUI apps you must be running **Windows 11 (Build 22000 and higher)**.
+In addition to that, installing a **vGPU driver** is also required. Please choose the one compatible with your hardware: 
+
+- [Intel GPU driver for WSL](https://www.intel.com/content/www/us/en/download/19344/intel-graphics-windows-dch-drivers.html?)
+- [AMD GPU driver for WSL](https://www.amd.com/en/support/kb/release-notes/rn-rad-win-wsl-support)
+- [NVIDIA GPU driver for WSL](https://developer.nvidia.com/cuda/wsl) (**Note:** NVIDIA does now includes the vGPU driver in their common gpu drivers. Please make sure you have your latest available drivers installed or refer to the previous link for official documentation)
+
+More information for that could be found in the [official guide for GUI apps on WSL](https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps#install-support-for-linux-gui-apps).
+:::
 
 ## Install WSL
 

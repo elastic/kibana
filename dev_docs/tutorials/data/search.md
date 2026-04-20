@@ -58,9 +58,9 @@ export class MyPlugin implements Plugin {
 
 Note: The `data` plugin contains services to help you generate the `query` and `aggs` portions, as well as managing indices using the `data.indexPatterns` service.
 
-<DocCallOut title="Server Side Search">
-  The `data.search` service is available on both server and client, with similar APIs.
-</DocCallOut>
+:::{note} Server Side Search
+The `data.search` service is available on both server and client, with similar APIs.
+:::
 
 #### Error handling
 
@@ -388,11 +388,11 @@ async function fetchData(data: DataPublicPluginStart) {
 }
 ```
 
-<DocCallOut title="Search Sessions with Server Side Search">
-  Search sessions are initiated by the client. If you are using a route that runs server side
-  searches, you can send the `searchSessionId` to the server, and then pass it down to the server
-  side `data.search` function call.
-</DocCallOut>
+:::{note} Search Sessions with Server Side Search
+Search sessions are initiated by the client. If you are using a route that runs server side
+searches, you can send the `searchSessionId` to the server, and then pass it down to the server
+side `data.search` function call.
+:::
 
 #### Supporting search sessions in your application
 
@@ -433,11 +433,11 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-<DocCallOut title="Search sessions restore state">
-  The restore state of a search session may be different from the initial state used to create it.
-  For example, where the initial state may contain relative dates, in the restore state, those must
-  be converted to absolute dates. Read more about the [NowProvider]().
-</DocCallOut>
+:::{note} Search sessions restore state
+The restore state of a search session may be different from the initial state used to create it.
+For example, where the initial state may contain relative dates, in the restore state, those must
+be converted to absolute dates. Read more about the [NowProvider]().
+:::
 
 :::{important}
 Calling `enableStorage` will also enable the `Search Session Indicator` component in the chrome

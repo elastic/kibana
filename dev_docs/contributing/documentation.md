@@ -30,11 +30,9 @@ Developer documentation can be segmented into two types: internal plugin details
 
 Internal plugin details can be kept alongside the code it describes. Information about extending Kibana may go in the root of your plugin folder, or inside the top-level [dev_docs](https://github.com/elastic/kibana/tree/main/dev_docs) folder. 
 
-<DocCallOut title="Internal only">
-
+:::{note} Internal only
 Only `mdx` files with the appropriate [frontmatter](#docsSyntax) are rendered inside the Developer Guide. Read about the syntax [here](#docsSyntax). Edit [kibana/nav-kibana-dev.docnav.json](https://github.com/elastic/kibana/blob/main/dev_docs/nav-kibana-dev.docnav.json) to have a link to your document appear in the navigation menu. Read [these instructions](#kibDevDocsBestPractices) for more details on how to add new content and test locally.
-
-</DocCallOut>
+:::
 
 ### Structure
 
@@ -68,7 +66,8 @@ We automatically generate [API documentation](../api_welcome.md). The following 
 
 If you encounter an error of the form:
 
-<DocCallOut color="danger" title="JavaScript heap out of memory" />
+:::{warning} JavaScript heap out of memory
+:::
 
 You can increase [max memory](https://nodejs.org/api/cli.html#--max-old-space-sizesize-in-megabytes) for node as follows:
 

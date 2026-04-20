@@ -33,64 +33,64 @@ all of our apps are accessible.
 - Learn how [EUI tackles accessibility](https://elastic.github.io/eui/#/guidelines/accessibility)
 - If you don't use EUI, follow the same EUI accessibility standards
 
-<DocCallOut title="Internal only">
-  ## Accessibility automation in Kibana
+:::{note} Internal only
+## Accessibility automation in Kibana
 
-  Kibana maintains accessibility quality using a layered, hybrid approach:
+Kibana maintains accessibility quality using a layered, hybrid approach:
 
-  ### 1. Code‑level checks
-  - **Tool:** `@elastic/eslint-plugin-eui` – custom rules for the ESLint library
-  - **Enforces:** Correct ARIA usage, required labels, prohibited patterns, and safer EUI practices
-  - **Action:** Resolve all warnings before committing (treat warnings as blockers)
+### 1. Code‑level checks
+- **Tool:** `@elastic/eslint-plugin-eui` – custom rules for the ESLint library
+- **Enforces:** Correct ARIA usage, required labels, prohibited patterns, and safer EUI practices
+- **Action:** Resolve all warnings before committing (treat warnings as blockers)
 
-  ### 2. Render‑level checks
-  - **CI tooling:** running `axe-core` check in `FTR`, `Scout` and `Cypress` tests.
-  - **Enforces:** Semantics, landmarks, contrast, focus order, interaction patterns. 
-  - **Note:** All tests are based on the common configuration defined in `src/platform/packages/shared/kbn-axe-config/index.ts`.
+### 2. Render‑level checks
+- **CI tooling:** running `axe-core` check in `FTR`, `Scout` and `Cypress` tests.
+- **Enforces:** Semantics, landmarks, contrast, focus order, interaction patterns. 
+- **Note:** All tests are based on the common configuration defined in `src/platform/packages/shared/kbn-axe-config/index.ts`.
 
-  - **Usage:**
-    - **FTR a11y tests** (tests must be placed in the `test/accessibility` folder):
-      ```ts
-      const a11y = getService('a11y');
-      ...
-      it('has no detectable a11y violations on load', async () => {
-        await common.navigateToApp('dashboard');
-        await a11y.testAppSnapshot();
-      });
-      ```
+- **Usage:**
+  - **FTR a11y tests** (tests must be placed in the `test/accessibility` folder):
+    ```ts
+    const a11y = getService('a11y');
+    ...
+    it('has no detectable a11y violations on load', async () => {
+      await common.navigateToApp('dashboard');
+      await a11y.testAppSnapshot();
+    });
+    ```
 
-    - **Scout** using `page.checkA11y`. Run an accessibility check on a specific root element:
-      ```ts
-      test('has no detectable a11y violations', async ({ page }) => {
-        const { violations } = await page.checkA11y({ include: ['{CSS selector of root element you are testing}'] });
-        expect(violations).toHaveLength(0);
-      });
-      ```
+  - **Scout** using `page.checkA11y`. Run an accessibility check on a specific root element:
+    ```ts
+    test('has no detectable a11y violations', async ({ page }) => {
+      const { violations } = await page.checkA11y({ include: ['{CSS selector of root element you are testing}'] });
+      expect(violations).toHaveLength(0);
+    });
+    ```
 
-    - **Cypress** using `cy.checkA11y`. A custom Cypress command is available to run accessibility checks:
-      ```ts
-      it('has no detectable a11y violations on load', () => {
-        cy.checkA11y();
-      });
-      ```
-  - **Action:** Improve coverage — add or extend tests while developing features.
+  - **Cypress** using `cy.checkA11y`. A custom Cypress command is available to run accessibility checks:
+    ```ts
+    it('has no detectable a11y violations on load', () => {
+      cy.checkA11y();
+    });
+    ```
+- **Action:** Improve coverage — add or extend tests while developing features.
 
-  ### 3. Ready check (execute before commit)
-  - Favor EUI components and honor their accessibility playbook
-  - Zero tolerance for a11y ESLint warnings
-  - No new axe violations in updated components — keep it clean
-  - VoiceOver sanity check: new or modified interactive areas should clearly announce their purpose
+### 3. Ready check (execute before commit)
+- Favor EUI components and honor their accessibility playbook
+- Zero tolerance for a11y ESLint warnings
+- No new axe violations in updated components — keep it clean
+- VoiceOver sanity check: new or modified interactive areas should clearly announce their purpose
 
-  For help: join `#accessibility` slack channel.
-</DocCallOut>
+For help: join `#accessibility` slack channel.
+:::
 
 ## Localization
 
 Kibana is translated into other languages. Use our i18n utilities to ensure your public facing strings will be translated to ensure all Kibana apps are localized. Read and adhere to our [i18n guidelines](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-i18n/GUIDELINE.md)
 
-<DocCallOut title="Internal only">
-  Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
-</DocCallOut>
+:::{note} Internal only
+Elasticians, check out the #kibana-localization channel to ask questions and receive guidance.
+:::
 
 ## Styleguide
 
@@ -128,7 +128,7 @@ Over-refactoring can be a problem in it's own right, but it's still important to
 
 ### Timing
 
-<DocCallOut title="Internal only">
+:::{note} Internal only
 
 Try not to put your PR in review mode, or merge large changes, right before Feature Freeze. It's inevitably one of the most volatile times for the
 Kibana code base, try not to contribute to this volatility. Doing this can:
@@ -141,7 +141,7 @@ All of the above contributes to more bugs being found in the QA cycle and can ca
 your large change right _after_ feature freeze. If you are worried about missing your initial release version goals, review our
 [release train philosophy](#devTimeBasedReleases). It's okay!
 
-</DocCallOut>
+:::
 
 ### Size
 
@@ -209,11 +209,11 @@ auto-fixing to migration all existing and new uses of this export to the proper 
 
 ## Licensing
 
-<DocCallOut title="Internal only">
+:::{note} Internal only
 
 Has there been a discussion about which license this feature should be available under? Open up a license issue in [https://github.com/elastic/dev](https://github.com/elastic/dev) if you are unsure.
 
-</DocCallOut>
+:::
 
 ## Testing scenarios
 

@@ -40,9 +40,9 @@ const expression = buildExpression([
 
 Note: Consumers need to be aware which plugin registers specific functions with expressions function registry and import correct type definitions from there.
 
-<DocCallOut>
-  The `expressions` service is available on both server and client, with similar APIs.
-</DocCallOut>
+:::{note}
+The `expressions` service is available on both server and client, with similar APIs.
+:::
 
 ### Running expressions
 
@@ -53,9 +53,9 @@ const executionContract = expressions.execute(expression, input);
 const result = await executionContract.getData();
 ```
 
-<DocCallOut>
-  Check the full spec of execute function [here](#kibExpressionsPluginApi)
-</DocCallOut>
+:::{note}
+Check the full spec of execute function [here](#kibExpressionsPluginApi)
+:::
 
 In addition, on the browser side, there are two additional ways to run expressions and render the results.
 
@@ -67,9 +67,9 @@ This is the easiest way to get expressions rendered inside your application.
 <ReactExpressionRenderer expression={expression} />
 ```
 
-<DocCallOut>
-  Check the full spec of ReactExpressionRenderer component props [here](#kibExpressionsPluginApi)
-</DocCallOut>
+:::{note}
+Check the full spec of ReactExpressionRenderer component props [here](#kibExpressionsPluginApi)
+:::
 
 #### Expression loader
 
@@ -79,9 +79,9 @@ If you are not using React, you can use the loader expression service provides t
 const handler = loader(domElement, expression, params);
 ```
 
-<DocCallOut>
-  Check the full spec of expression loader params [here](#kibExpressionsPluginApi)
-</DocCallOut>
+:::{note}
+Check the full spec of expression loader params [here](#kibExpressionsPluginApi)
+:::
 
 ### Creating new expression functions
 
@@ -102,9 +102,9 @@ const functionDefinition = {
 expressions.registerFunction(functionDefinition);
 ```
 
-<DocCallOut>
-  Check the full interface of ExpressionFuntionDefinition [here](#kibExpressionsPluginApi)
-</DocCallOut>
+:::{note}
+Check the full interface of ExpressionFuntionDefinition [here](#kibExpressionsPluginApi)
+:::
 
 ### Creating new expression renderers
 
@@ -124,6 +124,6 @@ const rendererDefinition = {
 expressions.registerRenderer(rendererDefinition);
 ```
 
-<DocCallOut>
-  Check the full interface of ExpressionRendererDefinition [here](#kibExpressionsPluginApi)
-</DocCallOut>
+:::{note}
+Check the full interface of ExpressionRendererDefinition [here](#kibExpressionsPluginApi)
+:::

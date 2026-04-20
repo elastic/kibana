@@ -4,74 +4,56 @@ description: Links to all the documentation maintained by the Kibana Operations 
 
 # Kibana Operations
 
-<DocLandingHero
-  title='Welcome to the ops docs!'
-  description="👋 Here you will find documentation about all the things the Kibana Operations team manages. Feel free to look around and ask questions!"
-/>
+Welcome to the ops docs! Here you will find documentation about all the things the Kibana Operations team manages. Feel free to look around and ask questions!
 
-<DocRelatedArticles
-  sectionTitle='Initiatives'
-  items={[
-    { pageId: "kibDevDocsOpsPackages" },
-  ]}
-/>
+## Initiatives
 
-<DocRelatedArticles
-  sectionTitle='CI'
-  items={[
-    { pageId: "kibDevDocsOpsFlakyTests" },
-    { pageId: "kibDevDocsOpsWritingStableFunctionalTests" },
-    { pageId: "kibDevDocsOpsFlakyTestRunner" },
-    { pageId: "kibDevDocsOpsCiStats" },
-    { pageId: "kibDevDocsOpsJourneys" },
-  ]}
-/>
+- Packages
 
-<DocRelatedArticles
-  sectionTitle='Build tooling'
-  items={[
-    { pageId: "kibDevDocsOpsKbnPm" },
-    { pageId: "kibDevDocsOpsOptimizer" },
-    { pageId: "kibDevDocsOpsBabelPreset" },
-    { pageId: "kibDevDocsOpsUiSharedDepsNpm" },
-    { pageId: "kibDevDocsOpsUiSharedDepsSrc" },
-  ]}
-/>
+## CI
 
-<DocRelatedArticles
-  sectionTitle='Linting & Validation'
-  items={[
-    { pageId: "kibDevDocsOpsEslintConfig" },
-    { pageId: "kibDevDocsOpsEslintPluginEslint" },
-    { pageId: "kibDevDocsOpsEslintWithTypes" },
-    { pageId: "kibDevDocsOpsEslintPluginImports" },
-    { pageId: "kibDevDocsOpsEslintPluginDisable" },
-    { pageId: "kibDevDocsOpsKbnYarnLockValidator"},
-  ]}
-/>
+- Flaky Tests
+- Writing Stable Functional Tests
+- Flaky Test Runner
+- CI Stats
+- Journeys
 
-<DocRelatedArticles
-  sectionTitle='Utilities'
-  items={[
-    { pageId: "kibDevDocsToolingLog" },
-    { pageId: "kibDevDocsOpsJestSerializers"},
-    { pageId: "kibDevDocsOpsExpect" },
-    { pageId: "kibDevDocsOpsAmbientStorybookTypes" },
-    { pageId: "kibDevDocsOpsAmbientUiTypes" },
-    { pageId: "kibDevDocsOpsAmbientCommonTypes" },
-    { pageId: "kibDevDocsOpsTestSubjSelector" },
-    { pageId: "kibDevDocsOpsCliDevMode" },
-    { pageId: "kibDevDocsOpsEs" },
-    { pageId: "kibDevDocsOpsSomeDevLog" },
-    { pageId: "kibDevDocsOpsDevCliRunner" },
-    { pageId: "kibDevDocsOpsGetRepoFiles" },
-    { pageId: "kibDevDocsOpsRepoSourceClassifier" },
-    { pageId: "kibDevDocsOpsKibanaManifestSchema" },
-    { pageId: "kibDevDocsOpsManagedVscodeConfig" },
-    { pageId: "kibDevDocsOpsManagedVscodeConfigCli" },
-    { pageId: "kibDevDocsOpsTest" },
-    { pageId: "kibDevDocsOpsEsArchiver" },
-    { pageId: "kibDevDocsOpsPeggy" },
-    { pageId: "kibDevDocsOpsPeggyLoader" },
-  ]}
-/>
+## Build tooling
+
+- kbn-pm
+- Optimizer
+- Babel Preset
+- UI Shared Deps (npm)
+- UI Shared Deps (src)
+
+## Linting & Validation
+
+- ESLint Config
+- ESLint Plugin
+- ESLint with Types
+- ESLint Plugin Imports
+- ESLint Plugin Disable
+- Yarn Lock Validator
+
+## Utilities
+
+- Tooling Log
+- Jest Serializers
+- Expect
+- Ambient Storybook Types
+- Ambient UI Types
+- Ambient Common Types
+- Test Subj Selector
+- CLI Dev Mode
+- Es
+- Some Dev Log
+- Dev CLI Runner
+- Get Repo Files
+- Repo Source Classifier
+- Kibana Manifest Schema
+- Managed VSCode Config
+- Managed VSCode Config CLI
+- Test
+- ES Archiver
+- Peggy
+- Peggy Loader

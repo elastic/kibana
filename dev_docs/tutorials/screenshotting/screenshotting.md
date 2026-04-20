@@ -79,6 +79,6 @@ export function plugin() {
 }
 ```
 
-<DocCallOut>
-  Check the complete API reference [here](#kibScreenshottingPluginApi).
-</DocCallOut>
+:::{note}
+Check the complete API reference [here](#kibScreenshottingPluginApi).
+:::

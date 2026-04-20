@@ -21,7 +21,7 @@ Understanding `LensXYConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-<Dataset />
+See [Dataset configuration](dataset.md) for details on configuring the data source.
 
 ### `layers`
 

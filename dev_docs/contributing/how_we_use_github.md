@@ -122,14 +122,13 @@ The following information notes how we use GitHub labels in Kibana. Note that on
 
 Many of our labels follow the pattern of `{key}:{value}`.
 
-<DocCallOut title="Internal only">
+:::{note} Internal only
 Use PascalCase when creating new labels.
 
 Teams can create labels at their own discretion, but we have over 600 labels at the time of this writing.
 Consider using an existing convention before creating a new one. If you think a new label or convention
 would be useful to all teams, talk to your team or tech lead about getting it added here.
-
-</DocCallOut>
+:::
 
 ### Team labels
 
@@ -139,10 +138,10 @@ These labels map the issue to the team that owns the particular area. Part of th
 (todo) is to ensure every issue has at least a team or a project
 label.
 
-<DocCallOut title="Internal only">
-  View our org chart [here](https://wiki.elastic.co/display/DEV/Kibana+Team+Organization) to view
-  all our teams and appropriate contacts.
-</DocCallOut>
+:::{note} Internal only
+View our org chart [here](https://wiki.elastic.co/display/DEV/Kibana+Team+Organization) to view
+all our teams and appropriate contacts.
+:::
 
 ### Feature labels
 

@@ -157,9 +157,9 @@ const handler = (ctx, req, res) => {
 }
 ```
 
-<DocCallOut title="Minimize the impact of refactors">
-  By referencing types linked from `latest.ts` we will not have to refactor all our app code to point to the latest version of `WeatherDashboard`. This happens by simply re-exporting the newest types from `latest.ts`. Otherwise, code that needs to know about a specific version or versions will have access to it by using the appropriate namespace.
-</DocCallOut>
+:::{tip} Minimize the impact of refactors
+By referencing types linked from `latest.ts` we will not have to refactor all our app code to point to the latest version of `WeatherDashboard`. This happens by simply re-exporting the newest types from `latest.ts`. Otherwise, code that needs to know about a specific version or versions will have access to it by using the appropriate namespace.
+:::
 
 ### Introducing a new field to `DataSource`
 
@@ -193,9 +193,9 @@ export interface DataSource {
 }
 ```
 
-<DocCallOut title="What is a breaking change?">
-  If we had only added the optional `description` field to `DataSource` this would be a backwards-compatible change that does not require a new version. We could have remained on `v1` of the `DataSource` interface.
-</DocCallOut>
+:::{note} What is a breaking change?
+If we had only added the optional `description` field to `DataSource` this would be a backwards-compatible change that does not require a new version. We could have remained on `v1` of the `DataSource` interface.
+:::
 
 We also need to update the `WeatherDashboard` interface to use our new `DataSource` interface:
 
@@ -248,11 +248,11 @@ export interface CreateWeatherDashboardHTTPResponse {
 
 ```
 
-<DocCallOut title="Inherit types from the `v1` namespace">
- It is possible to add `export * from './v1';` to the top of our `weather_dashboard/v2.ts` file to re-export unchanged types and avoid copying the whole file.
+:::{tip} Inherit types from the `v1` namespace
+It is possible to add `export * from './v1';` to the top of our `weather_dashboard/v2.ts` file to re-export unchanged types and avoid copying the whole file.
 
- However, copying and adapting the entire set of types is OK too. If we have correctly grouped our sub-domains we should be versioning all collections of types together.
-</DocCallOut>
+However, copying and adapting the entire set of types is OK too. If we have correctly grouped our sub-domains we should be versioning all collections of types together.
+:::
 
 Now we update the `latest.ts` and `index.ts` files accordingly:
 

@@ -18,9 +18,9 @@ When the use of an external dependency is necessary, ensure there is sufficient 
 Except in specific cases where widespread consensus was gained and clear ownership is established, third party dependencies should not be exposed directly as features of Kibana, whether it be through the UI, HTTP API, or programmatic interfaces.
 
 
-<DocCallOut>
+:::{note}
 Treat third-party code as if it was your own. We share the responsibility for the efficacy, performance, and security of both the code we integrate and the code we develop.
-</DocCallOut>
+:::
 
 
 ## Adding new dependencies
@@ -59,10 +59,10 @@ on Github:
 - **@elastic/kibana-operations**
 - **@elastic/kibana-security**
 
-<DocCallOut title="Internal only">
-  If you are unsure of which licenses are okay to use, refer to the
-  [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
-</DocCallOut>
+:::{note} Internal only
+If you are unsure of which licenses are okay to use, refer to the
+[Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
+:::
 
 ### Dependency evaluation
 

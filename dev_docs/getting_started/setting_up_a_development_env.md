@@ -6,10 +6,10 @@ description: Learn how to setup a development environment for contributing to th
 
 Setting up a development environment is pretty easy.
 
-<DocCallOut title="A note about Windows">
-  We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
-  Please check our [tutorial](../tutorials/development_windows.md) to know how to setup the environment and then follow the rest of this guide inside **WSL**.
-</DocCallOut>
+:::{note} A note about Windows
+We do not support Windows native development anymore and in order to develop Kibana on Windows you must use **WSL** which will give you a much better experience.
+Please check our [tutorial](../tutorials/development_windows.md) to know how to setup the environment and then follow the rest of this guide inside **WSL**.
+:::
 
 ## Get the code
 

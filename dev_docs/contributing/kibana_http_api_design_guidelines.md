@@ -4,9 +4,9 @@ description: Best practices and guidelines for designing consistent, user-friend
 
 # Guidelines for HTTP API design in Kibana
 
-<DocCallOut title="Work in progress" color="warning">
-  This guidance is under active review. If you have a question or intend to apply it to your use-case please reach out to the Kibana Core team first.
-</DocCallOut>
+:::{warning} Work in progress
+This guidance is under active review. If you have a question or intend to apply it to your use-case please reach out to the Kibana Core team first.
+:::
 
 Kibana's public HTTP APIs are the focus of this document. See the section about [Internal vs Public APIs](#internal-vs-public-apis) for more details.
 
@@ -63,13 +63,13 @@ GET /api/my_domain/my_resource_bs?page=1
 }
 ```
 
-<DocCallOut title="Internal vs Public APIs">
-  We categorize HTTP APIs as either **internal** or **public** to further reinforce the different purposes they serve. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
-</DocCallOut>
+:::{note} Internal vs Public APIs
+We categorize HTTP APIs as either **internal** or **public** to further reinforce the different purposes they serve. See the [Internal vs Public APIs](#internal-vs-public-apis) section for more details.
+:::
 
-<DocCallOut title="Unit, Integration and E2E tests">
-  All HTTP APIs must have [E2E or integration test coverage](../tutorials/testing_plugins.md#integration-tests) giving confidence the basic functionality works as intended.
-</DocCallOut>
+:::{note} Unit, Integration and E2E tests
+All HTTP APIs must have [E2E or integration test coverage](../tutorials/testing_plugins.md#integration-tests) giving confidence the basic functionality works as intended.
+:::
 
 ### Commitment
 
@@ -94,13 +94,13 @@ First release new HTTP APIs internally or as `Technical Preview` behind a [featu
  - Adding a new **optional** response property
  - Relaxing request validation requirements: e.g. going from `schema.string({ minLength: 10 })` -> `schema.string()`
 
-<DocCallOut title="Do not break clients!">
-  A public HTTP API should never cause a client to break. Not without a long deprecation period and a ready alternative.
+:::{warning} Do not break clients!
+A public HTTP API should never cause a client to break. Not without a long deprecation period and a ready alternative.
 
-  Even `Technical Preview` HTTP APIs should consider graceful paths for changes when possible.
+Even `Technical Preview` HTTP APIs should consider graceful paths for changes when possible.
 
-  Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always prioritize finding ways to avoid breaking our APIs.
-</DocCallOut>
+Linus Torvalds famously said of Kernel development: "WE DO NOT BREAK USERSPACE!" (along with some other expletives). We should adopt this kind of rigor and empathy when working with our _public_ HTTP APIs and always prioritize finding ways to avoid breaking our APIs.
+:::
 
 ## Internal vs Public APIs
 
@@ -353,13 +353,13 @@ POST /api/my_domain/my_api
 }
 ```
 
-<DocCallOut title="Snakes and camels">
-  In Kibana's TypeScript code it is considered a formatting issue to use snake case variable names. This clashes with the convenient [object destructuring assignments](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#object-destructuring) that are common throughout the codebase.
+:::{note} Snakes and camels
+In Kibana's TypeScript code it is considered a formatting issue to use snake case variable names. This clashes with the convenient [object destructuring assignments](https://www.typescriptlang.org/docs/handbook/variable-declarations.html#object-destructuring) that are common throughout the codebase.
 
-  If you would like to use object destructuring in your code:
-  - Convert to camel case by renaming inline `const { snake_case: camelCase } = body`
-  - Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @typescript-eslint/naming-convention` or disable the lint rule for a section `/* eslint-disable @typescript-eslint/naming-convention */` and re-enabling with `/* eslint-enable ... */`.
-</DocCallOut>
+If you would like to use object destructuring in your code:
+- Convert to camel case by renaming inline `const { snake_case: camelCase } = body`
+- Consider opting-out of this eslint rule about naming conventions `// eslint-disable-next-line @typescript-eslint/naming-convention` or disable the lint rule for a section `/* eslint-disable @typescript-eslint/naming-convention */` and re-enabling with `/* eslint-enable ... */`.
+:::
 
 **Use JSON**
 
@@ -428,9 +428,9 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 
 ### Pagination and sorting
 
-<DocCallOut>
-  For objects stored in ES (which is the case for most Kibana HTTP API resources) you can use [ES pagination API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results) from your route handler.
-</DocCallOut>
+:::{note}
+For objects stored in ES (which is the case for most Kibana HTTP API resources) you can use [ES pagination API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results) from your route handler.
+:::
 
 **Page-based request**
 
@@ -449,9 +449,9 @@ See the [MDN docs](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/S
 
 **Cursor based request**
 
-<DocCallOut title="Required for 10,000 or more" color="warning">
-  You will need to implement cursor-based pagination for paging across resources that exceed 10,000 instances in ES. See [the docs](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#index-max-result-window) and the [ES search after API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after).
-</DocCallOut>
+:::{warning} Required for 10,000 or more
+You will need to implement cursor-based pagination for paging across resources that exceed 10,000 instances in ES. See [the docs](https://www.elastic.co/docs/reference/elasticsearch/index-settings/index-modules#index-max-result-window) and the [ES search after API](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results#search-after).
+:::
 
 `GET /api/my_domain/my_resources?pit_id=abc&search_after=valueA,valueB&size=10`
 
@@ -497,9 +497,9 @@ Where `field_name` is the name of the field to sort by in ascending order and `-
 
 Prefer APIs that process their requests within the lifecycle of a single request. If your API handler is doing actions that take longer than a typical request (30s), consider using a background task or job and offer clients a way to monitor progress. Either by `GET`ing the resource or some special polling API.
 
-<DocCallOut title="Consider Infrastructure-as-Code" color="warning">
-  Polling style APIs create additional complexity for all API callers, but especially for IaC use cases that are typically not as sophisticated in their execution like Terraform.
-</DocCallOut>
+:::{warning} Consider Infrastructure-as-Code
+Polling style APIs create additional complexity for all API callers, but especially for IaC use cases that are typically not as sophisticated in their execution like Terraform.
+:::
 
 ### Filtering
 
@@ -509,15 +509,15 @@ Use [simple KQL](https://www.elastic.co/docs/explore-analyze/query-filter/langua
 
 Utilities for working with KQL queries are available in the `@kbn/es-query` package.
 
-<DocCallOut title="Beware of leaky filters!" color="warning">
-  Do not let API consumers directly query based on the schema of your database (saved) objects. This is leaking implementation detail that will make your API unversionable!
+:::{warning} Beware of leaky filters!
+Do not let API consumers directly query based on the schema of your database (saved) objects. This is leaking implementation detail that will make your API unversionable!
 
-  `cool_field: "value" AND other_field: "value"` : ✅
+`cool_field: "value" AND other_field: "value"` : ✅
 
-  `internalFieldName: "value" AND otherField: "value"` : ❌
+`internalFieldName: "value" AND otherField: "value"` : ❌
 
-  Take care in [documenting](#documentation) the filtering options available in a KQL filter. In your server-side code you must always be prepared to translate field names provided in a KQL filter to match the database column names you want API users to filter on. If API users try to filter on a field that does not exist, you should return a `400` error.
-</DocCallOut>
+Take care in [documenting](#documentation) the filtering options available in a KQL filter. In your server-side code you must always be prepared to translate field names provided in a KQL filter to match the database column names you want API users to filter on. If API users try to filter on a field that does not exist, you should return a `400` error.
+:::
 
 
 ### Errors
@@ -559,11 +559,11 @@ That accepts an array of operations:
 
 And either returns a task ID for tracking long running executions or a response with the result of the bulk operation.
 
-<DocCallOut title="Bulk operations against Elasticsearch are not atomic" color="warning">
-  Bulk operations are not atomic. If an operation fails, the previous operations will not be rolled back automatically.
+:::{warning} Bulk operations against Elasticsearch are not atomic
+Bulk operations are not atomic. If an operation fails, the previous operations will not be rolled back automatically.
 
-  Bulk operations add complexity, ensure that your use case merits the added complexity. Reach out to the Kibana Core team for more guidance.
-</DocCallOut>
+Bulk operations add complexity, ensure that your use case merits the added complexity. Reach out to the Kibana Core team for more guidance.
+:::
 
 If you are considering offering this API consider impacts on [IaC use cases](kibana_http_api_tf_guidelines.md).
 
@@ -571,15 +571,15 @@ If you are considering offering this API consider impacts on [IaC use cases](kib
 
 Consider common error states your API might face, as well the information you might need to answer unexpected questions about the behavior of the API. To this end, creating a dedicated logger is be a good idea. Something like `const log = logger.get('myApi')` will emit logs for your API that can be easily searched for in overview clusters.
 
-<DocCallOut title="Default to `debug`" color="warning">
-  Carefully choose the log level of any logs you emit. `info` level logs can generate a lot of log noise for Kibana operators. This increases costs and often provides little value. Rather stick to `debug` logs and scope Kibana logs using configuration in `kibana.dev.yml` when developing locally:
+:::{warning} Default to `debug`
+Carefully choose the log level of any logs you emit. `info` level logs can generate a lot of log noise for Kibana operators. This increases costs and often provides little value. Rather stick to `debug` logs and scope Kibana logs using configuration in `kibana.dev.yml` when developing locally:
 
-  ```yaml
-    logging.loggers:
-      - name: <your-logger-name>
-        level: debug
-  ```
-</DocCallOut>
+```yaml
+  logging.loggers:
+    - name: <your-logger-name>
+      level: debug
+```
+:::
 
 For questions about APM and telemetry please reach out to the Core team.
 
@@ -587,9 +587,9 @@ For questions about APM and telemetry please reach out to the Core team.
 
 User authentication is handled globally for all routes (whether public, internal or "Tech Preview"). However, as an API desiginer you still need make some decisions about the appropriate authentication and authorization for your API (see [API authorization docs](../key_concepts/api_authorization.md)). This depends on the actions your API performs.
 
-<DocCallOut title="Do not expose sensitive information" color="warning">
-  Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../key_concepts/audit_logging.md) that you can use to log sensitive information about user actions.
-</DocCallOut>
+:::{warning} Do not expose sensitive information
+Carefully consider the information you return from or log in your API handler, whether it's a successful response or an error. **Do not expose sensitive information**. This includes information that could be used to identify users, reveal sensitive file paths, internal resources, or even leak credentials. We have a separate [audit logger](../key_concepts/audit_logging.md) that you can use to log sensitive information about user actions.
+:::
 
 
 Assigning specific privilege requirements to your API will surface them in the code-generated OpenAPI spec. See the [documentation section](#documentation).
@@ -634,13 +634,13 @@ curl -v -uelastic:changeme 'http://localhost:5601/api/synthetics/monitors' \
 
 Kibana's public HTTP APIs in our Serverless offering are versioned with the entire Elastic organization using date-based versioning. The date indicates the last breaking change. For example: version `2023-10-31` is saying "the last breaking change was at the end of October 2023".
 
-<DocCallOut title="New public date versions will be very sparse" color="warning">
-  Do not build your public HTTP APIs with the idea you will be able to change them quickly using versions! Due to the MASSIVE surface area, new date string versions are not introduced lightly and must go through rigorous review and justification.
-</DocCallOut>
+:::{warning} New public date versions will be very sparse
+Do not build your public HTTP APIs with the idea you will be able to change them quickly using versions! Due to the MASSIVE surface area, new date string versions are not introduced lightly and must go through rigorous review and justification.
+:::
 
-<DocCallOut title="What about Kibana public APIs that are not explicitly versioned?">
-  You may see some routes using `router.get` instead of `router.versioned.get`. Routes registered in the former fashion are assumed to be part of the oldest, `2023-10-31` API surface area and will be included as-is in future version surface areas as well, unless they are explicitly versioned. This was done to prevent the need for a wide-spread refactor.
-</DocCallOut>
+:::{note} What about Kibana public APIs that are not explicitly versioned?
+You may see some routes using `router.get` instead of `router.versioned.get`. Routes registered in the former fashion are assumed to be part of the oldest, `2023-10-31` API surface area and will be included as-is in future version surface areas as well, unless they are explicitly versioned. This was done to prevent the need for a wide-spread refactor.
+:::
 
 Kibana's internal HTTP APIs can be versioned too, but for a very different purpose! With serverless, we continually roll out code changes _without_ asking browsers to refresh. That means, for a time, browser clients might expect old internal API behavior. It is up to route authors and UI developers to consider how to handle breaking changes of internal routes. Note: you are free to version internal APIs at will to mitigate any unfortunate browser client breakages!
 

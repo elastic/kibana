@@ -16,9 +16,9 @@ description: Learn how to use the `esql` method to query Saved Objects using ES|
 
 Use `esql` when you need ES|QL-specific features like `STATS`, `EVAL`, `ENRICH`, or pipe-based query composition.
 
-<DocCallOut title="With great power comes great responsibility">
-  While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Carefully consider how you would like to use this method in your plugin to unlock value for users.
-</DocCallOut>
+:::{warning} With great power comes great responsibility
+While the `esql` method is powerful, it can increase code complexity, introduce performance issues and introduce security risks (like injection attacks). Carefully consider how you would like to use this method in your plugin to unlock value for users.
+:::
 
 ## The `pipeline` concept
 

@@ -28,7 +28,9 @@ At a super high-level, Kibana is composed of **plugins**, **core**, and **Kibana
 
 **@kbn packages** provide static utilities that can be imported anywhere in Kibana.
 
-<DocAccordion buttonContent="(Internal only) FAQ: Should I put my code in a plugin or a package?" color="warning">
+<details>
+<summary>(Internal only) FAQ: Should I put my code in a plugin or a package?</summary>
+
 :::{warning}
 When the [Bazel migration](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md) is complete, all code, including plugins, will be a package. With that, packages won't be required to be in the `packages/` directory and can be located somewhere that makes more sense structurally.
 
@@ -39,24 +41,27 @@ In the meantime, the following can be used to determine whether it makes sense t
 
 Benefits to packages:
 
-1. <b>_Potentially_ reduced page load time</b>. All code that is statically exported from plugins will be downloaded on _every single page load_, even if that code isn't needed. With packages, only code that is imported is downloaded, which can be minimized by using async imports.
-2. <b>Puts the consumer is in charge of how and when to async import</b>. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our [performance docs](performance/index.md).
+1. **_Potentially_ reduced page load time**. All code that is statically exported from plugins will be downloaded on _every single page load_, even if that code isn't needed. With packages, only code that is imported is downloaded, which can be minimized by using async imports.
+2. **Puts the consumer is in charge of how and when to async import**. If a consumer async imports code exported from a plugin, it makes no difference, because of the above point. It's already been downloaded. However, simply moving code into a package is _not_ a guaranteed performance improvement. It does give the consumer the power to make smart performance choices, however. If they require code from multiple packages, the consumer can async import from multiple packages at the same time. Read more in our [performance docs](performance/index.md).
 
 Downsides to packages:
 
-1. <b>It's not [organized by domain](../contributing/dev_principles.md)</b>. The packages folder is far away from the plugins folder. Having your stateless code in a plugin and the rest in a package may make it hard to find, leading to duplication. The Operations team hopes to fix this by supporting packages and plugins existing in the same folder. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
+1. **It's not [organized by domain](../contributing/dev_principles.md)**. The packages folder is far away from the plugins folder. Having your stateless code in a plugin and the rest in a package may make it hard to find, leading to duplication. The Operations team hopes to fix this by supporting packages and plugins existing in the same folder. You can track this work by following [this issue](https://github.com/elastic/kibana/issues/112886).
 
-2. <b>Development overhead</b>. Developers have to run `yarn kbn watch` to have changes rebuilt automatically. [Phase II](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md#phase-ii---docs-developer-experience) of the Bazel migration work will bring the development experience on par with plugin development. This work can be tracked [here](https://github.com/elastic/kibana/issues/104519). 
+2. **Development overhead**. Developers have to run `yarn kbn watch` to have changes rebuilt automatically. [Phase II](https://github.com/elastic/kibana/blob/main/legacy_rfcs/text/0015_bazel.md#phase-ii---docs-developer-experience) of the Bazel migration work will bring the development experience on par with plugin development. This work can be tracked [here](https://github.com/elastic/kibana/issues/104519). 
 
-3. <b>Development performance</b>. Rebuild time is typically longer than it would be for the same code in a plugin. The reasons are captured in [this issue](https://github.com/elastic/kibana/issues/107648). The ops team is actively working to reduce this performance increase.
+3. **Development performance**. Rebuild time is typically longer than it would be for the same code in a plugin. The reasons are captured in [this issue](https://github.com/elastic/kibana/issues/107648). The ops team is actively working to reduce this performance increase.
 
 
 As you can see, the answer to "Should I put my code in a plugin or a package" is 'It Depends'. If you are still having a hard time determining what the best path location is, reach out to the Kibana Operations Team (#kibana-operations) for help.
 :::
-</DocAccordion>
 
-<DocAccordion buttonContent="FAQ: What is the difference between services provided by plugins and those by Core?" color="warning">
-<DocCallOut >
+</details>
+
+<details>
+<summary>FAQ: What is the difference between services provided by plugins and those by Core?</summary>
+
+:::{note}
 
 We try to put only the most stable and fundamental code into `Core`, while optional add-ons, applications, and solution-oriented functionality goes in a plugin. Unfortunately, we haven't done a great job of sticking to that. For example, notifications and toasts are core services, but data and search are plugin services.
 
@@ -88,7 +93,9 @@ It's something we will be working on!
 
 We will continue to focus on adding clarity around these types of services and what developers can expect from each.
 
-</DocCallOut></DocAccordion>
+:::
+
+</details>
 
 ## Plugins
 

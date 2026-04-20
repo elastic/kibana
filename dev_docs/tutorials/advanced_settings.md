@@ -43,9 +43,9 @@ uiSettings.overrides:
 
 On the client, the `uiSettings` service is accessible directly from `core` and the client provides plugins access to the `config` entries stored in Elasticsearch.
 
-<DocCallOut>
-  Refer to [the client-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-public.iuisettingsclient.md)
-</DocCallOut>
+:::{note}
+Refer to [the client-side uiSettings service API docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-public.iuisettingsclient.md)
+:::
 
 The following is a basic example for using the `uiSettings` service:
 
@@ -112,10 +112,10 @@ export class ChartsPlugin implements Plugin<ChartsPluginSetup, ChartsPluginStart
 On the server side, `uiSettings` are accessible directly from `core`. The following example shows how to register a new setting with the minimum required schema parameter against which validations are performed on read and write.
 The example also shows how plugins can leverage the optional deprecation parameter on registration for handling deprecation notices and renames. The deprecation warnings are rendered in the Advanced Settings UI and should also be added to the Configure Kibana guide.
 
-<DocCallOut>
-  Refer to [the server-side uiSettings service API
-  docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
-</DocCallOut>
+:::{note}
+Refer to [the server-side uiSettings service API
+docs](https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md)
+:::
 
 **src/plugins/dev_tools/server/plugin.ts**
 

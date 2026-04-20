@@ -4,17 +4,17 @@ description: This tutorial demonstrates how to generate OpenAPI specification fo
 
 # Generating OAS for HTTP APIs
 
-<DocCallOut title="OAS is required for all public routes">
-  If your route declares `access: 'public'` you **must** provide up-to-date OpenAPI specification for it. Docs for these routes get hosted on [on our docs site](https://www.elastic.co/docs/api/doc/serverless) and are used for client integrations. For example: our [Elastic stack terraform provider](https://github.com/elastic/terraform-provider-elasticstack).
-</DocCallOut>
+:::{important} OAS is required for all public routes
+If your route declares `access: 'public'` you **must** provide up-to-date OpenAPI specification for it. Docs for these routes get hosted on [on our docs site](https://www.elastic.co/docs/api/doc/serverless) and are used for client integrations. For example: our [Elastic stack terraform provider](https://github.com/elastic/terraform-provider-elasticstack).
+:::
 
-<DocCallOut title="Designing good code-first APIs" color="warning">
-  Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see [HTTP API Design](../contributing/kibana_http_api_design_guidelines.md).
+:::{warning} Designing good code-first APIs
+Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see [HTTP API Design](../contributing/kibana_http_api_design_guidelines.md).
 
-  Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
+Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See [types and patterns that do not map cleanly to OAS 3.0](#oas-compatibility-kbn-config-schema-types).
 
-  Always make sure to preview the OAS you generated before merging it to `main`, run `make help` in `<REPO_ROOT>/oas_docs` for preview commands.
-</DocCallOut>
+Always make sure to preview the OAS you generated before merging it to `main`, run `make help` in `<REPO_ROOT>/oas_docs` for preview commands.
+:::
 
 ### Important components
 
@@ -23,11 +23,11 @@ To get OAS generated for HTTP APIs you must use the following components:
 1. Core's `router` or `router.versioned` for defining HTTP APIs provided via the `core.http` service to all plugins
 2. `@kbn/config-schema` or `@kbn/zod` request and response schemas
 
-<DocCallOut title="Beyond runtime validation">
-  Kibana's core platform supports `@kbn/config-schema` as a first-class citizen for various schema purposes: configuration, saved objects, and HTTP API request/response bodies.
+:::{note} Beyond runtime validation
+Kibana's core platform supports `@kbn/config-schema` as a first-class citizen for various schema purposes: configuration, saved objects, and HTTP API request/response bodies.
 
-  Developers can leverage `@kbn/config-schema` as a single-source of truth for runtime validation, TypeScript interfaces, and OpenAPI specification.
-</DocCallOut>
+Developers can leverage `@kbn/config-schema` as a single-source of truth for runtime validation, TypeScript interfaces, and OpenAPI specification.
+:::
 
 ### How do I see my HTTP API's OAS?
 
@@ -49,9 +49,9 @@ Other useful query parameters for filtering are:
  * `pluginId` - get the OAS for a specific plugin, for example: `@kbn/data-views-plugin`
  * `access` - filter for specific access levels: `public` or `internal` are supported
 
-<DocCallOut>
-  For assistance with the writing docs or any other questions about the docs impact, check out https://docs.elastic.dev/content-architecture/oas or chat with writers on **#docs** or **#next-api-reference**
-</DocCallOut>
+:::{note}
+For assistance with the writing docs or any other questions about the docs impact, check out https://docs.elastic.dev/content-architecture/oas or chat with writers on **#docs** or **#next-api-reference**
+:::
 
 ### Some good practices to consider
 <a id="oas-compatibility-kbn-config-schema-types"></a>
@@ -351,19 +351,19 @@ z.string().meta({
 });
 ```
 
-<DocCallOut title="How this appears in generated OAS">
-  For example, `stability: 'stable'` together with `since: '9.4.0'` becomes `x-state: Generally available; added in 9.4.0` on that field in the generated document.
-</DocCallOut>
+:::{note} How this appears in generated OAS
+For example, `stability: 'stable'` together with `since: '9.4.0'` becomes `x-state: Generally available; added in 9.4.0` on that field in the generated document.
+:::
 
 #### 5. Publishing OAS
 
 OAS for public routes are written to the Kibana repo as a snapshot that will ultimately be published.
 
-<DocCallOut title="Under construction" color="warning">
-  At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
+:::{warning} Under construction
+At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
 
-  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core** or follow the instructions below.
-</DocCallOut>
+If you would like OAS for your endpoints to be included in the snapshot, **please reach out to #kibana-core** or follow the instructions below.
+:::
 
 To publish OAS to our docs site create a pull request updating [this command](https://github.com/elastic/kibana/blob/970e9fe4a3c29df81ccff6761d4986d316338398/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh#L11) to include your HTTP API path.
 

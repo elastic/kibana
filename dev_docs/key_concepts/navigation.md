@@ -196,9 +196,9 @@ const MyInternalLink = () => <Link to="/my-other-page"></Link>
 
 Try to avoid using `window.location` and `window.history` directly.
 
-<DocCallOut>
-  Instead, use [ScopedHistory](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance provided by `core`.
-</DocCallOut>
+:::{note}
+Instead, use [ScopedHistory](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance provided by `core`.
+:::
 
 - This way `core` will know about location changes triggered within your app, and it would act accordingly.
 - Some plugins are listening to location changes. Triggering location change manually could lead to unpredictable and hard-to-catch bugs.
@@ -234,9 +234,9 @@ There are utils to help you to implement such kind of state syncing.
 
 - Adding a query param flag or simple key/value to the URL.
 
-<DocCallOut>
-  Follow [these docs](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/README.md) to learn more.
-</DocCallOut>
+:::{note}
+Follow [these docs](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/docs/state_sync/README.md) to learn more.
+:::
 
 ## Preserving state between navigations
 

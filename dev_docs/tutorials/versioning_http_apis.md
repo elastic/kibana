@@ -6,18 +6,18 @@ description: This tutorial demonstrates how to create or migrate to versionable 
 
 All Kibana HTTP API developers and maintainers must ensure that past versions of HTTP APIs remain available.
 
-<DocCallOut title="A note on internal vs public HTTP APIs">
-  HTTP APIs may be intended for **internal** or **public** use. Different levels of rigour are appropriate when designing and managing changes for each. However, in both cases we must support some minimal set of past HTTP APIs.
+:::{note} A note on internal vs public HTTP APIs
+HTTP APIs may be intended for **internal** or **public** use. Different levels of rigour are appropriate when designing and managing changes for each. However, in both cases we must support some minimal set of past HTTP APIs.
 
-  The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
-</DocCallOut>
+The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
+:::
 
-<DocAccordion buttonContent="FAQ: What is the difference between an internal and a public HTTP API?">
-<DocCallOut >
+<details>
+<summary>FAQ: What is the difference between an internal and a public HTTP API?</summary>
 
 We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically garanteed not to change within a major. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
- 
-</DocCallOut></DocAccordion>
+
+</details>
 
 Versioned HTTP APIs should hold to the following set of properties. **Note:** how you meet these is properties is up to you. Use the examples provided as a guide.
 
@@ -222,9 +222,9 @@ We categorize our endpoints based on their intended audience: `public` or `inter
 #### Public endpoints
 Public endpoints include any endpoint that is intended for users to directly integrate with via HTTP.
 
-<DocCallOut title="Version all public endpoints">
-  All Kibana's public endpoints must be versioned using the format described below.
-</DocCallOut>
+:::{important} Version all public endpoints
+All Kibana's public endpoints must be versioned using the format described below.
+:::
 
 ##### Version lifecycle
 
@@ -246,10 +246,10 @@ but versioning can be leveraged to maintain BWC with existing clients.
 Introducing/removing a version is up to the team who owns the HTTP API. Consider how introduction or removal might
 affect client code when being rolled out.
 
-<DocCallOut title="Keep internal versions to a minimum">
-  To keep maintenance light it is **highly** recommended to reduce the number of versions you have for internal endpoints. In your code it is possible to
-  centrally define and share internal versions through code that is `common` to your browser- and server-side plugin code.
-</DocCallOut>
+:::{tip} Keep internal versions to a minimum
+To keep maintenance light it is **highly** recommended to reduce the number of versions you have for internal endpoints. In your code it is possible to
+centrally define and share internal versions through code that is `common` to your browser- and server-side plugin code.
+:::
 
 
 ##### Version format

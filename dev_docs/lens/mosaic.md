@@ -21,7 +21,7 @@ Understanding `LensMosaicConfig` in detail
 - **Type:** `string`
 - **Description:** The title of the visualization.
 
-<Dataset />
+See [Dataset configuration](dataset.md) for details on configuring the data source.
 
 ### `breakdown`
 
@@ -35,7 +35,7 @@ Understanding `LensMosaicConfig` in detail
 
 ## Optional Properties
 
-<Breakdown />
+See [Breakdown configuration](breakdown.md) for details on configuring data segmentation.
 
 ## Example
 

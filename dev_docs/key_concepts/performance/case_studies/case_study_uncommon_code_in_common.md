@@ -4,7 +4,9 @@ description: Learn how we were able to reduce the side of a plugin bundle by rem
 
 # Case Study - Uncommon code in common
 
-<DocCallOut>The following case study is derived from [kibana#178668](https://github.com/elastic/kibana/pull/178668).</DocCallOut>
+:::{note}
+The following case study is derived from [kibana#178668](https://github.com/elastic/kibana/pull/178668).
+:::
 
 ## Summary
 
