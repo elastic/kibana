@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export {
-  ALERTING_V2_RULE_API_PATH,
-  ALERTING_V2_ALERT_API_PATH,
-  ALERTING_V2_ALERT_SUMMARY_API_PATH,
-  ALERTING_V2_NOTIFICATION_POLICY_API_PATH,
-  ALERTING_V2_MATCHER_VALUE_SUGGESTIONS_API_PATH,
-} from '@kbn/alerting-v2-constants';
+export { AlertActivityCard } from './alert_activity_card';
+export { AlertActivityCardView } from './alert_activity_card_view';
+export { AlertActivitySparkline } from './alert_activity_sparkline';

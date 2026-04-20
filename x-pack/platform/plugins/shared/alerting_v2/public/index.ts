@@ -21,6 +21,7 @@ import {
   ALERTING_V2_NOTIFICATION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
 } from './constants';
+import { AlertSummaryApi } from './services/alert_summary_api';
 import { NotificationPoliciesApi } from './services/notification_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
@@ -35,6 +36,7 @@ export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(NotificationPoliciesApi).toSelf().inSingletonScope();
   bind(WorkflowsApi).toSelf().inSingletonScope();
+  bind(AlertSummaryApi).toSelf().inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
   } satisfies AlertingV2PublicStart);

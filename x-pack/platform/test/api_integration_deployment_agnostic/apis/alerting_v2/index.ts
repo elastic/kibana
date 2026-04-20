@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./notification_policy'));
     loadTestFile(require.resolve('./rule'));
     loadTestFile(require.resolve('./telemetry'));
+    loadTestFile(require.resolve('./alert_summary'));
   });
 }

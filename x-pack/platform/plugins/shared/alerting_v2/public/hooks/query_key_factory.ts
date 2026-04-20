@@ -34,6 +34,19 @@ export const matcherSuggestionKeys = {
   dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
 };
 
+export interface AlertSummaryQueryKeyParams {
+  /** Sorted rule ids to keep the cache key stable across input orderings. */
+  ruleIds: readonly string[];
+  gte: string;
+  lte: string;
+  fixed_interval: string;
+}
+
+export const alertSummaryKeys = {
+  all: ['alertSummary'] as const,
+  query: (params: AlertSummaryQueryKeyParams) => [...alertSummaryKeys.all, params] as const,
+};
+
 export const notificationPolicyKeys = {
   all: ['notificationPolicy'] as const,
   detail: (id: string) => [...notificationPolicyKeys.all, 'detail', id] as const,

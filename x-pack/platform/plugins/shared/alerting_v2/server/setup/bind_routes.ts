@@ -39,6 +39,7 @@ import { DeleteNotificationPolicyRoute } from '../routes/notification_policies/d
 import { MatcherValueSuggestionsRoute } from '../routes/suggestions/matcher_value_suggestions_route';
 import { MatcherDataFieldsRoute } from '../routes/suggestions/matcher_data_fields_route';
 import { NotificationPolicyTagsRoute } from '../routes/suggestions/notification_policy_tags_route';
+import { AlertSummaryRoute } from '../routes/alert_summary/alert_summary_route';
 
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
@@ -73,4 +74,5 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(MatcherValueSuggestionsRoute);
   bind(Route).toConstantValue(MatcherDataFieldsRoute);
   bind(Route).toConstantValue(NotificationPolicyTagsRoute);
+  bind(Route).toConstantValue(AlertSummaryRoute);
 }
