@@ -164,10 +164,10 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           {isView
-            ? i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.viewEndpointTitle', {
+            ? i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.viewTitle', {
                 defaultMessage: 'View endpoint',
               })
-            : i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.addEndpointTitle', {
+            : i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.title', {
                 defaultMessage: 'Add endpoint',
               })}
         </EuiModalHeaderTitle>
@@ -191,9 +191,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                 color="text"
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.addEndpointModal.copyModelIdAriaLabel',
-                  {
-                    defaultMessage: 'Copy model ID',
-                  }
+                  { defaultMessage: 'Copy model ID' }
                 )}
                 onClick={handleCopyModelId}
               />
@@ -223,9 +221,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                           <EuiBadge>
                             {i18n.translate(
                               'xpack.searchInferenceEndpoints.addEndpointModal.recommendedBadge',
-                              {
-                                defaultMessage: 'Recommended',
-                              }
+                              { defaultMessage: 'Recommended' }
                             )}
                           </EuiBadge>
                         </EuiFlexItem>
@@ -253,19 +249,16 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
         <EuiFormRow
           label={
             <span>
-              {i18n.translate(
-                'xpack.searchInferenceEndpoints.addEndpointModal.inferenceEndpointIdLabel',
-                {
-                  defaultMessage: 'Inference endpoint ID',
-                }
-              )}
+              {i18n.translate('xpack.searchInferenceEndpoints.addEndpointModal.endpointIdLabel', {
+                defaultMessage: 'Inference endpoint ID',
+              })}
               <EuiText
                 size="xs"
                 color="subdued"
                 style={{ marginTop: 4, marginBottom: 4, display: 'block' }}
               >
                 {i18n.translate(
-                  'xpack.searchInferenceEndpoints.addEndpointModal.inferenceEndpointIdHelpText',
+                  'xpack.searchInferenceEndpoints.addEndpointModal.endpointIdDescription',
                   {
                     defaultMessage:
                       'This ID will be used to reference the endpoint. It is auto-generated based on the model and task type.',
@@ -292,9 +285,7 @@ export const AddEndpointModal: React.FC<AddEndpointModalProps> = ({
                 color="text"
                 aria-label={i18n.translate(
                   'xpack.searchInferenceEndpoints.addEndpointModal.copyEndpointIdAriaLabel',
-                  {
-                    defaultMessage: 'Copy endpoint ID',
-                  }
+                  { defaultMessage: 'Copy endpoint ID' }
                 )}
                 onClick={handleCopyEndpointId}
               />

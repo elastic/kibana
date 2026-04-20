@@ -61,7 +61,7 @@ export const GroupByModelReducer = (
       groupId: modelId,
       groupLabel:
         modelId === UNKNOWN_MODEL_ID_FALLBACK
-          ? i18n.translate('xpack.searchInferenceEndpoints.groupBy.unknownModel', {
+          ? i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.unknownModelLabel', {
               defaultMessage: 'Unknown Model',
             })
           : modelId,

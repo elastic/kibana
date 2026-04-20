@@ -105,7 +105,7 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
     <EuiModal onClose={onClose} style={{ minWidth: 480 }} aria-labelledby={modalTitleId}>
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
-          {i18n.translate('xpack.searchInferenceEndpoints.settings.copyToModal.title', {
+          {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.title', {
             defaultMessage: 'Copy to sub-features',
           })}
         </EuiModalHeaderTitle>
@@ -114,9 +114,9 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.searchInferenceEndpoints.settings.copyToModal.description"
-              defaultMessage="Copy the model list from {featureName} to the selected sub-features below. Only sub-features with matching task types can be selected."
-              values={{ featureName: <strong>{sourceFeatureName}</strong> }}
+              id="xpack.searchInferenceEndpoints.settings.copyTo.description"
+              defaultMessage="Copy the model list from {source} to the selected sub-features below. Only sub-features with matching task types can be selected."
+              values={{ source: <strong>{sourceFeatureName}</strong> }}
             />
           </p>
         </EuiText>
@@ -126,16 +126,14 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
           expandByDefault
           showExpansionArrows
           aria-label={i18n.translate(
-            'xpack.searchInferenceEndpoints.settings.copyToModal.subFeaturesAriaLabel',
-            {
-              defaultMessage: 'Sub-features',
-            }
+            'xpack.searchInferenceEndpoints.settings.copyTo.treeAriaLabel',
+            { defaultMessage: 'Sub-features' }
           )}
         />
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onClose} data-test-subj="copy-to-modal-cancel">
-          {i18n.translate('xpack.searchInferenceEndpoints.settings.copyToModal.cancelButton', {
+          {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.cancel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
@@ -145,7 +143,7 @@ export const CopyToModal: React.FC<CopyToModalProps> = ({
           isDisabled={!hasSelection}
           data-test-subj="copy-to-modal-apply"
         >
-          {i18n.translate('xpack.searchInferenceEndpoints.settings.copyToModal.applyButton', {
+          {i18n.translate('xpack.searchInferenceEndpoints.settings.copyTo.apply', {
             defaultMessage: 'Apply',
           })}
         </EuiButton>

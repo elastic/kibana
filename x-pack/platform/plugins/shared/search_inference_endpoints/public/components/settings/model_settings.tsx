@@ -128,8 +128,8 @@ export const ModelSettings: React.FC = () => {
     <>
       <EuiPageTemplate.Header
         data-test-subj="modelSettingsPageHeader"
-        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.pageTitle', {
-          defaultMessage: 'Model settings',
+        pageTitle={i18n.translate('xpack.searchInferenceEndpoints.settings.title', {
+          defaultMessage: 'Feature settings',
         })}
         bottomBorder
         paddingSize="none"
@@ -142,7 +142,7 @@ export const ModelSettings: React.FC = () => {
             isDisabled={!isDirty}
             data-test-subj="save-settings-button"
           >
-            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveSettingsButton', {
+            {i18n.translate('xpack.searchInferenceEndpoints.settings.saveButton', {
               defaultMessage: 'Save settings',
             })}
           </EuiButton>,
@@ -208,7 +208,7 @@ export const ModelSettings: React.FC = () => {
                 iconType="gear"
                 title={
                   <h2>
-                    {i18n.translate('xpack.searchInferenceEndpoints.settings.noFeaturesTitle', {
+                    {i18n.translate('xpack.searchInferenceEndpoints.settings.noFeatures.title', {
                       defaultMessage: 'No features registered',
                     })}
                   </h2>
@@ -216,7 +216,7 @@ export const ModelSettings: React.FC = () => {
                 body={
                   <p>
                     {i18n.translate(
-                      'xpack.searchInferenceEndpoints.settings.noFeaturesDescription',
+                      'xpack.searchInferenceEndpoints.settings.noFeatures.description',
                       {
                         defaultMessage:
                           'No features have been registered for inference settings in this project.',

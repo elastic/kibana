@@ -30,22 +30,18 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModalProps> = ({
       onCancel={onCancel}
       onConfirm={onConfirm}
       cancelButtonText={i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.unsavedChangesModal.cancelButton',
-        {
-          defaultMessage: 'Cancel',
-        }
+        'xpack.searchInferenceEndpoints.settings.unsavedChangesModal.cancel',
+        { defaultMessage: 'Cancel' }
       )}
       confirmButtonText={i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.unsavedChangesModal.confirmButton',
-        {
-          defaultMessage: 'Discard changes',
-        }
+        'xpack.searchInferenceEndpoints.settings.unsavedChangesModal.confirm',
+        { defaultMessage: 'Discard changes' }
       )}
       buttonColor="primary"
       data-test-subj="unsavedChangesModal"
     >
       <p>
-        {i18n.translate('xpack.searchInferenceEndpoints.settings.unsavedChangesModal.description', {
+        {i18n.translate('xpack.searchInferenceEndpoints.settings.unsavedChangesModal.body', {
           defaultMessage: 'Discard changes and leave page?',
         })}
       </p>

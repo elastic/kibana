@@ -90,12 +90,12 @@ export const ElasticInferenceServiceModelsPage = () => {
         iconType="warning"
         title={
           <h2>
-            {i18n.translate('xpack.searchInferenceEndpoints.eisModels.unableToLoadModels', {
+            {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.error.title', {
               defaultMessage: 'Unable to load models',
             })}
           </h2>
         }
-        body={i18n.translate('xpack.searchInferenceEndpoints.eisModels.fetchError', {
+        body={i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.error.body', {
           defaultMessage: 'An error occurred while fetching model data.',
         })}
       />
@@ -111,16 +111,14 @@ export const ElasticInferenceServiceModelsPage = () => {
             <EuiFlexItem grow={true}>
               <EuiFieldSearch
                 placeholder={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModels.searchPlaceholder',
-                  {
-                    defaultMessage: 'Search models...',
-                  }
+                  'xpack.searchInferenceEndpoints.eisModelspage.searchPlaceholder',
+                  { defaultMessage: 'Search models...' }
                 )}
                 value={searchQuery}
                 fullWidth={true}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModels.searchAriaLabel',
+                  'xpack.searchInferenceEndpoints.eisModelspage.searchbar',
                   {
                     defaultMessage: 'Find Elastic Inference Service models',
                   }
@@ -163,7 +161,7 @@ export const ElasticInferenceServiceModelsPage = () => {
               data-test-subj="eisNoModelsFound"
               title={
                 <h3>
-                  {i18n.translate('xpack.searchInferenceEndpoints.eisModels.noModelsFound', {
+                  {i18n.translate('xpack.searchInferenceEndpoints.eisModelspage.noResults', {
                     defaultMessage: 'No models found',
                   })}
                 </h3>

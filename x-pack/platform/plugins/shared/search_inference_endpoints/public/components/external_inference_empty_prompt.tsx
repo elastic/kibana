@@ -25,14 +25,14 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
       iconType="plusInCircle"
       title={
         <h2>
-          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.title', {
+          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyTitle', {
             defaultMessage: 'Connect to external model providers',
           })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.description', {
+          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.emptyDescription', {
             defaultMessage:
               'Add model endpoints from your favorite model providers to use them for AI-powered search.',
           })}
@@ -52,7 +52,7 @@ export const ExternalInferenceEmptyPrompt: React.FC<ExternalInferenceEmptyPrompt
           external
           data-test-subj="viewDocumentationLink"
         >
-          {i18n.translate('xpack.searchInferenceEndpoints.externalInference.viewDocumentation', {
+          {i18n.translate('xpack.searchInferenceEndpoints.providerInference.viewDocumentation', {
             defaultMessage: 'View documentation',
           })}
         </EuiLink>

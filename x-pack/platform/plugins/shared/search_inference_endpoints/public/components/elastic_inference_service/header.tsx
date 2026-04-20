@@ -31,10 +31,10 @@ export const ElasticInferenceServiceModelsHeader = () => {
   return (
     <EuiPageTemplate.Header
       data-test-subj="eisModelsPageHeader"
-      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.eisHeader.pageTitle', {
+      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
         defaultMessage: 'Elastic Inference Service',
       })}
-      description={i18n.translate('xpack.searchInferenceEndpoints.eisHeader.description', {
+      description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
         defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
       })}
       paddingSize="none"
@@ -47,13 +47,13 @@ export const ElasticInferenceServiceModelsHeader = () => {
                 target="_blank"
                 iconType="external"
                 aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisHeader.viewCloudUsageAriaLabel',
+                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
                   {
                     defaultMessage: 'Click to go Cloud usage details',
                   }
                 )}
               >
-                {i18n.translate('xpack.searchInferenceEndpoints.eisHeader.viewCloudUsage', {
+                {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
                   defaultMessage: 'View Cloud usage',
                 })}
               </EuiButton>,
@@ -62,7 +62,7 @@ export const ElasticInferenceServiceModelsHeader = () => {
         <EuiButtonEmpty
           iconType="documentation"
           aria-label={i18n.translate(
-            'xpack.searchInferenceEndpoints.eisHeader.documentationAriaLabel',
+            'xpack.searchInferenceEndpoints.eisModelsPage.header.documentation.ariaLabel',
             {
               defaultMessage: 'Click to go Elastic Inference Service documentation',
             }
@@ -72,7 +72,7 @@ export const ElasticInferenceServiceModelsHeader = () => {
           target="_blank"
           data-test-subj="eis_documentation"
         >
-          {i18n.translate('xpack.searchInferenceEndpoints.eisHeader.documentation', {
+          {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.documentationButton', {
             defaultMessage: 'Documentation',
           })}
         </EuiButtonEmpty>,

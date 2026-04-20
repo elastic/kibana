@@ -92,7 +92,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
                     flush="both"
                     color="text"
                     aria-label={i18n.translate(
-                      'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.openIndexManagementAriaLabel',
+                      'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.openIndexManagement',
                       { defaultMessage: 'Open Index Management' }
                     )}
                     data-test-subj="inferenceManagementOpenIndexManagement"

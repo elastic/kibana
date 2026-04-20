@@ -8,6 +8,7 @@
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
+import { i18n } from '@kbn/i18n';
 import type { InferenceConnector } from '@kbn/inference-common';
 import {
   INFERENCE_SETTINGS_SO_TYPE,
@@ -185,7 +186,9 @@ export const defineInferenceSettingsRoutes = ({
         if (validationErrors.length > 0) {
           return response.badRequest({
             body: {
-              message: 'Invalid inference settings',
+              message: i18n.translate('xpack.searchInferenceEndpoints.settings.validationError', {
+                defaultMessage: 'Invalid inference settings',
+              }),
               attributes: { errors: validationErrors },
             },
           });

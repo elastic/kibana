@@ -31,10 +31,15 @@ export const GroupByIcon = ({ groupBy, data }: GroupByIconProps) => {
   return (
     <EuiFlexItem>
       <EuiIcon
-        title={i18n.translate('xpack.searchInferenceEndpoints.groupBy.serviceIcon', {
-          defaultMessage: '{providerName} service logo',
-          values: { providerName: provider.name },
-        })}
+        title={i18n.translate(
+          'xpack.searchInferenceEndpoints.groupedEndpoints.headers.icon.title',
+          {
+            defaultMessage: '{serviceName} service logo',
+            values: {
+              serviceName: provider.name,
+            },
+          }
+        )}
         data-test-subj={`group-by-service-provider-icon-${data.groupId}`}
         type={provider.icon}
         css={ServiceIcon}

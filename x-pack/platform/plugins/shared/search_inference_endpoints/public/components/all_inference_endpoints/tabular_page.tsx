@@ -154,10 +154,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             name: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
               defaultMessage: 'View endpoint',
             }),
-            description: i18n.translate(
-              'xpack.searchInferenceEndpoints.actions.viewEndpointDescription',
-              { defaultMessage: 'View endpoint' }
-            ),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.viewEndpooint', {
+              defaultMessage: 'View endpoint',
+            }),
             icon: 'eye',
             type: 'icon',
             onClick: (item) => displayInferenceFlyout(item),
@@ -167,10 +166,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             name: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
               defaultMessage: 'Copy endpoint ID',
             }),
-            description: i18n.translate(
-              'xpack.searchInferenceEndpoints.actions.copyEndpointIdDescription',
-              { defaultMessage: 'Copy endpoint ID' }
-            ),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.copyID', {
+              defaultMessage: 'Copy endpoint ID',
+            }),
             icon: 'copy',
             type: 'icon',
             onClick: (item) => copyContent(item.inference_id),
@@ -180,10 +178,9 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             name: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
               defaultMessage: 'Delete endpoint',
             }),
-            description: i18n.translate(
-              'xpack.searchInferenceEndpoints.actions.deleteEndpointDescription',
-              { defaultMessage: 'Delete endpoint' }
-            ),
+            description: i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
+              defaultMessage: 'Delete endpoint',
+            }),
             icon: 'trash',
             type: 'icon',
             enabled: (item) => !isEndpointPreconfigured(item.inference_id),

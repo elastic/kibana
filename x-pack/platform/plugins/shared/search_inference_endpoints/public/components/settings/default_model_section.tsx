@@ -30,12 +30,9 @@ interface Props {
 }
 
 const NoDefaultOption: EuiComboBoxOptionOption<string> = {
-  label: i18n.translate(
-    'xpack.searchInferenceEndpoints.settings.defaultModel.noDefaultModelOption',
-    {
-      defaultMessage: 'No default model',
-    }
-  ),
+  label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.noDefault', {
+    defaultMessage: 'No default model',
+  }),
   value: NO_DEFAULT_MODEL,
 };
 
@@ -54,7 +51,7 @@ const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<
     NoDefaultOption,
     {
       label: i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.defaultModel.preConfiguredGroup',
+        'xpack.searchInferenceEndpoints.settings.defaultModel.preconfiguredGroup',
         {
           defaultMessage: 'Pre-configured',
         }
@@ -63,12 +60,9 @@ const getOptions = (connectors?: InferenceConnector[]): EuiComboBoxOptionOption<
       options: preconfigured,
     },
     {
-      label: i18n.translate(
-        'xpack.searchInferenceEndpoints.settings.defaultModel.customConnectorsGroup',
-        {
-          defaultMessage: 'Custom connectors',
-        }
-      ),
+      label: i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.customGroup', {
+        defaultMessage: 'Custom connectors',
+      }),
       value: 'custom',
       options: custom,
     },
@@ -107,7 +101,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
     if (!connectorExists && !connectorExistsLoading && state.defaultModelId !== NO_DEFAULT_MODEL) {
       errors.push(
         i18n.translate(
-          'xpack.searchInferenceEndpoints.settings.defaultModel.modelNotAvailableError',
+          'xpack.searchInferenceEndpoints.settings.defaultModel.error.connectorNotExist',
           {
             defaultMessage:
               'The model previously selected is not available. Please select a different option.',
@@ -118,7 +112,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
     if (state.disallowOtherModels && state.defaultModelId === NO_DEFAULT_MODEL) {
       errors.push(
         i18n.translate(
-          'xpack.searchInferenceEndpoints.settings.defaultModel.defaultModelRequiredError',
+          'xpack.searchInferenceEndpoints.settings.defaultModel.error.disallowNoDefault',
           {
             defaultMessage: 'When disallowing all other models, a default model must be selected.',
           }
@@ -208,7 +202,7 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
               id="disallowOtherModelsCheckbox"
               data-test-subj="disallowOtherModelsCheckbox"
               label={i18n.translate(
-                'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModelsLabel',
+                'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels',
                 {
                   defaultMessage: 'Only allow the default model to be used.',
                 }
@@ -221,14 +215,14 @@ export const DefaultModelSection: React.FC<Props> = ({ defaultModelSettings }) =
             <EuiText size="s" color="subdued">
               {state.disallowOtherModels
                 ? i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.defaultModel.disallowedDescription',
+                    'xpack.searchInferenceEndpoints.settings.defaultModel.disallowOtherModels.description',
                     {
                       defaultMessage:
                         'Model selection is hidden and only the default model will be used.',
                     }
                   )
                 : i18n.translate(
-                    'xpack.searchInferenceEndpoints.settings.defaultModel.allowedDescription',
+                    'xpack.searchInferenceEndpoints.settings.defaultModel.allowOtherModels.description',
                     {
                       defaultMessage:
                         'Features can allow users to select other models than the default.',

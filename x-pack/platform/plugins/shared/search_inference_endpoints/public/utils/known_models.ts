@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export const ELASTIC_GROUP_ID = 'Elastic';
 
 export interface KnownModelGroup {
@@ -16,7 +18,9 @@ export interface KnownModelGroup {
 export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   {
     groupId: ELASTIC_GROUP_ID,
-    groupLabel: 'Elastic',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.elastic.label', {
+      defaultMessage: 'Elastic',
+    }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
       return normalizedModelId.includes('elser_model') || normalizedModelId.includes('.rerank-v1');
@@ -24,7 +28,9 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   },
   {
     groupId: 'Anthropic',
-    groupLabel: 'Anthropic',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.anthropic.label', {
+      defaultMessage: 'Anthropic',
+    }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
       return normalizedModelId.includes('claude') || normalizedModelId.includes('anthropic');
@@ -32,7 +38,9 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   },
   {
     groupId: 'Google',
-    groupLabel: 'Google',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.google.label', {
+      defaultMessage: 'Google',
+    }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
       return (
@@ -44,7 +52,9 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   },
   {
     groupId: 'OpenAI',
-    groupLabel: 'OpenAI',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.openAI.label', {
+      defaultMessage: 'OpenAI',
+    }),
     groupTest: (modelId: string) => {
       const normalizedModelId = modelId.toLowerCase();
       return (
@@ -56,7 +66,9 @@ export const KNOWN_MODEL_GROUPS: KnownModelGroup[] = [
   },
   {
     groupId: 'multilingual-e5',
-    groupLabel: 'Multilingual E5',
+    groupLabel: i18n.translate('xpack.searchInferenceEndpoints.knownModelGroups.e5.label', {
+      defaultMessage: 'Multilingual E5',
+    }),
     groupTest: (modelId: string) => modelId.toLowerCase().includes('multilingual-e5'),
   },
 ];

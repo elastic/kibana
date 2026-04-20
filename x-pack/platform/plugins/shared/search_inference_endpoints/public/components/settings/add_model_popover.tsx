@@ -95,7 +95,7 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
           data-test-subj="add-model-button"
           color="text"
         >
-          {i18n.translate('xpack.searchInferenceEndpoints.settings.addModel.buttonLabel', {
+          {i18n.translate('xpack.searchInferenceEndpoints.settings.addModel', {
             defaultMessage: 'Add a model',
           })}
         </EuiButtonEmpty>
@@ -121,12 +121,9 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
         searchable
         data-test-subj="add-model-selectable"
         searchProps={{
-          placeholder: i18n.translate(
-            'xpack.searchInferenceEndpoints.settings.addModel.searchPlaceholder',
-            {
-              defaultMessage: 'Search models...',
-            }
-          ),
+          placeholder: i18n.translate('xpack.searchInferenceEndpoints.settings.addModel.search', {
+            defaultMessage: 'Search models...',
+          }),
           'data-test-subj': 'add-model-search',
         }}
         listProps={{ bordered: false, showIcons: false }}

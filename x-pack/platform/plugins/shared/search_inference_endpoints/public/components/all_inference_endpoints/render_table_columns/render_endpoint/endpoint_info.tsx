@@ -26,23 +26,36 @@ import type {
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';
 
-const TASK_TYPE_TOOLTIPS: Partial<Record<InferenceTaskType, string>> = {
-  text_embedding: i18n.translate('xpack.searchInferenceEndpoints.endpoint.taskType.textEmbedding', {
-    defaultMessage: 'Converts text into dense vector representations for semantic search',
-  }),
-  sparse_embedding: i18n.translate(
-    'xpack.searchInferenceEndpoints.endpoint.taskType.sparseEmbedding',
-    { defaultMessage: 'Converts text into sparse vector representations for semantic search' }
+export const TASK_TYPE_TOOLTIPS: Partial<Record<InferenceTaskType, string>> = {
+  text_embedding: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.textEmbedding',
+    {
+      defaultMessage: 'Converts text into dense vector representations for semantic search',
+    }
   ),
-  rerank: i18n.translate('xpack.searchInferenceEndpoints.endpoint.taskType.rerank', {
-    defaultMessage: 'Re-ranks search results by relevance',
-  }),
-  completion: i18n.translate('xpack.searchInferenceEndpoints.endpoint.taskType.completion', {
-    defaultMessage: 'Generates text completions from a given input',
-  }),
+  sparse_embedding: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.sparseEmbedding',
+    {
+      defaultMessage: 'Converts text into sparse vector representations for semantic search',
+    }
+  ),
+  rerank: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.rerank',
+    {
+      defaultMessage: 'Re-ranks search results by relevance',
+    }
+  ),
+  completion: i18n.translate(
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.completion',
+    {
+      defaultMessage: 'Generates text completions from a given input',
+    }
+  ),
   chat_completion: i18n.translate(
-    'xpack.searchInferenceEndpoints.endpoint.taskType.chatCompletion',
-    { defaultMessage: 'Generates conversational responses from a chat input' }
+    'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.taskTypeTooltip.chatCompletion',
+    {
+      defaultMessage: 'Generates conversational responses from a chat input',
+    }
   ),
 };
 
@@ -108,7 +121,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
             <EuiCopy
               textToCopy={inferenceId}
               afterMessage={i18n.translate(
-                'xpack.searchInferenceEndpoints.endpoint.copiedAfterMessage',
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
                 { defaultMessage: 'Copied' }
               )}
             >
@@ -126,11 +139,12 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
                   }
                   aria-label={
                     isCopied
-                      ? i18n.translate('xpack.searchInferenceEndpoints.endpoint.copiedAriaLabel', {
-                          defaultMessage: 'Copied',
-                        })
+                      ? i18n.translate(
+                          'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdCopied',
+                          { defaultMessage: 'Copied' }
+                        )
                       : i18n.translate(
-                          'xpack.searchInferenceEndpoints.endpoint.copyEndpointIdAriaLabel',
+                          'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.copyIdToClipboard',
                           { defaultMessage: 'Copy endpoint ID to clipboard' }
                         )
                   }
@@ -156,7 +170,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
           {isPreconfigured && (
             <EuiToolTip
               content={i18n.translate(
-                'xpack.searchInferenceEndpoints.endpoint.preconfiguredTooltip',
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.preconfiguredTooltip',
                 {
                   defaultMessage: 'This endpoint is preconfigured by Elastic and cannot be deleted',
                 }
@@ -178,7 +192,7 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, endpoin
                 { defaultMessage: 'TECH PREVIEW' }
               )}
               tooltipContent={i18n.translate(
-                'xpack.searchInferenceEndpoints.endpoint.techPreviewTooltip',
+                'xpack.searchInferenceEndpoints.elasticsearch.endpointInfo.techPreviewTooltip',
                 {
                   defaultMessage:
                     'This functionality is experimental and not supported. It may change or be removed at any time.',

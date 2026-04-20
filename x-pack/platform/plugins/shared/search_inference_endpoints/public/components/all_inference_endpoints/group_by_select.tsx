@@ -96,8 +96,8 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
           >
             <EuiText size="s" className="eui-textTruncate">
               {i18n.translate('xpack.searchInferenceEndpoints.groupBy.label', {
-                defaultMessage: 'Group: {selectedOptionLabel}',
-                values: { selectedOptionLabel },
+                defaultMessage: 'Group: {selectedGroup}',
+                values: { selectedGroup: selectedOptionLabel },
               })}
             </EuiText>
           </EuiFilterButton>

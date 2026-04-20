@@ -83,7 +83,7 @@ export const GroupedEndpointsTables = ({
       <EuiEmptyPrompt
         title={
           <h2>
-            {i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.noItemsFound', {
+            {i18n.translate('xpack.searchInferenceEndpoints.table.noItemsMessage', {
               defaultMessage: 'No items found',
             })}
           </h2>
