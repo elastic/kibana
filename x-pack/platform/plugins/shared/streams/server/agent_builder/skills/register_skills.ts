@@ -8,6 +8,7 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
+import { kiIdentificationManagementSkill } from './ki_identification_management';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
@@ -18,7 +19,11 @@ export const registerAgentBuilderSkills = ({
     return;
   }
 
-  const streamsSkills = [streamsManagementSkill, knowledgeIndicatorsManagementSkill];
+  const streamsSkills = [
+    streamsManagementSkill,
+    knowledgeIndicatorsManagementSkill,
+    kiIdentificationManagementSkill,
+  ];
 
   for (const skill of streamsSkills) {
     agentBuilder.skills.register(skill);

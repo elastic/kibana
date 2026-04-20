@@ -1,0 +1,90 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { z } from '@kbn/zod/v4';
+import { platformStreamsSigEventsTools, ToolType } from '@kbn/agent-builder-common';
+import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
+import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import dedent from 'dedent';
+import type { GetScopedClients } from '../../../routes/types';
+import { classifyError } from '../error_utils';
+import { getKiIdentificationStatusToolHandler } from './handler';
+
+export const STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID =
+  platformStreamsSigEventsTools.kiIdentificationStatus;
+
+const onboardingStatusSchema = z.object({
+  stream_name: z.string().describe('Target stream name, e.g. "logs.ecs.nginx".'),
+  save_queries: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe(
+      'When true, checks the KI identification background task that persists generated queries.'
+    ),
+});
+
+export const createKiIdentificationStatusTool = ({
+  getScopedClients,
+}: {
+  getScopedClients: GetScopedClients;
+}): BuiltinToolDefinition<typeof onboardingStatusSchema> => ({
+  id: STREAMS_KI_IDENTIFICATION_STATUS_TOOL_ID,
+  type: ToolType.builtin,
+  description: dedent`
+    Get current status for a stream KI identification background task.
+
+    Use this tool after starting KI identification to check whether the background task is still
+    running, completed, failed, or canceled.
+
+    Use this tool to:
+    - Poll KI identification background task progress programmatically
+    - Retrieve completed KI identification results
+    - Inspect failure details when the background task fails
+    - Check status for tasks with or without query persistence (\`save_queries\`)
+
+    Returns:
+    - On success: task status payload for the stream (includes terminal results when available)
+    - On failure: an error result with \`message\`, \`operation\`, and \`likely_cause\`
+  `,
+  tags: ['streams', 'significant_events'],
+  schema: onboardingStatusSchema,
+  handler: async ({ stream_name: streamName, save_queries: saveQueries }, { request }) => {
+    try {
+      const { taskClient } = await getScopedClients({ request });
+      const data = await getKiIdentificationStatusToolHandler({
+        streamName,
+        saveQueries: saveQueries ?? true,
+        taskClient,
+      });
+
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data,
+          },
+        ],
+      };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Failed to get KI identification background task status for "${streamName}": ${message}`,
+              stream: streamName,
+              operation: 'ki_identification_status',
+              likely_cause: classifyError(err),
+            },
+          },
+        ],
+      };
+    }
+  },
+});

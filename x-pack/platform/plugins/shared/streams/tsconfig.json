@@ -94,6 +94,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/streams-app-plugin"
   ]
 }
