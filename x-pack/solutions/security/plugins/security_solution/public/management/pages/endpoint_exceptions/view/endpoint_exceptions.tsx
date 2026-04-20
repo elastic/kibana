@@ -18,11 +18,10 @@ import { ENDPOINT_EXCEPTIONS_PAGE_LABELS } from '../translations';
 import { usePerPolicyOptIn } from '../hooks/use_per_policy_opt_in';
 
 export const EndpointExceptions = memo(() => {
-  const { canWriteEndpointExceptions: hasUserWritePrivilege } =
-    useUserPrivileges().endpointPrivileges;
+  const { canWriteEndpointExceptions: hasWritePrivilege } = useUserPrivileges().endpointPrivileges;
 
-  const canUserCreateEndpointExceptionsBasedOnPerPolicyOptInStatus =
-    useEndpointExceptionsCapability('crudEndpointExceptions');
+  const canCreateEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+
   const http = useHttp();
   const endpointExceptionsApiClient = EndpointExceptionsApiClient.getInstance(http);
 
@@ -40,11 +39,11 @@ export const EndpointExceptions = memo(() => {
         searchableFields={ENDPOINT_EXCEPTIONS_SEARCHABLE_FIELDS}
         flyoutSize="l"
         // hide Create button before opt-in w/o global privilege, show after opt-in w/o global privilege
-        allowCardCreateAction={canUserCreateEndpointExceptionsBasedOnPerPolicyOptInStatus}
+        allowCardCreateAction={canCreateEndpointExceptions}
         // allow showing these before opt-in w/o global privilege, so they will be greyed based on
         // all existing artifacts being global, therefore showing user the 'needs additional priv' hint
-        allowCardEditAction={hasUserWritePrivilege}
-        allowCardDeleteAction={hasUserWritePrivilege}
+        allowCardEditAction={hasWritePrivilege}
+        allowCardDeleteAction={hasWritePrivilege}
         callout={perPolicyOptInCallout}
         additionalActions={
           perPolicyOptInActionMenuItem ? [perPolicyOptInActionMenuItem] : undefined
