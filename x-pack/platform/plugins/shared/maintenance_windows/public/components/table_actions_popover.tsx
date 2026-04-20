@@ -16,7 +16,6 @@ import {
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { i18n as i18nTranslate } from '@kbn/i18n';
 import type { MaintenanceWindowStatus } from '../../common';
 import * as i18n from '../translations';
 import { useKibana } from '../utils/kibana_react';
@@ -276,10 +275,7 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiPopover
-              aria-label={i18nTranslate.translate(
-                'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',
-                { defaultMessage: 'Actions' }
-              )}
+              aria-label={i18n.TABLE_ACTIONS_POPOVER_ARIA_LABEL}
               button={button}
               isOpen={isPopoverOpen}
               closePopover={closePopover}

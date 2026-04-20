@@ -456,3 +456,10 @@ export const SAVE_WITHOUT_FILTERS_MODAL_CONFIRM = i18n.translate(
     defaultMessage: 'Save without filters',
   }
 );
+
+export const TABLE_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.maintenanceWindows.tableActionsPopover.ariaLabel',
+  {
+    defaultMessage: 'Actions',
+  }
+);
