@@ -30,17 +30,26 @@ function stringifyToYaml(document: unknown): string {
     const doc = new Document(document, {
       aliasDuplicateObjects: false,
       sortMapEntries: sortYamlKeys,
+      // Use yaml-1.1 schema so that date-like strings (e.g. '2023-10-31') and
+      // extended boolean literals (yes/no/on/off/…) are automatically quoted,
+      // matching the behaviour of js-yaml's default schema.
+      schema: 'yaml-1.1',
       strict: false,
     });
-    return doc.toString();
+    // Prefer single quotes over double quotes when a string requires quoting,
+    // matching js-yaml's default style. The serialiser falls back to double
+    // quotes automatically when the value contains a single quote but no
+    // double quote (e.g. "status: 'inactive'" stays double-quoted).
+    return doc.toString({ singleQuote: true });
   } catch (e) {
     // Try to stringify with YAML Anchors enabled
     const doc = new Document(document, {
       aliasDuplicateObjects: true,
       sortMapEntries: sortYamlKeys,
+      schema: 'yaml-1.1',
       strict: false,
     });
-    return doc.toString();
+    return doc.toString({ singleQuote: true });
   }
 }
 
