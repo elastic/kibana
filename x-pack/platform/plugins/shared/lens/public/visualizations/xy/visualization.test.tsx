@@ -1482,6 +1482,7 @@ describe('xy_visualization', () => {
             annotations: [
               exampleAnnotation2,
               {
+                color: 'auto',
                 filter: {
                   language: 'kuery',
                   query: 'agent.keyword: *',
@@ -1541,6 +1542,7 @@ describe('xy_visualization', () => {
             indexPatternId: 'indexPattern1',
             annotations: [
               {
+                color: 'auto',
                 filter: {
                   language: 'kuery',
                   query: 'agent.keyword: *',
