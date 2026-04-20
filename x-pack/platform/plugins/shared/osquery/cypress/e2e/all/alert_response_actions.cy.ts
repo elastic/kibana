@@ -10,15 +10,12 @@ import {
   cleanupCase,
   cleanupPack,
   cleanupRule,
-  loadCase,
   loadPack,
   loadRule,
   multiQueryPackFixture,
   packFixture,
 } from '../../tasks/api_fixtures';
 import {
-  addToCase,
-  checkActionItemsInResults,
   checkResults,
   clickRuleName,
   inputQuery,
@@ -28,7 +25,6 @@ import {
   submitQuery,
   takeOsqueryActionWithParams,
   typeInECSFieldInput,
-  viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import {
