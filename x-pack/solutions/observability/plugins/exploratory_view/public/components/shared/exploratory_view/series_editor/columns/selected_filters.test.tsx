@@ -38,13 +38,12 @@ describe('SelectedFilters', function () {
       }
     );
 
-    await waitFor(() => {
-      screen.getByText('Chrome');
-      screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
-    },
+    await waitFor(
+      () => {
+        screen.getByText('Chrome');
+        screen.getByTitle('Filter: Browser family: Chrome. Select for more filter actions.');
+      },
       { timeout: 15_000 }
     );
-  },
-    30_000
-  );
+  }, 30_000);
 });
