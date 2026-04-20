@@ -25,12 +25,8 @@ apiTest.describe(
   () => {
     let cookieHeader: Record<string, string>;
 
-    apiTest.beforeAll(async ({ samlAuth, esClient }) => {
-      const info = await esClient.info();
-
-      if (!info.version.number.includes('SNAPSHOT')) {
-        apiTest.skip(true, 'Requires shard_delay agg (SNAPSHOT builds only)');
-      }
+    apiTest.beforeAll(async ({ samlAuth, esClient, isSnapshotBuild }) => {
+      apiTest.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       await esClient.index({
         index: TEST_INDEX,

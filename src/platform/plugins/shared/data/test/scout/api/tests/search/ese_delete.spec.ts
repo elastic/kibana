@@ -24,12 +24,9 @@ apiTest.describe(
   { tag: [...tags.stateful.all, ...tags.serverless.search] },
   () => {
     let cookieHeader: Record<string, string>;
-    let isSnapshot: boolean;
 
     apiTest.beforeAll(async ({ samlAuth, esClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      const info = await esClient.info();
-      isSnapshot = info.version.number.includes('SNAPSHOT');
       await esClient.index({
         index: TEST_INDEX,
         id: TEST_DOC_ID,
@@ -62,8 +59,8 @@ apiTest.describe(
       expect(response.body.attributes.root_cause).toBeDefined();
     });
 
-    apiTest('should delete an in-progress search', async ({ apiClient }) => {
-      apiTest.skip(!isSnapshot, 'Requires shard_delay agg (SNAPSHOT builds only)');
+    apiTest('should delete an in-progress search', async ({ apiClient, isSnapshotBuild }) => {
+      apiTest.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
 
       const response = await apiClient.post(ESE_API_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
@@ -94,8 +91,8 @@ apiTest.describe(
       expect(refetchResponse).toHaveStatusCode(404);
     });
 
-    apiTest('should delete a completed search', async ({ apiClient }) => {
-      apiTest.skip(!isSnapshot, 'Requires shard_delay agg (SNAPSHOT builds only)');
+    apiTest('should delete a completed search', async ({ apiClient, isSnapshotBuild }) => {
+      apiTest.skip(!isSnapshotBuild, 'Requires shard_delay agg (SNAPSHOT builds only)');
 
       const response = await apiClient.post(ESE_API_PATH, {
         headers: { ...COMMON_HEADERS, ...cookieHeader },
