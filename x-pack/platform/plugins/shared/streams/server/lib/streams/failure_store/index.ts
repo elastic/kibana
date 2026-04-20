@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-/**
- * ID of the (fake) user assigned as owner / creator for assets created by our system.
- */
-export const SYSTEM_USER_ID = 'system';
+export { getClusterDefaultFailureStoreRetentionValue, getFailureStoreStats } from './route_helpers';
