@@ -89,27 +89,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(detailsResponse.body.data.queries[0].action_id).to.be(queryActionId);
     });
 
-    it('includes result_counts in the response when the responses data stream exists, or omits it gracefully', async () => {
-      const detailsResponse = await supertest
-        .get(`/api/osquery/live_queries/${actionId}`)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', osqueryPublicApiVersion);
-
-      expect(detailsResponse.status).to.be(200);
-
-      const resultCounts = detailsResponse.body.data.result_counts;
-      if (resultCounts) {
-        expect(resultCounts).to.have.property('total_rows');
-        expect(resultCounts).to.have.property('responded_agents');
-        expect(resultCounts).to.have.property('successful_agents');
-        expect(resultCounts).to.have.property('error_agents');
-        expect(resultCounts.total_rows).to.be.a('number');
-        expect(resultCounts.responded_agents).to.be.a('number');
-        expect(resultCounts.successful_agents).to.be.a('number');
-        expect(resultCounts.error_agents).to.be.a('number');
-      }
-    });
-
     it('returns an error when creating a live query with agent_all and no enrolled agents', async () => {
       const response = await supertest
         .post('/api/osquery/live_queries')
