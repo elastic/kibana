@@ -1,7 +1,8 @@
 openapi: 3.0.3
 info:
-  description: You can create Timelines and Timeline templates via the API, as
-    well as import new Timelines from an ndjson file.
+  description: >-
+    You can create Timelines and Timeline templates via the API, as well as
+    import new Timelines from an ndjson file.
   title: Security Timeline API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -166,8 +167,9 @@ paths:
                   nullable: true
                   type: string
                 timelineId:
-                  description: The `savedObjectId` of the timeline that you want this pinned event
-                    unpinned from.
+                  description: >-
+                    The `savedObjectId` of the timeline that you want this
+                    pinned event unpinned from.
                   example: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
                   type: string
               required:
@@ -251,9 +253,10 @@ paths:
         - Security Timeline API
         - access:securitySolution
     patch:
-      description: Update an existing Timeline. You can update the title, description,
-        date range, pinned events, pinned queries, and/or pinned saved queries
-        of an existing Timeline.
+      description: >-
+        Update an existing Timeline. You can update the title, description, date
+        range, pinned events, pinned queries, and/or pinned saved queries of an
+        existing Timeline.
       operationId: PatchTimeline
       requestBody:
         content:
@@ -346,8 +349,9 @@ paths:
                   type: string
               required:
                 - timeline
-        description: The required Timeline fields used to create a new Timeline, along
-          with optional fields that will be created if not provided.
+        description: >-
+          The required Timeline fields used to create a new Timeline, along with
+          optional fields that will be created if not provided.
         required: true
       responses:
         '200':
@@ -406,7 +410,8 @@ paths:
         - access:securitySolution
   /api/timeline/_draft:
     get:
-      description: Get the details of the draft Timeline  or Timeline template for the
+      description: >-
+        Get the details of the draft Timeline  or Timeline template for the
         current user. If the user doesn't have a draft Timeline, an empty
         Timeline is returned.
       operationId: GetDraftTimelines
@@ -433,8 +438,9 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: If a draft Timeline was not found and we attempted to create one,
-            it indicates that the user does not have the required permissions to
+          description: >-
+            If a draft Timeline was not found and we attempted to create one, it
+            indicates that the user does not have the required permissions to
             create a draft Timeline.
         '409':
           content:
@@ -446,7 +452,8 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: This should never happen, but if a draft Timeline was not found and
+          description: >-
+            This should never happen, but if a draft Timeline was not found and
             we attempted to create one, it indicates that there is already a
             draft Timeline with the given `timelineId`.
       summary: Get draft Timeline or Timeline template details
@@ -454,13 +461,10 @@ paths:
         - Security Timeline API
         - access:securitySolution
     post:
-      description: >
+      description: |
         Create a clean draft Timeline or Timeline template for the current user.
-
         > info
-
-        > If the user already has a draft Timeline, the existing draft Timeline
-        is cleared and returned.
+        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -481,7 +485,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersistTimelineResponse'
-          description: Indicates that the draft Timeline was successfully created. In the
+          description: >-
+            Indicates that the draft Timeline was successfully created. In the
             event the user already has a draft Timeline, the existing draft
             Timeline is cleared and returned.
         '403':
@@ -494,7 +499,8 @@ paths:
                     type: string
                   status_code:
                     type: number
-          description: Indicates that the user does not have the required permissions to
+          description: >-
+            Indicates that the user does not have the required permissions to
             create a draft Timeline.
         '409':
           content:
@@ -607,8 +613,9 @@ paths:
                     type: string
                   statusCode:
                     type: number
-          description: Indicates the user does not have the required permissions to
-            persist the favorite status.
+          description: >-
+            Indicates the user does not have the required permissions to persist
+            the favorite status.
       summary: Favorite a Timeline or Timeline template
       tags:
         - Security Timeline API
@@ -654,7 +661,8 @@ paths:
                   statusCode:
                     example: 400
                     type: number
-          description: Indicates the import of Timelines was unsuccessful because of an
+          description: >-
+            Indicates the import of Timelines was unsuccessful because of an
             invalid file extension.
         '404':
           content:
@@ -669,7 +677,8 @@ paths:
                   statusCode:
                     example: 404
                     type: number
-          description: Indicates that we were unable to locate the saved object client
+          description: >-
+            Indicates that we were unable to locate the saved object client
             necessary to handle the import.
         '409':
           content:
@@ -1524,7 +1533,8 @@ components:
           nullable: true
           type: array
         indexNames:
-          description: A list of index names to use in the query (e.g. when the default
+          description: >-
+            A list of index names to use in the query (e.g. when the default
             data view has been modified)
           example:
             - .logs*
@@ -1533,9 +1543,8 @@ components:
           nullable: true
           type: array
         kqlMode:
-          description: >-
-            Indicates whether the KQL bar filters the query results or searches
-            for additional results, where:
+          description: |-
+            Indicates whether the KQL bar filters the query results or searches for additional results, where:
               * `filter`: filters query results
               * `search`: displays additional search results
           example: search
@@ -1763,7 +1772,8 @@ components:
 security:
   - BasicAuth: []
 tags:
-  - description: You can create Timelines and Timeline templates via the API, as
-      well as import new Timelines from an ndjson file.
+  - description: >-
+      You can create Timelines and Timeline templates via the API, as well as
+      import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline

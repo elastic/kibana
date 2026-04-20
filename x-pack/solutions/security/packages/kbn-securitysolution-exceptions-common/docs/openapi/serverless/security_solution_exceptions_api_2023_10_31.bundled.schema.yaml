@@ -1,8 +1,9 @@
 openapi: 3.0.3
 info:
-  description: Exceptions API allows you to manage detection rule exceptions to
-    prevent a rule from generating an alert from incoming events even when the
-    rule's other criteria are met.
+  description: >-
+    Exceptions API allows you to manage detection rule exceptions to prevent a
+    rule from generating an alert from incoming events even when the rule's
+    other criteria are met.
   title: Security Exceptions API (Elastic Cloud Serverless)
   version: '2023-10-31'
 servers:
@@ -129,10 +130,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -174,7 +177,8 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListId'
-        - description: Human readable exception list string identifier, e.g.
+        - description: >-
+            Human readable exception list string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `list_id` must be
             specified.
           examples:
@@ -233,8 +237,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'blob'"
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
                     statusCode: 400
               schema:
                 oneOf:
@@ -248,10 +253,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -263,7 +270,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [DELETE
+                    message: >-
+                      API [DELETE
                       /api/exception_lists?list_id=simple_list&namespace_type=single]
                       is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-all]
@@ -307,7 +315,8 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListId'
-        - description: Human readable exception list string identifier, e.g.
+        - description: >-
+            Human readable exception list string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `list_id` must be
             specified.
           in: query
@@ -361,8 +370,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'blob'"
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
                     statusCode: 400
               schema:
                 oneOf:
@@ -376,10 +386,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -391,7 +403,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [GET
+                    message: >-
+                      API [GET
                       /api/exception_lists?list_id=simple_list&namespace_type=single]
                       is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-read]
@@ -425,19 +438,10 @@ paths:
       tags:
         - Security Exceptions API
     post:
-      description: >
-        An exception list groups exception items and can be associated with
-        detection rules. You can assign exception lists to multiple detection
-        rules.
-
+      description: |
+        An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
         > info
-
-        > All exception items added to the same list are evaluated using `OR`
-        logic. That is, if any of the items in a list evaluate to `true`, the
-        exception prevents the rule from generating an alert. Likewise, `OR`
-        logic is used for evaluating exceptions when more than one exception
-        list is assigned to a rule. To use the `AND` operator, you can define
-        multiple clauses (`entries`) in a single exception item.
+        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
       operationId: CreateExceptionList
       requestBody:
         content:
@@ -591,7 +595,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
+                    message: |-
                       [security_exception
                       	Root causes:
                       		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
@@ -606,8 +610,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [POST /api/exception_lists] is unauthorized for user, this action
-                      is granted by the Kibana privileges [lists-all]
+                    message: >-
+                      API [POST /api/exception_lists] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -656,9 +662,10 @@ paths:
               type: object
               properties:
                 _version:
-                  description: The version id, normally returned by the API when the item was
-                    retrieved. Use it ensure updates are done against the latest
-                    version.
+                  description: >-
+                    The version id, normally returned by the API when the item
+                    was retrieved. Use it ensure updates are done against the
+                    latest version.
                   type: string
                 description:
                   $ref: '#/components/schemas/ExceptionListDescription'
@@ -736,10 +743,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -751,8 +760,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [PUT /api/exception_lists] is unauthorized for user, this action is
-                      granted by the Kibana privileges [lists-all]
+                    message: >-
+                      API [PUT /api/exception_lists] is unauthorized for user,
+                      this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -802,7 +813,8 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionNamespaceType'
-        - description: Determines whether to include expired exceptions in the duplicated
+        - description: >-
+            Determines whether to include expired exceptions in the duplicated
             list. Expiration date defined by `expire_time`.
           in: query
           name: include_expired_exceptions
@@ -848,8 +860,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'foo'"
+                    message: >-
+                      [request query]: namespace_type: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'foo'
                     statusCode: 400
               schema:
                 oneOf:
@@ -863,10 +876,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -878,8 +893,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [POST /api/exception_lists/_duplicate] is unauthorized for user,
-                      this action is granted by the Kibana privileges
+                    message: >-
+                      API [POST /api/exception_lists/_duplicate] is unauthorized
+                      for user, this action is granted by the Kibana privileges
                       [lists-all]
                     statusCode: 403
               schema:
@@ -941,7 +957,8 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/ExceptionNamespaceType'
-        - description: Determines whether to include expired exceptions in the exported
+        - description: >-
+            Determines whether to include expired exceptions in the exported
             list. Expiration date defined by `expire_time`.
           example: true
           in: query
@@ -989,10 +1006,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1004,8 +1023,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [POST /api/exception_lists/_export] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: >-
+                      API [POST /api/exception_lists/_export] is unauthorized
+                      for user, this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1040,28 +1061,20 @@ paths:
       description: Get a list of all exception list containers.
       operationId: FindExceptionLists
       parameters:
-        - description: >
-            Filters the returned results according to the value of the specified
-            field.
+        - description: |
+            Filters the returned results according to the value of the specified field.
 
-
-            Uses the `so type.field name:field` value syntax, where `so type`
-            can be:
-
+            Uses the `so type.field name:field` value syntax, where `so type` can be:
 
             - `exception-list`: Specify a space-aware exception list.
-
-            - `exception-list-agnostic`: Specify an exception list that is
-            shared across spaces.
+            - `exception-list-agnostic`: Specify an exception list that is shared across spaces.
           in: query
           name: filter
           required: false
           schema:
             $ref: '#/components/schemas/FindExceptionListsFilter'
-        - description: >
-            Determines whether the returned containers are Kibana associated
-            with a Kibana space
-
+        - description: |
+            Determines whether the returned containers are Kibana associated with a Kibana space
             or available in all spaces (`agnostic` or `single`)
           examples:
             agnostic:
@@ -1167,8 +1180,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'blob'"
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
                     statusCode: 400
               schema:
                 oneOf:
@@ -1182,10 +1196,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1197,8 +1213,9 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [GET /api/exception_lists/_find?namespace_type=single] is
-                      unauthorized for user, this action is granted by the
+                    message: >-
+                      API [GET /api/exception_lists/_find?namespace_type=single]
+                      is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
@@ -1223,12 +1240,9 @@ paths:
       description: Import an exception list and its associated items from an NDJSON file.
       operationId: ImportExceptionList
       parameters:
-        - description: >
-            Determines whether existing exception lists with the same `list_id`
-            are overwritten.
-
-            If any exception items have the same `item_id`, those are also
-            overwritten.
+        - description: |
+            Determines whether existing exception lists with the same `list_id` are overwritten.
+            If any exception items have the same `item_id`, those are also overwritten.
           in: query
           name: overwrite
           required: false
@@ -1236,13 +1250,9 @@ paths:
             default: false
             example: false
             type: boolean
-        - description: >
-            Determines whether the list being imported will have a new `list_id`
-            generated.
-
-            Additional `item_id`'s are generated for each exception item. Both
-            the exception
-
+        - description: |
+            Determines whether the list being imported will have a new `list_id` generated.
+            Additional `item_id`'s are generated for each exception item. Both the exception
             list and its items are overwritten.
           in: query
           name: as_new_list
@@ -1274,14 +1284,17 @@ paths:
                   value:
                     errors:
                       - error:
-                          message: 'Error found importing exception list: Invalid value \"4\" supplied to
-                            \"list_id\"'
+                          message: >-
+                            Error found importing exception list: Invalid value
+                            \"4\" supplied to \"list_id\"
                           status_code: 400
                         list_id: (unknown list_id)
                       - error:
-                          message: 'Found that item_id: \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" already
+                          message: >-
+                            Found that item_id:
+                            \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" already
                             exists. Import of item_id:
-                            \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" skipped.'
+                            \"f7fd00bb-dba8-4c93-9d59-6cbd427b6330\" skipped.
                           status_code: 409
                         item_id: f7fd00bb-dba8-4c93-9d59-6cbd427b6330
                         list_id: 7d7cccb8-db72-4667-b1f3-648efad7c1ee
@@ -1344,10 +1357,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1359,8 +1374,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [POST /api/exception_lists/_import] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: >-
+                      API [POST /api/exception_lists/_import] is unauthorized
+                      for user, this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1391,7 +1408,8 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemId'
-        - description: Human readable exception item string identifier, e.g.
+        - description: >-
+            Human readable exception item string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `item_id` must be
             specified
           in: query
@@ -1454,8 +1472,9 @@ paths:
               schema:
                 example:
                   error: Bad Request
-                  message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                    'agnostic' | 'single', received 'blob'"
+                  message: >-
+                    [request query]: namespace_type.0: Invalid enum value.
+                    Expected 'agnostic' | 'single', received 'blob'
                   statusCode: 400
                 oneOf:
                   - $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1468,10 +1487,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1483,7 +1504,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [DELETE
+                    message: >-
+                      API [DELETE
                       /api/exception_lists/items?item_id=simple_list&namespace_type=single]
                       is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-all]
@@ -1528,7 +1550,8 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/ExceptionListItemId'
-        - description: Human readable exception item string identifier, e.g.
+        - description: >-
+            Human readable exception item string identifier, e.g.
             `trusted-linux-processes`. Either `id` or `item_id` must be
             specified.
           in: query
@@ -1592,8 +1615,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'blob'"
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
                     statusCode: 400
               schema:
                 oneOf:
@@ -1607,10 +1631,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1622,8 +1648,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [GET /api/exception_lists/items?item_id=&namespace_type=single] is
-                      unauthorized for user, this action is granted by the
+                    message: >-
+                      API [GET
+                      /api/exception_lists/items?item_id=&namespace_type=single]
+                      is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-read]
                     statusCode: 403
               schema:
@@ -1655,12 +1683,9 @@ paths:
       tags:
         - Security Exceptions API
     post:
-      description: >
-        Create an exception item and associate it with the specified exception
-        list.
-
+      description: |
+        Create an exception item and associate it with the specified exception list.
         > info
-
         > Before creating exception items, you must create an exception list.
       operationId: CreateExceptionListItem
       requestBody:
@@ -1895,10 +1920,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1910,8 +1937,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [POST /api/exception_lists/items] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: >-
+                      API [POST /api/exception_lists/items] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2016,10 +2045,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2031,8 +2062,10 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [PUT /api/exception_lists/items] is unauthorized for user, this
-                      action is granted by the Kibana privileges [lists-all]
+                    message: >-
+                      API [PUT /api/exception_lists/items] is unauthorized for
+                      user, this action is granted by the Kibana privileges
+                      [lists-all]
                     statusCode: 403
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2075,10 +2108,8 @@ paths:
             items:
               $ref: '#/components/schemas/ExceptionListHumanId'
             type: array
-        - description: >
-            Filters the returned results according to the value of the specified
-            field,
-
+        - description: |
+            Filters the returned results according to the value of the specified field,
             using the `<field name>:<field value>` syntax.
           examples:
             singleFilter:
@@ -2092,10 +2123,8 @@ paths:
             items:
               $ref: '#/components/schemas/FindExceptionListItemsFilter'
             type: array
-        - description: >
-            Determines whether the returned containers are Kibana associated
-            with a Kibana space
-
+        - description: |
+            Determines whether the returned containers are Kibana associated with a Kibana space
             or available in all spaces (`agnostic` or `single`)
           examples:
             single:
@@ -2219,8 +2248,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'blob'"
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
                     statusCode: 400
               schema:
                 oneOf:
@@ -2234,10 +2264,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2249,7 +2281,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [GET
+                    message: >-
+                      API [GET
                       /api/exception_lists/items/_find?list_id=simple_list&namespace_type=single]
                       is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-read]
@@ -2315,7 +2348,8 @@ paths:
           name: filter
           required: false
           schema:
-            example: exception-list-agnostic.attributes.tags:"policy:policy-1" OR
+            example: >-
+              exception-list-agnostic.attributes.tags:"policy:policy-1" OR
               exception-list-agnostic.attributes.tags:"policy:all"
             type: string
       responses:
@@ -2352,8 +2386,9 @@ paths:
                 badRequest:
                   value:
                     error: Bad Request
-                    message: "[request query]: namespace_type.0: Invalid enum value. Expected
-                      'agnostic' | 'single', received 'blob'"
+                    message: >-
+                      [request query]: namespace_type.0: Invalid enum value.
+                      Expected 'agnostic' | 'single', received 'blob'
                     statusCode: 400
               schema:
                 oneOf:
@@ -2367,10 +2402,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to
-                      authenticate user [elastic] for REST request
+                    message: >-
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
                       [/_security/_authenticate]]: unable to authenticate user
-                      [elastic] for REST request [/_security/_authenticate]'
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -2382,7 +2419,8 @@ paths:
                 forbidden:
                   value:
                     error: Forbidden
-                    message: API [GET
+                    message: >-
+                      API [GET
                       /api/exception_lists/summary?list_id=simple_list&namespace_type=agnostic]
                       is unauthorized for user, this action is granted by the
                       Kibana privileges [lists-summary]
@@ -2417,19 +2455,10 @@ paths:
         - Security Exceptions API
   /api/exceptions/shared:
     post:
-      description: >
-        An exception list groups exception items and can be associated with
-        detection rules. A shared exception list can apply to multiple detection
-        rules.
-
+      description: |
+        An exception list groups exception items and can be associated with detection rules. A shared exception list can apply to multiple detection rules.
         > info
-
-        > All exception items added to the same list are evaluated using `OR`
-        logic. That is, if any of the items in a list evaluate to `true`, the
-        exception prevents the rule from generating an alert. Likewise, `OR`
-        logic is used for evaluating exceptions when more than one exception
-        list is assigned to a rule. To use the `AND` operator, you can define
-        multiple clauses (`entries`) in a single exception item.
+        > All exception items added to the same list are evaluated using `OR` logic. That is, if any of the items in a list evaluate to `true`, the exception prevents the rule from generating an alert. Likewise, `OR` logic is used for evaluating exceptions when more than one exception list is assigned to a rule. To use the `AND` operator, you can define multiple clauses (`entries`) in a single exception item.
       operationId: CreateSharedExceptionList
       requestBody:
         content:
@@ -2503,7 +2532,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: >-
+                    message: |-
                       [security_exception
                       	Root causes:
                       		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
@@ -2903,15 +2932,10 @@ components:
         - entries
     EndpointArtifactTags:
       default: []
-      description: >
+      description: |
         Tags for categorization. Special tags for scope control:
-
-        * `"policy:all"` - Global artifact (applies to all Elastic Defend
-        policies)
-
-        * `"policy:<policy_id>"` - Private artifact (applies to specific Elastic
-        Defend policy only, where `<policy_id>` is the Elastic Defend
-        integration policy ID)
+        * `"policy:all"` - Global artifact (applies to all Elastic Defend policies)
+        * `"policy:<policy_id>"` - Private artifact (applies to specific Elastic Defend policy only, where `<policy_id>` is the Elastic Defend integration policy ID)
       items:
         type: string
       type: array
@@ -2921,14 +2945,10 @@ components:
       properties:
         entries:
           $ref: '#/components/schemas/ExceptionListItemEntryArray'
-          description: >
-            Exception entries for endpoint security exceptions (used to prevent
-            detection rule alerts).
+          description: |
+            Exception entries for endpoint security exceptions (used to prevent detection rule alerts).
 
-
-            **Fully flexible:** Supports any field name for maximum
-            compatibility with detection rules. No field restrictions are
-            enforced.
+            **Fully flexible:** Supports any field name for maximum compatibility with detection rules. No field restrictions are enforced.
         list_id:
           enum:
             - endpoint_list
@@ -2947,14 +2967,10 @@ components:
       properties:
         entries:
           $ref: '#/components/schemas/ExceptionListItemEntryArray'
-          description: >
+          description: |
             Exception entries for the event filter.
 
-
-            **Flexible field support:** Any event field name is allowed (e.g.,
-            `process.name`, `file.path`, `event.action`, `dns.question.name`,
-            etc.)
-
+            **Flexible field support:** Any event field name is allowed (e.g., `process.name`, `file.path`, `event.action`, `dns.question.name`, etc.)
 
             **Minimum requirement:** At least 1 entry required
         list_id:
@@ -2973,7 +2989,8 @@ components:
       type: object
       properties:
         _version:
-          description: The version id, normally returned by the API when the item was
+          description: >-
+            The version id, normally returned by the API when the item was
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
@@ -3061,7 +3078,8 @@ components:
       type: object
       properties:
         _version:
-          description: The version id, normally returned by the API when the item was
+          description: >-
+            The version id, normally returned by the API when the item was
             retrieved. Use it ensure updates are done against the latest
             version.
           type: string
@@ -3300,8 +3318,9 @@ components:
         - included
       type: string
     ExceptionListItemExpireTime:
-      description: The exception item’s expiration date, in ISO format. This field is
-        only available for regular exception items, not endpoint exceptions.
+      description: >-
+        The exception item’s expiration date, in ISO format. This field is only
+        available for regular exception items, not endpoint exceptions.
       format: date-time
       type: string
     ExceptionListItemHumanId:
@@ -3386,13 +3405,15 @@ components:
         $ref: '#/components/schemas/ExceptionListsImportBulkError'
       type: array
     ExceptionListTags:
-      description: String array containing words and phrases to help categorize
-        exception containers.
+      description: >-
+        String array containing words and phrases to help categorize exception
+        containers.
       items:
         type: string
       type: array
     ExceptionListType:
-      description: The type of exception list to be created. Different list types may
+      description: >-
+        The type of exception list to be created. Different list types may
         denote where they can be utilized.
       enum:
         - detection
@@ -3409,21 +3430,14 @@ components:
       minimum: 1
       type: integer
     ExceptionNamespaceType:
-      description: >
-        Determines whether the exception container is available in all Kibana
-        spaces or just the space
-
+      description: |
+        Determines whether the exception container is available in all Kibana spaces or just the space
         in which it is created, where:
 
-
         - `single`: Only available in the Kibana space in which it is created.
-
         - `agnostic`: Available in all Kibana spaces.
 
-
-        For endpoint artifacts, the `namespace_type` must always be `agnostic`.
-        Space awareness for endpoint artifacts is enforced based on Elastic
-        Defend policy assignments.
+        For endpoint artifacts, the `namespace_type` must always be `agnostic`. Space awareness for endpoint artifacts is enforced based on Elastic Defend policy assignments.
       enum:
         - agnostic
         - single
@@ -3496,17 +3510,12 @@ components:
       minLength: 1
       type: string
     ListType:
-      description: >
-        Specifies the Elasticsearch data type of excludes the list container
-        holds. Some common examples:
-
+      description: |
+        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
 
         - `keyword`: Many ECS fields are Elasticsearch keywords
-
         - `ip`: IP addresses
-
-        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
-        notation)
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
       enum:
         - binary
         - boolean
@@ -3854,7 +3863,8 @@ components:
       type: object
       properties:
         entries:
-          description: Exception entries for the trusted device (duplicate field entries
+          description: >-
+            Exception entries for the trusted device (duplicate field entries
             are not allowed)
           items:
             type: object
@@ -3922,7 +3932,8 @@ components:
       type: object
       properties:
         entries:
-          description: Exception entries for the trusted device (duplicate field entries
+          description: >-
+            Exception entries for the trusted device (duplicate field entries
             are not allowed, username not available when targeting both OS)
           items:
             type: object
@@ -3991,7 +4002,8 @@ components:
       type: object
       properties:
         entries:
-          description: Exception entries for the trusted device (duplicate field entries
+          description: >-
+            Exception entries for the trusted device (duplicate field entries
             are not allowed)
           items:
             type: object
@@ -4058,7 +4070,8 @@ components:
       type: object
       properties:
         _version:
-          description: The version ID, normally returned by the API when the item is
+          description: >-
+            The version ID, normally returned by the API when the item is
             retrieved. Use it to ensure updates are made against the latest
             version.
           type: string

@@ -93,13 +93,10 @@ paths:
       tags:
         - Security Entity Analytics API
     post:
-      description: >
+      description: |
         Create or update an asset criticality record for a specific entity.
 
-
-        If a record already exists for the specified entity, that record is
-        overwritten with the specified value. If a record doesn't exist for the
-        specified entity, a new record is created.
+        If a record already exists for the specified entity, that record is overwritten with the specified value. If a record doesn't exist for the specified entity, a new record is created.
       operationId: CreateAssetCriticalityRecord
       requestBody:
         content:
@@ -133,14 +130,10 @@ paths:
         - Security Entity Analytics API
   /api/asset_criticality/bulk:
     post:
-      description: >
+      description: |
         Bulk upsert up to 1000 asset criticality records.
 
-
-        If asset criticality records already exist for the specified entities,
-        those records are overwritten with the specified values. If asset
-        criticality records don't exist for the specified entities, new records
-        are created.
+        If asset criticality records already exist for the specified entities, those records are overwritten with the specified values. If asset criticality records don't exist for the specified entities, new records are created.
       operationId: BulkUpsertAssetCriticalityRecords
       requestBody:
         content:
@@ -603,7 +596,8 @@ paths:
                 required:
                   - message
           description: Successful response
-      summary: Installs the privileged access detection package for the Entity
+      summary: >-
+        Installs the privileged access detection package for the Entity
         Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
@@ -652,7 +646,8 @@ paths:
                   - ml_module_setup_status
                   - jobs
           description: Privileged access detection status retrieved
-      summary: Gets the status of the privileged access detection package for the
+      summary: >-
+        Gets the status of the privileged access detection package for the
         Entity Analytics privileged user monitoring experience
       tags:
         - Security Entity Analytics API
@@ -705,8 +700,9 @@ paths:
                       indexPattern:
                         type: string
                       integrationName:
-                        description: Required when type is entity_analytics_integration. One of
-                          entityanalytics_okta, entityanalytics_ad.
+                        description: >-
+                          Required when type is entity_analytics_integration.
+                          One of entityanalytics_okta, entityanalytics_ad.
                         type: string
                       matchers:
                         items:
@@ -864,22 +860,13 @@ paths:
       x-state: Technical Preview
   /api/entity_analytics/watchlists/{watchlist_id}/csv_upload:
     post:
-      description: >
-        Uploads a CSV file to add entities to a watchlist. The CSV must contain
-        a header row
+      description: |
+        Uploads a CSV file to add entities to a watchlist. The CSV must contain a header row
+        with a "type" column (user, host, service, or generic) and one or more ECS identity
+        fields (e.g. "user.name", "host.hostname") used to match entities in the entity store.
 
-        with a "type" column (user, host, service, or generic) and one or more
-        ECS identity
-
-        fields (e.g. "user.name", "host.hostname") used to match entities in the
-        entity store.
-
-
-        Matched entities are added to the watchlist and their
-        `entity.attributes.watchlists`
-
+        Matched entities are added to the watchlist and their `entity.attributes.watchlists`
         field is updated in the entity store.
-
 
         Each row will match up to 10,000 entities.
       operationId: UploadWatchlistCsv
@@ -1092,8 +1079,9 @@ paths:
           name: entityTypes
           required: false
           schema:
-            description: Array of engine types to delete. Empty by default, which results in
-              all the engines being deleted.
+            description: >-
+              Array of engine types to delete. Empty by default, which results
+              in all the engines being deleted.
             items:
               $ref: '#/components/schemas/EntityType'
             type: array
@@ -1384,13 +1372,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/entities/{entityType}:
     delete:
-      description: >
+      description: |
         Delete a single entity in Entity Store.
-
-        The entity will be immediately deleted from the latest index.  It will
-        remain available in historical snapshots if it has been
-        snapshotted.  The delete operation does not prevent the entity from
-        being recreated if it is observed again in the future. 
+        The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
       operationId: DeleteSingleEntity
       parameters:
         - in: path
@@ -1430,23 +1414,11 @@ paths:
       tags:
         - Security Entity Analytics API
     put:
-      description: >
+      description: |
         Update or create an entity in Entity Store.
-
-        If the specified entity already exists, it is updated with the provided
-        values.  If the entity does not exist, a new one is created. By default,
-        only the following fields can be updated: * `entity.attributes.*` *
-        `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set
-        the `force` query parameter to `true`. > info > Some fields always
-        retain the first observed value. Updates to these fields will not appear
-        in the final index.
-
-        > Due to technical limitations, not all updates are guaranteed to appear
-        in the final list of observed values.
-
-        > Due to technical limitations, create is an async operation. The time
-        for a document to be present in the  > final index depends on the entity
-        store transform and usually takes more than 1 minute.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created. By default, only the following fields can be updated: * `entity.attributes.*` * `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set the `force` query parameter to `true`. > info > Some fields always retain the first observed value. Updates to these fields will not appear in the final index.
+        > Due to technical limitations, not all updates are guaranteed to appear in the final list of observed values.
+        > Due to technical limitations, create is an async operation. The time for a document to be present in the  > final index depends on the entity store transform and usually takes more than 1 minute.
       operationId: UpsertEntity
       parameters:
         - in: path
@@ -1477,7 +1449,8 @@ paths:
         '403':
           description: Operation on a restricted field
         '409':
-          description: Conflict. The entity was updated while another update was happening
+          description: >-
+            Conflict. The entity was updated while another update was happening
             in ElasticSearch
         '503':
           description: Operation on an uninitialized Engine or in a cluster without CRUD
@@ -1487,15 +1460,10 @@ paths:
         - Security Entity Analytics API
   /api/entity_store/entities/bulk:
     put:
-      description: >
+      description: |
         Update or create many entities in Entity Store.
-
-        If the specified entity already exists, it is updated with the provided
-        values.  If the entity does not exist, a new one is created.
-
-        The creation is asynchronous. The time for a document to be present in
-        the  final index depends on the entity store transform and usually takes
-        more than 1 minute.
+        If the specified entity already exists, it is updated with the provided values.  If the entity does not exist, a new one is created.
+        The creation is asynchronous. The time for a document to be present in the  final index depends on the entity store transform and usually takes more than 1 minute.
       operationId: UpsertEntitiesBulk
       parameters:
         - in: query
@@ -1739,9 +1707,10 @@ paths:
         - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
-      description: Schedule the risk scoring engine to run as soon as possible. You
-        can use this to recalculate entity risk scores after updating their
-        asset criticality.
+      description: >-
+        Schedule the risk scoring engine to run as soon as possible. You can use
+        this to recalculate entity risk scores after updating their asset
+        criticality.
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
@@ -1825,7 +1794,8 @@ components:
         - extreme_impact
       type: string
     AssetCriticalityLevelsForBulkUpload:
-      description: The criticality level of the asset for bulk upload. The value
+      description: >-
+        The criticality level of the asset for bulk upload. The value
         `unassigned` is used to indicate that the criticality level is not
         assigned and is only used for bulk upload.
       enum:
@@ -2278,7 +2248,8 @@ components:
               format: double
               type: number
             calculated_score_norm:
-              description: The normalized numeric value of the given entity's risk score.
+              description: >-
+                The normalized numeric value of the given entity's risk score.
                 Useful for comparing with other entities.
               format: double
               maximum: 100
@@ -2317,7 +2288,8 @@ components:
           format: double
           type: number
         calculated_score_norm:
-          description: The normalized numeric value of the given entity's risk score.
+          description: >-
+            The normalized numeric value of the given entity's risk score.
             Useful for comparing with other entities.
           format: double
           maximum: 100
@@ -2327,11 +2299,13 @@ components:
           description: Unique identifier for the scoring run that produced this document.
           type: string
         category_1_count:
-          description: The number of risk input documents that contributed to the Category
+          description: >-
+            The number of risk input documents that contributed to the Category
             1 score (`category_1_score`).
           type: integer
         category_1_score:
-          description: The contribution of Category 1 to the overall risk score
+          description: >-
+            The contribution of Category 1 to the overall risk score
             (`calculated_score`). Category 1 contains Detection Engine Alerts.
           format: double
           type: number
@@ -2346,17 +2320,20 @@ components:
           format: double
           type: number
         id_field:
-          description: The identifier field defining this risk score. Coupled with
+          description: >-
+            The identifier field defining this risk score. Coupled with
             `id_value`, uniquely identifies the entity being scored.
           example: host.name
           type: string
         id_value:
-          description: The identifier value defining this risk score. Coupled with
+          description: >-
+            The identifier value defining this risk score. Coupled with
             `id_field`, uniquely identifies the entity being scored.
           example: example.host
           type: string
         inputs:
-          description: A list of the highest-risk documents contributing to this risk
+          description: >-
+            A list of the highest-risk documents contributing to this risk
             score. Useful for investigative purposes.
           items:
             $ref: '#/components/schemas/RiskScoreInput'
@@ -2578,9 +2555,10 @@ components:
           description: Index to read latest sync markers from
           type: string
     Interval:
-      description: Interval in which enrich policy runs. For example, `"1h"` means the
-        rule runs every hour. Must be less than or equal to half the duration of
-        the lookback period,
+      description: >-
+        Interval in which enrich policy runs. For example, `"1h"` means the rule
+        runs every hour. Must be less than or equal to half the duration of the
+        lookback period,
       example: 1h
       pattern: ^[1-9]\d*[smh]$
       type: string
@@ -2592,11 +2570,8 @@ components:
             type: string
           type: array
         values:
-          description: >
-            Matcher values. Must be either an array of strings (e.g. group or
-            role names) or an array of booleans (e.g. integration-derived flags
-            like privileged_group_member). Mixed types are intentionally not
-            supported for simplicity and predictability.
+          description: |
+            Matcher values. Must be either an array of strings (e.g. group or role names) or an array of booleans (e.g. integration-derived flags like privileged_group_member). Mixed types are intentionally not supported for simplicity and predictability.
           oneOf:
             - items:
                 type: string
