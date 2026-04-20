@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type {
@@ -114,10 +114,12 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       );
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      combineLatest([serviceName$, environment$]).subscribe(([sn, env]) => {
-        filters$.next(buildFiltersFromState(sn, env));
-      });
-      kuery$.subscribe((k) => {
+      const filtersSubscription = combineLatest([serviceName$, environment$]).subscribe(
+        ([sn, env]) => {
+          filters$.next(buildFiltersFromState(sn, env));
+        }
+      );
+      const querySubscription = kuery$.subscribe((k) => {
         query$.next(buildQueryFromKuery(k));
       });
 
@@ -221,6 +223,13 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
       return {
         api,
         Component: () => {
+          useEffect(() => {
+            return () => {
+              filtersSubscription.unsubscribe();
+              querySubscription.unsubscribe();
+            };
+          }, []);
+
           const [environment, kuery, serviceName, serviceGroupId] = useBatchedPublishingSubjects(
             environment$,
             kuery$,

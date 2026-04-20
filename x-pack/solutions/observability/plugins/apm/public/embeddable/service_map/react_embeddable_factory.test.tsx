@@ -475,4 +475,23 @@ describe('getServiceMapEmbeddableFactory', () => {
       expect(api.filters$.getValue()).toHaveLength(0);
     });
   });
+
+  it('cleans up subscriptions on unmount', async () => {
+    const finalizeApi = jest.fn((api) => api);
+    const parentApi = { query$: new BehaviorSubject({ query: '' }) };
+    const deps = { coreStart: {} } as unknown as EmbeddableDeps;
+    const factory = getServiceMapEmbeddableFactory(deps);
+    const embeddable = await factory.buildEmbeddable({
+      initialState: { serviceName: 'test-service', environment: 'production', kuery: 'test' },
+      finalizeApi,
+      uuid: 'panel-cleanup',
+      parentApi,
+    } as never);
+
+    const { unmount } = render(<embeddable.Component />);
+
+    expect(mockServiceMapEmbeddable).toHaveBeenCalled();
+
+    expect(() => unmount()).not.toThrow();
+  });
 });
