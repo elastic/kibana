@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_ACTIONS_DATA_STREAM = '.alert-actions';
-export const ALERT_ACTIONS_DATA_STREAM_VERSION = 1;
+export const ALERT_ACTIONS_DATA_STREAM_VERSION = 2;
 export const ALERT_ACTIONS_BACKING_INDEX = '.ds-.alert-actions-*';
 export const ALERT_ACTIONS_ILM_POLICY_NAME = '.alert-actions-ilm-policy';
 
@@ -36,6 +36,7 @@ const mappings: MappingsDefinition = {
     last_series_event_timestamp: { type: 'date' },
     expiry: { type: 'date' },
     actor: { type: 'keyword' },
+    assignee_uid: { type: 'keyword' },
     action_type: { type: 'keyword' },
     group_hash: { type: 'keyword' },
     episode_id: { type: 'keyword' },
@@ -54,6 +55,7 @@ export const alertActionSchema = z.object({
   last_series_event_timestamp: z.string(),
   expiry: z.string().optional(),
   actor: z.string().nullable(),
+  assignee_uid: z.string().optional(),
   action_type: z.string(),
   episode_id: z.string().optional(),
   episode_status: z.string().optional(),
