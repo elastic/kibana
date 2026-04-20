@@ -23,7 +23,7 @@ export const chatExperienceSetting: Omit<UiSettingsParams<AIChatExperience>, 'va
   ),
   schema: schema.oneOf(
     [schema.literal(AIChatExperience.Classic), schema.literal(AIChatExperience.Agent)],
-    { defaultValue: AIChatExperience.Classic }
+    { defaultValue: AIChatExperience.Agent }
   ),
   options: [AIChatExperience.Classic, AIChatExperience.Agent],
   type: 'select' as const,
