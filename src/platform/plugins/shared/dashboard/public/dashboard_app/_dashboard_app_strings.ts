@@ -244,6 +244,9 @@ export const topNavStrings = {
     description: i18n.translate('dashboard.topNave.exportConfigDescription', {
       defaultMessage: 'Export dashboard',
     }),
+    jsonLabel: i18n.translate('dashboard.topNave.exportJsonButtonAriaLabel', {
+      defaultMessage: 'Export JSON',
+    }),
     pngLabel: i18n.translate('dashboard.topNave.exportPngButtonAriaLabel', {
       defaultMessage: 'PNG reports',
     }),
@@ -295,7 +298,7 @@ export const topNavStrings = {
   },
   add: {
     label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
-      defaultMessage: 'add',
+      defaultMessage: 'Add panel',
     }),
     description: i18n.translate('dashboard.topNave.addConfigDescription', {
       defaultMessage: 'Add content to your dashboard',

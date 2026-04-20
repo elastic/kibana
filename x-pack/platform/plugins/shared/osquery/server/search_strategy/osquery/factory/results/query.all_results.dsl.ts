@@ -8,37 +8,42 @@
 import type { ISearchRequestParams } from '@kbn/search-types';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { buildIndexNameWithNamespace } from '../../../../utils/build_index_name_with_namespace';
 import { getQueryFilter } from '../../../../utils/build_query';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
 import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
+import { prefixIndexPatternsWithCcs } from '../../../../utils/ccs_utils';
 
 export const buildResultsQuery = ({
   actionId,
   agentId,
   kuery,
+  esFilters,
   sort,
   startDate,
   pagination: { activePage, querySize },
   integrationNamespaces,
   scheduleId,
   executionCount,
+  ccsEnabled,
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
-  let filter: string;
+  let baseFilter: string;
   if (scheduleId != null && executionCount != null) {
     const scheduleQuery = `schedule_id: ${scheduleId} AND osquery_meta.schedule_execution_count: ${executionCount}`;
     const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    filter = scheduleQuery + agentQuery;
+    baseFilter = scheduleQuery + agentQuery;
   } else {
     const actionIdQuery = `action_id: ${actionId}`;
     const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    filter = actionIdQuery + agentQuery;
+    baseFilter = actionIdQuery + agentQuery;
   }
 
   if (!isEmpty(kuery)) {
-    filter = filter + ` AND ${kuery}`;
+    baseFilter = baseFilter + ` AND ${kuery}`;
   }
 
   const timeRangeFilter =
@@ -54,7 +59,15 @@ export const buildResultsQuery = ({
           },
         ]
       : [];
-  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+
+  const kqlFilterClause = getQueryFilter({ filter: baseFilter });
+
+  const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
+
+  const esFilterClauses =
+    parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];
+
+  const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
 
   let index: string;
 
@@ -65,6 +78,8 @@ export const buildResultsQuery = ({
   } else {
     index = baseIndex;
   }
+
+  index = prefixIndexPatternsWithCcs(index, ccsEnabled ?? false);
 
   return {
     allow_no_indices: true,

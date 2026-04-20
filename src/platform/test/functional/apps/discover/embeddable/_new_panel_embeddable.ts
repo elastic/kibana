@@ -52,54 +52,73 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('defaultIndex');
     });
 
-    beforeEach(async () => {
-      await dashboard.navigateToApp();
-      await filterBar.ensureFieldEditorModalIsClosed();
-      await dashboard.gotoDashboardLandingPage();
-      await dashboard.clickNewDashboard();
+    describe('New Panel button', () => {
+      beforeEach(async () => {
+        await dashboard.navigateToApp();
+        await filterBar.ensureFieldEditorModalIsClosed();
+        await dashboard.gotoDashboardLandingPage();
+        await dashboard.clickNewDashboard();
+      });
+
+      it('can add a new Discover session panel to the dashboard', async () => {
+        await dashboardAddPanel.clickAddDiscoverPanel();
+        await header.waitUntilLoadingHasFinished();
+        await Promise.all([
+          globalNav
+            .getFirstBreadcrumb()
+            .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
+          discover
+            .getSavedSearchTitle()
+            .then((lastBreadcrumb) => expect(lastBreadcrumb).to.be('Editing New Discover session')),
+          testSubjects
+            .exists('unifiedTabs_tabsBar', { timeout: 1000 })
+            .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
+          discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
+        ]);
+
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+        await discover.clickSaveSearchButton();
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+      });
+
+      it('can cancel adding a new Discover session panel', async () => {
+        await dashboardAddPanel.clickAddDiscoverPanel();
+        await header.waitUntilLoadingHasFinished();
+
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
+
+        await discover.clickCancelButton();
+
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql([]);
+      });
     });
 
-    it('can add a new Discover session panel to the dashboard', async () => {
-      await dashboardAddPanel.clickAddDiscoverPanel();
-      await header.waitUntilLoadingHasFinished();
-      await Promise.all([
-        globalNav
-          .getFirstBreadcrumb()
-          .then((firstBreadcrumb) => expect(firstBreadcrumb).to.be('Dashboards')),
-        discover
-          .getSavedSearchTitle()
-          .then((lastBreadcrumb) =>
-            expect(lastBreadcrumb).to.be('Editing New by-value Discover session')
-          ),
-        testSubjects
-          .exists('unifiedTabs_tabsBar', { timeout: 1000 })
-          .then((unifiedTabs) => expect(unifiedTabs).not.to.be(true)),
-        discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(true)),
-      ]);
+    describe('Save Discover Table Button', () => {
+      it('can save to a new Dashboard from Discover', async () => {
+        await discover.navigateToApp();
+        await discover.clickNewSearchButton();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
 
-      await queryBar.setQuery('test');
-      await queryBar.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-      await discover.clickSaveSearchButton();
-      await dashboard.waitForRenderComplete();
-      await dashboard.verifyNoRenderErrors();
-      expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
-    });
+        await queryBar.setQuery('test');
+        await queryBar.submitQuery();
+        await discover.waitUntilTabIsLoaded();
 
-    it('can cancel adding a new Discover session panel', async () => {
-      await dashboardAddPanel.clickAddDiscoverPanel();
-      await header.waitUntilLoadingHasFinished();
+        await discover.clickSaveDiscoverTableToDashboard('By-Value Table');
 
-      await queryBar.setQuery('test');
-      await queryBar.submitQuery();
-      await discover.waitUntilTabIsLoaded();
-
-      await discover.clickCancelButton();
-
-      await dashboard.waitForRenderComplete();
-      await dashboard.verifyNoRenderErrors();
-
-      expect(await discover.getAllSavedSearchDocumentCount()).to.eql([]);
+        await dashboard.waitForRenderComplete();
+        await dashboard.verifyNoRenderErrors();
+        expect(await discover.getAllSavedSearchDocumentCount()).to.eql(['13 documents']);
+      });
     });
   });
 }

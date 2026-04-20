@@ -21,6 +21,7 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 export type {
   EmitEventFn,
   EmitEventParams,
+  EventChainContext,
   ServerTriggerDefinition,
   TriggerEventHandlerParams,
   WorkflowsClient,
@@ -30,6 +31,15 @@ export type {
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStartDeps,
 } from './types';
+
+export {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+  getEventChainContext,
+  getOutboundEventChainHeaders,
+  setWorkflowEventChainContext,
+} from './event_chain_context';
 
 export type {
   ServerStepDefinition,
@@ -42,3 +52,6 @@ export type {
 export { createServerStepDefinition } from './step_registry/types';
 
 export { TriggerRegistry } from './trigger_registry';
+
+export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from './triggers';
+export type { WorkflowExecutionFailedEvent } from './triggers';

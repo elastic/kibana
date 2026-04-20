@@ -32,13 +32,11 @@
     "@kbn/core-http-server",
     "@kbn/search-navigation",
     "@kbn/search-api-keys-components",
+    "@kbn/search-api-keys-server",
     "@kbn/logging",
     "@kbn/sample-data-ingest",
     "@kbn/core-elasticsearch-server",
     "@kbn/search-shared-ui",
-    "@kbn/search-code-examples",
-    "@kbn/try-in-console",
-    "@kbn/deeplinks-search",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/react-query",
@@ -47,7 +45,6 @@
     "@kbn/cloud",
     "@kbn/agent-builder-plugin",
     "@kbn/scout-search",
-    "@kbn/management-settings-ids"
   ],
   "exclude": [
     "target/**/*"

@@ -8,10 +8,16 @@
 import React from 'react';
 import JiraServiceManagementConnectorFields from './connector_params';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, screen, render, waitFor } from '@testing-library/react';
+import { screen, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => ({
+  ...jest.requireActual(
+    '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+  ),
+  checkConnectorIdAvailability: jest.fn().mockResolvedValue({ isAvailable: true }),
+}));
 
 const actionConnector = {
   actionTypeId: '.jira-service-management',
@@ -60,16 +66,17 @@ describe('JiraServiceManagementConnectorFields renders', () => {
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      waitFor(() => {
+      await waitFor(() => {
         expect(onSubmit).toBeCalledWith({
           data: {
             actionTypeId: '.jira-service-management',
             name: 'jira-service-management',
-            config: {},
+            config: {
+              apiUrl: 'https://api.atlassian.com',
+            },
+            id: 'jira-service-management',
             secrets: {
               apiKey: 'secret',
             },
@@ -95,7 +102,9 @@ describe('JiraServiceManagementConnectorFields renders', () => {
       await userEvent.clear(res.getByTestId(field));
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+      });
     });
   });
 });

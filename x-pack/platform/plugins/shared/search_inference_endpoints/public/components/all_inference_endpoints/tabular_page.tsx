@@ -16,14 +16,7 @@ import type {
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import {
-  EisCloudConnectPromoCallout,
-  EisPromotionalCallout,
-  useCloudConnectStatus,
-} from '@kbn/search-api-panels';
-import { CLOUD_CONNECT_NAV_ID } from '@kbn/deeplinks-management/constants';
 
-import { docLinks } from '../../../common/doc_links';
 import {
   ENDPOINT,
   ENDPOINT_COPY_ID_ACTION_LABEL,
@@ -33,7 +26,6 @@ import {
   SERVICE_PROVIDER,
 } from '../../../common/translations';
 
-import { useKibana } from '../../hooks/use_kibana';
 import { useEndpointActions } from '../../hooks/use_endpoint_actions';
 import { type FilterOptions, GroupByOptions } from '../../types';
 import { getModelId } from '../../utils/get_model_id';
@@ -81,12 +73,6 @@ interface TabularPageProps {
 }
 
 export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) => {
-  const {
-    services: { cloud, cloudConnect, application },
-  } = useKibana();
-  const { isLoading: isCloudConnectStatusLoading, isCloudConnected } = useCloudConnectStatus(
-    cloudConnect?.hooks.useCloudConnectStatus
-  );
   const [searchKey, setSearchKey] = useState('');
   const [groupBy, setGroupBy] = useState<GroupByOptions>(initializeGroupBy);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(DEFAULT_FILTER_OPTIONS);
@@ -179,7 +165,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           {
             name: ENDPOINT_COPY_ID_ACTION_LABEL,
             description: ENDPOINT_COPY_ID_ACTION_LABEL,
-            icon: 'copyClipboard',
+            icon: 'copy',
             type: 'icon',
             onClick: (item) => copyContent(item.inference_id),
             'data-test-subj': 'inference-endpoints-action-copy-id-label',
@@ -206,22 +192,6 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   return (
     <>
       <EuiFlexGroup direction="column">
-        <EisPromotionalCallout
-          promoId="inferenceEndpointManagement"
-          isCloudEnabled={cloud?.isCloudEnabled ?? false}
-          ctaLink={docLinks.elasticInferenceService}
-          direction="row"
-        />
-        {!isCloudConnectStatusLoading && !isCloudConnected && (
-          <EisCloudConnectPromoCallout
-            promoId="inferenceEndpointManagement"
-            isSelfManaged={!cloud?.isCloudEnabled}
-            direction="row"
-            navigateToApp={() =>
-              application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
-            }
-          />
-        )}
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem css={searchContainerStyles} grow={false}>
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />

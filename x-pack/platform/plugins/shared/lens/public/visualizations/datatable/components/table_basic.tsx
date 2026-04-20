@@ -6,7 +6,7 @@
  */
 
 import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
-import { getFallbackDataBounds } from '@kbn/coloring';
+import { getFallbackDataBounds, DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
   useCallback,
@@ -73,7 +73,7 @@ import {
 } from '../../../../common/expressions/impl/datatable/utils';
 import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
-import { getColumnAlignment } from '../utils';
+import { getColumnAlignment, hasIncompatibleColorConfig, getColorByValuePalette } from '../utils';
 
 export const DataContext = React.createContext<DataContextType>({});
 
@@ -425,12 +425,49 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const colInfo = getDatatableColumn(sortedTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
+
+      const hasColorConfigMismatch = hasIncompatibleColorConfig({
+        colorByTerms,
+        palette,
+        colorMapping,
+      });
+
+      let appliedPalette = hasColorConfigMismatch ? undefined : palette;
+      let appliedColorMapping = hasColorConfigMismatch ? undefined : colorMapping;
+
+      const shouldApplyDefaults = !palette && !colorMapping && !hasColorConfigMismatch;
+
+      if (shouldApplyDefaults) {
+        if (colorByTerms) {
+          appliedColorMapping = JSON.stringify(DEFAULT_COLOR_MAPPING_CONFIG);
+          appliedPalette = undefined;
+        } else {
+          const dataBounds = minMaxByColumnId.get(originalId) ?? getFallbackDataBounds();
+          const defaultPalette = getColorByValuePalette(props.paletteService, dataBounds);
+          const stops = defaultPalette.params?.stops || [];
+          appliedPalette = {
+            type: 'palette',
+            name: 'custom', // Only 'custom' palette has getColorForValue
+            params: {
+              colors: stops.map(({ color }) => color),
+              stops: stops.map(({ stop }) => stop),
+              gradient: false,
+              range: defaultPalette.params?.rangeType ?? 'percent',
+              rangeMin: dataBounds.min,
+              rangeMax: dataBounds.max,
+              continuity: defaultPalette.params?.continuity,
+            },
+          };
+          appliedColorMapping = undefined;
+        }
+      }
+
       const categoryRows = (untransposedDataRef.current ?? sortedTable)?.rows;
 
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: colorMapping
+            categories: appliedColorMapping
               ? getColorCategories(categoryRows, [originalId], [null])
               : getLegacyColorCategories(categoryRows, [originalId], [null]),
           }
@@ -446,8 +483,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         colorByTerms,
         isDarkMode,
         syncColors,
-        palette,
-        colorMapping
+        appliedPalette,
+        appliedColorMapping
       );
       cellColorFnMap.set(originalId, colorFn);
 

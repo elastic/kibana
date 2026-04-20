@@ -112,7 +112,7 @@ const useContentMetadata = (
       const entityItem = firstItem as EntityItem;
       return {
         icon: entityItem.icon || 'index',
-        groupedItemsType: translateEntityType(entityItem.type),
+        groupedItemsType: translateEntityType(entityItem.entity?.type),
       };
     }
 

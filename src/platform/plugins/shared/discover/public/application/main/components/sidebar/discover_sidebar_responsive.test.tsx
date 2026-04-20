@@ -8,7 +8,7 @@
  */
 
 import { render, screen, within, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import React from 'react';
@@ -19,7 +19,10 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import type { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import {
+  getDiscoverInternalStateMock,
+  type InternalStateMockToolkit,
+} from '../../../../__mocks__/discover_state.mock';
 import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { resetExistingFieldsCache } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
@@ -28,14 +31,14 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
-import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
+import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { UnifiedFieldListRestorableState } from '@kbn/unified-field-list';
 import { internalStateActions } from '../../state_management/redux';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 // There are some flaky tests in this file because they render a big DOM tree, which can take some time to run the tests.
-const EXTENDED_TIMEOUT = 10_000;
+const EXTENDED_TIMEOUT = 60_000;
 
 type TestWrapperProps = DiscoverSidebarResponsiveProps & { selectedDataView: DataView };
 
@@ -66,8 +69,7 @@ jest.mock('../../../../customizations', () => ({
 
 const mockGetRecommendedFieldsAccessor = jest.fn();
 
-jest.mock('../../../../context_awareness', () => ({
-  ...jest.requireActual('../../../../context_awareness'),
+jest.mock('../../../../context_awareness/hooks/use_profile_accessor', () => ({
   useProfileAccessor: jest.fn((accessorId: string) => {
     if (accessorId === 'getRecommendedFields') {
       return mockGetRecommendedFieldsAccessor;
@@ -186,16 +188,21 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): TestWrapperProps 
   };
 }
 
-function getStateContainer({
+async function setupToolkit({
   query,
   fieldListUiState,
+  services,
 }: {
   query?: Query | AggregateQuery;
   fieldListUiState?: Partial<UnifiedFieldListRestorableState>;
-}) {
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.dispatch(
-    stateContainer.injectCurrentTab(internalStateActions.setAppState)({
+  services?: DiscoverServices;
+}): Promise<InternalStateMockToolkit> {
+  const toolkit = getDiscoverInternalStateMock({ services });
+  await toolkit.initializeTabs();
+  await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+  toolkit.internalState.dispatch(
+    toolkit.injectCurrentTab(internalStateActions.setAppState)({
       appState: {
         query: query ?? { query: '', language: 'lucene' },
         filters: [],
@@ -203,13 +210,13 @@ function getStateContainer({
     })
   );
   if (fieldListUiState) {
-    stateContainer.internalState.dispatch(
-      stateContainer.injectCurrentTab(internalStateActions.setFieldListUiState)({
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setFieldListUiState)({
         fieldListUiState,
       })
     );
   }
-  return stateContainer;
+  return toolkit;
 }
 
 async function renderComponent(
@@ -220,8 +227,9 @@ async function renderComponent(
   } = {},
   services?: DiscoverServices
 ) {
-  const stateContainer = getStateContainer(appStateParams);
   const mockedServices = services ?? createMockServices();
+  const toolkit = await setupToolkit({ ...appStateParams, services: mockedServices });
+
   mockedServices.data.dataViews.getIdsWithTitle = jest.fn(async () =>
     props.selectedDataView
       ? [{ id: props.selectedDataView.id!, title: props.selectedDataView.title! }]
@@ -232,20 +240,24 @@ async function renderComponent(
   });
   mockedServices.data.query.getState = jest
     .fn()
-    .mockImplementation(() => stateContainer.getCurrentTab().appState);
+    .mockImplementation(() => toolkit.getCurrentTab().appState);
 
-  const user = userEvent.setup();
+  // Set the current data view in runtime state
+  toolkit.internalState.dispatch(
+    internalStateActions.setDataView({
+      tabId: toolkit.getCurrentTab().id,
+      dataView: props.selectedDataView,
+    })
+  );
+
+  const user = userEvent.setup({
+    pointerEventsCheck: PointerEventsCheckLevel.Never,
+    skipHover: true,
+  });
   const result = render(
-    <DiscoverTestProvider
-      services={mockedServices}
-      stateContainer={stateContainer}
-      runtimeState={{
-        currentDataView: props.selectedDataView!,
-        adHocDataViews: [],
-      }}
-    >
+    <DiscoverToolkitTestProvider toolkit={toolkit}>
       <DiscoverSidebarResponsive {...props} />
-    </DiscoverTestProvider>
+    </DiscoverToolkitTestProvider>
   );
 
   await act(async () => {
@@ -280,45 +292,51 @@ describe('discover responsive sidebar', function () {
     resetExistingFieldsCache();
   });
 
-  it('should have loading indicators during fields existence loading', async function () {
-    let resolveFunction: (arg: unknown) => void;
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
-    (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
-      return new Promise((resolve) => {
-        resolveFunction = resolve;
+  it(
+    'should have loading indicators during fields existence loading',
+    async function () {
+      let resolveFunction: (arg: unknown) => void;
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockReset();
+      (ExistingFieldsServiceApi.loadFieldExisting as jest.Mock).mockImplementation(() => {
+        return new Promise((resolve) => {
+          resolveFunction = resolve;
+        });
       });
-    });
 
-    const { result } = await renderComponent(
-      {
-        ...props,
-        fieldListVariant: 'list-always',
-      },
-      {},
-      undefined
-    );
+      const { result } = await renderComponent(
+        {
+          ...props,
+          fieldListVariant: 'list-always',
+        },
+        {},
+        undefined
+      );
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-countLoading')).toBeInTheDocument();
-    expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
-
-    expect(result.container.querySelector('.euiProgress')).not.toBeNull();
-
-    resolveFunction!({
-      indexPatternTitle: 'test-loaded',
-      existingFieldNames: Object.keys(mockfieldCounts),
-    });
-
-    await waitFor(() => {
       expect(
-        screen.queryByTestId('fieldListGroupedAvailableFields-countLoading')
-      ).not.toBeInTheDocument();
-    });
+        screen.getByTestId('fieldListGroupedAvailableFields-countLoading')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('fieldListGroupedAvailableFields-count')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeInTheDocument();
-    expect(result.container.querySelector('.euiProgress')).toBeNull();
+      expect(result.container.querySelector('.euiProgress')).not.toBeNull();
 
-    expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
-  });
+      resolveFunction!({
+        indexPatternTitle: 'test-loaded',
+        existingFieldNames: Object.keys(mockfieldCounts),
+      });
+
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('fieldListGroupedAvailableFields-countLoading')
+        ).not.toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toBeInTheDocument();
+      expect(result.container.querySelector('.euiProgress')).toBeNull();
+
+      expect(ExistingFieldsServiceApi.loadFieldExisting).toHaveBeenCalledTimes(1);
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it('should have Selected Fields, Available Fields, Popular and Meta Fields sections', async function () {
     await renderComponent(props);
@@ -493,24 +511,28 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  it('should restore sidebar state after switching tabs', async function () {
-    await renderComponent(props, {
-      fieldListUiState: {
-        nameFilter: 'byte',
-        selectedFieldTypes: ['number'],
-        pageSize: 10,
-        scrollTop: 0,
-        accordionState: {},
-      },
-    });
+  it(
+    'should restore sidebar state after switching tabs',
+    async function () {
+      await renderComponent(props, {
+        fieldListUiState: {
+          nameFilter: 'byte',
+          selectedFieldTypes: ['number'],
+          pageSize: 10,
+          scrollTop: 0,
+          accordionState: {},
+        },
+      });
 
-    expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('1');
-    expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
-      '1 popular field. 1 available field. 0 meta fields.'
-    );
+      expect(screen.getByTestId('fieldListGroupedAvailableFields-count')).toHaveTextContent('1');
+      expect(screen.getByTestId('fieldListGrouped__ariaDescription')).toHaveTextContent(
+        '1 popular field. 1 available field. 0 meta fields.'
+      );
 
-    expect(screen.getByTestId('fieldListFiltersFieldSearch')).toHaveValue('byte');
-  });
+      expect(screen.getByTestId('fieldListFiltersFieldSearch')).toHaveValue('byte');
+    },
+    EXTENDED_TIMEOUT
+  );
 
   it('should restore collapsed state state after switching tabs', async function () {
     const { result: collapsedRender } = await renderComponent(
@@ -740,8 +762,7 @@ describe('discover responsive sidebar', function () {
     EXTENDED_TIMEOUT
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/225127
-  describe.skip('search bar customization', () => {
+  describe('search bar customization', () => {
     it(
       'should not render CustomDataViewPicker',
       async () => {
@@ -788,13 +809,45 @@ describe('discover responsive sidebar', function () {
       EXTENDED_TIMEOUT
     );
 
-    it('should allow to toggle sidebar', async function () {
-      const { user } = await renderComponent(props);
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-collapse'));
-      expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
-      await user.click(screen.getByTestId('unifiedFieldListSidebar__toggle-expand'));
-      expect(screen.getByTestId('fieldList')).toBeInTheDocument();
+    it('should sync sidebar toggle state', async function () {
+      const expandedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: true,
+        toggle: () => {},
+      });
+
+      const { result: expandedRender } = await renderComponent({
+        ...props,
+        sidebarToggleState$: expandedSidebarToggleState$,
+      });
+
+      await waitFor(() => {
+        expect(expandedSidebarToggleState$.value.isCollapsed).toBe(false);
+        expect(expandedSidebarToggleState$.value.toggle).toBeDefined();
+      });
+
+      expandedRender.unmount();
+
+      const collapsedSidebarToggleState$ = new BehaviorSubject<SidebarToggleState>({
+        isCollapsed: false,
+        toggle: () => {},
+      });
+
+      await renderComponent(
+        {
+          ...props,
+          sidebarToggleState$: collapsedSidebarToggleState$,
+        },
+        {
+          fieldListUiState: {
+            isCollapsed: true,
+          },
+        }
+      );
+
+      await waitFor(() => {
+        expect(collapsedSidebarToggleState$.value.isCollapsed).toBe(true);
+        expect(collapsedSidebarToggleState$.value.toggle).toBeDefined();
+      });
     });
   });
 

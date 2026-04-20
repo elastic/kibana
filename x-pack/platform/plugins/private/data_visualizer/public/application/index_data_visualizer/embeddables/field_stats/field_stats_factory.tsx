@@ -199,7 +199,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         };
       };
 
-      const unsavedChangesApi = initializeUnsavedChanges({
+      const unsavedChangesApi = initializeUnsavedChanges<FieldStatisticsTableEmbeddableState>({
         uuid,
         parentApi,
         serializeState,
@@ -406,7 +406,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                     </h3>
                   }
                   color="warning"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             );

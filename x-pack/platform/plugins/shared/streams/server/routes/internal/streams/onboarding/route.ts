@@ -10,14 +10,13 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import type { OnboardingResult, TaskResult } from '@kbn/streams-schema';
 import { OnboardingStep } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import type { OnboardingTaskParams } from '../../../../lib/tasks/task_definitions/onboarding';
 import {
   getOnboardingTaskId,
   STREAMS_ONBOARDING_TASK_TYPE,
+  type OnboardingTaskParams,
 } from '../../../../lib/tasks/task_definitions/onboarding';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
-import { resolveConnectorId } from '../../../utils/resolve_connector_id';
 import { handleTaskAction } from '../../../utils/task_helpers';
 import { taskActionSchema } from '../../../../lib/tasks/task_action_schema';
 
@@ -47,12 +46,6 @@ export const onboardingTaskRoute = createServerRoute({
     body: taskActionSchema({
       from: timestampFromString,
       to: timestampFromString,
-      connectorId: z
-        .string()
-        .optional()
-        .describe(
-          'Optional connector ID. If not provided, the default AI connector from settings will be used.'
-        ),
       steps: z
         .array(z.nativeEnum(OnboardingStep))
         .optional()
@@ -60,15 +53,18 @@ export const onboardingTaskRoute = createServerRoute({
         .describe(
           'Optional list of steps to perform as part of stream onboarding in the specified sequence. By default it will execute all steps.'
         ),
+      connectors: z
+        .object({
+          features: z.string().optional().describe('Connector ID for features identification.'),
+          queries: z.string().optional().describe('Connector ID for queries generation.'),
+        })
+        .optional()
+        .describe(
+          'Optional per-step connector overrides. When omitted the server resolves connectors from the inference feature registry.'
+        ),
     }),
   }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-    logger,
-  }): Promise<OnboardingTaskResult> => {
+  handler: async ({ params, request, getScopedClients, server }): Promise<OnboardingTaskResult> => {
     const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
       request,
     });
@@ -92,22 +88,14 @@ export const onboardingTaskRoute = createServerRoute({
             scheduleConfig: {
               taskType: STREAMS_ONBOARDING_TASK_TYPE,
               taskId: onboardingTaskId,
-              params: await (async (): Promise<OnboardingTaskParams> => {
-                const connectorId = await resolveConnectorId({
-                  connectorId: body.connectorId,
-                  uiSettingsClient,
-                  logger,
-                });
-
-                return {
-                  connectorId,
-                  streamName,
-                  from: body.from,
-                  to: body.to,
-                  steps: body.steps,
-                  saveQueries,
-                };
-              })(),
+              params: {
+                streamName,
+                from: body.from,
+                to: body.to,
+                steps: body.steps,
+                saveQueries,
+                connectors: body.connectors,
+              },
               request,
             },
           } as const)

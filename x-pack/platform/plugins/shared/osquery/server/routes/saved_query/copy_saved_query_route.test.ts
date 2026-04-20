@@ -59,6 +59,7 @@ describe('copySavedQueryRoute', () => {
         get: jest.fn().mockReturnValue(loggingSystemMock.createLogger()),
       },
       security: {},
+      getStartServices: jest.fn().mockResolvedValue([{}, { security: {} }, {}]),
     } as unknown as OsqueryAppContext;
   });
 

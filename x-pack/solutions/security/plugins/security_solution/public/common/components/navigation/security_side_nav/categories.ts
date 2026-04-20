@@ -11,7 +11,7 @@ import { SecurityPageName } from '../../../../../common';
 export const getNavCategories = (
   enableAlertsAndAttacksAlignment?: boolean
 ): SeparatorLinkCategory[] => {
-  return [
+  const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
       linkIds: [SecurityPageName.dashboards],
@@ -38,13 +38,7 @@ export const getNavCategories = (
         SecurityPageName.assetInventory,
       ],
     },
-    {
-      type: LinkCategoryType.separator,
-      linkIds: [
-        SecurityPageName.siemReadiness,
-        SecurityPageName.aiValue,
-        SecurityPageName.siemMigrationsLanding,
-      ],
-    },
   ];
+
+  return categories;
 };

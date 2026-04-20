@@ -142,7 +142,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
       <div className="canvasVarHeader__triggerWrapper">
         <button className="canvasVarHeader__button" type="button" onClick={() => onCancel()}>
           <span className="canvasVarHeader__iconWrapper">
-            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} />
+            <EuiIcon type="sortLeft" style={{ verticalAlign: 'top' }} aria-hidden={true} />
           </span>
           <span>
             <span className="canvasVarHeader__anchor">

@@ -26,6 +26,7 @@ import {
   getViews,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
@@ -53,7 +54,11 @@ type MemoizedFieldsFromESQL = MemoizedFn<
 >;
 
 type MemoizedSources = MemoizedFn<
-  [CoreStart, (() => Promise<ILicense | undefined>) | undefined],
+  [
+    CoreStart,
+    (() => Promise<ILicense | undefined>) | undefined,
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+  ],
   ReturnType<typeof getESQLSources>
 >;
 
@@ -107,25 +112,40 @@ export const useEsqlCallbacks = ({
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
     const getLicense = esqlService?.getLicense;
-    const sources = await memoizedSources(core, getLicense).result;
+    const enrichSources = esqlService?.enrichSources;
+    const sources = await memoizedSources(core, getLicense, enrichSources).result;
     return sources;
   }, [dataSourcesCache, minimalQueryRef, memoizedSources, core, esqlService]);
 
   const getColumnsFor = useCallback(
     async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
       if (queryToExecute) {
-        // Abort any previous in-flight autocomplete column fetch and
-        // remove its potentially stale cache entry
-        if (columnsAbortControllerRef.current) {
+        // Only abort if the query changed — re-requests for the same query
+        // (e.g. from concurrent validation passes) should share the same fetch
+        // rather than aborting each other, which causes "Unknown column" errors.
+        if (
+          columnsAbortControllerRef.current &&
+          previousColumnsQueryRef.current !== queryToExecute
+        ) {
           columnsAbortControllerRef.current.abort();
           if (previousColumnsQueryRef.current) {
             esqlFieldsCache.delete(previousColumnsQueryRef.current);
           }
         }
 
-        const controller = new AbortController();
-        columnsAbortControllerRef.current = controller;
-        previousColumnsQueryRef.current = queryToExecute;
+        if (
+          !columnsAbortControllerRef.current ||
+          previousColumnsQueryRef.current !== queryToExecute
+        ) {
+          const controller = new AbortController();
+          columnsAbortControllerRef.current = controller;
+          previousColumnsQueryRef.current = queryToExecute;
+        }
+
+        // Capture the controller before the await so the aborted check
+        // refers to this request's signal, not a newer one that may have
+        // replaced it on the ref during the async gap.
+        const currentController = columnsAbortControllerRef.current;
 
         clearCacheWhenOld(esqlFieldsCache, queryToExecute);
         const timeRange = data.query.timefilter.timefilter.getTime();
@@ -133,12 +153,12 @@ export const useEsqlCallbacks = ({
           esqlQuery: queryToExecute,
           search: data.search.search,
           timeRange,
-          signal: controller.signal,
+          signal: currentController.signal,
           variables: esqlService?.variablesService?.esqlVariables,
           dropNullColumns: true,
         }).result;
 
-        if (controller.signal.aborted) {
+        if (currentController.signal.aborted) {
           esqlFieldsCache.delete(queryToExecute);
           return [];
         }

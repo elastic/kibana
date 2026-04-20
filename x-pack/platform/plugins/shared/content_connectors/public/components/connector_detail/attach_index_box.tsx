@@ -31,6 +31,7 @@ import type { Connector } from '@kbn/search-connectors';
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { AttachIndexLogic } from './attach_index_logic';
 import { Status } from '../../../common/types/api';
 import { FetchAvailableIndicesAPILogic } from '../../api/index/fetch_available_indices_api_logic';
@@ -375,24 +376,23 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
           <EuiSpacer size="m" />
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <AiButton
                 data-telemetry-id="entSearchContent-connector-connectorDetail-createAttachIndexButton"
                 data-test-subj="entSearchContent-connector-connectorDetail-createAttachIndexButton"
+                variant="accent"
                 iconType="sparkles"
-                color="primary"
-                fill
                 onClick={() => {
                   createIndex({ indexName: sanitizedName, language: null });
                   setSelectedIndex({ label: sanitizedNameWithoutPrefix });
                 }}
                 isLoading={isSaveLoading || isExistLoading}
-                disabled={indexExists[sanitizedName]}
+                isDisabled={indexExists[sanitizedName]}
               >
                 {i18n.translate('xpack.searchConnectorsattachIndexBox.createSameIndexButtonLabel', {
                   defaultMessage: 'Create and attach an index named {indexName}',
                   values: { indexName: sanitizedName },
                 })}
-              </EuiButton>
+              </AiButton>
               {indexExists[sanitizedName] && (
                 <EuiText size="xs">
                   {i18n.translate('xpack.searchConnectorsattachIndexBox.indexNameExistsError', {

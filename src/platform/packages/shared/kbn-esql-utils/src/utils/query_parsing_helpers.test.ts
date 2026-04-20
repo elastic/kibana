@@ -33,6 +33,7 @@ import {
   missingSortBeforeLimit,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
+  getSparklineColumns,
 } from './query_parsing_helpers';
 
 describe('esql query helpers', () => {
@@ -228,6 +229,21 @@ describe('esql query helpers', () => {
       );
       expect(code).toEqual(
         'FROM index1 /* cmt */\n  | KEEP field1, field2 /* cmt */\n  | SORT field1 /* cmt */'
+      );
+    });
+
+    it('should respect custom lineWidth when provided', function () {
+      const query =
+        'FROM kibana_sample_data_logs | STATS count = COUNT(*), avg = AVG(bytes), p95 = PERCENTILE(bytes, 95), ext = VALUES(tags.keyword) BY ip | EVAL newField = CASE(count < 100, "groupA", count > 100 AND count < 500, "groupB", "Other") | KEEP newField';
+      const codeWithNarrowWidth = prettifyQuery(query, 40);
+      const codeWithWideWidth = prettifyQuery(query, 120);
+      const maxLineLength = (code: string) =>
+        Math.max(...code.split('\n').map((line) => line.length));
+      expect(maxLineLength(codeWithNarrowWidth)).toBeLessThanOrEqual(40);
+      expect(maxLineLength(codeWithWideWidth)).toBeLessThanOrEqual(120);
+      // Wider width should allow longer lines (fewer wraps)
+      expect(maxLineLength(codeWithWideWidth)).toBeGreaterThanOrEqual(
+        maxLineLength(codeWithNarrowWidth)
       );
     });
   });
@@ -972,6 +988,33 @@ describe('esql query helpers', () => {
       const esql = 'FROM index | STATS COUNT() BY field1';
       const expected: string[] = [];
       expect(getCategorizeField(esql)).toEqual(expected);
+    });
+  });
+
+  describe('getSparklineColumns', () => {
+    it('should return sparkline alias and not inner column refs (patterns-style query)', () => {
+      const esql =
+        'FROM kibana_sample_data_logs | STATS Count = COUNT(*), Sparkline=SPARKLINE(Count(*), @timestamp, 40, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(message) | SORT Count DESC';
+      expect(getSparklineColumns(esql)).toEqual(['Sparkline']);
+    });
+
+    it('should return bare SPARKLINE expression as column id', () => {
+      const esql =
+        'FROM index | STATS SPARKLINE(COUNT(*), @timestamp, 10, ?_tstart, ?_tend) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([
+        'SPARKLINE(COUNT(*),@timestamp,10,?_tstart,?_tend)',
+      ]);
+    });
+
+    it('should not treat unrelated stats columns as sparklines based on name text', () => {
+      const esql = 'FROM index | STATS my_sparkline_metric = COUNT(*) BY Pattern=CATEGORIZE(msg)';
+      expect(getSparklineColumns(esql)).toEqual([]);
+    });
+
+    it('should apply every RENAME command in pipeline order', () => {
+      const esql =
+        'FROM index | STATS Sparkline=SPARKLINE(COUNT(*), @ts, 5, ?_a, ?_b) BY Pattern=CATEGORIZE(m) | RENAME Sparkline AS S1 | RENAME S1 AS S2';
+      expect(getSparklineColumns(esql)).toEqual(['S2']);
     });
   });
 

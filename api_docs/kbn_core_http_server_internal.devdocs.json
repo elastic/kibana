@@ -218,7 +218,7 @@
           }
         ],
         "path": "src/core/packages/http/server-internal/src/http_config.ts",
-        "lineNumber": 334,
+        "lineNumber": 352,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -231,7 +231,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 335,
+            "lineNumber": 353,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -244,7 +244,7 @@
             "label": "autoListen",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 336,
+            "lineNumber": 354,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -260,7 +260,7 @@
               "\"http1\" | \"http2\""
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 337,
+            "lineNumber": 355,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -273,7 +273,7 @@
             "label": "host",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 338,
+            "lineNumber": 356,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -286,7 +286,7 @@
             "label": "keepaliveTimeout",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 339,
+            "lineNumber": 357,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -299,7 +299,7 @@
             "label": "socketTimeout",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 340,
+            "lineNumber": 358,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -312,7 +312,7 @@
             "label": "payloadTimeout",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 341,
+            "lineNumber": 359,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -325,7 +325,7 @@
             "label": "port",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 342,
+            "lineNumber": 360,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -341,7 +341,7 @@
               "{ enabled: boolean; allowCredentials: boolean; allowOrigin: string[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 343,
+            "lineNumber": 361,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -357,7 +357,7 @@
               "{ enabled: boolean; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 348,
+            "lineNumber": 366,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -373,7 +373,7 @@
               "{ [x: string]: string | string[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 351,
+            "lineNumber": 369,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -389,7 +389,7 @@
               "{ [x: string]: string | string[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 352,
+            "lineNumber": 370,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -411,7 +411,7 @@
               }
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 353,
+            "lineNumber": 371,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -427,7 +427,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 354,
+            "lineNumber": 372,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -443,7 +443,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 355,
+            "lineNumber": 373,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -456,7 +456,7 @@
             "label": "rewriteBasePath",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 356,
+            "lineNumber": 374,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -472,7 +472,7 @@
               "CdnConfig"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 357,
+            "lineNumber": 375,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -494,7 +494,7 @@
               }
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 358,
+            "lineNumber": 376,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -510,7 +510,7 @@
               "{ enabled: boolean; referrerWhitelist?: string[] | undefined; brotli: { enabled: boolean; quality: number; }; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 359,
+            "lineNumber": 377,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -526,7 +526,7 @@
               "ICspConfig"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 364,
+            "lineNumber": 382,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -539,7 +539,7 @@
             "label": "prototypeHardening",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 365,
+            "lineNumber": 383,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -555,7 +555,7 @@
               "IExternalUrlConfig"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 366,
+            "lineNumber": 384,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -571,7 +571,7 @@
               "{ disableProtection: boolean; allowlist: string[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 367,
+            "lineNumber": 385,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -587,7 +587,7 @@
               "string[]"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 368,
+            "lineNumber": 386,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -603,7 +603,7 @@
               "{ allowFromAnyIp: boolean; ipAllowlist: string[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 369,
+            "lineNumber": 387,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -621,7 +621,7 @@
               "; strictClientVersionCheck: boolean; useVersionResolutionStrategyForInternalPaths: string[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 370,
+            "lineNumber": 388,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -637,7 +637,7 @@
               "moment.Duration"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 375,
+            "lineNumber": 393,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -650,7 +650,7 @@
             "label": "restrictInternalApis",
             "description": [],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 376,
+            "lineNumber": 394,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -666,7 +666,33 @@
               "{ readonly term: \"long\" | \"short\" | \"medium\"; readonly enabled: boolean; readonly elu: number; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 377,
+            "lineNumber": 395,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-server.HttpConfig.serverTiming",
+            "type": "boolean",
+            "tags": [],
+            "label": "serverTiming",
+            "description": [],
+            "path": "src/core/packages/http/server-internal/src/http_config.ts",
+            "lineNumber": 396,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-internal",
+            "id": "def-server.HttpConfig.serverTimingElasticsearch",
+            "type": "boolean",
+            "tags": [],
+            "label": "serverTimingElasticsearch",
+            "description": [],
+            "path": "src/core/packages/http/server-internal/src/http_config.ts",
+            "lineNumber": 397,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -682,7 +708,7 @@
               "IHttpEluMonitorConfig"
             ],
             "path": "src/core/packages/http/server-internal/src/http_config.ts",
-            "lineNumber": 379,
+            "lineNumber": 399,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -698,7 +724,7 @@
         "label": "HttpServer",
         "description": [],
         "path": "src/core/packages/http/server-internal/src/http_server.ts",
-        "lineNumber": 185,
+        "lineNumber": 193,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -714,7 +740,7 @@
               "any"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 204,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -730,7 +756,7 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 205,
+                "lineNumber": 213,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -747,7 +773,7 @@
                   "string"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 206,
+                "lineNumber": 214,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -765,7 +791,7 @@
                   "<moment.Duration>"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 207,
+                "lineNumber": 215,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -785,7 +811,7 @@
               "() => boolean"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 218,
+            "lineNumber": 226,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -807,7 +833,7 @@
               ">"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 248,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -823,7 +849,7 @@
                   "HttpServerSetupOptions"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 248,
+                "lineNumber": 256,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -843,7 +869,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 347,
+            "lineNumber": 355,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -861,7 +887,7 @@
               "() => Promise<void>"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 372,
+            "lineNumber": 380,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -887,7 +913,7 @@
               "[]; }"
             ],
             "path": "src/core/packages/http/server-internal/src/http_server.ts",
-            "lineNumber": 863,
+            "lineNumber": 952,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -903,7 +929,7 @@
                   "GetRoutersOptions"
                 ],
                 "path": "src/core/packages/http/server-internal/src/http_server.ts",
-                "lineNumber": 863,
+                "lineNumber": 952,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1590,7 +1616,7 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"required\" | \"optional\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; readonly host: string; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly prototypeHardening: boolean; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly uuid?: string | undefined; readonly basePath?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; clientAuthentication: \"none\" | \"optional\" | \"required\"; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; }>; readonly host: string; readonly protocol: \"http1\" | \"http2\"; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly cdn: Readonly<{ url?: string | null | undefined; } & {}>; readonly prototypeHardening: boolean; readonly http2: Readonly<{} & { allowUnsecure: boolean; }>; readonly versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly oas: Readonly<{} & { enabled: boolean; }>; readonly securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1598,10 +1624,10 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly payloadTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly excludeRoutes: string[]; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly rateLimiter: Readonly<{} & { term: \"long\" | \"short\" | \"medium\"; enabled: boolean; elu: number; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; }"
+          "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly payloadTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly excludeRoutes: string[]; readonly eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; readonly rateLimiter: Readonly<{} & { term: \"long\" | \"short\" | \"medium\"; enabled: boolean; elu: number; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; readonly restrictInternalApis: boolean; readonly serverTiming: boolean; readonly serverTimingElasticsearch: boolean; }"
         ],
         "path": "src/core/packages/http/server-internal/src/http_config.ts",
-        "lineNumber": 306,
+        "lineNumber": 324,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

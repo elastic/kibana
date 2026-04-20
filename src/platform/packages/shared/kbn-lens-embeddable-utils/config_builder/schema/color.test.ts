@@ -9,8 +9,13 @@
 
 import { freeze, produce } from 'immer';
 
-import type { ColorByValueStep, ColorByValueType, ColorMappingType } from './color';
-import { allColoringTypeSchema, colorByValueStepsSchema } from './color';
+import type {
+  ColorByValueStep,
+  ColorByValueType,
+  ColorMappingCategoricalType,
+  ColorMappingType,
+} from './color';
+import { allColoringTypeSchema, colorByValueStepsSchema, AUTO_COLOR, NO_COLOR } from './color';
 
 describe('Color Schema', () => {
   describe('colorByValue schema', () => {
@@ -235,10 +240,10 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: 'red' },
+            color: { type: 'color_code', value: 'red' },
           },
         ],
-        unassignedColor: { type: 'colorCode', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -252,7 +257,7 @@ describe('Color Schema', () => {
         mapping: [
           {
             values: ['value1', 'value2', 'value3'],
-            color: { type: 'colorCode', value: 'red' },
+            color: { type: 'color_code', value: 'red' },
           },
         ],
       };
@@ -271,7 +276,7 @@ describe('Color Schema', () => {
             color: { type: 'from_palette', palette: 'default', index: 0 },
           },
         ],
-        unassignedColor: { type: 'colorCode', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -305,7 +310,7 @@ describe('Color Schema', () => {
           },
           {
             values: ['value4', 'value5', 'value6'],
-            color: { type: 'colorCode', value: 'green' },
+            color: { type: 'color_code', value: 'green' },
           },
         ],
       };
@@ -354,7 +359,7 @@ describe('Color Schema', () => {
             palette: 'default',
           },
         ],
-        unassignedColor: { type: 'colorCode', value: 'green' },
+        unassigned: { type: 'color_code', value: 'green' },
       };
 
       const validated = allColoringTypeSchema.validate(input);
@@ -376,28 +381,32 @@ describe('Color Schema', () => {
       it('throws on invalid mode in color mapping', () => {
         const input = {
           palette: 'kibana_palette',
+          // @ts-expect-error
           mode: 'invalid',
-          colorMapping: {
-            values: ['value1'],
-          },
-          otherColors: {},
-        };
+          mapping: [
+            {
+              values: ['value1'],
+              color: { type: 'color_code', value: '#FF00FF' },
+            },
+          ],
+        } satisfies ColorMappingCategoricalType;
 
         expect(() => allColoringTypeSchema.validate(input)).toThrow();
       });
+    });
+  });
 
-      it('throws on empty values array in categorical mapping', () => {
-        const input = {
-          palette: 'kibana_palette',
-          mode: 'categorical',
-          colorMapping: {
-            values: [],
-          },
-          otherColors: {},
-        };
+  describe('noColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(NO_COLOR);
+      expect(validated).toEqual({ type: 'none' });
+    });
+  });
 
-        expect(() => allColoringTypeSchema.validate(input)).toThrow();
-      });
+  describe('autoColor schema', () => {
+    it('validates via allColoringTypeSchema', () => {
+      const validated = allColoringTypeSchema.validate(AUTO_COLOR);
+      expect(validated).toEqual({ type: 'auto' });
     });
   });
 });

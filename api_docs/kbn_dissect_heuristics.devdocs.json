@@ -21,6 +21,67 @@
     "functions": [
       {
         "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.assembleDissectProcessor",
+        "type": "Function",
+        "tags": [],
+        "label": "assembleDissectProcessor",
+        "description": [
+          "\nOrchestrates the full dissect processor assembly pipeline:\n  1. Group messages by structural pattern\n  2. Extract a dissect pattern from the largest group\n  3. Compute review fields from the extracted pattern\n  4. Call the provided reviewFn (LLM review) with those fields\n  5. Assemble and return a Streamlang DissectProcessor\n\nCallers supply their own reviewFn to handle LLM transport\n(streaming API, in-process call, kbnClient.request, etc.).\n\nMessages passed to reviewFn are truncated to avoid polluting\nthe LLM context."
+        ],
+        "signature": [
+          "({ from, messages, reviewFn, }: ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.AssembleDissectProcessorParams",
+            "text": "AssembleDissectProcessorParams"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.DissectProcessor",
+            "text": "DissectProcessor"
+          },
+          " | null>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+        "lineNumber": 43,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.assembleDissectProcessor.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  from,\n  messages,\n  reviewFn,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.AssembleDissectProcessorParams",
+                "text": "AssembleDissectProcessorParams"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+            "lineNumber": 43,
+            "columnNumber": 48,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
         "id": "def-common.extractDissectPattern",
         "type": "Function",
         "tags": [],
@@ -171,7 +232,13 @@
             "text": "DissectPattern"
           },
           ", reviewResult: ",
-          "NormalizedReviewResult",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.NormalizedReviewResult",
+            "text": "NormalizedReviewResult"
+          },
           ", sourceField: string) => ",
           {
             "pluginId": "@kbn/dissect-heuristics",
@@ -218,7 +285,13 @@
             "label": "reviewResult",
             "description": [],
             "signature": [
-              "NormalizedReviewResult"
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.NormalizedReviewResult",
+                "text": "NormalizedReviewResult"
+              }
             ],
             "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_dissect_processor_with_review.ts",
             "lineNumber": 27,
@@ -484,6 +557,118 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.AssembleDissectProcessorParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "AssembleDissectProcessorParams",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.AssembleDissectProcessorParams.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.AssembleDissectProcessorParams.messages",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.AssembleDissectProcessorParams.reviewFn",
+            "type": "Function",
+            "tags": [],
+            "label": "reviewFn",
+            "description": [],
+            "signature": [
+              "(reviewFields: ",
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.ReviewFields",
+                "text": "ReviewFields"
+              },
+              ", messages: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/dissect-heuristics",
+                "scope": "common",
+                "docId": "kibKbnDissectHeuristicsPluginApi",
+                "section": "def-common.NormalizedReviewResult",
+                "text": "NormalizedReviewResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/dissect-heuristics",
+                "id": "def-common.AssembleDissectProcessorParams.reviewFn.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "reviewFields",
+                "description": [],
+                "signature": [
+                  "{ [x: string]: { example_values: string[]; position: number; }; }"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+                "lineNumber": 16,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/dissect-heuristics",
+                "id": "def-common.AssembleDissectProcessorParams.reviewFn.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "messages",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+                "lineNumber": 17,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/dissect-heuristics",
         "id": "def-common.DelimiterNode",
@@ -1035,6 +1220,53 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.NormalizedReviewResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NormalizedReviewResult",
+        "description": [
+          "\nResult from LLM review of dissect fields where ECS field names have already been mapped to OpenTelemetry fields."
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+        "lineNumber": 36,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.NormalizedReviewResult.log_source",
+            "type": "string",
+            "tags": [],
+            "label": "log_source",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.NormalizedReviewResult.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ ecs_field: string; columns: string[]; }[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/get_review_fields.ts",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1074,6 +1306,74 @@
       },
       {
         "parentPluginId": "@kbn/dissect-heuristics",
+        "id": "def-common.DissectReviewFn",
+        "type": "Type",
+        "tags": [],
+        "label": "DissectReviewFn",
+        "description": [],
+        "signature": [
+          "(reviewFields: ",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.ReviewFields",
+            "text": "ReviewFields"
+          },
+          ", messages: string[]) => Promise<",
+          {
+            "pluginId": "@kbn/dissect-heuristics",
+            "scope": "common",
+            "docId": "kibKbnDissectHeuristicsPluginApi",
+            "section": "def-common.NormalizedReviewResult",
+            "text": "NormalizedReviewResult"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectReviewFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "reviewFields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: { example_values: string[]; position: number; }; }"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/dissect-heuristics",
+            "id": "def-common.DissectReviewFn.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/assemble_dissect_processor.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/dissect-heuristics",
         "id": "def-common.ReviewFields",
         "type": "Type",
         "tags": [],
@@ -1106,7 +1406,7 @@
             "section": "def-common.Prompt",
             "text": "Prompt"
           },
-          "<unknown, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
+          "<{ sample_messages: string[]; review_fields: string; }, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-dissect-heuristics/src/review/review_fields_prompt.ts",
         "lineNumber": 12,

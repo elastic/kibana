@@ -61,8 +61,6 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
 
           const rulesClient = await ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
-          const exceptionsClient = ctx.lists?.getExceptionListClient();
-          const { canWriteEndpointList } = await ctx.securitySolution.getEndpointAuthz();
 
           if (request.body.rule_id != null) {
             const rule = await readRules({
@@ -78,10 +76,6 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             }
           }
 
-          // This will create the endpoint list if it does not exist yet
-          if (canWriteEndpointList) {
-            await exceptionsClient?.createEndpointList();
-          }
           checkDefaultRuleExceptionListReferences({
             exceptionLists: request.body.exceptions_list,
           });
@@ -98,6 +92,8 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             endpointService: ctx.securitySolution.getEndpointService(),
             rulePayload: request.body,
             spaceId: ctx.securitySolution.getSpaceId(),
+            checkOsqueryResponseActionAuthz:
+              ctx.securitySolution.getCheckOsqueryResponseActionAuthz(),
           });
 
           const createdRule = await detectionRulesClient.createCustomRule({

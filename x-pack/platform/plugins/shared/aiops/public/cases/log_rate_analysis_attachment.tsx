@@ -8,8 +8,9 @@
 import React from 'react';
 import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import type {
@@ -19,13 +20,16 @@ import type {
 
 export const initComponent = memoize(
   (fieldFormats: FieldFormatsStart, LogRateAnalysisComponent: LogRateAnalysisEmbeddableWrapper) => {
-    return React.memo((props: PersistableStateAttachmentViewProps) => {
-      const { persistableStateAttachmentState } = props;
+    return React.memo((props: UnifiedValueAttachmentViewProps) => {
+      const rawState = props.data.state as Record<string, unknown>;
       const dataFormatter = fieldFormats.deserialize({
         id: FIELD_FORMAT_IDS.DATE,
       });
-      const inputProps =
-        persistableStateAttachmentState as unknown as LogRateAnalysisEmbeddableWrapperProps;
+      const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
+      const inputProps = {
+        ...(rawState as unknown as LogRateAnalysisEmbeddableWrapperProps),
+        timeRange,
+      };
 
       const listItems = [
         {

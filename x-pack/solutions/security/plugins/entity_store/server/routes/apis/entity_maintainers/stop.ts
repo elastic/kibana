@@ -7,8 +7,8 @@
 
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { ENTITY_STORE_ROUTES } from '../../../../common';
-import { API_VERSIONS, DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
+import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
+import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../../constants';
 import type { EntityStorePluginRouter } from '../../../types';
 import { wrapMiddlewares } from '../../middleware';
 import { maintainerIdParamsSchema } from './utils/validator';
@@ -16,7 +16,7 @@ import { maintainerIdParamsSchema } from './utils/validator';
 export function registerStopMaintainer(router: EntityStorePluginRouter) {
   router.versioned
     .put({
-      path: `${ENTITY_STORE_ROUTES.ENTITY_MAINTAINERS_STOP}`,
+      path: `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP}`,
       access: 'internal',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,

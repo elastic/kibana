@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSiemReadinessApi } from '@kbn/siem-readiness';
+import { useSiemReadinessApi, CATEGORY_ORDER } from '@kbn/siem-readiness';
 import type {
   RetentionInfo,
   RetentionStatus,
@@ -103,6 +103,19 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
 
     return result;
   }, [categoriesData?.mainCategoriesMap, retentionData?.items, activeCategories]);
+
+  // Check if any matched items exist ignoring activeCategories filter (for hasUnfilteredData prop)
+  const hasUnfilteredData = useMemo(() => {
+    for (const category of categoriesData?.mainCategoriesMap ?? []) {
+      for (const retention of retentionData?.items ?? []) {
+        const hasMatch = category.indices.some((idx) =>
+          idx.indexName.includes(retention.indexName)
+        );
+        if (hasMatch) return true;
+      }
+    }
+    return false;
+  }, [categoriesData?.mainCategoriesMap, retentionData?.items]);
 
   // Count non-compliant items (deduplicated by indexName)
   const nonCompliantStats = useMemo(() => {
@@ -257,7 +270,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           }
         ),
         sortable: (item: RetentionInfoWithStatus) => item?.retentionDays ?? 0,
-        width: '20%',
+        width: '15%',
         render: (retentionPeriod: string | null, item: RetentionInfoWithStatus) => {
           if (!retentionPeriod) {
             return (
@@ -282,6 +295,7 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
+        field: 'indexName' as const,
         name: i18n.translate(
           'xpack.securitySolution.siemReadiness.retention.table.column.baselineRetentionFedRAMP',
           {
@@ -332,54 +346,53 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         },
       },
       {
-        name: i18n.translate('xpack.securitySolution.siemReadiness.retention.table.column.action', {
-          defaultMessage: 'Action',
-        }),
-        width: '10%',
-        render: (item: RetentionInfoWithStatus) => {
-          let href: string;
-          let label: string;
-
-          const isDsl = item.retentionType === 'dsl';
-          const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
-          const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
-
-          if (isDsl || isUnmanagedDataStream) {
-            href = getDataStreamUrl(basePath, item.indexName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
-              { defaultMessage: 'View Data Stream' }
-            );
-          } else if (item.retentionType === 'ilm' && item.policyName) {
-            href = getIlmPoliciesUrl(basePath, item.policyName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
-              { defaultMessage: 'View ILM policies' }
-            );
-          } else if (isUnmanagedIndex) {
-            href = getIndexDetailsUrl(basePath, item.indexName);
-            label = i18n.translate(
-              'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
-              { defaultMessage: 'View Index' }
-            );
-          } else {
-            return null;
+        field: 'indexName' as const,
+        name: i18n.translate(
+          'xpack.securitySolution.siemReadiness.retention.table.column.actions',
+          {
+            defaultMessage: 'Actions',
           }
+        ),
+        actions: [
+          {
+            render: (item: RetentionInfoWithStatus) => {
+              let href: string;
+              let label: string;
 
-          return (
-            <div style={{ textAlign: 'right' }}>
-              <EuiButtonEmpty
-                size="xs"
-                href={href}
-                target="_blank"
-                iconType="popout"
-                iconSide="right"
-              >
-                {label}
-              </EuiButtonEmpty>
-            </div>
-          );
-        },
+              const isDsl = item.retentionType === 'dsl';
+              const isUnmanagedDataStream = item.isDataStream && item.retentionType === null;
+              const isUnmanagedIndex = !item.isDataStream && item.retentionType === null;
+
+              if (isDsl || isUnmanagedDataStream) {
+                href = getDataStreamUrl(basePath, item.indexName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewDataStream',
+                  { defaultMessage: 'View Data Stream' }
+                );
+              } else if (item.retentionType === 'ilm' && item.policyName) {
+                href = getIlmPoliciesUrl(basePath, item.policyName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewIlm',
+                  { defaultMessage: 'View ILM policies' }
+                );
+              } else if (isUnmanagedIndex) {
+                href = getIndexDetailsUrl(basePath, item.indexName);
+                label = i18n.translate(
+                  'xpack.securitySolution.siemReadiness.retention.action.viewIndex',
+                  { defaultMessage: 'View Index' }
+                );
+              } else {
+                return null;
+              }
+
+              return (
+                <EuiButtonEmpty size="s" href={href} target="_blank">
+                  {label}
+                </EuiButtonEmpty>
+              );
+            },
+          },
+        ],
       },
     ],
     [basePath]
@@ -411,28 +424,6 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
           announceOnMount
         >
           <p>{(error as Error).message}</p>
-        </EuiCallOut>
-      </>
-    );
-  }
-
-  if (categories.length === 0) {
-    return (
-      <>
-        <EuiSpacer size="m" />
-        <EuiCallOut
-          title={i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.title', {
-            defaultMessage: 'No data streams found',
-          })}
-          color="primary"
-          iconType="iInCircle"
-          announceOnMount
-        >
-          <p>
-            {i18n.translate('xpack.securitySolution.siemReadiness.retention.noData.description', {
-              defaultMessage: 'No data streams with security-relevant data were found.',
-            })}
-          </p>
         </EuiCallOut>
       </>
     );
@@ -492,6 +483,8 @@ export const RetentionTab: React.FC<SiemReadinessTabActiveCategoriesProps> = ({
         defaultSortDirection="asc"
         itemName="data streams / indices"
         storageKey={SIEM_READINESS_ACCORDIONS_STORAGE_KEY}
+        isFilterActive={activeCategories.length < CATEGORY_ORDER.length && hasUnfilteredData}
+        hasUnfilteredData={hasUnfilteredData}
       />
     </>
   );

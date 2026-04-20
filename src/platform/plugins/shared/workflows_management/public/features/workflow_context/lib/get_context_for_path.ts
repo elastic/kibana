@@ -10,7 +10,7 @@
 import _ from 'lodash';
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicStepContextSchema, WhileContextSchema } from '@kbn/workflows';
+import { DynamicStepContextSchema, getStepId, WhileContextSchema } from '@kbn/workflows';
 import { isAtomic, isEnterForeach, isEnterWhile, type WorkflowGraph } from '@kbn/workflows/graph';
 import { DataMapStepTypeId } from '@kbn/workflows-extensions/common';
 import type { z } from '@kbn/zod/v4';
@@ -31,6 +31,50 @@ type WorkflowDefinitionForContext =
         | Array<{ name: string; type: string; [key: string]: unknown }>;
     });
 
+/**
+ * Builds the step-level context schema for a given step name, without
+ * template-local extension.
+ */
+export function getContextSchemaForStep(
+  baseSchema: typeof DynamicStepContextSchema,
+  workflowGraph: WorkflowGraph,
+  stepName: string
+): typeof DynamicStepContextSchema {
+  const stepId = getStepId(stepName);
+  const stepNode = workflowGraph.getStepNode(stepId);
+  if (!stepNode) {
+    return baseSchema;
+  }
+  const predecessors = workflowGraph.getAllPredecessors(stepNode.id);
+
+  const extension: Record<string, z.ZodType> = {};
+
+  const stepsCollectionSchema = getStepsCollectionSchema(
+    baseSchema,
+    workflowGraph,
+    stepName,
+    predecessors
+  );
+  if (Object.keys(stepsCollectionSchema.shape).length > 0) {
+    extension.steps = stepsCollectionSchema;
+  }
+
+  extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors);
+
+  let schema = baseSchema.extend(extension) as typeof DynamicStepContextSchema;
+
+  const enrichments = getStepContextSchemaEnrichmentEntries(schema, workflowGraph, stepName);
+  if (enrichments.length > 0) {
+    const enrichmentShape: Record<string, z.ZodType> = {};
+    for (const enrichment of enrichments) {
+      enrichmentShape[enrichment.key] = enrichment.value;
+    }
+    schema = schema.extend(enrichmentShape) as typeof DynamicStepContextSchema;
+  }
+
+  return schema;
+}
+
 // Implementation should be the same as in the 'WorkflowContextManager.getContext' function
 // src/platform/plugins/shared/workflows_execution_engine/server/workflow_context_manager/workflow_context_manager.ts
 export function getContextSchemaForPath(
@@ -40,9 +84,6 @@ export function getContextSchemaForPath(
   yamlDocument?: Document | null,
   offset?: number
 ): typeof DynamicStepContextSchema {
-  // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
-  // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
-  // Merge result has dynamic event type (ZodType); cast so schema satisfies typeof DynamicStepContextSchema
   let schema: typeof DynamicStepContextSchema = DynamicStepContextSchema.merge(
     getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
   ) as typeof DynamicStepContextSchema;
@@ -56,26 +97,7 @@ export function getContextSchemaForPath(
     return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
   }
 
-  const stepsCollectionSchema = getStepsCollectionSchema(schema, workflowGraph, nearestStep.name);
-
-  if (Object.keys(stepsCollectionSchema.shape).length > 0) {
-    schema = schema.extend({ steps: stepsCollectionSchema });
-  }
-
-  const variablesSchema = getVariablesSchema(workflowGraph, nearestStep.name);
-  schema = schema.extend({ variables: variablesSchema });
-
-  const enrichments = getStepContextSchemaEnrichmentEntries(
-    schema,
-    workflowGraph,
-    nearestStep.name
-  );
-
-  for (const enrichment of enrichments) {
-    schema = schema.extend({
-      [enrichment.key]: enrichment.value,
-    }) as typeof DynamicStepContextSchema;
-  }
+  schema = getContextSchemaForStep(schema, workflowGraph, nearestStep.name);
 
   return maybeExtendWithTemplateLocals(schema, yamlDocument, offset);
 }

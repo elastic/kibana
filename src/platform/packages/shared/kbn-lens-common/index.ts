@@ -209,7 +209,6 @@ export type {
   SecondaryTrend,
   MetricVisualizationState,
   MetricVisualizationStateOptionals,
-  TitleFontWeight,
   PrimaryMetricFontSize,
   IconPosition,
   Alignment,
@@ -243,8 +242,22 @@ export type {
   XYLayerConfig,
   ValidXYDataLayerConfig,
   ValidLayer,
-  XYState,
+  XYVisualizationState,
 } from './visualizations/xy/types';
+export type {
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedState,
+} from './visualizations/xy/persistence';
+export {
+  isPersistedAnnotationsLayer,
+  isPersistedByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  isPersistedLinkedByValueAnnotationsLayer,
+} from './visualizations/xy/persistence';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
@@ -277,7 +290,6 @@ export type {
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
-  SupportedDatasourceId,
   LensByValueInput,
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
@@ -401,3 +413,6 @@ export {
 } from './datasources/form_based/helpers';
 
 export { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from './editor/constants';
+export { LENS_DATASOURCE_ID } from './embeddable/types';
+export type { LensDatasourceId } from './embeddable/types';
+export { LENS_EMBEDDABLE_TYPE } from './embeddable/constants';

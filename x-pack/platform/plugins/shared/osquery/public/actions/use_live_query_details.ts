@@ -32,6 +32,7 @@ export interface PackQueriesQuery {
   platform?: string;
   saved_query_id?: string;
   expiration?: string;
+  timeout?: number;
 }
 
 export interface LiveQueryDetailsItem {
@@ -47,6 +48,7 @@ export interface LiveQueryDetailsItem {
   pack_id?: string;
   pack_name?: string;
   pack_prebuilt?: boolean;
+  tags?: string[];
   status?: string;
   queries?: PackQueriesQuery[];
 }

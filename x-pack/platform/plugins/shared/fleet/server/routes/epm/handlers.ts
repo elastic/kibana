@@ -45,13 +45,18 @@ import type {
   GetInstalledPackagesRequestSchema,
   GetDataStreamsRequestSchema,
   GetInfoRequestSchema,
+  GetInfoWithoutVersionRequestSchema,
   InstallPackageFromRegistryRequestSchema,
+  InstallPackageFromRegistryWithoutVersionRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  DeletePackageWithoutVersionRequestSchema,
   BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
+  GetDependenciesRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
+  UpdatePackageWithoutVersionRequestSchema,
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
@@ -90,7 +95,7 @@ import {
   licenseService,
   packagePolicyService,
 } from '../../services';
-import { getPackageUsageStats } from '../../services/epm/packages/get';
+import { getPackageUsageStats, getPackageDependencies } from '../../services/epm/packages/get';
 import {
   bulkRollbackAvailableCheck,
   isIntegrationRollbackTTLExpired,
@@ -230,12 +235,14 @@ export const getLimitedListHandler: FleetRequestHandler<
 };
 
 export const getInfoHandler: FleetRequestHandler<
-  TypeOf<typeof GetInfoRequestSchema.params>,
+  | TypeOf<typeof GetInfoRequestSchema.params>
+  | TypeOf<typeof GetInfoWithoutVersionRequestSchema.params>,
   TypeOf<typeof GetInfoRequestSchema.query>
 > = async (context, request, response) => {
   const savedObjectsClient = (await context.fleet).internalSoClient;
   const { limitedToPackages } = await context.fleet;
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
 
   checkAllowedPackages([pkgName], limitedToPackages);
 
@@ -301,7 +308,8 @@ export const getBulkAssetsHandler: FleetRequestHandler<
 };
 
 export const updatePackageHandler: FleetRequestHandler<
-  TypeOf<typeof UpdatePackageRequestSchema.params>,
+  | TypeOf<typeof UpdatePackageRequestSchema.params>
+  | TypeOf<typeof UpdatePackageWithoutVersionRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
@@ -342,8 +350,17 @@ export const getStatsHandler: FleetRequestHandler<
   return response.ok({ body });
 };
 
+export const getDependenciesHandler: FleetRequestHandler<
+  TypeOf<typeof GetDependenciesRequestSchema.params>
+> = async (context, request, response) => {
+  const { pkgName, pkgVersion } = request.params;
+  const items = await getPackageDependencies(pkgName, pkgVersion);
+  return response.ok({ body: { items } });
+};
+
 export const installPackageFromRegistryHandler: FleetRequestHandler<
-  TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
+  | TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>
+  | TypeOf<typeof InstallPackageFromRegistryWithoutVersionRequestSchema.params>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
@@ -352,7 +369,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
 
   const spaceId = fleetContext.spaceId;
   const installSource = 'registry';
@@ -368,6 +386,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     request,
     ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
     skipDataStreamRollover: request.query?.skipDataStreamRollover,
+    skipDependencyCheck: request.query?.skipDependencyCheck,
   });
 
   if (!res.error) {
@@ -560,10 +579,12 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 };
 
 export const deletePackageHandler: FleetRequestHandler<
-  TypeOf<typeof DeletePackageRequestSchema.params>,
+  | TypeOf<typeof DeletePackageRequestSchema.params>
+  | TypeOf<typeof DeletePackageWithoutVersionRequestSchema.params>,
   TypeOf<typeof DeletePackageRequestSchema.query>
 > = async (context, request, response) => {
-  const { pkgName, pkgVersion } = request.params;
+  const { pkgName } = request.params;
+  const pkgVersion = 'pkgVersion' in request.params ? request.params.pkgVersion : undefined;
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;

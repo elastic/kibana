@@ -14,10 +14,8 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { take } from 'rxjs';
@@ -49,6 +47,10 @@ interface WorkflowExecuteEventFormProps {
   setValue: (data: string) => void;
   errors: string | null;
   setErrors: (errors: string | null) => void;
+  /**
+   * When false, RAC alert index/fields HTTP calls are not made
+   */
+  racQueriesEnabled?: boolean;
 }
 
 export const WorkflowExecuteEventForm = ({
@@ -56,7 +58,9 @@ export const WorkflowExecuteEventForm = ({
   setValue,
   errors,
   setErrors,
+  racQueriesEnabled = true,
 }: WorkflowExecuteEventFormProps): React.JSX.Element => {
+  const { euiTheme } = useEuiTheme();
   const { services } = useKibana();
   const { http, notifications, data: dataService, unifiedSearch } = services;
   const [alerts, setAlerts] = useState<Alert[]>([]);
@@ -73,10 +77,13 @@ export const WorkflowExecuteEventForm = ({
   const dataViewCreatingRef = useRef(false);
 
   // Fetch alert indices via the RAC endpoint (handles space-unaware systems like o11y)
-  // Empty ruleTypeIds + enabled: true → returns indices for all authorized rule types
+  // Empty ruleTypeIds + enabled → returns indices for all authorized rule types.
   const { data: alertIndexNames } = useFetchAlertsIndexNamesQuery(
     { http, ruleTypeIds: [] },
-    { enabled: true }
+    {
+      enabled: racQueriesEnabled,
+      retry: false,
+    }
   );
 
   const indexPattern = useMemo(
@@ -310,68 +317,36 @@ export const WorkflowExecuteEventForm = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiSpacer size="s" />
-      <EuiFlexItem>
-        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
-          <AlertsSearchBar
-            appName="workflow_management"
-            showDatePicker
-            onQueryChange={handleQueryChange}
-            onQuerySubmit={handleQuerySubmit}
-            onFiltersUpdated={handleFiltersUpdated}
-            query={query}
-            filters={filters}
-            rangeFrom={timeRange.from}
-            rangeTo={timeRange.to}
-            showFilterBar={false}
-            showSubmitButton={true}
-            placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
-              defaultMessage:
-                'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
-            })}
-            ruleTypeIds={[]}
-            http={http}
-            toasts={notifications.toasts}
-            unifiedSearchBar={unifiedSearch.ui.SearchBar}
-            dataService={dataService}
-            fetchUnifiedAlertsFields={true}
-          />
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        {alertsLoading ? (
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="m" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                {i18n.translate('workflows.workflowExecuteEventForm.loadingAlerts', {
-                  defaultMessage: 'Loading alerts...',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <EuiBasicTable
-            itemId="_id"
-            rowHeader="@timestamp"
-            tableLayout="fixed"
-            items={alerts}
-            columns={columns}
-            tableCaption={i18n.translate('workflows.workflowExecuteEventForm.tableCaption', {
-              defaultMessage: 'Alerts list for workflow execution',
-            })}
-            selection={{
-              onSelectionChange: updateEventData,
-            }}
-          />
-        )}
+      <EuiFlexItem grow={false}>
+        <AlertsSearchBar
+          appName="workflow_management"
+          showDatePicker
+          onQueryChange={handleQueryChange}
+          onQuerySubmit={handleQuerySubmit}
+          onFiltersUpdated={handleFiltersUpdated}
+          query={query}
+          filters={filters}
+          rangeFrom={timeRange.from}
+          rangeTo={timeRange.to}
+          showFilterBar={false}
+          showSubmitButton={true}
+          placeholder={i18n.translate('workflows.workflowExecuteEventForm.searchPlaceholder', {
+            defaultMessage:
+              'Filter your data using KQL syntax (e.g., rule.name:test or kibana.alert.rule.name:test)',
+          })}
+          ruleTypeIds={[]}
+          http={http}
+          toasts={notifications.toasts}
+          unifiedSearchBar={unifiedSearch.ui.SearchBar}
+          dataService={dataService}
+          fetchUnifiedAlertsFields={Boolean(
+            racQueriesEnabled && alertIndexNames && alertIndexNames.length > 0
+          )}
+        />
       </EuiFlexItem>
 
-      {/* Error Display */}
       {errors && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCallOut
             announceOnMount
             title={i18n.translate('workflows.workflowExecuteEventForm.errorTitle', {
@@ -391,6 +366,24 @@ export const WorkflowExecuteEventForm = ({
           </EuiCallOut>
         </EuiFlexItem>
       )}
+
+      <EuiFlexItem>
+        <EuiBasicTable
+          itemId="_id"
+          rowHeader="@timestamp"
+          tableLayout="fixed"
+          items={alerts}
+          columns={columns}
+          loading={alertsLoading}
+          tableCaption={i18n.translate('workflows.workflowExecuteEventForm.tableCaption', {
+            defaultMessage: 'Alerts list for workflow execution',
+          })}
+          selection={{
+            onSelectionChange: updateEventData,
+          }}
+          css={{ border: euiTheme.border.thin, paddingTop: '1px' }}
+        />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

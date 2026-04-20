@@ -1364,8 +1364,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
-      await testSubjects.click('lnsDatatable_dynamicColoring_groups_' + coloringType);
+    async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
+      const label = coloringType.charAt(0).toUpperCase() + coloringType.slice(1);
+      await this.selectOptionFromComboBox('lnsDatatable_dynamicColoring_groups', label);
     },
 
     async openPalettePanel() {
@@ -2179,7 +2180,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async triggerCSVDownloadExport() {
       await this.clickExportButton();
       // simply clicking the export button is enough, to trigger the CSV download in lens
-      await exports.clickPopoverItem('CSV', this.clickExportButton);
+      await exports.clickPopoverItem('CSV', async () => {
+        await this.clickExportButton();
+        return true;
+      });
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {

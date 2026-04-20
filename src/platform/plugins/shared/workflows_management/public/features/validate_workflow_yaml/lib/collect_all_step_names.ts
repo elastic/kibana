@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Document, isPair, isScalar, visit } from 'yaml';
+import { type Document, isPair, isScalar, type LineCounter, visit } from 'yaml';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { StepNameInfo } from '../model/types';
 
-export function collectAllStepNames(yamlDocument: Document): StepNameInfo[] {
+export function collectAllStepNames(
+  yamlDocument: Document,
+  lineCounter: LineCounter
+): StepNameInfo[] {
   const stepNames: StepNameInfo[] = [];
 
   if (!yamlDocument?.contents || yamlDocument.errors.length > 0) {
@@ -48,41 +51,16 @@ export function collectAllStepNames(yamlDocument: Document): StepNameInfo[] {
 
       if (isInSteps) {
         const [startOffset, endOffset] = node.range;
-
-        // Convert byte offsets to line/column positions
-        const text = yamlDocument.toString();
-        let line = 1;
-        let column = 1;
-        let startLine = 1;
-        let startCol = 1;
-        let endLine = 1;
-        let endCol = 1;
-
-        for (let i = 0; i < text.length; i++) {
-          if (i === startOffset) {
-            startLine = line;
-            startCol = column;
-          }
-          if (i === endOffset) {
-            endLine = line;
-            endCol = column;
-            break;
-          }
-          if (text[i] === '\n') {
-            line++;
-            column = 1;
-          } else {
-            column++;
-          }
-        }
+        const startPos = lineCounter.linePos(startOffset);
+        const endPos = lineCounter.linePos(endOffset);
 
         stepNames.push({
           name: node.value as string,
           node,
-          startLineNumber: startLine,
-          startColumn: startCol,
-          endLineNumber: endLine,
-          endColumn: endCol,
+          startLineNumber: startPos.line,
+          startColumn: startPos.col,
+          endLineNumber: endPos.line,
+          endColumn: endPos.col,
         });
       }
     },

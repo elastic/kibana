@@ -8,6 +8,7 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
 import { conditionToESQL } from '@kbn/streamlang';
+import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
 import {
@@ -16,9 +17,12 @@ import {
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
 import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+
 import {
   buildExtractionSourceClause,
+  buildLogPageProbeSourceClause,
   buildFieldEvaluations,
+  buildSetFieldsByCondition,
   type PaginationParams,
   type PaginationFields,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -33,10 +37,10 @@ import {
   extractPaginationParams,
   buildPaginationSection,
   hasFieldEvaluations,
+  mapPostAggFilterFieldsToRecentForEsql,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
-const HASH_ALG = 'MD5';
 
 export const MAIN_EXTRACTION_PAGINATION_FIELDS: PaginationFields = {
   timestampField: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -63,6 +67,8 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
   recoveryId?: string;
   pagination?: PaginationParams;
+  logsPageCursorStart?: PaginationParams;
+  logsPageCursorEnd?: PaginationParams;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -71,9 +77,10 @@ export function buildRemainingLogsCountQuery(params: {
   fromDateISO: string;
   toDateISO: string;
   recoveryId?: string;
+  logsPageCursorStart?: PaginationParams;
 }): string {
   return (
-    buildExtractionSourceClause(params) +
+    buildLogPageProbeSourceClause(params) +
     `
   | STATS document_count = COUNT()`
   );
@@ -88,6 +95,8 @@ export function buildLogsExtractionEsqlQuery({
   latestIndex,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback } = entityDefinition;
 
@@ -95,12 +104,26 @@ export function buildLogsExtractionEsqlQuery({
 
   // FROM and WHERE
   parts.push(
-    buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO, recoveryId })
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      recoveryId,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
   );
 
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {
     parts.push(buildFieldEvaluations(entityDefinition));
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsPreAgg) {
+      parts.push(buildSetFieldsByCondition(entry));
+    }
   }
 
   // Evaluation of the id without type so we can fallback to name
@@ -145,7 +168,11 @@ export function buildLogsExtractionEsqlQuery({
 
   if (entityDefinition.postAggFilter) {
     // If it has post aggregation filter, we filter it right after lookup join
-    parts.push(buildPostAggFilter(entityDefinition.postAggFilter));
+    parts.push(
+      buildPostAggFilter(
+        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
+      )
+    );
     // then we can paginate after the post aggregation filter
     parts.push(
       ...buildPaginationSection(
@@ -156,6 +183,17 @@ export function buildLogsExtractionEsqlQuery({
         recoveryId
       )
     );
+  }
+
+  if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
+    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
+      parts.push(
+        buildSetFieldsByCondition(entry, {
+          entityFields: fields,
+          useRecentDataPrefix: true,
+        })
+      );
+    }
   }
 
   // Perform the final merge of the fields between latest and recent data

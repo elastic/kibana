@@ -41,8 +41,6 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/grok-ui'
-  - '@kbn/grok-heuristics'
-  - '@kbn/dissect-heuristics'
   - '@kbn/streams-plugin'
   - '@kbn/search-types'
   - '@kbn/xstate-utils'
@@ -72,6 +70,7 @@ dependsOn:
   - '@kbn/saved-objects-tagging-plugin'
   - '@kbn/config-schema'
   - '@kbn/scout'
+  - '@kbn/scout-synthtrace'
   - '@kbn/unified-doc-viewer'
   - '@kbn/monaco'
   - '@kbn/unified-doc-viewer-plugin'
@@ -104,10 +103,19 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/timerange'
   - '@kbn/inference-common'
+  - '@kbn/inference-connectors'
   - '@kbn/esql'
   - '@kbn/inference-endpoint-ui-common'
   - '@kbn/stack-connectors-plugin'
   - '@kbn/std'
+  - '@kbn/streams-ai'
+  - '@kbn/cps'
+  - '@kbn/evals-plugin'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/deeplinks-management'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-ui-settings-browser'
+  - '@kbn/inference-connectors'
 tags:
   - plugin
   - prod
@@ -124,26 +132,6 @@ fileGroups:
     - test/scout/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

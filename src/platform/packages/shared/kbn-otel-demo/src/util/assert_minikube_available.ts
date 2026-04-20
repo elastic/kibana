@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 
 /**
@@ -48,20 +49,22 @@ export async function assertKubectlAvailable(): Promise<void> {
 /**
  * Starts minikube if not already running
  */
-export async function ensureMinikubeRunning(): Promise<void> {
+export async function ensureMinikubeRunning(log?: ToolingLog): Promise<void> {
   try {
     const { stdout } = await execa.command('minikube status --format={{.Host}}');
     if (stdout.trim() === 'Running') {
-      return; // Already running
+      log?.info('minikube is already running');
+      return;
     }
   } catch {
     // Not running or not started
   }
 
-  // Start minikube
+  log?.info('Starting minikube (--cpus=4 --memory=4096) — this may take a minute...');
   await execa.command('minikube start --driver=docker --memory=4096 --cpus=4', {
     stdio: 'inherit',
   });
+  log?.info('minikube started');
 }
 
 /**
@@ -73,9 +76,32 @@ export async function getMinikubeIp(): Promise<string> {
 }
 
 /**
+ * Resolves the IP address for host.minikube.internal from minikube's /etc/hosts.
+ * Pods use CoreDNS which doesn't resolve this hostname, so the IP is needed
+ * for hostAliases in pod specs that need to reach the host machine.
+ */
+export async function getMinikubeHostGatewayIp(): Promise<string | undefined> {
+  try {
+    const { stdout } = await execa('minikube', ['ssh', 'grep host.minikube.internal /etc/hosts']);
+    const ip = stdout.trim().split(/\s+/)[0];
+    return ip || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Waits for all pods in a namespace to be ready
  */
-export async function waitForPodsReady(namespace: string, timeoutSeconds = 600): Promise<void> {
+export async function waitForPodsReady(
+  namespace: string,
+  options?: { timeoutSeconds?: number; pollIntervalMs?: number; log?: ToolingLog }
+): Promise<void> {
+  const timeoutSeconds = options?.timeoutSeconds ?? 600;
+  const pollIntervalMs = options?.pollIntervalMs ?? 2000;
+  const log = options?.log;
+
+  log?.info(`Waiting for pods in namespace "${namespace}" to be ready...`);
   const startTime = Date.now();
   const timeoutMs = timeoutSeconds * 1000;
 
@@ -87,13 +113,13 @@ export async function waitForPodsReady(namespace: string, timeoutSeconds = 600):
       const phases = stdout.replace(/'/g, '').trim().split(' ').filter(Boolean);
 
       if (phases.length > 0 && phases.every((phase) => phase === 'Running')) {
-        // Check if all containers are ready
         const { stdout: readyOutput } = await execa.command(
           `kubectl get pods -n ${namespace} -o jsonpath='{.items[*].status.containerStatuses[*].ready}'`
         );
         const readyStates = readyOutput.replace(/'/g, '').trim().split(' ').filter(Boolean);
 
         if (readyStates.length > 0 && readyStates.every((ready) => ready === 'true')) {
+          log?.info('All pods ready');
           return;
         }
       }
@@ -101,10 +127,12 @@ export async function waitForPodsReady(namespace: string, timeoutSeconds = 600):
       // Pods might not exist yet
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }
 
-  throw new Error(`Timeout waiting for pods in namespace ${namespace} to be ready`);
+  throw new Error(
+    `Timeout (${timeoutSeconds}s) waiting for pods in namespace ${namespace} to be ready`
+  );
 }
 
 /**

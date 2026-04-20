@@ -24,6 +24,7 @@ const FetchMonitorQueryArgsCommon = {
   projects: t.array(t.string),
   schedules: t.array(t.string),
   monitorQueryIds: t.array(t.string),
+  configIds: t.array(t.string),
   sortField: t.string,
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
   showFromAllSpaces: t.boolean,

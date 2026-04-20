@@ -1,5 +1,5 @@
 {
-  "sha1": "954415e168f093707c215be26ba5559d4b5f2878",
+  "sha1": "d811624fed52d985ebbfaf9bcd552ae63c18ff7a",
   "tests": [
     {
       "id": "db4898614990d08-c129e7cf5767d21",
@@ -333,7 +333,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/private_locations.spec.ts",
-        "line": 30,
+        "line": 29,
         "column": 7
       }
     },

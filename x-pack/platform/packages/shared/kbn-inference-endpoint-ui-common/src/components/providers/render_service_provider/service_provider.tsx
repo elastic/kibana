@@ -19,8 +19,7 @@ import elasticIcon from '../assets/images/elastic.svg';
 import huggingFaceIcon from '../assets/images/hugging_face.svg';
 import cohereIcon from '../assets/images/cohere.svg';
 import openAIIcon from '../assets/images/open_ai.svg';
-import azureAIStudioIcon from '../assets/images/azure_ai_studio.svg';
-import azureOpenAIIcon from '../assets/images/azure_open_ai.svg';
+import azureIcon from '../assets/images/azure_ai_studio.svg';
 import googleAIStudioIcon from '../assets/images/google_ai_studio.svg';
 import mistralIcon from '../assets/images/mistral.svg';
 import amazonBedrockIcon from '../assets/images/amazon_bedrock.svg';
@@ -74,12 +73,12 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     solutions: ['Search'],
   },
   [ServiceProviderKeys.azureaistudio]: {
-    icon: azureAIStudioIcon,
+    icon: azureIcon,
     name: 'Azure AI Studio',
     solutions: ['Search'],
   },
   [ServiceProviderKeys.azureopenai]: {
-    icon: azureOpenAIIcon,
+    icon: azureIcon,
     name: 'Azure OpenAI',
     solutions: ['Observability', 'Security', 'Search'],
   },
@@ -194,7 +193,7 @@ export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKe
       name={providerKey}
       data-test-subj={`icon-service-provider-${providerKey}`}
       iconType={iconType}
-      color="#fff"
+      color="plain"
       size="s"
       type="space"
     />

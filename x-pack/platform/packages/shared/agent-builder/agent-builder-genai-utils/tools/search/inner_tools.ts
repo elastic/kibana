@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
+import type { TimeRange } from '@kbn/agent-builder-common';
 import type { Resource, ResourceListResult, ToolResult } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -17,6 +18,7 @@ import { createErrorResult, getToolResultId } from '@kbn/agent-builder-server/to
 import { relevanceSearch } from '../relevance_search';
 import { naturalLanguageSearch } from '../nl_search';
 import type { MatchResult } from '../steps/perform_match_search';
+import type { TopSnippetsConfig } from '../steps/extract_snippets';
 import { progressMessages } from './i18n';
 
 const convertMatchResult = (result: MatchResult): Resource => {
@@ -27,7 +29,7 @@ const convertMatchResult = (result: MatchResult): Resource => {
     },
     partial: true,
     content: {
-      highlights: result.highlights,
+      snippets: result.snippets,
     },
   };
 };
@@ -39,11 +41,13 @@ export const createRelevanceSearchTool = ({
   esClient,
   events,
   logger,
+  topSnippetsConfig,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events?: ToolEventEmitter;
   logger: Logger;
+  topSnippetsConfig?: TopSnippetsConfig;
 }) => {
   return toTool(
     async ({ term, index, size }) => {
@@ -59,6 +63,7 @@ export const createRelevanceSearchTool = ({
             model,
             esClient,
             logger,
+            topSnippetsConfig,
           });
           const resources = rawResults.map(convertMatchResult);
 
@@ -99,6 +104,7 @@ export const createNaturalLanguageSearchTool = ({
   logger,
   rowLimit,
   customInstructions,
+  timeRange,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -106,6 +112,7 @@ export const createNaturalLanguageSearchTool = ({
   logger: Logger;
   rowLimit?: number;
   customInstructions?: string;
+  timeRange: TimeRange;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -123,6 +130,7 @@ export const createNaturalLanguageSearchTool = ({
             logger,
             rowLimit,
             customInstructions,
+            timeRange,
           });
 
           const results: ToolResult[] = response.esqlData
@@ -142,6 +150,7 @@ export const createNaturalLanguageSearchTool = ({
                     query: response.generatedQuery,
                     columns: response.esqlData.columns,
                     values: response.esqlData.values,
+                    time_range: timeRange,
                   },
                 },
               ]

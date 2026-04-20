@@ -6,84 +6,164 @@
  */
 
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
   EuiWindowEvent,
 } from '@elastic/eui';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
-import {
-  useAssetCriticalityData,
-  useAssetCriticalityPrivileges,
-} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
-import {
-  AssetCriticalitySelector,
-  AssetCriticalityTitle,
-} from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
+import { Title } from '../../../../common/components/header_page/title';
+import { LastEventTime } from '../../../../common/components/last_event_time';
+import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
+import { buildAnomaliesTableInfluencersFilterQuery } from '../../../../common/components/ml/anomaly/anomaly_table_euid';
+import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
+import {
+  USER_OVERVIEW_RISK_SCORE_QUERY_ID,
+  UserOverview,
+  type UserSummaryProps,
+} from '../../../../overview/components/user_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useUiSetting } from '../../../../common/lib/kibana';
 import { inputsSelectors } from '../../../../common/store';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { setUsersDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
-import { getUsersDetailsPageFilters } from './helpers';
-import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
-import { LastEventTime } from '../../../../common/components/last_event_time';
-import { EntityType } from '../../../../../common/entity_analytics/types';
-import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
-import type { UserSummaryProps } from '../../../../overview/components/user_overview';
-import {
-  USER_OVERVIEW_RISK_SCORE_QUERY_ID,
-  UserOverview,
-} from '../../../../overview/components/user_overview';
-import { useObservedUserDetails } from '../../containers/users/observed_details';
-import { useQueryInspector } from '../../../../common/components/page/manage_query';
-import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { UsersType } from '../../store/model';
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { getUsersDetailsPageFilters, getIdentityFieldsPageFilters } from './helpers';
+import {
+  identityFieldsHaveUsableValues,
+  mergeLegacyIdentityWhenStoreEntityMissing,
+} from '../../../../flyout/document_details/shared/utils';
+import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
+import { Display } from '../../../hosts/pages/display';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { useObservedUserDetails } from '../../containers/users/observed_details';
+import { manageQuery } from '../../../../common/components/page/manage_query';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
+import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
+import {
+  useEntityFromStore,
+  type EntityStoreRecord,
+} from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import { ObservedDataSection as UserObservedDataSection } from '../../../../flyout/entity_details/user_right/components/observed_data_section';
+import { USER_PANEL_OBSERVED_USER_QUERY_ID } from '../../../../flyout/entity_details/user_right';
+import { useObservedUser } from '../../../../flyout/entity_details/user_right/hooks/use_observed_user';
+import { buildRiskScoreStateFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_details/shared/translations';
+import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
+import { sourcererSelectors } from '../../../../sourcerer/store';
+import type { UserItem } from '../../../../../common/search_strategy';
+import type { Entity } from '../../../../../common/api/entity_analytics';
 
-const QUERY_ID = 'UsersDetailsQueryId';
+const USERS_DETAILS_OVERVIEW_QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
+
+const UserOverviewManage = manageQuery(UserOverview);
+
+const UserDetailsHeaderTitle: React.FC<{
+  detailName: string;
+  displayEntityId?: string;
+}> = ({ detailName, displayEntityId }) => (
+  <>
+    <Title title={detailName} />
+    {displayEntityId ? (
+      <>
+        <EuiSpacer size="xs" />
+        <EuiText size="xs" color="subdued" data-test-subj="user-details-page-entity-id">
+          {displayEntityId}
+        </EuiText>
+      </>
+    ) : null}
+  </>
+);
+UserDetailsHeaderTitle.displayName = 'UserDetailsHeaderTitle';
+
+const UserDetailsAssetCriticalitySection: React.FC<{
+  canRead: boolean;
+  detailName: string;
+  entityStoreV2Enabled: boolean;
+  noEntityInStore: boolean;
+  observedUserEntityRecord: EntityStoreRecord | null | undefined;
+  storeRecord: EntityStoreRecord | null | undefined;
+  onSaveViaEntityStore: (updatedRecord: Entity) => Promise<void>;
+  onCriticalityChange: () => void;
+}> = ({
+  canRead,
+  detailName,
+  entityStoreV2Enabled,
+  noEntityInStore,
+  observedUserEntityRecord,
+  storeRecord,
+  onSaveViaEntityStore,
+  onCriticalityChange,
+}) => {
+  if (!canRead || (entityStoreV2Enabled && noEntityInStore)) {
+    return null;
+  }
+  return (
+    <AssetCriticalityAccordion
+      entity={{ name: detailName, type: EntityType.user }}
+      onChange={onCriticalityChange}
+      entityRecord={entityStoreV2Enabled ? observedUserEntityRecord ?? undefined : undefined}
+      criticalityFromEntityStore={
+        entityStoreV2Enabled && observedUserEntityRecord
+          ? storeRecord?.asset?.criticality
+          : undefined
+      }
+      onSaveViaEntityStore={entityStoreV2Enabled && storeRecord ? onSaveViaEntityStore : undefined}
+    />
+  );
+};
+UserDetailsAssetCriticalitySection.displayName = 'UserDetailsAssetCriticalitySection';
 
 const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   detailName,
   usersDetailsPagePath,
+  entityId,
+  identityFields,
 }) => {
+  const { search: urlStateQuery } = useLocation();
   const dispatch = useDispatch();
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -93,20 +173,37 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const globalFilters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
-  const { signalIndexName } = useSignalIndex();
-  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
-  const canReadAlerts = hasAlertsRead && hasIndexRead;
-
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const { signalIndexName } = useSignalIndex();
 
+  const capabilities = useMlCapabilities();
   const {
     services: { uiSettings },
   } = useKibana();
 
+  const resolvedIdentityFields = useMemo(
+    () => identityFields ?? { [ES_USER_FIELD]: detailName },
+    [identityFields, detailName]
+  );
+
   const usersDetailsPageFilters: Filter[] = useMemo(
     () => getUsersDetailsPageFilters(detailName),
     [detailName]
+  );
+
+  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
+      dispatch(
+        setAbsoluteRangeDatePicker({
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
+        })
+      );
+    },
+    [dispatch]
   );
 
   const {
@@ -121,11 +218,102 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
   const experimentalSelectedPatterns = useSelectedPatterns(PageScope.explore);
 
   const indicesExist = newDataViewPickerEnabled
-    ? experimentalDataView.hasMatchedIndices()
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
+
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+
+  const userStoreIdentityFields = useMemo(() => {
+    if (entityId) {
+      return undefined;
+    }
+    return Object.keys(resolvedIdentityFields).length > 0 ? resolvedIdentityFields : undefined;
+  }, [entityId, resolvedIdentityFields]);
+
+  const entityFromStoreResult = useEntityFromStore({
+    entityId,
+    identityFields: userStoreIdentityFields,
+    entityType: 'user',
+    skip: !entityStoreV2Enabled || isInitializing,
+  });
+
+  const euidApi = useEntityStoreEuidApi();
+
+  const noEntityInStore =
+    entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
+
+  const usersDetailsEventsPageFilters = useMemo(() => {
+    if (!entityStoreV2Enabled || noEntityInStore) {
+      return getUsersDetailsPageFilters(detailName);
+    }
+    const fromStore =
+      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
+      {};
+    const merged = mergeLegacyIdentityWhenStoreEntityMissing(fromStore, resolvedIdentityFields);
+    if (identityFieldsHaveUsableValues(merged)) {
+      return getIdentityFieldsPageFilters(merged);
+    }
+    return getUsersDetailsPageFilters(detailName);
+  }, [
+    detailName,
+    entityFromStoreResult.entityRecord,
+    entityStoreV2Enabled,
+    noEntityInStore,
+    euidApi?.euid,
+    resolvedIdentityFields,
+  ]);
+
+  const oldSecurityDefaultPatterns =
+    useSelector(sourcererSelectors.defaultDataView)?.patternList ?? [];
+  const { indexPatterns: experimentalSecurityDefaultIndexPatterns } = useSecurityDefaultPatterns();
+  const securityDefaultPatterns = newDataViewPickerEnabled
+    ? experimentalSecurityDefaultIndexPatterns
+    : oldSecurityDefaultPatterns;
+
+  const observedUser = useObservedUser(
+    detailName,
+    PageScope.explore,
+    entityStoreV2Enabled ? entityFromStoreResult : undefined
+  );
+
+  const [loading, { inspect, userDetails: userOverview, id, refetch }] = useObservedUserDetails({
+    id: USERS_DETAILS_OVERVIEW_QUERY_ID,
+    endDate: to,
+    startDate: from,
+    userName: detailName,
+    indexNames: selectedPatterns,
+    skip: selectedPatterns.length === 0 || entityStoreV2Enabled,
+  });
+
+  const userDetailsForOverview = entityStoreV2Enabled ? observedUser.details : userOverview;
+  const isUserOverviewLoading = entityStoreV2Enabled ? observedUser.isLoading : loading;
+
+  const userRiskScoreStateFromEntityStore = useMemo(
+    () =>
+      entityStoreV2Enabled && observedUser.entityRecord
+        ? buildRiskScoreStateFromEntityRecord(EntityType.user, observedUser.entityRecord, {
+            refetch: observedUser.refetchEntityStore ?? (() => {}),
+            isLoading: observedUser.isLoading,
+            error: null,
+            inspect: entityFromStoreResult?.inspect,
+          })
+        : undefined,
+    [
+      entityFromStoreResult?.inspect,
+      entityStoreV2Enabled,
+      observedUser.entityRecord,
+      observedUser.isLoading,
+      observedUser.refetchEntityStore,
+    ]
+  );
+
+  const displayEntityId = useMemo(
+    () => (entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : entityId),
+    [entityId, entityStoreV2Enabled, observedUser.entityRecord?.entity?.id]
+  );
 
   const [rawFilteredQuery, kqlError] = useMemo(() => {
     try {
@@ -143,18 +331,51 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
       return [undefined, e];
     }
   }, [
-    experimentalDataView,
-    globalFilters,
     newDataViewPickerEnabled,
+    experimentalDataView,
     oldSourcererDataViewSpec,
     query,
-    uiSettings,
     usersDetailsPageFilters,
+    globalFilters,
+    uiSettings,
   ]);
+
+  const [rawFilteredQueryForUserDetailsIdentity] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataViewSpec),
+          [query],
+          [...usersDetailsEventsPageFilters, ...globalFilters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch {
+      return [undefined];
+    }
+  }, [
+    newDataViewPickerEnabled,
+    experimentalDataView,
+    oldSourcererDataViewSpec,
+    query,
+    usersDetailsEventsPageFilters,
+    globalFilters,
+    uiSettings,
+  ]);
+
+  const stringifiedUserDetailsIdentityFilterQuery = useMemo(
+    () =>
+      rawFilteredQueryForUserDetailsIdentity != null
+        ? JSON.stringify(rawFilteredQueryForUserDetailsIdentity)
+        : undefined,
+    [rawFilteredQueryForUserDetailsIdentity]
+  );
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
-    id: QUERY_ID,
+    id: USERS_DETAILS_OVERVIEW_QUERY_ID,
     filterQuery: stringifiedAdditionalFilters,
     kqlError,
     query,
@@ -166,32 +387,8 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     dispatch(setUsersDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const [loading, { inspect, userDetails, refetch }] = useObservedUserDetails({
-    id: QUERY_ID,
-    endDate: to,
-    startDate: from,
-    userName: detailName,
-    indexNames: selectedPatterns,
-    skip: selectedPatterns.length === 0,
-  });
-
-  const capabilities = useMlCapabilities();
-
-  useQueryInspector({ setQuery, deleteQuery, refetch, inspect, loading, queryId: QUERY_ID });
-
-  const narrowDateRange = useCallback<UserSummaryProps['narrowDateRange']>(
-    (score, interval) => {
-      const fromTo = scoreIntervalToDateTime(score, interval);
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: InputsModelId.global,
-          from: fromTo.from,
-          to: fromTo.to,
-        })
-      );
-    },
-    [dispatch]
-  );
+  const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasAlertsRead && hasIndexRead;
 
   const entityFilter = useMemo(
     () => ({
@@ -201,7 +398,19 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const entity = useMemo(() => ({ type: EntityType.user, name: detailName }), [detailName]);
+  const additionalFilters = useMemo(
+    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
+    [rawFilteredQuery]
+  );
+
+  const entity = useMemo(
+    () => ({
+      type: EntityType.user as const,
+      name: detailName,
+      identifiers: resolvedIdentityFields,
+    }),
+    [detailName, resolvedIdentityFields]
+  );
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);
@@ -209,17 +418,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     onSuccess: refetchRiskScore,
   });
 
-  const additionalFilters = useMemo(
-    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
-    [rawFilteredQuery]
-  );
+  const { updateAssetCriticalityRecord } = useUpdateAssetCriticality('user', {
+    onSuccess: calculateEntityRiskScore,
+  });
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
-  const criticality = useAssetCriticalityData({
-    entity,
-    enabled: canReadAssetCriticality,
-    onChange: calculateEntityRiskScore,
-  });
 
   if (newDataViewPickerEnabled && status === 'pristine') {
     return <PageLoader />;
@@ -238,93 +441,181 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
             />
           </FiltersGlobal>
 
-          <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
-            <HeaderPage
-              subtitle={
-                <LastEventTime
-                  indexKey={LastEventIndexKey.userDetails}
-                  indexNames={selectedPatterns}
-                  userName={detailName}
-                />
-              }
-              title={detailName}
-            />
-
-            {canReadAssetCriticality && (
-              <>
-                <EuiHorizontalRule margin="m" />
-                <AssetCriticalityTitle />
-                <EuiSpacer size="s" />
-                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
-                <EuiHorizontalRule margin="m" />
-              </>
-            )}
-
-            <AnomalyTableProvider
-              criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
-              startDate={from}
-              endDate={to}
-              skip={isInitializing}
-            >
-              {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
-                <UserOverview
-                  userName={detailName}
-                  id={QUERY_ID}
-                  isInDetailsSidePanel={false}
-                  data={userDetails}
-                  anomaliesData={anomaliesData}
-                  isLoadingAnomaliesData={isLoadingAnomaliesData}
-                  loading={loading}
-                  startDate={from}
-                  endDate={to}
-                  narrowDateRange={narrowDateRange}
-                  indexPatterns={selectedPatterns}
-                  jobNameById={jobNameById}
-                  scopeId={newDataViewPickerEnabled ? PageScope.explore : PageScope.default}
-                />
+          <SecuritySolutionPageWrapper
+            noPadding={globalFullScreen}
+            data-test-subj="usersDetailsPage"
+          >
+            <Display show={!globalFullScreen}>
+              <HeaderPage
+                border
+                subtitle={
+                  <LastEventTime
+                    indexKey={LastEventIndexKey.userDetails}
+                    indexNames={selectedPatterns}
+                    userName={detailName}
+                  />
+                }
+                title={detailName}
+                titleNode={
+                  <UserDetailsHeaderTitle
+                    detailName={detailName}
+                    displayEntityId={displayEntityId}
+                  />
+                }
+              />
+              {noEntityInStore && (
+                <>
+                  <EuiCallOut
+                    title={NO_CORRESPONDING_ENTITY_EXISTS}
+                    color="warning"
+                    iconType="warning"
+                    data-test-subj="user-details-no-entity-warning"
+                    announceOnMount
+                  />
+                  <EuiSpacer size="m" />
+                  <UserObservedDataSection
+                    userName={detailName}
+                    identityFields={resolvedIdentityFields}
+                    observedUser={observedUser}
+                    contextID={PageScope.explore}
+                    scopeId={PageScope.explore}
+                    queryId={USER_PANEL_OBSERVED_USER_QUERY_ID}
+                  />
+                  <EuiHorizontalRule />
+                  <EuiSpacer />
+                </>
               )}
-            </AnomalyTableProvider>
-            <EuiHorizontalRule />
-            <EuiSpacer />
+              <UserDetailsAssetCriticalitySection
+                canRead={canReadAssetCriticality}
+                detailName={detailName}
+                entityStoreV2Enabled={entityStoreV2Enabled}
+                noEntityInStore={noEntityInStore}
+                observedUserEntityRecord={observedUser.entityRecord}
+                storeRecord={entityFromStoreResult.entityRecord}
+                onSaveViaEntityStore={updateAssetCriticalityRecord}
+                onCriticalityChange={calculateEntityRiskScore}
+              />
+              {!noEntityInStore && (
+                <>
+                  <AnomalyTableProvider
+                    criteriaFields={getCriteriaFromUsersType(
+                      UsersType.details,
+                      detailName,
+                      resolvedIdentityFields,
+                      euidApi?.euid
+                    )}
+                    filterQuery={buildAnomaliesTableInfluencersFilterQuery({
+                      euid: euidApi?.euid,
+                      entityType: 'user',
+                      isScopedToEntity: true,
+                      identityFields: resolvedIdentityFields,
+                      fallbackDisplayName: detailName,
+                    })}
+                    startDate={from}
+                    endDate={to}
+                    skip={isInitializing}
+                  >
+                    {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
+                      <UserOverviewManage
+                        id={id}
+                        isInDetailsSidePanel={false}
+                        data={userDetailsForOverview as UserItem}
+                        anomaliesData={anomaliesData}
+                        isLoadingAnomaliesData={isLoadingAnomaliesData}
+                        loading={isUserOverviewLoading}
+                        startDate={from}
+                        endDate={to}
+                        narrowDateRange={narrowDateRange}
+                        setQuery={setQuery}
+                        refetch={
+                          entityStoreV2Enabled
+                            ? observedUser.refetchEntityStore ??
+                              observedUser.refetchObservedDetails ??
+                              refetch
+                            : refetch
+                        }
+                        inspect={
+                          entityStoreV2Enabled
+                            ? entityFromStoreResult?.inspect ??
+                              observedUser.observedDetailsInspect ??
+                              inspect
+                            : inspect
+                        }
+                        userName={detailName}
+                        indexPatterns={
+                          entityStoreV2Enabled ? securityDefaultPatterns : selectedPatterns
+                        }
+                        jobNameById={jobNameById}
+                        scopeId={PageScope.explore}
+                        riskScoreState={userRiskScoreStateFromEntityStore}
+                        firstSeenFromEntityStore={
+                          entityStoreV2Enabled
+                            ? observedUser.firstSeen?.date ?? undefined
+                            : undefined
+                        }
+                        lastSeenFromEntityStore={
+                          entityStoreV2Enabled
+                            ? observedUser.lastSeen?.date ?? undefined
+                            : undefined
+                        }
+                      />
+                    )}
+                  </AnomalyTableProvider>
+                  <EuiHorizontalRule />
+                  <EuiSpacer />
+                </>
+              )}
 
-            {canReadAlerts && (
-              <>
-                <EuiFlexGroup>
-                  <EuiFlexItem>
-                    <AlertsByStatus
-                      signalIndexName={signalIndexName}
-                      entityFilter={entityFilter}
-                      additionalFilters={additionalFilters}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <AlertCountByRuleByStatus
-                      entityFilter={entityFilter}
-                      signalIndexName={signalIndexName}
-                      additionalFilters={additionalFilters}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer />
-              </>
-            )}
+              {canReadAlerts && (
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <AlertsByStatus
+                        signalIndexName={signalIndexName}
+                        entityFilter={entityFilter}
+                        identityFields={resolvedIdentityFields}
+                        additionalFilters={additionalFilters}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <AlertCountByRuleByStatus
+                        entityFilter={{ ...entityFilter, entityType: EntityType.user }}
+                        identityFields={resolvedIdentityFields}
+                        signalIndexName={signalIndexName}
+                        additionalFilters={additionalFilters}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                </>
+              )}
 
-            <TabNavigation
-              navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities))}
-            />
-            <EuiSpacer />
+              <TabNavigation
+                navTabs={navTabsUsersDetails(detailName, hasMlUserPermissions(capabilities), {
+                  entityId,
+                  identityFields: resolvedIdentityFields,
+                  urlStateQuery,
+                })}
+              />
+
+              <EuiSpacer />
+            </Display>
+
             <UsersDetailsTabs
-              deleteQuery={deleteQuery}
-              detailName={detailName}
-              filterQuery={stringifiedAdditionalFilters}
-              from={from}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
-              userDetailFilter={usersDetailsPageFilters}
-              setQuery={setQuery}
+              deleteQuery={deleteQuery}
+              userDetailFilter={usersDetailsEventsPageFilters}
+              userDetailsIdentityFilterQuery={stringifiedUserDetailsIdentityFilterQuery}
               to={to}
+              from={from}
+              detailName={detailName}
               type={UsersType.details}
+              setQuery={setQuery}
+              filterQuery={stringifiedAdditionalFilters}
               usersDetailsPagePath={usersDetailsPagePath}
+              identityFields={resolvedIdentityFields}
+              entityId={entityId}
             />
           </SecuritySolutionPageWrapper>
         </>

@@ -10,15 +10,12 @@
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { ViewMode } from '@kbn/presentation-publishing';
 import type { History } from 'history';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import type { SerializableRecord } from '@kbn/utility-types';
-import type { DashboardState } from '../../common/types';
-import type { DashboardApi, DashboardCreationOptions } from '..';
+import type { DashboardApi } from '..';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { DashboardRenderer } from '../dashboard_renderer/dashboard_renderer';
 import { DashboardTopNav } from '../dashboard_top_nav';
@@ -26,10 +23,10 @@ import {
   coreServices,
   dataService,
   embeddableService,
-  screenshotModeService,
   shareService,
 } from '../services/kibana_services';
-import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../utils/urls';
+import { DASHBOARD_STATE_STORAGE_KEY } from '../utils/urls';
+import { useCreationOptions } from './hooks/use_creation_options';
 import { useDashboardMountContext } from './hooks/dashboard_mount_context';
 import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_validation';
 import { useObservabilityAIAssistantContext } from './hooks/use_observability_ai_assistant_context';
@@ -40,17 +37,7 @@ import {
 import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 import type { DashboardRedirect } from './types';
 import { type DashboardEmbedSettings } from './types';
-import {
-  createSessionRestorationDataProvider,
-  getSearchSessionIdFromURL,
-  getSessionURLObservable,
-  removeSearchSessionIdFromURL,
-} from './url/search_sessions_integration';
-import {
-  extractDashboardState,
-  loadAndRemoveDashboardState,
-  startSyncingExpandedPanelState,
-} from './url';
+import { startSyncingExpandedPanelState } from './url';
 import type { DashboardInternalApi } from '../dashboard_api/types';
 
 export interface DashboardAppProps {
@@ -59,6 +46,7 @@ export interface DashboardAppProps {
   redirectTo: DashboardRedirect;
   embedSettings?: DashboardEmbedSettings;
   expandedPanelId?: string;
+  setDashboardAppApi: (api: DashboardApi | undefined) => void;
 }
 
 export function DashboardApp({
@@ -67,6 +55,7 @@ export function DashboardApp({
   redirectTo,
   history,
   expandedPanelId,
+  setDashboardAppApi,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const [regenerateId, setRegenerateId] = useState(uuidv4());
@@ -78,8 +67,7 @@ export function DashboardApp({
 
   useEffect(() => {
     let canceled = false;
-    // show dashboard when there is an incoming embeddable
-    if (incomingEmbeddables) {
+    if (savedDashboardId || incomingEmbeddables?.length) {
       return;
     }
 
@@ -96,13 +84,12 @@ export function DashboardApp({
     return () => {
       canceled = true;
     };
-  }, [incomingEmbeddables]);
+  }, [incomingEmbeddables, savedDashboardId]);
   const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>(undefined);
   const [dashboardInternalApi, setDashboardInternalApi] = useState<
     DashboardInternalApi | undefined
   >(undefined);
   const showPlainSpinner = useObservable(coreServices.customBranding.hasCustomBranding$, false);
-
   const { scopedHistory: getScopedHistory } = useDashboardMountContext();
 
   useObservabilityAIAssistantContext({
@@ -134,89 +121,41 @@ export function DashboardApp({
   }, []);
 
   /**
+   * Handle incoming embeddables from the state transfer service received after the dashboard has already loaded
+   * This can happen if a modal or popup makes use of state transfers and redirects to add panels to a dashboard,
+   * but it tries to add them to the dashboard the user is already looking at. e.g. the AI agent chat sidebar works this way
+   */
+  useEffect(() => {
+    if (!dashboardApi) return;
+    const embeddableStateTransferSubscription = embeddableService
+      .getStateTransfer()
+      .onTransferEmbeddablePackage$(DASHBOARD_APP_ID, true)
+      .subscribe((lateEmbeddables) => {
+        if (lateEmbeddables?.length) {
+          // If a panel is expanded, minimize it so that the user can see the newly added embeddables
+          if (dashboardApi.expandedPanelId$.value) {
+            dashboardApi.expandPanel(dashboardApi.expandedPanelId$.value);
+          }
+          dashboardApi.addIncomingEmbeddables(lateEmbeddables);
+          dashboardApi.setViewMode('edit');
+        }
+      });
+
+    return () => embeddableStateTransferSubscription.unsubscribe();
+  }, [dashboardApi, history, savedDashboardId]);
+
+  /**
    * Validate saved object load outcome
    */
   const { validateOutcome, getLegacyConflictWarning } = useDashboardOutcomeValidation();
-
-  /**
-   * Create options to pass into the dashboard renderer
-   */
-  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
-    const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
-
-    const getInitialInput = () => {
-      let stateFromLocator: Partial<DashboardState> = {};
-      try {
-        stateFromLocator = extractDashboardState(getScopedHistory().location.state);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('Unable to extract dashboard state from locator. Error: ', e);
-      }
-
-      let initialUrlState: Partial<DashboardState> = {};
-      try {
-        initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.warn('Unable to extract dashboard state from URL. Error: ', e);
-      }
-
-      // Override all state with URL + Locator input
-      return {
-        // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
-        ...initialUrlState,
-        ...stateFromLocator,
-
-        // if print mode is active, force viewMode.PRINT
-        ...(screenshotModeService.isScreenshotMode() &&
-        screenshotModeService.getScreenshotContext('layout') === 'print'
-          ? { viewMode: 'print' as ViewMode }
-          : {}),
-      };
-    };
-
-    return Promise.resolve<DashboardCreationOptions>({
-      getIncomingEmbeddables: () => incomingEmbeddables,
-
-      // integrations
-      useSessionStorageIntegration: true,
-      useUnifiedSearchIntegration: true,
-      // Hide the control group from the dashboard renderer; the dashboard app handles displaying
-      // pinned controls in the top nav instead
-      useControlsIntegration: false,
-      unifiedSearchSettings: {
-        kbnUrlStateStorage,
-      },
-      useSearchSessionsIntegration: true,
-      searchSessionSettings: {
-        createSessionRestorationDataProvider,
-        sessionIdToRestore: searchSessionIdFromURL,
-        sessionIdUrlChangeObservable: getSessionURLObservable(history),
-        getSearchSessionIdFromURL: () => getSearchSessionIdFromURL(history),
-        removeSessionIdFromUrl: () => removeSearchSessionIdFromURL(kbnUrlStateStorage),
-      },
-      getInitialInput,
-      getPassThroughContext: () =>
-        (getScopedHistory().location.state as { passThroughContext?: SerializableRecord })
-          ?.passThroughContext,
-      validateLoadedSavedObject: validateOutcome,
-      fullScreenMode:
-        kbnUrlStateStorage.get<{ fullScreenMode?: boolean }>(DASHBOARD_STATE_STORAGE_KEY)
-          ?.fullScreenMode ?? false,
-      isEmbeddedExternally: Boolean(embedSettings), // embed settings are only sent if the dashboard URL has `embed=true`
-      getEmbeddableAppContext: (dashboardId) => ({
-        currentAppId: DASHBOARD_APP_ID,
-        getCurrentPath: () => `#${createDashboardEditUrl(dashboardId)}`,
-      }),
-    });
-  }, [
+  const getCreationOptions = useCreationOptions({
     history,
-    embedSettings,
-    validateOutcome,
     getScopedHistory,
     kbnUrlStateStorage,
+    embedSettings,
     incomingEmbeddables,
-  ]);
+    validateOutcome,
+  });
 
   useEffect(() => {
     if (!dashboardApi) return;
@@ -263,6 +202,7 @@ export function DashboardApp({
         key={regenerateId}
         locator={locator}
         onApiAvailable={(dashboard, dashboardInternal) => {
+          setDashboardAppApi(dashboard);
           if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
             setDashboardInternalApi(dashboardInternal);
@@ -270,6 +210,9 @@ export function DashboardApp({
               dashboard?.expandPanel(expandedPanelId);
             }
           }
+        }}
+        onApiCleanup={() => {
+          setDashboardAppApi(undefined);
         }}
         dashboardRedirect={redirectTo}
         savedObjectId={savedDashboardId}

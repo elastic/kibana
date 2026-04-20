@@ -95,12 +95,15 @@ dependsOn:
   - '@kbn/router-utils'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/actions-types'
+  - '@kbn/response-ops-oauth-hooks'
   - '@kbn/kql'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/deeplinks-observability'
   - '@kbn/cps-utils'
   - '@kbn/cps'
   - '@kbn/security-plugin'
+  - '@kbn/std'
+  - '@kbn/lens-common'
 tags:
   - plugin
   - prod
@@ -115,26 +118,6 @@ fileGroups:
     - common/**/*
     - config.ts
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

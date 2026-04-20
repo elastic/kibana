@@ -52,7 +52,7 @@ export function getRegularEcsField(field: string): string {
 export function isNamespacedEcsField(field: string): boolean {
   return (
     NAMESPACE_PREFIXES.some((prefix) => field.startsWith(prefix)) ||
-    KEEP_FIELDS.includes(field as any)
+    KEEP_FIELDS.includes(field as (typeof KEEP_FIELDS)[number])
   );
 }
 

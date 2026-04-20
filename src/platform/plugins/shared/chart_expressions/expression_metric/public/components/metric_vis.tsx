@@ -77,14 +77,23 @@ function buildTrendConfig(
 ): TrendConfig | undefined {
   if (!palette) return undefined;
 
+  const isPrimaryNumeric = typeof value === 'number';
+  const isNumericBaseline = Number.isFinite(baseline);
+
+  // When baseline is not a valid finite number ('primary'), but the primary value is numeric at runtime,
+  // disable compare-to-primary and fall back to baseline 0.
+  const compareToPrimary = !isNumericBaseline && isPrimaryNumeric;
+
+  const baselineValue = isNumericBaseline ? Number(baseline) : isPrimaryNumeric ? value : 0;
+
   return {
     showIcon: visuals !== 'value',
     showValue: visuals !== 'icon',
-    baselineValue: baseline === 'primary' && typeof value === 'number' ? value : Number(baseline),
+    baselineValue,
     palette,
     textPalette,
     borderColor: undefined,
-    compareToPrimary: baseline === 'primary',
+    compareToPrimary,
   };
 }
 
@@ -189,12 +198,16 @@ export const MetricVis = ({
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
     if (secondaryMetric) {
-      // Do not call getSecondaryMetricInfo if there is no Secondary Metric
+      // When baseline is 'primary' but the primary value is non-numeric at runtime,
+      // reset the label to use the column name
+      const isNumericBaseline = Number.isFinite(config.metric.secondaryTrend.baseline);
+      const isCompareToPrimaryInvalid = !isNumericBaseline && typeof value !== 'number';
+
       const secondaryMetricInfo = getSecondaryMetricInfo({
         row,
         columns: data.columns,
         secondaryMetric,
-        secondaryLabel: config.metric.secondaryLabel,
+        secondaryLabel: isCompareToPrimaryInvalid ? undefined : config.metric.secondaryLabel,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,
       });
@@ -345,7 +358,6 @@ export const MetricVis = ({
                   iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
                   valuePosition: config.metric.primaryPosition,
-                  titleWeight: config.metric.titleWeight,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)

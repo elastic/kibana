@@ -8,13 +8,21 @@
 import { expect } from '@kbn/scout/ui';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
+import { tags } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Confirmation Modal',
-  { tag: ['@ess', '@svlOblt', '@svlSecurity'] },
+  {
+    tag: [
+      '@local-stateful-classic',
+      ...tags.serverless.observability.complete,
+      ...tags.serverless.security.complete,
+    ],
+  },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
+      await scoutSpace.uiSettings.set({ [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Classic });
       await browserAuth.loginAsFullAIPrivilegesUser();
       await pageObjects.genAiSettings.navigateTo();
     });
@@ -25,7 +33,7 @@ spaceTest.describe(
 
     // The happy path is covered by other tests within same directory
     spaceTest('should cancel Agent selection without saving changes', async ({ pageObjects }) => {
-      await spaceTest.step('verify current chat experience is Classic', async () => {
+      await spaceTest.step('verify starting chat experience is Classic', async () => {
         const chatExperienceField = pageObjects.genAiSettings.getChatExperienceField();
         await expect(chatExperienceField).toHaveValue(AIChatExperience.Classic);
       });

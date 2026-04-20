@@ -183,7 +183,10 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
         <EuiFlexItem grow={false}>
           <OpenInDiscover
             dataTestSubj="apmFailedTransactionRateChartOpenInDiscover"
-            variant="link"
+            variant="iconButton"
+            label={i18n.translate('xpack.apm.failedTransactionRateChart.openTracesInDiscover', {
+              defaultMessage: 'Open traces in Discover',
+            })}
             indexType="traces"
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
@@ -193,6 +196,7 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
               environment,
               transactionName,
               transactionType,
+              sortDirection: 'DESC',
             }}
           />
         </EuiFlexItem>

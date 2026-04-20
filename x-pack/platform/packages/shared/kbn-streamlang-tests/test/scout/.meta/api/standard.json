@@ -1,5 +1,5 @@
 {
-  "sha1": "c6e39a51e18ae17349a1148673f80058e3545f7f",
+  "sha1": "2d01ddb30271bba791ae6b9bf03d28e8a4805684",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -173,7 +173,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 12
       }
     },
@@ -189,7 +189,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 12
       }
     },
@@ -205,7 +205,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 81,
+        "line": 82,
         "column": 12
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 14
       }
     },
@@ -237,7 +237,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/convert.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 14
       }
     },
@@ -253,7 +253,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 16,
+        "line": 17,
         "column": 10
       }
     },
@@ -267,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 46,
+        "line": 49,
         "column": 10
       }
     },
@@ -283,7 +283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 81,
+        "line": 88,
         "column": 10
       }
     },
@@ -299,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 124,
+        "line": 131,
         "column": 12
       }
     },
@@ -315,7 +315,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 124,
+        "line": 131,
         "column": 12
       }
     },
@@ -329,7 +329,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 152,
+        "line": 159,
         "column": 10
       }
     },
@@ -345,7 +345,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 200,
+        "line": 207,
         "column": 10
       }
     },
@@ -361,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/date.spec.ts",
-        "line": 232,
+        "line": 239,
         "column": 10
       }
     },
@@ -574,6 +574,182 @@
       }
     },
     {
+      "id": "7e7734002ff1828-77cbc1a165a96c6",
+      "title": "Cross-compatibility - Else Branch should execute if-branch when condition matches and else-branch when it does not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 24,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-2d279610bc298d0",
+      "title": "Cross-compatibility - Else Branch should execute multiple steps in else branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-bba14a33864c832",
+      "title": "Cross-compatibility - Else Branch documents with missing condition field: ingest else-branch fires, esql excludes from both branches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-6c140a3d9a94214",
+      "title": "Cross-compatibility - Else Branch should handle nested conditions inside else branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 211,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-c98a4552941a449",
+      "title": "Cross-compatibility - Else Branch should handle if-else inside an else branch with multiple steps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 287,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e7734002ff1828-352b74f3d354fef",
+      "title": "Cross-compatibility - Else Branch should produce same results after round-tripping through identifier utilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
+        "line": 381,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-e8d5316e5b547d1",
+      "title": "Cross-compatibility - Enrich Processor should add matching location fields from policy for each document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-28c2fb8f3d5bb7e",
+      "title": "Cross-compatibility - Enrich Processor should override existing location fields when override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-ca76641b3b62f99",
+      "title": "Cross-compatibility - Enrich Processor should preserve existing location fields when override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 129,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-ee07bac03af6632",
+      "title": "Cross-compatibility - Enrich Processor with ignore_missing true, should enrich when ip is present and skip enrichment when ip is absent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "a266e89714316e8-e1bdde64e74d440",
+      "title": "Cross-compatibility - Enrich Processor with ignore_missing false, should drop documents with missing match field in both ingest outcomes and ES|QL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/enrich.spec.ts",
+        "line": 222,
+        "column": 12
+      }
+    },
+    {
       "id": "edf87fd95fcb890-def917dabb846e7",
       "title": "Cross-compatibility - Filter Conditions should handle eq (equals) filter condition",
       "expectedStatus": "passed",
@@ -585,7 +761,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -601,7 +777,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 70,
+        "line": 71,
         "column": 12
       }
     },
@@ -617,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 123,
+        "line": 124,
         "column": 12
       }
     },
@@ -633,7 +809,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 178,
+        "line": 179,
         "column": 12
       }
     },
@@ -649,7 +825,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 231,
+        "line": 232,
         "column": 12
       }
     },
@@ -665,7 +841,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 286,
+        "line": 287,
         "column": 12
       }
     },
@@ -681,7 +857,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 339,
+        "line": 340,
         "column": 12
       }
     },
@@ -697,7 +873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 397,
+        "line": 398,
         "column": 12
       }
     },
@@ -713,7 +889,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 460,
+        "line": 461,
         "column": 12
       }
     },
@@ -729,7 +905,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 566,
+        "line": 567,
         "column": 12
       }
     },
@@ -745,7 +921,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 633,
+        "line": 634,
         "column": 12
       }
     },
@@ -761,7 +937,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 700,
+        "line": 701,
         "column": 12
       }
     },
@@ -777,7 +953,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 780,
+        "line": 781,
         "column": 12
       }
     },
@@ -793,7 +969,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 846,
+        "line": 847,
         "column": 12
       }
     },
@@ -809,7 +985,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 918,
+        "line": 919,
         "column": 12
       }
     },
@@ -825,7 +1001,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 978,
+        "line": 979,
         "column": 12
       }
     },
@@ -841,7 +1017,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 1032,
+        "line": 1033,
         "column": 12
       }
     },
@@ -857,7 +1033,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 1099,
+        "line": 1100,
         "column": 12
       }
     },
@@ -1210,6 +1386,454 @@
       }
     },
     {
+      "id": "3c528f7697507b0-1a2235843efb49d",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract a simple field from JSON string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 19,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-92f4deac54a855f",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract multiple fields from JSON string",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-9499b22337dff1b",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract nested fields using dot notation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-4df186dd3c3670c",
+      "title": "Cross-compatibility - JsonExtract Processor should support conditional extraction with where clause",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 113,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-edd515e4da44a99",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly cast extracted values to integer type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-7aff0eecc6563f4",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly cast extracted values to boolean type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 196,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-94292aeb2aef8ab",
+      "title": "Cross-compatibility - JsonExtract Processor should default to keyword type when no type specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 221,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-2f8799084852940",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly cast multiple extractions with different types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 246,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-c487560bf9454ce",
+      "title": "Cross-compatibility - JsonExtract Processor should handle invalid JSON differently between transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 288,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-d1e624514d5e88b",
+      "title": "Cross-compatibility - JsonExtract Processor should handle array index extraction in both transpilers",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 324,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-0b1554f2952a761",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract using bracket notation selectors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 354,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-646ab2d2c71d6e6",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract deeply nested fields (5+ levels)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 382,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-3e4394a38dd428c",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract boolean false without converting to null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 420,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-e8d6b56e5efc866",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract second array element with [1] selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 448,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-16b611d75f7bd37",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract from multiple documents in batch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 476,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-eb603245fb274ba",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly coerce string number to integer",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 522,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-57f0a5dd41e5eb2",
+      "title": "Cross-compatibility - JsonExtract Processor should handle ignore_missing: true when field value is null",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 547,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-271ba4c49054b45",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract with mixed bracket and dot notation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 591,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-f7cf6a7f21702b7",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract null JSON value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 621,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-aa0a3569548c15a",
+      "title": "Cross-compatibility - JsonExtract Processor should extract using $ root selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 646,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-8eaa3826787ef4e",
+      "title": "Cross-compatibility - JsonExtract Processor should not set target field when selector path not found",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 671,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-b2227384109ba7f",
+      "title": "Cross-compatibility - JsonExtract Processor should correctly extract integer to same field as source (type change)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 700,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-65b909a52f29ab1",
+      "title": "Cross-compatibility - JsonExtract Processor should apply conditional extraction only to matching documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 731,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-c9de5c1c84cd158",
+      "title": "Cross-compatibility - JsonExtract Processor should conditionally extract multiple fields with different types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 791,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-4ff40ee96b6c516",
+      "title": "Cross-compatibility - JsonExtract Processor should conditionally overwrite original field with extracted value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 856,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-8512ff454277073",
+      "title": "Cross-compatibility - JsonExtract Processor should extract an array value from JSON",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 909,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-7e90dac5d77561a",
+      "title": "Cross-compatibility - JsonExtract Processor should extract a nested object value from JSON",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 937,
+        "column": 12
+      }
+    },
+    {
+      "id": "3c528f7697507b0-a625401dde929e4",
+      "title": "Cross-compatibility - JsonExtract Processor should handle complex JSON with mixed types and array access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/json_extract.spec.ts",
+        "line": 965,
+        "column": 12
+      }
+    },
+    {
       "id": "03549666dbe4a8a-2dbaedb8e69eac6",
       "title": "Cross-compatibility - Lowercase Processor should lowercase a field in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
@@ -1454,12 +2078,14 @@
       "title": "Cross-compatibility - Network Direction Processor should set network direction with internal networks in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
-        "line": 17,
+        "line": 19,
         "column": 12
       }
     },
@@ -1468,12 +2094,14 @@
       "title": "Cross-compatibility - Network Direction Processor should set network direction with target field in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
-        "line": 54,
+        "line": 56,
         "column": 12
       }
     },
@@ -1482,12 +2110,14 @@
       "title": "Cross-compatibility - Network Direction Processor should set network direction with internal networks field in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
-        "line": 91,
+        "line": 93,
         "column": 12
       }
     },
@@ -1496,12 +2126,14 @@
       "title": "Cross-compatibility - Network Direction Processor should set network direction with ignore_missing option in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
-        "line": 138,
+        "line": 140,
         "column": 12
       }
     },
@@ -1510,12 +2142,14 @@
       "title": "Cross-compatibility - Network Direction Processor should set network direction with where condition in both ingest pipeline and ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/network_direction.spec.ts",
-        "line": 181,
+        "line": 183,
         "column": 12
       }
     },
@@ -1723,7 +2357,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/redact.spec.ts",
-        "line": 225,
+        "line": 229,
         "column": 12
       }
     },
@@ -1739,7 +2373,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/redact.spec.ts",
-        "line": 255,
+        "line": 259,
         "column": 12
       }
     },
@@ -1755,7 +2389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/redact.spec.ts",
-        "line": 285,
+        "line": 289,
         "column": 12
       }
     },
@@ -1771,7 +2405,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/redact.spec.ts",
-        "line": 325,
+        "line": 329,
         "column": 14
       }
     },
@@ -1787,7 +2421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/redact.spec.ts",
-        "line": 325,
+        "line": 329,
         "column": 14
       }
     },
@@ -2043,7 +2677,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 188,
+        "line": 192,
         "column": 12
       }
     },
@@ -2059,7 +2693,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 226,
+        "line": 230,
         "column": 12
       }
     },
@@ -2075,7 +2709,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 273,
+        "line": 277,
         "column": 14
       }
     },
@@ -2091,7 +2725,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 273,
+        "line": 277,
         "column": 14
       }
     },
@@ -2107,7 +2741,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/replace.spec.ts",
-        "line": 302,
+        "line": 306,
         "column": 12
       }
     },
@@ -2123,7 +2757,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 12
       }
     },
@@ -2139,7 +2773,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 12
       }
     },
@@ -2155,7 +2789,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 12
       }
     },
@@ -2171,7 +2805,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 104,
+        "line": 105,
         "column": 12
       }
     },
@@ -2187,7 +2821,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 148,
+        "line": 149,
         "column": 14
       }
     },
@@ -2203,7 +2837,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/set.spec.ts",
-        "line": 148,
+        "line": 149,
         "column": 14
       }
     },
@@ -2212,13 +2846,15 @@
       "title": "Cross-compatibility - Sort Processor should correctly sort an array in ascending order (default)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 19,
+        "column": 12
       }
     },
     {
@@ -2226,13 +2862,15 @@
       "title": "Cross-compatibility - Sort Processor should correctly sort an array in descending order",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 44,
-        "column": 10
+        "line": 48,
+        "column": 12
       }
     },
     {
@@ -2240,13 +2878,15 @@
       "title": "Cross-compatibility - Sort Processor should correctly sort an array to a target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 71,
-        "column": 10
+        "line": 75,
+        "column": 12
       }
     },
     {
@@ -2254,13 +2894,15 @@
       "title": "Cross-compatibility - Sort Processor should sort numeric arrays",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 102,
-        "column": 10
+        "line": 112,
+        "column": 12
       }
     },
     {
@@ -2268,13 +2910,15 @@
       "title": "Cross-compatibility - Sort Processor should handle single element array",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 129,
-        "column": 10
+        "line": 139,
+        "column": 12
       }
     },
     {
@@ -2282,13 +2926,15 @@
       "title": "Cross-compatibility - Sort Processor should support conditional sort with where clause",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 153,
-        "column": 10
+        "line": 172,
+        "column": 12
       }
     },
     {
@@ -2296,13 +2942,15 @@
       "title": "Cross-compatibility - Sort Processor should handle ignore_missing consistently between transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 201,
-        "column": 10
+        "line": 224,
+        "column": 12
       }
     },
     {
@@ -2310,13 +2958,15 @@
       "title": "Cross-compatibility - Sort Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 262,
-        "column": 12
+        "line": 291,
+        "column": 14
       }
     },
     {
@@ -2324,13 +2974,15 @@
       "title": "Cross-compatibility - Sort Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/sort.spec.ts",
-        "line": 262,
-        "column": 12
+        "line": 291,
+        "column": 14
       }
     },
     {
@@ -2338,13 +2990,15 @@
       "title": "Cross-compatibility - Split Processor should correctly split a string into an array using a simple delimiter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 15,
-        "column": 10
+        "line": 19,
+        "column": 12
       }
     },
     {
@@ -2352,13 +3006,15 @@
       "title": "Cross-compatibility - Split Processor should correctly split a string to a target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 45,
-        "column": 10
+        "line": 49,
+        "column": 12
       }
     },
     {
@@ -2366,13 +3022,15 @@
       "title": "Cross-compatibility - Split Processor should split with different delimiters",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 76,
-        "column": 10
+        "line": 80,
+        "column": 12
       }
     },
     {
@@ -2380,13 +3038,15 @@
       "title": "Cross-compatibility - Split Processor should handle single value (no delimiter found)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 103,
-        "column": 10
+        "line": 107,
+        "column": 12
       }
     },
     {
@@ -2394,13 +3054,15 @@
       "title": "Cross-compatibility - Split Processor should support conditional split with where clause",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 128,
-        "column": 10
+        "line": 141,
+        "column": 12
       }
     },
     {
@@ -2408,13 +3070,15 @@
       "title": "Cross-compatibility - Split Processor should consistently reject {{ }} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 204,
+        "column": 14
       }
     },
     {
@@ -2422,13 +3086,15 @@
       "title": "Cross-compatibility - Split Processor should consistently reject {{{ }}} template syntax in both Ingest Pipeline and ES|QL transpilers",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 204,
+        "column": 14
       }
     },
     {
@@ -2436,13 +3102,15 @@
       "title": "Cross-compatibility - Split Processor should document regex separator limitation: Ingest Pipeline supports regex, ES|QL only supports single byte delimiters",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 213,
-        "column": 10
+        "line": 232,
+        "column": 12
       }
     },
     {
@@ -2450,13 +3118,15 @@
       "title": "Cross-compatibility - Split Processor should handle missing field differently between transpilers when ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 250,
-        "column": 10
+        "line": 269,
+        "column": 12
       }
     },
     {
@@ -2464,13 +3134,15 @@
       "title": "Cross-compatibility - Split Processor should handle preserve_trailing option in Ingest Pipeline (not supported in ES|QL)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/split.spec.ts",
-        "line": 282,
-        "column": 10
+        "line": 301,
+        "column": 12
       }
     },
     {
@@ -3111,6 +3783,86 @@
       }
     },
     {
+      "id": "07da9a53b3ea83f-19826d7591e9df9",
+      "title": "Streamlang to ES|QL - Enrich Processor should enrich a document with location data based on ip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-425a5609742d793",
+      "title": "Streamlang to ES|QL - Enrich Processor should leave the document unchanged if match field is not present and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 71,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-e572158789127dc",
+      "title": "Streamlang to ES|QL - Enrich Processor should filter out documents where match field is missing when ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-f08240a75bd764f",
+      "title": "Streamlang to ES|QL - Enrich Processor should override the existing value if override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 134,
+        "column": 12
+      }
+    },
+    {
+      "id": "07da9a53b3ea83f-854c0bddc54eaa4",
+      "title": "Streamlang to ES|QL - Enrich Processor should preserve the existing value if override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/enrich.spec.ts",
+        "line": 161,
+        "column": 12
+      }
+    },
+    {
       "id": "525ab2d1aa4c0d7-efb87aa60cf0d0e",
       "title": "Streamlang to ES|QL - Grok Processor should correctly parse a log line with the grok processor",
       "expectedStatus": "passed",
@@ -3314,6 +4066,38 @@
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/grok.spec.ts",
         "line": 561,
         "column": 10
+      }
+    },
+    {
+      "id": "04d48691d4b7263-4ceffcf6c842184",
+      "title": "Streamlang to ES|QL - JsonExtract Processor (ES|QL-specific) should filter out documents with missing source field when ignore_missing: false (ES|QL-specific WHERE filter)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/json_extract.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "04d48691d4b7263-01e6d775dc08bfd",
+      "title": "Streamlang to ES|QL - JsonExtract Processor (ES|QL-specific) should include all documents with null for missing when ignore_missing: true (ES|QL-specific null handling)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/json_extract.spec.ts",
+        "line": 58,
+        "column": 12
       }
     },
     {
@@ -3641,12 +4425,14 @@
       "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with internal networks",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
-        "line": 17,
+        "line": 18,
         "column": 12
       }
     },
@@ -3655,12 +4441,14 @@
       "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with internal networks field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
-        "line": 41,
+        "line": 42,
         "column": 12
       }
     },
@@ -3669,12 +4457,14 @@
       "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with ignore_missing option",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 12
       }
     },
@@ -3683,12 +4473,14 @@
       "title": "Streamlang to ES|QL - Network Direction Processor should set network direction with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/network_direction.spec.ts",
-        "line": 106,
+        "line": 107,
         "column": 12
       }
     },
@@ -3832,7 +4624,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/redact.spec.ts",
-        "line": 252,
+        "line": 254,
         "column": 12
       }
     },
@@ -3848,7 +4640,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/redact.spec.ts",
-        "line": 277,
+        "line": 279,
         "column": 12
       }
     },
@@ -3864,7 +4656,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/redact.spec.ts",
-        "line": 302,
+        "line": 304,
         "column": 12
       }
     },
@@ -4385,13 +5177,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should sort an array field in ascending order with EVAL MV_SORT() (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -4399,13 +5193,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should sort an array field in descending order with EVAL MV_SORT()",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 41,
-        "column": 10
+        "line": 45,
+        "column": 12
       }
     },
     {
@@ -4413,13 +5209,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should sort an array field to target field with EVAL MV_SORT()",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 69,
-        "column": 10
+        "line": 73,
+        "column": 12
       }
     },
     {
@@ -4427,13 +5225,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should sort numeric arrays",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 101,
-        "column": 10
+        "line": 106,
+        "column": 12
       }
     },
     {
@@ -4441,13 +5241,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should handle single element array",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 126,
-        "column": 10
+        "line": 131,
+        "column": 12
       }
     },
     {
@@ -4455,13 +5257,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should sort field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 148,
-        "column": 10
+        "line": 154,
+        "column": 12
       }
     },
     {
@@ -4469,13 +5273,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should sort to target field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 188,
-        "column": 10
+        "line": 194,
+        "column": 12
       }
     },
     {
@@ -4483,13 +5289,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should handle ignore_missing: true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 245,
-        "column": 10
+        "line": 256,
+        "column": 12
       }
     },
     {
@@ -4497,13 +5305,15 @@
       "title": "Streamlang to ES|QL - Sort Processor should reject Mustache template syntax {{ and {{{ in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/sort.spec.ts",
-        "line": 274,
-        "column": 10
+        "line": 285,
+        "column": 12
       }
     },
     {
@@ -4511,13 +5321,15 @@
       "title": "Streamlang to ES|QL - Split Processor should split a string field into an array with EVAL SPLIT() (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 14,
-        "column": 10
+        "line": 18,
+        "column": 12
       }
     },
     {
@@ -4525,13 +5337,15 @@
       "title": "Streamlang to ES|QL - Split Processor should split a string field to target field with EVAL SPLIT()",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 42,
-        "column": 10
+        "line": 46,
+        "column": 12
       }
     },
     {
@@ -4539,13 +5353,15 @@
       "title": "Streamlang to ES|QL - Split Processor should split using various single byte delimiters",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 74,
-        "column": 10
+        "line": 78,
+        "column": 12
       }
     },
     {
@@ -4553,13 +5369,15 @@
       "title": "Streamlang to ES|QL - Split Processor should handle single value (no delimiter found)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 99,
-        "column": 10
+        "line": 103,
+        "column": 12
       }
     },
     {
@@ -4567,13 +5385,15 @@
       "title": "Streamlang to ES|QL - Split Processor should handle ignore_missing: false (default) with WHERE filter",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 122,
-        "column": 10
+        "line": 127,
+        "column": 12
       }
     },
     {
@@ -4581,13 +5401,15 @@
       "title": "Streamlang to ES|QL - Split Processor should handle ignore_missing: true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 153,
-        "column": 10
+        "line": 158,
+        "column": 12
       }
     },
     {
@@ -4595,13 +5417,15 @@
       "title": "Streamlang to ES|QL - Split Processor should split field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 183,
-        "column": 10
+        "line": 188,
+        "column": 12
       }
     },
     {
@@ -4609,13 +5433,15 @@
       "title": "Streamlang to ES|QL - Split Processor should split to target field conditionally with EVAL CASE",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 222,
-        "column": 10
+        "line": 227,
+        "column": 12
       }
     },
     {
@@ -4623,13 +5449,15 @@
       "title": "Streamlang to ES|QL - Split Processor should reject Mustache template syntax {{ and {{{ in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/esql/split.spec.ts",
-        "line": 285,
-        "column": 10
+        "line": 290,
+        "column": 12
       }
     },
     {
@@ -4932,7 +5760,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -4948,7 +5776,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -4964,7 +5792,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -4980,7 +5808,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -4996,7 +5824,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -5012,7 +5840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 85,
+        "line": 86,
         "column": 12
       }
     },
@@ -5028,7 +5856,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/convert.spec.ts",
-        "line": 112,
+        "line": 113,
         "column": 12
       }
     },
@@ -5045,7 +5873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 10
       }
     },
@@ -5061,7 +5889,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 10
       }
     },
@@ -5077,7 +5905,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 71,
+        "line": 72,
         "column": 10
       }
     },
@@ -5091,7 +5919,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 100,
+        "line": 101,
         "column": 10
       }
     },
@@ -5107,7 +5935,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 129,
+        "line": 130,
         "column": 10
       }
     },
@@ -5123,7 +5951,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 158,
+        "line": 159,
         "column": 10
       }
     },
@@ -5139,7 +5967,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 12
       }
     },
@@ -5155,7 +5983,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 12
       }
     },
@@ -5171,7 +5999,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 216,
+        "line": 217,
         "column": 10
       }
     },
@@ -5187,7 +6015,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 247,
+        "line": 250,
         "column": 10
       }
     },
@@ -5203,7 +6031,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/date.spec.ts",
-        "line": 277,
+        "line": 280,
         "column": 10
       }
     },
@@ -5219,7 +6047,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -5235,7 +6063,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
-        "line": 51,
+        "line": 52,
         "column": 12
       }
     },
@@ -5251,7 +6079,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 12
       }
     },
@@ -5267,7 +6095,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 12
       }
     },
@@ -5283,7 +6111,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 14
       }
     },
@@ -5299,7 +6127,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/dissect.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 14
       }
     },
@@ -5320,6 +6148,102 @@
       }
     },
     {
+      "id": "42c8b1eed5b4b64-a61bf942a4ec73a",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should enrich a document with location data based on ip",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-f2852338a7f2898",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should leave the document unchanged if match field is not present and ignore_missing is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-4272daad5609273",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should fail if match field is not present and ignore_missing is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-07cc372a6f886de",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should override the existing value if override is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-9153f072bb7ec16",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should preserve existing values if override is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "42c8b1eed5b4b64-b027c8e44b9b1b3",
+      "title": "Streamlang to Ingest Pipeline - Enrich Processor should fail if policy name is not present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/enrich.spec.ts",
+        "line": 181,
+        "column": 12
+      }
+    },
+    {
       "id": "22c3aac9a279c90-658f5b09f43fc36",
       "title": "Streamlang to Ingest Pipeline - Filter Conditions should handle includes filter condition with numeric array",
       "expectedStatus": "passed",
@@ -5331,7 +6255,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 12
       }
     },
@@ -5347,7 +6271,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 12
       }
     },
@@ -5363,7 +6287,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 89,
+        "line": 90,
         "column": 12
       }
     },
@@ -5379,7 +6303,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 120,
+        "line": 121,
         "column": 12
       }
     },
@@ -5395,7 +6319,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 154,
+        "line": 155,
         "column": 12
       }
     },
@@ -5411,7 +6335,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 188,
+        "line": 189,
         "column": 12
       }
     },
@@ -5427,7 +6351,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/filter_conditions.spec.ts",
-        "line": 222,
+        "line": 223,
         "column": 12
       }
     },
@@ -5443,7 +6367,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -5459,7 +6383,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
-        "line": 48,
+        "line": 49,
         "column": 12
       }
     },
@@ -5475,7 +6399,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
-        "line": 73,
+        "line": 74,
         "column": 12
       }
     },
@@ -5491,7 +6415,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
-        "line": 94,
+        "line": 95,
         "column": 12
       }
     },
@@ -5507,7 +6431,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
-        "line": 124,
+        "line": 125,
         "column": 14
       }
     },
@@ -5523,8 +6447,40 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/grok.spec.ts",
-        "line": 124,
+        "line": 125,
         "column": 14
+      }
+    },
+    {
+      "id": "c2ff3f0c948bea8-f20294ba3ea371a",
+      "title": "Streamlang to Ingest Pipeline - JsonExtract Processor (Ingest Pipeline-specific) should fail ingestion when JSON parsing fails (Ingest Pipeline-specific error handling)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/json_extract.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "c2ff3f0c948bea8-f781779ab5a3fd5",
+      "title": "Streamlang to Ingest Pipeline - JsonExtract Processor (Ingest Pipeline-specific) should not add target field when source field is missing with ignore_missing: true (Ingest Pipeline-specific)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/json_extract.spec.ts",
+        "line": 51,
+        "column": 12
       }
     },
     {
@@ -5916,12 +6872,14 @@
       "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction with internal networks",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
-        "line": 17,
+        "line": 19,
         "column": 12
       }
     },
@@ -5930,12 +6888,14 @@
       "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction with internal networks field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
-        "line": 41,
+        "line": 43,
         "column": 12
       }
     },
@@ -5944,12 +6904,14 @@
       "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction with target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
-        "line": 71,
+        "line": 73,
         "column": 12
       }
     },
@@ -5958,12 +6920,14 @@
       "title": "Streamlang to Ingest Pipeline - Network Direction Processor should set network direction conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 12
       }
     },
@@ -5972,12 +6936,14 @@
       "title": "Streamlang to Ingest Pipeline - Network Direction Processor should omit network direction if any fields are missing with ignore_missing option",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/network_direction.spec.ts",
-        "line": 135,
+        "line": 137,
         "column": 12
       }
     },
@@ -6121,7 +7087,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/redact.spec.ts",
-        "line": 234,
+        "line": 238,
         "column": 12
       }
     },
@@ -6137,7 +7103,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/redact.spec.ts",
-        "line": 259,
+        "line": 263,
         "column": 12
       }
     },
@@ -6153,7 +7119,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/redact.spec.ts",
-        "line": 294,
+        "line": 298,
         "column": 14
       }
     },
@@ -6169,7 +7135,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/redact.spec.ts",
-        "line": 294,
+        "line": 298,
         "column": 14
       }
     },
@@ -6185,7 +7151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -6201,7 +7167,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 12
       }
     },
@@ -6217,7 +7183,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 83,
+        "line": 84,
         "column": 12
       }
     },
@@ -6233,7 +7199,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 118,
+        "line": 119,
         "column": 12
       }
     },
@@ -6249,7 +7215,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 157,
+        "line": 158,
         "column": 12
       }
     },
@@ -6265,7 +7231,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 198,
+        "line": 199,
         "column": 12
       }
     },
@@ -6281,7 +7247,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 239,
+        "line": 240,
         "column": 12
       }
     },
@@ -6297,7 +7263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 295,
+        "line": 298,
         "column": 14
       }
     },
@@ -6313,7 +7279,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove_by_prefix.spec.ts",
-        "line": 295,
+        "line": 298,
         "column": 14
       }
     },
@@ -6329,7 +7295,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -6345,7 +7311,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 12
       }
     },
@@ -6361,7 +7327,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 66,
+        "line": 67,
         "column": 12
       }
     },
@@ -6377,7 +7343,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 12
       }
     },
@@ -6393,7 +7359,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 125,
+        "line": 126,
         "column": 12
       }
     },
@@ -6409,7 +7375,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 156,
+        "line": 157,
         "column": 14
       }
     },
@@ -6425,7 +7391,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/remove.spec.ts",
-        "line": 156,
+        "line": 157,
         "column": 14
       }
     },
@@ -6441,7 +7407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -6457,7 +7423,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 14
       }
     },
@@ -6473,7 +7439,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 14
       }
     },
@@ -6489,7 +7455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 12
       }
     },
@@ -6505,7 +7471,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 12
       }
     },
@@ -6521,7 +7487,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 119,
+        "line": 120,
         "column": 12
       }
     },
@@ -6537,7 +7503,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 144,
+        "line": 145,
         "column": 12
       }
     },
@@ -6553,7 +7519,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/rename.spec.ts",
-        "line": 166,
+        "line": 167,
         "column": 12
       }
     },
@@ -6569,7 +7535,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -6585,7 +7551,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 12
       }
     },
@@ -6601,7 +7567,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 68,
+        "line": 69,
         "column": 12
       }
     },
@@ -6617,7 +7583,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 92,
+        "line": 93,
         "column": 12
       }
     },
@@ -6633,7 +7599,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 12
       }
     },
@@ -6649,7 +7615,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 141,
+        "line": 142,
         "column": 12
       }
     },
@@ -6665,7 +7631,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 168,
+        "line": 169,
         "column": 12
       }
     },
@@ -6681,7 +7647,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 208,
+        "line": 213,
         "column": 12
       }
     },
@@ -6697,7 +7663,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 264,
+        "line": 273,
         "column": 14
       }
     },
@@ -6713,7 +7679,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/replace.spec.ts",
-        "line": 264,
+        "line": 273,
         "column": 14
       }
     },
@@ -6729,7 +7695,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 18,
+        "line": 19,
         "column": 12
       }
     },
@@ -6745,7 +7711,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -6761,7 +7727,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -6777,7 +7743,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -6793,7 +7759,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 67,
+        "line": 68,
         "column": 14
       }
     },
@@ -6809,7 +7775,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 84,
+        "line": 85,
         "column": 12
       }
     },
@@ -6825,7 +7791,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 106,
+        "line": 107,
         "column": 12
       }
     },
@@ -6841,7 +7807,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 129,
+        "line": 130,
         "column": 12
       }
     },
@@ -6857,7 +7823,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 152,
+        "line": 153,
         "column": 12
       }
     },
@@ -6873,7 +7839,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/set.spec.ts",
-        "line": 167,
+        "line": 168,
         "column": 12
       }
     },
@@ -6882,12 +7848,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should sort an array field in ascending order (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 17,
+        "line": 19,
         "column": 12
       }
     },
@@ -6896,12 +7864,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should sort an array field in descending order",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 41,
+        "line": 43,
         "column": 12
       }
     },
@@ -6910,12 +7880,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should sort an array field to a target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 66,
+        "line": 68,
         "column": 12
       }
     },
@@ -6924,12 +7896,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should sort numeric arrays",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 95,
+        "line": 97,
         "column": 12
       }
     },
@@ -6938,12 +7912,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should fail if field is missing and ignore_failure is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 120,
+        "line": 122,
         "column": 12
       }
     },
@@ -6952,12 +7928,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should not fail if field is missing and ignore_failure is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 141,
+        "line": 143,
         "column": 12
       }
     },
@@ -6966,12 +7944,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should skip processing when field is missing and ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 169,
+        "line": 171,
         "column": 12
       }
     },
@@ -6980,12 +7960,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should process when field exists and ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 197,
+        "line": 199,
         "column": 12
       }
     },
@@ -6994,12 +7976,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should sort field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 222,
+        "line": 224,
         "column": 12
       }
     },
@@ -7008,12 +7992,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should sort to target field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 263,
+        "line": 274,
         "column": 12
       }
     },
@@ -7022,12 +8008,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 324,
+        "line": 341,
         "column": 14
       }
     },
@@ -7036,12 +8024,14 @@
       "title": "Streamlang to Ingest Pipeline - Sort Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/sort.spec.ts",
-        "line": 324,
+        "line": 341,
         "column": 14
       }
     },
@@ -7050,12 +8040,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should split a string field into an array (in-place)",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 17,
+        "line": 19,
         "column": 12
       }
     },
@@ -7064,12 +8056,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should split a string field to a target field",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 42,
+        "line": 44,
         "column": 12
       }
     },
@@ -7078,12 +8072,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should split using regex pattern",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 71,
+        "line": 73,
         "column": 12
       }
     },
@@ -7092,12 +8088,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should fail if field is missing and ignore_missing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 12
       }
     },
@@ -7106,12 +8104,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should ignore missing field when ignore_missing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 118,
+        "line": 120,
         "column": 12
       }
     },
@@ -7120,12 +8120,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should preserve trailing empty elements when preserve_trailing is true",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 144,
+        "line": 146,
         "column": 12
       }
     },
@@ -7134,12 +8136,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should discard trailing empty elements when preserve_trailing is false",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 173,
+        "line": 175,
         "column": 12
       }
     },
@@ -7148,12 +8152,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should split field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 200,
+        "line": 202,
         "column": 12
       }
     },
@@ -7162,12 +8168,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should split to target field conditionally with where condition",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 241,
+        "line": 253,
         "column": 12
       }
     },
@@ -7176,12 +8184,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should reject {{ }} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 304,
+        "line": 320,
         "column": 14
       }
     },
@@ -7190,12 +8200,14 @@
       "title": "Streamlang to Ingest Pipeline - Split Processor should reject {{{ }}} template syntax in field names",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/ingest_pipeline/split.spec.ts",
-        "line": 304,
+        "line": 320,
         "column": 14
       }
     },

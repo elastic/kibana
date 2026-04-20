@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Liquid } from 'liquidjs';
 import { type Document, Scalar, visit } from 'yaml';
-import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { extractLiquidErrorPosition } from './extract_liquid_error_position';
+import { parseTemplateString } from './liquid_parse_cache';
 
 export interface LiquidValidationError {
   message: string;
@@ -18,21 +17,6 @@ export interface LiquidValidationError {
   startColumn: number;
   endLine: number;
   endColumn: number;
-}
-
-let liquidInstance: Liquid | null = null;
-
-function getLiquidInstance(): Liquid {
-  if (!liquidInstance) {
-    liquidInstance = createWorkflowLiquidEngine({
-      strictFilters: true,
-      strictVariables: false,
-    });
-    liquidInstance.registerFilter('json_parse', (value: unknown): unknown => {
-      return value;
-    });
-  }
-  return liquidInstance;
 }
 
 function convertOffsetToLineColumn(text: string, offset: number): { line: number; column: number } {
@@ -100,7 +84,6 @@ export function validateLiquidTemplate(
   yamlDocument: Document
 ): LiquidValidationError[] {
   const errors: LiquidValidationError[] = [];
-  const liquid = getLiquidInstance();
 
   visit(yamlDocument, {
     Scalar(key, node) {
@@ -111,7 +94,7 @@ export function validateLiquidTemplate(
         return;
 
       try {
-        liquid.parse(node.value);
+        parseTemplateString(node.value);
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Invalid Liquid syntax';
         const relativePosition = extractLiquidErrorPosition(node.value, errorMessage);

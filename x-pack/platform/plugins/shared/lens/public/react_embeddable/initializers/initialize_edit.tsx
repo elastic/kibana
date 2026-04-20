@@ -28,6 +28,12 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import {
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
@@ -49,12 +55,33 @@ function getSupportedTriggers(
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return ensureNestedTriggers([
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ]);
     }
-    return [];
+    return panelTriggers;
   };
+}
+
+/**
+ * ON_CLICK_VALUE and ON_SELECT_RANGE also trigger ON_APPLY_FILTER.
+ * This function appends ON_APPLY_FILTER to the list of triggers if either ON_CLICK_VALUE
+ * or ON_SELECT_RANGE is supported.
+ * @param triggers
+ */
+function ensureNestedTriggers(triggers: string[]): string[] {
+  if (
+    !triggers.includes(ON_APPLY_FILTER) &&
+    (triggers.includes(ON_CLICK_VALUE) || triggers.includes(ON_SELECT_RANGE))
+  ) {
+    return [...triggers, ON_APPLY_FILTER];
+  }
+
+  return triggers;
 }
 
 function isReadOnly(viewMode$: PublishingSubject<ViewMode>) {
@@ -122,7 +149,7 @@ export function initializeEditApi(
       const parentApiContext = parentApi.getAppContext();
       const currentState = getState();
       await stateTransfer.navigateToEditor(APP_ID, {
-        path: getEditPath(currentState.savedObjectId),
+        path: getEditPath(currentState.ref_id),
         state: {
           embeddableId: uuid,
           valueInput: currentState,
@@ -141,9 +168,9 @@ export function initializeEditApi(
     canEdit: () => isEditMode(viewMode$),
   });
 
-  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'savedObjectId'>) => {
+  const updateState = (newState: Pick<LensRuntimeState, 'attributes' | 'ref_id'>) => {
     stateApi.updateAttributes(newState.attributes);
-    stateApi.updateSavedObjectId(newState.savedObjectId);
+    stateApi.updateRefId(newState.ref_id);
   };
 
   /**
@@ -217,7 +244,7 @@ export function initializeEditApi(
     }
     return (
       Boolean(capabilities.visualize_v2.save) ||
-      (!getState().savedObjectId &&
+      (!getState().ref_id &&
         Boolean(capabilities.dashboard_v2?.showWriteControls) &&
         Boolean(capabilities.visualize_v2.show))
     );
@@ -361,7 +388,7 @@ export function initializeEditApi(
         }
         const currentState = getState();
         return getEditPath(
-          currentState.savedObjectId,
+          currentState.ref_id,
           currentState.time_range,
           currentState.filters,
           data.query.timefilter.timefilter.getRefreshInterval()

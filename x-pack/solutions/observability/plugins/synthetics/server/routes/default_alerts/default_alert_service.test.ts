@@ -13,7 +13,6 @@ import {
 } from '../../../common/constants/synthetics_alerts';
 import { DefaultRuleService } from './default_alert_service';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../constants/settings';
-import { MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL } from '../../../common/constants';
 
 describe('DefaultAlertService', () => {
   describe('getSettings', () => {
@@ -42,7 +41,8 @@ describe('DefaultAlertService', () => {
         defaultEmail: undefined,
         defaultStatusRuleEnabled: true,
         defaultTLSRuleEnabled: true,
-        privateLocationsSyncInterval: MIN_PRIVATE_LOCATIONS_SYNC_INTERVAL,
+        useAllRemoteClusters: false,
+        selectedRemoteClusters: [],
       });
       expect(soClient.get).toHaveBeenCalledTimes(1);
     });

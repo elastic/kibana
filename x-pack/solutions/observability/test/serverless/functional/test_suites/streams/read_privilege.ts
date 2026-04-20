@@ -22,6 +22,7 @@ import {
 const STREAM_NAME = 'logs.otel.crud';
 const request: Streams.WiredStream.UpsertRequest = {
   stream: {
+    type: 'wired',
     description: '',
     ingest: {
       lifecycle: { inherit: {} },

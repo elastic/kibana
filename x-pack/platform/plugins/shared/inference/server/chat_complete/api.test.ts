@@ -22,6 +22,8 @@ import {
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
+  createInferenceProviderError,
+  InferenceTaskErrorCode,
 } from '@kbn/inference-common';
 import {
   createInferenceConnectorAdapterMock,
@@ -443,6 +445,87 @@ describe('createChatCompleteApi', () => {
 
         expect(caughtError).toBeInstanceOf(Error);
         expect(caughtError.message).toContain('Request was aborted');
+      });
+    });
+  });
+
+  describe('upstream provider 404 errors', () => {
+    it('does not rewrite upstream provider 404 errors as connector-not-found errors', async () => {
+      const providerError = createInferenceProviderError(
+        'API Error: Not Found - No endpoints found for google/gemini-3-pro-preview',
+        { status: 404 }
+      );
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        throw providerError;
+      });
+
+      await expect(
+        chatComplete({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.providerError,
+        message: expect.stringContaining('No endpoints found for google/gemini-3-pro-preview'),
+      });
+    });
+  });
+
+  describe('stack connector resolving to inference endpoint', () => {
+    const mockEndpointExecutor = { invoke: jest.fn() };
+
+    beforeEach(() => {
+      const endpointConnector = createInferenceConnectorMock({
+        connectorId: '.my-inference-endpoint',
+        isInferenceEndpoint: true,
+      });
+      const executor = createInferenceExecutorMock({ connector: endpointConnector });
+      getInferenceExecutorMock.mockResolvedValue(executor);
+
+      resolveInferenceEndpointMock.mockResolvedValue({
+        inferenceId: '.my-inference-endpoint',
+        provider: 'openai',
+        modelId: 'gpt-4o',
+        taskType: 'chat_completion',
+      });
+      createInferenceEndpointExecutorMock.mockReturnValue(mockEndpointExecutor);
+      inferenceEndpointAdapterMock.chatComplete.mockReturnValue(of(chunkEvent('endpoint-chunk')));
+    });
+
+    it('routes to the inference endpoint adapter when getInferenceExecutor returns an inference endpoint connector', async () => {
+      await chatComplete({
+        connectorId: 'stack-connector-id',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(getInferenceExecutorMock).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: 'stack-connector-id' })
+      );
+      expect(resolveInferenceEndpointMock).toHaveBeenCalledWith({
+        inferenceId: '.my-inference-endpoint',
+        esClient: mockEsClient,
+      });
+      expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+        inferenceId: '.my-inference-endpoint',
+        esClient: mockEsClient,
+      });
+      expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+      expect(getInferenceAdapterMock).not.toHaveBeenCalled();
+    });
+
+    it('returns the correct response in non-stream mode', async () => {
+      const response = await chatComplete({
+        connectorId: 'stack-connector-id',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response).toEqual({
+        content: 'endpoint-chunk',
+        metadata: undefined,
+        toolCalls: [],
       });
     });
   });

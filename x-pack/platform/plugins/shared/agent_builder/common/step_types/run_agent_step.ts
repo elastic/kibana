@@ -10,6 +10,10 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
 import { i18n } from '@kbn/i18n';
+import {
+  CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+  normalizeOptionalConnectorOrInferenceParam,
+} from '../resolve_connector_or_inference_id';
 
 /**
  * Step type ID for the agentBuilder run agent step.
@@ -34,24 +38,33 @@ export const InputSchema = z.object({
    */
   attachments: z
     .array(
-      z.object({
-        /**
-         * Optional unique identifier for the attachment.
-         */
-        id: z.string().optional(),
-        /**
-         * Type of the attachment (e.g., "security.alert").
-         */
-        type: z.string(),
-        /**
-         * Data payload of the attachment, specific to the attachment type.
-         */
-        data: z.record(z.string(), z.any()),
-        /**
-         * When true, the attachment will not be displayed in the UI.
-         */
-        hidden: z.boolean().optional(),
-      })
+      z
+        .object({
+          /**
+           * Optional unique identifier for the attachment.
+           */
+          id: z.string().optional(),
+          /**
+           * Type of the attachment (e.g., "security.alert").
+           */
+          type: z.string(),
+          /**
+           * Data payload of the attachment, specific to the attachment type.
+           * Required unless `origin` is provided.
+           */
+          data: z.record(z.string(), z.any()).optional(),
+          /**
+           * Origin string (e.g. saved object ID) for by-reference attachments; resolved at send time when `data` is omitted.
+           */
+          origin: z.string().optional(),
+          /**
+           * When true, the attachment will not be displayed in the UI.
+           */
+          hidden: z.boolean().optional(),
+        })
+        .refine((a) => a.data !== undefined || a.origin !== undefined, {
+          message: 'Each attachment must include either data or origin',
+        })
     )
     .optional()
     .describe('Optional attachments to provide to the agent.'),
@@ -88,30 +101,53 @@ export const OutputSchema = z.object({
 /**
  * Config schema for the run agent step.
  */
-export const ConfigSchema = z.object({
-  /**
-   * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
-   */
-  'agent-id': z
-    .string()
-    .optional()
-    .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
-  /**
-   * The ID of the GenAI connector to use. Defaults to the default GenAI connector.
-   */
-  'connector-id': z
-    .string()
-    .optional()
-    .describe('The ID of the connector to use. Defaults to the default GenAI connector.'),
-  /**
-   * When true, create/persist a conversation and associate it with the executing user.
-   * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
-   */
-  'create-conversation': z
-    .boolean()
-    .optional()
-    .describe('When true, creates a conversation for the step.'),
-});
+export const ConfigSchema = z
+  .object({
+    /**
+     * The ID of the agent to chat with. Defaults to the default Elastic AI agent.
+     */
+    'agent-id': z
+      .string()
+      .optional()
+      .describe('The ID of the agent to chat with. Defaults to the default Elastic AI agent.'),
+    /**
+     * The ID of the connector to use for model routing. Mutually exclusive with `inference-id`.
+     */
+    'connector-id': z
+      .string()
+      .optional()
+      .describe(
+        'The ID of the connector to use. Defaults to the default GenAI connector. Mutually exclusive with `inference-id`.'
+      ),
+    /**
+     * Inference endpoint ID for model routing (alias for the same internal id as connector-id).
+     */
+    'inference-id': z
+      .string()
+      .optional()
+      .describe(
+        'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
+      ),
+    /**
+     * When true, create/persist a conversation and associate it with the executing user.
+     * If conversation_id is provided, this can auto-create the conversation with that id if it does not exist.
+     */
+    'create-conversation': z
+      .boolean()
+      .optional()
+      .describe('When true, creates a conversation for the step.'),
+  })
+  .superRefine((cfg, ctx) => {
+    const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
+    const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
+    if (connector !== undefined && inference !== undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
+        path: ['connector-id'],
+      });
+    }
+  });
 
 export type RunAgentStepInputSchema = typeof InputSchema;
 export type RunAgentStepOutputSchema = typeof OutputSchema;
@@ -157,6 +193,15 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
   agent-id: "my-custom-agent"
   with:
     message: "{{ workflow.input.message }}"
+\`\`\``,
+
+      `## Use an inference endpoint (mutually exclusive with connector-id)
+\`\`\`yaml
+- name: run_with_inference
+  type: ${RunAgentStepTypeId}
+  inference-id: "my-inference-endpoint-id"
+  with:
+    message: "Summarize the findings."
 \`\`\``,
 
       `## Create a conversation and reuse it in a follow-up step

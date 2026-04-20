@@ -374,7 +374,12 @@ export class SearchService {
           return request;
         } else {
           try {
-            const id = await deps.searchSessionsClient.getId(request, options);
+            const id = await deps.searchSessionsClient.getId(
+              request,
+              options,
+              // The search route uses minimal auth for performance, which doesn't include realm information.
+              true
+            );
             this.logger.debug(`Found search session id for request ${id}`);
             return {
               ...request,
@@ -417,7 +422,14 @@ export class SearchService {
                     isStored: true,
                   });
                 } else {
-                  return from(deps.searchSessionsClient.trackId(response.id, options)).pipe(
+                  return from(
+                    deps.searchSessionsClient.trackId(
+                      response.id,
+                      options,
+                      // The search route uses minimal auth for performance, which doesn't include realm information.
+                      true
+                    )
+                  ).pipe(
                     tap(() => {
                       isInternalSearchStored = true;
                     }),
@@ -586,12 +598,6 @@ export class SearchService {
     request: KibanaRequest;
     opts?: AsScopedOptions;
   }) => {
-    return opts?.projectRouting === 'space'
-      ? client.asScoped(request, { projectRouting: 'space' })
-      : opts?.projectRouting === 'all'
-      ? client.asScoped(request, { projectRouting: 'all' })
-      : opts?.projectRouting === 'origin-only'
-      ? client.asScoped(request, { projectRouting: 'origin-only' })
-      : client.asScoped(request);
+    return opts ? client.asScoped(request, opts) : client.asScoped(request);
   };
 }

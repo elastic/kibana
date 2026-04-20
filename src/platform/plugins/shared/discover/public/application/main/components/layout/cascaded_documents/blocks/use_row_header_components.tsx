@@ -14,7 +14,11 @@ import type {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import { type AggregateQuery } from '@kbn/es-query';
-import { appendFilteringWhereClauseForCascadeLayout, constructCascadeQuery } from '@kbn/esql-utils';
+import {
+  appendFilteringWhereClauseForCascadeLayout,
+  constructCascadeQuery,
+  GROUP_NOT_SET_VALUE,
+} from '@kbn/esql-utils';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -39,10 +43,12 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldTerminals } from '@kbn/esql-utils/src/utils/esql_fields_utils';
+import { getSparklineCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/sparkline_cell_renderer';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 import type { ESQLDataGroupNode } from './types';
 import type { internalStateActions } from '../../../../state_management/redux';
+import { useDiscoverServices } from '../../../../../../hooks/use_discover_services';
 
 interface RowContext {
   groupId: string;
@@ -91,7 +97,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.filterIn', {
       defaultMessage: 'Filter in',
     }),
-    icon: 'plusInCircle',
+    icon: 'plusCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterIn',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
@@ -100,7 +106,7 @@ const contextRowActions: Array<
         this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue,
-        '+'
+        this.rowContext.groupValue === GROUP_NOT_SET_VALUE ? 'is_null' : '+'
       );
 
       if (!updatedQuery) {
@@ -117,7 +123,7 @@ const contextRowActions: Array<
     name: i18n.translate('discover.dataCascade.row.action.filterOut', {
       defaultMessage: 'Filter out',
     }),
-    icon: 'minusInCircle',
+    icon: 'minusCircle',
     'data-test-subj': 'dscCascadeRowContextActionFilterOut',
     onClick(this: RowClickActionContext) {
       const updatedQuery = appendFilteringWhereClauseForCascadeLayout(
@@ -126,7 +132,7 @@ const contextRowActions: Array<
         this.dataView,
         this.rowContext.groupId,
         this.rowContext.groupValue,
-        '-'
+        this.rowContext.groupValue === GROUP_NOT_SET_VALUE ? 'is_not_null' : '-'
       );
 
       if (!updatedQuery) {
@@ -320,6 +326,9 @@ export const useEsqlDataCascadeRowActionHelpers = ({
           panelPaddingSize="none"
           anchorPosition="upLeft"
           container={container}
+          aria-label={i18n.translate('discover.dataCascade.rowActions.popoverAriaLabel', {
+            defaultMessage: 'Row actions',
+          })}
         >
           <ContextMenu
             close={closePopover}
@@ -374,13 +383,19 @@ const textSlotStyles = css({
   whiteSpace: 'nowrap',
 });
 
+const NO_VALUE_PLACEHOLDER = i18n.translate('discover.dataCascade.row.action.noValue', {
+  defaultMessage: '(blank)',
+});
+
 export function useEsqlDataCascadeRowHeaderComponents(
   editorQueryMeta: ESQLStatsQueryMeta,
   selectedColumns: string[],
-  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
+  togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'],
+  columnTypes: Map<string, 'number' | 'array'>
 ) {
-  const namedColumnsFromQuery = useMemo(() => {
-    return editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier);
+  const services = useDiscoverServices();
+  const aggregateColumnIdentifiers = useMemo(() => {
+    return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));
   }, [editorQueryMeta.appliedFunctions]);
 
   /**
@@ -424,9 +439,29 @@ export function useEsqlDataCascadeRowHeaderComponents(
     ({ rowData }) =>
       selectedColumns
         .map((selectedColumn) => {
-          // only allow aggregation columns to be rendered in the meta part of the row header
-          if (namedColumnsFromQuery.indexOf(selectedColumn) < 0) {
+          if (!aggregateColumnIdentifiers.has(selectedColumn)) {
             return null;
+          }
+
+          const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+          const isArrayType =
+            Array.isArray(aggregatedValue) ||
+            (aggregatedValue === undefined && columnTypes.get(selectedColumn) === 'array');
+
+          const aggregation = editorQueryMeta.appliedFunctions.find(
+            ({ identifier }) => identifier === selectedColumn
+          )?.aggregation;
+
+          if (aggregation && /sparkline/i.test(aggregation) && isArrayType) {
+            return (
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <div css={css({ width: '100px' })}>
+                    {getSparklineCellRenderer(services.charts, aggregatedValue, false, undefined)}
+                  </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
           }
 
           return (
@@ -442,26 +477,23 @@ export function useEsqlDataCascadeRowHeaderComponents(
                     </EuiFlexItem>
                   ),
                   badge: () => {
-                    const aggregatedValue = rowData.aggregatedValues[selectedColumn];
+                    if (isArrayType) {
+                      return (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="hollow" css={textSlotStyles}>
+                            {Array.isArray(aggregatedValue)
+                              ? aggregatedValue
+                                  .map((value) => value || NO_VALUE_PLACEHOLDER)
+                                  .join(', ')
+                              : '-'}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      );
+                    }
 
                     return (
                       <EuiFlexItem grow={false}>
-                        {typeof aggregatedValue === 'number' ? (
-                          <NumberBadge value={aggregatedValue} shortenAtExpSize={3} />
-                        ) : (
-                          <EuiBadge color="hollow" css={textSlotStyles}>
-                            {aggregatedValue
-                              .map((value) => {
-                                return (
-                                  value ||
-                                  i18n.translate('discover.dataCascade.row.action.noValue', {
-                                    defaultMessage: '(blank)',
-                                  })
-                                );
-                              })
-                              .join(', ')}
-                          </EuiBadge>
-                        )}
+                        <NumberBadge value={Number(aggregatedValue)} shortenAtExpSize={3} />
                       </EuiFlexItem>
                     );
                   },
@@ -471,7 +503,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
           );
         })
         .filter(Boolean),
-    [namedColumnsFromQuery, selectedColumns]
+    [aggregateColumnIdentifiers, columnTypes, editorQueryMeta, selectedColumns, services]
   );
 
   const rowActions = useCallback<

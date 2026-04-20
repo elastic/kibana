@@ -51,6 +51,7 @@ import { trackSaveUiCounterEvents } from '../lens_ui_telemetry';
 import { saveUpdatedLinkedAnnotationsToLibrary } from '../react_embeddable/helper';
 import {
   getCurrentTitle,
+  isComingFromContainerView,
   isLegacyEditorEmbeddable,
   setBreadcrumbsTitle,
   useNavigateBackToApp,
@@ -68,16 +69,6 @@ export type SaveProps = Simplify<
     panelTimeRange?: TimeRange;
   }
 >;
-
-// Helper to determine if we're coming from a specific dashboard/canvas view (not from library list)
-function isComingFromContainerView(incomingState?: LensAppProps['incomingState']): boolean {
-  return Boolean(
-    incomingState?.originatingApp &&
-      incomingState?.originatingPath &&
-      // Exclude library lists (/list/*) - no "Save and Return" from Dashboard Viz tab
-      !incomingState.originatingPath.includes('/list/')
-  );
-}
 
 export function App({
   history,
@@ -164,19 +155,19 @@ export function App({
   }
 
   const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
-  const savedObjectId = initialInput?.savedObjectId;
+  const savedObjectId = initialInput?.ref_id;
 
   const isFromLegacyEditorEmbeddable = isLegacyEditorEmbeddable(initialContext);
   const legacyEditorAppName =
-    initialContext && 'originatingApp' in initialContext
+    initialContext && 'legacyEditorOriginatingApp' in initialContext
+      ? initialContext.legacyEditorOriginatingApp
+      : initialContext && 'originatingApp' in initialContext
       ? initialContext.originatingApp
       : undefined;
   const legacyEditorAppUrl =
     initialContext && 'vizEditorOriginatingAppUrl' in initialContext
       ? initialContext.vizEditorOriginatingAppUrl
       : undefined;
-  const initialContextIsEmbedded = Boolean(legacyEditorAppName);
-
   const showNoDataPopover = useCallback(() => {
     setIndicateNoData(true);
   }, [setIndicateNoData]);
@@ -274,19 +265,26 @@ export function App({
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
+    if (savedObjectId && !persistedDoc) {
+      return;
+    }
     const isByValueMode = getIsByValueMode();
     const currentDocTitle = getCurrentTitle(persistedDoc, isByValueMode, initialContext);
     setBreadcrumbsTitle(
       { application, chrome, serverless },
       {
-        isByValueMode,
         currentDocTitle,
         redirectToOrigin,
-        isFromLegacyEditor: Boolean(isLinkedToOriginatingApp || legacyEditorAppName),
+        incomingBreadcrumbs:
+          incomingState?.breadcrumbs ??
+          (initialContext && 'breadcrumbs' in initialContext
+            ? initialContext.breadcrumbs
+            : undefined),
         originatingAppName: getOriginatingAppName(),
       }
     );
   }, [
+    savedObjectId,
     getOriginatingAppName,
     redirectToOrigin,
     getIsByValueMode,
@@ -298,6 +296,8 @@ export function App({
     legacyEditorAppName,
     serverless,
     initialContext,
+    incomingState?.originatingApp,
+    incomingState?.breadcrumbs,
   ]);
 
   const switchDatasource = useCallback(() => {
@@ -357,7 +357,9 @@ export function App({
             onAppLeave,
             redirectTo,
             switchDatasource,
-            originatingApp: incomingState?.originatingApp,
+            originatingApp: isComingFromContainerView(incomingState)
+              ? incomingState?.originatingApp ?? initialContext?.originatingApp
+              : undefined,
             textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
             ...lensAppServices,
           },
@@ -387,7 +389,8 @@ export function App({
       onAppLeave,
       redirectTo,
       switchDatasource,
-      incomingState?.originatingApp,
+      incomingState,
+      initialContext?.originatingApp,
       shouldCloseAndSaveTextBasedQuery,
       lensAppServices,
       dispatchSetState,
@@ -499,7 +502,6 @@ export function App({
           isCurrentStateDirty={!isLensEqualWrapper(persistedDoc)}
           goBackToOriginatingApp={goBackToOriginatingApp}
           contextOriginatingApp={contextOriginatingApp}
-          initialContextIsEmbedded={initialContextIsEmbedded}
           topNavMenuEntryGenerators={topNavMenuEntryGenerators}
           initialContext={initialContext}
           indexPatternService={indexPatternService}
@@ -523,7 +525,7 @@ export function App({
         <SaveModalContainer
           lensServices={lensAppServices}
           originatingApp={
-            isComingFromContainerView(incomingState) || initialContextIsEmbedded
+            isComingFromContainerView(incomingState) || legacyEditorAppName
               ? incomingState?.originatingApp ?? initialContext?.originatingApp
               : undefined
           }

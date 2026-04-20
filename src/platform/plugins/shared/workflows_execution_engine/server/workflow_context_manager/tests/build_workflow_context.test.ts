@@ -568,4 +568,55 @@ describe('buildWorkflowContext', () => {
       });
     });
   });
+
+  describe('metadata context', () => {
+    it('should include metadata from execution document when present', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        metadata: { agent_id: 'agent-abc', source: 'agent-builder' },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toEqual({ agent_id: 'agent-abc', source: 'agent-builder' });
+    });
+
+    it('should fall back to context.metadata when execution.metadata is not set', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {
+          metadata: { agent_id: 'agent-from-context' },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toEqual({ agent_id: 'agent-from-context' });
+    });
+
+    it('should return undefined metadata when neither execution.metadata nor context.metadata is set', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {},
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toBeUndefined();
+    });
+
+    it('should prefer execution.metadata over context.metadata', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        metadata: { agent_id: 'from-execution' },
+        context: {
+          metadata: { agent_id: 'from-context' },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.metadata).toEqual({ agent_id: 'from-execution' });
+    });
+  });
 });

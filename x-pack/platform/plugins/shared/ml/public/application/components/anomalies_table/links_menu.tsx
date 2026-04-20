@@ -788,7 +788,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         items.push(
           <EuiContextMenuItem
             key={`custom_url_${index}`}
-            icon="popout"
+            icon="external"
             onClick={() => {
               closePopover();
               openCustomUrl(customUrl);
@@ -898,7 +898,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="view_examples"
-          icon="popout"
+          icon="external"
           onClick={() => {
             closePopover();
             viewExamples();
@@ -927,7 +927,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="create_rule"
-          icon="controlsHorizontal"
+          icon="controls"
           onClick={() => {
             closePopover();
             props.showRuleEditorFlyout(anomaly, focusTrapProps);
@@ -981,7 +981,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
-          icon="logPatternAnalysis"
+          icon="pattern"
           onClick={() => {
             closePopover();
             const additionalField = getAdditionalField(anomaly);
@@ -1063,6 +1063,12 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
         closePopover={closePopover}
         panelPaddingSize="none"
         anchorPosition="downLeft"
+        aria-label={i18n.translate(
+          'xpack.ml.anomaliesTable.linksMenu.anomalyLinksMenuPopoverAriaLabel',
+          {
+            defaultMessage: 'Anomaly links menu',
+          }
+        )}
       >
         <LinksMenuUI {...props} onItemClick={closePopover} />
       </EuiPopover>

@@ -40,6 +40,15 @@ export const RICH_TRACE = {
 
 export const MINIMAL_TRACE = {
   TRANSACTION_NAME: 'GET /health',
+  LOGS: {
+    HEALTH_CHECK_START: 'Health check started',
+    HEALTH_CHECK_SUCCESS: 'Health check passed',
+  },
+};
+
+export const DEEP_TRACE = {
+  TRANSACTION_NAME: 'GET /scroll-test',
+  SCROLL_TARGET_SPAN_NAME: 'scroll-target-span',
 };
 
 export const PRODUCER_TRACE = {

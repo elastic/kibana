@@ -14,13 +14,21 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp, enableSkillsDeepLink } from './register';
+import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
+
+const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
+  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
+    default: m.AgentBuilderAnnouncementChromeInner,
+  }))
+);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -31,6 +39,7 @@ import {
   NavigationService,
   ToolsService,
   SkillsService,
+  SmlService,
   PluginsService,
   EventsService,
   type AgentBuilderInternalService,
@@ -71,6 +80,7 @@ export class AgentBuilderPlugin
   private internalServices?: AgentBuilderInternalService;
   private setupServices?: {
     navigationService: NavigationService;
+    usageCollection?: UsageCollectionSetup;
   };
   private activeSidebarRef: ConversationSidebarRef | null = null;
   private sidebarCallbacks: {
@@ -79,6 +89,7 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -92,7 +103,7 @@ export class AgentBuilderPlugin
       licenseManagement: deps.licenseManagement?.locator,
     });
 
-    this.setupServices = { navigationService };
+    this.setupServices = { navigationService, usageCollection: deps.usageCollection };
 
     registerApp({
       core,
@@ -143,41 +154,15 @@ export class AgentBuilderPlugin
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
+    const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
-
-    const isExperimentalFeaturesEnabled = core.settings.client.get<boolean>(
-      AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
-      false
-    );
-    if (isExperimentalFeaturesEnabled) {
-      enableSkillsDeepLink(this.appUpdater$);
-    }
 
     if (!this.setupServices) {
       throw new Error('plugin start called before plugin setup');
     }
 
-    const { navigationService } = this.setupServices;
-
-    const internalServices: AgentBuilderInternalService = {
-      agentService,
-      attachmentsService,
-      chatService,
-      conversationsService,
-      docLinksService,
-      navigationService,
-      toolsService,
-      skillsService,
-      pluginsService,
-      startDependencies,
-      accessChecker,
-      eventsService,
-    };
-
-    this.internalServices = internalServices;
-
-    setSidebarServices(core, internalServices);
+    const { navigationService, usageCollection } = this.setupServices;
 
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const sidebar = core.chrome.sidebar.getApp('agentBuilder');
@@ -218,6 +203,39 @@ export class AgentBuilderPlugin
       this.activeSidebarRef = sidebarRef;
       return { chatRef: sidebarRef };
     };
+
+    const internalServices: AgentBuilderInternalService = {
+      agentService,
+      attachmentsService,
+      chatService,
+      conversationsService,
+      docLinksService,
+      navigationService,
+      toolsService,
+      skillsService,
+      smlService,
+      pluginsService,
+      startDependencies,
+      usageCollection,
+      accessChecker,
+      eventsService,
+      openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
+        return openSidebarInternal(options);
+      },
+    };
+
+    this.internalServices = internalServices;
+
+    setSidebarServices(core, internalServices);
+
+    this.experimentalDeepLinksSubscription = core.uiSettings
+      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .pipe(distinctUntilChanged())
+      .subscribe((experimentalFeaturesEnabled) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
+        }));
+      });
 
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
@@ -261,12 +279,30 @@ export class AgentBuilderPlugin
 
         openSidebarInternal(options);
       },
-      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: unknown) => {
+      updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
     };
 
     if (hasAgentBuilder) {
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
+            <LazyAgentBuilderAnnouncementChromeInner
+              coreStart={core}
+              pluginsStart={startDependencies}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        order: 1000,
+      });
+
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
@@ -289,5 +325,9 @@ export class AgentBuilderPlugin
     }
 
     return agentBuilderService;
+  }
+
+  stop() {
+    this.experimentalDeepLinksSubscription?.unsubscribe();
   }
 }

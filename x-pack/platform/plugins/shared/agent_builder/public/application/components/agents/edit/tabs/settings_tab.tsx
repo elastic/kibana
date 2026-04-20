@@ -23,6 +23,7 @@ import {
   EuiPanel,
   EuiMarkdownEditor,
   EuiHorizontalRule,
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -40,11 +41,11 @@ import { useAgentLabels } from '../../../../hooks/agents/use_agent_labels';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useCurrentUser } from '../../../../hooks/agents/use_current_user';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
-import { useExperimentalFeatures } from '../../../../hooks/use_experimental_features';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
 import { VISIBILITY_LABELS } from '../../../../utils/visibility_i18n';
 import type { AgentFormData } from '../agent_form';
+import { truncateAvatarSymbol } from '../agent_form_validation';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -67,20 +68,18 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   const {
     services: { uiSettings },
   } = useKibana();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
 
-  const { currentUser } = useCurrentUser({ enabled: isExperimentalFeaturesEnabled });
+  const { currentUser } = useCurrentUser();
   const { isAdmin } = useUiPrivileges();
 
   const canChangeVisibility =
-    isExperimentalFeaturesEnabled &&
-    (isCreateMode ||
-      canChangeAgentVisibility({
-        agentId,
-        owner,
-        currentUser,
-        isAdmin,
-      }));
+    isCreateMode ||
+    canChangeAgentVisibility({
+      agentId,
+      owner,
+      currentUser,
+      isAdmin,
+    });
 
   const showAgentWorkflowsSection = useMemo(() => {
     return isPreExecutionWorkflowEnabled(uiSettings);
@@ -262,6 +261,62 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         direction="row"
         gutterSize="xl"
         alignItems="flexStart"
+        aria-labelledby="elastic-capabilities-section-title"
+      >
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              <EuiIcon type="sparkles" aria-hidden={true} />
+              <EuiTitle size="xs">
+                <h2 id="elastic-capabilities-section-title">
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesTitle',
+                    {
+                      defaultMessage: 'Elastic capabilities',
+                    }
+                  )}
+                </h2>
+              </EuiTitle>
+            </EuiFlexGroup>
+            <EuiText size="s" color="subdued">
+              {i18n.translate(
+                'xpack.agentBuilder.agents.form.settings.elasticCapabilitiesDescription',
+                {
+                  defaultMessage:
+                    'Enable built-in Elastic capabilities that enhance the agent with additional tools and skills provided by Elastic.',
+                }
+              )}
+            </EuiText>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+          <Controller
+            name="configuration.enable_elastic_capabilities"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <EuiSwitch
+                label={i18n.translate(
+                  'xpack.agentBuilder.agents.form.settings.enableElasticCapabilitiesLabel',
+                  {
+                    defaultMessage: 'Enable Elastic capabilities',
+                  }
+                )}
+                checked={Boolean(value)}
+                onChange={(e) => onChange(e.target.checked)}
+                disabled={isFormDisabled}
+                data-test-subj="agentSettingsEnableElasticCapabilitiesSwitch"
+              />
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiHorizontalRule />
+
+      <EuiFlexGroup
+        direction="row"
+        gutterSize="xl"
+        alignItems="flexStart"
         aria-labelledby="organization-access-section-title"
       >
         <EuiFlexItem grow={1}>
@@ -270,14 +325,10 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               <EuiIcon type="tag" aria-hidden={true} />
               <EuiTitle size="xs">
                 <h2 id="organization-access-section-title">
-                  {isExperimentalFeaturesEnabled
-                    ? i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.organizationAccessTitle',
-                        { defaultMessage: 'Organization' }
-                      )
-                    : i18n.translate('xpack.agentBuilder.agents.form.settings.labelsSectionTitle', {
-                        defaultMessage: 'Labels',
-                      })}
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.organizationAccessTitle',
+                    { defaultMessage: 'Organization' }
+                  )}
                 </h2>
               </EuiTitle>
             </EuiFlexGroup>
@@ -285,86 +336,83 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               {i18n.translate(
                 'xpack.agentBuilder.agents.form.settings.organizationAccessDescription',
                 {
-                  defaultMessage: isExperimentalFeaturesEnabled
-                    ? 'Use labels to organize agents and visibility to control who can view and edit.'
-                    : 'Use labels to organize and filter agents.',
+                  defaultMessage:
+                    'Use labels to organize agents and visibility to control who can view and edit.',
                 }
               )}
             </EuiText>
             <EuiSpacer size="s" />
-            {isExperimentalFeaturesEnabled && (
-              <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
-                <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
-                  <EuiTitle size="xxs">
-                    <span>
+            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                <EuiTitle size="xxs">
+                  <span>
+                    {i18n.translate(
+                      'xpack.agentBuilder.agents.form.settings.visibilityMeaningLabel',
+                      {
+                        defaultMessage: 'Visibility levels',
+                      }
+                    )}
+                  </span>
+                </EuiTitle>
+                <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      <strong>
+                        {i18n.translate(
+                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningPublicLabel',
+                          {
+                            defaultMessage: 'Public:',
+                          }
+                        )}
+                      </strong>{' '}
                       {i18n.translate(
-                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningLabel',
+                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningPublicDescription',
                         {
-                          defaultMessage: 'Visibility levels',
+                          defaultMessage: 'Anyone can view and edit.',
                         }
                       )}
-                    </span>
-                  </EuiTitle>
-                  <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="subdued">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.agentBuilder.agents.form.settings.visibilityMeaningPublicLabel',
-                            {
-                              defaultMessage: 'Public:',
-                            }
-                          )}
-                        </strong>{' '}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningPublicDescription',
+                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedLabel',
                           {
-                            defaultMessage: 'Anyone can view and edit.',
+                            defaultMessage: 'Shared:',
                           }
                         )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="subdued">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedLabel',
-                            {
-                              defaultMessage: 'Shared:',
-                            }
-                          )}
-                        </strong>{' '}
+                      </strong>{' '}
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedDescription',
+                        {
+                          defaultMessage:
+                            'Anyone can view. Only the owner or an administrator can edit.',
+                        }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      <strong>
                         {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningSharedDescription',
+                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateLabel',
                           {
-                            defaultMessage:
-                              'Anyone can view. Only the owner or an administrator can edit.',
+                            defaultMessage: 'Private:',
                           }
                         )}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s" color="subdued">
-                        <strong>
-                          {i18n.translate(
-                            'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateLabel',
-                            {
-                              defaultMessage: 'Private:',
-                            }
-                          )}
-                        </strong>{' '}
-                        {i18n.translate(
-                          'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateDescription',
-                          {
-                            defaultMessage: 'Only the owner or an administrator can view and edit.',
-                          }
-                        )}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+                      </strong>{' '}
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.visibilityMeaningPrivateDescription',
+                        {
+                          defaultMessage: 'Only the owner or an administrator can view and edit.',
+                        }
+                      )}
+                    </EuiText>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
-              </EuiPanel>
-            )}
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={2} css={formFlexColumnStyles}>
@@ -411,47 +459,42 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             />
           </EuiFormRow>
 
-          {isExperimentalFeaturesEnabled && (
-            <EuiFormRow
-              label={i18n.translate('xpack.agentBuilder.agents.form.visibilityLabel', {
-                defaultMessage: 'Visibility',
-              })}
-              helpText={
-                agentId === agentBuilderDefaultAgentId
-                  ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDefaultAgentReason', {
-                      defaultMessage: 'The default agent is always visible to all users.',
-                    })
-                  : !canChangeVisibility
-                  ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDisabledReason', {
-                      defaultMessage: 'Only the owner or an administrator can change visibility.',
-                    })
-                  : undefined
-              }
-              isInvalid={!!formState.errors.visibility}
-              error={formState.errors.visibility?.message}
-            >
-              <Controller
-                name="visibility"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <EuiSuperSelect
-                    fullWidth
-                    options={visibilityOptions}
-                    valueOfSelected={value}
-                    onChange={onChange}
-                    disabled={isFormDisabled || !canChangeVisibility}
-                    aria-label={i18n.translate(
-                      'xpack.agentBuilder.agents.form.visibilityAriaLabel',
-                      {
-                        defaultMessage: 'Agent visibility',
-                      }
-                    )}
-                    data-test-subj="agentSettingsVisibilitySelect"
-                  />
-                )}
-              />
-            </EuiFormRow>
-          )}
+          <EuiFormRow
+            label={i18n.translate('xpack.agentBuilder.agents.form.visibilityLabel', {
+              defaultMessage: 'Visibility',
+            })}
+            helpText={
+              agentId === agentBuilderDefaultAgentId
+                ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDefaultAgentReason', {
+                    defaultMessage: 'The default agent is always visible to all users.',
+                  })
+                : !canChangeVisibility
+                ? i18n.translate('xpack.agentBuilder.agents.form.visibilityDisabledReason', {
+                    defaultMessage: 'Only the owner or an administrator can change visibility.',
+                  })
+                : undefined
+            }
+            isInvalid={!!formState.errors.visibility}
+            error={formState.errors.visibility?.message}
+          >
+            <Controller
+              name="visibility"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <EuiSuperSelect
+                  fullWidth
+                  options={visibilityOptions}
+                  valueOfSelected={value}
+                  onChange={onChange}
+                  disabled={isFormDisabled || !canChangeVisibility}
+                  aria-label={i18n.translate('xpack.agentBuilder.agents.form.visibilityAriaLabel', {
+                    defaultMessage: 'Agent visibility',
+                  })}
+                  data-test-subj="agentSettingsVisibilitySelect"
+                />
+              )}
+            />
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -639,8 +682,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                     <EuiFieldText
                       {...rest}
                       onChange={(event) => {
-                        const value = event.target.value;
-                        rest.onChange(value.slice(0, 2));
+                        rest.onChange(truncateAvatarSymbol(event.target.value));
                       }}
                       inputRef={ref}
                       disabled={isFormDisabled}

@@ -117,11 +117,15 @@ export function SloStatusBadge({
   sloCount,
   serviceName,
   onClick,
+  hideTooltip = false,
 }: {
   sloStatus: SloStatus | 'noSLOs';
   sloCount?: number;
   serviceName: string;
-  onClick: MouseEventHandler<HTMLButtonElement>;
+  /** When omitted, the badge is display-only (e.g. service map static badges). */
+  onClick?: MouseEventHandler<HTMLButtonElement>;
+  /** When true, no EuiToolTip (e.g. service map). Inventory and other callers omit this. */
+  hideTooltip?: boolean;
 }) {
   const config = SLO_STATUS_CONFIG[sloStatus];
   const cappedCount =
@@ -131,24 +135,41 @@ export function SloStatusBadge({
         : sloCount
       : undefined;
 
+  const badge = (
+    <EuiBadge
+      data-test-subj="apmSloBadge"
+      data-slo-status={sloStatus}
+      color={config.color}
+      {...(onClick
+        ? { onClick, onClickAriaLabel: config.ariaLabel(serviceName) }
+        : { 'aria-label': config.ariaLabel(serviceName) })}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="chartGauge" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBadge>
+  );
+
+  if (hideTooltip) {
+    return badge;
+  }
+
+  if (onClick) {
+    return (
+      <EuiToolTip position="bottom" content={config.tooltipContent}>
+        {badge}
+      </EuiToolTip>
+    );
+  }
+
   return (
     <EuiToolTip position="bottom" content={config.tooltipContent}>
-      <EuiBadge
-        data-test-subj="apmSloBadge"
-        data-slo-status={sloStatus}
-        color={config.color}
-        onClick={onClick}
-        onClickAriaLabel={config.ariaLabel(serviceName)}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="visGauge" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">{config.badgeLabel(cappedCount)}</EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBadge>
+      <span tabIndex={0}>{badge}</span>
     </EuiToolTip>
   );
 }

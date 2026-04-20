@@ -1,5 +1,6 @@
 env:
   KBN_EVALS: '1'
+  KBN_EVALS_WEEKLY: '1'
 steps:
   - label: '👨‍🔧 Pre-Build'
     command: .buildkite/scripts/lifecycle/pre_build.sh
@@ -10,6 +11,23 @@ steps:
       machineType: n2-standard-2
 
   - wait
+
+  - label: ':github: Sync models:* labels'
+    command: .buildkite/scripts/steps/evals/sync_git_labels.sh
+    key: sync-git-labels
+    timeout_in_minutes: 30
+    soft_fail: true
+    env:
+      FTR_EIS_CCM: '1'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
 
   - label: 'Store Cache for build'
     command: .buildkite/scripts/steps/store_cache.sh
@@ -47,13 +65,15 @@ steps:
           EVAL_SUITE_ID: 'agent-builder'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          # Weekly pipeline model allowlist:
-          # - Default behavior (EVAL_MODEL_GROUPS=all) runs against every discovered LiteLLM + EIS model.
-          # - That is too expensive/noisy for a weekly cadence, so we currently pin to a small EIS allowlist.
+          # Weekly pipeline model allowlist (per-suite):
+          # - Core tier: default for most suites (one flagship per provider).
+          # - Extended tier: includes additional model sizes for suites that benefit from them.
+          # - Canonical per-suite config lives in evals.suites.json `weeklyEisModelGroups`
+          #   these YAML anchors must stay in sync. See also DEFAULT_WEEKLY_EIS_MODELS in eval_pipeline.ts.
           #
           # NOTE: Use `eis/<modelId>` values (not connector ids) so we can filter purely on the discovered
           # EIS model ids in `target/eis_models.json`.
-          EVAL_MODEL_GROUPS: &weekly_eis_model_groups 'eis/anthropic-claude-4.5-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.0-pro,eis/openai-gpt-5.2,eis/openai-gpt-oss-120b'
+          EVAL_MODEL_GROUPS: &weekly_eis_core_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.4,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -75,7 +95,7 @@ steps:
           EVAL_SUITE_ID: 'esql-generation'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -97,7 +117,7 @@ steps:
           EVAL_SUITE_ID: 'streams'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -110,16 +130,18 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Streams Significant Events'
-        key: kbn-evals-weekly-streams-significant-events
+      - label: 'Evals: Significant Events'
+        key: kbn-evals-weekly-significant-events
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
-          EVAL_SUITE_ID: 'streams/significant-events'
+          EVAL_SUITE_ID: 'significant-events'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          # Extended tier: includes smaller/cheaper models for cost-performance evaluation.
+          # Keep in sync with `weeklyEisModelGroups` for significant-events in evals.suites.json.
+          EVAL_MODEL_GROUPS: &weekly_eis_extended_models 'eis/anthropic-claude-4.6-sonnet,eis/anthropic-claude-4.6-opus,eis/google-gemini-3.0-flash,eis/google-gemini-3.1-pro,eis/openai-gpt-5.2,eis/openai-gpt-5.4,eis/openai-gpt-5.4-mini,eis/openai-gpt-5.4-nano,eis/openai-gpt-oss-120b'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -141,7 +163,7 @@ steps:
           EVAL_SUITE_ID: 'llm-tasks'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -162,7 +184,7 @@ steps:
           EVAL_SUITE_ID: 'observability-ai'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -184,7 +206,7 @@ steps:
           EVAL_SUITE_ID: 'security-ai-rules'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -206,7 +228,7 @@ steps:
           EVAL_SUITE_ID: 'endpoint'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
           EVAL_SERVER_CONFIG_SET: 'evals_endpoint'
         timeout_in_minutes: 60
         agents:
@@ -220,7 +242,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      - label: 'Evals: Entity Anlaytics'
+      - label: 'Evals: Entity Analytics'
         key: kbn-evals-weekly-entity-analytics
         command: bash .buildkite/scripts/steps/evals/run_suite.sh
         env:
@@ -229,8 +251,53 @@ steps:
           EVAL_SUITE_ID: 'entity-analytics'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
-          EVAL_MODEL_GROUPS: *weekly_eis_model_groups
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
           EVAL_SERVER_CONFIG_SET: 'evals_entity_analytics'
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Attack Discovery'
+        key: kbn-evals-weekly-attack-discovery
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'attack-discovery'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Workflows Authoring'
+        key: kbn-evals-weekly-workflows
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'workflows'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_workflows'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404

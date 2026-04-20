@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { registerOptionsListControlTransforms } from './options_list_control_transforms';
-import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 
 const REF_NAME = 'test-data-view';
 
@@ -56,11 +56,36 @@ describe('options list control transforms', () => {
           "data_view_id": "data-view-id",
           "exclude": true,
           "field_name": "test",
+          "ignore_validations": false,
           "search_technique": "prefix",
           "selected_options": Array [
             "val",
           ],
           "title": "Test",
+          "use_global_filters": true,
+        }
+      `);
+    });
+
+    it('falls back to a data view id stored explicitly in state if no reference can be found', () => {
+      const result = transformOut(
+        {
+          ...baseState,
+          dataViewRefName: 'broken',
+          dataViewId: 'data-view-id',
+        },
+        panelReferences,
+        undefined,
+        undefined
+      );
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "data_view_id": "data-view-id",
+          "field_name": "test",
+          "ignore_validations": false,
+          "title": "Test",
+          "use_global_filters": true,
         }
       `);
     });

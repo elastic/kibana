@@ -93,6 +93,9 @@ dependsOn:
   - '@kbn/connector-schemas'
   - '@kbn/agent-builder-plugin'
   - '@kbn/object-utils'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/react-query'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
@@ -108,26 +111,6 @@ fileGroups:
     - server/**/*
     - .storybook/**/*.tsx
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

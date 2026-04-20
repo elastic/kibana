@@ -11,86 +11,35 @@ import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
+import type { EventSchemaPropertyInfo } from './event_schema_properties';
+import { getEventSchemaProperties } from './event_schema_properties';
+import { getStabilityNote } from '../get_stability_note';
 
 /**
- * Get the shape of a Zod object schema (unwrap optional so we can read .shape).
+ * Format event properties as a tree: nested paths (e.g. foo.bar.baz) are shown
+ * with indentation and segment names so the structure reads like foo: { bar: { baz: (string) } }.
  */
-function getZodObjectShape(schema: z.ZodType): Record<string, z.ZodType> | undefined {
-  const s = schema as unknown as { shape?: Record<string, z.ZodType>; unwrap?: () => z.ZodType };
-  if (s.shape && typeof s.shape === 'object') {
-    return s.shape;
-  }
-  if (typeof s.unwrap === 'function') {
-    const unwrapped = s.unwrap() as unknown as { shape?: Record<string, z.ZodType> };
-    return unwrapped?.shape;
-  }
-  return undefined;
-}
-
-/**
- * Get description from a Zod schema (Zod v4 exposes .description on described schemas).
- * Unwraps optional/inner type once if needed to find the description.
- */
-function getZodDescription(schema: z.ZodType): string | undefined {
-  const s = schema as unknown as {
-    description?: string;
-    unwrap?: () => z.ZodType;
-    innerType?: z.ZodType;
-  };
-  if (typeof s.description === 'string') return s.description;
-  const unwrappedSchema = s.unwrap?.() ?? s.innerType;
-  if (unwrappedSchema) return getZodDescription(unwrappedSchema);
-  return undefined;
-}
-
-/** Display shape for one event schema property (derived from getEventSchemaProperties return type). */
-type EventPropertyInfo = ReturnType<typeof getEventSchemaProperties>[number];
-
-/**
- * Extract event schema properties (name, type, description) from a Zod schema
- * for display in trigger hover. Uses JSON Schema for structure and falls back
- * to Zod schema .description when toJSONSchema omits it.
- */
-function getEventSchemaProperties(eventSchema: z.ZodType): Array<{
-  name: string;
-  type: string;
-  description?: string;
-}> {
-  try {
-    const jsonSchema = z.toJSONSchema(eventSchema) as Record<string, unknown>;
-    const properties = jsonSchema?.properties as
-      | Record<string, Record<string, unknown>>
-      | undefined;
-    if (!properties || typeof properties !== 'object') {
-      return [];
+function formatEventPropertiesAsTree(eventProperties: EventSchemaPropertyInfo[]): string {
+  const lines: string[] = [];
+  for (const prop of eventProperties) {
+    const parts = prop.name.split('.');
+    const depth = parts.length - 1;
+    const segment = parts[parts.length - 1] ?? prop.name;
+    const indent = '  '.repeat(depth);
+    const typeInfo = prop.type ? ` _(${prop.type})_` : '';
+    lines.push(`${indent}- \`${segment}\`${typeInfo}`);
+    if (prop.description) {
+      lines.push(`${indent}  ${prop.description}`);
     }
-
-    const shape = getZodObjectShape(eventSchema);
-
-    return Object.entries(properties).map(([name, prop]) => {
-      let desc = typeof prop?.description === 'string' ? prop.description : undefined;
-      if (!desc && shape?.[name]) {
-        desc = getZodDescription(shape[name]);
-      }
-      const rawType = prop?.type;
-      const type =
-        typeof rawType === 'string'
-          ? rawType
-          : Array.isArray(rawType)
-          ? (rawType as string[]).join(' | ')
-          : 'unknown';
-      return { name, type, description: desc };
-    });
-  } catch {
-    return [];
   }
+  return lines.join('\n');
 }
 
 function generateTriggerUsage(
   definition: PublicTriggerDefinition,
   triggerType: string,
-  eventProperties: EventPropertyInfo[]
+  eventProperties: EventSchemaPropertyInfo[]
 ): string {
   const lines: string[] = [];
 
@@ -106,13 +55,7 @@ function generateTriggerUsage(
       })
     );
     lines.push('');
-    for (const prop of eventProperties) {
-      const typeInfo = prop.type ? ` _(${prop.type})_` : '';
-      lines.push(`- \`${prop.name}\`${typeInfo}`);
-      if (prop.description) {
-        lines.push(`  ${prop.description}`);
-      }
-    }
+    lines.push(formatEventPropertiesAsTree(eventProperties));
     lines.push('');
   }
 
@@ -141,6 +84,9 @@ function buildTriggerHoverFromDefinition(
   triggerType: string
 ): monaco.IMarkdownString {
   const lines: string[] = [];
+  // all custom triggers are tech preview now, later we should get the stability from the definition
+  lines.push(getStabilityNote('tech_preview'));
+  lines.push('');
   lines.push(
     i18n.translate('workflows.triggerHover.workflowTriggerLabel', {
       defaultMessage: '**Workflow Trigger**: `{title}`',

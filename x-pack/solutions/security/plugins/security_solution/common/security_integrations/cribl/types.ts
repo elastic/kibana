@@ -19,6 +19,10 @@ export interface RouteEntry {
    * Elastic fleet integration's datastream target
    */
   datastream: string;
+  /**
+   * Optional namespace for the reroute processor (defaults to 'default')
+   */
+  namespace?: string;
 }
 
 export interface RerouteProcessor {

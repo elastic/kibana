@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-common'
   - '@kbn/zod'
-  - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-plugin'
   - '@kbn/core-lifecycle-server'
   - '@kbn/esql-language'
@@ -40,6 +39,11 @@ dependsOn:
   - '@kbn/core-http-server-mocks'
   - '@kbn/core-ui-settings-server-mocks'
   - '@kbn/share-plugin'
+  - '@kbn/workflows'
+  - '@kbn/core-logging-server-mocks'
+  - '@kbn/connector-specs'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod
@@ -53,26 +57,6 @@ fileGroups:
     - server/**/*
     - '!target/**/*'
     - '!.storybook/**/*.js'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

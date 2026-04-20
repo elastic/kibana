@@ -9,23 +9,32 @@
 
 import type {
   AtomicGraphNode,
+  EnterCaseBranchNode,
   EnterConditionBranchNode,
   EnterContinueNode,
+  EnterDefaultBranchNode,
   EnterForeachNode,
   EnterIfNode,
   EnterRetryNode,
+  EnterSwitchNode,
   EnterTryBlockNode,
   EnterWhileNode,
+  ExitCaseBranchNode,
   ExitConditionBranchNode,
+  ExitDefaultBranchNode,
   ExitFallbackPathNode,
   ExitForeachNode,
   ExitNormalPathNode,
   ExitRetryNode,
   ExitWhileNode,
+  LoopBreakNode,
+  LoopContinueNode,
   WaitForInputGraphNode,
+  WaitGraphNode,
   WorkflowExecuteAsyncGraphNode,
   WorkflowExecuteGraphNode,
   WorkflowGraph,
+  WorkflowOutputGraphNode,
 } from '@kbn/workflows/graph';
 import {
   isDataSet,
@@ -34,10 +43,12 @@ import {
   isExitStepTimeoutZone,
   isExitWorkflowTimeoutZone,
 } from '@kbn/workflows/graph';
+import type { ElasticsearchGraphNode, KibanaGraphNode } from '@kbn/workflows/graph/types';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { CustomStepImpl } from './custom_step_impl';
 import { DataSetStepImpl } from './data_set_step';
 import { ElasticsearchActionStepImpl } from './elasticsearch_action_step';
+import { LoopBreakNodeImpl, LoopContinueNodeImpl } from './flow_control_step';
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import {
   EnterConditionBranchNodeImpl,
@@ -55,8 +66,14 @@ import {
   ExitFallbackPathNodeImpl,
   ExitNormalPathNodeImpl,
   ExitTryBlockNodeImpl,
-} from './on_failure/fallback-step';
+} from './on_failure/fallback_step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import {
+  EnterBranchNodeImpl,
+  EnterSwitchNodeImpl,
+  ExitBranchNodeImpl,
+  ExitSwitchNodeImpl,
+} from './switch_step';
 import {
   EnterStepTimeoutZoneNodeImpl,
   EnterWorkflowTimeoutZoneNodeImpl,
@@ -67,11 +84,13 @@ import { WaitForInputStepImpl } from './wait_for_input_step/wait_for_input_step'
 import { WaitStepImpl } from './wait_step/wait_step';
 import { EnterWhileNodeImpl, ExitWhileNodeImpl } from './while_step';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step/workflow_execute_step_impl';
+import { WorkflowOutputStepImpl } from './workflow_output_step/workflow_output_step_impl';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class NodesFactory {
@@ -81,7 +100,8 @@ export class NodesFactory {
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
     private workflowGraph: WorkflowGraph,
     private stepExecutionRuntimeFactory: StepExecutionRuntimeFactory,
-    private dependencies: ContextDependencies
+    private dependencies: ContextDependencies,
+    private workflowExecutionState: WorkflowExecutionState
   ) {}
 
   public create(stepExecutionRuntime: StepExecutionRuntime): NodeImplementation {
@@ -100,8 +120,7 @@ export class NodesFactory {
         tags: ['step-factory', 'elasticsearch', 'internal-action'],
       });
       return new ElasticsearchActionStepImpl(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        node as any,
+        node as ElasticsearchGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
@@ -114,8 +133,7 @@ export class NodesFactory {
         tags: ['step-factory', 'kibana', 'internal-action'],
       });
       return new KibanaActionStepImpl(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        node as any,
+        node as KibanaGraphNode,
         stepExecutionRuntime,
         this.workflowRuntime,
         this.workflowLogger
@@ -176,7 +194,9 @@ export class NodesFactory {
           node as ExitForeachNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'enter-while':
         return new EnterWhileNodeImpl(
@@ -190,7 +210,29 @@ export class NodesFactory {
           node as ExitWhileNode,
           stepExecutionRuntime,
           this.workflowRuntime,
-          stepLogger
+          stepLogger,
+          this.workflowExecutionState,
+          this.workflowGraph
+        );
+      case 'loop-break':
+        return new LoopBreakNodeImpl(
+          node as LoopBreakNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory,
+          this.workflowExecutionState,
+          this.workflowGraph
+        );
+      case 'loop-continue':
+        return new LoopContinueNodeImpl(
+          node as LoopContinueNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory,
+          this.workflowExecutionState,
+          this.workflowGraph
         );
       case 'enter-retry':
         return new EnterRetryNodeImpl(
@@ -273,10 +315,33 @@ export class NodesFactory {
         );
       case 'exit-if':
         return new ExitIfNodeImpl(stepExecutionRuntime, this.workflowRuntime);
+      case 'enter-switch':
+        return new EnterSwitchNodeImpl(
+          node as EnterSwitchNode,
+          this.workflowRuntime,
+          this.workflowGraph,
+          stepExecutionRuntime,
+          stepLogger
+        );
+      case 'enter-case-branch':
+      case 'enter-default-branch':
+        return new EnterBranchNodeImpl(
+          node as EnterCaseBranchNode | EnterDefaultBranchNode,
+          this.workflowRuntime,
+          stepExecutionRuntime
+        );
+      case 'exit-case-branch':
+      case 'exit-default-branch':
+        return new ExitBranchNodeImpl(
+          node as ExitCaseBranchNode | ExitDefaultBranchNode,
+          this.workflowGraph,
+          this.workflowRuntime
+        );
+      case 'exit-switch':
+        return new ExitSwitchNodeImpl(stepExecutionRuntime, this.workflowRuntime);
       case 'wait':
         return new WaitStepImpl(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          node as any,
+          node as WaitGraphNode,
           stepExecutionRuntime,
           this.workflowRuntime,
           stepLogger
@@ -327,7 +392,20 @@ export class NodesFactory {
           workflowExecutionRepository: this.dependencies.workflowExecutionRepository,
           stepExecutionRepository: this.dependencies.stepExecutionRepository,
           workflowLogger: this.workflowLogger,
+          maxWorkflowDepth: this.dependencies.workflowsExecutionEngine.getMaxWorkflowDepth(),
         });
+      case 'workflow.output':
+        this.workflowLogger.logDebug(`Creating workflow.output step`, {
+          event: { action: 'workflow-output-step-creation', outcome: 'success' },
+          tags: ['step-factory', 'workflow-output', 'core-step'],
+        });
+        return new WorkflowOutputStepImpl(
+          node as WorkflowOutputGraphNode,
+          stepExecutionRuntime,
+          this.workflowRuntime,
+          stepLogger,
+          this.stepExecutionRuntimeFactory
+        );
       default:
         throw new Error(`Unknown node type: ${node.stepType}`);
     }
