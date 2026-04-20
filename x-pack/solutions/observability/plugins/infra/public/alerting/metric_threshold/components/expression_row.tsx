@@ -22,6 +22,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
+  builtInComparatorsWithInclusive,
   OfExpression,
   ThresholdExpression,
   WhenExpression,
@@ -376,6 +377,7 @@ const ThresholdElement: React.FC<{
     <>
       <StyledExpression>
         <ThresholdExpression
+          customComparators={builtInComparatorsWithInclusive}
           thresholdComparator={thresholdComparator()}
           threshold={displayedThreshold}
           onChangeSelectedThresholdComparator={updateComparator}

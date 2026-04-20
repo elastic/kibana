@@ -26,7 +26,11 @@ import type {
   IErrorObject,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { ForLastExpression, ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  builtInComparatorsWithInclusive,
+  ForLastExpression,
+  ThresholdExpression,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { omit } from 'lodash';
 import type { ChangeEvent, PropsWithChildren } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -766,6 +770,7 @@ const ThresholdElement: React.FC<{
     <>
       <div css={StyledExpressionCss}>
         <ThresholdExpression
+          customComparators={builtInComparatorsWithInclusive}
           thresholdComparator={convertToBuiltInComparators(comparator) || COMPARATORS.GREATER_THAN}
           threshold={threshold}
           onChangeSelectedThresholdComparator={updateComparator}

@@ -75,6 +75,10 @@ export const builtInComparators: { [key: string]: Comparator } = {
     value: COMPARATORS.NOT_BETWEEN,
     requiredValues: 2,
   },
+};
+
+export const builtInComparatorsWithInclusive: { [key: string]: Comparator } = {
+  ...builtInComparators,
   [COMPARATORS.BETWEEN_INCLUSIVE]: {
     text: i18n.translate(
       'xpack.triggersActionsUI.common.constants.comparators.isBetweenInclusiveLabel',
