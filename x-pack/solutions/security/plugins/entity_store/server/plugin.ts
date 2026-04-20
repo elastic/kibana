@@ -9,6 +9,7 @@ import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/c
 import { registerRoutes } from './routes';
 import type {
   EntityStoreCoreSetup,
+  EntityStorePostInstallHook,
   EntityStoreRequestHandlerContext,
   EntityStoreSetupPlugins,
   EntityStoreStartPlugins,
@@ -38,6 +39,7 @@ export class EntityStorePlugin
 {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
+  private readonly postInstallHooks: EntityStorePostInstallHook[] = [];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -69,7 +71,7 @@ export class EntityStorePlugin
 
     registerTasks(plugins.taskManager, this.logger, core);
     this.logger.debug('Registering routes');
-    registerRoutes(router);
+    registerRoutes(router, { postInstallHooks: this.postInstallHooks });
 
     this.logger.debug('Registering ui settings');
     registerUiSettings(core.uiSettings);
@@ -95,6 +97,7 @@ export class EntityStorePlugin
           core,
           analytics: createReportEvent(core.analytics),
         }),
+      registerPostInstallHook: (hook) => this.postInstallHooks.push(hook),
     };
   }
 

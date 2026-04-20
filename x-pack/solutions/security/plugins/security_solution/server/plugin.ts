@@ -169,6 +169,7 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
+import { registerEntityStorePostInstallHook } from './lib/entity_analytics/watchlists/migrations/register_entity_store_post_install_hook';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
 import {
   initializeEndpointExceptionsPerPolicyOptInStatus,
@@ -339,6 +340,13 @@ export class Plugin implements ISecuritySolutionPlugin {
           getStartServices: core.getStartServices,
           logger: this.logger,
         });
+
+        if (!experimentalFeatures.entityStoreDisabled) {
+          registerEntityStorePostInstallHook({
+            entityStore: plugins.entityStore,
+            logger: this.logger,
+          });
+        }
       }
     } else {
       registerRiskScoringTask({

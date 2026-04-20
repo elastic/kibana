@@ -17,7 +17,6 @@ import { startEntityEngineRoute } from './start';
 import { stopEntityEngineRoute } from './stop';
 import { getEntityStoreStatusRoute } from './status';
 import { enableEntityStoreRoute } from './enablement';
-import { installPrebuiltWatchlistsRoute } from './ensure_prebuilt_watchlists';
 import { upsertEntity } from './entity_crud/upsert_entity';
 import { upsertEntitiesBulk } from './entity_crud/upsert_entities_bulk';
 import { deleteEntity } from './entity_crud/delete_entity';
@@ -30,7 +29,6 @@ export const registerEntityStoreRoutes = ({
   config,
 }: EntityAnalyticsRoutesDeps) => {
   enableEntityStoreRoute(router, logger, telemetry, config);
-  installPrebuiltWatchlistsRoute(router, logger);
   getEntityStoreStatusRoute(router, logger, telemetry, config);
   initEntityEngineRoute(router, logger, telemetry, config);
   startEntityEngineRoute(router, telemetry, logger);

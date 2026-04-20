@@ -20,7 +20,6 @@ import type {
   StopEntityEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
-import { ENTITY_STORE_WATCHLISTS_INSTALL_URL } from '../../../common/entity_analytics/entity_store/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export const useEntityStoreRoutes = () => {
@@ -28,12 +27,6 @@ export const useEntityStoreRoutes = () => {
   const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   return useMemo(() => {
-    const installPrebuiltWatchlists = async () =>
-      http.fetch<{ acknowledged: boolean }>(ENTITY_STORE_WATCHLISTS_INSTALL_URL, {
-        method: 'POST',
-        version: API_VERSIONS.public.v1,
-      });
-
     const getEntityStoreStatus = async (withComponents = false) => {
       if (isV2Enabled) {
         return http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.public.STATUS, {
@@ -51,7 +44,6 @@ export const useEntityStoreRoutes = () => {
 
     const installEntityStore = async (options?: InitEntityStoreRequestBodyInput) => {
       if (isV2Enabled) {
-        await installPrebuiltWatchlists();
         return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
           method: 'POST',
           version: API_VERSIONS.public.v1,

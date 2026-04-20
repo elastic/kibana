@@ -30,10 +30,13 @@ import {
   registerUpdate,
   registerCheckPrivileges,
 } from './apis';
-import type { EntityStorePluginRouter } from '../types';
+import type { EntityStorePluginRouter, EntityStorePostInstallHook } from '../types';
 
-export function registerRoutes(router: EntityStorePluginRouter) {
-  registerInstall(router);
+export function registerRoutes(
+  router: EntityStorePluginRouter,
+  { postInstallHooks }: { postInstallHooks: EntityStorePostInstallHook[] }
+) {
+  registerInstall(router, postInstallHooks);
   registerStop(router);
   registerStatus(router);
   registerUninstall(router);
