@@ -1,0 +1,64 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        updateLogExtractionExample:
+          summary: "Update log extraction settings"
+          description: "Update the log extraction configuration with a new lookback period and frequency."
+          value:
+            logExtraction:
+              lookbackPeriod: "6h"
+              frequency: "10m"
+              fieldHistoryLength: 15
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          updateSuccessExample:
+            summary: "Entity Store updated"
+            description: "The Entity Store configuration was successfully updated."
+            value:
+              ok: true
+  400:
+    description: "Bad request."
+    content:
+      application/json:
+        examples:
+          invalidDurationExample:
+            summary: "Invalid duration parameter"
+            description: "A log extraction parameter has an invalid duration format."
+            value:
+              statusCode: 400
+              error: "Bad Request"
+              message: "[request body]: logExtraction.frequency: must be a valid duration of at least 30 seconds (e.g. 1m, 30s)"
+  404:
+    description: "Entity Store not found."
+    content:
+      application/json:
+        examples:
+          notFoundExample:
+            summary: "Entity Store not installed"
+            description: "The Entity Store has not been installed yet."
+            value:
+              statusCode: 404
+              error: "Not Found"
+              message: "Entity store is not installed"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X PUT -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"logExtraction":{"lookbackPeriod":"6h","frequency":"10m","fieldHistoryLength":15}}' \
+        "${KIBANA_URL}/api/security/entity_store"
+  - lang: Console
+    source: |
+      PUT kbn://api/security/entity_store
+      {
+        "logExtraction": {
+          "lookbackPeriod": "6h",
+          "frequency": "10m",
+          "fieldHistoryLength": 15
+        }
+      }

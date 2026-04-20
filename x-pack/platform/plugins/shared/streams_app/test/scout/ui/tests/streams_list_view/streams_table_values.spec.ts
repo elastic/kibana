@@ -15,7 +15,8 @@ const GOOD_QUALITY_STREAM = 'logs-good-quality';
 const DEGRADED_QUALITY_STREAM = 'logs-degraded-quality';
 const POOR_QUALITY_STREAM = 'logs-poor-quality';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/264236
+test.describe.skip(
   'Stream list view - table values',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

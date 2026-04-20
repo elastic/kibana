@@ -11,7 +11,7 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core/server';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { RiskEngineConfiguration } from '../types';
@@ -19,28 +19,35 @@ import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from '../utils/transforms';
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 
+const getRiskEngineConfigurationSavedObject = (attributes = {}) => ({
+  type: 'risk-engine-configuration',
+  id: 'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
+  namespaces: ['default'],
+  attributes: {
+    enabled: false,
+    ...attributes,
+  },
+  references: [],
+  managed: false,
+  updated_at: '2023-07-28T09:52:28.768Z',
+  created_at: '2023-07-28T09:12:26.083Z',
+  version: 'WzE4MzIsMV0=',
+  coreMigrationVersion: '8.8.0',
+  score: 0,
+});
+
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,
   per_page: 20,
   total: 1,
-  saved_objects: [
-    {
-      type: 'risk-engine-configuration',
-      id: 'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
-      namespaces: ['default'],
-      attributes: {
-        enabled: false,
-        ...attributes,
-      },
-      references: [],
-      managed: false,
-      updated_at: '2023-07-28T09:52:28.768Z',
-      created_at: '2023-07-28T09:12:26.083Z',
-      version: 'WzE4MzIsMV0=',
-      coreMigrationVersion: '8.8.0',
-      score: 0,
-    },
-  ],
+  saved_objects: [getRiskEngineConfigurationSavedObject(attributes)],
+});
+
+const getEmptySavedObjectConfiguration = () => ({
+  page: 1,
+  per_page: 20,
+  total: 0,
+  saved_objects: [],
 });
 
 jest.mock('@kbn/alerting-plugin/server', () => ({
@@ -69,6 +76,8 @@ describe('RiskEngineDataClient', () => {
       const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       logger = loggingSystemMock.createLogger();
       mockSavedObjectClient = savedObjectsClientMock.create();
+      mockSavedObjectClient.get.mockResolvedValue(getRiskEngineConfigurationSavedObject());
+      mockSavedObjectClient.find.mockResolvedValue(getEmptySavedObjectConfiguration());
       const options = {
         logger,
         kibanaVersion: '8.9.0',
@@ -90,11 +99,11 @@ describe('RiskEngineDataClient', () => {
 
     describe('#getConfiguration', () => {
       it('retrieves configuration from the saved object', async () => {
-        mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+        mockSavedObjectClient.get.mockResolvedValueOnce(getRiskEngineConfigurationSavedObject());
 
         const configuration = await riskEngineDataClient.getConfiguration();
 
-        expect(mockSavedObjectClient.find).toHaveBeenCalledTimes(1);
+        expect(mockSavedObjectClient.get).toHaveBeenCalledTimes(1);
 
         expect(configuration).toEqual({
           enabled: false,
@@ -106,17 +115,14 @@ describe('RiskEngineDataClient', () => {
       let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
 
       beforeEach(() => {
-        mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
+        mockSavedObjectClient.get.mockResolvedValue(getRiskEngineConfigurationSavedObject());
         mockTaskManagerStart = taskManagerMock.createStart();
       });
 
       it('returns an error if saved object does not exist', async () => {
-        mockSavedObjectClient.find.mockResolvedValue({
-          page: 1,
-          per_page: 20,
-          total: 0,
-          saved_objects: [],
-        });
+        mockSavedObjectClient.get.mockRejectedValue(
+          SavedObjectsErrorHelpers.createGenericNotFoundError()
+        );
 
         await expect(
           riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
@@ -172,12 +178,9 @@ describe('RiskEngineDataClient', () => {
       });
 
       it('should return error if saved object not exist', async () => {
-        mockSavedObjectClient.find.mockResolvedValueOnce({
-          page: 1,
-          per_page: 20,
-          total: 0,
-          saved_objects: [],
-        });
+        mockSavedObjectClient.get.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError()
+        );
 
         expect.assertions(1);
         try {
@@ -188,7 +191,7 @@ describe('RiskEngineDataClient', () => {
       });
 
       it('should update saved object attribute', async () => {
-        mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+        mockSavedObjectClient.get.mockResolvedValueOnce(getRiskEngineConfigurationSavedObject());
 
         await riskEngineDataClient.disableRiskEngine({ taskManager: mockTaskManagerStart });
 
@@ -318,7 +321,7 @@ describe('RiskEngineDataClient', () => {
       const mockTaskManagerStart = taskManagerMock.createStart();
 
       it('should delete the risk engine object and task if it exists', async () => {
-        mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+        mockSavedObjectClient.find.mockResolvedValueOnce(getEmptySavedObjectConfiguration());
         const riskScoreDataClient = riskScoreDataClientMock.create();
         await riskEngineDataClient.tearDown({
           taskManager: mockTaskManagerStart,
