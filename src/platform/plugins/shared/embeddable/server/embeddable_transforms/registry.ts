@@ -11,11 +11,16 @@ import type { ObjectType } from '@kbn/config-schema';
 import type { getDrilldownRegistry } from '../drilldowns/registry';
 import type { EmbeddableServerDefinition } from './types';
 
-export function getEmbeddableServerRegistry(drilldownRegistry: ReturnType<typeof getDrilldownRegistry>) {
+export function getEmbeddableServerRegistry(
+  drilldownRegistry: ReturnType<typeof getDrilldownRegistry>
+) {
   const registry: { [key: string]: EmbeddableServerDefinition<any, any> } = {};
 
   return {
-    registerEmbeddableServerDefinition: (type: string, definition: EmbeddableServerDefinition<any, any>) => {
+    registerEmbeddableServerDefinition: (
+      type: string,
+      definition: EmbeddableServerDefinition<any, any>
+    ) => {
       if (registry[type]) {
         throw new Error(`Embeddable transforms for type "${type}" are already registered.`);
       }

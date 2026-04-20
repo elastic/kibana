@@ -47,7 +47,10 @@ export interface EmbeddableSetup extends PersistableStateService<EmbeddableState
    * Registers an embeddable server defintion.
    * Be sure to register an embeddable public definition for this type.
    */
-  registerEmbeddableServerDefinition: (type: string, transforms: EmbeddableServerDefinition<any, any>) => void;
+  registerEmbeddableServerDefinition: (
+    type: string,
+    transforms: EmbeddableServerDefinition<any, any>
+  ) => void;
   getAllMigrations: () => MigrateFunctionsObject;
 }
 
@@ -77,7 +80,8 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerDrilldown: this.drilldownRegistry
         .registerDrilldown as EmbeddableSetup['registerDrilldown'],
-      registerEmbeddableServerDefinition: this.transformsRegistry.registerEmbeddableServerDefinition,
+      registerEmbeddableServerDefinition:
+        this.transformsRegistry.registerEmbeddableServerDefinition,
       telemetry: getTelemetryFunction(this.getEmbeddableFactory),
       extract: getExtractFunction(this.getEmbeddableFactory),
       inject: getInjectFunction(this.getEmbeddableFactory),

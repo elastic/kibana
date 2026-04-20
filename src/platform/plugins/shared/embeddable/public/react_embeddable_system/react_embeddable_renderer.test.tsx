@@ -262,7 +262,9 @@ describe('embeddable renderer', () => {
         throw new Error('container parent error');
       },
     };
-    registerEmbeddablePublicDefinition('errorWithContainerParent', () => Promise.resolve(errorFactory));
+    registerEmbeddablePublicDefinition('errorWithContainerParent', () =>
+      Promise.resolve(errorFactory)
+    );
     setupPresentationPanelServices();
 
     const parentApi = {

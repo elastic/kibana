@@ -27,12 +27,15 @@ export function registerEmbeddables(
     return getAnomalySwimLaneEmbeddableFactory(core.getStartServices);
   });
 
-  embeddable.registerEmbeddablePublicDefinition(ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE, async () => {
-    const { getAnomalyChartsReactEmbeddableFactory } = await import(
-      './anomaly_charts/anomaly_charts_embeddable_factory'
-    );
-    return getAnomalyChartsReactEmbeddableFactory(core.getStartServices, usageCollection);
-  });
+  embeddable.registerEmbeddablePublicDefinition(
+    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
+    async () => {
+      const { getAnomalyChartsReactEmbeddableFactory } = await import(
+        './anomaly_charts/anomaly_charts_embeddable_factory'
+      );
+      return getAnomalyChartsReactEmbeddableFactory(core.getStartServices, usageCollection);
+    }
+  );
 
   embeddable.registerEmbeddablePublicDefinition(
     ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,

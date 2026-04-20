@@ -56,7 +56,9 @@ export class VisualizationsPlugin
       makeVisualizeEmbeddableFactory(getSearchSourceMigrations)()
     );
 
-    plugins.embeddable.registerEmbeddableServerDefinition(VISUALIZE_EMBEDDABLE_TYPE, { getTransforms });
+    plugins.embeddable.registerEmbeddableServerDefinition(VISUALIZE_EMBEDDABLE_TYPE, {
+      getTransforms,
+    });
 
     plugins.contentManagement.register({
       id: CONTENT_ID,

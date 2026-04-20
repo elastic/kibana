@@ -52,7 +52,9 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerDrilldown: jest.fn(),
-    registerEmbeddablePublicDefinition: jest.fn().mockImplementation(registerEmbeddablePublicDefinition),
+    registerEmbeddablePublicDefinition: jest
+      .fn()
+      .mockImplementation(registerEmbeddablePublicDefinition),
     registerLegacyURLTransform: jest.fn(),
   };
   return setupContract;
