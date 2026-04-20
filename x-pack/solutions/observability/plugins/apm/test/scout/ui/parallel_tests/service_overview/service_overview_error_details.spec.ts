@@ -127,11 +127,17 @@ test.describe(
       });
 
       await test.step('Verify error is visible in errors table', async () => {
-        await expect(page.getByTestId('apmErrorDetailsLink')).toBeVisible();
+        const errorsTable = serviceDetailsPage.overviewTab.serviceOverviewErrorsTable;
+        await errorsTable.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+        await expect(errorsTable.getByTestId('apmErrorDetailsLink')).toBeVisible({
+          timeout: EXTENDED_TIMEOUT,
+        });
       });
 
       await test.step('Click on error link and wait for navigation', async () => {
-        await page.getByTestId('apmErrorDetailsLink').click();
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable
+          .getByTestId('apmErrorDetailsLink')
+          .click();
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
@@ -156,8 +162,22 @@ test.describe(
         rangeTo: testData.END_DATE,
       });
 
+      await test.step('Wait for errors table to load', async () => {
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.waitFor({
+          state: 'visible',
+          timeout: EXTENDED_TIMEOUT,
+        });
+        await expect(
+          serviceDetailsPage.overviewTab.serviceOverviewErrorsTable.getByTestId(
+            'apmErrorDetailsLink'
+          )
+        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+      });
+
       await test.step('Click on error link to go to detail page', async () => {
-        await page.getByTestId('apmErrorDetailsLink').click();
+        await serviceDetailsPage.overviewTab.serviceOverviewErrorsTable
+          .getByTestId('apmErrorDetailsLink')
+          .click();
         await page
           .getByTestId('errorDistribution')
           .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
