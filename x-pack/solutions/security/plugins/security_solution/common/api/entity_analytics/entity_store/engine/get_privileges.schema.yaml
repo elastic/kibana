@@ -10,10 +10,31 @@ paths:
       x-codegen-enabled: true
       operationId: EntityStoreGetPrivileges
       summary: Get Entity Store Privileges
+      description: Check whether the current user has the required Elasticsearch and Kibana privileges to use the Entity Store.
       responses:
         '200':
           description: Successful response
           content:
             application/json:
-              schema:              
+              schema:
                 $ref: '../../common/common.schema.yaml#/components/schemas/EntityAnalyticsPrivileges'
+              examples:
+                allPrivilegesGranted:
+                  summary: User has all required privileges
+                  description: The current user has all Elasticsearch cluster and index privileges required to operate the Entity Store.
+                  value:
+                    has_all_required: true
+                    has_read_permissions: true
+                    has_write_permissions: true
+                    privileges:
+                      elasticsearch:
+                        cluster:
+                          manage_enrich: true
+                          manage_transform: true
+                          manage_ingest_pipelines: true
+                          manage_index_templates: true
+                        index:
+                          '.entities.v1.latest.*':
+                            read: true
+                            write: true
+                      kibana: {}

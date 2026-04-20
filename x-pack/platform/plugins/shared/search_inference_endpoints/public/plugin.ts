@@ -24,7 +24,6 @@ import type {
   SearchInferenceEndpointsPluginStart,
 } from './types';
 import { registerLocators } from './locators';
-import { isElasticInferenceServiceEnabled, isModelSettingsEnabled } from './feature_flag';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>
@@ -46,18 +45,12 @@ export class SearchInferenceEndpointsPlugin
 
     registerLocators(plugins.share);
 
-    const eisEnabled = isElasticInferenceServiceEnabled(core.uiSettings);
-
     this.registerInferenceEndpoints =
       plugins.management.sections.section.modelManagement.registerApp({
         id: INFERENCE_ENDPOINTS_APP_ID,
-        title: eisEnabled
-          ? i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
-              defaultMessage: 'External Inference',
-            })
-          : i18n.translate('xpack.searchInferenceEndpoints.inferenceEndpointsTitle', {
-              defaultMessage: 'Inference endpoints',
-            }),
+        title: i18n.translate('xpack.searchInferenceEndpoints.externalInferenceTitle', {
+          defaultMessage: 'External Inference',
+        }),
         order: 2,
         async mount({ element, history }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');
@@ -71,52 +64,48 @@ export class SearchInferenceEndpointsPlugin
         },
       });
 
-    if (isModelSettingsEnabled(core.uiSettings)) {
-      this.registerModelSettings = plugins.management.sections.section.modelManagement.registerApp({
-        id: MODEL_SETTINGS_APP_ID,
-        title: i18n.translate('xpack.searchInferenceEndpoints.modelSettingsSectionTitle', {
-          defaultMessage: 'Feature Settings',
+    this.registerModelSettings = plugins.management.sections.section.modelManagement.registerApp({
+      id: MODEL_SETTINGS_APP_ID,
+      title: i18n.translate('xpack.searchInferenceEndpoints.modelSettingsTitle', {
+        defaultMessage: 'Feature Settings',
+      }),
+      order: 3,
+      async mount({ element, history }: ManagementAppMountParams) {
+        const { renderSettingsMgmtApp } = await import('./application');
+        const [coreStart, depsStart] = await core.getStartServices();
+        const startDeps: AppPluginStartDependencies = {
+          ...depsStart,
+          history,
+        };
+
+        return renderSettingsMgmtApp(coreStart, startDeps, element);
+      },
+    });
+
+    this.registerElasticInferenceService =
+      plugins.management.sections.section.modelManagement.registerApp({
+        id: ELASTIC_INFERENCE_SERVICE_APP_ID,
+        title: i18n.translate('xpack.searchInferenceEndpoints.elasticInferenceServiceTitle', {
+          defaultMessage: 'Elastic Inference',
         }),
-        order: 3,
+        order: 1,
         async mount({ element, history }: ManagementAppMountParams) {
-          const { renderSettingsMgmtApp } = await import('./application');
+          const { renderElasticInferenceServiceApp } = await import(
+            './elastic_inference_service_application'
+          );
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
           };
 
-          return renderSettingsMgmtApp(coreStart, startDeps, element);
+          return renderElasticInferenceServiceApp(coreStart, startDeps, element);
         },
       });
-    }
-
-    if (eisEnabled) {
-      this.registerElasticInferenceService =
-        plugins.management.sections.section.modelManagement.registerApp({
-          id: ELASTIC_INFERENCE_SERVICE_APP_ID,
-          title: i18n.translate('xpack.searchInferenceEndpoints.elasticInferenceServiceTitle', {
-            defaultMessage: 'Elastic Inference',
-          }),
-          order: 1,
-          async mount({ element, history }: ManagementAppMountParams) {
-            const { renderElasticInferenceServiceApp } = await import(
-              './elastic_inference_service_application'
-            );
-            const [coreStart, depsStart] = await core.getStartServices();
-            const startDeps: AppPluginStartDependencies = {
-              ...depsStart,
-              history,
-            };
-
-            return renderElasticInferenceServiceApp(coreStart, startDeps, element);
-          },
-        });
-    }
 
     this.registerInferenceEndpoints.disable();
-    this.registerModelSettings?.disable();
-    this.registerElasticInferenceService?.disable();
+    this.registerModelSettings.disable();
+    this.registerElasticInferenceService.disable();
 
     return {};
   }

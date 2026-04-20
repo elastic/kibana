@@ -18,9 +18,6 @@ export const INFERENCE_ENDPOINTS_QUERY_KEY = 'inferenceEndpointsQueryKey';
 export const INFERENCE_FEATURES_QUERY_KEY = 'inferenceFeaturesQueryKey';
 export const TRAINED_MODEL_STATS_QUERY_KEY = 'trainedModelStats';
 export const INFERENCE_SETTINGS_QUERY_KEY = 'inferenceSettingsQueryKey';
-export const MODEL_SETTINGS_FEATURE_FLAG_ID = 'searchInferenceEndpoints:modelSettingsEnabled';
-export const ELASTIC_INFERENCE_SERVICE_FEATURE_FLAG_ID =
-  'searchInferenceEndpoints:elasticInferenceServiceEnabled';
 
 export const INFERENCE_SETTINGS_SO_TYPE = 'inference-settings';
 export const INFERENCE_SETTINGS_NAMESPACE_TYPE = 'single';
