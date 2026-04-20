@@ -81,13 +81,13 @@ export class FieldRow {
   // format as React node in a lazy way
   public get formattedAsReact(): ReactNode {
     if (!this.#isFormattedAsReact) {
-      this.#formattedAsReact = formatFieldValueReact(
-        this.flattenedValue,
-        this.#hit.raw,
-        this.#fieldFormats,
-        this.#dataView,
-        this.dataViewField
-      );
+      this.#formattedAsReact = formatFieldValueReact({
+        value: this.flattenedValue,
+        hit: this.#hit.raw,
+        fieldFormats: this.#fieldFormats,
+        dataView: this.#dataView,
+        field: this.dataViewField,
+      });
       this.#isFormattedAsReact = true;
     }
 

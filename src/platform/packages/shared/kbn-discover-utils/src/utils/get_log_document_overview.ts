@@ -23,13 +23,13 @@ export function getLogDocumentOverview(
     const result = getFieldValueWithFallback(doc.flattened, field);
     const value = result.value;
     return value !== undefined && value !== null
-      ? formatFieldValueReact(
+      ? formatFieldValueReact({
           value,
-          doc.raw,
+          hit: doc.raw,
           fieldFormats,
           dataView,
-          dataView.fields.getByName(field)
-        )
+          field: dataView.fields.getByName(field),
+        })
       : undefined;
   };
 
