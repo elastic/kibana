@@ -238,22 +238,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
-    label: Trigger unsupported ftr tests
-    timeout_in_minutes: 10
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-2
-    depends_on:
-      - build
-      - quick_checks
-      - checks
-      - linting
-      - linting_with_types
-      - check_types
-
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:

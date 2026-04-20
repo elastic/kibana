@@ -28,13 +28,10 @@
       "kibanaUtils",
       "lens",
       "share",
-      "taskManager",
       "triggersActionsUi",
     ],
     "optionalPlugins": [
       "alerting",
-      "telemetry",
-      "usageCollection",
     ],
     "requiredBundles": [
       "discover",
