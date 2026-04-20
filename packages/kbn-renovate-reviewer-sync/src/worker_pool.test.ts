@@ -345,6 +345,56 @@ describe('WorkerPool', () => {
     });
   });
 
+  describe('WHEN a worker emits `exit` without a preceding `error`', () => {
+    it('SHOULD reject the in-flight batch and evict the worker', async () => {
+      const { pool, workers } = buildPool(1);
+      const promise = pool.processBatch(batchOf(['/abs/foo.ts', 'foo.ts']));
+      await flushMicrotasks();
+
+      // Simulate a clean exit (e.g. the worker module calls `process.exit(0)`
+      // or all of its refs are dropped) — no `'error'` event is emitted.
+      workers[0].emit('exit', 0);
+      await expect(promise).rejects.toThrow('Worker exited unexpectedly');
+
+      // Next dispatch must not target the dead worker — and since it was the
+      // last living worker, the pool should fast-fail with the same reason it
+      // uses for the all-workers-died case.
+      await expect(pool.processBatch(batchOf(['/abs/b.ts', 'b.ts']))).rejects.toThrow(
+        'All worker threads have died'
+      );
+
+      await pool.shutdown();
+    });
+
+    it('SHOULD treat `error` followed by `exit` as a single death (no double-decrement)', async () => {
+      const { pool, workers } = buildPool(2);
+
+      const p1 = pool.processBatch(batchOf(['/abs/a.ts', 'a.ts']));
+      await flushMicrotasks();
+      const aWorker = workers.find((w) =>
+        w.posted.some((m) => m.files.some((f) => f.relativePath === 'a.ts'))
+      )!;
+      const survivor = workers.find((w) => w !== aWorker)!;
+
+      // Node always emits 'exit' after 'error' on the same worker. The pool
+      // must not count this as two deaths (which would drop
+      // `livingWorkerCount` to 0 with one worker still alive).
+      aWorker.emit('error', new Error('died'));
+      aWorker.emit('exit', 1);
+      await expect(p1).rejects.toThrow('died');
+
+      // Survivor is still alive; a new batch must be dispatched to it, not
+      // rejected with "All worker threads have died".
+      const p2 = pool.processBatch(batchOf(['/abs/b.ts', 'b.ts']));
+      await flushMicrotasks();
+      expect(survivor.posted.length).toEqual(1);
+      survivor.respondBatch();
+      await p2;
+
+      await pool.shutdown();
+    });
+  });
+
   describe('WHEN shutdown() is called', () => {
     it('SHOULD reject pending batches with "Worker pool shutdown"', async () => {
       const { pool, workers } = buildPool(1);

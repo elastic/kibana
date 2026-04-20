@@ -75,11 +75,16 @@ interface WorkerBatchTask {
  * - Per-file errors do NOT reject the batch promise. They are surfaced inline
  *   as `{ success: false, error }` entries in the result array. The orchestrator
  *   inspects each entry and decides whether to abort.
- * - A worker that emits `'error'` is terminated by Node. The pool evicts it from
- *   `availableWorkers` (covering both active-batch and idle-worker death) so that
- *   subsequent dispatches never go to a dead thread, and rejects the in-flight
- *   batch (if any) with the worker error — the orchestrator treats this as a
- *   batch-level failure.
+ * - A dead worker is evicted via a single `handleWorkerDeath` path driven by
+ *   BOTH `'error'` and `'exit'`. `'error'` is raised when the worker throws
+ *   asynchronously (Node then terminates it); `'exit'` fires whenever the
+ *   worker thread stops, including the clean-exit-without-error case (e.g. a
+ *   worker module that calls `process.exit(0)` or drops all event listeners).
+ *   Relying only on `'error'` would leak the dead worker into `availableWorkers`
+ *   on clean exit and strand the task promise. The handler is idempotent via a
+ *   per-pool "already-counted-dead" set so `'error' → 'exit'` never
+ *   double-decrements. It evicts from `availableWorkers`, rejects any in-flight
+ *   batch, and tries the next queued task.
  * - When the LAST living worker dies, any queued `pendingTasks` are rejected
  *   immediately and any subsequent `processBatch` call rejects synchronously
  *   with `All worker threads have died`. This prevents a deadlock in the
@@ -94,9 +99,15 @@ export class WorkerPool implements WorkerPoolLike {
   private readonly activeTasks = new Map<WorkerHandle, WorkerBatchTask>();
   private pendingTasks: WorkerBatchTask[] = [];
   private isShuttingDown = false;
-  // Counts workers that haven't emitted `'error'` yet. Decremented exactly
-  // once per worker death; used to fast-fail when the pool has no usable workers.
+  // Counts workers that are still usable (haven't been observed dead via
+  // `'error'` or `'exit'`). Decremented exactly once per worker death by the
+  // idempotent `handleWorkerDeath` helper.
   private livingWorkerCount = 0;
+  // Workers already accounted for by `handleWorkerDeath`. Guards against
+  // `'error' → 'exit'` firing in sequence (Node emits 'exit' after 'error' for
+  // every terminated worker, and also fires 'exit' on clean termination with
+  // no preceding 'error').
+  private readonly deadWorkers = new Set<WorkerHandle>();
 
   constructor(
     workerCount: number,
@@ -122,33 +133,56 @@ export class WorkerPool implements WorkerPoolLike {
       });
 
       worker.on('error', (error: Error) => {
-        // Node terminates the worker thread when it emits 'error'. Evict it from
-        // the pool so we never dispatch to a dead thread. Two cases to cover:
-        //   1. Worker died while active: it's in activeTasks, not availableWorkers.
-        //   2. Worker died while idle (e.g. module-load throw before any task):
-        //      it's still in availableWorkers and must be removed explicitly.
-        const availableIdx = this.availableWorkers.indexOf(worker);
-        if (availableIdx !== -1) {
-          this.availableWorkers.splice(availableIdx, 1);
-        }
-        const task = this.activeTasks.get(worker);
-        if (task) {
-          this.activeTasks.delete(worker);
-          task.reject(error);
-        }
-        this.livingWorkerCount--;
-        if (this.livingWorkerCount === 0 && this.pendingTasks.length > 0) {
-          // No worker left to drain the queue; reject everything so callers
-          // (and the orchestrator's `failureState` early-exit) can abort cleanly.
-          const stranded = this.pendingTasks;
-          this.pendingTasks = [];
-          for (const queued of stranded) {
-            queued.reject(new Error('All worker threads have died'));
-          }
-        }
-        this.processNextTask();
+        this.handleWorkerDeath(worker, error);
+      });
+
+      worker.on('exit', () => {
+        // Covers the clean-exit case where the worker stops without emitting
+        // `'error'` first. No-op when `'error'` already handled this worker.
+        this.handleWorkerDeath(worker, new Error('Worker exited unexpectedly'));
       });
     }
+  }
+
+  /**
+   * Idempotent worker-death path. Called from both `'error'` (carries the real
+   * throw) and `'exit'` (carries a synthesized reason for clean exits). The
+   * `deadWorkers` guard ensures exactly-once bookkeeping no matter the event
+   * ordering.
+   */
+  private handleWorkerDeath(worker: WorkerHandle, reason: Error): void {
+    if (this.deadWorkers.has(worker)) return;
+    this.deadWorkers.add(worker);
+
+    // Two cases to cover:
+    //   1. Worker died while active: it's in activeTasks, not availableWorkers.
+    //   2. Worker died while idle (e.g. module-load throw, or clean
+    //      `process.exit(0)` from the worker): it's still in availableWorkers
+    //      and must be removed explicitly so `processNextTask` never picks it.
+    const availableIdx = this.availableWorkers.indexOf(worker);
+    if (availableIdx !== -1) {
+      this.availableWorkers.splice(availableIdx, 1);
+    }
+
+    const task = this.activeTasks.get(worker);
+    if (task) {
+      this.activeTasks.delete(worker);
+      task.reject(reason);
+    }
+
+    this.livingWorkerCount--;
+
+    if (this.livingWorkerCount === 0 && this.pendingTasks.length > 0) {
+      // No worker left to drain the queue; reject everything so callers
+      // (and the orchestrator's `failureState` early-exit) can abort cleanly.
+      const stranded = this.pendingTasks;
+      this.pendingTasks = [];
+      for (const queued of stranded) {
+        queued.reject(new Error('All worker threads have died'));
+      }
+    }
+
+    this.processNextTask();
   }
 
   private processNextTask(): void {

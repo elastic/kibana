@@ -244,10 +244,27 @@ export async function generateRenovateCodeowners(
 
   if (installSignalHandlers) {
     const cleanup = async () => {
+      // Re-entry guard: SIGINT/SIGTERM/uncaught events can fire more than once
+      // (e.g. the user hits Ctrl-C twice, or shutdown() throws and triggers
+      // `unhandledRejection` → `uncaughtHandler` → `cleanup()` again). Without
+      // this guard we'd recurse through shutdown on an already-drained pool.
+      if (isShuttingDown) return;
       isShuttingDown = true;
       clearInterval(progressInterval);
-      if (workerPool) {
-        await workerPool.shutdown();
+
+      // Null out before awaiting shutdown so a second `cleanup()` call that
+      // somehow bypasses the guard above (different async frame) can't call
+      // shutdown() on the same pool twice.
+      const poolToShutdown = workerPool;
+      workerPool = null;
+      if (poolToShutdown) {
+        try {
+          await poolToShutdown.shutdown();
+        } catch {
+          // Best-effort during signal-handler shutdown. If shutdown rejects we
+          // still want to exit the process — letting the rejection bubble up
+          // would re-enter `uncaughtHandler` and call `cleanup()` again.
+        }
       }
       try {
         process.exit(1);
