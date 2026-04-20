@@ -45,8 +45,11 @@ export const registerFindRoute = (
       path: '/_find',
       options: {
         summary: `Search for saved objects`,
-        description:
-          'WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.\n\nFor transferring or backing up saved objects, prefer the export API (`POST /api/saved_objects/_export`).',
+        description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Searches for Kibana saved objects.
+
+For transferring or backing up saved objects, prefer the export API (\`POST /api/saved_objects/_export\`).`,
         tags: ['oas-tag:saved objects'],
         access,
         deprecated: deprecationInfo,

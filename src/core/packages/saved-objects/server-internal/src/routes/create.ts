@@ -66,8 +66,11 @@ export const registerCreateRoute = (
 
   const routeOptions = {
     summary: `Create a saved object`,
-    description:
-      'WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.\n\nFor transferring or backing up saved objects, prefer the import and export APIs (`POST /api/saved_objects/_import` and `POST /api/saved_objects/_export`).',
+    description: `WARNING: This API is deprecated. This is a legacy Saved Objects API and may be removed in a future version of Kibana.
+
+Creates a Kibana saved object; if an ID is provided it is used, otherwise Kibana generates one.
+
+For transferring or backing up saved objects, prefer the import and export APIs (\`POST /api/saved_objects/_import\` and \`POST /api/saved_objects/_export\`).`,
     tags: ['oas-tag:saved objects'],
     access,
     deprecated: deprecationInfo,
