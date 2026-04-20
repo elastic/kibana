@@ -114,6 +114,7 @@ const previouslyRegisteredTypes = [
   'inventory-view',
   'investigation',
   'kql-telemetry',
+  'lead-generation-config',
   'legacy-url-alias',
   'lens',
   'lens-ui-telemetry',

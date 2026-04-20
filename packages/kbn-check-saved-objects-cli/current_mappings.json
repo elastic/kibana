@@ -3187,6 +3187,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "lead-generation-config": {
+    "dynamic": false,
+    "properties": {}
+  },
   "legacy-url-alias": {
     "dynamic": false,
     "properties": {
