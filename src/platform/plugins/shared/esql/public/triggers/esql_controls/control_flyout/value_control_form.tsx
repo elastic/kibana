@@ -181,7 +181,7 @@ export function ValueControlForm({
 
       try {
         const timezone = core.uiSettings.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-        getESQLResults({
+        const results = await getESQLResults({
           esqlQuery: query,
           search,
           signal: controller.signal,
@@ -190,30 +190,29 @@ export function ValueControlForm({
           timeRange,
           timezone,
           variables: esqlVariables,
-        }).then((results) => {
-          if (!isMounted() || controller.signal.aborted) {
-            return;
-          }
-          const columns = results.response.columns.map((col) => col.name);
-          setQueryColumns(columns);
-          setShowValuesPreview(true);
-
-          if (columns.length === 1) {
-            const valuesArray = results.response.values.map((value) => value[0]);
-            const options = valuesArray
-              .filter((v) => v)
-              .map((option) => {
-                return {
-                  label: String(option),
-                  key: String(option),
-                  'data-test-subj': String(option),
-                };
-              });
-            setSelectedValues(options);
-            setAvailableValuesOptions(options);
-            setEsqlQueryErrors([]);
-          }
         });
+        if (!isMounted() || controller.signal.aborted) {
+          return;
+        }
+        const columns = results.response.columns.map((col) => col.name);
+        setQueryColumns(columns);
+        setShowValuesPreview(true);
+
+        if (columns.length === 1) {
+          const valuesArray = results.response.values.map((value) => value[0]);
+          const options = valuesArray
+            .filter((v) => v)
+            .map((option) => {
+              return {
+                label: String(option),
+                key: String(option),
+                'data-test-subj': String(option),
+              };
+            });
+          setSelectedValues(options);
+          setAvailableValuesOptions(options);
+          setEsqlQueryErrors([]);
+        }
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
@@ -227,12 +226,13 @@ export function ValueControlForm({
 
   const setSuggestedQuery = useCallback(async () => {
     const indexPattern = getIndexPatternFromESQLQuery(queryString);
-    const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
-    const response = (await core.http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch the timefield', error);
-      return undefined;
-    })) as { timeField?: string } | undefined;
+    const response = (await core.http
+      ?.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: `FROM ${indexPattern}` }) })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch the timefield', error);
+        return undefined;
+      })) as { timeField?: string } | undefined;
 
     const timeField = response?.timeField;
     const timeFilter = Boolean(timeField)

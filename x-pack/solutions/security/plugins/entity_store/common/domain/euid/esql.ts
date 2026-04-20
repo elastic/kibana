@@ -26,7 +26,6 @@ import {
   getSourceFieldNames,
   isEuidField,
   isEuidSeparator,
-  mergeDocumentsFilterAndPostAgg,
 } from './commons';
 import {
   applyFieldEvaluations,
@@ -265,9 +264,7 @@ export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
     return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
   }
 
-  return conditionToESQL(
-    mergeDocumentsFilterAndPostAgg(identityField.documentsFilter, entityDefinition.postAggFilter)
-  );
+  return conditionToESQL(identityField.documentsFilter);
 }
 
 /**

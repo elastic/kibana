@@ -17,7 +17,8 @@ const TEST_RULE_NAME = 'attachments-test-rule';
 const TEST_SLO_NAME = 'Attachments Test SLO';
 
 // TODO: Re-enable on serverless once https://github.com/elastic/kibana/issues/248090 is resolved
-test.describe('Attachments', { tag: tags.stateful.classic }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/248090
+test.describe.skip('Attachments', { tag: tags.stateful.classic }, () => {
   let ruleId: string;
   let sloId: string;
 

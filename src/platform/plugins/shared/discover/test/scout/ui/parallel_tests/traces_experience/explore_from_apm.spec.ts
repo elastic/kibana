@@ -15,23 +15,13 @@ import {
   RICH_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
+  expectTracesExperienceEnabled,
 } from '../../fixtures/traces_experience';
-import type { TracesExperienceTestFixtures } from '../../fixtures/traces_experience';
 
 const APM_TIME_RANGE = {
   rangeFrom: TRACES.DEFAULT_START_TIME,
   rangeTo: TRACES.DEFAULT_END_TIME,
 };
-
-async function expectTracesExperienceEnabled(
-  pageObjects: TracesExperienceTestFixtures['pageObjects']
-) {
-  await pageObjects.discover.waitForDocTableRendered();
-  for (const column of pageObjects.tracesExperience.grid.expectedColumns) {
-    await expect(pageObjects.discover.getColumnHeader(column)).toBeVisible();
-  }
-  await expect(pageObjects.tracesExperience.charts.redMetricsCharts).toBeVisible();
-}
 
 spaceTest.describe(
   'Traces in Discover - Explore from APM',
