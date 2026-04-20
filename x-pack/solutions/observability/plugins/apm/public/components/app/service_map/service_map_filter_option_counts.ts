@@ -38,9 +38,9 @@ function getAlertStatusServiceCounts(serviceNodes: ServiceMapNode[]): Record<Ale
   };
   for (const node of serviceNodes) {
     if (node.type !== 'service' || !isServiceNodeData(node.data)) continue;
-    const d = node.data as ServiceNodeData;
+    const serviceNodeData = node.data as ServiceNodeData;
     for (const status of ALERT_STATUSES) {
-      if (getServiceNodeAlertCountForStatus(d, status) > 0) {
+      if (getServiceNodeAlertCountForStatus(serviceNodeData, status) > 0) {
         counts[status]++;
       }
     }

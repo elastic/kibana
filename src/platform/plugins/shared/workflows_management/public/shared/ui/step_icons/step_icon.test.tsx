@@ -152,6 +152,22 @@ describe('StepIcon', () => {
       // When a custom icon is provided, the default "plugs" icon should NOT render
       expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
     });
+
+    it('resolves a base type to a registered namespaced step def icon (list aggregation)', () => {
+      // List rows pass the base type (e.g. `cases` from `cases.createCase`). When no step
+      // definition is registered under the bare base type but one exists for `${base}.X`, the
+      // icon should be inherited from that family definition rather than falling through to
+      // actionTypeRegistry or `plugs`.
+      (mockServices.workflowsExtensions.getStepDefinition as jest.Mock).mockReturnValue(undefined);
+      (mockServices.workflowsExtensions.getAllStepDefinitions as jest.Mock).mockReturnValue([
+        { id: 'cases.createCase', icon: 'briefcase' },
+        { id: 'cases.getCase', icon: 'briefcase' },
+      ]);
+
+      const { container } = render(<StepIcon stepType="cases" executionStatus={undefined} />);
+      expect(container.querySelector('[data-euiicon-type="briefcase"]')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="plugs"]')).not.toBeInTheDocument();
+    });
   });
 
   describe('__overview pseudo-step', () => {
