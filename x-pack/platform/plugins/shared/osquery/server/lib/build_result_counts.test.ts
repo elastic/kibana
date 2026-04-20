@@ -86,4 +86,44 @@ describe('buildPackResultCounts', () => {
     expect(result.successful_agents).toBe(8);
     expect(result.error_agents).toBe(2);
   });
+
+  it('returns zeroes with queries_total: 0 for empty queryActionIds array', () => {
+    const map: ResultCountsMap = new Map([
+      ['q-1', { totalRows: 10, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+    ]);
+
+    expect(buildPackResultCounts([], map)).toEqual({
+      total_rows: 0,
+      queries_with_results: 0,
+      queries_total: 0,
+      successful_agents: 0,
+      error_agents: 0,
+    });
+  });
+
+  it('uses first-seen agent counts when multiple queries tie on respondedAgents', () => {
+    const map: ResultCountsMap = new Map([
+      ['q-1', { totalRows: 5, respondedAgents: 3, successfulAgents: 2, errorAgents: 1 }],
+      ['q-2', { totalRows: 5, respondedAgents: 3, successfulAgents: 1, errorAgents: 2 }],
+    ]);
+
+    const result = buildPackResultCounts(['q-1', 'q-2'], map);
+    expect(result.successful_agents).toBe(2);
+    expect(result.error_agents).toBe(1);
+  });
+
+  it('ignores entries in the map that are not referenced by queryActionIds', () => {
+    const map: ResultCountsMap = new Map([
+      ['q-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ['q-unreferenced', { totalRows: 100, respondedAgents: 50, successfulAgents: 50, errorAgents: 0 }],
+    ]);
+
+    expect(buildPackResultCounts(['q-1'], map)).toEqual({
+      total_rows: 5,
+      queries_with_results: 1,
+      queries_total: 1,
+      successful_agents: 1,
+      error_agents: 0,
+    });
+  });
 });

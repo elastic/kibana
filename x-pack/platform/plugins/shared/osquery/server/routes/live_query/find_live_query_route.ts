@@ -138,8 +138,9 @@ export const findLiveQueryRoute = (
                   _source: { ...action, result_counts },
                 };
               });
-            } catch {
-              // Result counts are supplementary — don't fail the listing if aggregation errors
+            } catch (err) {
+              const logger = osqueryContext.logFactory.get('findLiveQuery');
+              logger.warn(`Failed to enrich result_counts for live query listing: ${String(err)}`);
             }
           }
 

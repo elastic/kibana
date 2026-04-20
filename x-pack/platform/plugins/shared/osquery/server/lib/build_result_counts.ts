@@ -34,6 +34,9 @@ export const buildPackResultCounts = (
   let errorAgents = 0;
   let maxRespondedAgents = 0;
 
+  // Agent success/error counts are taken from the sub-query with the most
+  // responded agents (not summed), since all pack queries target the same
+  // agent set and per-agent status is identical across queries.
   for (const actionId of queryActionIds) {
     const counts = resultCountsMap.get(actionId);
     if (counts) {

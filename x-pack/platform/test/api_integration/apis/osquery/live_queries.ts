@@ -100,9 +100,11 @@ export default function ({ getService }: FtrProviderContext) {
       const resultCounts = detailsResponse.body.data.result_counts;
       if (resultCounts) {
         expect(resultCounts).to.have.property('total_rows');
+        expect(resultCounts).to.have.property('responded_agents');
         expect(resultCounts).to.have.property('successful_agents');
         expect(resultCounts).to.have.property('error_agents');
         expect(resultCounts.total_rows).to.be.a('number');
+        expect(resultCounts.responded_agents).to.be.a('number');
         expect(resultCounts.successful_agents).to.be.a('number');
         expect(resultCounts.error_agents).to.be.a('number');
       }

@@ -84,40 +84,81 @@ components:
                                 type: string
                       result_counts:
                         type: object
-                        description: 'Result count statistics (present when withResultCounts is true).'
+                        description: >
+                          Result count statistics (present when withResultCounts is true).
+                          Single-query actions include responded_agents; pack actions include
+                          queries_with_results and queries_total instead.
                         properties:
                           total_rows:
                             type: integer
                           responded_agents:
+                            description: 'Number of agents that responded (single-query actions only).'
                             type: integer
                           successful_agents:
                             type: integer
                           error_agents:
                             type: integer
-      example:
-        data:
-          total: 1
-          items:
-            - _source:
-                action_id: '3c42c847-eb30-4452-80e0-728584042334'
-                expiration: '2023-10-31T00:00:00Z'
-                '@timestamp': '2023-10-31T00:00:00Z'
-                agents: [ '16d7caf5-efd2-4212-9b62-73dafc91fa13' ]
-                user_id: 'elastic'
-                queries:
-                  - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
-                    id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
-                    query: "select * from uptime;"
-                    saved_query_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
-                    ecs_mapping:
-                      host.uptime:
-                        field: "total_seconds"
-                    agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
-                result_counts:
-                  total_rows: 42
-                  responded_agents: 1
-                  successful_agents: 1
-                  error_agents: 0
+                          queries_with_results:
+                            description: 'Number of sub-queries that returned at least one row (pack actions only).'
+                            type: integer
+                          queries_total:
+                            description: 'Total number of sub-queries in the pack (pack actions only).'
+                            type: integer
+      examples:
+        single_query:
+          summary: Single-query action with result_counts
+          value:
+            data:
+              total: 1
+              items:
+                - _source:
+                    action_id: '3c42c847-eb30-4452-80e0-728584042334'
+                    expiration: '2023-10-31T00:00:00Z'
+                    '@timestamp': '2023-10-31T00:00:00Z'
+                    agents: [ '16d7caf5-efd2-4212-9b62-73dafc91fa13' ]
+                    user_id: 'elastic'
+                    queries:
+                      - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
+                        id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
+                        query: "select * from uptime;"
+                        saved_query_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+                        ecs_mapping:
+                          host.uptime:
+                            field: "total_seconds"
+                        agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+                    result_counts:
+                      total_rows: 42
+                      responded_agents: 1
+                      successful_agents: 1
+                      error_agents: 0
+        pack_query:
+          summary: Pack action with result_counts
+          value:
+            data:
+              total: 1
+              items:
+                - _source:
+                    action_id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+                    expiration: '2023-10-31T00:00:00Z'
+                    '@timestamp': '2023-10-31T00:00:00Z'
+                    agents: [ '16d7caf5-efd2-4212-9b62-73dafc91fa13' ]
+                    user_id: 'elastic'
+                    pack_id: 'my-pack'
+                    queries:
+                      - action_id: "aaa-111"
+                        id: "query-1"
+                        query: "select * from uptime;"
+                        agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+                      - action_id: "bbb-222"
+                        id: "query-2"
+                        query: "select * from os_version;"
+                        agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+                    result_counts:
+                      total_rows: 84
+                      queries_with_results: 2
+                      queries_total: 2
+                      successful_agents: 1
+                      error_agents: 0
     FindLiveQueryDetailsResponse:
       type: object
       properties:
@@ -156,15 +197,27 @@ components:
               enum: [completed, running]
             result_counts:
               type: object
-              description: 'Aggregated result count statistics for the query (present when resultCountsEnabled experimental feature is on).'
+              description: >
+                Aggregated result count statistics for the query. Present when the
+                resultCountsEnabled experimental feature is on and the aggregation
+                succeeds; omitted on aggregation failure. Single-query actions include
+                responded_agents; pack actions include queries_with_results and
+                queries_total instead.
               properties:
                 total_rows:
                   type: integer
                 responded_agents:
+                  description: 'Number of agents that responded (single-query actions only).'
                   type: integer
                 successful_agents:
                   type: integer
                 error_agents:
+                  type: integer
+                queries_with_results:
+                  description: 'Number of sub-queries that returned at least one row (pack actions only).'
+                  type: integer
+                queries_total:
+                  description: 'Total number of sub-queries in the pack (pack actions only).'
                   type: integer
             queries:
               description: 'The queries with their execution status.'
@@ -205,32 +258,74 @@ components:
                     description: 'Status of this individual query.'
                     type: string
                     enum: [completed, running]
-      example:
-        data:
-          action_id: "3c42c847-eb30-4452-80e0-728584042334"
-          expiration: "2022-07-26T10:04:32.220Z"
-          '@timestamp': "2022-07-26T09:59:32.220Z"
-          agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
-          user_id: "elastic"
-          status: "completed"
-          result_counts:
-            total_rows: 42
-            responded_agents: 1
-            successful_agents: 1
-            error_agents: 0
-          queries:
-            - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
-              id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
-              query: "select * from uptime;"
-              saved_query_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
-              ecs_mapping:
-                host.uptime:
-                  field: "total_seconds"
-              agents:
-                - "16d7caf5-efd2-4212-9b62-73dafc91fa13"
-              docs: 0
-              failed: 1
-              pending: 0
-              responded: 1
-              successful: 0
+      examples:
+        single_query:
+          summary: Single-query action details
+          value:
+            data:
+              action_id: "3c42c847-eb30-4452-80e0-728584042334"
+              expiration: "2022-07-26T10:04:32.220Z"
+              '@timestamp': "2022-07-26T09:59:32.220Z"
+              agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+              user_id: "elastic"
               status: "completed"
+              result_counts:
+                total_rows: 42
+                responded_agents: 1
+                successful_agents: 1
+                error_agents: 0
+              queries:
+                - action_id: "609c4c66-ba3d-43fa-afdd-53e244577aa0"
+                  id: "6724a474-cbba-41ef-a1aa-66aebf0879e2"
+                  query: "select * from uptime;"
+                  saved_query_id: "42ba9c50-0cc5-11ed-aa1d-2b27890bc90d"
+                  ecs_mapping:
+                    host.uptime:
+                      field: "total_seconds"
+                  agents:
+                    - "16d7caf5-efd2-4212-9b62-73dafc91fa13"
+                  docs: 0
+                  failed: 1
+                  pending: 0
+                  responded: 1
+                  successful: 0
+                  status: "completed"
+        pack_query:
+          summary: Pack action details
+          value:
+            data:
+              action_id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+              expiration: "2022-07-26T10:04:32.220Z"
+              '@timestamp': "2022-07-26T09:59:32.220Z"
+              agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+              user_id: "elastic"
+              pack_id: "my-pack"
+              pack_name: "My Pack"
+              status: "completed"
+              result_counts:
+                total_rows: 84
+                queries_with_results: 2
+                queries_total: 2
+                successful_agents: 1
+                error_agents: 0
+              queries:
+                - action_id: "aaa-111"
+                  id: "query-1"
+                  query: "select * from uptime;"
+                  agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+                  docs: 42
+                  failed: 0
+                  pending: 0
+                  responded: 1
+                  successful: 1
+                  status: "completed"
+                - action_id: "bbb-222"
+                  id: "query-2"
+                  query: "select * from os_version;"
+                  agents: [ "16d7caf5-efd2-4212-9b62-73dafc91fa13" ]
+                  docs: 42
+                  failed: 0
+                  pending: 0
+                  responded: 1
+                  successful: 1
+                  status: "completed"
