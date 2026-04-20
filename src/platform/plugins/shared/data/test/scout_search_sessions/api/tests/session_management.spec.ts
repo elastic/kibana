@@ -9,17 +9,15 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, SESSION_API_PATH, ESE_API_PATH, COMMON_HEADERS, waitFor } from '../fixtures';
-
-function randomSessionId() {
-  return `my-session-${Math.random()}`;
-}
-
-function randomHash() {
-  return Array.from({ length: 64 }, () =>
-    'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26))
-  ).join('');
-}
+import {
+  apiTest,
+  SESSION_API_PATH,
+  ESE_API_PATH,
+  COMMON_HEADERS,
+  waitFor,
+  randomSessionId,
+  randomHash,
+} from '../fixtures';
 
 apiTest.describe(
   'search session - management (stateful only)',

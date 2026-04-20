@@ -9,11 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, SESSION_API_PATH, COMMON_HEADERS } from '../fixtures';
-
-function randomSessionId() {
-  return `my-session-${Math.random()}`;
-}
+import { apiTest, SESSION_API_PATH, COMMON_HEADERS, randomSessionId } from '../fixtures';
 
 apiTest.describe(
   'search session - permissions (stateful only)',

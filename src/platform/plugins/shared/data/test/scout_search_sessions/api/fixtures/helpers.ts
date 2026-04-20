@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export const randomSessionId = () => `my-session-${Math.random()}`;
+
+export const randomHash = () =>
+  Array.from({ length: 64 }, () =>
+    'abcdefghijklmnopqrstuvwxyz'.charAt(Math.floor(Math.random() * 26))
+  ).join('');
+
 /**
  * Polls a callback until it returns the expected value or the timeout is reached.
  */
