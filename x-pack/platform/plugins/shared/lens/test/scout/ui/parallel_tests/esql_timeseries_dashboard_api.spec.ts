@@ -7,7 +7,7 @@
 
 import type { DebugState } from '@elastic/charts';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { test } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { testData } from '../fixtures';
@@ -18,7 +18,6 @@ const DASHBOARD_API_HEADERS = {
   'elastic-api-version': '2023-10-31',
 } as const;
 
-/** Matches logstash_functional data used by other Lens Scout tests. */
 const LOGSTASH_ABSOLUTE_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
   to: '2015-09-23T18:31:44.000Z',
@@ -78,12 +77,13 @@ function buildLensLineTimeseriesPanel(esql: EsqlTimeseriesCase) {
 
 async function createDashboardWithLensPanel(
   kbnClient: import('@kbn/scout').KbnClient,
+  spaceId: string,
   title: string,
   esql: EsqlTimeseriesCase
 ): Promise<string> {
   const response = await kbnClient.request<{ id: string }>({
     method: 'POST',
-    path: DASHBOARD_API_PATH,
+    path: `s/${spaceId}/${DASHBOARD_API_PATH}`,
     headers: DASHBOARD_API_HEADERS,
     body: {
       title,
@@ -117,60 +117,68 @@ function assertTemporalXAxis(debug: DebugState) {
   ).toBe(true);
 }
 
-test.describe('Lens ES|QL timeseries via dashboard API', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esArchiver, uiSettings }) => {
-    await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-    await uiSettings.set({
-      defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
-      'dateFormat:tz': 'UTC',
-      'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
-    });
-  });
-
-  test.beforeEach(async ({ context }) => {
-    await context.addInitScript(() => {
-      (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
-    });
-  });
-
-  test.afterAll(async ({ kbnClient, uiSettings }) => {
-    await uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
-    await kbnClient.savedObjects.cleanStandardList();
-  });
-
-  for (const esqlCase of TIMESERIES_CASES) {
-    test(`renders a time-scaled x-axis for ${esqlCase.description}`, async ({
-      browserAuth,
-      kbnClient,
-      page,
-      pageObjects,
-    }) => {
-      const title = `Scout ES|QL timeseries API ${esqlCase.description} ${Date.now()}`;
-      const dashboardId = await createDashboardWithLensPanel(kbnClient, title, esqlCase);
-
-      await browserAuth.loginAsPrivilegedUser();
-
-      const { dashboard } = pageObjects;
-
-      await dashboard.openDashboardWithId(dashboardId);
-      await dashboard.waitForPanelsToLoad(1);
-
-      await expect(page.testSubj.locator('embeddable-lens-failure')).toBeHidden();
-      await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
-
-      const chart = page.testSubj.locator('xyVisChart');
-      await expect(chart.locator('.echChartStatus[data-ech-render-complete="true"]')).toBeAttached({
-        timeout: 30_000,
+spaceTest.describe(
+  'Lens ES|QL timeseries via dashboard API',
+  { tag: '@local-stateful-classic' },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.set({
+        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
+        'dateFormat:tz': 'UTC',
+        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_IN_RANGE_DATES.from}", "to": "${testData.LOGSTASH_IN_RANGE_DATES.to}"}`,
       });
-
-      const chartStatus = chart.locator('.echChartStatus');
-      const debugJson = await chartStatus.getAttribute('data-ech-debug-state');
-      await expect(chartStatus, 'Elastic Charts debug state attribute missing').toHaveAttribute(
-        'data-ech-debug-state'
-      );
-      const debug = JSON.parse(debugJson ?? '{}') as DebugState;
-
-      assertTemporalXAxis(debug);
     });
+
+    spaceTest.beforeEach(async ({ context }) => {
+      await context.addInitScript(() => {
+        (window as unknown as { _echDebugStateFlag?: boolean })._echDebugStateFlag = true;
+      });
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    for (const esqlCase of TIMESERIES_CASES) {
+      spaceTest(
+        `renders a time-scaled x-axis for ${esqlCase.description}`,
+        async ({ browserAuth, kbnClient, scoutSpace, page, pageObjects }) => {
+          const title = `Scout ES|QL timeseries API ${esqlCase.description} ${Date.now()}`;
+          const dashboardId = await createDashboardWithLensPanel(
+            kbnClient,
+            scoutSpace.id,
+            title,
+            esqlCase
+          );
+
+          await browserAuth.loginAsPrivilegedUser();
+
+          const { dashboard } = pageObjects;
+
+          await dashboard.openDashboardWithId(dashboardId);
+          await dashboard.waitForPanelsToLoad(1);
+
+          await expect(page.testSubj.locator('embeddable-lens-failure')).toBeHidden();
+          await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+
+          const chart = page.testSubj.locator('xyVisChart');
+          await expect(
+            chart.locator('.echChartStatus[data-ech-render-complete="true"]')
+          ).toBeAttached({
+            timeout: 30_000,
+          });
+
+          const chartStatus = chart.locator('.echChartStatus');
+          const debugJson = await chartStatus.getAttribute('data-ech-debug-state');
+          await expect(chartStatus, 'Elastic Charts debug state attribute missing').toHaveAttribute(
+            'data-ech-debug-state'
+          );
+          const debug = JSON.parse(debugJson ?? '{}') as DebugState;
+
+          assertTemporalXAxis(debug);
+        }
+      );
+    }
   }
-});
+);
