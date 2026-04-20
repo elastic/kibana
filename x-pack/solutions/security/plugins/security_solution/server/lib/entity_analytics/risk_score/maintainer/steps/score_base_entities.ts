@@ -24,6 +24,7 @@ import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
 import type { ScopedLogger } from '../utils/with_log_context';
 import { syncLookupIndexForCategorizedPage } from '../lookup/sync_lookup_index';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import { MAX_RESOLUTION_MEMBER_FETCH_COUNT } from '../../constants';
 
 interface ScoreBaseEntitiesParams {
   esClient: ElasticsearchClient;
@@ -62,12 +63,6 @@ interface EuidPageResult {
   upperBound: string;
   afterKey: Record<string, string> | undefined;
 }
-
-/**
- * Aligns maintainer resolution-member fetch bounds with entity_store resolution APIs,
- * which cap resolution search responses at 10k and treat larger groups as truncated.
- */
-const MAX_RESOLUTION_MEMBER_FETCH_COUNT = 10_000;
 
 /**
  * Computes base risk scores for one entity type and streams paginated results.

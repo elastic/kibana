@@ -21,6 +21,7 @@ import { parseEsqlResolutionScoreRow } from './parse_esql_row';
 import type { ParsedResolutionScore } from './parse_esql_row';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskScoreModifierEntity } from './pipeline_types';
+import { MAX_RESOLUTION_MEMBER_FETCH_COUNT } from '../../constants';
 
 interface ScoreResolutionEntitiesParams {
   esClient: ElasticsearchClient;
@@ -42,11 +43,6 @@ interface ResolutionPageResult {
   afterKey: Record<string, string> | undefined;
 }
 
-/**
- * Aligns maintainer resolution-member fetch bounds with entity_store resolution APIs,
- * which cap resolution search responses at 10k and treat larger groups as truncated.
- */
-const MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT = 10_000;
 const RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE = 1_000;
 
 export const calculateResolutionEntityScores = async function* ({
@@ -241,7 +237,7 @@ export const fetchResolutionGroupMemberIds = async ({
 
   try {
     const maxIterations = Math.ceil(
-      MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT / RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE
+      MAX_RESOLUTION_MEMBER_FETCH_COUNT / RESOLUTION_GROUP_MEMBER_FETCH_PAGE_SIZE
     );
     let searchAfter: Array<string | number> | undefined;
     let iterations = 0;
@@ -250,7 +246,7 @@ export const fetchResolutionGroupMemberIds = async ({
       iterations += 1;
       if (iterations > maxIterations) {
         logger.warn(
-          `fetchResolutionGroupMemberIds exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT}), returning partial results`
+          `fetchResolutionGroupMemberIds exceeded ${maxIterations} pages (aligned cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
         );
         break;
       }
@@ -270,9 +266,9 @@ export const fetchResolutionGroupMemberIds = async ({
           memberIds.add(id);
         }
       }
-      if (fetchedCount >= MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT) {
+      if (fetchedCount >= MAX_RESOLUTION_MEMBER_FETCH_COUNT) {
         logger.warn(
-          `fetchResolutionGroupMemberIds fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_GROUP_MEMBER_FETCH_COUNT}), returning partial results`
+          `fetchResolutionGroupMemberIds fetched ${fetchedCount} entities (cap=${MAX_RESOLUTION_MEMBER_FETCH_COUNT}), returning partial results`
         );
         break;
       }
