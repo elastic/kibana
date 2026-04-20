@@ -2391,7 +2391,7 @@ steps:
       expect(result.valid).toBe(false);
       expect(result.validationErrors).toEqual(
         expect.arrayContaining([
-          expect.stringContaining('Invalid trigger type. Available: manual, alert, scheduled'),
+          expect.stringContaining('type has an invalid value'),
           expect.stringContaining('No steps found. Add at least one step.'),
         ])
       );
@@ -2708,9 +2708,15 @@ steps:
           hits: { hits: [workflowDoc], total: { value: 1 } },
         } as any)
         .mockResolvedValueOnce(noRunningExecutions())
+        // Storage adapter's delete() performs an internal search before calling esClient.delete
         .mockResolvedValueOnce({
           hits: { hits: [workflowDoc], total: { value: 1 } },
         } as any);
+      // Mock the bulk disable step (disable-first to close TOCTOU race window)
+      mockEsClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        items: [{ index: { _id: workflowDoc._id, status: 200 } }],
+      } as any);
     };
 
     it('should hard delete workflows when force=true', async () => {
@@ -2741,7 +2747,8 @@ steps:
         })
       );
       expect(mockEsClient.delete).toHaveBeenCalled();
-      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      // bulk is called once for the disable-first step (not for the delete itself)
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
     });
 
     it('should reject hard delete when workflows have running executions', async () => {
@@ -2765,6 +2772,16 @@ steps:
             total: { value: 1 },
           },
         } as any);
+      // Mock bulk for disable + restore (rollback)
+      mockEsClient.bulk
+        .mockResolvedValueOnce({
+          errors: false,
+          items: [{ index: { _id: 'test-workflow-id', status: 200 } }],
+        } as any)
+        .mockResolvedValueOnce({
+          errors: false,
+          items: [{ index: { _id: 'test-workflow-id', status: 200 } }],
+        } as any);
 
       await expect(
         service.deleteWorkflows(['test-workflow-id'], 'default', { force: true })
@@ -2772,6 +2789,8 @@ steps:
 
       expect(mockEsClient.delete).not.toHaveBeenCalled();
       expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+      // Verify workflows were disabled then re-enabled (rollback)
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(2);
     });
 
     it('should purge executions and step executions scoped to spaceId on hard delete', async () => {
@@ -2874,12 +2893,18 @@ steps:
         } as any)
         .mockResolvedValueOnce(noRunningExecutions())
         .mockResolvedValueOnce(noRunningExecutions())
+        // Storage adapter's delete() internal search per workflow
         .mockResolvedValueOnce({
           hits: { hits: [{ ...mockWorkflowDocument, _id: 'wf-1' }], total: { value: 1 } },
         } as any)
         .mockResolvedValueOnce({
           hits: { hits: [{ ...mockWorkflowDocument, _id: 'wf-2' }], total: { value: 1 } },
         } as any);
+      // Mock bulk disable for two enabled workflows
+      mockEsClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        items: [{ index: { _id: 'wf-1', status: 200 } }, { index: { _id: 'wf-2', status: 200 } }],
+      } as any);
       mockEsClient.delete
         .mockResolvedValueOnce({ _id: 'wf-1', result: 'deleted' } as any)
         .mockRejectedValueOnce(new Error('ES delete failed'));
@@ -2894,7 +2919,7 @@ steps:
       });
     });
 
-    it('should not use bulk index when force=true', async () => {
+    it('should use individual deletes (not bulk) for removing workflow documents on force=true', async () => {
       mockHardDeleteSearchSequence();
       mockEsClient.delete.mockResolvedValue({
         _id: 'test-workflow-id',
@@ -2903,7 +2928,9 @@ steps:
 
       await service.deleteWorkflows(['test-workflow-id'], 'default', { force: true });
 
-      expect(mockEsClient.bulk).not.toHaveBeenCalled();
+      // bulk is called once for the disable-first step, but the actual delete uses individual calls
+      expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.delete).toHaveBeenCalledTimes(1);
     });
 
     it('should continue even if purge fails', async () => {
