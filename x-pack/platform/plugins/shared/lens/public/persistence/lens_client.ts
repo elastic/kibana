@@ -8,8 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 import { buildPath } from '@kbn/core-http-browser';
 import type { Reference } from '@kbn/content-management-utils';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensApiState } from '@kbn/lens-embeddable-utils/config_builder/schema';
+import type { LensApiConfig, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 import type { LensSavedObjectAttributes } from '@kbn/lens-common';
 import { LENS_INTERNAL_VIS_API_PATH, LENS_INTERNAL_API_VERSION } from '../../common/constants';
@@ -66,7 +65,7 @@ export class LensClient {
     const chartType = this.builder?.getType(data);
 
     if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...this.builder.fromAPIFormat(config),
@@ -130,7 +129,7 @@ export class LensClient {
     );
 
     if (useApiFormat && this.builder) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...rest,
@@ -195,7 +194,7 @@ export class LensClient {
     );
 
     if (useApiFormat && this.builder) {
-      const config = data as LensApiState;
+      const config = data as LensApiConfig;
       return {
         item: {
           ...rest,
@@ -255,7 +254,7 @@ export class LensClient {
       const chartType = this.builder?.getType(data);
 
       if (this.builder?.isEnabled && this.builder?.isSupported(chartType)) {
-        const config = data as LensApiState;
+        const config = data as LensApiConfig;
         return {
           id,
           ...this.builder.fromAPIFormat(config),
