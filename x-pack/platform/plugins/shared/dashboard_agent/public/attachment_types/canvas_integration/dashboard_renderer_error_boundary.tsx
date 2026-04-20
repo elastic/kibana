@@ -9,6 +9,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 interface DashboardRendererErrorBoundaryProps {
   resetKey: unknown;
@@ -64,10 +65,17 @@ export const DashboardPreviewErrorCallout = ({}: {}) => (
       announceOnMount
       color="danger"
       iconType="error"
-      title="This dashboard preview could not be rendered."
+      title={i18n.translate(
+        'xpack.dashboardAgent.attachments.dashboard.previewErrorCalloutTitle',
+        {
+          defaultMessage: 'This dashboard preview could not be rendered.',
+        }
+      )}
       data-test-subj="dashboardRendererError"
     >
-      Ask the agent to repair the invalid or incomplete dashboard state.
+      {i18n.translate('xpack.dashboardAgent.attachments.dashboard.previewErrorCalloutBody', {
+        defaultMessage: 'Ask the agent to repair the invalid or incomplete dashboard state.',
+      })}
     </EuiCallOut>
   </div>
 );
