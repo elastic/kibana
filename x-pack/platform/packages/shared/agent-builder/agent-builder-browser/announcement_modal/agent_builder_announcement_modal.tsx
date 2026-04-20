@@ -7,12 +7,9 @@
 
 import React from 'react';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiLink,
   EuiModal,
   EuiModalBody,
@@ -61,14 +58,7 @@ export const AgentBuilderAnnouncementModal: React.FC<AgentBuilderAnnouncementMod
   return (
     <EuiModal aria-labelledby={modalTitleId} onClose={onContinue} css={{ maxWidth: '576px' }}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle id={modalTitleId}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{i18n.MODAL_TITLE}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge label={i18n.BETA_LABEL} size="m" css={{ verticalAlign: 'middle' }} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
