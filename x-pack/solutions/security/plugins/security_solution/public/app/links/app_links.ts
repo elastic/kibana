@@ -65,7 +65,7 @@ export const getFilteredLinks = async (
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    AIChatExperience.Agent
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
