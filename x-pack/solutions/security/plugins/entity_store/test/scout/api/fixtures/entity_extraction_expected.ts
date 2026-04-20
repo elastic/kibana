@@ -13,7 +13,11 @@ const LATEST_INDEX = getLatestEntitiesIndexName('default');
 type Hits = SearchHitsMetadata<unknown>['hits'];
 
 // Takes non sorted hits and compares them by _id, also prints rich information about missing entities
-export function assertEntitiesEqual(expected: Hits, actual: Hits, log?: (message: string) => void) {
+export function assertEntitiesEqual(
+  expected: Hits,
+  actual: Hits,
+  logError?: (message: string) => void
+) {
   if (actual.length !== expected.length) {
     const actualIdSet = new Set(actual.map((h) => h._id));
     const expectedIdSet = new Set(expected.map((h) => h._id));
@@ -23,7 +27,7 @@ export function assertEntitiesEqual(expected: Hits, actual: Hits, log?: (message
 
     const messageParts: string[] = [];
     if (missingEntities.length > 0) {
-      log?.(
+      logError?.(
         'Entities present in expected not in actual:' + JSON.stringify(missingEntities, null, 2)
       );
       messageParts.push(
@@ -33,7 +37,7 @@ export function assertEntitiesEqual(expected: Hits, actual: Hits, log?: (message
       );
     }
     if (extraEntities.length > 0) {
-      log?.(
+      logError?.(
         'Entities present in actual but not in expected:' + JSON.stringify(extraEntities, null, 2)
       );
       messageParts.push(
