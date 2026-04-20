@@ -1677,11 +1677,15 @@ describe('execute()', () => {
         response: {
           status: 400,
           statusText: 'Bad Request',
-          data: {
-            error: {
-              message: 'Invalid client or Invalid client credentials',
-            },
-          },
+          headers: { 'content-type': 'application/json' },
+          data: Buffer.from(
+            JSON.stringify({
+              error: {
+                message: 'Invalid client or Invalid client credentials',
+              },
+            }),
+            'utf-8'
+          ),
         },
       } as unknown as Error);
 
@@ -1704,6 +1708,105 @@ describe('execute()', () => {
       expect(result?.serviceMessage).toBe(
         '[400] Bad Request: Invalid client or Invalid client credentials'
       );
+    });
+
+    it('extracts top-level message from a JSON error body returned as a Buffer', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 401',
+        response: {
+          status: 401,
+          statusText: 'Unauthorized',
+          headers: { 'content-type': 'application/json' },
+          data: Buffer.from(JSON.stringify({ message: 'API key expired' }), 'utf-8'),
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/secure' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('[401] Unauthorized: API key expired');
+    });
+
+    it('extracts message from a non-buffer (already-parsed) JSON error body', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 403',
+        response: {
+          status: 403,
+          statusText: 'Forbidden',
+          headers: { 'content-type': 'application/json' },
+          data: { message: 'Insufficient permissions' },
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/admin' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('[403] Forbidden: Insufficient permissions');
+    });
+
+    it('strips HTML from a text/html error body returned as a Buffer', async () => {
+      const config: ConnectorTypeConfigType = {
+        ...emptyConfig,
+        url: 'https://abc.def',
+      };
+
+      requestMock.mockRejectedValueOnce({
+        tag: 'err',
+        isAxiosError: true,
+        message: 'Request failed with status code 502',
+        response: {
+          status: 502,
+          statusText: 'Bad Gateway',
+          headers: { 'content-type': 'text/html; charset=utf-8' },
+          data: Buffer.from('<html><body><h1>Bad Gateway</h1></body></html>', 'utf-8'),
+        },
+      } as unknown as Error);
+
+      const result = await connectorType.executor?.({
+        actionId: 'some-id',
+        services,
+        config,
+        secrets: { ...emptySecrets, user: 'abc', password: '123' },
+        params: { method: 'GET', path: '/x' },
+        configurationUtilities,
+        logger: mockedLogger,
+        connectorUsageCollector,
+      });
+
+      expect(result?.status).toBe('error');
+      expect(result?.serviceMessage).toBe('[502] Bad Gateway: Bad Gateway');
     });
 
     it('should log an error if refreshing access token fails', async () => {
