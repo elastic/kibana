@@ -399,6 +399,27 @@ test.beforeEach(async ({ page, browserAuth, pageObjects }) => {
 
 :::::
 
+## Extend `browserAuth` for repeated roles [extend-browserauth-for-repeated-roles]
+
+If the same custom role appears in many specs, extract it into a `browserAuth` fixture extension instead of repeating the role descriptor everywhere. Tests then read like intent.
+
+:::::{dropdown} Example
+
+```ts
+// in your plugin's fixtures/index.ts
+await use({
+  ...browserAuth,
+  loginAsPlatformEngineer: () =>
+    browserAuth.loginWithCustomRole('platform_engineer', roleDescriptor),
+});
+
+// in specs
+await browserAuth.loginAsPlatformEngineer();
+```
+
+For setup details, see [Reuse role helpers](./browser-auth.md#scout-browser-auth-extend).
+:::::
+
 ## Related guides
 
 - [General best practices](./best-practices.md) — apply to both UI and API tests
