@@ -9,6 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 import { createSLO, createAPMTransactionErrorRateIndicator } from './fixtures/slo';
 import { createCompositeSlo } from './fixtures/composite_slo';
+import { Duration, DurationUnit } from '../domain/models';
 import { CompositeHistoricalSummaryClient } from './composite_historical_summary_client';
 import type { HistoricalSummaryProvider } from './composite_historical_summary_client';
 import { createCompositeSLORepositoryMock, createSLORepositoryMock } from './mocks';
@@ -419,7 +420,10 @@ describe('CompositeHistoricalSummaryClient', () => {
     expect(mockHistoricalProvider.fetch).toHaveBeenCalledWith({
       list: [
         expect.objectContaining({
-          timeWindow: composite.timeWindow,
+          timeWindow: {
+            duration: new Duration(30, DurationUnit.Day),
+            type: 'rolling',
+          },
         }),
       ],
     });

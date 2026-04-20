@@ -9,6 +9,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import type YAML from 'yaml';
+import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { z } from '@kbn/zod/v4';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
@@ -54,18 +55,18 @@ export function useMonacoMarkersChangedInterceptor({
       owner: string,
       markers: monaco.editor.IMarkerData[]
     ) => {
-      return filterMonacoYamlMarkers(markers, editorModel, yamlDocumentRef.current).map(
-        (marker) => {
-          if (owner === 'yaml') {
-            return formatMonacoYamlMarker(
-              marker,
-              editorModel,
-              workflowYamlSchema,
-              yamlDocumentRef.current
-            );
-          }
-          return marker;
-        }
+      const filtered = filterMonacoYamlMarkers(markers, editorModel, yamlDocumentRef.current);
+
+      if (owner !== 'yaml') {
+        return filtered;
+      }
+
+      // we absolutely need to have up to date yaml document to format the error message, not the one from the ref object (which is debounced)
+      // the monaco-yaml validation is already debounced, so this won't be run every key stroke
+      const freshYamlDocument = parseDocument(editorModel.getValue());
+
+      return filtered.map((marker) =>
+        formatMonacoYamlMarker(marker, editorModel, workflowYamlSchema, freshYamlDocument)
       );
     },
     [workflowYamlSchema, yamlDocumentRef]
@@ -118,8 +119,7 @@ export function useMonacoMarkersChangedInterceptor({
       });
     },
     // the yamlDocumentRef is not needed here because it's a ref object and not a dependency
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [workflowYamlSchema]
+    []
   );
 
   return {
