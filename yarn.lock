@@ -6355,6 +6355,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-navigation-options-common@link:src/platform/packages/private/dashboard/dashboard-navigation-options-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dashboard-navigation-options-components@link:src/platform/packages/private/dashboard/dashboard-navigation-options-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dashboard-navigation-options-schema@link:src/platform/packages/private/dashboard/dashboard-navigation-options-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-plugin@link:src/platform/plugins/shared/dashboard":
   version "0.0.0"
   uid ""
