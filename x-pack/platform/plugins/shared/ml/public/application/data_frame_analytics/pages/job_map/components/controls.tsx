@@ -48,10 +48,12 @@ import {
 import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 import { useMlIndexUtils } from '../../../../util/index_service';
 import type { JobMapNodeData } from '../map_elements_to_flow';
+import type { GetDataObjectParameter } from '../use_fetch_analytics_map_data';
+import { JOB_MAP_INDEX_PATTERN_TYPE } from '../job_map_flow_constants';
 
 interface Props {
   details: Record<string, any>;
-  getNodeData: any;
+  getNodeData: (params?: GetDataObjectParameter) => void;
   modelId?: string;
   selectedNodeData: JobMapNodeData | undefined;
   onClearSelection: () => void;
@@ -60,24 +62,25 @@ interface Props {
 }
 
 function getListItemsFactory(showLicenseInfo: boolean) {
-  return (details: Record<string, any>): EuiDescriptionListProps['listItems'] => {
+  return (details: Record<string, unknown>): EuiDescriptionListProps['listItems'] => {
     if (showLicenseInfo === false) {
       delete details.license_level;
     }
 
     return Object.entries(details).map(([key, value]) => {
-      let description;
+      let description: React.ReactNode;
       if (key === 'create_time') {
-        description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
+        description = formatHumanReadableDateTimeSeconds(
+          moment(value as moment.MomentInput).unix() * 1000
+        );
+      } else if (typeof value === 'object') {
+        description = (
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+            {JSON.stringify(value, null, 2)}
+          </EuiCodeBlock>
+        );
       } else {
-        description =
-          typeof value === 'object' ? (
-            <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
-              {JSON.stringify(value, null, 2)}
-            </EuiCodeBlock>
-          ) : (
-            value
-          );
+        description = String(value);
       }
 
       return {
@@ -88,7 +91,7 @@ function getListItemsFactory(showLicenseInfo: boolean) {
   };
 }
 
-export const Controls: FC<Props> = React.memo(
+export const JobMapNodeFlyout: FC<Props> = React.memo(
   ({
     details,
     getNodeData,
@@ -375,7 +378,7 @@ export const Controls: FC<Props> = React.memo(
                   compressed
                   type="column"
                   listItems={
-                    nodeType === 'index-pattern'
+                    nodeType === JOB_MAP_INDEX_PATTERN_TYPE
                       ? getListItems(details[nodeId][nodeLabel])
                       : getListItems(details[nodeId])
                   }

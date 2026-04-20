@@ -89,7 +89,9 @@ export function applyJobMapDagreLayout<T extends Record<string, unknown>>(
 
   try {
     Dagre.layout(g);
-  } catch {
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[JobMap] Dagre layout failed, falling back to grid layout:', err);
     return applyGridFallbackLayout(nodes, opts);
   }
 

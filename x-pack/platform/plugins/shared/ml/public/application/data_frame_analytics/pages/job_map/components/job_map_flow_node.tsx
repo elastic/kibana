@@ -14,18 +14,21 @@ import { ANALYSIS_CONFIG_TYPE, JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-ana
 
 import type { JOB_MAP_FLOW_NODE_TYPE } from '../map_elements_to_flow';
 import { type JobMapNodeData } from '../map_elements_to_flow';
-import { JOB_MAP_NODE_HEIGHT, JOB_MAP_NODE_WIDTH } from '../job_map_flow_constants';
+import {
+  JOB_MAP_INDEX_PATTERN_TYPE,
+  JOB_MAP_NODE_HEIGHT,
+  JOB_MAP_NODE_WIDTH,
+} from '../job_map_flow_constants';
 
 import classificationJobIcon from './icons/ml_classification_job.svg';
 import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
-import { JobMapShapeGlyph } from './job_map_shape_glyph';
+import { GLYPH_VIEW_BOX_SIZE, JobMapShapeGlyph } from './job_map_shape_glyph';
 
 type JobMapFlowNodeType = Node<JobMapNodeData, typeof JOB_MAP_FLOW_NODE_TYPE>;
 
-const SHAPE_BOX = 52;
 /** Vertical band that holds handles + glyph so edges meet the shape, not the label block. */
-const SHAPE_ROW_HEIGHT = SHAPE_BOX + 20;
+const SHAPE_ROW_HEIGHT = GLYPH_VIEW_BOX_SIZE + 20;
 
 function iconSrcForAnalysisType(analysisType?: string): string | undefined {
   switch (analysisType) {
@@ -56,7 +59,7 @@ function borderColorForType(
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return colors.vis.euiColorVis2;
     case JOB_MAP_NODE_TYPES.INDEX:
-    case 'index-pattern':
+    case JOB_MAP_INDEX_PATTERN_TYPE:
       return colors.vis.euiColorVis4;
     case JOB_MAP_NODE_TYPES.TRAINED_MODEL:
       return colors.vis.euiColorVis5;
@@ -113,8 +116,8 @@ export const JobMapFlowNode = memo(({ data, selected }: NodeProps<JobMapFlowNode
         <div
           css={css`
             position: relative;
-            width: ${SHAPE_BOX}px;
-            height: ${SHAPE_BOX}px;
+            width: ${GLYPH_VIEW_BOX_SIZE}px;
+            height: ${GLYPH_VIEW_BOX_SIZE}px;
             flex-shrink: 0;
           `}
         >

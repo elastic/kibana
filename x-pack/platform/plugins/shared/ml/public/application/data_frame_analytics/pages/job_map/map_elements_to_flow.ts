@@ -13,6 +13,7 @@ import type {
   MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
 
+import { JOB_MAP_EDGE_MARKER_SIZE, JOB_MAP_EDGE_STROKE_WIDTH } from './job_map_flow_constants';
 import { applyJobMapDagreLayout } from './apply_job_map_dagre_layout';
 
 export const JOB_MAP_FLOW_NODE_TYPE = 'jobMapNode' as const;
@@ -29,7 +30,7 @@ function isEdgeElement(el: MapElements): el is AnalyticsMapEdgeElement {
   return 'source' in el.data && 'target' in el.data;
 }
 
-function isNodeElement(el: MapElements): el is AnalyticsMapNodeElement {
+export function isNodeElement(el: MapElements): el is AnalyticsMapNodeElement {
   return 'label' in el.data && 'type' in el.data;
 }
 
@@ -67,12 +68,12 @@ export function mapElementsToFlowGraph(
     target,
     type: 'smoothstep',
     animated: false,
-    style: { stroke: edgeColor, strokeWidth: 1 },
+    style: { stroke: edgeColor, strokeWidth: JOB_MAP_EDGE_STROKE_WIDTH },
     markerEnd: {
       type: MarkerType.ArrowClosed,
       color: edgeColor,
-      width: 12,
-      height: 12,
+      width: JOB_MAP_EDGE_MARKER_SIZE,
+      height: JOB_MAP_EDGE_MARKER_SIZE,
     },
   }));
 

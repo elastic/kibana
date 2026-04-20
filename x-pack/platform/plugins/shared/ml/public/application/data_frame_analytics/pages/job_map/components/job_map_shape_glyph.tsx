@@ -7,9 +7,10 @@
 
 import React, { memo } from 'react';
 import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
+import { JOB_MAP_INDEX_PATTERN_TYPE } from '../job_map_flow_constants';
 
 /** Width and height of the SVG `viewBox` (and rendered size in px). */
-const GLYPH_VIEW_BOX_SIZE = 52;
+export const GLYPH_VIEW_BOX_SIZE = 52;
 /** Horizontal and vertical center of the viewBox (used for symmetric shapes). */
 const VIEW_BOX_CENTER = GLYPH_VIEW_BOX_SIZE / 2;
 
@@ -41,7 +42,7 @@ export const JobMapShapeGlyph = memo(
         body = <rect x={6} y={6} width={40} height={40} {...common} />;
         break;
       case JOB_MAP_NODE_TYPES.INDEX:
-      case 'index-pattern':
+      case JOB_MAP_INDEX_PATTERN_TYPE:
         body = (
           <polygon
             points={`${VIEW_BOX_CENTER},5 47,${VIEW_BOX_CENTER} ${VIEW_BOX_CENTER},47 5,${VIEW_BOX_CENTER}`}

@@ -6,56 +6,23 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  useEuiTheme,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  type EuiThemeComputed,
-} from '@elastic/eui';
-import {
-  JOB_MAP_NODE_TYPES,
-  type AnalyticsMapNodeElement,
-  type MapElements,
-} from '@kbn/ml-data-frame-analytics-utils';
+import { useEuiTheme, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { JOB_MAP_NODE_TYPES } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlKibana } from '../../../contexts/kibana';
-import { Controls, JobMapLegend, JobMapReactFlow } from './components';
+import { JobMapNodeFlyout, JobMapLegend, JobMapReactFlow } from './components';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
 import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 import type { JobMapNodeData } from './map_elements_to_flow';
-
-const getJobMapGraphSurfaceStyle = (theme: EuiThemeComputed) => ({
-  background: `linear-gradient(
-  90deg,
-  ${theme.colors.backgroundBasePlain}
-    calc(${theme.size.l} - calc(${theme.size.xs} / 2)),
-  transparent 1%
-)
-center,
-linear-gradient(
-  ${theme.colors.backgroundBasePlain}
-    calc(${theme.size.l} - calc(${theme.size.xs} / 2)),
-    transparent 1%
-)
-center,
-${theme.colors.lightShade}`,
-  backgroundSize: `${theme.size.l} ${theme.size.l}`,
-  marginTop: 0,
-});
-
-function isNodeElement(el: MapElements): el is AnalyticsMapNodeElement {
-  return 'label' in el.data && 'type' in el.data;
-}
+import { isNodeElement } from './map_elements_to_flow';
+import { JOB_MAP_CANVAS_BOTTOM_PADDING } from './job_map_flow_constants';
 
 interface Props {
-  key?: string;
   defaultHeight?: number;
   analyticsId?: string;
   modelId?: string;
@@ -90,44 +57,54 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
     setSelectedNodeData(undefined);
   }, []);
 
-  const updateElements = (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
-    if (nodeLabel === analyticsId) {
-      redirectToAnalyticsManagementPage();
-    } else {
-      const filteredElements = elements.filter((e) => {
-        let isNotDeletedNodeOrRelated =
-          e.data.id !== nodeId &&
-          !('target' in e.data && e.data.target === nodeId) &&
-          !('source' in e.data && e.data.source === nodeId);
+  const updateElements = useCallback(
+    (nodeId: string, nodeLabel: string, destIndexNode?: string) => {
+      if (nodeLabel === analyticsId) {
+        redirectToAnalyticsManagementPage();
+      } else {
+        const filteredElements = elements.filter((e) => {
+          let isNotDeletedNodeOrRelated =
+            e.data.id !== nodeId &&
+            !('target' in e.data && e.data.target === nodeId) &&
+            !('source' in e.data && e.data.source === nodeId);
 
-        if (
-          e.data.id !== undefined &&
-          isNodeElement(e) &&
-          e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL
-        ) {
-          isNotDeletedNodeOrRelated =
-            isNotDeletedNodeOrRelated &&
-            nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
-        }
+          if (
+            e.data.id !== undefined &&
+            isNodeElement(e) &&
+            e.data.type === JOB_MAP_NODE_TYPES.TRAINED_MODEL
+          ) {
+            isNotDeletedNodeOrRelated =
+              isNotDeletedNodeOrRelated &&
+              nodeDetails[e.data.id]?.metadata?.analytics_config?.id !== nodeLabel;
+          }
 
-        if (destIndexNode !== undefined) {
-          return (
-            isNotDeletedNodeOrRelated &&
-            e.data.id !== destIndexNode &&
-            !('target' in e.data && e.data.target === destIndexNode) &&
-            !('source' in e.data && e.data.source === destIndexNode)
-          );
-        }
+          if (destIndexNode !== undefined) {
+            return (
+              isNotDeletedNodeOrRelated &&
+              e.data.id !== destIndexNode &&
+              !('target' in e.data && e.data.target === destIndexNode) &&
+              !('source' in e.data && e.data.source === destIndexNode)
+            );
+          }
 
-        return isNotDeletedNodeOrRelated;
-      });
-      setElements(filteredElements);
-    }
-  };
+          return isNotDeletedNodeOrRelated;
+        });
+        setElements(filteredElements);
+      }
+    },
+    [analyticsId, elements, nodeDetails, redirectToAnalyticsManagementPage, setElements]
+  );
+
+  // Keep a stable ref to the latest fetch function so effects that only want to
+  // re-run on specific prop changes don't need to list `fetchAndSetElementsWrapper`
+  // (which is recreated on every render) as a dependency.
+  const fetchRef = useRef(fetchAndSetElementsWrapper);
+  useEffect(() => {
+    fetchRef.current = fetchAndSetElementsWrapper;
+  });
 
   useEffect(() => {
-    fetchAndSetElementsWrapper({ analyticsId, modelId });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchRef.current({ analyticsId, modelId });
   }, [analyticsId, modelId]);
 
   useEffect(() => {
@@ -136,25 +113,22 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
 
   useEffect(() => {
     if (forceRefresh === true) {
-      fetchAndSetElementsWrapper({ analyticsId, modelId });
+      fetchRef.current({ analyticsId, modelId });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [forceRefresh]);
+  }, [forceRefresh, analyticsId, modelId]);
 
   useEffect(() => {
     if (message !== undefined) {
       notifications.toasts.add(message);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [message]);
+  }, [message, notifications.toasts]);
 
   useEffect(
     function updateOnTimerRefresh() {
       if (!refresh) return;
-      fetchAndSetElementsWrapper({ analyticsId, modelId });
+      fetchRef.current({ analyticsId, modelId });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [refresh]
+    [refresh, analyticsId, modelId]
   );
 
   useEffect(() => {
@@ -169,19 +143,25 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
     }
   }, [elements, selectedNodeData]);
 
-  if (error !== undefined) {
-    notifications.toasts.addDanger(
-      i18n.translate('xpack.ml.dataframe.analyticsMap.fetchDataErrorMessage', {
-        defaultMessage: 'Unable to fetch some data. An error occurred: {error}',
-        values: { error: JSON.stringify(error) },
-      })
-    );
-    setError(undefined);
-  }
+  useEffect(() => {
+    if (error !== undefined) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.ml.dataframe.analyticsMap.fetchDataErrorMessage', {
+          defaultMessage: 'Unable to fetch some data. An error occurred: {error}',
+          values: { error: JSON.stringify(error) },
+        })
+      );
+      setError(undefined);
+    }
+  }, [error, notifications.toasts, setError]);
 
   const { ref, width, height } = useRefDimensions();
 
-  const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
+  const refreshCallback = useCallback(
+    () => fetchRef.current({ analyticsId, modelId }),
+    [analyticsId, modelId]
+  );
+
   const hasMissingJobNode = useMemo(
     () =>
       elements
@@ -212,18 +192,20 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <div style={{ height: h - parseInt(euiTheme.size.l, 10) - 20 }} ref={ref}>
+      <div
+        style={{ height: h - parseInt(euiTheme.size.l, 10) - JOB_MAP_CANVAS_BOTTOM_PADDING }}
+        ref={ref}
+      >
         <JobMapReactFlow
           elements={elements}
-          height={h - 20}
+          height={h - JOB_MAP_CANVAS_BOTTOM_PADDING}
           width={width}
-          style={getJobMapGraphSurfaceStyle(euiTheme)}
           resetViewportSignal={resetViewportSignal}
           selectedNodeId={selectedNodeData?.id}
           onSelectNodeData={setSelectedNodeData}
           onClearSelection={onClearSelection}
         />
-        <Controls
+        <JobMapNodeFlyout
           details={nodeDetails}
           getNodeData={fetchAndSetElementsWrapper}
           modelId={modelId}

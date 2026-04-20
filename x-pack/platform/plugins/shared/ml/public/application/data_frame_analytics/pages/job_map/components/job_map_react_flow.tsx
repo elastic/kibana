@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CSSProperties, FC } from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -43,7 +43,6 @@ interface JobMapReactFlowInnerProps {
   elements: MapElements[];
   width: number;
   height: number;
-  style?: CSSProperties;
   resetViewportSignal: number;
   selectedNodeId: string | undefined;
   onSelectNodeData: (data: JobMapNodeData) => void;
@@ -54,7 +53,6 @@ const JobMapReactFlowInner: FC<JobMapReactFlowInnerProps> = ({
   elements,
   width,
   height,
-  style,
   resetViewportSignal,
   selectedNodeId,
   onSelectNodeData,
@@ -125,29 +123,19 @@ const JobMapReactFlowInner: FC<JobMapReactFlowInnerProps> = ({
     [onSelectNodeData, toasts]
   );
 
-  const divStyle = useMemo(() => ({ ...style, height, width }), [height, style, width]);
+  const divStyle = useMemo(() => ({ height, width }), [height, width]);
+
+  const canvasCss = css`
+    background: ${euiTheme.colors.backgroundBasePlain};
+    ${divStyle}
+  `;
 
   if (width <= 0 || height <= 0) {
-    return (
-      <div
-        data-test-subj="mlPageDataFrameAnalyticsMapGraph"
-        css={css`
-          ${divStyle}
-        `}
-      />
-    );
+    return <div data-test-subj="mlPageDataFrameAnalyticsMapGraph" css={canvasCss} />;
   }
 
   return (
-    <div
-      data-test-subj="mlPageDataFrameAnalyticsMapGraph"
-      css={css`
-        ${divStyle}
-        .react-flow__attribution {
-          display: none;
-        }
-      `}
-    >
+    <div data-test-subj="mlPageDataFrameAnalyticsMapGraph" css={canvasCss}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -178,7 +166,6 @@ export interface JobMapReactFlowProps {
   elements: MapElements[];
   width: number;
   height: number;
-  style?: CSSProperties;
   resetViewportSignal: number;
   selectedNodeId: string | undefined;
   onSelectNodeData: (data: JobMapNodeData) => void;

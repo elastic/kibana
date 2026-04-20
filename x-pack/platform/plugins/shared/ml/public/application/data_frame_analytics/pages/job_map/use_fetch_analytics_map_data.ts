@@ -15,7 +15,7 @@ import {
   type MapElements,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { useMlApi } from '../../../contexts/kibana';
-interface GetDataObjectParameter {
+export interface GetDataObjectParameter {
   analyticsId?: string;
   id?: string;
   modelId?: string;
