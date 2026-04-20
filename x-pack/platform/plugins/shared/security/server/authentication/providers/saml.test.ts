@@ -469,7 +469,7 @@ describe('SAMLAuthenticationProvider', () => {
           method: 'POST',
           path: '/_security/saml/prepare',
           body: {
-            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+            acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
           },
         });
       });
@@ -983,7 +983,7 @@ describe('SAMLAuthenticationProvider', () => {
           method: 'POST',
           path: '/_security/saml/prepare',
           body: {
-            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+            acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
           },
         });
 
@@ -1027,7 +1027,7 @@ describe('SAMLAuthenticationProvider', () => {
           method: 'POST',
           path: '/_security/saml/prepare',
           body: {
-            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+            acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
           },
         });
 
@@ -1099,7 +1099,7 @@ describe('SAMLAuthenticationProvider', () => {
           method: 'POST',
           path: '/_security/saml/prepare',
           body: {
-            acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+            acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
           },
         });
       });
@@ -1211,7 +1211,7 @@ describe('SAMLAuthenticationProvider', () => {
         method: 'POST',
         path: '/_security/saml/prepare',
         body: {
-          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+          acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
         },
       });
     });
@@ -1534,7 +1534,7 @@ describe('SAMLAuthenticationProvider', () => {
         path: '/_security/saml/invalidate',
         body: {
           query_string: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+          acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
         },
       });
     });
@@ -1656,7 +1656,7 @@ describe('SAMLAuthenticationProvider', () => {
         path: '/_security/saml/invalidate',
         body: {
           query_string: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+          acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
         },
       });
     });
@@ -1678,7 +1678,7 @@ describe('SAMLAuthenticationProvider', () => {
         path: '/_security/saml/invalidate',
         body: {
           query_string: 'SAMLRequest=xxx%20yyy',
-          acs: 'test-protocol://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
+          acs: 'https://test-hostname:1234/mock-server-basepath/api/security/saml/callback',
         },
       });
     });

@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   function checkIntermediateSessionCookiePropsDefault(sessionCookie: Cookie) {
     expect(sessionCookie.sameSite).to.be('none');
-    expect(sessionCookie.secure).to.be(true);
+    expect(sessionCookie.secure).to.be(isSSlEnabled);
   }
 
   async function checkSessionCookie(sessionCookie: Cookie, username = 'a@b.c') {
