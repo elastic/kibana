@@ -26,10 +26,12 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 
 ### Keep tests close to the code they test [keep-tests-close-to-source-code]
 
-Scout uses selective testing to run only the tests for modules affected by a PR. For this to work, tests must live in the same plugin or package as the code they cover, otherwise changes won't trigger the relevant tests. The full suite still runs post-merge on `kibana-on-merge`.
+A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:
 
-- **API tests**: place them in the plugin that defines the routes being tested.
-- **UI tests**: place them in the plugin that owns the UI components or pages.
+- **API tests**: the routes under test should be defined in this plugin's `/server` directory.
+- **UI tests**: the UI being driven should come from this plugin's `/public` directory — a quick look there is usually enough to understand what the plugin renders and whether the test fits.
+
+This also keeps Scout's selective testing effective: it runs only the tests for modules affected by a PR, so a test placed in the wrong plugin won't be triggered by changes to the code it actually covers. The full suite still runs post-merge on `kibana-on-merge`.
 
 ### Prefer runtime feature flags [prefer-runtime-feature-flags]
 
