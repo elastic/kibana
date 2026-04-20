@@ -171,16 +171,15 @@ export function DataDimensionEditor(
       formatter = props.formatFactory(columnMeta?.params);
     }
 
+    const defaultColorMapping = !layer.palette
+      ? { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: getDefaultPalette(layer.seriesType) }
+      : undefined;
+
     return !layer.collapseFn ? (
       <div className="lnsIndexPatternDimensionEditor--padded">
         <ColorMappingByTerms
           isDarkMode={isDarkMode}
-          colorMapping={
-            layer.colorMapping ??
-            (!layer.palette
-              ? { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: getDefaultPalette(layer.seriesType) }
-              : undefined)
-          }
+          colorMapping={layer.colorMapping ?? defaultColorMapping}
           palette={layer.palette}
           isInlineEditing={isInlineEditing}
           setPalette={setPalette}
