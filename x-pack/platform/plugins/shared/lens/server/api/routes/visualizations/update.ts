@@ -7,7 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
-import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
@@ -34,13 +34,20 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
     access: LENS_API_ACCESS,
-    summary: 'Create or update visualization',
-    description:
-      'Create or update a visualization with the given id. When no visualization exists for the id, one is created.',
+    summary: 'Update visualization',
+    description: [
+      'Replaces the full configuration of an existing Lens visualization. Partial updates are not supported.',
+      'To make incremental changes, retrieve the visualization first, modify the fields you need, then send the complete object back.',
+      '',
+      'If no visualization exists with the specified ID, a new one is created.',
+      '',
+      'ES|QL visualizations cannot be updated through this endpoint.',
+    ].join('\n'),
     options: {
       tags: [LENS_API_TAG],
       availability: {
         stability: 'experimental',
+        since: '9.4.0',
       },
     },
     security: {

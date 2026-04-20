@@ -10,8 +10,7 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensAPIFormat, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type {
   AttachmentPanel,

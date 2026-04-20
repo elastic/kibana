@@ -1,0 +1,33 @@
+{
+  "sha1": "d3a6e733685da3818d4e96db30df0c9f69f3099b",
+  "tests": [
+    {
+      "id": "208b6394ca1260b-100a2f007029fdb",
+      "title": "Task Manager API Keys scheduled task has both apiKey and uiamApiKey",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
+        "line": 51,
+        "column": 10
+      }
+    },
+    {
+      "id": "208b6394ca1260b-fcb14904c934c2b",
+      "title": "Task Manager API Keys when task is removed, apiKey and uiamApiKey are queued for invalidation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
+        "line": 64,
+        "column": 10
+      }
+    }
+  ]
+}

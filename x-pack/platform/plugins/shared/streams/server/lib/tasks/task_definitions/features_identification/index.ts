@@ -195,6 +195,7 @@ export async function identifyStreamFeatures({
 
   let successCount = 0;
   let failureCount = 0;
+  let diverseOffset = 0;
 
   for (let i = 0; i < maxIterations; i++) {
     if (signal.aborted) {
@@ -213,7 +214,14 @@ export async function identifyStreamFeatures({
       entityFilteredRatio,
       diverseRatio,
       maxEntityFilters,
+      diverseOffset,
     });
+
+    if (batchResult.nextOffset === diverseOffset) {
+      // Diverse sampling is expensive; once the pool is exhausted (offset did not advance), skip further diverse fetches.
+      diverseRatio = 0;
+    }
+    diverseOffset = batchResult.nextOffset;
 
     if (batchResult.documents.length === 0) {
       logger.debug('Stopping: no documents available for sampling');
