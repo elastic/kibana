@@ -32,7 +32,7 @@ export function StreamOverview() {
   );
 
   const sidebarColumnStyle = useMemo<CSSProperties>(
-    () => (isStackedOverviewLayout ? { width: '100%' } : { width: 450 }),
+    () => (isStackedOverviewLayout ? { width: '100%' } : { width: 340 }),
     [isStackedOverviewLayout]
   );
 
