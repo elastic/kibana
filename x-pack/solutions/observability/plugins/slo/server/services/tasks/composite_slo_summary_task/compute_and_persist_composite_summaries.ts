@@ -23,7 +23,7 @@ import type {
   StoredCompositeSLODefinition,
   StoredSLODefinition,
 } from '../../../domain/models';
-import type { TimeWindow } from '../../../domain/models/time_window';
+import { toRichRollingTimeWindow, type TimeWindow } from '../../../domain/models/time_window';
 import { SO_SLO_COMPOSITE_TYPE } from '../../../saved_objects/slo_composite';
 import { SO_SLO_TYPE } from '../../../saved_objects/slo';
 import { DefaultBurnRatesClient } from '../../burn_rates_client';
@@ -206,13 +206,14 @@ async function fetchMemberSummaries(
         { slo: SLODefinition; instanceId: string; timeWindowOverride: TimeWindow }
       >();
       for (const { compositeSlo } of items) {
+        const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
         for (const member of compositeSlo.members) {
           const slo = memberDefinitionMap.get(member.sloId);
           if (!slo) continue;
           const instanceId = member.instanceId ?? ALL_VALUE;
-          const key = buildMemberSummaryKey(member.sloId, instanceId, compositeSlo.timeWindow);
+          const key = buildMemberSummaryKey(member.sloId, instanceId, richTimeWindow);
           if (!seen.has(key)) {
-            seen.set(key, { slo, instanceId, timeWindowOverride: compositeSlo.timeWindow });
+            seen.set(key, { slo, instanceId, timeWindowOverride: richTimeWindow });
           }
         }
       }
@@ -252,12 +253,13 @@ function buildBulkOps(
 
     for (const { compositeSlo } of items) {
       try {
+        const richTimeWindow = toRichRollingTimeWindow(compositeSlo.timeWindow);
         const unresolvedMemberIds: string[] = [];
         const memberSummaries: MemberSummaryData[] = compositeSlo.members.flatMap((member) => {
           const key = buildMemberSummaryKey(
             member.sloId,
             member.instanceId ?? ALL_VALUE,
-            compositeSlo.timeWindow
+            richTimeWindow
           );
           const slo = memberDefinitionMap.get(member.sloId);
           const result = summaryResultMap.get(key);
@@ -305,12 +307,12 @@ function decodeCompositeSLO(
   so: SavedObject<StoredCompositeSLODefinition>,
   logger: Logger
 ): CompositeSLODefinition | undefined {
-  const result = compositeSloDefinitionSchema.decode(so.attributes);
-  if (isLeft(result)) {
+  try {
+    return compositeSloDefinitionSchema.decode(so.attributes);
+  } catch {
     logger.warn(`Invalid stored composite SLO [${so.attributes.id}], skipping`);
     return undefined;
   }
-  return result.right;
 }
 
 async function findMemberSLOs(
@@ -415,12 +417,12 @@ function buildSummaryDoc(
       tags: compositeSlo.tags,
       objective: { target: compositeSlo.objective.target },
       timeWindow: {
-        duration: compositeSlo.timeWindow.duration.format(),
+        duration: compositeSlo.timeWindow.duration,
         type: compositeSlo.timeWindow.type,
       },
       budgetingMethod: compositeSlo.budgetingMethod,
-      createdAt: compositeSlo.createdAt.toISOString(),
-      updatedAt: compositeSlo.updatedAt.toISOString(),
+      createdAt: compositeSlo.createdAt,
+      updatedAt: compositeSlo.updatedAt,
     },
     sliValue: summary.sliValue,
     status: summary.status,

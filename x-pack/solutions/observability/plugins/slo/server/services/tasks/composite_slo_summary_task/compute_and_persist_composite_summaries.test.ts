@@ -32,6 +32,7 @@ const mockComputeCompositeSummary = computeCompositeSummary as jest.MockedFuncti
 
 const COMPOSITE_ID = 'composite-slo-id-12345678';
 const MEMBER_ID = 'member-slo-id-123456789';
+const MEMBER_ID_2 = 'member-slo-id-987654321';
 const TEST_DATE = new Date('2024-01-01T00:00:00.000Z');
 
 function buildStoredCompositeSLO(
@@ -58,7 +59,10 @@ function buildStoredCompositeSLO(
       createdBy: 'user',
       updatedBy: 'user',
       version: 1,
-      members: [{ sloId: MEMBER_ID, weight: 1 }],
+      members: [
+        { sloId: MEMBER_ID, weight: 1 },
+        { sloId: MEMBER_ID_2, weight: 1 },
+      ],
       ...overrides,
     } as StoredCompositeSLODefinition,
   };
@@ -148,7 +152,7 @@ describe('computeAndPersistCompositeSummaries', () => {
     jest.useFakeTimers().setSystemTime(TEST_DATE);
     jest.clearAllMocks();
 
-    mockComputeSummaries = jest.fn().mockResolvedValue([buildSummaryResult()]);
+    mockComputeSummaries = jest.fn().mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
     MockDefaultSummaryClient.mockImplementation(
       () =>
         ({
@@ -162,8 +166,8 @@ describe('computeAndPersistCompositeSummaries', () => {
     mockComputeCompositeSummary.mockReturnValue(buildCompositeSummary());
 
     soClient.find.mockResolvedValue({
-      saved_objects: [buildStoredMemberSLO()],
-      total: 1,
+      saved_objects: [buildStoredMemberSLO(), buildStoredMemberSLO(MEMBER_ID_2)],
+      total: 2,
       per_page: 10,
       page: 1,
     });
@@ -400,7 +404,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
       const bulkCall = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0];
       const doc = bulkCall.operations[1];
-      expect(doc.unresolvedMemberIds).toEqual([MEMBER_ID]);
+      expect(doc.unresolvedMemberIds).toEqual([MEMBER_ID, MEMBER_ID_2]);
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(MEMBER_ID));
     });
 
