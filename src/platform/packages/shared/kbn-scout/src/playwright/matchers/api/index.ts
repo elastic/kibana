@@ -49,7 +49,10 @@ const allowedMatchers = new Set([
 /**
  * Properties that are structural (not matchers) and should always be allowed through.
  */
-const structuralProps = new Set(['not', 'rejects', 'resolves', 'then', 'toJSON']);
+// Structural props that return nested Playwright objects — wrap with the same restriction
+const nestedProps = new Set(['not', 'rejects', 'resolves']);
+// Props that must not throw to avoid breaking serializers and await
+const safePassthroughProps = new Set(['then', 'toJSON']);
 
 /**
  * Creates a restricting Proxy around a Playwright expect result.
@@ -63,9 +66,11 @@ function restrictMatchers(playwrightExpectResult: object): Matchers {
       if (typeof prop === 'symbol') {
         return Reflect.get(target, prop, receiver);
       }
-      if (structuralProps.has(prop)) {
+      if (safePassthroughProps.has(prop)) {
+        return undefined;
+      }
+      if (nestedProps.has(prop)) {
         const value = Reflect.get(target, prop, receiver);
-        // Wrap nested objects (like .not, .rejects) with the same restriction
         if (typeof value === 'object' && value !== null) {
           return restrictMatchers(value);
         }
@@ -77,6 +82,11 @@ function restrictMatchers(playwrightExpectResult: object): Matchers {
             `See the Scout API matchers README for the list of supported matchers.`
         );
       }
+      // Matchers are returned unbound; `this` at call time will be the Proxy, not the target.
+      // Safe today because Playwright's matchers use closures, not `this`.
+      // If a Playwright upgrade causes unexpected "Matcher 'X' is not available" errors
+      // for internal property names, bind the function to target here instead:
+      //   return Reflect.get(target, prop, receiver).bind(target);
       return Reflect.get(target, prop, receiver);
     },
   }) as Matchers;
