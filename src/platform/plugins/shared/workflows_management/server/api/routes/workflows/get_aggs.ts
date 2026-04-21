@@ -16,12 +16,12 @@ import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { withLicenseCheck } from '../utils/with_license_check';
 
 const MAX_AGG_FIELDS = 25;
-const FIELDS_DENY_LIST = new Set(['_id', '_index', '_score', '_source']);
+const ALLOWED_AGG_FIELDS = new Set(['name', 'enabled', 'tags', 'createdBy', 'triggerTypes']);
 
 const fieldSchema = schema.string({
   meta: { description: 'Field name to aggregate.' },
   validate: (field) =>
-    !FIELDS_DENY_LIST.has(field) ? undefined : 'Field is not allowed for aggregation.',
+    ALLOWED_AGG_FIELDS.has(field) ? undefined : `Field '${field}' is not allowed for aggregation.`,
 });
 
 export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies) {
