@@ -375,6 +375,13 @@ export const ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER = i18n.translate(
   }
 );
 
+export const ASSIGNEE_FLYOUT_NO_ASSIGNEE_OPTION = i18n.translate(
+  'xpack.alertingV2.episodes.assignees.flyout.noAssigneeOption',
+  {
+    defaultMessage: 'No assignee',
+  }
+);
+
 export const ASSIGNEE_FLYOUT_CANCEL = i18n.translate(
   'xpack.alertingV2.episodes.assignees.flyout.cancel',
   {

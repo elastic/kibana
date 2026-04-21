@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -107,11 +107,15 @@ export function EditEpisodeAssigneeFlyout({
 
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedProfile, setSelectedProfile] = useState<UserProfileWithAvatar | null>(null);
+  const selectionTouchedRef = useRef(false);
 
   useEffect(() => {
+    selectionTouchedRef.current = false;
     setSearchInput('');
     setDebouncedSearch('');
-  }, [episodeId, groupHash]);
+    setSelectedProfile(null);
+  }, [episodeId, groupHash, lastAssigneeUid]);
 
   useEffect(() => {
     const handle = window.setTimeout(() => setDebouncedSearch(searchInput), 300);
@@ -130,9 +134,12 @@ export function EditEpisodeAssigneeFlyout({
     [currentProfiles]
   );
 
-  const [selectedProfile, setSelectedProfile] = useState<UserProfileWithAvatar | null>(
-    currentProfile ?? null
-  );
+  useEffect(() => {
+    if (selectionTouchedRef.current || !lastAssigneeUid || currentProfiles === undefined) {
+      return;
+    }
+    setSelectedProfile(currentProfile ?? null);
+  }, [currentProfile, currentProfiles, lastAssigneeUid]);
 
   const { data: suggestions, isFetching: isSuggestLoading } = useSuggestedProfiles({
     userProfile,
@@ -150,17 +157,21 @@ export function EditEpisodeAssigneeFlyout({
 
   const { mutate: createAssignAction, isLoading: isSaving } = useCreateAlertAction(http);
 
-  const handleSave = useCallback(() => {
-    if (!selectedProfile) {
-      return;
+  const isSaveDisabled = useMemo(() => {
+    if (lastAssigneeUid && currentProfiles === undefined) {
+      return true;
     }
+    return (selectedProfile?.uid ?? null) === (currentProfile?.uid ?? null);
+  }, [currentProfiles, currentProfile, lastAssigneeUid, selectedProfile]);
+
+  const handleSave = useCallback(() => {
     createAssignAction(
       {
         groupHash,
         actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
         body: {
           episode_id: episodeId,
-          assignee_uid: selectedProfile.uid,
+          assignee_uid: selectedProfile?.uid ?? null,
         },
       },
       {
@@ -200,12 +211,12 @@ export function EditEpisodeAssigneeFlyout({
           cancelTestSubj="alertingV2EditEpisodeAssigneeCancel"
           primaryTestSubj="alertingV2EditEpisodeAssigneeSave"
           isPrimaryLoading={isSaving}
-          isPrimaryDisabled={!selectedProfile}
+          isPrimaryDisabled={isSaveDisabled}
           isCancelDisabled={isSaving}
         />
       }
     >
-      <UserProfilesSelectable<UserProfileWithAvatar>
+      <UserProfilesSelectable<UserProfileWithAvatar | null>
         data-test-subj="alertingV2EditEpisodeAssigneeSelectable"
         height={360}
         singleSelection
@@ -217,9 +228,13 @@ export function EditEpisodeAssigneeFlyout({
         noMatchesMessage={!isSuggestLoading ? <AssigneeFlyoutNoMatchesMessage /> : undefined}
         onSearchChange={(term) => setSearchInput(term)}
         onChange={(next) => {
-          const picked = next.filter((v): v is UserProfileWithAvatar => Boolean(v));
+          selectionTouchedRef.current = true;
+          const picked = next.filter(
+            (v): v is UserProfileWithAvatar => v !== null && v !== undefined
+          );
           setSelectedProfile(picked[0] ?? null);
         }}
+        nullOptionLabel={i18n.ASSIGNEE_FLYOUT_NO_ASSIGNEE_OPTION}
         searchPlaceholder={i18n.ASSIGNEE_FLYOUT_SEARCH_PLACEHOLDER}
       />
     </EpisodeActionFlyout>
