@@ -87,14 +87,14 @@ export class SearchSessionsService extends FtrService {
     await this.dismissSuccessToast();
   }
 
-  public async dismissSuccessToast() {
+  private async dismissSuccessToast() {
     const successToast = await this.getSuccessToast();
     if (!successToast) return;
     const closeBtn = await successToast.findByTestSubject('toastCloseButton');
     await closeBtn.click();
   }
 
-  public async getSuccessToast() {
+  private async getSuccessToast() {
     const toasts = await this.toasts.getAll();
     for (const toast of toasts) {
       const text = await toast.getVisibleText();
