@@ -100,7 +100,7 @@ export class TriggerEventHandler {
   async handleEvent(params: EmitEventParams): Promise<void> {
     if (!this.config.enabled) {
       this.logger.debug(
-        'Event-driven execution is disabled (config.eventDriven.enabled: false); skipping workflow scheduling.'
+        'Event-driven execution is disabled (workflowsExecutionEngine.eventDriven.enabled: false); skipping workflow scheduling.'
       );
       return;
     }
@@ -118,7 +118,7 @@ export class TriggerEventHandler {
     const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(
       triggerId,
       spaceId,
-      { ...payload, timestamp, spaceId, eventChainDepth: 1 }
+      { ...payload, timestamp, spaceId }
     );
     const subscriberResolutionMs = Math.max(0, Date.now() - resolutionStartMs);
     this.logger.trace(
@@ -196,7 +196,7 @@ export class TriggerEventHandler {
   private async resolveMatchingWorkflowSubscriptions(
     triggerId: string,
     spaceId: string,
-    eventContext: Record<string, unknown>
+    payload: Record<string, unknown>
   ) {
     const allWorkflows = await this.workflowRepository.getWorkflowsSubscribedToTrigger(
       triggerId,
@@ -208,7 +208,7 @@ export class TriggerEventHandler {
     const workflows: WorkflowDetailDto[] = [];
 
     for (const workflow of allWorkflows) {
-      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, eventContext, this.logger);
+      const outcome = classifyWorkflowTriggerMatch(workflow, triggerId, payload, this.logger);
       switch (outcome) {
         case 'disabled':
           stats.disabledCount += 1;

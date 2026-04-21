@@ -15,12 +15,18 @@ import { WORKFLOW_INDEX_NAME } from '../constants';
 export interface WorkflowRepositoryOptions {
   esClient: ElasticsearchClient;
   logger: Logger;
-  indexName?: string;
+  indexName: string;
 }
 
+export type WorkflowRepositoryParams = Omit<WorkflowRepositoryOptions, 'indexName'> & {
+  indexName?: string;
+};
+
 export class WorkflowRepository {
-  constructor(private options: WorkflowRepositoryOptions) {
-    this.options.indexName = this.options.indexName || WORKFLOW_INDEX_NAME;
+  private options: WorkflowRepositoryOptions;
+
+  constructor(params: WorkflowRepositoryParams) {
+    this.options = { ...params, indexName: params.indexName || WORKFLOW_INDEX_NAME };
   }
 
   /**
@@ -96,7 +102,6 @@ export class WorkflowRepository {
     const pageSize = 1000;
     const MAX_PAGES = 50;
     const keepAlive = '1m';
-    const indexPattern = `${this.options.indexName}-*`;
     const sort: estypes.Sort = [{ updated_at: { order: 'desc' } }, '_shard_doc'];
     const query = {
       bool: {
@@ -117,12 +122,12 @@ export class WorkflowRepository {
       'createdBy',
       'lastUpdatedBy',
       'valid',
-      'created_at',
-      'updated_at',
+      'createdAt',
+      'lastUpdatedAt',
     ];
 
     const pitResponse = await this.options.esClient.openPointInTime({
-      index: indexPattern,
+      index: this.options.indexName,
       keep_alive: keepAlive,
       ignore_unavailable: true,
     });
