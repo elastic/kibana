@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiConfirmModal, EuiPageTemplate, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -49,8 +49,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   const { core } = useAppContext();
   const { defaultRepository, setDefaultRepository, clearDefaultRepository } =
     useDefaultRepository();
-  const [isConfirmDeleteAllOpen, setIsConfirmDeleteAllOpen] = useState(false);
-  const confirmDeleteAllModalTitleId = useGeneratedHtmlId();
 
   const openRepositoryDetailsUrl = (newRepositoryName: Repository['name']): string => {
     return linkToRepository(newRepositoryName);
@@ -66,7 +64,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       await deleteRepositories(allNames);
     }
     await clearDefaultRepository();
-    setIsConfirmDeleteAllOpen(false);
     if (repositoryName) {
       closeRepositoryDetails();
     }
@@ -164,11 +161,12 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           onRepositoryDeleted={onRepositoryDeleted}
           defaultRepository={defaultRepository}
           onSetDefaultRepository={setDefaultRepository}
-          onDeleteAll={() => setIsConfirmDeleteAllOpen(true)}
         />
       </section>
     );
   }
+
+  const hasRepositories = Boolean(repositories && repositories.length > 0);
 
   return (
     <>
@@ -180,43 +178,32 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           isDefaultRepository={repositoryName === defaultRepository}
         />
       ) : null}
-      {isConfirmDeleteAllOpen ? (
-        <EuiConfirmModal
-          aria-labelledby={confirmDeleteAllModalTitleId}
-          titleProps={{ id: confirmDeleteAllModalTitleId }}
-          title={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.title"
-              defaultMessage="Delete all repositories?"
-            />
-          }
-          onCancel={() => setIsConfirmDeleteAllOpen(false)}
-          onConfirm={handleDeleteAll}
-          cancelButtonText={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.cancelButtonLabel"
-              defaultMessage="Cancel"
-            />
-          }
-          confirmButtonText={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.confirmButtonLabel"
-              defaultMessage="Delete all"
-            />
-          }
-          buttonColor="danger"
-          maxWidth={440}
-          data-test-subj="confirmDeleteAllRepositoriesModal"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryList.confirmDeleteAllModal.description"
-              defaultMessage="This will permanently delete all repositories and clear the default. This action is for prototype testing only."
-            />
-          </p>
-        </EuiConfirmModal>
-      ) : null}
       {content}
+      {hasRepositories ? (
+        <button
+          onClick={handleDeleteAll}
+          data-test-subj="resetPrototypeButton"
+          style={{
+            position: 'fixed',
+            bottom: '24px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'white',
+            border: 'none',
+            borderRadius: '9999px',
+            padding: '10px 24px',
+            boxShadow: '0 2px 12px rgba(0, 0, 0, 0.25)',
+            cursor: 'pointer',
+            fontSize: '13px',
+            fontWeight: 500,
+            color: '#343741',
+            whiteSpace: 'nowrap',
+            zIndex: 1000,
+          }}
+        >
+          Reset prototype
+        </button>
+      ) : null}
     </>
   );
 };
