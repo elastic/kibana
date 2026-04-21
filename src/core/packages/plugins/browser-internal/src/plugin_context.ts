@@ -95,6 +95,7 @@ export function createPluginSetupContext<
     injection: {
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
+    hotkeys: deps.hotkeys,
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
@@ -166,6 +167,7 @@ export function createPluginStartContext<
       getContainer: () => deps.injection.getContainer(plugin.opaqueId),
     },
     chrome: omit(deps.chrome, 'getComponent'),
+    hotkeys: deps.hotkeys,
     i18n: deps.i18n,
     notifications: deps.notifications,
     overlays: deps.overlays,

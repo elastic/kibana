@@ -16,6 +16,7 @@ import type { FeatureFlagsSetup } from '@kbn/core-feature-flags-browser';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { HotkeysSetup } from '@kbn/core-hotkeys-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { ApplicationSetup } from '@kbn/core-application-browser';
 import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
@@ -51,6 +52,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   fatalErrors: FatalErrorsSetup;
   /** {@link FeatureFlagsSetup} */
   featureFlags: FeatureFlagsSetup;
+  /** {@link HotkeysSetup} */
+  hotkeys: HotkeysSetup;
   /** {@link HttpSetup} */
   http: HttpSetup;
   /** {@link CoreDiServiceSetup} */

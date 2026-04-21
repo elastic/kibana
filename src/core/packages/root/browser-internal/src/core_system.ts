@@ -31,6 +31,7 @@ import { DeprecationsService } from '@kbn/core-deprecations-browser-internal';
 import { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { OverlayService } from '@kbn/core-overlays-browser-internal';
+import { HotkeysService } from '@kbn/core-hotkeys-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
@@ -93,6 +94,7 @@ export class CoreSystem {
   private readonly featureFlags: FeatureFlagsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly injection: CoreInjectionService;
+  private readonly hotkeys: HotkeysService;
   private readonly notifications: NotificationsService;
   private readonly http: HttpService;
   private readonly httpRateLimiter: HttpRateLimiterService;
@@ -155,6 +157,7 @@ export class CoreSystem {
     this.security = new SecurityService(this.coreContext);
     this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
+    this.hotkeys = new HotkeysService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.httpRateLimiter = new HttpRateLimiterService();
@@ -271,6 +274,7 @@ export class CoreSystem {
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings, analytics });
+      const hotkeys = this.hotkeys.setup();
       const customBranding = this.customBranding.setup({ injectedMetadata });
       const application = this.application.setup({ http, analytics });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
@@ -282,6 +286,7 @@ export class CoreSystem {
         chrome,
         fatalErrors: this.fatalErrorsSetup,
         featureFlags,
+        hotkeys,
         http,
         injectedMetadata,
         injection,
@@ -409,6 +414,8 @@ export class CoreSystem {
 
       resolveNotifications!(notifications);
 
+      const hotkeys = this.hotkeys.start({ application });
+
       this.coreApp.start({
         application,
         docLinks,
@@ -430,6 +437,7 @@ export class CoreSystem {
         docLinks,
         executionContext,
         featureFlags,
+        hotkeys,
         http,
         theme,
         i18n,
@@ -504,6 +512,7 @@ export class CoreSystem {
     this.overlayNavigationSubscription?.unsubscribe();
     this.plugins.stop();
     this.coreApp.stop();
+    this.hotkeys.stop();
     this.notifications.stop();
     this.http.stop();
     this.integrations.stop();

@@ -18,6 +18,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { uiSettingsServiceMock, settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
+import { hotkeysServiceMock } from '@kbn/core-hotkeys-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
@@ -38,6 +39,7 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     docLinks: docLinksServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createStartContract(),
     featureFlags: coreFeatureFlagsMock.createStart(),
+    hotkeys: hotkeysServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract({ basePath }),
     i18n: i18nServiceMock.createStartContract(),
     injection: injectionServiceMock.createStartContract(),
