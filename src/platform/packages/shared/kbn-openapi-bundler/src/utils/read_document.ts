@@ -47,7 +47,15 @@ async function readYamlFile(filePath: string): Promise<Record<string, unknown>> 
 
   fileContent = normalizeSingleQuotedScalars(fileContent);
 
-  const maybeObject = parse(fileContent, { schema: 'yaml-1.1' });
+  // yaml-1.1 parses ISO timestamp strings as Date objects. Convert them back
+  // to their full ISO string representation so that the time component is
+  // never lost when serialising (e.g. midnight dates like
+  // 2024-12-31T00:00:00.000Z would otherwise be truncated to 2024-12-31).
+  const maybeObject = parse(
+    fileContent,
+    (_key, value) => (value instanceof Date ? value.toISOString() : value),
+    { schema: 'yaml-1.1' }
+  );
 
   if (!isPlainObjectType(maybeObject)) {
     throw new Error(
@@ -127,7 +135,7 @@ function normalizeSingleQuotedScalars(fileContent: string): string {
   // scalars (e.g. "alerts'" where ' is preceded by a word character).
   let masked = maskedLines.join('\n');
   masked = masked.replace(/(?<=[\s\[{,:])'(?:[^']|'')*'/gs, (match) =>
-    match.includes('\n') ? match.replace(/\n[ \t]*/g, ' ') : match
+    match.includes('\n') ? match.replace(/\r?\n[ \t]*/g, ' ') : match
   );
 
   // Restore each block scalar's original verbatim content.
