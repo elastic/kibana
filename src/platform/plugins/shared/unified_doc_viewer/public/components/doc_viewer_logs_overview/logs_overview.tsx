@@ -99,7 +99,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const spanId = getFieldValue(hit, SPAN_ID_FIELD) as string | undefined;
     const serviceName = getFieldValue(hit, SERVICE_NAME_FIELD) as string | undefined;
 
-    const showSimilarErrors = traceId && hasErrorFields(formattedDoc);
+    const showSimilarErrors = formattedDoc[TRACE_ID_FIELD] && hasErrorFields(formattedDoc);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);

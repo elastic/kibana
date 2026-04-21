@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useState, type ReactNode } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { EuiSpacer, EuiText, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { css } from '@emotion/react';
 import useWindowSize from 'react-use/lib/useWindowSize';
@@ -80,7 +81,13 @@ export function ContentFrameworkTable({
     fieldNames,
   });
 
-  const flattenedHit = useMemo(() => getFlattenedFields(hit, fieldNames), [hit, fieldNames]);
+  const { formattedHit, flattenedHit } = useMemo(
+    () => ({
+      formattedHit: getFormattedFields(hit, fieldNames, { dataView, fieldFormats }),
+      flattenedHit: getFlattenedFields(hit, fieldNames),
+    }),
+    [dataView, fieldFormats, hit, fieldNames]
+  );
 
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -96,19 +103,9 @@ export function ContentFrameworkTable({
           const fieldConfiguration = fieldConfigurations?.[fieldName];
           const fieldDescription =
             fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
+          const formattedValue = formattedHit[fieldName];
 
           if (!value) return acc;
-
-          const fieldRow = new FieldRow({
-            name: fieldName,
-            displayNameOverride: fieldName,
-            flattenedValue: value,
-            hit,
-            dataView,
-            fieldFormats,
-            isPinned: false,
-            columnsMeta: {},
-          });
 
           acc.fields[fieldName] = {
             name: fieldConfiguration?.title || fieldName,
@@ -116,7 +113,6 @@ export function ContentFrameworkTable({
             description: fieldDescription,
             type: fieldsMetadata[fieldName]?.type,
             valueCellContent: ({ truncate }: { truncate?: boolean } = { truncate: true }) => {
-              const formattedValue = fieldRow.formattedAsReact;
               return fieldConfiguration?.formatter ? (
                 <>{fieldConfiguration.formatter(value as FieldConfigValue, formattedValue)}</>
               ) : (
@@ -125,13 +121,33 @@ export function ContentFrameworkTable({
             },
           };
 
-          acc.rows.push(fieldRow);
+          acc.rows.push(
+            new FieldRow({
+              name: fieldName,
+              displayNameOverride: fieldName,
+              flattenedValue: value,
+              hit,
+              dataView,
+              fieldFormats,
+              isPinned: false,
+              columnsMeta: {},
+            })
+          );
 
           return acc;
         },
         { fields: {} as Record<string, TableFieldConfiguration>, rows: [] as FieldRow[] }
       ),
-    [dataView, fieldConfigurations, fieldFormats, fieldNames, fieldsMetadata, flattenedHit, hit]
+    [
+      dataView,
+      fieldConfigurations,
+      fieldFormats,
+      fieldNames,
+      fieldsMetadata,
+      flattenedHit,
+      formattedHit,
+      hit,
+    ]
   );
 
   const cellValueRenderer = useCallback(

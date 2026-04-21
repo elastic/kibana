@@ -42,7 +42,6 @@ export {
   formatHitReact,
   getDocId,
   getLogDocumentOverview,
-  getTraceDocumentOverview,
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,

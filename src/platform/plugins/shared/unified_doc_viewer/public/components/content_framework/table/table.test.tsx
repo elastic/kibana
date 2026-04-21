@@ -28,20 +28,6 @@ jest.mock('@elastic/eui', () => ({
   euiFontSize: (_themeContext: any, size: string) => ({ fontSize: size === 's' ? '12px' : '10px' }),
 }));
 
-const mockFieldFormats = {
-  getDefaultInstance: () => ({
-    reactConvert: (value: unknown) => {
-      // Map values to match original getFormattedFields mock output
-      const formattedMap: Record<string, string> = {
-        valueA: 'formattedA',
-        valueB: 'formattedB',
-        valueC: 'formattedC',
-      };
-      return formattedMap[value as string] ?? String(value);
-    },
-  }),
-};
-
 jest.mock('../../../plugin', () => ({
   getUnifiedDocViewerServices: () => ({
     fieldsMetadata: {
@@ -52,7 +38,15 @@ jest.mock('../../../plugin', () => ({
         },
       }),
     },
-    fieldFormats: mockFieldFormats,
+    fieldFormats: {},
+  }),
+}));
+
+jest.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => ({
+  getFormattedFields: () => ({
+    fieldA: 'formattedA',
+    fieldB: 'formattedB',
+    fieldC: 'formattedC',
   }),
 }));
 jest.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => ({
