@@ -16,6 +16,9 @@ paths:
         - name: 'fields'
           in: query
           required: false
+          description: |
+            Optional list of rule response fields to include. When omitted, the API returns the
+            default field set for each rule.
           schema:
             type: array
             items:

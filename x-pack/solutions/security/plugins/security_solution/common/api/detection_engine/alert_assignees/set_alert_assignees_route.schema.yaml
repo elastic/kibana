@@ -15,6 +15,8 @@ paths:
         > You cannot add and remove the same assignee in the same request.
       requestBody:
         required: true
+        description: |
+          Alert identifiers to update and the user profile IDs to assign or unassign on those alerts.
         content:
           application/json:
             schema:

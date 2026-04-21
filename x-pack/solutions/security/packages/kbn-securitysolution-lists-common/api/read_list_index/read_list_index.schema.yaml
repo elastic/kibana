@@ -23,6 +23,11 @@ paths:
                   list_item_index:
                     type: boolean
                 required: [list_index, list_item_index]
+              examples:
+                bothExist:
+                  value:
+                    list_index: true
+                    list_item_index: true
         400:
           description: Invalid input data response
           content:

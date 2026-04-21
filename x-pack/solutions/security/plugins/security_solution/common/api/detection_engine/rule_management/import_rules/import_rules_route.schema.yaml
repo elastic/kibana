@@ -37,6 +37,9 @@ paths:
             --form "file=@<link to file>"
       requestBody:
         required: true
+        description: |
+          Multipart upload of the `.ndjson` file produced by a rule export (or compatible format),
+          including optional actions and exception list objects.
         content:
           multipart/form-data:
             schema:
@@ -46,6 +49,8 @@ paths:
                   type: string
                   format: binary
                   description: The `.ndjson` file containing the rules.
+                  example: |
+                    {"rule_id":"example-rule","name":"Imported rule","type":"query","risk_score":21}
       parameters:
         - name: overwrite
           in: query

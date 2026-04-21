@@ -9,6 +9,9 @@ paths:
       operationId: DeleteAlertsIndex
       x-codegen-enabled: true
       summary: Delete an alerts index
+      description: |
+        Deletes the Elastic Security alerts backing index. Use with care; this affects stored
+        detection alerts for the deployment.
       tags:
         - Alert index API
       responses:
@@ -22,6 +25,10 @@ paths:
                   acknowledged:
                     type: boolean
                 required: [acknowledged]
+              examples:
+                deleted:
+                  value:
+                    acknowledged: true
         401:
           description: Unsuccessful authentication response
           content:

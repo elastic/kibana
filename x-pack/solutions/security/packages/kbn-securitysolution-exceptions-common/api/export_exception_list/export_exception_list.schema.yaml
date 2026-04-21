@@ -14,16 +14,21 @@ paths:
         - name: id
           in: query
           required: true
+          description: Saved-object identifier of the exception list container to export.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
         - name: list_id
           in: query
           required: true
+          description: Human-readable `list_id` of the exception list to export.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
         - name: namespace_type
           in: query
           required: true
+          description: |
+            Whether the list is scoped to the current Kibana space (`single`) or shared across
+            all spaces (`agnostic`).
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
           examples:

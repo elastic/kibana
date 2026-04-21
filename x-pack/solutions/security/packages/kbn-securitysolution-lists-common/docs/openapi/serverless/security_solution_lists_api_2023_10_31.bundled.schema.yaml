@@ -19,7 +19,8 @@ paths:
         > When you delete a list, all of its list items are also deleted.
       operationId: DeleteList
       parameters:
-        - in: query
+        - description: The value list's identifier.
+          in: query
           name: id
           required: true
           schema:
@@ -142,7 +143,8 @@ paths:
       description: Get the details of a value list using the list ID.
       operationId: ReadList
       parameters:
-        - in: query
+        - description: The value list's identifier.
+          in: query
           name: id
           required: true
           schema:
@@ -862,6 +864,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -928,6 +934,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                bothExist:
+                  value:
+                    list_index: true
+                    list_item_index: true
               schema:
                 type: object
                 properties:
@@ -998,6 +1009,10 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                acknowledged:
+                  value:
+                    acknowledged: true
               schema:
                 type: object
                 properties:
@@ -1870,7 +1885,8 @@ paths:
       description: Get all value list items in the specified list.
       operationId: FindListItems
       parameters:
-        - in: query
+        - description: Identifier of the value list whose items are returned.
+          in: query
           name: list_id
           required: true
           schema:
@@ -1908,7 +1924,12 @@ paths:
               - asc
             example: asc
             type: string
-        - in: query
+        - description: >
+            Opaque pagination cursor from a previous response. Pass the prior
+            `cursor` value to
+
+            retrieve the next page of results.
+          in: query
           name: cursor
           required: false
           schema:
@@ -2099,6 +2120,11 @@ paths:
                     127.0.0.9
                   format: binary
                   type: string
+        description: >
+          Multipart upload of a newline-separated `.txt` or `.csv` file whose
+          lines become list
+
+          items for a new or existing list (see query parameters).
         required: true
       responses:
         '200':
@@ -2190,6 +2216,12 @@ paths:
         - Security Lists API
   /api/lists/privileges:
     get:
+      description: >
+        Returns Elasticsearch cluster and index privileges for the current user
+        for value lists
+
+        (`.lists-*`) and list items (`.items-*`), plus whether the user is
+        authenticated.
       operationId: ReadListPrivileges
       responses:
         '200':

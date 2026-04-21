@@ -66,6 +66,9 @@ paths:
         * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
       requestBody:
         required: true
+        description: |
+          Full definition of the detection rule to create, including rule type, query or machine
+          learning configuration, schedule, and optional actions.
         content:
           application/json:
             schema:
