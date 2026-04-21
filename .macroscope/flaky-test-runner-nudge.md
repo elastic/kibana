@@ -30,9 +30,9 @@ If nothing matches, stop.
 
 ## Step 2: Does the change introduce non-determinism?
 
-The required CI pass already catches deterministic failures. The flaky test runner only adds signal when the *same* change could fail *non-deterministically* — i.e., when a single pass isn't a reliable signal. Ask one question:
+The required CI pass already catches deterministic failures. The flaky test runner only adds signal when the _same_ change could fail _non-deterministically_ — i.e., when a single pass isn't a reliable signal. Ask one question:
 
-> *Does this change introduce a new source of non-determinism that one CI pass wouldn't reliably catch?*
+> _Does this change introduce a new source of non-determinism that one CI pass wouldn't reliably catch?_
 
 If no, skip — regardless of how many test files are touched.
 
@@ -43,14 +43,13 @@ If no, skip — regardless of how many test files are touched.
 - **New or changed waits/timing:** `waitFor`, `expect.toPass`, `retry`, polling intervals, `setTimeout`, increased/decreased timeouts, new `await` on async operations whose ordering matters.
 - **New fixtures/hooks with timing components:** index creation, data ingestion waits, server startup, role/space provisioning, `beforeEach`/`afterEach` that mutate shared state.
 - **New async interactions:** new API calls, new ES queries, new network requests, new WebSocket/SSE subscriptions in tests.
-- **Parallelism or ordering changes:** `test.describe.parallel`, worker count, `fullyParallel`, changes to test sharding/grouping in configs.
-- **New selectors tied to dynamic content:** text matchers on i18n strings, selectors depending on animations, virtualized lists, or async-rendered content.
+- **New tags** added to the test suite
 
 **Skip (deterministic — one pass is sufficient):**
 
 - Renames (identifiers, tool IDs, symbols) applied uniformly across the diff.
 - File moves / directory reorganizations (e.g., for CODEOWNERS), even with mechanical import path updates.
-- Pure assertion *value* changes where the value is deterministic (`expect(x).toBe(1)` → `expect(x).toBe(2)` to match a code change).
+- Pure assertion _value_ changes where the value is deterministic (`expect(x).toBe(1)` → `expect(x).toBe(2)` to match a code change).
 - Snapshot updates.
 - Type-only changes, comments, formatting, import reorders.
 - Mechanical refactors preserving semantics (extracting a helper, splitting a file).
