@@ -44,6 +44,23 @@ jest.mock('../../../services/kibana_services', () => ({
         execute: () => {},
         isCompatible: async () => true,
       },
+      {
+        id: 'createTimeSlider',
+        type: '',
+        order: 0,
+        grouping: [
+          {
+            id: 'controls',
+            order: 950,
+            getDisplayName: () => 'Controls',
+          },
+        ],
+        getDisplayName: () => 'Time slider',
+        getIconType: () => 'controls',
+        getDisplayNameTooltip: () => 'Only one time slider',
+        execute: () => {},
+        isCompatible: async () => true,
+      },
     ],
   },
 }));
@@ -58,11 +75,38 @@ describe('getMenuItemGroups', () => {
       clearOverlays: () => {},
     };
     const groups = await getMenuItemGroups(api);
-    expect(groups.length).toBe(2);
+    expect(groups.length).toBe(3);
 
     expect(groups[0].title).toBe('Other visualizations');
     expect(groups[0].items.length).toBe(1);
-    expect(groups[1].title).toBe('My group');
+    expect(groups[1].title).toBe('Controls');
     expect(groups[1].items.length).toBe(1);
+    expect(groups[1].items[0].id).toBe('createTimeSlider');
+    expect(groups[1].items[0].isDisabled).toBeFalsy();
+    expect(groups[2].title).toBe('My group');
+    expect(groups[2].items.length).toBe(1);
+  });
+
+  test('disables time slider menu item when a time slider is already pinned', async () => {
+    const api = {
+      getAppContext: () => ({
+        currentAppId: 'dashboards',
+      }),
+      openOverlay: () => {},
+      clearOverlays: () => {},
+      layout$: {
+        getValue: () => ({
+          pinnedPanels: {
+            ts1: { type: 'time_slider_control' },
+          },
+          panels: {},
+          sections: {},
+        }),
+      },
+    };
+    const groups = await getMenuItemGroups(api);
+    const controlsGroup = groups.find((g) => g.id === 'controls');
+    expect(controlsGroup?.items[0].isDisabled).toBe(true);
+    expect(controlsGroup?.items[0].description).toBe('Only one time slider');
   });
 });

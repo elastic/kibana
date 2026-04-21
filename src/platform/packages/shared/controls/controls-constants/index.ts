@@ -29,7 +29,10 @@ export {
   MAX_OPTIONS_LIST_REQUEST_SIZE,
 } from './src/options_list_constants';
 export { DEFAULT_RANGE_SLIDER_STATE } from './src/range_slider_constants';
-export { DEFAULT_TIME_SLIDER_STATE } from './src/time_slider_constants';
+export {
+  DEFAULT_TIME_SLIDER_STATE,
+  pinnedPanelsContainTimeSlider,
+} from './src/time_slider_constants';
 
 export {
   ACTION_CREATE_CONTROL,

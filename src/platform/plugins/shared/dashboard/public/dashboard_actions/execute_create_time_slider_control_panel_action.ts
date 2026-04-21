@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map } from 'rxjs';
-
 import { triggers, type ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ACTION_CREATE_TIME_SLIDER, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { ACTION_CREATE_TIME_SLIDER } from '@kbn/controls-constants';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { coreServices, uiActionsService } from '../services/kibana_services';
 import type { DashboardApi } from '../dashboard_api/types';
@@ -38,16 +36,7 @@ export async function isTimeSliderControlCreationCompatible(
   try {
     const createControlPanelAction = await uiActionsService.getAction(ACTION_CREATE_TIME_SLIDER);
     return await createControlPanelAction.isCompatible({
-      embeddable: {
-        ...dashboardApi,
-        ...(dashboardApi.layout$ && {
-          hasTimeSliderControl: () =>
-            Object.values(dashboardApi.layout$.getValue().pinnedPanels).some(
-              (control) => control.type === TIME_SLIDER_CONTROL
-            ),
-          layoutChanged$: dashboardApi.layout$.pipe(map(() => undefined)),
-        }),
-      },
+      embeddable: dashboardApi,
       trigger: triggers[ADD_PANEL_TRIGGER],
     } as ActionExecutionContext);
   } catch (error) {

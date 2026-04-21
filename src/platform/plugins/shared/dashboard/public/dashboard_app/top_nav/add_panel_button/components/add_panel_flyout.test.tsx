@@ -8,9 +8,11 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { BehaviorSubject } from 'rxjs';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ACTION_CREATE_TIME_SLIDER, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { AddPanelFlyout } from './add_panel_flyout';
 import type { DashboardApi } from '../../../../dashboard_api/types';
 
@@ -45,11 +47,7 @@ describe('AddPanelFlyout', () => {
     test('renders "New" and "From library" tabs', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -60,11 +58,7 @@ describe('AddPanelFlyout', () => {
     test('defaults to "New" tab', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -75,11 +69,7 @@ describe('AddPanelFlyout', () => {
     test('switches to "From library" tab on click', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -96,7 +86,6 @@ describe('AddPanelFlyout', () => {
           <AddPanelFlyout
             dashboardApi={mockDashboardApi}
             ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
             initialTab="library"
           />
         </IntlProvider>
@@ -120,11 +109,7 @@ describe('AddPanelFlyout', () => {
     test('displays "Add to dashboard" heading', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -143,11 +128,7 @@ describe('AddPanelFlyout', () => {
     test('displays getMenuItemGroups error', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -186,11 +167,7 @@ describe('AddPanelFlyout', () => {
     test('calls item onClick handler when item is clicked', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -203,11 +180,7 @@ describe('AddPanelFlyout', () => {
     test('displays not found message when a user searches for an item that is not in the selection list', async () => {
       render(
         <IntlProvider locale="en">
-          <AddPanelFlyout
-            dashboardApi={mockDashboardApi}
-            ariaLabelledBy="addPanelFlyout"
-            closeFlyout={jest.fn()}
-          />
+          <AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />
         </IntlProvider>
       );
 
@@ -217,6 +190,61 @@ describe('AddPanelFlyout', () => {
           'non existent panel'
         );
         screen.getByTestId('dashboardPanelSelectionNoPanelMessage');
+      });
+    });
+  });
+
+  describe('time slider disabled state reacts to layout$', () => {
+    const layout$ = new BehaviorSubject<{ pinnedPanels: Record<string, { type: string }> }>({
+      pinnedPanels: { pinned1: { type: TIME_SLIDER_CONTROL } },
+    });
+
+    const dashboardApiWithLayout = { layout$ } as unknown as DashboardApi;
+
+    beforeEach(() => {
+      layout$.next({
+        pinnedPanels: { pinned1: { type: TIME_SLIDER_CONTROL } },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('../get_menu_item_groups').getMenuItemGroups = async () => [
+        {
+          id: 'controlsGroup',
+          title: 'Controls',
+          items: [
+            {
+              icon: 'controls',
+              id: ACTION_CREATE_TIME_SLIDER,
+              name: 'Time slider',
+              'data-test-subj': 'create-action-Time slider',
+              onClick: jest.fn(),
+              order: 0,
+            },
+          ],
+          order: 10,
+          'data-test-subj': 'dashboardEditorMenu-controlsGroupGroup',
+        },
+      ];
+    });
+
+    test('re-enables time slider when pinned time slider is removed while flyout is open', async () => {
+      render(
+        <IntlProvider locale="en">
+          <AddPanelFlyout dashboardApi={dashboardApiWithLayout} ariaLabelledBy="addPanelFlyout" />
+        </IntlProvider>
+      );
+
+      await screen.findByTestId('create-action-Time slider');
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-action-Time slider')).toBeDisabled();
+      });
+
+      await act(async () => {
+        layout$.next({ pinnedPanels: {} });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('create-action-Time slider')).not.toBeDisabled();
       });
     });
   });

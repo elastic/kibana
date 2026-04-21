@@ -54,7 +54,6 @@ export function DashboardEmptyScreen() {
         return (
           <AddPanelFlyout
             dashboardApi={dashboardApi}
-            closeFlyout={closeFlyout}
             ariaLabelledBy={ariaLabelledBy}
             initialTab="library"
           />

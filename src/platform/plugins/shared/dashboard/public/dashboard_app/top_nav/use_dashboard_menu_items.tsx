@@ -165,13 +165,7 @@ export const useDashboardMenuItems = ({
       loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
         const { AddPanelFlyout } = await import('./add_panel_button/components/add_panel_flyout');
 
-        return (
-          <AddPanelFlyout
-            dashboardApi={dashboardApi}
-            closeFlyout={closeFlyout}
-            ariaLabelledBy={ariaLabelledBy}
-          />
-        );
+        return <AddPanelFlyout dashboardApi={dashboardApi} ariaLabelledBy={ariaLabelledBy} />;
       },
       flyoutProps: {
         'data-test-subj': 'dashboardPanelSelectionFlyout',
