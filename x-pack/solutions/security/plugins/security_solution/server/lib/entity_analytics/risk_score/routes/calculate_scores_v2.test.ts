@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EntityUpdateClient } from '@kbn/entity-store/server';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { calculateScoresWithESQLV2 } from './calculate_scores_v2';
 import { fetchEntitiesByIds } from '../maintainer/utils/fetch_entities_by_ids';
 import { applyScoreModifiersFromEntities } from '../modifiers/apply_modifiers_from_entities';
@@ -92,7 +93,7 @@ describe('calculateScoresWithESQLV2', () => {
   it('discards preview scores for entities missing from the entity store', async () => {
     const response = await calculateScoresWithESQLV2({
       afterKeys: {},
-      identifierType: 'host',
+      identifierType: EntityType.host,
       index: 'test-index',
       pageSize: 100,
       range: { start: 'now-15d', end: 'now' },
