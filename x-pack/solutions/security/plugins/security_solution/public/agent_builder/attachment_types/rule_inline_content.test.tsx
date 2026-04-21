@@ -14,8 +14,11 @@ import {
   MachineLearningDetails,
   NewTermsDetails,
   EqlDetails,
+  FiltersDisplay,
+  getFilterLabel,
   createRuleAttachmentDefinition,
 } from './rule_attachment';
+import type { Filter } from '@kbn/es-query';
 import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
@@ -543,6 +546,131 @@ describe('EqlDetails', () => {
   });
 });
 
+describe('getFilterLabel', () => {
+  it('returns alias when present', () => {
+    const filter: Filter = { meta: { alias: 'My custom filter' } };
+    expect(getFilterLabel(filter)).toBe('My custom filter');
+  });
+
+  it('formats phrase filter as key: value', () => {
+    const filter: Filter = {
+      meta: { key: 'host.name', type: 'phrase', value: 'server-01' },
+    };
+    expect(getFilterLabel(filter)).toBe('host.name: server-01');
+  });
+
+  it('formats phrases filter with comma-separated params', () => {
+    const filter: Filter = {
+      meta: { key: 'status', type: 'phrases', params: ['active', 'pending', 'error'] },
+    };
+    expect(getFilterLabel(filter)).toBe('status: active, pending, error');
+  });
+
+  it('formats exists filter', () => {
+    const filter: Filter = { meta: { key: 'agent.name', type: 'exists' } };
+    expect(getFilterLabel(filter)).toBe('agent.name: exists');
+  });
+
+  it('formats negated filter with NOT prefix', () => {
+    const filter: Filter = {
+      meta: { key: 'host.name', negate: true, type: 'phrase', value: 'bad-host' },
+    };
+    expect(getFilterLabel(filter)).toBe('NOT host.name: bad-host');
+  });
+
+  it('formats range filter with gte and lte', () => {
+    const filter: Filter = {
+      meta: { key: 'bytes', type: 'range', params: { gte: 100, lte: 500 } },
+    };
+    expect(getFilterLabel(filter)).toBe('bytes: >= 100 AND <= 500');
+  });
+
+  it('formats range filter with only gte', () => {
+    const filter: Filter = {
+      meta: { key: 'risk_score', type: 'range', params: { gte: 50 } },
+    };
+    expect(getFilterLabel(filter)).toBe('risk_score: >= 50');
+  });
+
+  it('falls back to JSON for filter without key', () => {
+    const filter: Filter = { meta: {}, query: { match_all: {} } };
+    expect(getFilterLabel(filter)).toBe('{"match_all":{}}');
+  });
+
+  it('formats negated exists filter', () => {
+    const filter: Filter = { meta: { key: 'error.message', type: 'exists', negate: true } };
+    expect(getFilterLabel(filter)).toBe('NOT error.message: exists');
+  });
+
+  it('shows key only when no value or params', () => {
+    const filter: Filter = { meta: { key: 'event.action', type: 'custom' } };
+    expect(getFilterLabel(filter)).toBe('event.action');
+  });
+
+  it('resolves phrase filter with params as { query: value } object', () => {
+    const filter: Filter = {
+      meta: { key: 'event.category', type: 'phrase', params: { query: 'network' } },
+      query: { match_phrase: { 'event.category': 'network' } },
+    };
+    expect(getFilterLabel(filter)).toBe('event.category: network');
+  });
+
+  it('resolves non-typed filter with params as { query: value } object', () => {
+    const filter: Filter = {
+      meta: { key: 'host.os', params: { query: 'linux' } },
+    };
+    expect(getFilterLabel(filter)).toBe('host.os: linux');
+  });
+});
+
+describe('FiltersDisplay', () => {
+  it('renders filters as badges', () => {
+    const filters = [
+      { meta: { key: 'host.name', type: 'phrase', value: 'server-01' } },
+      { meta: { key: 'agent.type', type: 'exists' } },
+    ];
+
+    render(<FiltersDisplay filters={filters} />);
+
+    expect(screen.getByText('Filters')).toBeInTheDocument();
+    expect(screen.getByText('host.name: server-01')).toBeInTheDocument();
+    expect(screen.getByText('agent.type: exists')).toBeInTheDocument();
+  });
+
+  it('renders negated filters with danger color', () => {
+    const filters = [
+      { meta: { key: 'host.name', negate: true, type: 'phrase', value: 'bad-host' } },
+    ];
+
+    const { container } = render(<FiltersDisplay filters={filters} />);
+
+    expect(screen.getByText('NOT host.name: bad-host')).toBeInTheDocument();
+    const badge = container.querySelector('.euiBadge');
+    expect(badge).toBeInTheDocument();
+  });
+
+  it('renders nothing when filters array is empty', () => {
+    const { container } = render(<FiltersDisplay filters={[]} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('skips invalid filter objects without meta', () => {
+    const filters = [{ something: 'else' }, null, undefined, { meta: { key: 'valid' } }];
+
+    render(<FiltersDisplay filters={filters as unknown[]} />);
+
+    expect(screen.getByText('valid')).toBeInTheDocument();
+  });
+
+  it('renders filter with alias', () => {
+    const filters = [{ meta: { alias: 'Production servers only', key: 'env' } }];
+
+    render(<FiltersDisplay filters={filters} />);
+
+    expect(screen.getByText('Production servers only')).toBeInTheDocument();
+  });
+});
+
 describe('RuleInlineContent integration', () => {
   const originalLocation = window.location;
 
@@ -759,5 +887,81 @@ describe('RuleInlineContent integration', () => {
     renderInlineContent({ type: 'query', query: '*:*' });
 
     expect(screen.getByText('New Rule')).toBeInTheDocument();
+  });
+
+  it('renders filters between index patterns and type-specific details', () => {
+    const { container } = renderInlineContent({
+      ...baseRule,
+      type: 'threshold',
+      query: 'host.name: *',
+      index: ['logs-*'],
+      filters: [
+        { meta: { key: 'host.os', type: 'phrase', value: 'linux' } },
+        { meta: { key: 'agent.type', type: 'exists' } },
+      ],
+      threshold: { field: 'source.ip', value: 5 },
+      tags: ['test-tag'],
+    });
+
+    expect(screen.getByText('Filters')).toBeInTheDocument();
+    expect(screen.getByText('host.os: linux')).toBeInTheDocument();
+    expect(screen.getByText('agent.type: exists')).toBeInTheDocument();
+
+    const allText = container.textContent ?? '';
+    const indexPos = allText.indexOf('logs-*');
+    const filtersPos = allText.indexOf('Filters');
+    const thresholdPos = allText.indexOf('Results aggregated by');
+    expect(indexPos).toBeLessThan(filtersPos);
+    expect(filtersPos).toBeLessThan(thresholdPos);
+  });
+
+  it('does not render filters section when filters array is empty', () => {
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+      filters: [],
+    });
+
+    expect(screen.queryByText('Filters')).not.toBeInTheDocument();
+  });
+
+  it('does not render filters section when filters is undefined', () => {
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+    });
+
+    expect(screen.queryByText('Filters')).not.toBeInTheDocument();
+  });
+
+  it('renders query in a code block', () => {
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+      language: 'kuery',
+    });
+
+    expect(screen.getByText('host.name: *')).toBeInTheDocument();
+    expect(screen.getByText('KQL Detection Logic')).toBeInTheDocument();
+  });
+
+  it('renders filters for indicator match rule with threat_filters', () => {
+    renderInlineContent({
+      ...baseRule,
+      type: 'threat_match',
+      query: '*:*',
+      threat_index: ['filebeat-*'],
+      threat_query: '*:*',
+      threat_mapping: [
+        { entries: [{ field: 'source.ip', type: 'mapping', value: 'threat.indicator.ip' }] },
+      ],
+      filters: [{ meta: { key: 'event.category', type: 'phrase', value: 'network' } }],
+    });
+
+    expect(screen.getByText('Filters')).toBeInTheDocument();
+    expect(screen.getByText('event.category: network')).toBeInTheDocument();
   });
 });

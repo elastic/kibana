@@ -25,6 +25,7 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { Filter } from '@kbn/es-query';
 import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
@@ -53,7 +54,10 @@ import {
   NEW_TERMS_FIELDS_FIELD_LABEL,
   HISTORY_WINDOW_SIZE_FIELD_LABEL,
 } from '../../detection_engine/rule_management/components/rule_details/translations';
-import { THREAT_QUERY_LABEL } from '../../detection_engine/rule_creation_ui/components/description_step/translations';
+import {
+  THREAT_QUERY_LABEL,
+  FILTERS_LABEL,
+} from '../../detection_engine/rule_creation_ui/components/description_step/translations';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
 
@@ -186,6 +190,89 @@ const IndexPatterns: React.FC<{ patterns: string[] }> = ({ patterns }) => (
   </>
 );
 
+const formatRangeFilter = (key: string, params: Record<string, unknown>): string => {
+  const parts: string[] = [];
+  if (params.gte !== undefined || params.gt !== undefined) {
+    parts.push(`>= ${params.gte ?? params.gt}`);
+  }
+  if (params.lte !== undefined || params.lt !== undefined) {
+    parts.push(`<= ${params.lte ?? params.lt}`);
+  }
+  return `${key}: ${parts.join(' AND ')}`;
+};
+
+const resolveParamValue = (params: Filter['meta']['params']): string => {
+  if (params == null) return '';
+  if (typeof params === 'string' || typeof params === 'number' || typeof params === 'boolean') {
+    return String(params);
+  }
+  if (Array.isArray(params)) return params.join(', ');
+  if (typeof params === 'object' && 'query' in params) return String(params.query);
+  return JSON.stringify(params);
+};
+
+const formatPhraseFilter = (
+  key: string,
+  value: Filter['meta']['value'],
+  params: Filter['meta']['params']
+): string => {
+  const display = typeof value === 'string' ? value : resolveParamValue(params);
+  return `${key}: ${display}`;
+};
+
+export const getFilterLabel = (filter: Filter): string => {
+  if (filter.meta?.alias) {
+    return filter.meta.alias;
+  }
+  const { key, negate, type, params, value } = filter.meta ?? {};
+  const prefix = negate ? 'NOT ' : '';
+
+  if (!key) {
+    return `${prefix}${JSON.stringify(filter.query ?? filter)}`;
+  }
+
+  if (type === 'exists') {
+    return `${prefix}${key}: exists`;
+  }
+
+  if (type === 'phrase' || type === 'phrases') {
+    return `${prefix}${formatPhraseFilter(key, value, params)}`;
+  }
+
+  if (type === 'range' && params && typeof params === 'object' && !Array.isArray(params)) {
+    return `${prefix}${formatRangeFilter(key, params as Record<string, unknown>)}`;
+  }
+
+  const displayValue = typeof value === 'string' ? value : resolveParamValue(params);
+  return displayValue ? `${prefix}${key}: ${displayValue}` : `${prefix}${key}`;
+};
+
+export const FiltersDisplay: React.FC<{ filters: unknown[] }> = ({ filters }) => {
+  const validFilters = filters.filter(
+    (f): f is Filter => f != null && typeof f === 'object' && 'meta' in f
+  );
+  if (validFilters.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <SectionHeading>{FILTERS_LABEL}</SectionHeading>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup responsive={false} gutterSize="xs" wrap>
+        {validFilters.map((filter, idx) => (
+          <EuiFlexItem grow={false} key={idx}>
+            <EuiBadge color={filter.meta?.negate ? 'danger' : 'hollow'}>
+              {getFilterLabel(filter)}
+            </EuiBadge>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
+  );
+};
+
 export const ThresholdDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   if (rule.type !== 'threshold') {
     return null;
@@ -222,7 +309,7 @@ export const ThreatMatchDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) =
             <strong>{THREAT_QUERY_LABEL}</strong>
           </EuiText>
           <EuiSpacer size="xs" />
-          <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={100}>
+          <EuiCodeBlock fontSize="s" paddingSize="s" overflowHeight={100} isCopyable>
             {rule.threat_query}
           </EuiCodeBlock>
           <EuiSpacer size="xs" />
@@ -347,6 +434,35 @@ const RuleTypeDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
   }
 };
 
+const SeverityRiskScore: React.FC<{ severity?: string; riskScore?: number }> = ({
+  severity,
+  riskScore,
+}) => (
+  <EuiText size="xs">
+    {severity && (
+      <>
+        <strong>
+          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.severityLabel', {
+            defaultMessage: 'Severity:',
+          })}
+        </strong>{' '}
+        {severity.charAt(0).toUpperCase() + severity.slice(1)}
+        {riskScore !== undefined && <>{' | '}</>}
+      </>
+    )}
+    {riskScore !== undefined && (
+      <>
+        <strong>
+          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.riskScoreLabel', {
+            defaultMessage: 'Risk Score:',
+          })}
+        </strong>{' '}
+        {riskScore}
+      </>
+    )}
+  </EuiText>
+);
+
 const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ attachment }) => {
   const rule = parseRuleFromAttachment(attachment);
 
@@ -356,6 +472,7 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
 
   const query = 'query' in rule ? rule.query : undefined;
   const index = 'index' in rule ? (rule.index as string[] | undefined) : undefined;
+  const filters = 'filters' in rule ? (rule.filters as unknown[] | undefined) : undefined;
   const interval = 'interval' in rule ? rule.interval : undefined;
   const from = 'from' in rule ? rule.from : undefined;
 
@@ -393,7 +510,13 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
         <>
           <SectionHeading>{getQueryHeading(rule)}</SectionHeading>
           <EuiSpacer size="xs" />
-          <EuiCodeBlock language="esql" fontSize="s" paddingSize="s" overflowHeight={150}>
+          <EuiCodeBlock
+            language="esql"
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={150}
+            isCopyable
+          >
             {query}
           </EuiCodeBlock>
           <EuiSpacer size="s" />
@@ -401,6 +524,8 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
       )}
 
       {index && index.length > 0 && <IndexPatterns patterns={index} />}
+
+      {filters && filters.length > 0 && <FiltersDisplay filters={filters} />}
 
       <RuleTypeDetails rule={rule} />
 
@@ -417,29 +542,7 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
         </>
       )}
 
-      <EuiText size="xs">
-        {rule.severity && (
-          <>
-            <strong>
-              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.severityLabel', {
-                defaultMessage: 'Severity:',
-              })}
-            </strong>{' '}
-            {rule.severity.charAt(0).toUpperCase() + rule.severity.slice(1)}
-            {rule.risk_score !== undefined && <>{' | '}</>}
-          </>
-        )}
-        {rule.risk_score !== undefined && (
-          <>
-            <strong>
-              {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.riskScoreLabel', {
-                defaultMessage: 'Risk Score:',
-              })}
-            </strong>{' '}
-            {rule.risk_score}
-          </>
-        )}
-      </EuiText>
+      <SeverityRiskScore severity={rule.severity} riskScore={rule.risk_score} />
 
       {interval && (
         <>
