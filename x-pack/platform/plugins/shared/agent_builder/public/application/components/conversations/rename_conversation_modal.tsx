@@ -34,46 +34,48 @@ const labels = {
   }),
 };
 
-interface RenameConversationModalProps {
+export interface BaseRenameConversationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  conversationId: string;
+  initialTitle: string;
+  onRename: (conversationId: string, title: string) => Promise<void>;
 }
 
-export const RenameConversationModal: React.FC<RenameConversationModalProps> = ({
+export const BaseRenameConversationModal: React.FC<BaseRenameConversationModalProps> = ({
   isOpen,
   onClose,
+  conversationId,
+  initialTitle,
+  onRename,
 }) => {
-  const conversationId = useConversationId();
-  const { title } = useConversationTitle();
-  const { conversationActions } = useConversationContext();
   const { addErrorToast } = useToasts();
   const [newTitle, setNewTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Sync input to current title each time the modal opens
   useEffect(() => {
     if (isOpen) {
-      setNewTitle(title || '');
+      setNewTitle(initialTitle || '');
+      setIsLoading(false);
     }
-  }, [isOpen, title]);
+  }, [isOpen, initialTitle]);
 
-  const isDirty = newTitle.trim() !== (title || '').trim();
+  const isDirty = newTitle.trim() !== (initialTitle || '').trim();
 
   const handleSave = useCallback(async () => {
     if (!conversationId || !newTitle.trim() || !isDirty) return;
     setIsLoading(true);
     try {
-      await conversationActions.renameConversation(conversationId, newTitle.trim());
+      await onRename(conversationId, newTitle.trim());
       onClose();
-    } catch (error) {
+    } catch (error: unknown) {
+      setIsLoading(false);
       addErrorToast({
         title: labels.renameErrorToast,
         text: formatAgentBuilderErrorMessage(error),
       });
-    } finally {
-      setIsLoading(false);
     }
-  }, [conversationId, newTitle, isDirty, conversationActions, onClose, addErrorToast]);
+  }, [conversationId, newTitle, isDirty, onRename, onClose, addErrorToast]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -131,5 +133,31 @@ export const RenameConversationModal: React.FC<RenameConversationModalProps> = (
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
+  );
+};
+
+interface RenameConversationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const RenameConversationModal: React.FC<RenameConversationModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const conversationId = useConversationId();
+  const { title } = useConversationTitle();
+  const { conversationActions } = useConversationContext();
+
+  if (!isOpen || !conversationId) return null;
+
+  return (
+    <BaseRenameConversationModal
+      isOpen={isOpen}
+      onClose={onClose}
+      conversationId={conversationId}
+      initialTitle={title || ''}
+      onRename={conversationActions.renameConversation}
+    />
   );
 };

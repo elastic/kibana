@@ -6,41 +6,48 @@
  */
 
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useConversationContext } from '../../context/conversation/conversation_context';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useConversationTitle } from '../../hooks/use_conversation';
 
-interface DeleteConversationModalProps {
+export interface BaseDeleteConversationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // Override conversation to be deleted
-  conversation?: { id: string; title: string };
+  conversationId: string;
+  title: string;
+  onDelete: (conversationId: string) => Promise<void>;
 }
 
-export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
+export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalProps> = ({
   isOpen,
   onClose,
-  conversation,
+  conversationId,
+  title,
+  onDelete,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const currentConversationId = useConversationId();
-  const { title: currentTitle } = useConversationTitle();
-  const conversationId = conversation?.id ?? currentConversationId;
-  const title = conversation?.title ?? currentTitle;
-  const { conversationActions } = useConversationContext();
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsLoading(false);
+    }
+  }, [isOpen]);
 
   const handleDelete = useCallback(async () => {
     if (!conversationId) {
       return;
     }
     setIsLoading(true);
-    await conversationActions.deleteConversation(conversationId);
-    setIsLoading(false);
-    onClose();
-  }, [conversationId, conversationActions, onClose]);
+    try {
+      await onDelete(conversationId);
+      onClose();
+    } catch {
+      setIsLoading(false);
+    }
+  }, [conversationId, onDelete, onClose]);
 
   if (!isOpen || !conversationId) {
     return null;
@@ -85,5 +92,33 @@ export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = (
         />
       </p>
     </EuiConfirmModal>
+  );
+};
+
+interface DeleteConversationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const DeleteConversationModal: React.FC<DeleteConversationModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
+  const conversationId = useConversationId();
+  const { title } = useConversationTitle();
+  const { conversationActions } = useConversationContext();
+
+  if (!isOpen || !conversationId) {
+    return null;
+  }
+
+  return (
+    <BaseDeleteConversationModal
+      isOpen={isOpen}
+      onClose={onClose}
+      conversationId={conversationId}
+      title={title || ''}
+      onDelete={conversationActions.deleteConversation}
+    />
   );
 };
