@@ -183,7 +183,7 @@ export const EntityAnalyticsHomePage = () => {
           title={
             <FormattedMessage
               id="xpack.securitySolution.entityAnalytics.homePage.pageTitle"
-              defaultMessage="Entity Analytics"
+              defaultMessage="Entity analytics"
             />
           }
           rightSideItems={[
