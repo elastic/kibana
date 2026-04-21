@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SocTrends } from './soc_trends';
+export { CollectorConfigView } from './collector_config_view';
