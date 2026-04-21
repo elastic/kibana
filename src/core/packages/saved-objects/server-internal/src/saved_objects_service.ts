@@ -149,7 +149,6 @@ export class SavedObjectsService
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
     deprecations.getRegistry('savedObjects').registerDeprecations(
       getSavedObjectsDeprecationsProvider({
-        kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
         savedObjectsConfig: this.config,
         kibanaVersion: this.kibanaVersion,
         typeRegistry: this.typeRegistry,
@@ -164,7 +163,6 @@ export class SavedObjectsService
       logger: this.logger,
       config: this.config,
       migratorPromise: firstValueFrom(this.migrator$),
-      kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
       isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
       docLinks,
