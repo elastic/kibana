@@ -48,6 +48,7 @@ import type {
   GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationRulesResponse,
   CreateRuleMigrationRulesRequestBody,
+  CreateSentinelRuleMigrationRulesRequestBody,
   GetRuleMigrationIntegrationsStatsResponse,
   UpdateRuleMigrationRulesResponse,
   UpdateRuleMigrationRequestBody,
@@ -127,8 +128,8 @@ export const addRulesToQRadarMigration = async ({
 export interface AddRulesToSentinelMigrationParams {
   /** `id` of the migration to add the rules to */
   migrationId: string;
-  /** The body containing the Sentinel ARM template JSON */
-  body: { json: string };
+  /** The body containing the Sentinel ARM template resources */
+  body: CreateSentinelRuleMigrationRulesRequestBody;
   /** Optional AbortSignal for cancelling request */
   signal?: AbortSignal;
 }

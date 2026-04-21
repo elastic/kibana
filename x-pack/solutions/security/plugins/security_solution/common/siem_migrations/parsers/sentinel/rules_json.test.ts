@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { SentinelRulesJsonParser } from './rules_json';
+import type { SentinelArmResource } from '../../model/vendor/rules/sentinel.gen';
+import { SentinelRulesParser } from './rules_json';
 
-const SCHEDULED_RULE = {
+const SCHEDULED_RULE: SentinelArmResource = {
   id: '/subscriptions/sub-id/resourceGroups/rg/providers/Microsoft.OperationalInsights/workspaces/ws/providers/Microsoft.SecurityInsights/alertRules/rule-guid',
   name: 'rule-guid',
   type: 'Microsoft.SecurityInsights/alertRules',
@@ -15,32 +16,28 @@ const SCHEDULED_RULE = {
   properties: {
     displayName: 'Suspicious Login Activity',
     description: 'Detects suspicious login attempts',
-    severity: 'Medium',
-    enabled: true,
     query: 'SecurityEvent | where EventID == 4625 | summarize count() by Account',
-    queryFrequency: 'PT5M',
-    queryPeriod: 'PT5M',
+    severity: 'Medium',
     tactics: ['InitialAccess'],
     techniques: ['T1078'],
   },
 };
 
-const FUSION_RULE = {
+const FUSION_RULE: SentinelArmResource = {
   name: 'fusion-rule',
   kind: 'Fusion',
   properties: {
     displayName: 'Advanced Multistage Attack Detection',
     description: 'Fusion rule',
+    query: 'placeholder',
     severity: 'High',
-    enabled: true,
   },
 };
 
-describe('SentinelRulesJsonParser', () => {
+describe('SentinelRulesParser', () => {
   describe('getRules', () => {
-    it('parses rules from an ARM template wrapper', () => {
-      const json = JSON.stringify({ resources: [SCHEDULED_RULE] });
-      const parser = new SentinelRulesJsonParser(json);
+    it('parses Scheduled rules from resources', () => {
+      const parser = new SentinelRulesParser([SCHEDULED_RULE]);
       const rules = parser.getRules();
 
       expect(rules).toHaveLength(1);
@@ -55,18 +52,8 @@ describe('SentinelRulesJsonParser', () => {
       });
     });
 
-    it('parses rules from a direct array', () => {
-      const json = JSON.stringify([SCHEDULED_RULE]);
-      const parser = new SentinelRulesJsonParser(json);
-      const rules = parser.getRules();
-
-      expect(rules).toHaveLength(1);
-      expect(rules[0].id).toBe('rule-guid');
-    });
-
     it('filters out non-Scheduled rule kinds', () => {
-      const json = JSON.stringify({ resources: [SCHEDULED_RULE, FUSION_RULE] });
-      const parser = new SentinelRulesJsonParser(json);
+      const parser = new SentinelRulesParser([SCHEDULED_RULE, FUSION_RULE]);
       const rules = parser.getRules();
 
       expect(rules).toHaveLength(1);
@@ -74,19 +61,18 @@ describe('SentinelRulesJsonParser', () => {
     });
 
     it('filters out rules with missing displayName or query', () => {
-      const incomplete = {
+      const incomplete: SentinelArmResource = {
         kind: 'Scheduled',
-        properties: { displayName: 'No Query Rule', severity: 'Low' },
+        properties: { displayName: 'No Query Rule', query: '' },
       };
-      const json = JSON.stringify([incomplete]);
-      const parser = new SentinelRulesJsonParser(json);
+      const parser = new SentinelRulesParser([incomplete]);
       const rules = parser.getRules();
 
       expect(rules).toHaveLength(0);
     });
 
     it('defaults severity to "medium" when missing', () => {
-      const rule = {
+      const rule: SentinelArmResource = {
         name: 'no-severity',
         kind: 'Scheduled',
         properties: {
@@ -94,41 +80,28 @@ describe('SentinelRulesJsonParser', () => {
           query: 'SecurityEvent | limit 10',
         },
       };
-      const json = JSON.stringify([rule]);
-      const parser = new SentinelRulesJsonParser(json);
+      const parser = new SentinelRulesParser([rule]);
       const rules = parser.getRules();
 
       expect(rules[0].severity).toBe('medium');
     });
 
     it('uses displayName as id when name and id are absent', () => {
-      const rule = {
+      const rule: SentinelArmResource = {
         kind: 'Scheduled',
         properties: {
           displayName: 'Fallback Id Rule',
           query: 'SecurityEvent | limit 10',
-          severity: 'Low',
         },
       };
-      const json = JSON.stringify([rule]);
-      const parser = new SentinelRulesJsonParser(json);
+      const parser = new SentinelRulesParser([rule]);
       const rules = parser.getRules();
 
       expect(rules[0].id).toBe('Fallback Id Rule');
     });
 
-    it('throws on invalid JSON', () => {
-      const parser = new SentinelRulesJsonParser('{invalid json}');
-      expect(() => parser.getRules()).toThrow('Failed to parse Sentinel JSON');
-    });
-
-    it('throws on unrecognized format', () => {
-      const parser = new SentinelRulesJsonParser(JSON.stringify({ something: 'else' }));
-      expect(() => parser.getRules()).toThrow('Unrecognized Sentinel export format');
-    });
-
     it('handles rules without optional tactics and techniques', () => {
-      const rule = {
+      const rule: SentinelArmResource = {
         name: 'no-mitre',
         kind: 'Scheduled',
         properties: {
@@ -138,8 +111,7 @@ describe('SentinelRulesJsonParser', () => {
           severity: 'Informational',
         },
       };
-      const json = JSON.stringify([rule]);
-      const parser = new SentinelRulesJsonParser(json);
+      const parser = new SentinelRulesParser([rule]);
       const rules = parser.getRules();
 
       expect(rules[0].tactics).toBeUndefined();

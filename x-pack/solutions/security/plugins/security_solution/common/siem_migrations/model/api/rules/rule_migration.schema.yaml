@@ -405,19 +405,12 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - json
-              properties:
-                json:
-                  type: string
-                  description: The Sentinel rules ARM template JSON export content
-                  minLength: 1
+              $ref: '../../vendor/rules/sentinel.schema.yaml#/components/schemas/CreateSentinelRulesBody'
       responses:
         200:
           description: Indicates Sentinel rules have been added to the migration successfully.
         400:
-          description: Indicates invalid JSON or parsing error.
+          description: Indicates invalid request body or no valid rules found.
         404:
           description: Indicates the migration id was not found.
 

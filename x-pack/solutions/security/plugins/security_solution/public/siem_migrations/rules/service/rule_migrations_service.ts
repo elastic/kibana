@@ -108,7 +108,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
     migrationId: string,
     rules: CreateSentinelRuleMigrationRulesRequestBody
   ) {
-    if (!rules.json) {
+    if (!rules.resources?.length) {
       throw new Error(i18n.EMPTY_RULES_ERROR);
     }
 
@@ -165,7 +165,7 @@ export class SiemRulesMigrationsService extends SiemMigrationsServiceBase<RuleMi
 
         return migrationId;
       } else if (vendor === MigrationSource.SENTINEL) {
-        if (!rules.json) {
+        if (!rules.resources?.length) {
           throw new Error(i18n.EMPTY_RULES_ERROR);
         }
 

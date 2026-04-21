@@ -31,6 +31,7 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { CreateSentinelRulesBody } from '../../vendor/rules/sentinel.gen';
 import { EnhanceQRadarRule } from '../../vendor/rules/qradar.gen';
 import {
   LangSmithOptions,
@@ -111,12 +112,7 @@ export type CreateSentinelRuleMigrationRulesRequestParamsInput = z.input<
 export type CreateSentinelRuleMigrationRulesRequestBody = z.infer<
   typeof CreateSentinelRuleMigrationRulesRequestBody
 >;
-export const CreateSentinelRuleMigrationRulesRequestBody = z.object({
-  /**
-   * The Sentinel rules ARM template JSON export content
-   */
-  json: z.string().min(1),
-});
+export const CreateSentinelRuleMigrationRulesRequestBody = CreateSentinelRulesBody;
 export type CreateSentinelRuleMigrationRulesRequestBodyInput = z.input<
   typeof CreateSentinelRuleMigrationRulesRequestBody
 >;

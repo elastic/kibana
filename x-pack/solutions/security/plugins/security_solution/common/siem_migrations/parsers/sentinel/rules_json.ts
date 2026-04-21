@@ -5,75 +5,29 @@
  * 2.0.
  */
 
+import type { SentinelArmResource } from '../../model/vendor/rules/sentinel.gen';
 import type { SentinelRule } from './types';
 
-interface SentinelRuleProperties {
-  displayName?: string;
-  description?: string;
-  query?: string;
-  severity?: string;
-  tactics?: string[];
-  techniques?: string[];
-  enabled?: boolean;
-}
-
-interface SentinelArmResource {
-  id?: string;
-  name?: string;
-  kind?: string;
-  type?: string;
-  properties?: SentinelRuleProperties;
-}
-
 /**
- * Parses Microsoft Sentinel Analytics Rules from an ARM template JSON export.
- *
- * Supports two export formats:
- * 1. ARM template wrapper: `{ "resources": [...] }`
- * 2. Direct array of rule objects: `[...]`
+ * Processes pre-validated Sentinel ARM template resources into SentinelRule objects.
  *
  * Only "Scheduled" rule kinds are extracted, as these map to detection rules.
+ * The resources array is expected to be already validated by the API schema.
  */
-export class SentinelRulesJsonParser {
-  private readonly rawJson: string;
+export class SentinelRulesParser {
+  private readonly resources: SentinelArmResource[];
 
-  constructor(rawJson: string) {
-    this.rawJson = rawJson;
+  constructor(resources: SentinelArmResource[]) {
+    this.resources = resources;
   }
 
   /**
-   * Parses the JSON and returns all valid Scheduled Analytics Rules.
-   * @throws Error if the JSON is malformed or not a recognized Sentinel export format.
+   * Returns all valid Scheduled Analytics Rules from the resources.
    */
   public getRules(): SentinelRule[] {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(this.rawJson);
-    } catch (e) {
-      throw new Error(`Failed to parse Sentinel JSON: ${e.message}`);
-    }
-
-    const resources = this.extractResources(parsed);
-    return resources
+    return this.resources
       .flatMap((resource) => this.processResource(resource))
       .filter(Boolean) as SentinelRule[];
-  }
-
-  private extractResources(parsed: unknown): SentinelArmResource[] {
-    if (Array.isArray(parsed)) {
-      return parsed as SentinelArmResource[];
-    }
-    if (
-      parsed &&
-      typeof parsed === 'object' &&
-      'resources' in parsed &&
-      Array.isArray((parsed as { resources: unknown }).resources)
-    ) {
-      return (parsed as { resources: SentinelArmResource[] }).resources;
-    }
-    throw new Error(
-      'Unrecognized Sentinel export format. Expected an ARM template with a "resources" array or a direct array of rule objects.'
-    );
   }
 
   private processResource(resource: SentinelArmResource): SentinelRule | undefined {

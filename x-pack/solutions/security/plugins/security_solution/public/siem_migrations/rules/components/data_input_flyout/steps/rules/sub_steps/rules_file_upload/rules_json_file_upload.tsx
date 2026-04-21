@@ -17,6 +17,7 @@ import type { CreateMigration } from '../../../../../../service/hooks/use_create
 import * as i18nTranslations from './translations';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 import { MigrationSource } from '../../../../../../../common/types';
+import type { SentinelArmResource } from '../../../../../../../../../common/siem_migrations/model/vendor/rules/sentinel.gen';
 
 const SENTINEL_UPLOAD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.dataInputFlyout.rules.rulesFileUpload.sentinel.description',
@@ -35,31 +36,56 @@ export interface SentinelRulesJsonFileUploadProps {
   apiError: string | undefined;
 }
 
+/**
+ * Extracts resources from a parsed Sentinel ARM template JSON export.
+ * Supports two formats:
+ * 1. ARM template wrapper: `{ "resources": [...] }`
+ * 2. Direct array of resource objects: `[...]`
+ */
+const extractResources = (parsed: unknown): SentinelArmResource[] => {
+  if (Array.isArray(parsed)) {
+    return parsed as SentinelArmResource[];
+  }
+  if (
+    parsed &&
+    typeof parsed === 'object' &&
+    'resources' in parsed &&
+    Array.isArray((parsed as { resources: unknown }).resources)
+  ) {
+    return (parsed as { resources: SentinelArmResource[] }).resources;
+  }
+  throw new Error(
+    'Unrecognized Sentinel export format. Expected an ARM template with a "resources" array or a direct array of rule objects.'
+  );
+};
+
 export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
-    const [rulesToUpload, setRulesToUpload] = useState<string>();
+    const [resourcesToUpload, setResourcesToUpload] = useState<SentinelArmResource[]>();
     const filePickerRef = useRef<EuiFilePickerClass>(null);
 
     const createRules = useCallback(() => {
-      if (migrationName && rulesToUpload) {
+      if (migrationName && resourcesToUpload) {
         filePickerRef.current?.removeFiles();
         createMigration({
           migrationName,
-          rules: { json: rulesToUpload },
+          rules: { resources: resourcesToUpload },
           vendor: MigrationSource.SENTINEL,
         });
       }
-    }, [createMigration, migrationName, rulesToUpload]);
+    }, [createMigration, migrationName, resourcesToUpload]);
 
     const onJsonFileParsed = useCallback((content: string) => {
-      setRulesToUpload(content);
+      const parsed = JSON.parse(content);
+      const resources = extractResources(parsed);
+      setResourcesToUpload(resources);
     }, []);
 
     const { parseFile, isParsing, error: fileError } = useParseFileInput(onJsonFileParsed);
 
     const onFileChange = useCallback(
       (files: FileList | null) => {
-        setRulesToUpload(undefined);
+        setResourcesToUpload(undefined);
         onRulesFileChanged(files);
         parseFile(files);
       },
@@ -75,7 +101,7 @@ export const SentinelRulesJsonFileUpload = React.memo<SentinelRulesJsonFileUploa
 
     const showLoader = isParsing || isLoading;
     const isDisabled = !migrationName || showLoader || isCreated;
-    const isButtonDisabled = isDisabled || rulesToUpload == null;
+    const isButtonDisabled = isDisabled || resourcesToUpload == null;
 
     return (
       <EuiFlexGroup direction="column" gutterSize="s">

@@ -12,7 +12,7 @@ import {
   CreateSentinelRuleMigrationRulesRequestBody,
   CreateSentinelRuleMigrationRulesRequestParams,
 } from '../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { SentinelRulesJsonParser } from '../../../../../../../common/siem_migrations/parsers/sentinel/rules_json';
+import { SentinelRulesParser } from '../../../../../../../common/siem_migrations/parsers/sentinel/rules_json';
 import { RuleResourceIdentifier } from '../../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { SiemMigrationAuditLogger } from '../../../../common/api/util/audit';
@@ -45,7 +45,7 @@ export const registerSiemRuleMigrationsCreateSentinelRulesRoute = (
       withLicense(
         withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
           const { migration_id: migrationId } = req.params;
-          const { json } = req.body;
+          const { resources } = req.body;
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
             context.securitySolution,
             'rules'
@@ -56,8 +56,8 @@ export const registerSiemRuleMigrationsCreateSentinelRulesRoute = (
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
             const { experimentalFeatures } = ctx.securitySolution.getConfig();
 
-            // Parse Sentinel JSON export
-            const parser = new SentinelRulesJsonParser(json);
+            // Process validated Sentinel ARM resources
+            const parser = new SentinelRulesParser(resources);
             const sentinelRules = parser.getRules();
 
             if (!sentinelRules || sentinelRules.length === 0) {
