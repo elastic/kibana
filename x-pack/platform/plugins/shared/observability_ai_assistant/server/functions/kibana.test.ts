@@ -175,9 +175,9 @@ describe('kibana tool', () => {
       serverInfo: { hostname: '0.0.0.0', port: 5601, protocol: 'http' },
     });
 
-      mockedAxios
-        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
-        .mockResolvedValueOnce({ data: { status: 'ok' } });
+    mockedAxios
+      .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
+      .mockResolvedValueOnce({ data: { status: 'ok' } });
 
     const result = await handler({
       arguments: { method: 'GET', pathname: '/api/status' },
@@ -192,8 +192,6 @@ describe('kibana tool', () => {
     expect(retryCall.url).toBe('http://localhost:5601/api/status');
 
     expect(result).toEqual({ content: { status: 'ok' } });
-      expect(resources.logger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('(ENOTFOUND)')
-      );
+    expect(resources.logger.debug).toHaveBeenCalledWith(expect.stringContaining('(ENOTFOUND)'));
   });
 });
