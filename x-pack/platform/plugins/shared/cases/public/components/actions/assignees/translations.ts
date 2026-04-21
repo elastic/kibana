@@ -31,7 +31,7 @@ export const NO_SELECTED_ASSIGNEES = (totalCases: number) =>
   i18n.translate('xpack.cases.actions.assignees.noSelectedAssigneesTitle', {
     values: { totalCases },
     defaultMessage:
-      'The selected {totalCases, plural, =1 {episode does} other {episodes do}} not have any assigned users',
+      'The selected {totalCases, plural, =1 {case does} other {cases do}} not have any assigned users',
   });
 
 export const NO_SELECTED_ASSIGNEES_HELP_TEXT = i18n.translate(
