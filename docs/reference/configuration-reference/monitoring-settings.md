@@ -5,6 +5,7 @@ mapped_pages:
 applies_to:
   deployment:
     self: all
+    ess: all
 ---
 
 # Monitoring settings in {{kib}} [monitoring-settings-kb]
