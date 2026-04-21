@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-source-management-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Data source management UI in Stack Management",
+  "plugin": {
+    "id": "data_source_management",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "management"
+    ],
+    "requiredBundles": []
+  }
+}
