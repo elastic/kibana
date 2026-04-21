@@ -359,14 +359,21 @@ describe('ExplorationDashboard Component', () => {
         expect(mockHttp.post).toHaveBeenCalledWith(
           '/internal/aesop/exploration/run',
           expect.objectContaining({
-            body: expect.objectContaining({
-              agent_role: 'SOC analyst',
-              exploration_depth: 100,
-              min_pattern_frequency: 10,
-            }),
+            body: expect.any(String),
           })
         );
       });
+
+      const [, { body }] = mockHttp.post.mock.calls.find(
+        ([url]: [string]) => url === '/internal/aesop/exploration/run'
+      )!;
+      expect(JSON.parse(body as string)).toEqual(
+        expect.objectContaining({
+          agent_role: 'SOC analyst',
+          exploration_depth: 100,
+          min_pattern_frequency: 10,
+        })
+      );
     });
 
     it('should show success message after starting exploration', async () => {
@@ -479,12 +486,14 @@ describe('ExplorationDashboard Component', () => {
         expect(mockHttp.post).toHaveBeenCalledWith(
           expect.any(String),
           expect.objectContaining({
-            body: expect.objectContaining({
-              mode: 'incremental',
-            }),
+            body: expect.any(String),
           })
         );
       });
+
+      const lastCall = mockHttp.post.mock.calls[mockHttp.post.mock.calls.length - 1];
+      const [, { body }] = lastCall as [string, { body: string }];
+      expect(JSON.parse(body)).toEqual(expect.objectContaining({ mode: 'incremental' }));
     });
   });
 

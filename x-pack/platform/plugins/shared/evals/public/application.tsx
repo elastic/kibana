@@ -7,6 +7,7 @@
 
 import React, { Suspense, useEffect } from 'react';
 import {
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -149,6 +150,26 @@ const suitesBreadcrumbLabel = i18n.translate('xpack.evals.breadcrumbs.suites', {
   defaultMessage: 'Suites',
 });
 
+const technicalPreviewLabel = i18n.translate('xpack.evals.technicalPreview.badgeLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+const technicalPreviewTooltip = i18n.translate('xpack.evals.technicalPreview.tooltip', {
+  defaultMessage:
+    'This feature is in technical preview. It may change or be removed in a future release, and is not subject to support SLA.',
+});
+
+const TechPreviewBadge: React.FC = () => (
+  <EuiBetaBadge
+    label={technicalPreviewLabel}
+    iconType="beaker"
+    size="s"
+    color="hollow"
+    tooltipContent={technicalPreviewTooltip}
+    css={{ marginLeft: 6 }}
+  />
+);
+
 const EvalsHeader: React.FC = () => {
   return (
     <>
@@ -256,13 +277,13 @@ const getBreadcrumbs = ({
   return [{ text: runsTabLabel }];
 };
 
-const EvalsNavigation: React.FC = () => {
+const EvalsNavigation: React.FC<{ aesopEnabled: boolean }> = ({ aesopEnabled }) => {
   const history = useHistory();
   const { pathname } = useLocation();
   const isTracingSelected = pathname.startsWith(TRACING_PATH);
   const isDatasetsSelected = pathname.startsWith(DATASETS_PATH);
   const isRemotesSelected = pathname.startsWith(REMOTES_PATH);
-  const isAESOPSelected = pathname.startsWith('/aesop');
+  const isAESOPSelected = aesopEnabled && pathname.startsWith('/aesop');
   const isEvaluatorsSelected = pathname === '/evaluators';
   const isComparisonSelected = pathname.startsWith('/comparison');
   const isMonitoringSelected = pathname.startsWith('/monitoring');
@@ -292,20 +313,30 @@ const EvalsNavigation: React.FC = () => {
         <EuiTab isSelected={isRemotesSelected} onClick={() => history.push(REMOTES_PATH)}>
           {remotesTabLabel}
         </EuiTab>
-        <EuiTab isSelected={isAESOPSelected} onClick={() => history.push('/aesop/skills/proposed')}>
-          {aesopTabLabel}
-        </EuiTab>
+        {aesopEnabled && (
+          <EuiTab
+            isSelected={isAESOPSelected}
+            onClick={() => history.push('/aesop/skills/proposed')}
+          >
+            {aesopTabLabel}
+            <TechPreviewBadge />
+          </EuiTab>
+        )}
         <EuiTab isSelected={isEvaluatorsSelected} onClick={() => history.push('/evaluators')}>
           {evaluatorsTabLabel}
+          <TechPreviewBadge />
         </EuiTab>
         <EuiTab isSelected={isComparisonSelected} onClick={() => history.push('/comparison')}>
           {comparisonTabLabel}
+          <TechPreviewBadge />
         </EuiTab>
         <EuiTab isSelected={isMonitoringSelected} onClick={() => history.push('/monitoring')}>
           {monitoringTabLabel}
+          <TechPreviewBadge />
         </EuiTab>
         <EuiTab isSelected={isSuitesSelected} onClick={() => history.push('/suites')}>
           {suitesTabLabel}
+          <TechPreviewBadge />
         </EuiTab>
       </EuiTabs>
     </div>
@@ -331,12 +362,13 @@ export const EvalsApp: React.FC<{
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   getHref: (path: string) => string;
   breadcrumbPrefix?: ChromeBreadcrumb[];
-}> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix }) => {
+  aesopEnabled?: boolean;
+}> = ({ history, setBreadcrumbs, getHref, breadcrumbPrefix, aesopEnabled = false }) => {
   return (
     <Router history={history}>
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
         <EvalsHeader />
-        <EvalsNavigation />
+        <EvalsNavigation aesopEnabled={aesopEnabled} />
         <EvalsBreadcrumbs
           setBreadcrumbs={setBreadcrumbs}
           getHref={getHref}
@@ -353,22 +385,28 @@ export const EvalsApp: React.FC<{
               <Route path="/runs/:runId" component={RunDetailPage} />
               <Route exact path={TRACING_PATH} component={TracingProjectsListPage} />
               <Route exact path="/tracing/:projectName" component={TracingProjectDetailPage} />
-              {/* AESOP Routes */}
-              <Route exact path="/aesop/skills/proposed">
-                <AesopErrorBoundary>
-                  <ProposedSkillsList />
-                </AesopErrorBoundary>
-              </Route>
-              <Route exact path="/aesop/exploration">
-                <AesopErrorBoundary>
-                  <ExplorationDashboard />
-                </AesopErrorBoundary>
-              </Route>
-              <Route path="/aesop/exploration/:executionId">
-                <AesopErrorBoundary>
-                  <ExecutionDetailPage />
-                </AesopErrorBoundary>
-              </Route>
+              {/* AESOP Routes (flag-gated) */}
+              {aesopEnabled && (
+                <Route exact path="/aesop/skills/proposed">
+                  <AesopErrorBoundary>
+                    <ProposedSkillsList />
+                  </AesopErrorBoundary>
+                </Route>
+              )}
+              {aesopEnabled && (
+                <Route exact path="/aesop/exploration">
+                  <AesopErrorBoundary>
+                    <ExplorationDashboard />
+                  </AesopErrorBoundary>
+                </Route>
+              )}
+              {aesopEnabled && (
+                <Route path="/aesop/exploration/:executionId">
+                  <AesopErrorBoundary>
+                    <ExecutionDetailPage />
+                  </AesopErrorBoundary>
+                </Route>
+              )}
               <Route exact path="/evaluators" component={EvaluatorCatalogPage} />
               <Route exact path="/comparison" component={ComparisonDashboard} />
               <Route path="/comparison/:id" component={ComparisonDashboard} />
