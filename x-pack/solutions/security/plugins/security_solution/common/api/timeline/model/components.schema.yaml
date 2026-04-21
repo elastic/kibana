@@ -487,7 +487,7 @@ components:
               example: This is an example text
             timelineId:
               type: string
-              description: The `savedObjectId` of the Timeline this note belongs to (not the note's own id).
+              description: The `savedObjectId` of the Timeline this note belongs to (not the note's own ID).
               example: '15c1929b-0af7-42bd-85a8-56e234cc7c4e'
     Note:
       allOf:
