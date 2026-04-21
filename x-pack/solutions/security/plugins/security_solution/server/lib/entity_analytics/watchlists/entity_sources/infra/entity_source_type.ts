@@ -30,6 +30,16 @@ const watchlistEntitySourceMappings: SavedObjectsType['mappings'] = {
     enabled: {
       type: 'boolean',
     },
+    range: {
+      properties: {
+        start: {
+          type: 'keyword',
+        },
+        end: {
+          type: 'keyword',
+        },
+      },
+    },
   },
 };
 
@@ -72,6 +82,7 @@ type WatchlistEntitySourceSchemaAttributes = Pick<
   | 'matchers'
   | 'filter'
   | 'integrations'
+  | 'range'
 > & {
   error?: string;
   matchersModifiedByUser?: boolean;
@@ -96,6 +107,19 @@ const entitySourceSchemaV1 = {
   managedVersion: schema.maybe(schema.number()),
   filter: schema.maybe(schema.any()),
   integrations: schema.maybe(integrationsSchema),
+} satisfies Omit<WatchlistEntitySourceSchemaProps, 'range'>;
+
+const entitySourceSchemaV2 = {
+  ...entitySourceSchemaV1,
+  range: schema.maybe(
+    schema.object(
+      {
+        start: schema.string(),
+        end: schema.string(),
+      },
+      { unknowns: 'ignore' }
+    )
+  ),
 } satisfies WatchlistEntitySourceSchemaProps;
 
 export const watchlistEntitySourceType: SavedObjectsType = {
@@ -110,6 +134,25 @@ export const watchlistEntitySourceType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: schema.object(entitySourceSchemaV1, { unknowns: 'ignore' }),
         create: schema.object(entitySourceSchemaV1, { unknowns: 'ignore' }),
+      },
+    },
+    '2': {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            range: {
+              properties: {
+                start: { type: 'keyword' },
+                end: { type: 'keyword' },
+              },
+            },
+          },
+        },
+      ],
+      schemas: {
+        forwardCompatibility: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
+        create: schema.object(entitySourceSchemaV2, { unknowns: 'ignore' }),
       },
     },
   },

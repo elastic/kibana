@@ -211,6 +211,7 @@ enabled:
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_common.ts
+  - x-pack/platform/test/cases_api_integration/security_and_spaces/config_trial_unified_attachments.ts
   - x-pack/platform/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/platform/test/cases_api_integration/spaces_only/config.ts
   - x-pack/platform/test/disable_ems/config.ts
@@ -462,16 +463,13 @@ enabled:
   - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
-  - x-pack/platform/test/api_integration/apis/logstash/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/management/index_management/disabled_data_enrichers/config.ts
-  - x-pack/platform/test/api_integration/apis/maps/config.ts
   - x-pack/platform/test/api_integration/apis/lens/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/search/config.ts
   - x-pack/platform/test/api_integration/apis/search_inference_endpoints/config.ts
   - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
