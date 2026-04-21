@@ -121,7 +121,7 @@
           "({ children, zIndex, isConversationApp, }: AIAgentTourCalloutProps) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/ai_agent_tour_callout.tsx",
-        "lineNumber": 32,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -137,7 +137,7 @@
               "AIAgentTourCalloutProps"
             ],
             "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/components/tour_callout/ai_agent_tour_callout.tsx",
-            "lineNumber": 32,
+            "lineNumber": 25,
             "columnNumber": 36,
             "deprecated": false,
             "trackAdoption": false,
