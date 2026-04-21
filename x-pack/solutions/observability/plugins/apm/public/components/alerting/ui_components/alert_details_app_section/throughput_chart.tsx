@@ -26,7 +26,7 @@ const INITIAL_STATE = {
   currentPeriod: [],
   previousPeriod: [],
 };
-function ThroughputChart({
+export function ThroughputChart({
   transactionType,
   transactionTypes,
   setTransactionType,
@@ -195,6 +195,3 @@ function ThroughputChart({
     </EuiFlexItem>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default ThroughputChart;

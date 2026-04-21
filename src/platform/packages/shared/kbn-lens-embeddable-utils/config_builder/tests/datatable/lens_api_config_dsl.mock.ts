@@ -11,12 +11,12 @@ import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
   AS_CODE_DATA_VIEW_SPEC_TYPE,
 } from '@kbn/as-code-data-views-schema';
-import type { DatatableState, DatatableStateNoESQL } from '../../schema';
+import type { DatatableConfig, DatatableConfigNoESQL } from '../../schema';
 
 /**
  * Basic datatable with single metric column and ad hoc dataView
  */
-export const singleMetricDatatableWithAdhocDataView: DatatableState = {
+export const singleMetricDatatableWithAdhocDataView: DatatableConfig = {
   title: 'Single metric',
   type: 'data_table',
   data_source: {
@@ -32,12 +32,12 @@ export const singleMetricDatatableWithAdhocDataView: DatatableState = {
       empty_as_null: true,
     },
   ],
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Datatable with multiple metrics, rows, and split_metrics_by columns
  */
-export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
+export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableConfig = {
   title: 'Multiple metrics, rows, split by with ad hoc dataView',
   type: 'data_table',
   data_source: {
@@ -108,12 +108,12 @@ export const multiMetricRowSplitByDatatableWithAdhocDataView: DatatableState = {
       },
     },
   ],
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Full config datatable and ad hoc dataView
  */
-export const fullConfigDatatableWithAdhocDataView: DatatableState = {
+export const fullConfigDatatableWithAdhocDataView: DatatableConfig = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
   data_source: {
@@ -275,12 +275,12 @@ export const fullConfigDatatableWithAdhocDataView: DatatableState = {
     paging: 10,
     row_numbers: { visible: true },
   },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Full config datatable and dataView
  */
-export const fullConfigDatatableWithDataView: DatatableState = {
+export const fullConfigDatatableWithDataView: DatatableConfig = {
   title: 'Multiple metrics, rows, split by with full config',
   type: 'data_table',
   data_source: {
@@ -440,12 +440,12 @@ export const fullConfigDatatableWithDataView: DatatableState = {
     },
     paging: 10,
   },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Datatable sorted by a pivoted metric column (split_metrics_by)
  */
-export const sortedByPivotedMetricColumnDatatable: DatatableState = {
+export const sortedByPivotedMetricColumnDatatable: DatatableConfig = {
   title: 'Sorted by a pivoted metric column',
   type: 'data_table',
   data_source: {
@@ -611,12 +611,12 @@ export const sortedByPivotedMetricColumnDatatable: DatatableState = {
       direction: 'desc',
     },
   },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
 
 /**
  * Datatable sorted by a row column
  */
-export const sortedByRowDatatable: DatatableState = {
+export const sortedByRowDatatable: DatatableConfig = {
   title: 'Sorted by row column',
   type: 'data_table',
   data_source: {
@@ -781,4 +781,4 @@ export const sortedByRowDatatable: DatatableState = {
       direction: 'asc',
     },
   },
-} satisfies DatatableStateNoESQL;
+} satisfies DatatableConfigNoESQL;
