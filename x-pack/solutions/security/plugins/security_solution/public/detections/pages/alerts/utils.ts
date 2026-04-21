@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { encode } from '@kbn/rison';
-import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_details/shared/hooks/url/expandable_flyout_state_from_event_meta';
+import { expandableFlyoutStateFromEventMeta } from '../../../flyout/shared/utils/expandable_flyout_state_from_event_meta';
+import { resolveFlyoutUrlParam } from '../../../flyout/shared/utils/expandable_flyout_url_state';
 
 export interface ResolveFlyoutParamsConfig {
   index: string;
@@ -22,12 +22,8 @@ export interface ResolveFlyoutParamsConfig {
 export const resolveFlyoutParams = (
   { index, alertId }: ResolveFlyoutParamsConfig,
   currentParamsString: string | null
-) => {
-  if (currentParamsString) {
-    return currentParamsString;
-  }
-
-  return encode(
+) =>
+  resolveFlyoutUrlParam(
+    currentParamsString,
     expandableFlyoutStateFromEventMeta({ index, eventId: alertId, scopeId: 'alerts-page' })
   );
-};
