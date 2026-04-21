@@ -10,9 +10,11 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useStartServices } from '../../hooks';
 import { sendGetOneAgentPolicyFull } from '../../hooks/use_request/agent_policy';
 import { sendCreateStandaloneAgentAPIKey } from '../../hooks/use_request';
-import { getYamlFormatters } from '../../services/yaml_formatters';
 
 import { useFetchFullPolicy } from './hooks';
+import { fullAgentPolicyToYaml } from '../../services';
+
+jest.mock('../../services');
 
 jest.mock('../../hooks', () => ({
   ...jest.requireActual('../../hooks'),
@@ -26,10 +28,6 @@ jest.mock('../../hooks/use_request/agent_policy', () => ({
 jest.mock('../../hooks/use_request', () => ({
   ...jest.requireActual('../../hooks/use_request'),
   sendCreateStandaloneAgentAPIKey: jest.fn(),
-}));
-
-jest.mock('../../services/yaml_formatters', () => ({
-  getYamlFormatters: jest.fn(),
 }));
 
 const mockNotificationsToasts = { addError: jest.fn() };
@@ -104,9 +102,7 @@ describe('useFetchFullPolicy — downloadYaml', () => {
     (sendGetOneAgentPolicyFull as jest.Mock).mockResolvedValue({
       data: { item: policyObject },
     });
-    (getYamlFormatters as jest.Mock).mockResolvedValue({
-      fullAgentPolicyToYaml: jest.fn().mockReturnValue(formattedYaml),
-    });
+    (fullAgentPolicyToYaml as jest.Mock).mockReturnValue(formattedYaml);
 
     const { result } = renderHook(() => useFetchFullPolicy(mockAgentPolicy, 'IS_NOT_KUBERNETES'));
     await waitFor(() => expect(result.current.yaml).toBe(formattedYaml));
