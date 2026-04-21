@@ -99,10 +99,7 @@ export const registerDashboardAppIntegration = ({
     agentBuilder,
     api,
     setAttachments: (attachments: DashboardAttachment[]) => {
-      // attachments can already be added so we may compare lengths here and it's enough
-      if (state.attachments?.length !== attachments.length) {
-        state.attachments = attachments;
-      }
+      state.attachments = attachments;
     },
   });
 
