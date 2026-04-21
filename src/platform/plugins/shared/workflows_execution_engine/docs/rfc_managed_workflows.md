@@ -301,8 +301,8 @@ Extend the existing `.workflows-workflows` index and document model with new fie
 | `managed` | `boolean` | `true` for managed workflows, `false` (default) for user workflows. Not user-settable. |
 | `managedBy` | `string \| null` | Plugin ID that owns this workflow (e.g., `securityInsights`, `streams`). `null` for user workflows. Used for ownership tracking, reconciliation, and cleanup. |
 | `definitionHash` | `string \| null` | SHA-256 of the YAML definition. Used for reconciliation (create-if-absent, update-if-changed). `null` for user workflows. |
-| `defaultEnabled` | `boolean` | The enabled state declared at registration time (`true` by default). Stored on the document so reconciliation knows the registering team's intent. |
-| `preserveEnabledState` | `boolean` | Whether to preserve the user's current `enabled` value when a new version is reconciled. `true` (default) means the user's choice survives upgrades. `false` means reconciliation resets `enabled` to `defaultEnabled` on every update — used for critical fixes that must be active. |
+
+`defaultEnabled` and `preserveEnabledState` are **not** stored on the document — they live in the in-memory registration only. During reconciliation, the platform reads these values from the registered workflow definition and acts accordingly. This keeps the storage model lean and avoids persisting registration-time metadata that may change between releases.
 
 New mapping additions (in `workflow_storage.ts`):
 
@@ -310,8 +310,6 @@ New mapping additions (in `workflow_storage.ts`):
 managed: types.boolean({}),
 managedBy: types.keyword({}),
 definitionHash: types.keyword({ index: false }),
-defaultEnabled: types.boolean({}),
-preserveEnabledState: types.boolean({}),
 ```
 
 - **Reads:** One index; list/detail APIs filter or label using `managed` (e.g., hide managed by default).
@@ -568,9 +566,9 @@ function computeDefinitionHash(yaml: string): string {
 For each registered managed workflow, for each space:
 
 1. Query `.workflows-workflows` by `id` + `spaceId`.
-2. If not found → **create** with `managed: true`, `managedBy: pluginId`, `definitionHash: hash`, `enabled: registration.enabled ?? true`, `defaultEnabled: registration.enabled ?? true`, `preserveEnabledState: registration.preserveEnabledState ?? true`.
+2. If not found → **create** with `managed: true`, `managedBy: pluginId`, `definitionHash: hash`, `enabled: registration.enabled ?? true`.
 3. If found and `definitionHash` matches → **skip** (no I/O).
-4. If found and `definitionHash` differs → **update** the `yaml`, `definition`, `definitionHash`, `defaultEnabled`, `preserveEnabledState`, `lastUpdatedBy: 'system'`. For the `enabled` field: if `preserveEnabledState` is `true`, keep the existing document's `enabled` value (user's choice survives). If `false`, reset `enabled` to `defaultEnabled` (registering team forces a state).
+4. If found and `definitionHash` differs → **update** the `yaml`, `definition`, `definitionHash`, `lastUpdatedBy: 'system'`. For the `enabled` field: read `preserveEnabledState` from the in-memory registration (default `true`). If `true`, keep the existing document's `enabled` value (user's choice survives). If `false`, reset `enabled` to `registration.enabled` (registering team forces a state).
 5. If found but `managed: false` → This shouldn't happen (ID collision between user workflow and managed workflow). Log a warning and skip. The caller-provided deterministic ID (R17) makes this unlikely but not impossible.
 
 **Cleanup on unregistration (R14):**
