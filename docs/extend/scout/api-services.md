@@ -162,7 +162,7 @@ export const test = baseTest.extend<{}, { apiServices: MyFeatureApiServices }>({
 
 ::::::::::{step} Use it for setup/teardown
 
-Use the helper for **setup/teardown** (and keep the endpoint under test in `apiClient` for readable, scoped tests). See [best practices](./best-practices.md#api-tests).
+Use the helper for **setup/teardown** (and keep the endpoint under test in `apiClient` for readable, scoped tests). See [API test best practices](./api-best-practices.md).
 
 :::::::{note}
 In parallel UI suites (`spaceTest`), use `scoutSpace.id` when calling methods that need space scoping: `await apiServices.myFeature.enable(scoutSpace.id)`.

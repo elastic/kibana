@@ -17,7 +17,12 @@ export function getCreateRequestBodySchema(isDashboardAppRequest: boolean) {
 
 export function getCreateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
-    id: schema.string(),
+    id: schema.string({
+      meta: {
+        description:
+          'The unique ID of the dashboard, as returned by the create or search endpoints.',
+      },
+    }),
     data: getDashboardStateSchema(isDashboardAppRequest),
     meta: asCodeMetaSchema,
   });

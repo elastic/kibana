@@ -22,7 +22,7 @@
           ") => React.JSX.Element"
         ],
         "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
-        "lineNumber": 28,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal/ai_agent_confirmation_modal.tsx",
-            "lineNumber": 28,
+            "lineNumber": 20,
             "columnNumber": 83,
             "deprecated": false,
             "trackAdoption": false,

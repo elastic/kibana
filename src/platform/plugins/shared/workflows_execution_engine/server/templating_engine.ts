@@ -35,6 +35,16 @@ export class WorkflowTemplatingEngine {
       }
     });
 
+    // TODO: Remove once https://github.com/harttle/liquidjs/pull/881 is merged and upgraded.
+    // Override built-in base64_encode to handle Buffer inputs (e.g. binary HTTP responses)
+    // without going through lossy UTF-8 string conversion.
+    this.engine.registerFilter('base64_encode', (value: unknown): string => {
+      if (Buffer.isBuffer(value)) {
+        return value.toString('base64');
+      }
+      return Buffer.from(String(value ?? ''), 'utf8').toString('base64');
+    });
+
     // register entries filter that converts an object into an array of {key, value} pairs
     this.engine.registerFilter('entries', (value: unknown): unknown => {
       if (typeof value !== 'object' || value === null || Array.isArray(value)) {

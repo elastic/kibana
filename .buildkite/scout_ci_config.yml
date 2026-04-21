@@ -25,6 +25,7 @@ plugins:
     - infra
     - intercepts
     - lens
+    - logstash
     - maps
     - navigation
     - observability
@@ -44,6 +45,7 @@ plugins:
     - streams
     - streams_app
     - synthetics
+    - task_manager
     - transform
     - triggers_actions_ui
     - uptime
@@ -54,6 +56,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
     - kbn-streamlang-tests
   disabled:
