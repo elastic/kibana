@@ -14,13 +14,32 @@ interface EntitySource {
     name?: string;
     EngineMetadata?: { Type?: EntityType };
   };
+  user?: { name?: string };
+  host?: { name?: string };
+  service?: { name?: string };
 }
 
 export const getEntityFields = (doc: DataTableRecord) => {
-  const { entity } = doc.raw._source as EntitySource;
+  const source = doc.raw._source as EntitySource;
+  const { entity } = source;
+  const entityType = entity?.EngineMetadata?.Type;
+
+  // entity.name can be a composed display name (e.g., user.name@host.name for local users in
+  // Entity Store v2), which differs from the ECS identity field (user.name) stored in alerts.
+  // entityIdentifier is the raw identity field value used for alert count queries.
+  const entityIdentifier =
+    (entityType === 'user'
+      ? source.user?.name
+      : entityType === 'host'
+      ? source.host?.name
+      : entityType === 'service'
+      ? source.service?.name
+      : undefined) ?? entity?.name;
+
   return {
-    entityType: entity?.EngineMetadata?.Type,
+    entityType,
     entityName: entity?.name,
     entityId: entity?.id,
+    entityIdentifier,
   };
 };

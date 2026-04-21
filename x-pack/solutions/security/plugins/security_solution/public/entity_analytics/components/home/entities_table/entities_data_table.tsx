@@ -463,9 +463,11 @@ export const EntitiesDataTable = ({
       alerts: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
         const doc = rows[rowIndex];
         if (!doc) return null;
-        const { entityType, entityName } = getEntityFields(doc);
+        const { entityType, entityName, entityIdentifier } = getEntityFields(doc);
         if (!entityName || !entityType) return null;
-        return <EntityAlertsCell entityName={entityName} entityType={entityType} />;
+        return (
+          <EntityAlertsCell entityName={entityIdentifier ?? entityName} entityType={entityType} />
+        );
       },
     };
 
