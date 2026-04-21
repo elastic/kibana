@@ -12,6 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { flyoutHeaderBlockStyles } from '../../../../flyout_v2/document/constants/styles';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { Assignees } from '../../../../flyout_v2/document/components/assignees';
 import { Timestamp } from '../../../../flyout_v2/document/components/timestamp';
@@ -33,6 +34,7 @@ import { CellActions } from '../../shared/components/cell_actions';
  */
 export const AlertHeaderTitle = memo(() => {
   const { scopeId, isRulePreview, refetchFlyoutData, searchHit } = useDocumentDetailsContext();
+  const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
@@ -79,11 +81,13 @@ export const AlertHeaderTitle = memo(() => {
 
   return (
     <>
-      <DocumentSeverity hit={hit} />
-      <EuiSpacer size="m" />
-      <Timestamp hit={hit} />
-      <EuiSpacer size="xs" />
-      <Title hit={hit} hideLink={isRulePreview} />
+      <DocumentSeverity hit={hit}>
+        <EuiSpacer size="m" />
+      </DocumentSeverity>
+      <Timestamp hit={hit}>
+        <EuiSpacer size="xs" />
+      </Timestamp>
+      <Title hit={hit} hideLink={isRulePreview || !canReadRules} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
         direction="row"

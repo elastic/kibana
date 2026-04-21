@@ -8,7 +8,7 @@
 import type { HttpServiceSetup, Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 
 export type * from './routes/types';
 

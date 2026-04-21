@@ -20,19 +20,37 @@ import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { EntityType } from '../common.gen';
 import { Entity } from './common.gen';
 
+/**
+ * A wrapper that pairs an entity type with the entity record to upsert.
+ */
 export type EntityContainer = z.infer<typeof EntityContainer>;
 export const EntityContainer = z.object({
+  /**
+   * The entity type of the record.
+   */
   type: EntityType,
+  /**
+   * The entity record to create or update.
+   */
   record: Entity,
 });
 
+/**
+ * A collection of entities to upsert in bulk.
+ */
 export type EntitiesContainer = z.infer<typeof EntitiesContainer>;
 export const EntitiesContainer = z.object({
+  /**
+   * The entities to create or update.
+   */
   entities: z.array(EntityContainer),
 });
 
 export type UpsertEntitiesBulkRequestQuery = z.infer<typeof UpsertEntitiesBulkRequestQuery>;
 export const UpsertEntitiesBulkRequestQuery = z.object({
+  /**
+   * When true, allows updating protected fields.
+   */
   force: BooleanFromString.optional().default(false),
 });
 export type UpsertEntitiesBulkRequestQueryInput = z.input<typeof UpsertEntitiesBulkRequestQuery>;

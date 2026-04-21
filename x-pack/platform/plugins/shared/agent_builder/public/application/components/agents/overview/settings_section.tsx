@@ -24,8 +24,17 @@ import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
 
+const CARD_BODY_BLOCK_SIZE = '275px';
+
 const settingRowStyles = css`
   width: 100%;
+`;
+const instructionsContainerStyles = css`
+  max-block-size: ${CARD_BODY_BLOCK_SIZE};
+  overflow: auto;
+`;
+const instructionsTextStyles = css`
+  white-space: pre-wrap;
 `;
 
 export interface SettingsSectionProps {
@@ -61,7 +70,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="stretch">
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart">
         {/* Custom Instructions Card */}
         <EuiFlexItem grow={1}>
           <EuiCard
@@ -71,7 +80,7 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             title={overviewLabels.customInstructionsTitle}
             titleElement="h3"
             titleSize="xs"
-            description={currentInstructions || overviewLabels.customInstructionsOnboardingText}
+            description={overviewLabels.customInstructionsSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
             footer={
@@ -91,7 +100,18 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                 color: ${euiTheme.colors.textSubdued};
               }
             `}
-          />
+          >
+            {currentInstructions && (
+              <>
+                <EuiSpacer size="l" />
+                <div css={instructionsContainerStyles}>
+                  <EuiText size="s" color="subdued">
+                    <p css={instructionsTextStyles}>{currentInstructions}</p>
+                  </EuiText>
+                </div>
+              </>
+            )}
+          </EuiCard>
         </EuiFlexItem>
 
         {/* Agent Settings Card */}
@@ -106,93 +126,91 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
             description={overviewLabels.agentSettingsCardSubtitle}
             textAlign="left"
             onClick={canEditAgent ? onOpenEditFlyout : undefined}
-            footer={
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="s"
-                responsive={false}
-                css={settingRowStyles}
-              >
-                {/* Include built-in capabilities row */}
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow>
-                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiText
-                            color={enableElasticCapabilities ? 'textPrimary' : 'subdued'}
-                            size="s"
-                          >
-                            {overviewLabels.autoIncludeTitle}
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem
-                          grow={false}
-                          css={enableElasticCapabilities ? undefined : textDisabledStyles}
-                        >
-                          <EuiIcon type="info" size="s" aria-hidden={true} />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {enableElasticCapabilities ? (
-                        <EuiBadge color="success" data-test-subj="agentOverviewAutoIncludeBadge">
-                          {overviewLabels.enabledBadge}
-                        </EuiBadge>
-                      ) : (
-                        <EuiBadge color="default" data-test-subj="agentOverviewAutoIncludeBadge">
-                          {overviewLabels.notSetBadge}
-                        </EuiBadge>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                {/* Pre-execution workflows row */}
-                {showWorkflowSection && (
-                  <>
-                    <EuiHorizontalRule margin="none" />
-
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                        <EuiFlexItem grow>
-                          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s" color={hasWorkflows ? 'textPrimary' : 'subdued'}>
-                                {overviewLabels.preExecutionWorkflowTitle}
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem
-                              grow={false}
-                              css={hasWorkflows ? undefined : textDisabledStyles}
-                            >
-                              <EuiIcon type="info" size="s" aria-hidden={true} />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiBadge
-                            color={hasWorkflows ? 'success' : 'default'}
-                            data-test-subj="agentOverviewWorkflowsBadge"
-                          >
-                            {hasWorkflows
-                              ? overviewLabels.enabledBadge
-                              : overviewLabels.notSetBadge}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </>
-                )}
-              </EuiFlexGroup>
-            }
             css={css`
               height: 100%;
               .euiCard__content p {
                 color: ${euiTheme.colors.textSubdued};
               }
             `}
-          />
+          >
+            <EuiSpacer size="l" />
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="s"
+              responsive={false}
+              css={settingRowStyles}
+            >
+              {/* Include built-in capabilities row */}
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiText
+                          color={enableElasticCapabilities ? 'textPrimary' : 'subdued'}
+                          size="s"
+                        >
+                          {overviewLabels.autoIncludeTitle}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        css={enableElasticCapabilities ? undefined : textDisabledStyles}
+                      >
+                        <EuiIcon type="info" size="s" aria-hidden={true} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    {enableElasticCapabilities ? (
+                      <EuiBadge color="success" data-test-subj="agentOverviewAutoIncludeBadge">
+                        {overviewLabels.enabledBadge}
+                      </EuiBadge>
+                    ) : (
+                      <EuiBadge color="default" data-test-subj="agentOverviewAutoIncludeBadge">
+                        {overviewLabels.notSetBadge}
+                      </EuiBadge>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {/* Pre-execution workflows row */}
+              {showWorkflowSection && (
+                <>
+                  <EuiHorizontalRule margin="none" />
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="s" color={hasWorkflows ? 'textPrimary' : 'subdued'}>
+                              {overviewLabels.preExecutionWorkflowTitle}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                            css={hasWorkflows ? undefined : textDisabledStyles}
+                          >
+                            <EuiIcon type="info" size="s" aria-hidden={true} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color={hasWorkflows ? 'success' : 'default'}
+                          data-test-subj="agentOverviewWorkflowsBadge"
+                        >
+                          {hasWorkflows ? overviewLabels.enabledBadge : overviewLabels.notSetBadge}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </>
+              )}
+            </EuiFlexGroup>
+          </EuiCard>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

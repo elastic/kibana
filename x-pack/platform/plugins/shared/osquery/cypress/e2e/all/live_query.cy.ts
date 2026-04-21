@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -15,6 +16,8 @@ import {
 } from '../../tasks/live_query';
 import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
+import { request } from '../../tasks/common';
+import { loadLiveQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
@@ -48,6 +51,23 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
       expect(interception.response?.body.data.queries[0]).to.have.property('timeout', 120);
     });
     checkResults();
+  });
+
+  it('should return results for a live query via API (requires enrolled agents)', () => {
+    // Moved from cypress/e2e/api/live_query_results.cy.ts — requires agents to produce results
+    loadLiveQuery().then((liveQuery) => {
+      const liveQueryId = liveQuery.action_id;
+      const queriesQueryActionId = liveQuery.queries?.[0].action_id;
+
+      request({
+        url: `/api/osquery/live_queries/${liveQueryId}/results/${queriesQueryActionId}`,
+        headers: {
+          'Elastic-Api-Version': API_VERSIONS.public.v1,
+        },
+      }).then((response) => {
+        expect(response.status).to.eq(200);
+      });
+    });
   });
 
   it('should run multiline query', () => {
