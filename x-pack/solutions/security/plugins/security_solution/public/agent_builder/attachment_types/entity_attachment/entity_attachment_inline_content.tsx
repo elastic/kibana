@@ -30,7 +30,6 @@ export interface EntityAttachmentInlineContentProps
  */
 export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineContentProps> = ({
   attachment,
-  setComposerContent,
   experimentalFeatures,
 }) => {
   const parsed = normaliseEntityAttachment(attachment);
@@ -75,10 +74,9 @@ export const EntityAttachmentInlineContent: React.FC<EntityAttachmentInlineConte
           identifier={parsed.entities[0]}
           watchlistsEnabled={watchlistsEnabled}
           privmonModifierEnabled={privmonModifierEnabled}
-          setComposerContent={setComposerContent}
         />
       ) : (
-        <EntityTable entities={parsed.entities} setComposerContent={setComposerContent} />
+        <EntityTable entities={parsed.entities} />
       )}
     </QueryClientProvider>
   );

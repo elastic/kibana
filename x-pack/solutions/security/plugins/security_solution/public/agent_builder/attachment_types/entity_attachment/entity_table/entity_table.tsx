@@ -10,13 +10,9 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiPopover,
   EuiSkeletonText,
   EuiText,
 } from '@elastic/eui';
@@ -32,19 +28,10 @@ import { EntitySourceBadge } from '../../../../flyout/entity_details/shared/comp
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { useEntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
-import {
-  getChangeAssetCriticalityPrompt,
-  getCheckGraphPrompt,
-  getContinueConversationBulkPrompt,
-  getContinueConversationPrompt,
-  getResolutionGroupPrompt,
-  getRiskContributionsPrompt,
-} from '../prompts';
 import type { EntityAttachmentIdentifier } from '../types';
 
 interface EntityTableProps {
   entities: EntityAttachmentIdentifier[];
-  setComposerContent?: (text: string) => void;
 }
 
 interface EntityRow {
@@ -75,133 +62,12 @@ const COLUMN_LABELS = {
   lastSeen: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.lastSeen', {
     defaultMessage: 'Last seen',
   }),
-  actions: i18n.translate('xpack.securitySolution.agentBuilder.entityAttachment.table.actions', {
-    defaultMessage: 'Actions',
-  }),
 };
-
-const ROW_ACTION_LABELS = {
-  continueConversation: i18n.translate(
-    'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.continueConversation',
-    { defaultMessage: 'Continue the conversation' }
-  ),
-  riskContributions: i18n.translate(
-    'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.riskContributions',
-    { defaultMessage: 'View risk contributions' }
-  ),
-  changeAssetCriticality: i18n.translate(
-    'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.changeAssetCriticality',
-    { defaultMessage: 'Change asset criticality' }
-  ),
-  resolutionGroup: i18n.translate(
-    'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.resolutionGroup',
-    { defaultMessage: 'View resolution group' }
-  ),
-  checkGraph: i18n.translate(
-    'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.checkGraph',
-    { defaultMessage: 'Check graph' }
-  ),
-  open: i18n.translate(
-    'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.openMenu',
-    { defaultMessage: 'Actions' }
-  ),
-};
-
-const INVESTIGATE_ALL_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.entityAttachment.table.actions.investigateAll',
-  { defaultMessage: 'Investigate these entities together' }
-);
 
 const OPEN_ENTITY_ANALYTICS_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.table.openEntityAnalytics',
   { defaultMessage: 'Open Entity Analytics' }
 );
-
-/**
- * Per-row popover that mirrors the single-card follow-up chip set. Each
- * item prefills the composer via `setComposerContent` (no programmatic
- * send) so the user can tweak the prompt before hitting Enter.
- */
-const RowActionsPopover: React.FC<{
-  identifier: EntityAttachmentIdentifier;
-  setComposerContent?: (text: string) => void;
-}> = ({ identifier, setComposerContent }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const closeAnd = useCallback(
-    (prompt: string) => () => {
-      setComposerContent?.(prompt);
-      setIsOpen(false);
-    },
-    [setComposerContent]
-  );
-
-  if (!setComposerContent) return null;
-
-  const button = (
-    <EuiButtonIcon
-      iconType="boxesHorizontal"
-      aria-label={ROW_ACTION_LABELS.open}
-      color="text"
-      onClick={() => setIsOpen((prev) => !prev)}
-      data-test-subj="entityAttachmentTableRowActionsToggle"
-    />
-  );
-
-  const items = [
-    <EuiContextMenuItem
-      key="continue"
-      icon="discuss"
-      onClick={closeAnd(getContinueConversationPrompt(identifier))}
-      data-test-subj="entityAttachmentTableRowContinueConversation"
-    >
-      {ROW_ACTION_LABELS.continueConversation}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="risk"
-      icon="inspect"
-      onClick={closeAnd(getRiskContributionsPrompt(identifier))}
-      data-test-subj="entityAttachmentTableRowRiskContributions"
-    >
-      {ROW_ACTION_LABELS.riskContributions}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="criticality"
-      icon="pencil"
-      onClick={closeAnd(getChangeAssetCriticalityPrompt(identifier))}
-      data-test-subj="entityAttachmentTableRowChangeAssetCriticality"
-    >
-      {ROW_ACTION_LABELS.changeAssetCriticality}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="resolution"
-      icon="aggregate"
-      onClick={closeAnd(getResolutionGroupPrompt(identifier))}
-      data-test-subj="entityAttachmentTableRowResolutionGroup"
-    >
-      {ROW_ACTION_LABELS.resolutionGroup}
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="graph"
-      icon="graphApp"
-      onClick={closeAnd(getCheckGraphPrompt(identifier))}
-      data-test-subj="entityAttachmentTableRowCheckGraph"
-    >
-      {ROW_ACTION_LABELS.checkGraph}
-    </EuiContextMenuItem>,
-  ];
-
-  return (
-    <EuiPopover
-      button={button}
-      isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
-      panelPaddingSize="none"
-      anchorPosition="leftCenter"
-    >
-      <EuiContextMenuPanel size="s" items={items} />
-    </EuiPopover>
-  );
-};
 
 const identifierTypeToEntityType = (
   type: EntityAttachmentIdentifier['identifierType']
@@ -256,7 +122,7 @@ const EntityRowLoader: React.FC<{
   return null;
 };
 
-export const EntityTable: React.FC<EntityTableProps> = ({ entities, setComposerContent }) => {
+export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
   const { services } = useKibana<{ application: ApplicationStart }>();
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsByKey, setRowsByKey] = useState<Record<string, EntityRow>>({});
@@ -373,18 +239,8 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities, setComposerC
           ),
         width: '140px',
       },
-      {
-        name: COLUMN_LABELS.actions,
-        width: '80px',
-        render: (row: EntityRow) => (
-          <RowActionsPopover
-            identifier={row.identifier}
-            setComposerContent={setComposerContent}
-          />
-        ),
-      },
     ],
-    [setComposerContent]
+    []
   );
 
   const pagination = useMemo(
@@ -424,19 +280,6 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities, setComposerC
         tableLayout="auto"
       />
       <EuiFlexGroup gutterSize="s" wrap responsive={false} style={{ marginTop: 8 }}>
-        {setComposerContent && entities.length > 1 && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="discuss"
-              onClick={() => setComposerContent(getContinueConversationBulkPrompt(entities))}
-              data-test-subj="entityAttachmentInvestigateAll"
-              aria-label={INVESTIGATE_ALL_LABEL}
-            >
-              {INVESTIGATE_ALL_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             size="xs"

@@ -33,13 +33,6 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   screenContext?: ScreenContextAttachmentData;
   /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
   openSidebarConversation?: () => void;
-  /**
-   * One-shot composer injection: replace the conversation composer editor
-   * content with `text`. Use from "Continue the conversation" affordances on
-   * attachment renderers. The injection is applied and cleared automatically
-   * by the conversation input; consumers should not manually clear state.
-   */
-  setComposerContent?: (text: string) => void;
 }
 
 /**
@@ -80,11 +73,6 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
    * Use to mark an attachment as currently previewed outside canvas.
    */
   setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
-  /**
-   * One-shot composer injection for "Continue the conversation" action buttons.
-   * See {@link AttachmentRenderProps.setComposerContent}.
-   */
-  setComposerContent?: (text: string) => void;
 }
 
 /**

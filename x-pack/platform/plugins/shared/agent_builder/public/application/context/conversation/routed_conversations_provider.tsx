@@ -10,7 +10,6 @@ import { useLocation, useParams } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ConversationContext } from './conversation_context';
-import { useComposerInjection } from './use_composer_injection';
 import type { LocationState } from '../../hooks/use_navigation';
 import { newConversationId } from '../../utils/new_conversation';
 import { appPaths } from '../../utils/app_paths';
@@ -120,9 +119,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     );
   }, []);
 
-  const { composerInjection, setComposerContent, acknowledgeComposerInjection } =
-    useComposerInjection();
-
   const contextValue = useMemo(
     () => ({
       conversationId,
@@ -136,9 +132,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
-      composerInjection,
-      setComposerContent,
-      acknowledgeComposerInjection,
     }),
     [
       conversationId,
@@ -150,9 +143,6 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
-      composerInjection,
-      setComposerContent,
-      acknowledgeComposerInjection,
     ]
   );
 

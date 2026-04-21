@@ -51,7 +51,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
     previewedAttachmentKey,
     setPreviewedAttachmentKey,
   } = useCanvasContext();
-  const { conversationActions, setComposerContent } = useConversationContext();
+  const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
   const { updatePersistedConversationId } = usePersistedConversationId({});
 
@@ -92,7 +92,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             nextPreviewState === 'previewing' ? attachmentPreviewKey : null
           );
         },
-        setComposerContent,
       }),
     [
       uiDefinition,
@@ -103,7 +102,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       setPreviewedAttachmentKey,
       attachmentPreviewKey,
       openSidebarConversation,
-      setComposerContent,
     ]
   );
 
@@ -138,7 +136,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
           isSidebar,
           screenContext,
           openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-          setComposerContent,
         })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

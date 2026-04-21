@@ -8,7 +8,6 @@
 import React, { useMemo } from 'react';
 import {
   EuiBasicTable,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -40,7 +39,6 @@ interface RiskSummaryMiniProps {
   resolutionRiskStats?: RiskStats;
   privmonModifierEnabled: boolean;
   watchlistEnabled: boolean;
-  onViewRiskContributions?: () => void;
 }
 
 const TITLE = (entityType: EntityType) =>
@@ -57,11 +55,6 @@ const ENTITY_RISK_LABEL = i18n.translate(
 const RESOLUTION_RISK_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.risk.resolutionGroupScore',
   { defaultMessage: 'Resolution group risk score' }
-);
-
-const VIEW_RISK_CONTRIBUTIONS_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.entityAttachment.risk.viewContributions',
-  { defaultMessage: 'View risk contributions' }
 );
 
 const ScoreBlock: React.FC<{
@@ -139,7 +132,6 @@ export const RiskSummaryMini: React.FC<RiskSummaryMiniProps> = ({
   resolutionRiskStats,
   privmonModifierEnabled,
   watchlistEnabled,
-  onViewRiskContributions,
 }) => {
   if (!riskStats && riskScore == null) {
     return null;
@@ -157,27 +149,9 @@ export const RiskSummaryMini: React.FC<RiskSummaryMiniProps> = ({
       paddingSize="none"
       data-test-subj="entityAttachmentRiskSummaryMini"
     >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>{TITLE(entityType)}</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {onViewRiskContributions && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="inspect"
-              iconSide="left"
-              onClick={onViewRiskContributions}
-              data-test-subj="entityAttachmentViewRiskContributions"
-              aria-label={VIEW_RISK_CONTRIBUTIONS_LABEL}
-            >
-              {VIEW_RISK_CONTRIBUTIONS_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <EuiTitle size="xs">
+        <h3>{TITLE(entityType)}</h3>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" direction="row" wrap>
         <EuiFlexItem grow={1} style={{ minWidth: 160 }}>

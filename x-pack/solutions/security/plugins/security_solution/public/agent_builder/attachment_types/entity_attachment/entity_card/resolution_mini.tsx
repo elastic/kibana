@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   EuiAccordion,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -24,17 +23,11 @@ import { ResolutionGroupTable } from '../../../../entity_analytics/components/en
 interface ResolutionMiniProps {
   entityStoreEntityId?: string;
   currentEntityStoreEntityId?: string;
-  onViewResolutionGroup?: () => void;
 }
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.agentBuilder.entityAttachment.resolution.title',
   { defaultMessage: 'Resolution group' }
-);
-
-const VIEW_LABEL = i18n.translate(
-  'xpack.securitySolution.agentBuilder.entityAttachment.resolution.viewAction',
-  { defaultMessage: 'View resolution group' }
 );
 
 const MEMBERS_LABEL = (count: number) =>
@@ -58,7 +51,6 @@ const EMPTY_LABEL = i18n.translate(
 export const ResolutionMini: React.FC<ResolutionMiniProps> = ({
   entityStoreEntityId,
   currentEntityStoreEntityId,
-  onViewResolutionGroup,
 }) => {
   const accordionId = useGeneratedHtmlId({ prefix: 'entityAttachmentResolutionMini' });
   const enabled = Boolean(entityStoreEntityId);
@@ -106,20 +98,6 @@ export const ResolutionMini: React.FC<ResolutionMiniProps> = ({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-        }
-        extraAction={
-          onViewResolutionGroup && (
-            <EuiButtonEmpty
-              size="xs"
-              iconType="inspect"
-              iconSide="left"
-              onClick={onViewResolutionGroup}
-              data-test-subj="entityAttachmentViewResolutionGroup"
-              aria-label={VIEW_LABEL}
-            >
-              {VIEW_LABEL}
-            </EuiButtonEmpty>
-          )
         }
       >
         <EuiSpacer size="s" />

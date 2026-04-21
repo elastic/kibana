@@ -14,12 +14,6 @@ export const AGENT_BUILDER_CONVERSATION_INPUT_EDITOR =
 
 export const ENTITY_ATTACHMENT_CARD_ACTIONS = '[data-test-subj="entityAttachmentCardActions"]';
 
-export const ENTITY_ATTACHMENT_OPEN_FLYOUT_ACTION =
-  '[data-test-subj="entityAttachmentOpenFlyoutAction"]';
-
-export const ENTITY_ATTACHMENT_CONTINUE_CONVERSATION_ACTION =
-  '[data-test-subj="entityAttachmentContinueConversationAction"]';
-
 export const ENTITY_ATTACHMENT_OPEN_ENTITY_ANALYTICS_ACTION =
   '[data-test-subj="entityAttachmentOpenEntityAnalyticsAction"]';
 

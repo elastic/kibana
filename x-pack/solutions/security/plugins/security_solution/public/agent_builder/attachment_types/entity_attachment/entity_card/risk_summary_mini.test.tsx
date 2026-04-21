@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { RiskStats } from '../../../../../common/search_strategy';
@@ -83,19 +83,5 @@ describe('RiskSummaryMini', () => {
     });
     expect(screen.getByTestId('entityAttachmentResolutionRiskScoreBlock')).toBeInTheDocument();
     expect(screen.getByTestId('entityAttachmentResolutionContributionsTable')).toBeInTheDocument();
-  });
-
-  it('wires the view-risk-contributions chip to the provided callback', () => {
-    const onViewRiskContributions = jest.fn();
-    renderMini({ onViewRiskContributions });
-    fireEvent.click(screen.getByTestId('entityAttachmentViewRiskContributions'));
-    expect(onViewRiskContributions).toHaveBeenCalledTimes(1);
-  });
-
-  it('hides the view-risk-contributions chip when no callback is provided', () => {
-    renderMini({ onViewRiskContributions: undefined });
-    expect(
-      screen.queryByTestId('entityAttachmentViewRiskContributions')
-    ).not.toBeInTheDocument();
   });
 });

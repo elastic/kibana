@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
@@ -27,7 +27,6 @@ jest.mock('./resolution_mini', () => ({
     <div
       data-test-subj="resolutionMiniMock"
       data-has-entity-id={String(Boolean(props.entityStoreEntityId))}
-      data-has-callback={String(Boolean(props.onViewResolutionGroup))}
     />
   ),
 }));
@@ -48,7 +47,6 @@ jest.mock('./risk_summary_mini', () => ({
     <div
       data-test-subj="riskSummaryMiniMock"
       data-has-stats={String(Boolean(props.riskStats))}
-      data-has-callback={String(Boolean(props.onViewRiskContributions))}
     />
   ),
 }));
@@ -92,7 +90,6 @@ const renderCard = (props: Partial<React.ComponentProps<typeof EntityCard>> = {}
     identifier: { identifierType: 'user', identifier: 'bob' },
     watchlistsEnabled: true,
     privmonModifierEnabled: true,
-    setComposerContent: jest.fn(),
   };
   return render(
     <I18nProvider>
@@ -167,28 +164,6 @@ describe('EntityCard', () => {
     expect(screen.queryByTestId('riskSummaryMiniMock')).not.toBeInTheDocument();
   });
 
-  it('wires view-risk-contributions and view-resolution-group chips to setComposerContent', () => {
-    mockedUseEntityForAttachment.mockReturnValue({
-      isLoading: false,
-      data: baseEntity(),
-    });
-    const setComposerContent = jest.fn();
-    renderCard({ setComposerContent });
-
-    fireEvent.click(screen.getByTestId('entityAttachmentRiskContributionsAction'));
-    fireEvent.click(screen.getByTestId('entityAttachmentChangeAssetCriticalityAction'));
-    fireEvent.click(screen.getByTestId('entityAttachmentResolutionGroupAction'));
-    fireEvent.click(screen.getByTestId('entityAttachmentCheckGraphAction'));
-    fireEvent.click(screen.getByTestId('entityAttachmentContinueConversationAction'));
-
-    expect(setComposerContent).toHaveBeenCalledTimes(5);
-    const prompts = setComposerContent.mock.calls.map((call) => String(call[0]));
-    expect(prompts.some((prompt) => prompt.toLowerCase().includes('risk contributions'))).toBe(true);
-    expect(prompts.some((prompt) => prompt.toLowerCase().includes('asset criticality'))).toBe(true);
-    expect(prompts.some((prompt) => prompt.toLowerCase().includes('resolution group'))).toBe(true);
-    expect(prompts.some((prompt) => prompt.toLowerCase().includes('graph'))).toBe(true);
-  });
-
   it('passes the store entity id and watchlist flag to the summary grid', () => {
     mockedUseEntityForAttachment.mockReturnValue({
       isLoading: false,
@@ -208,20 +183,5 @@ describe('EntityCard', () => {
     });
     renderCard();
     expect(screen.queryByTestId('resolutionMiniMock')).not.toBeInTheDocument();
-  });
-
-  it('suppresses the view callbacks in the mini sections when setComposerContent is missing', () => {
-    mockedUseEntityForAttachment.mockReturnValue({
-      isLoading: false,
-      data: baseEntity(),
-    });
-    renderCard({ setComposerContent: undefined });
-
-    expect(screen.getByTestId('riskSummaryMiniMock').getAttribute('data-has-callback')).toBe(
-      'false'
-    );
-    expect(screen.getByTestId('resolutionMiniMock').getAttribute('data-has-callback')).toBe(
-      'false'
-    );
   });
 });

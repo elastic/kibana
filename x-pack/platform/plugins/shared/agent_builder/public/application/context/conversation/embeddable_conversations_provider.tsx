@@ -17,7 +17,6 @@ import type {
 } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
-import { useComposerInjection } from './use_composer_injection';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -186,9 +185,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
   }, []);
 
-  const { composerInjection, setComposerContent, acknowledgeComposerInjection } =
-    useComposerInjection();
-
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
@@ -206,9 +202,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       upsertAttachments,
       resetAttachments,
       removeAttachment,
-      composerInjection,
-      setComposerContent,
-      acknowledgeComposerInjection,
       conversationActions,
     }),
     [
@@ -225,9 +218,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       setAgentId,
       resetAttachments,
       removeAttachment,
-      composerInjection,
-      setComposerContent,
-      acknowledgeComposerInjection,
       conversationActions,
     ]
   );

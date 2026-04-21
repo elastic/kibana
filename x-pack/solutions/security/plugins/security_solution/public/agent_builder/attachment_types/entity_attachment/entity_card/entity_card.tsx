@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiCallOut, EuiPanel, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EntityType } from '../../../../../common/entity_analytics/types';
@@ -16,16 +16,11 @@ import { EntitySummaryGridMini } from './entity_summary_grid';
 import { RiskSummaryMini } from './risk_summary_mini';
 import { ResolutionMini } from './resolution_mini';
 import { EntityCardActions } from './entity_card_actions';
-import {
-  getResolutionGroupPrompt,
-  getRiskContributionsPrompt,
-} from '../prompts';
 
 interface EntityCardProps {
   identifier: EntityAttachmentIdentifier;
   watchlistsEnabled: boolean;
   privmonModifierEnabled: boolean;
-  setComposerContent?: (text: string) => void;
 }
 
 const identifierTypeToEntityType = (
@@ -49,26 +44,15 @@ const identifierTypeToEntityType = (
  * in the entity store, we mirror the user/host details flyout layout
  * (identity header → summary grid → risk summary → resolution group),
  * rebuilt with lightweight hooks so the card stays decoupled from the
- * Security Solution Redux/expandable-flyout providers.
- *
- * Actions are prefill-only: the chips set the composer content via
- * `setComposerContent` and let the user press Enter to send.
+ * Security Solution Redux/expandable-flyout providers. Follow-up actions
+ * other than "Open in Entity Analytics" are driven from the agent side.
  */
 export const EntityCard: React.FC<EntityCardProps> = ({
   identifier,
   watchlistsEnabled,
   privmonModifierEnabled,
-  setComposerContent,
 }) => {
   const { isLoading, error, data } = useEntityForAttachment(identifier);
-
-  const handleViewRiskContributions = useCallback(() => {
-    setComposerContent?.(getRiskContributionsPrompt(identifier));
-  }, [setComposerContent, identifier]);
-
-  const handleViewResolutionGroup = useCallback(() => {
-    setComposerContent?.(getResolutionGroupPrompt(identifier));
-  }, [setComposerContent, identifier]);
 
   if (isLoading && !data) {
     return (
@@ -126,7 +110,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({
           isEntityInStore={false}
           hasLastSeenDate={false}
         />
-        <EntityCardActions identifier={identifier} setComposerContent={setComposerContent} />
+        <EntityCardActions identifier={identifier} />
       </EuiPanel>
     );
   }
@@ -170,9 +154,6 @@ export const EntityCard: React.FC<EntityCardProps> = ({
                 riskStats={resolved.riskStats}
                 privmonModifierEnabled={privmonModifierEnabled}
                 watchlistEnabled={watchlistsEnabled}
-                onViewRiskContributions={
-                  setComposerContent ? handleViewRiskContributions : undefined
-                }
               />
             </>
           )}
@@ -182,15 +163,12 @@ export const EntityCard: React.FC<EntityCardProps> = ({
               <ResolutionMini
                 entityStoreEntityId={resolved.entityId}
                 currentEntityStoreEntityId={resolved.entityId}
-                onViewResolutionGroup={
-                  setComposerContent ? handleViewResolutionGroup : undefined
-                }
               />
             </>
           )}
         </>
       )}
-      <EntityCardActions identifier={identifier} setComposerContent={setComposerContent} />
+      <EntityCardActions identifier={identifier} />
     </EuiPanel>
   );
 };

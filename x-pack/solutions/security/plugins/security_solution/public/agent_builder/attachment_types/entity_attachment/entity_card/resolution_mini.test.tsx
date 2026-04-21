@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ResolutionMini } from './resolution_mini';
 
@@ -82,20 +82,5 @@ describe('ResolutionMini', () => {
     expect(table.getAttribute('data-target-id')).toBe('target-id');
     expect(table.getAttribute('data-show-actions')).toBe('false');
     expect(table.getAttribute('data-current-id')).toBe('entity-1');
-  });
-
-  it('renders the view-resolution-group chip and wires it to the callback', () => {
-    mockedUseResolutionGroup.mockReturnValue({
-      data: {
-        target: { entity: { id: 'target-id' } },
-        aliases: [{ entity: { id: 'alias-id' } }],
-        group_size: 2,
-      },
-      isLoading: false,
-    });
-    const onViewResolutionGroup = jest.fn();
-    renderMini({ onViewResolutionGroup });
-    fireEvent.click(screen.getByTestId('entityAttachmentViewResolutionGroup'));
-    expect(onViewResolutionGroup).toHaveBeenCalledTimes(1);
   });
 });
