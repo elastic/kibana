@@ -9,6 +9,7 @@
 
 import * as Fs from 'fs';
 import os from 'os';
+import { execFileSync } from 'child_process';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
@@ -37,6 +38,44 @@ import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipelin
 
 // TODO: this is always false on on-merge, when switching to enable this by default, check if this is a PR
 const USE_SELECTIVE_TESTING = process.env.GITHUB_PR_LABELS?.includes(SELECTIVE_TESTS_LABEL);
+
+const FTR_RUN_ORDER_GCS_BUCKET = 'gs://kibana-ci-ftr-run-order';
+const FTR_RUN_ORDER_CACHE_ENABLED = process.env.FTR_RUN_ORDER_CACHE !== 'false';
+
+type FtrRunOrder = Record<
+  string,
+  { title: string; expectedDurationMin: number; names: string[] }
+>;
+
+function uploadFtrRunOrderCache(branch: string, ftrRunOrder: FtrRunOrder): void {
+  const gcsPath = `${FTR_RUN_ORDER_GCS_BUCKET}/${branch}/ftr_run_order.json`;
+  try {
+    Fs.writeFileSync('/tmp/ftr_run_order_cache.json', JSON.stringify(ftrRunOrder, null, 2));
+    execFileSync('gsutil', [
+      '-h',
+      'Cache-Control:no-cache, max-age=0, no-transform',
+      'cp',
+      '/tmp/ftr_run_order_cache.json',
+      gcsPath,
+    ]);
+    console.log(`Uploaded FTR run order cache to ${gcsPath}`);
+  } catch (ex) {
+    console.warn(`Failed to upload FTR run order cache: ${(ex as Error).message}`);
+  }
+}
+
+function downloadFtrRunOrderCache(branch: string): FtrRunOrder | undefined {
+  const gcsPath = `${FTR_RUN_ORDER_GCS_BUCKET}/${branch}/ftr_run_order.json`;
+  try {
+    execFileSync('gsutil', ['cp', gcsPath, '/tmp/ftr_run_order_cache.json']);
+    const data = JSON.parse(Fs.readFileSync('/tmp/ftr_run_order_cache.json', 'utf8'));
+    console.log(`Downloaded FTR run order cache from ${gcsPath}`);
+    return data as FtrRunOrder;
+  } catch (ex) {
+    console.warn(`FTR run order cache miss (${branch}): ${(ex as Error).message}`);
+    return undefined;
+  }
+}
 
 const SHARD_ANNOTATION_SEP = '||shard=';
 /**
@@ -251,11 +290,61 @@ export async function pickTestGroupRunOrder() {
   const ownBranch = process.env.BUILDKITE_BRANCH as string;
   const pipelineSlug = process.env.BUILDKITE_PIPELINE_SLUG as string;
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
+  const isOnMerge = pipelineSlug === 'kibana-on-merge';
+
+  // Try to use cached FTR run order for PR builds to skip the FTR portion of the ci-stats call.
+  // On-merge builds always compute fresh and upload the cache.
+  let cachedFtrRunOrder: FtrRunOrder | undefined;
+  if (FTR_RUN_ORDER_CACHE_ENABLED && !isOnMerge && ftrConfigsByQueue.size) {
+    cachedFtrRunOrder =
+      downloadFtrRunOrderCache(trackedBranch) ?? downloadFtrRunOrderCache('main');
+  }
+
+  const useFtrCache = !!cachedFtrRunOrder;
+  if (useFtrCache) {
+    console.log('Using cached FTR run order — skipping FTR configs from ci-stats query');
+  }
+
+  const ciStatsGroups = [
+    {
+      type: UNIT_TYPE,
+      defaultMin: 4,
+      maxMin: JEST_UNIT_MAX_MINUTES,
+      tooLongMin: JEST_UNIT_TOO_LONG_MINUTES,
+      overheadMin: 0.2,
+      warmupMin: 4,
+      concurrency: 3,
+      names: jestUnitConfigs,
+    },
+    {
+      type: INTEGRATION_TYPE,
+      defaultMin: 60,
+      maxMin: JEST_INTEGRATION_MAX_MINUTES,
+      tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
+      overheadMin: 0.2,
+      warmupMin: 2,
+      concurrency: 1,
+      names: jestIntegrationConfigs,
+    },
+    // Only include FTR configs in ci-stats call if we don't have a cache
+    ...(!useFtrCache
+      ? Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
+          type: FUNCTIONAL_TYPE,
+          defaultMin: 60,
+          queue,
+          maxMin: FUNCTIONAL_MAX_MINUTES,
+          tooLongMin: FUNCTIONAL_TOO_LONG_MINUTES,
+          minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
+          overheadMin: 0,
+          warmupMin: 3,
+          names,
+        }))
+      : []),
+  ];
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
     durationPercentile: 75,
     sources: [
-      // try to get times from a recent successful job on this PR
       ...(prNumber
         ? [
             {
@@ -264,10 +353,6 @@ export async function pickTestGroupRunOrder() {
             },
           ]
         : []),
-      // if we are running on a external job, like kibana-code-coverage-main, try finding times that are specific to that job
-      // kibana-elasticsearch-serverless-verify-and-promote is not necessarily run in commit order -
-      // using kibana-on-merge groups will provide a closer approximation, with a failure mode -
-      // of too many ftr groups instead of potential timeouts.
       ...(!prNumber &&
       pipelineSlug !== 'kibana-on-merge' &&
       pipelineSlug !== 'kibana-elasticsearch-serverless-verify-and-promote'
@@ -282,7 +367,6 @@ export async function pickTestGroupRunOrder() {
             },
           ]
         : []),
-      // try to get times from the mergeBase commit
       ...(process.env.GITHUB_PR_MERGE_BASE
         ? [
             {
@@ -291,50 +375,16 @@ export async function pickTestGroupRunOrder() {
             },
           ]
         : []),
-      // fallback to the latest times from the tracked branch
       {
         branch: trackedBranch,
         jobName: 'kibana-on-merge',
       },
-      // finally fallback to the latest times from the main branch in case this branch is brand new
       {
         branch: 'main',
         jobName: 'kibana-on-merge',
       },
     ],
-    groups: [
-      {
-        type: UNIT_TYPE,
-        defaultMin: 4,
-        maxMin: JEST_UNIT_MAX_MINUTES,
-        tooLongMin: JEST_UNIT_TOO_LONG_MINUTES,
-        overheadMin: 0.2,
-        warmupMin: 4,
-        concurrency: 3,
-        names: jestUnitConfigs,
-      },
-      {
-        type: INTEGRATION_TYPE,
-        defaultMin: 60,
-        maxMin: JEST_INTEGRATION_MAX_MINUTES,
-        tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
-        overheadMin: 0.2,
-        warmupMin: 2,
-        concurrency: 1,
-        names: jestIntegrationConfigs,
-      },
-      ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
-        type: FUNCTIONAL_TYPE,
-        defaultMin: 60,
-        queue,
-        maxMin: FUNCTIONAL_MAX_MINUTES,
-        tooLongMin: FUNCTIONAL_TOO_LONG_MINUTES,
-        minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
-        overheadMin: 0,
-        warmupMin: 3,
-        names,
-      })),
-    ],
+    groups: ciStatsGroups,
   });
 
   console.log('test run order is determined by builds:');
@@ -346,20 +396,32 @@ export async function pickTestGroupRunOrder() {
   let configCounter = 0;
   let groupCounter = 0;
 
-  // the relevant data we will use to define the pipeline steps
   const functionalGroups: Array<{
     title: string;
     key: string;
     sortBy: number | string;
     queue: string;
   }> = [];
-  // the map that we will write to the artifacts for informing ftr config jobs of what they should do
-  const ftrRunOrder: Record<
-    string,
-    { title: string; expectedDurationMin: number; names: string[] }
-  > = {};
+  const ftrRunOrder: FtrRunOrder = {};
 
-  if (ftrConfigsByQueue.size) {
+  if (useFtrCache && cachedFtrRunOrder) {
+    // Restore FTR grouping from cache — reuse the cached keys, titles, and groupings
+    for (const [key, entry] of Object.entries(cachedFtrRunOrder)) {
+      functionalGroups.push({
+        title: entry.title,
+        key,
+        sortBy: entry.title.startsWith('FTR Configs #')
+          ? parseInt(entry.title.replace('FTR Configs #', ''), 10) || entry.title
+          : entry.title,
+        queue: defaultQueue,
+      });
+      ftrRunOrder[key] = entry;
+      configCounter++;
+    }
+    console.log(
+      `Restored ${Object.keys(cachedFtrRunOrder).length} FTR groups from cache`
+    );
+  } else if (ftrConfigsByQueue.size) {
     for (const { groups, queue } of getRunGroups(bk, types, FUNCTIONAL_TYPE)) {
       for (const group of groups) {
         if (!group.names.length) {
@@ -397,9 +459,16 @@ export async function pickTestGroupRunOrder() {
   bk.uploadArtifacts('jest_run_order.json');
 
   if (ftrConfigsIncluded) {
-    // write the config for functional steps to an artifact that can be used by the individual functional jobs
     Fs.writeFileSync('ftr_run_order.json', JSON.stringify(ftrRunOrder, null, 2));
     bk.uploadArtifacts('ftr_run_order.json');
+
+    // On-merge builds upload the FTR run order to GCS for PR builds to reuse
+    if (isOnMerge && FTR_RUN_ORDER_CACHE_ENABLED) {
+      uploadFtrRunOrderCache(ownBranch, ftrRunOrder);
+      if (ownBranch !== 'main') {
+        uploadFtrRunOrderCache('main', ftrRunOrder);
+      }
+    }
   }
 
   const steps = [
