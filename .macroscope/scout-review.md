@@ -93,9 +93,8 @@ One line stating what was found on the latest review. Examples:
 
 - `Found 2 issues (1 🟡 Major, 1 🔵 Minor). See inline comments for details.`
 - `Found 1 issue (1 🟡 Major). See inline comments for details.`
-- `No issues found. ✅`
+- `No issues found ✅`
 - `All issues resolved ✅`
-- `Skipped — no Scout test files changed.`
 
 **2. Footer (always present, verbatim)**
 
