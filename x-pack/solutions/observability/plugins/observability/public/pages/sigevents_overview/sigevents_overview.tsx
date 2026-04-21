@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { SignificantEventsDiscoveryIllustration } from './significant_events_discovery_illustration';
 
 export function SigeventsOverviewPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -18,6 +20,7 @@ export function SigeventsOverviewPage() {
       isPageDataLoaded={true}
       data-test-subj="obltSigeventsOverviewPageHeader"
       pageSectionProps={{
+        grow: true,
         contentProps: {
           style: {
             display: 'flex',
@@ -27,30 +30,41 @@ export function SigeventsOverviewPage() {
         },
       }}
     >
-      <EuiEmptyPrompt
-        iconType="logoObservability"
-        data-test-subj="obltSigeventsOverviewPlaceholder"
-        css={{
-          flexGrow: 1,
-          display: 'flex',
-          alignItems: 'center',
-        }}
-        title={
-          <h2>
-            {i18n.translate('xpack.observability.sigeventsOverview.emptyState.title', {
-              defaultMessage: 'Significant events overview',
-            })}
-          </h2>
-        }
-        body={
-          <p>
-            {i18n.translate('xpack.observability.sigeventsOverview.emptyState.body', {
-              defaultMessage:
-                'This area will become a full chat experience for exploring significant events.',
-            })}
-          </p>
-        }
-      />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="center"
+        direction="column"
+        gutterSize="none"
+        css={css`
+          flex: 1 1 auto;
+          width: 100%;
+          min-height: var(--kbn-application--content-height);
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiEmptyPrompt
+            hasShadow
+            color="plain"
+            icon={<SignificantEventsDiscoveryIllustration />}
+            data-test-subj="obltSigeventsOverviewPlaceholder"
+            title={
+              <h2>
+                {i18n.translate('xpack.observability.sigeventsOverview.emptyState.title', {
+                  defaultMessage: 'Observability Status page',
+                })}
+              </h2>
+            }
+            body={
+              <p>
+                {i18n.translate('xpack.observability.sigeventsOverview.emptyState.body', {
+                  defaultMessage:
+                    'This page will show status, active significant events, impacted entities and other related information. It will also allow for a conversation with context.',
+                })}
+              </p>
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </ObservabilityPageTemplate>
   );
 }
