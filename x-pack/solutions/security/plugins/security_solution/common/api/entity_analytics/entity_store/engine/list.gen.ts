@@ -11,7 +11,7 @@
  *
  * info:
  *   title: List Entity Engines
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z } from '@kbn/zod/v4';

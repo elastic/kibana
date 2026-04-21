@@ -25,6 +25,8 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSourcererDataView } from '../../sourcerer/containers';
+import { useKibana } from '../../common/lib/kibana';
+import { EntityEventTypes } from '../../common/lib/telemetry';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
@@ -58,6 +60,7 @@ const getDefaultQuery = ({ query, filters }: EntitiesBaseURLQuery): URLQuery => 
 });
 
 export const EntityAnalyticsHomePage = () => {
+  const { telemetry } = useKibana().services;
   const {
     indicesExist: oldIndicesExist,
     loading: oldIsSourcererLoading,
@@ -143,8 +146,11 @@ export const EntityAnalyticsHomePage = () => {
   const handleCloseFlyout = useCallback(() => setIsFlyoutOpen(false), []);
 
   const handleOpenLeadInChat = useCallback(
-    (lead: HuntingLead) => openAgentBuilderWithLead(lead),
-    [openAgentBuilderWithLead]
+    (lead: HuntingLead) => {
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationLeadClicked, {});
+      openAgentBuilderWithLead(lead);
+    },
+    [openAgentBuilderWithLead, telemetry]
   );
 
   const handleHuntInChat = useCallback(() => {

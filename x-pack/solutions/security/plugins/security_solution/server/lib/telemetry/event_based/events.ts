@@ -1859,6 +1859,34 @@ export const GAP_DETECTED_EVENT: EventTypeOpts<{
   },
 };
 
+export const LEAD_GENERATION_EXECUTION_EVENT: EventTypeOpts<{
+  spaceId: string;
+  leadsGenerated: number;
+  sourceType: string;
+}> = {
+  eventType: 'lead_generation_execution',
+  schema: {
+    spaceId: {
+      type: 'keyword',
+      _meta: {
+        description: 'Space ID where lead generation was run',
+      },
+    },
+    leadsGenerated: {
+      type: 'long',
+      _meta: {
+        description: 'Number of leads successfully generated',
+      },
+    },
+    sourceType: {
+      type: 'keyword',
+      _meta: {
+        description: 'How lead generation was triggered: "adhoc" or "scheduled"',
+      },
+    },
+  },
+};
+
 export const events = [
   DETECTION_RULE_UPGRADE_EVENT,
   DETECTION_RULE_BULK_UPGRADE_EVENT,
@@ -1896,4 +1924,5 @@ export const events = [
   ...SIEM_MIGRATIONS_EVENTS,
   GAP_DETECTED_EVENT,
   ...TRIAL_COMPANION_EVENTS,
+  LEAD_GENERATION_EXECUTION_EVENT,
 ];

@@ -31,8 +31,8 @@ export const deleteEntity = (
 ) => {
   router.versioned
     .delete({
-      access: 'public',
-      path: '/api/entity_store/entities/{entityType}',
+      access: 'internal',
+      path: '/internal/entity_store/entities/{entityType}',
       options: {
         availability: {
           since: '9.3.0',
@@ -47,7 +47,7 @@ export const deleteEntity = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(DeleteSingleEntityRequestParams),
