@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiFlexGroup, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiCodeBlock, EuiFlexGroup, EuiLink, useEuiTheme } from '@elastic/eui';
 import { useTruncateText } from '@kbn/react-hooks';
 import { readLess, readMore } from '../../../../common/translations';
 
@@ -37,7 +37,7 @@ export const ExpandableTruncatedText = ({
       style={{ width: '100%' }}
       justifyContent="flexStart"
     >
-      <EuiCode
+      <EuiCodeBlock
         language={codeLanguage}
         style={{
           fontWeight: 'normal',
@@ -46,7 +46,7 @@ export const ExpandableTruncatedText = ({
         }}
       >
         {displayText}
-      </EuiCode>
+      </EuiCodeBlock>
       {shouldTruncate && (
         <EuiLink data-test-subj="truncatedTextToggle" onClick={toggleExpanded}>
           {isExpanded ? readLess : readMore}

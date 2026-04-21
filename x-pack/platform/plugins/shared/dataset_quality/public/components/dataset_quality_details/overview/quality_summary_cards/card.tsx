@@ -8,13 +8,13 @@
 import {
   EuiButtonEmpty,
   useEuiTheme,
+  EuiIconTip,
+  EuiStat,
   EuiText,
   EuiSpacer,
+  EuiThemeProvider,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
-  EuiSkeletonTitle,
-  EuiSkeletonText,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -41,68 +41,142 @@ export function Card({
   dataTestSubjTitle?: string;
 }) {
   const { euiTheme } = useEuiTheme();
+  const cardPadding = euiTheme.size.m;
 
   const style = css`
     height: 100%;
     min-width: 300px;
+    padding: 0;
+    border-radius: ${euiTheme.border.radius.medium};
     border: ${isSelected
       ? `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderStrongPrimary}`
       : 'none'};
     background-color: ${isSelected ? euiTheme.colors.backgroundLightPrimary : 'inherit'};
   `;
 
+  const buttonStyle = css`
+    ${style}
+    && {
+      cursor: ${isSelected ? 'default' : 'pointer'};
+    }
+
+    ${isSelected
+      ? css`
+          &&,
+          &&:hover,
+          &&:focus,
+          &&:focus-visible,
+          &&:active {
+            background-color: ${euiTheme.colors.backgroundLightPrimary};
+            text-decoration: none;
+            color: ${euiTheme.colors.textPrimary};
+          }
+
+          /* EuiButtonEmpty hover/active state uses a ::before overlay */
+          &&::before,
+          &&:hover::before,
+          &&:active::before {
+            content: none;
+            display: none;
+            background-color: transparent;
+          }
+
+          /* High-contrast mode can add a hover ::after border indicator */
+          &&::after,
+          &&:hover::after,
+          &&:active::after {
+            display: none;
+          }
+
+          && .euiButtonEmpty__content,
+          &&:hover .euiButtonEmpty__content,
+          &&:focus .euiButtonEmpty__content,
+          &&:active .euiButtonEmpty__content,
+          && .euiButtonEmpty__text,
+          &&:hover .euiButtonEmpty__text,
+          &&:focus .euiButtonEmpty__text,
+          &&:active .euiButtonEmpty__text {
+            color: inherit;
+            text-decoration: none;
+          }
+        `
+      : undefined}
+  `;
+
   const divStyle = css`
     ${style}
-    padding: ${euiTheme.size.m};
+    padding: ${cardPadding};
   `;
 
   const dataTestSubject = `datasetQualityDetailsSummaryKpiCard-${dataTestSubjTitle || title}`;
+  const selectedDataTestSubject = isSelected ? `${dataTestSubject}-selected` : dataTestSubject;
+  const displayKpiValue = isLoading ? '--' : kpiValue;
 
   const content = (
     <>
-      <EuiText textAlign="left">
-        {titleTooltipContent ? (
-          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
-            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={titleTooltipContent} size="m" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          title
-        )}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiSkeletonTitle size="m" isLoading={isLoading}>
-        <EuiText textAlign="left" data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
-          <h2>{kpiValue}</h2>
-        </EuiText>
-      </EuiSkeletonTitle>
-      <EuiSpacer size="xs" />
-      <EuiSkeletonText lines={1} isLoading={isLoading}>
-        <EuiText textAlign="left">{footer}</EuiText>
-      </EuiSkeletonText>
+      <EuiStat
+        title={
+          <span data-test-subj={`datasetQualityDetailsSummaryKpiValue-${title}`}>
+            {displayKpiValue}
+          </span>
+        }
+        titleColor={isSelected ? 'primary' : 'default'}
+        titleSize="m"
+        descriptionElement="div"
+        css={css`
+          padding: ${euiTheme.size.xs};
+          color: ${isSelected ? euiTheme.colors.textPrimary : euiTheme.colors.textParagraph};
+        `}
+        description={
+          <>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{title}</EuiText>
+              </EuiFlexItem>
+              {titleTooltipContent && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="info"
+                    content={
+                      <EuiThemeProvider colorMode="dark">{titleTooltipContent}</EuiThemeProvider>
+                    }
+                    size="m"
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiSpacer size="xs" />
+          </>
+        }
+        textAlign="left"
+      >
+        <EuiSpacer size="xs" />
+
+        {footer}
+      </EuiStat>
     </>
   );
 
   return onClick ? (
     <EuiButtonEmpty
       isDisabled={isDisabled}
-      onClick={onClick}
-      css={style}
+      onClick={isSelected ? undefined : onClick}
+      css={buttonStyle}
       contentProps={{
         css: css`
           justify-content: flex-start;
+          padding: ${cardPadding};
         `,
       }}
       aria-label={title}
-      data-test-subj={dataTestSubject}
-      color={isSelected ? 'primary' : 'text'}
+      aria-pressed={Boolean(isSelected)}
+      data-test-subj={selectedDataTestSubject}
+      color="text"
     >
       {content}
     </EuiButtonEmpty>
   ) : (
-    <div css={divStyle} data-test-subj={dataTestSubject}>
+    <div css={divStyle} data-test-subj={selectedDataTestSubject}>
       {content}
     </div>
   );

@@ -66,7 +66,7 @@ describe('Card', () => {
 
     const tooltipIcon = screen
       .getByTestId('datasetQualityDetailsSummaryKpiCard-Test Card Title')
-      .querySelector('[data-euiicon-type="question"]');
+      .querySelector('[data-euiicon-type="info"]');
     expect(tooltipIcon).toBeTruthy();
   });
 
@@ -79,15 +79,12 @@ describe('Card', () => {
     expect(tooltipIcon).toBe(null);
   });
 
-  it('shows loading skeleton when isLoading is true', () => {
+  it('shows loading state when isLoading is true', () => {
     render(<Card {...defaultProps} isLoading />);
 
-    // Check for skeleton elements
-    const skeletonTitle = document.querySelector('.euiSkeletonTitle');
-    const skeletonText = document.querySelector('.euiSkeletonText');
-
-    expect(skeletonTitle).toBeTruthy();
-    expect(skeletonText).toBeTruthy();
+    const kpiValue = screen.getByTestId('datasetQualityDetailsSummaryKpiValue-Test Card Title');
+    expect(kpiValue).toBeTruthy();
+    expect(kpiValue).toHaveTextContent('--');
   });
 
   it('renders complex footer content', () => {
@@ -110,6 +107,6 @@ describe('Card', () => {
 
     const kpiValue = screen.getByTestId('datasetQualityDetailsSummaryKpiValue-Test Card Title');
     expect(kpiValue).toBeTruthy();
-    expect(kpiValue.textContent).toBe('');
+    expect(kpiValue).toHaveTextContent('');
   });
 });
