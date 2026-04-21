@@ -53,6 +53,7 @@ import { reviewGrokFields } from '../processing/grok_suggestions_handler';
 import { reviewDissectFields } from '../processing/dissect_suggestions_handler';
 import { isNoLLMSuggestionsError } from '../processing/no_llm_suggestions_error';
 import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 export interface SuggestIngestPipelineParams {
   path: { name: string };
@@ -127,7 +128,20 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           );
         }
 
-        const abortController = new AbortController();
+        // Get the request abort signal to respect client disconnections
+        const requestAbortSignal = getRequestAbortSignal(request);
+
+        // Create a timeout-based AbortSignal for grok/dissect and pipeline suggestions
+        // 2 minute timeout for the entire operation
+        const OPERATION_TIMEOUT_MS = 2 * 60 * 1000;
+        const timeoutSignal = AbortSignal.timeout(OPERATION_TIMEOUT_MS);
+
+        // Combine request abort and timeout signals
+        const timeoutAbortController = new AbortController();
+        const cleanup = () => timeoutAbortController.abort();
+        requestAbortSignal.addEventListener('abort', cleanup);
+        timeoutSignal.addEventListener('abort', cleanup);
+
         let parsingProcessor: GrokProcessor | DissectProcessor | undefined;
 
         const fieldName = getDefaultTextField(params.body.documents, PRIORITIZED_CONTENT_FIELDS);
@@ -160,7 +174,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -177,7 +191,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
-              signal: abortController.signal,
+              signal: timeoutAbortController.signal,
               logger: log,
             })
           );
@@ -283,7 +297,8 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           inferenceClient: inferenceClient.bindTo({ connectorId }),
           agentPipelineSchema,
           maxSteps,
-          signal: abortController.signal,
+          maxDurationMs: 180_000, // 3 minutes - surface errors faster than infrastructure timeout
+          signal: timeoutAbortController.signal,
           documents: documentsForAgent,
           esClient: scopedClusterClient.asCurrentUser,
           fieldsMetadataClient,
@@ -305,17 +320,14 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         });
 
         // If LLM suggests a pipeline and we have a parsing processor, merge them.
-        // If LLM doesn't suggest a pipeline but we have a valid parsing processor, use it.
-        const pipeline = suggestion.pipeline
-          ? effectiveParsingProcessor
+        // Otherwise use the suggestion as-is (or null if nothing was suggested).
+        const pipeline =
+          suggestion.pipeline && effectiveParsingProcessor
             ? mergeSeedParsingProcessorIntoSuggestedPipeline(
                 effectiveParsingProcessor,
                 suggestion.pipeline
               )
-            : suggestion.pipeline
-          : effectiveParsingProcessor
-            ? { steps: [effectiveParsingProcessor] }
-            : null;
+            : suggestion.pipeline;
 
         const result: SuggestProcessingPipelineResult = {
           ...suggestion,

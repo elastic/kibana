@@ -75,7 +75,7 @@
           "{ readonly version?: string | undefined; readonly created_at?: string | undefined; readonly updated_at?: string | undefined; readonly managed?: boolean | undefined; readonly created_by?: string | undefined; readonly updated_by?: string | undefined; readonly owner?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/meta/schema.ts",
-        "lineNumber": 30,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -92,7 +92,7 @@
           "{ readonly language: \"kql\" | \"lucene\"; readonly expression: string; }"
         ],
         "path": "src/platform/packages/shared/as-code/shared-schemas/src/schemas/query/schema.ts",
-        "lineNumber": 30,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

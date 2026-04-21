@@ -33,7 +33,6 @@ export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: P
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

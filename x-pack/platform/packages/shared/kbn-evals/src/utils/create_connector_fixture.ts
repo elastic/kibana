@@ -37,7 +37,6 @@ export function resolveConnectorId(connectorId: string): string {
  * Also handles non-Axios errors (e.g., from HttpHandler) that have status/message properties.
  */
 function isAlreadyExistsConnectorError(error: unknown): boolean {
-  // Handle Axios errors
   if (isAxiosError(error)) {
     if (error.status === 409) {
       return true;
@@ -53,8 +52,7 @@ function isAlreadyExistsConnectorError(error: unknown): boolean {
     return /already exists/i.test(message);
   }
 
-  // Handle non-Axios errors with status and message properties (e.g., HttpHandler errors)
-  const errorObj = error as Record<string, unknown> | null;
+  const errorObj = error as { status?: number; message?: unknown } | null;
   if (!errorObj) {
     return false;
   }

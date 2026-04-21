@@ -7,19 +7,12 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import type { InferenceConnector } from '@kbn/inference-common';
-import {
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-  GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-} from '@kbn/management-settings-ids';
-import { fetchConnectorById } from './fetch_connector_by_id';
+import type { ApiInferenceConnector } from '@kbn/inference-common';
 import { fetchConnectorsForFeature } from './fetch_connectors_for_feature';
 import { isOpenAiProviderType } from './openai_provider_type_guard';
 import type { AIConnector } from './types';
 
-type InferenceConnectorFromApi = InferenceConnector & { isRecommended?: boolean };
-
-export const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector => ({
+export const toAIConnector = (connector: ApiInferenceConnector): AIConnector => ({
   id: connector.connectorId,
   name: connector.name,
   actionTypeId: connector.type,
@@ -41,49 +34,21 @@ export const toAIConnector = (connector: InferenceConnectorFromApi): AIConnector
 });
 
 /**
- * Fetches AI connectors for a given feature, maps them to {@link AIConnector},
- * and applies the default-connector UI settings filter.
+ * Fetches AI connectors for a given feature from the search_inference_endpoints backend
+ * and maps them to {@link AIConnector}. The backend route applies feature resolution,
+ * default-connector UI settings, and recommended-endpoint flagging.
  *
- * When the "default connector only" setting is active and a default connector
- * ID is configured, the connector is retrieved directly by ID rather than
- * filtered from the feature connector list.
+ * @param settings - Deprecated; no longer read. Default-connector UI settings are applied
+ *                   server-side. Kept for call-site compatibility.
  */
 export const loadConnectors = async ({
   http,
   featureId,
-  settings,
 }: {
   http: HttpSetup;
   featureId: string;
-  settings: SettingsStart;
+  settings?: SettingsStart;
 }): Promise<AIConnector[]> => {
-  const defaultConnectorId = settings.client.get<string>(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR);
-  const defaultConnectorOnly = settings.client.get<boolean>(
-    GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
-    false
-  );
-
-  if (defaultConnectorOnly) {
-    if (!defaultConnectorId) {
-      return [];
-    }
-    const connector = await fetchConnectorById(http, defaultConnectorId);
-    if (connector) {
-      return [connector];
-    } else {
-      return [];
-    }
-  }
-
-  const { connectors, soEntryFound } = await fetchConnectorsForFeature(http, featureId);
-  const aiConnectors = connectors.map(toAIConnector);
-
-  if (!soEntryFound && defaultConnectorId) {
-    const defaultConnector = await fetchConnectorById(http, defaultConnectorId);
-    if (defaultConnector) {
-      return [defaultConnector, ...aiConnectors.filter((c) => c.id !== defaultConnectorId)];
-    }
-  }
-
-  return aiConnectors;
+  const { connectors } = await fetchConnectorsForFeature(http, featureId);
+  return connectors.map(toAIConnector);
 };

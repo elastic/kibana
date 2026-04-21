@@ -31,7 +31,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     isLogsEnabled,
     skipFork,
     loghubTimestampLayout,
-    loghubMetadataOverrides: metadataOverridesStr,
+    loghubMetadataOverrides: metadataOverridesInput,
   } = (runOptions.scenarioOpts ?? {}) as {
     rpm?: number;
     systems?: string | string[];
@@ -39,16 +39,16 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     skipFork?: boolean;
     isLogsEnabled?: boolean;
     loghubTimestampLayout?: LoghubTimestampLayout;
-    loghubMetadataOverrides?: string;
+    loghubMetadataOverrides?: string | Record<string, Record<string, unknown>>;
   };
 
   // Parse JSON string metadata overrides if provided
   let loghubMetadataOverrides: Record<string, Record<string, unknown>> | undefined;
-  if (metadataOverridesStr) {
+  if (metadataOverridesInput) {
     loghubMetadataOverrides =
-      typeof metadataOverridesStr === 'string'
-        ? JSON.parse(metadataOverridesStr)
-        : metadataOverridesStr;
+      typeof metadataOverridesInput === 'string'
+        ? JSON.parse(metadataOverridesInput)
+        : metadataOverridesInput;
   }
 
   const generators = await client.getLogGenerators({

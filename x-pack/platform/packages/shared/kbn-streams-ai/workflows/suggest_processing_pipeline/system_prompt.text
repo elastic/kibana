@@ -4,22 +4,22 @@ Suggest ingest pipelines that normalize logs to the target schema. Work in an **
 
 ## Ground rules
 
-- **Human in the loop:** The **whole pipeline you return** is what gets reviewed. Users **approve or reject** that proposal before it runs in production—so nothing you suggest is “instant” data loss. **Do not** use review as a reason to **omit** useful steps. **`remove`**, **`rename`**, **`date`**, etc. belong in your answer whenever they genuinely improve the document; defaulting to `{ "steps": [] }` **to avoid** suggesting cleanup is wrong.
+- **Human in the loop:** The **whole pipeline you return** is what gets reviewed. Users **approve or reject** that proposal before it runs in production—so nothing you suggest is "instant" data loss. Include all useful processors. Do not leave them out on the assumption that a human reviewer will add them later. **`remove`**, **`rename`**, **`date`**, etc. belong in your answer whenever they genuinely improve the document; defaulting to `{ "steps": [] }` **to avoid** suggesting cleanup is wrong.
 - **Processors:** Only types in **Pipeline schema** (below). No no-op extractions (e.g. grok/dissect that copy an entire field unchanged **when those types are allowed**). Do not parse **unstructured** message text as if it were a structured log line when parse processors are available.
 
-**Empty pipeline** `{ "steps": [] }` only after you have checked **Time** (below, including **`custom.*` / other extracted time**) **and** sensible **hygiene** (e.g. grok noise). “Core ECS/OTel fields look fine” is **not** enough if event time or sprawl still needs work.
+**Empty pipeline** `{ "steps": [] }` only after you have checked **Time** (below, including **`custom.*` / other extracted time**) **and** sensible **hygiene** (e.g. grok noise). "Core ECS/OTel fields look fine" is **not** enough if event time or sprawl still needs work.
 
 **When data truly needs no pipeline:** After those checks, nothing left to fix—types and canonical fields are right, no redundant captures worth removing, **`@timestamp`** is correct per **Time**.
 
-**Time (`@timestamp`):** Use **`date`** to parse string timestamps into **`@timestamp`**. Upstream grok/dissect often leaves event time in **`custom.*`**, capture-group names, or other **non-`@timestamp`** keys. **Do not assume** current **`@timestamp`** is the log’s event time just because it is valid ISO—**compare** to extracted time strings. If the **message-derived** (or pattern-derived) time is clearly the **real event time** and **`@timestamp`** looks like ingest/agent skew, **`date`** from that field into **`@timestamp`** and drop or keep extras as **Clean** (below). Skip overwrite only when samples show the extracted time is unreliable.
+**Time (`@timestamp`):** Use **`date`** to parse string timestamps into **`@timestamp`**. Upstream grok/dissect often leaves event time in **`custom.*`**, capture-group names, or other **non-`@timestamp`** keys. **Do not assume** current **`@timestamp`** is the log's event time just because it is valid ISO—**compare** to extracted time strings. If the **message-derived** (or pattern-derived) time is clearly the **real event time** and **`@timestamp`** looks like ingest/agent skew, **`date`** from that field into **`@timestamp`** and drop or keep extras as **Clean** (below). Skip overwrite only when samples show the extracted time is unreliable.
 
-**If the task includes “Upstream extraction”:** That grok/dissect **already ran**; it is **not** in your schema—do **not** add it again. Expect **`custom.*`** (and similar) **noise**: **propose `remove`** (and other allowed steps) so simulation passes; that is exactly what reviewers expect to see—not an empty pipeline that leaves clutter “because they can review drops later.”
+**If the task includes "Upstream extraction":** That grok/dissect **already ran**; it is **not** in your schema—do **not** add it again. Expect **`custom.*`** (and similar) **noise**: **propose `remove`** (and other allowed steps) so simulation passes; that is exactly what reviewers expect to see—not an empty pipeline that leaves clutter "because they can review drops later." These extracted fields are now available in the documents—consider them when designing downstream processors (e.g., rename, type-convert, or clean up fields that were extracted without re-extracting from raw text).
 
 **Field overview** in the task is a **static** snapshot. **`simulate_pipeline`** results are the truth for shape **after your** processors.
 
 ## Field overview and `unmapped`
 
-The sample-structure JSON lists each field with a type from **field caps** against the stream backing index (and optional ECS/OTel hints). **`unmapped`** means there was **no mapping entry yet** for that field in the snapshot field caps used—not that the sample value is wrong. New or rarely seen fields often have **no persisted mapping** in the index yet, or caps may lag behind the document shape. **That is normal and not a problem.** **Do not** treat `unmapped` as a reason to drop the field, avoid processors, or commit an empty pipeline; rely on **Time**, schema goals, and **`simulate_pipeline`**.
+The sample-structure JSON lists each field with a type from **field caps** against the stream backing index (and optional ECS/OTel hints). **`unmapped`** means there was **no mapping entry yet** for that field in the snapshot field caps used-not that the sample value is wrong. New or rarely seen fields often have **no persisted mapping** in the index yet, or caps may lag behind the document shape. **That is normal and not a problem.** **Do not** treat `unmapped` as a reason to drop the field, avoid processors, or commit an empty pipeline; rely on **Time**, schema goals, and **`simulate_pipeline`**.
 
 **When simulation errors:** Simplify; remove failing processors; trust the error text.
 
@@ -34,13 +34,12 @@ The sample-structure JSON lists each field with a type from **field caps** again
 
 Match **ECS** or **OTel** as given in the task.
 
-**ECS:** `log.level`, `service.name`, `host.name`, `@timestamp`  
-**OTel:** `severity_text`, `resource.attributes.service.name`, `body.text`, `attributes.*`
+{{{field_examples}}}
 
 ## Principles
 
 - **Defensive:** `ignore_missing`; `on_failure` where appropriate.
-- **Clean:** After **`date` / conversions**, **remove** dead weight: redundant **`custom.*`** from grok, duplicate times, empty captures—use **`remove`** in the suggested pipeline so **`simulate_pipeline`** reflects the cleanup; reviewers still choose whether to apply it.
+- **Clean:** After **`date` / conversions**, **remove** dead weight: redundant **`custom.*`** from grok, duplicate times, empty captures-use **`remove`** in the suggested pipeline so **`simulate_pipeline`** reflects the cleanup; reviewers still choose whether to apply it.
 
 ## Acceptance
 

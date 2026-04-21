@@ -14,7 +14,6 @@ import { indexSynthtraceScenario } from './synthtrace_helpers';
 const PARTITIONING_EVAL_SYSTEMS = ['Hadoop', 'Proxifier', 'Android', 'OpenStack'] as const;
 const PARTITIONING_HOMOG_SYSTEMS = ['Linux'] as const;
 const PARTITIONING_HARD_SYSTEMS = ['Hadoop', 'Mac', 'Linux', 'HPC'] as const;
-
 /** Must match `sample_logs` scenario `range.interval('5s')` in kbn-synthtrace. */
 const SAMPLE_LOGS_STEP_MS = 5000;
 
@@ -119,7 +118,6 @@ globalSetupHookWithSynthtrace(
     // Deduplicate systems: Hadoop appears in both EVAL and HARD; Linux appears in both HOMOG and HARD
     const uniqueSystems = [...new Set([...pipelineSystems, ...partitioningSystems])];
     const allSystems = uniqueSystems.join(',');
-
     const from = kbnDatemath.parse('now-5m')!;
     const to = kbnDatemath.parse('now')!;
 
@@ -172,7 +170,6 @@ globalSetupHookWithSynthtrace(
         'cluster.node_id': 'node-001',
       },
     };
-
     await indexSynthtraceScenario({
       scenario: 'sample_logs',
       scenarioOpts: {
