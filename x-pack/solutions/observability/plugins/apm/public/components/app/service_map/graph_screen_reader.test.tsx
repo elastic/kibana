@@ -87,7 +87,7 @@ jest.mock('./popover', () => ({
   MapPopover: () => <div data-testid="service-map-popover" />,
 }));
 
-jest.mock('./layout', () => ({
+jest.mock('../../shared/service_map/layout', () => ({
   applyDagreLayout: jest.fn((nodes) => nodes),
 }));
 
