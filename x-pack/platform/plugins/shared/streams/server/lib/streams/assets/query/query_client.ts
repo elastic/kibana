@@ -481,29 +481,35 @@ export class QueryClient {
   }
 
   /**
+   * Shared bool-query shape for the promotable-unbacked set: `rule_backed=false`
+   * AND `type != STATS`, with optional severity floor. Keeps
+   * {@link countPromotableUnbackedQueries} and {@link getPromotableUnbackedQueries}
+   * structurally aligned so the UI callout count and the Promote-All set
+   * can't diverge.
+   */
+  private promotableUnbackedBoolQuery(filters?: { minSeverityScore?: number }) {
+    return {
+      filter: [
+        ...termQuery(ASSET_TYPE, 'query'),
+        ...termQuery(RULE_BACKED, false),
+        ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
+      ],
+      must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
+    };
+  }
+
+  /**
    * Counts queries promotable to rules — unbacked AND non-STATS. Pairs with
-   * {@link getPromotableUnbackedQueries}; the pair MUST stay in sync or the UI
-   * callout count and the Promote-All set diverge.
+   * {@link getPromotableUnbackedQueries}.
    *
    * Pre-migration docs lacking QUERY_TYPE are safe: STATS were introduced
    * alongside the type field, so any doc without it is a match query.
    */
   async countPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<number> {
-    const filter = [
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
-    ];
-
     const assetsResponse = await this.dependencies.storageClient.search({
       size: 0,
       track_total_hits: true,
-      query: {
-        bool: {
-          filter,
-          must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
-        },
-      },
+      query: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
     const total = assetsResponse.hits.total;
@@ -512,26 +518,15 @@ export class QueryClient {
 
   /**
    * Returns all unbacked, non-STATS queries across streams — the list whose
-   * size is {@link countPromotableUnbackedQueries}. The two MUST stay aligned.
+   * size is {@link countPromotableUnbackedQueries}.
    */
   async getPromotableUnbackedQueries(filters?: {
     minSeverityScore?: number;
   }): Promise<QueryLink[]> {
-    const filter = [
-      ...termQuery(ASSET_TYPE, 'query'),
-      ...termQuery(RULE_BACKED, false),
-      ...rangeGteQuery(QUERY_SEVERITY_SCORE, filters?.minSeverityScore),
-    ];
-
     const assetsResponse = await this.dependencies.storageClient.search({
       size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
-      query: {
-        bool: {
-          filter,
-          must_not: termQuery(QUERY_TYPE, QUERY_TYPE_STATS),
-        },
-      },
+      query: { bool: this.promotableUnbackedBoolQuery(filters) },
     });
 
     return mapSearchHits(assetsResponse);
