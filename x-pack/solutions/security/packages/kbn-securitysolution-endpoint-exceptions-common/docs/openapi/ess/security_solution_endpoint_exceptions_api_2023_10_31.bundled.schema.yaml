@@ -23,6 +23,28 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                alreadyExists:
+                  summary: Endpoint exception list already exists (empty response)
+                  value: {}
+                newList:
+                  summary: Endpoint exception list created
+                  value:
+                    created_at: '2025-01-01T00:00:00.000Z'
+                    created_by: elastic
+                    description: Endpoint Security Exception List
+                    id: 2e23a8c4-ef7e-4c10-adfa-3eae4e4b4b8b
+                    immutable: false
+                    list_id: endpoint_list
+                    name: Endpoint Security Exception List
+                    namespace_type: agnostic
+                    os_types: []
+                    tags: []
+                    tie_breaker_id: e3c5a8e0-5b6a-4b4b-8b3a-2e23a8c4ef7e
+                    type: endpoint
+                    updated_at: '2025-01-01T00:00:00.000Z'
+                    updated_by: elastic
+                    version: 1
               schema:
                 $ref: '#/components/schemas/EndpointList'
           description: Successful response
@@ -78,6 +100,32 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleted:
+                  summary: Deleted endpoint exception list item
+                  value:
+                    comments: []
+                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_by: elastic
+                    description: Blocks a known malicious file by its hash
+                    entries:
+                      - field: file.hash.sha256
+                        operator: included
+                        type: match
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
+                    item_id: block-malicious-file
+                    list_id: endpoint_list
+                    name: Block malicious file
+                    namespace_type: agnostic
+                    os_types:
+                      - windows
+                    tags: []
+                    tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
+                    type: simple
+                    updated_at: '2025-01-01T12:00:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
           description: Successful response
@@ -138,6 +186,33 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                item:
+                  summary: Endpoint exception list item
+                  value:
+                    comments: []
+                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_by: elastic
+                    description: Blocks a known malicious file by its hash
+                    entries:
+                      - field: file.hash.sha256
+                        operator: included
+                        type: match
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
+                    item_id: block-malicious-file
+                    list_id: endpoint_list
+                    name: Block malicious file
+                    namespace_type: agnostic
+                    os_types:
+                      - windows
+                    tags:
+                      - policy:all
+                    tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
+                    type: simple
+                    updated_at: '2025-01-01T12:00:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
           description: Successful response
@@ -184,6 +259,38 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              matchAny:
+                summary: Exclude multiple process names
+                value:
+                  description: Exclude common security tools from endpoint protection
+                  entries:
+                    - field: process.name
+                      operator: included
+                      type: match_any
+                      value:
+                        - scanner.exe
+                        - updater.exe
+                  name: Trusted security tools
+                  os_types:
+                    - windows
+                  type: simple
+              simpleMatch:
+                summary: Block a specific file hash
+                value:
+                  description: Blocks a known malicious file by its hash
+                  entries:
+                    - field: file.hash.sha256
+                      operator: included
+                      type: match
+                      value: >-
+                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                  name: Block malicious file
+                  os_types:
+                    - windows
+                  tags:
+                    - policy:all
+                  type: simple
             schema:
               type: object
               properties:
@@ -219,6 +326,33 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                created:
+                  summary: Endpoint exception list item created
+                  value:
+                    comments: []
+                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_by: elastic
+                    description: Blocks a known malicious file by its hash
+                    entries:
+                      - field: file.hash.sha256
+                        operator: included
+                        type: match
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
+                    item_id: block-malicious-file
+                    list_id: endpoint_list
+                    name: Block malicious file
+                    namespace_type: agnostic
+                    os_types:
+                      - windows
+                    tags:
+                      - policy:all
+                    tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
+                    type: simple
+                    updated_at: '2025-01-01T12:00:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
           description: Successful response
@@ -265,10 +399,31 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              updateName:
+                summary: Update an endpoint exception list item
+                value:
+                  description: Updated description for the exception
+                  entries:
+                    - field: file.hash.sha256
+                      operator: included
+                      type: match
+                      value: >-
+                        e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                  item_id: block-malicious-file
+                  name: Block malicious file (updated)
+                  os_types:
+                    - windows
+                    - linux
+                  type: simple
             schema:
               type: object
               properties:
                 _version:
+                  description: >-
+                    The version id, normally returned by the API when the item
+                    is retrieved. Use it ensure updates are made against the
+                    latest version.
                   type: string
                 comments:
                   $ref: '#/components/schemas/ExceptionListItemCommentArray'
@@ -305,6 +460,34 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                updated:
+                  summary: Endpoint exception list item updated
+                  value:
+                    comments: []
+                    created_at: '2025-01-01T12:00:00.000Z'
+                    created_by: elastic
+                    description: Updated description for the exception
+                    entries:
+                      - field: file.hash.sha256
+                        operator: included
+                        type: match
+                        value: >-
+                          e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                    id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
+                    item_id: block-malicious-file
+                    list_id: endpoint_list
+                    name: Block malicious file (updated)
+                    namespace_type: agnostic
+                    os_types:
+                      - windows
+                      - linux
+                    tags:
+                      - policy:all
+                    tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
+                    type: simple
+                    updated_at: '2025-01-15T09:30:00.000Z'
+                    updated_by: elastic
               schema:
                 $ref: '#/components/schemas/EndpointListItem'
           description: Successful response
@@ -391,22 +574,58 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                foundItems:
+                  summary: Found endpoint exception list items
+                  value:
+                    data:
+                      - comments: []
+                        created_at: '2025-01-01T12:00:00.000Z'
+                        created_by: elastic
+                        description: Blocks a known malicious file by its hash
+                        entries:
+                          - field: file.hash.sha256
+                            operator: included
+                            type: match
+                            value: >-
+                              e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+                        id: d4b0c1e2-3f4a-5b6c-7d8e-9f0a1b2c3d4e
+                        item_id: block-malicious-file
+                        list_id: endpoint_list
+                        name: Block malicious file
+                        namespace_type: agnostic
+                        os_types:
+                          - windows
+                        tags:
+                          - policy:all
+                        tie_breaker_id: f1e2d3c4-b5a6-7890-abcd-ef1234567890
+                        type: simple
+                        updated_at: '2025-01-01T12:00:00.000Z'
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
               schema:
                 type: object
                 properties:
                   data:
+                    description: The list of endpoint exception list items.
                     items:
                       $ref: '#/components/schemas/EndpointListItem'
                     type: array
                   page:
+                    description: The current page number.
                     minimum: 0
                     type: integer
                   per_page:
+                    description: The number of items per page.
                     minimum: 0
                     type: integer
                   pit:
+                    description: The point-in-time ID for pagination.
                     type: string
                   total:
+                    description: The total number of endpoint exception list items.
                     minimum: 0
                     type: integer
                 required:

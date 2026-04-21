@@ -33,9 +33,10 @@ export const apiTest = baseApiTest.extend<
       },
       use: (extendedApiServices: OsqueryApiServicesFixture) => Promise<void>
     ) => {
-      const extendedApiServices = apiServices as OsqueryApiServicesFixture;
-      extendedApiServices.osquery = getOsqueryApiService({ kbnClient, log });
-      await use(extendedApiServices);
+      await use({
+        ...apiServices,
+        osquery: getOsqueryApiService({ kbnClient, log }),
+      } as OsqueryApiServicesFixture);
     },
     { scope: 'worker' },
   ],

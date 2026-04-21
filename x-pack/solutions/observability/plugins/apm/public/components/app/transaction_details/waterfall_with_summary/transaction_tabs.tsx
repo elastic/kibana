@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { LazySavedSearchComponent, type SavedSearchTableConfig } from '@kbn/saved-search-component';
+import { getTimestampUs } from '../../../../../common/utils/get_timestamp_us';
 import { useKibana } from '../../../../context/kibana_context/use_kibana';
 import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -92,7 +93,7 @@ export function TransactionTabs({
           <>
             {transaction && (
               <LogsTabContent
-                timestamp={transaction.timestamp.us}
+                timestamp={getTimestampUs(transaction)}
                 duration={transaction.transaction.duration.us}
                 traceId={transaction.trace.id}
                 logsTableConfig={logsTableConfig}
@@ -174,7 +175,6 @@ function TimelineTabContent({
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/traces/explorer/waterfall',
     '/dependencies/operation'
   );
   const traceId = unifiedWaterfallFetchResult.traceItems[0]?.traceId;

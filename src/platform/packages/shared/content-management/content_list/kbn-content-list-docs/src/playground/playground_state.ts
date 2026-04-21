@@ -11,7 +11,7 @@
 // Types
 // =============================================================================
 
-export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred';
+export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred' | 'createdBy';
 
 export interface ActiveColumn {
   instanceId: string;
@@ -21,14 +21,14 @@ export interface ActiveColumn {
   actions: ActiveAction[];
 }
 
-export type ActionType = 'edit' | 'delete' | 'export';
+export type ActionType = 'edit' | 'delete' | 'inspect' | 'export';
 
 export interface ActiveAction {
   instanceId: string;
   type: ActionType;
 }
 
-export type FilterType = 'sort' | 'tags' | 'starred';
+export type FilterType = 'sort' | 'tags' | 'starred' | 'createdBy';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -46,6 +46,8 @@ export interface PlaygroundState {
     pagination: boolean;
     search: boolean;
     starred: boolean;
+    tags: boolean;
+    userProfiles: boolean;
     initialPageSize: number;
   };
   item: {
@@ -53,6 +55,7 @@ export interface PlaygroundState {
     getEditUrl: boolean;
     onEdit: boolean;
     onDelete: boolean;
+    onInspect: boolean;
   };
   table: {
     columns: ActiveColumn[];
@@ -131,6 +134,16 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     configurableProps: [{ name: 'width', label: 'width', type: 'string', defaultValue: '' }],
   },
   {
+    type: 'createdBy',
+    label: 'Column.CreatedBy',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [
+      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
+    ],
+  },
+  {
     type: 'actions',
     label: 'Column.Actions',
     allowMultiple: false,
@@ -144,12 +157,14 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
 
 export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
   { type: 'starred', label: 'Filters.Starred' },
-  { type: 'sort', label: 'Filters.Sort' },
   { type: 'tags', label: 'Filters.Tags' },
+  { type: 'createdBy', label: 'Filters.CreatedBy' },
+  { type: 'sort', label: 'Filters.Sort' },
 ];
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
   { type: 'edit', label: 'Action.Edit' },
+  { type: 'inspect', label: 'Action.Inspect' },
   { type: 'delete', label: 'Action.Delete' },
   { type: 'export', label: 'Action (Export)' },
 ];
@@ -200,6 +215,8 @@ export const INITIAL_STATE: PlaygroundState = {
     pagination: true,
     search: true,
     starred: false,
+    tags: true,
+    userProfiles: true,
     initialPageSize: 10,
   },
   item: {
@@ -207,6 +224,7 @@ export const INITIAL_STATE: PlaygroundState = {
     getEditUrl: false,
     onEdit: false,
     onDelete: false,
+    onInspect: false,
   },
   table: {
     columns: [],

@@ -23,8 +23,9 @@ import {
   UpdatedAtColumn,
   ActionsColumn,
   StarredColumn,
+  CreatedByColumn,
 } from './column';
-import { Action as BaseAction, EditAction, DeleteAction } from './action';
+import { Action as BaseAction, EditAction, DeleteAction, InspectAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
 import { EmptyState } from './empty_state';
 
@@ -175,12 +176,14 @@ export const Column = Object.assign(BaseColumn, {
   UpdatedAt: UpdatedAtColumn,
   Actions: ActionsColumn,
   Starred: StarredColumn,
+  CreatedBy: CreatedByColumn,
 });
 
 // Create Action namespace with sub-components.
 export const Action = Object.assign(BaseAction, {
   Edit: EditAction,
   Delete: DeleteAction,
+  Inspect: InspectAction,
 });
 
 export const ContentListTable = Object.assign(ContentListTableComponent, {
