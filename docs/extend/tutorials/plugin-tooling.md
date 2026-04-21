@@ -14,10 +14,12 @@ We recommend that you kick-start your plugin by generating it with the [{{kib}} 
 node scripts/generate_plugin
 ```
 
+Pass `--name <plugin_name>` with `-y` to generate non-interactively using the defaults.
+
 
 ### Plugin location [_plugin_location]
 
-The {{kib}} directory must be named `kibana`, and your plugin directory should be located in the root of `kibana` in a `plugins` directory, for example:
+External plugins live in a `plugins/` directory at the root of your {{kib}} checkout, for example:
 
 ```shell
 .
@@ -26,6 +28,12 @@ The {{kib}} directory must be named `kibana`, and your plugin directory should b
         ├── foo-plugin
         └── bar-plugin
 ```
+
+The `plugins/` directory is gitignored, so your plugin is not tracked alongside the {{kib}} sources. {{kib}} discovers external plugins by scanning this directory at startup and reading each plugin's `kibana.json` manifest, so you do **not** need to run `yarn kbn bootstrap` after dropping in a new plugin or editing its manifest.
+
+:::{note}
+External plugins use a flat `kibana.json` manifest. This differs from the nested `kibana.jsonc` manifest used by in-repo {{kib}} plugins — see [Anatomy of a plugin](../key-concepts/platform-architecture/anatomy-of-a-plugin.md#kibana-jsonc) for the in-repo format.
+:::
 
 ## Build plugin distributable [_build_plugin_distributable]
 
@@ -50,12 +58,17 @@ See [How to install a plugin](/reference/kibana-plugins.md#install-plugin).
 
 ## Run {{kib}} with your plugin in dev mode [_run_kib_with_your_plugin_in_dev_mode]
 
-If your plugin isn’t server only and contains `ui` in order for Kibana to pick the browser bundles you need to run `yarn dev --watch` in the plugin root folder at a dedicated terminal.
+External plugins use a **two-terminal workflow** in development. Unlike in-repo plugins, their browser bundles are not built by the {{kib}} optimizer at startup, so you drive the build yourself from inside the plugin directory.
 
-Then, in a second terminal, run `yarn start` at the {{kib}} root folder. Make sure {{kib}} found and bootstrapped your plugin by:
+In the first terminal, build and watch the browser bundle from the plugin root:
+
+```shell
+cd plugins/my_plugin_name
+yarn dev --watch
+```
+
+In a second terminal, run `yarn start` from the {{kib}} root. Confirm {{kib}} discovered your plugin by looking for it in the startup logs:
 
 ```shell
 [INFO ][plugins-system.standard] Setting up […] plugins: […, myPluginName, …]
 ```
-
-

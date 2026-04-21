@@ -2,7 +2,7 @@
 navigation_title: "Hello World"
 description: "Build a very basic plugin that registers an application that says \"Hello World!\"."
 ---
-###LG TODO let's flip the order, and check to see if the automated plugin generator works OOTB now.
+
 # Hello World
 
 This tutorial walks you through two ways to create a plugin that registers an application that says "Hello World!".
@@ -13,9 +13,56 @@ You can view the tested example plugin at [examples/hello_world](https://github.
 
 Read through [these instructions](./set-up-a-development-environment.md) to get your development environment set up.
 
-## 2. Option 1 - Write it manually
+## 2. Option 1 — Use the plugin generator (recommended)
 
-This is a good option if you want to understand the bare minimum needed to register a "Hello world" application. The example plugin is based off of this option.
+This is the fastest way to get a working Kibana plugin. The generator scaffolds an **external plugin** in the root `plugins/` directory. This is the supported location for plugins that are not checked into the Kibana repo.
+
+From the Kibana repo root:
+
+```sh
+node scripts/generate_plugin --name hello_world
+```
+
+You'll be prompted for a description, ownership, and whether to generate UI and/or server code.
+
+When it finishes, your plugin is at `plugins/hello_world/` with:
+
+- `kibana.json` — the manifest Kibana reads at startup
+- `public/`, `server/`, `common/` — scaffolded plugin code
+- `tsconfig.json` and a `package.json` with dev scripts
+
+### Run your new plugin
+
+External plugins use a two-terminal workflow: one builds the browser bundle, the other runs Kibana.
+
+In one terminal, from inside your plugin directory, build and watch the browser bundle:
+
+```sh
+cd plugins/hello_world
+yarn dev --watch
+```
+
+In another terminal, from the Kibana repo root, boot Elasticsearch and Kibana:
+
+```sh
+yarn es snapshot --license trial
+```
+
+```sh
+yarn start
+```
+
+When Kibana picks up your plugin, you'll see it in the startup logs:
+
+```text
+[INFO ][plugins-system.standard] Setting up […] plugins: […, helloWorld, …]
+```
+
+Open Kibana in your browser and find your application in the side navigation.
+
+## 3. Option 2 — Write it manually as an in-repo example
+
+This option is useful if you want to understand the bare minimum needed to register an application, or if you are contributing a plugin to the Kibana repo. The tested example at [examples/hello_world](https://github.com/elastic/kibana/tree/main/examples/hello_world) is based on this option.
 
 1. Create your plugin folder. Start off in the `kibana` folder.
 
@@ -135,45 +182,19 @@ export function plugin() {
 }
 ```
 
-## 2. Option 2 - Use the automatic plugin generator
+### Run your new plugin
 
----
+In-repo example plugins are discovered via the workspace's package map, so you must bootstrap after creating the manifest:
 
-**Note:** Plugin generator is not yet updated and generated code won't work out-of-the-box. Please refer to [existing examples](https://github.com/elastic/kibana/tree/main/examples).
-
----
-
-This is an easy option to get up and running ASAP and includes additional code.
-
-Use the Automatic plugin generator to get a basic structure for a new plugin. Plugins that are not part of the Kibana repo should be developed inside the plugins folder. If you are building a new plugin to check in to the Kibana repo, you will choose between a few locations:
-
-- `x-pack/plugins` for plugins related to subscription features
-- `src/plugins` for plugins related to free features
-- `examples` for developer example plugins (these will not be included in the distributables)
-
-```
-% node scripts/generate_plugin hello_world
-? Plugin name (use camelCase) helloWorld
-? Will this plugin be part of the Kibana repository? Yes
-? What type of internal plugin would you like to create Kibana Example
-? Should an UI plugin be generated? Yes
-? Should a server plugin be generated? No
- succ 🎉
-
-      Your plugin has been created in examples/hello_world
+```sh
+yarn kbn bootstrap
 ```
 
-## 3. Build your new application
+In one terminal, run `yarn es snapshot --license trial` to boot up Elasticsearch.
 
-Run `yarn kbn bootstrap`
+In another terminal, run `yarn start --run-examples` to boot up Kibana and include the example plugins. Your example plugin should show up in the navigation at the very bottom.
 
-## 3. Start Kibana with examples and navigate to your new application
-
-In one terminal window, run `yarn es snapshot --license trial` to boot up Elasticsearch.
-
-In another terminal window, run `yarn start --run-examples` to boot up Kibana and include the example plugins. Your example plugin should show up in the navigation at the very bottom.
-
-If you build it manually it will look something like this:
+If you built it manually, it will look something like this:
 
 ![hello world manual plugin in nav](./images/kibana_hello_world_home_nav.png)
 
