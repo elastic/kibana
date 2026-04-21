@@ -284,6 +284,7 @@
     "@kbn/charts-theme": "link:src/platform/packages/shared/kbn-charts-theme",
     "@kbn/classic-stream-flyout": "link:x-pack/platform/packages/shared/kbn-classic-stream-flyout",
     "@kbn/cleanup-before-exit": "link:src/platform/packages/shared/kbn-cleanup-before-exit",
+    "@kbn/client-apps-plugin": "link:x-pack/solutions/observability/plugins/client_apps",
     "@kbn/cloud": "link:src/platform/packages/shared/cloud",
     "@kbn/cloud-chat-plugin": "link:x-pack/platform/plugins/private/cloud_integrations/cloud_chat",
     "@kbn/cloud-connect-plugin": "link:x-pack/platform/plugins/shared/cloud_connect",

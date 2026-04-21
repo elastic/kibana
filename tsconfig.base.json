@@ -266,6 +266,8 @@
       "@kbn/cleanup-before-exit/*": ["src/platform/packages/shared/kbn-cleanup-before-exit/*"],
       "@kbn/cli-dev-mode": ["packages/kbn-cli-dev-mode"],
       "@kbn/cli-dev-mode/*": ["packages/kbn-cli-dev-mode/*"],
+      "@kbn/client-apps-plugin": ["x-pack/solutions/observability/plugins/client_apps"],
+      "@kbn/client-apps-plugin/*": ["x-pack/solutions/observability/plugins/client_apps/*"],
       "@kbn/cloud": ["src/platform/packages/shared/cloud"],
       "@kbn/cloud/*": ["src/platform/packages/shared/cloud/*"],
       "@kbn/cloud-chat-plugin": ["x-pack/platform/plugins/private/cloud_integrations/cloud_chat"],
