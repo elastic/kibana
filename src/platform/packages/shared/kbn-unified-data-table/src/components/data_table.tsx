@@ -1151,7 +1151,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               <DataTableDocumentToolbarBtn
                 isPlainRecord={isPlainRecord}
                 isFilterActive={isFilterActive}
-                rows={rows!}
+                rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
                 selectedDocsState={selectedDocsState}
                 enableComparisonMode={enableComparisonMode}
@@ -1187,7 +1187,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       inTableSearchControl,
       isPlainRecord,
       isFilterActive,
-      rows,
+      displayedRows,
       selectedDocsState,
       enableComparisonMode,
       setIsFilterActive,

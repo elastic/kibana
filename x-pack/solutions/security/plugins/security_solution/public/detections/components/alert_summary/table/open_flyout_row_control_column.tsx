@@ -16,7 +16,7 @@ export const ROW_ACTION_FLYOUT_ICON_TEST_ID = 'alert-summary-table-row-action-fl
 
 export interface ActionsCellProps {
   /**
-   * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
+   * Alert data passed from the renderCellValue callback
    */
   alert: Alert;
 }
