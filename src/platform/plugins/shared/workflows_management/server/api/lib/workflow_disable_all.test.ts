@@ -120,8 +120,6 @@ describe('disableAllWorkflows', () => {
 
     await disableAllWorkflows({ storage, taskScheduler: null, logger });
 
-    expect(logger.info).toHaveBeenCalledWith(
-      expect.stringContaining('Disabled 1 workflows')
-    );
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Disabled 1 workflows'));
   });
 });

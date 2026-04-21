@@ -7,17 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, KibanaRequest, Logger, SecurityServiceStart } from '@kbn/core/server';
 import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SecurityServiceStart,
+} from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import type { IWorkflowEventLoggerService } from '@kbn/workflows-execution-engine/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
+import type { SearchWorkflowExecutionsParams } from '../api/workflows_management_service';
 import type { WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import type { SearchWorkflowExecutionsParams } from '../api/workflows_management_service';
 
 /** Core deps shared by all services that access workflow storage. */
 export interface WorkflowStorageDeps {
@@ -57,9 +62,7 @@ export interface WorkflowExecutionQueryDeps {
 export interface WorkflowValidationDeps {
   workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined;
   getActionsClient: () => Promise<IUnsecuredActionsClient>;
-  getActionsClientWithRequest: (
-    request: KibanaRequest
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
+  getActionsClientWithRequest: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
 }
 
 /** Deps for WorkflowDeletionService. */

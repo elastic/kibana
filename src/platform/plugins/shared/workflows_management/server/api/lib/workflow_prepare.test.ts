@@ -9,12 +9,12 @@
 
 import type { WorkflowYaml } from '@kbn/workflows';
 
-import type { WorkflowProperties } from '../../storage/workflow_storage';
 import {
   applyFieldUpdates,
   getTriggerTypesFromDefinition,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
+import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 describe('getTriggerTypesFromDefinition', () => {
   it('returns empty array for null definition', () => {

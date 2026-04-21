@@ -32,7 +32,9 @@ const makeWorkflowSource = (overrides = {}) => ({
   ...overrides,
 });
 
-const makeStorageClient = (hits: Array<{ _id: string; _source: ReturnType<typeof makeWorkflowSource> }>) => {
+const makeStorageClient = (
+  hits: Array<{ _id: string; _source: ReturnType<typeof makeWorkflowSource> }>
+) => {
   const mockClient = {
     search: jest.fn().mockResolvedValue({
       hits: { hits: hits.map((h) => ({ _id: h._id, _source: h._source })) },
@@ -48,9 +50,10 @@ const makeStorageClient = (hits: Array<{ _id: string; _source: ReturnType<typeof
   };
 };
 
-const makeEsClient = () => ({
-  deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
-} as unknown as ElasticsearchClient);
+const makeEsClient = () =>
+  ({
+    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+  } as unknown as ElasticsearchClient);
 
 const noopExecutions = jest.fn().mockResolvedValue({ total: 0, results: [] });
 
@@ -246,13 +249,9 @@ describe('deleteWorkflows', () => {
     });
 
     it('logs warning but does not throw when purge fails', async () => {
-      const { storage } = makeStorageClient([
-        { _id: 'wf-1', _source: makeWorkflowSource() },
-      ]);
+      const { storage } = makeStorageClient([{ _id: 'wf-1', _source: makeWorkflowSource() }]);
       const esClient = makeEsClient();
-      (esClient.deleteByQuery as jest.Mock).mockRejectedValue(
-        new Error('purge failed')
-      );
+      (esClient.deleteByQuery as jest.Mock).mockRejectedValue(new Error('purge failed'));
 
       const result = await deleteWorkflows({
         ids: ['wf-1'],
@@ -266,9 +265,7 @@ describe('deleteWorkflows', () => {
       });
 
       expect(result.deleted).toBe(1);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to purge')
-      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to purge'));
     });
   });
 });

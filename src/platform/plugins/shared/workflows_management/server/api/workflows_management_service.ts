@@ -311,7 +311,6 @@ export class WorkflowsService {
     return this.executionQueryService.getWorkflowExecutionHistory(executionId, spaceId);
   }
 
-
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     await this.ensureInitialized();
     return this.executionQueryService.getStepExecutions(params, spaceId);
