@@ -80,12 +80,7 @@ export class WorkflowRepository {
    * Check if a workflow is enabled by ID and space ID
    */
   async isWorkflowEnabled(workflowId: string, spaceId: string): Promise<boolean> {
-    try {
-      const workflow = await this.getWorkflow(workflowId, spaceId);
-      return workflow?.enabled ?? false;
-    } catch (error) {
-      this.options.logger.error(`Failed to check if workflow ${workflowId} is enabled: ${error}`);
-      return false;
-    }
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+    return workflow?.enabled ?? false;
   }
 }

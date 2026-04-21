@@ -154,6 +154,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="craft"
+            aria-label="Select spacecraft"
             button={
               <EuiExpression
                 description="When the People in"
@@ -208,6 +209,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="outerSpaceCapacity"
+            aria-label="Set capacity threshold"
             button={
               <EuiExpression
                 description={outerSpaceCapacityTrigger.op}
