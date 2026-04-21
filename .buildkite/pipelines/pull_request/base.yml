@@ -9,6 +9,21 @@ steps:
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
+    plugins:
+      - custom-checkout#v1.8.0:
+          skip_checkout: true
+          repos:
+            - url: git@github.com:elastic/kibana.git
+              mirror_url: /opt/git-mirrors/git-github-com-elastic-kibana-git
+              ref: "${BUILDKITE_COMMIT}"
+              fetch: true
+              clone_flags:
+                - '--depth=1'
+                - '--no-tags'
+                - '--single-branch'
+              fetch_flags:
+                - '--depth=1'
+                - '--no-tags'
     retry:
       automatic:
         - exit_status: '-1'
