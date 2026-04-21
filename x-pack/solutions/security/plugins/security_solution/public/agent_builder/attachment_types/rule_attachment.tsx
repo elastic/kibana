@@ -34,12 +34,12 @@ import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../common/con
 import { hasCapabilities } from '../../common/lib/capabilities';
 import {
   Threshold as ThresholdDisplay,
-  AnomalyThreshold as AnomalyThresholdDisplay,
   ThreatIndex as ThreatIndexDisplay,
   constructThreatMappingDescription,
   NewTermsFields as NewTermsFieldsDisplay,
-  HistoryWindowSize,
 } from '../../detection_engine/rule_management/components/rule_details/rule_definition_section';
+import { convertDateMathToDuration } from '../../common/utils/date_math';
+import { DEFAULT_HISTORY_WINDOW_SIZE } from '../../common/constants';
 import {
   EQL_OPTIONS_EVENT_CATEGORY_FIELD_LABEL,
   EQL_OPTIONS_EVENT_TIEBREAKER_FIELD_LABEL,
@@ -293,13 +293,11 @@ export const ThresholdDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => 
   }
 
   return (
-    <EuiText size="s">
-      <strong>
-        {THRESHOLD_FIELD_LABEL}
-        {':'}
-      </strong>{' '}
+    <>
+      <SectionHeading>{THRESHOLD_FIELD_LABEL}</SectionHeading>
+      <EuiSpacer size="xs" />
       <ThresholdDisplay threshold={rule.threshold} />
-    </EuiText>
+    </>
   );
 };
 
@@ -358,7 +356,7 @@ export const MachineLearningDetails: React.FC<{ rule: RuleResponse }> = ({ rule 
           {ANOMALY_THRESHOLD_FIELD_LABEL}
           {':'}
         </strong>{' '}
-        <AnomalyThresholdDisplay anomalyThreshold={rule.anomaly_threshold} />
+        {rule.anomaly_threshold}
       </EuiText>
     </>
   );
@@ -371,20 +369,18 @@ export const NewTermsDetails: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
 
   return (
     <>
-      <EuiText size="s">
-        <strong>
-          {NEW_TERMS_FIELDS_FIELD_LABEL}
-          {':'}
-        </strong>{' '}
-        <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
-      </EuiText>
+      <SectionHeading>{NEW_TERMS_FIELDS_FIELD_LABEL}</SectionHeading>
+      <EuiSpacer size="xs" />
+      <NewTermsFieldsDisplay newTermsFields={rule.new_terms_fields} />
       <EuiSpacer size="xs" />
       <EuiText size="s">
         <strong>
           {HISTORY_WINDOW_SIZE_FIELD_LABEL}
           {':'}
         </strong>{' '}
-        <HistoryWindowSize historyWindowStart={rule.history_window_start} />
+        {rule.history_window_start
+          ? convertDateMathToDuration(rule.history_window_start)
+          : DEFAULT_HISTORY_WINDOW_SIZE}
       </EuiText>
     </>
   );
