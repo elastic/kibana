@@ -208,6 +208,7 @@ const generateSignificantEventsRoute = createServerRoute({
       uiSettingsClient,
       soClient,
       getFeatureClient,
+      getQueryClient,
       scopedClusterClient,
     } = await getScopedClients({ request });
 
@@ -230,13 +231,13 @@ const generateSignificantEventsRoute = createServerRoute({
         })
       : undefined;
 
-    // Get connector info for error enrichment
-    const [connector, definition, { significantEventsPromptOverride }, featureClient] =
+    const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
       await Promise.all([
         inferenceClient.getConnectorById(connectorId),
         streamsClient.getStream(params.path.name),
         new PromptsConfigService({ soClient, logger }).getPrompt(),
         getFeatureClient(),
+        getQueryClient(),
       ]);
 
     return fromRxjs(
@@ -249,6 +250,7 @@ const generateSignificantEventsRoute = createServerRoute({
         {
           inferenceClient,
           featureClient,
+          queryClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
           esClient: scopedClusterClient.asCurrentUser,

@@ -12,13 +12,21 @@ import { getReroutePipelineName } from './name';
 
 interface GenerateReroutePipelineParams {
   definition: Streams.WiredStream.Definition;
+  excludeDestinations?: Set<string>;
 }
 
-export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
+export function generateReroutePipeline({
+  definition,
+  excludeDestinations,
+}: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
     processors: definition.ingest.wired.routing
-      .filter((child) => child.status !== 'disabled')
+      .filter(
+        (child) =>
+          child.status !== 'disabled' &&
+          (!excludeDestinations || !excludeDestinations.has(child.destination))
+      )
       .map((child) => {
         return {
           reroute: {
