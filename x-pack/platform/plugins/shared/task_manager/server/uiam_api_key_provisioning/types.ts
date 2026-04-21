@@ -31,7 +31,15 @@ export interface UiamConvertResponse {
   results: Array<UiamConvertSuccessResult | UiamConvertFailedResult>;
 }
 
-/** Params for core.security.authc.apiKeys.uiam.convert */
-export interface UiamConvertParams {
-  keys: Array<{ key: string; type: 'elasticsearch' }>;
+/** Task doc queued for UIAM convert + SO update */
+export interface ApiKeyToConvert {
+  taskId: string;
+  apiKey: string;
+}
+
+/** Successful UIAM key material for one task */
+export interface UiamKeyResult {
+  taskId: string;
+  uiamApiKey: string;
+  uiamApiKeyId: string;
 }

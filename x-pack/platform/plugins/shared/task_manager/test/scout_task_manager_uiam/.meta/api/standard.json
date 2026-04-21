@@ -1,5 +1,5 @@
 {
-  "sha1": "d3a6e733685da3818d4e96db30df0c9f69f3099b",
+  "sha1": "1cb8d0f958d3966203c39b849d35789c3d831462",
   "tests": [
     {
       "id": "208b6394ca1260b-100a2f007029fdb",
@@ -27,6 +27,20 @@
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
         "line": 64,
         "column": 10
+      }
+    },
+    {
+      "id": "7b5a2f206f49d25-22b5097b2dfc323",
+      "title": "Task Manager UIAM API key provisioning (background task) provisions UIAM for tasks that still have an ES api key but no UIAM key, and skips tasks with no api key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
+        "line": 99,
+        "column": 5
       }
     }
   ]
