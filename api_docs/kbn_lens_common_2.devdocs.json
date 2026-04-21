@@ -838,8 +838,8 @@
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
             "docId": "kibKbnLensEmbeddableUtilsPluginApi",
-            "section": "def-common.LensApiState",
-            "text": "LensApiState"
+            "section": "def-common.LensApiConfig",
+            "text": "LensApiConfig"
           },
           " | undefined; ref_id?: string | undefined; }"
         ],
