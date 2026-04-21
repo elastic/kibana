@@ -112,7 +112,7 @@ describe('getEarsAccessToken', () => {
 
       expect(error).toBeInstanceOf(ConnectorAuthorizationError);
       expect(error.reason).toBe('no_token');
-      expect(error.authMethod).toBe('oauth_authorization_code');
+      expect(error.authMethod).toBe('ears');
     });
 
     it('returns the stored token without refreshing when it has not expired', async () => {
@@ -151,7 +151,7 @@ describe('getEarsAccessToken', () => {
 
       expect(error).toBeInstanceOf(ConnectorAuthorizationError);
       expect(error.reason).toBe('token_expired');
-      expect(error.authMethod).toBe('oauth_authorization_code');
+      expect(error.authMethod).toBe('ears');
     });
 
     it('throws ConnectorAuthorizationError with reason refresh_token_expired when the refresh token itself is expired', async () => {
@@ -167,7 +167,7 @@ describe('getEarsAccessToken', () => {
 
       expect(error).toBeInstanceOf(ConnectorAuthorizationError);
       expect(error.reason).toBe('refresh_token_expired');
-      expect(error.authMethod).toBe('oauth_authorization_code');
+      expect(error.authMethod).toBe('ears');
     });
 
     it('returns the refreshed token formatted as "tokenType accessToken"', async () => {
@@ -265,7 +265,7 @@ describe('getEarsAccessToken', () => {
 
       expect(error).toBeInstanceOf(ConnectorAuthorizationError);
       expect(error.reason).toBe('refresh_failed');
-      expect(error.authMethod).toBe('oauth_authorization_code');
+      expect(error.authMethod).toBe('ears');
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: EARS endpoint unreachable'
       );
@@ -285,7 +285,7 @@ describe('getEarsAccessToken', () => {
 
       expect(error).toBeInstanceOf(ConnectorAuthorizationError);
       expect(error.reason).toBe('refresh_failed');
-      expect(error.authMethod).toBe('oauth_authorization_code');
+      expect(error.authMethod).toBe('ears');
       expect(logger.error).toHaveBeenCalledWith(
         'Failed to refresh access token for connectorId: connector-1. Error: DB write failed'
       );

@@ -41,5 +41,8 @@ export class ConnectorAuthorizationError extends Error {
 export const isConnectorAuthorizationError = (
   error: unknown
 ): error is ConnectorAuthorizationError => {
-  return error instanceof ConnectorAuthorizationError;
+  return (
+    error instanceof ConnectorAuthorizationError ||
+    (Error.isError(error) && error.name === 'ConnectorAuthorizationError')
+  );
 };

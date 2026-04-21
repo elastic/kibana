@@ -70,6 +70,7 @@ const baseOpts = {
   connectorId: 'connector-1',
   logger,
   connectorTokenClient,
+  authMethod: 'oauth_authorization_code',
   refreshFn,
 };
 

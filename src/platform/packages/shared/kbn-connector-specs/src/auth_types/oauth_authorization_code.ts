@@ -14,6 +14,8 @@ import { normalizeAuthorizationHeaderValue } from './oauth_authz_code_and_ears_h
 import { isConnectorAuthorizationError } from '../errors';
 import * as i18n from './translations';
 
+export const OAUTH_AUTHORIZATION_CODE_AUTH_ID = 'oauth_authorization_code';
+
 const authSchema = z
   .object({
     authorizationUrl: z.url().meta({
@@ -97,7 +99,7 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * The _start_oauth_flow and _oauth_callback routes are generic and work with any provider.
  */
 export const OAuthAuthorizationCode: AuthTypeSpec<AuthSchemaType> = {
-  id: 'oauth_authorization_code',
+  id: OAUTH_AUTHORIZATION_CODE_AUTH_ID,
   schema: authSchema,
   authMode: 'per-user',
   configure: async (

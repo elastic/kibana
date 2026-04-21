@@ -27,6 +27,12 @@ export interface GetStoredTokenWithRefreshOpts {
   logger: Logger;
   connectorTokenClient: ConnectorTokenClientContract;
   /**
+   * Identifies the auth type that initiated the refresh (e.g. 'oauth_authorization_code',
+   * 'ears'). Propagated onto any `ConnectorAuthorizationError` thrown from this function
+   * so downstream consumers can report which auth flow needs re-authorization.
+   */
+  authMethod: string;
+  /**
    * When true, skip the expiration check and force a token refresh.
    * Use this when you've received a 401 and know the token is invalid
    * even if it hasn't "expired" according to the stored timestamp.
@@ -100,6 +106,7 @@ export const getStoredTokenWithRefresh = async ({
   connectorId,
   logger,
   connectorTokenClient,
+  authMethod,
   forceRefresh = false,
   isPerUser = false,
   profileUid,
@@ -134,7 +141,7 @@ export const getStoredTokenWithRefresh = async ({
       // No token found - user must authorize first
       if (!connectorToken) {
         throw new ConnectorAuthorizationError({
-          authMethod: 'oauth_authorization_code',
+          authMethod,
           reason: 'no_token',
           message: `No access token found for connectorId: ${connectorId}. User must complete OAuth authorization flow.`,
         });
@@ -166,7 +173,7 @@ export const getStoredTokenWithRefresh = async ({
 
       if (!storedRefreshToken) {
         throw new ConnectorAuthorizationError({
-          authMethod: 'oauth_authorization_code',
+          authMethod,
           reason: 'token_expired',
           message: `Access token expired and no refresh token available for connectorId: ${connectorId}. User must re-authorize.`,
         });
@@ -178,7 +185,7 @@ export const getStoredTokenWithRefresh = async ({
         Date.parse(connectorToken.refreshTokenExpiresAt) <= now
       ) {
         throw new ConnectorAuthorizationError({
-          authMethod: 'oauth_authorization_code',
+          authMethod,
           reason: 'refresh_token_expired',
           message: `Refresh token expired for connectorId: ${connectorId}. User must re-authorize.`,
         });
@@ -215,7 +222,7 @@ export const getStoredTokenWithRefresh = async ({
 
         if (isTokenRevoked) {
           throw new ConnectorAuthorizationError({
-            authMethod: 'oauth_authorization_code',
+            authMethod,
             reason: 'token_revoked',
             message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
           });
@@ -223,7 +230,7 @@ export const getStoredTokenWithRefresh = async ({
 
         if (treatRefreshFailureAsAuthError) {
           throw new ConnectorAuthorizationError({
-            authMethod: 'oauth_authorization_code',
+            authMethod,
             reason: 'refresh_failed',
             message: `Failed to refresh access token for connectorId: ${connectorId}. User must re-authorize.`,
           });
