@@ -24,7 +24,6 @@ bootstrap_exit=0
 download_exit=0
 wait $download_pid || download_exit=$?
 
-echo "--- Download build artifacts (log)"
 cat "$download_log"
 rm -f "$download_log"
 
