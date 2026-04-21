@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { asMillisecondDuration, asPercent } from '../../common/utils/formatters';
+import { i18n } from '@kbn/i18n';
+import { asInteger, asMillisecondDuration, asPercent } from '../../common/utils/formatters';
 import {
   ALERT_EVALUATION_UNIT_TYPE,
   getAlertEvaluationUnitTypeByRuleTypeId,
@@ -19,6 +20,11 @@ export const formatAlertEvaluationValue = (ruleTypeId?: string, evaluationValue?
       return asMillisecondDuration(evaluationValue);
     case ALERT_EVALUATION_UNIT_TYPE.PERCENT:
       return asPercent(evaluationValue, 100);
+    case ALERT_EVALUATION_UNIT_TYPE.COUNT:
+      return i18n.translate('xpack.observability.alertEvaluation.countValue', {
+        defaultMessage: '{value} {value, plural, one {error} other {errors}}',
+        values: { value: asInteger(evaluationValue) },
+      });
     default:
       return evaluationValue;
   }

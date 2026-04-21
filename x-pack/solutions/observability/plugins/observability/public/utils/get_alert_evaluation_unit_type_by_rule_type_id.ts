@@ -8,6 +8,7 @@
 export const ALERT_EVALUATION_UNIT_TYPE = {
   DURATION: 'DURATION',
   PERCENT: 'PERCENT',
+  COUNT: 'COUNT',
   NUMBER: 'NUMBER',
 } as const;
 
@@ -22,6 +23,8 @@ export const getAlertEvaluationUnitTypeByRuleTypeId = (
       return ALERT_EVALUATION_UNIT_TYPE.DURATION;
     case 'apm.transaction_error_rate':
       return ALERT_EVALUATION_UNIT_TYPE.PERCENT;
+    case 'apm.error_rate':
+      return ALERT_EVALUATION_UNIT_TYPE.COUNT;
     default:
       return ALERT_EVALUATION_UNIT_TYPE.NUMBER;
   }
