@@ -7,7 +7,7 @@
 
 import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
-import { DEFAULT_COLOR_MAPPING_CONFIG, type PaletteRegistry } from '@kbn/coloring';
+import { type PaletteRegistry } from '@kbn/coloring';
 import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -69,6 +69,7 @@ import {
 } from '../../shared_components';
 import type { CollapseExpressionFunction } from '../../../common/expressions';
 import { hasIcon } from './xy_config_panel/shared/marker_decoration_settings';
+import { getColorMappingDefaults } from '../../utils';
 
 type XYLayerConfigWithSimpleView = XYLayerConfig & { simpleView?: boolean };
 type XYAnnotationLayerConfigWithSimpleView = XYAnnotationLayerConfig & { simpleView?: boolean };
@@ -525,10 +526,9 @@ const dataLayerToExpression = (
     colorMapping: layer.colorMapping
       ? JSON.stringify(layer.colorMapping)
       : hasActiveSplits
-      ? JSON.stringify({
-          ...DEFAULT_COLOR_MAPPING_CONFIG,
-          paletteId: getDefaultPalette(layer.seriesType),
-        })
+      ? JSON.stringify(
+          getColorMappingDefaults({ defaultPaletteId: getDefaultPalette(layer.seriesType) })
+        )
       : undefined,
   });
 
