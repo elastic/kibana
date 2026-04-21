@@ -376,6 +376,8 @@ export const searchEntitiesTool = (
     description: `Search entity store for security entities (host, user, service, generic).
     Supports filtering by normalized risk score, asset criticality, entity attributes, and lifecycle timestamps.
     Use this tool to find entities matching specific criteria.
+    When the user asks for **the** single riskiest / top-1 / **one** host or user (singular), or an **entity card**, set **maxResults: 1** (and the right entityTypes), then use security.get_entity and attachments.add with type "security.entity_card" — **not** "security.entity_list" (entity_list requires two or more entities; see entity-analytics skill).
+    When the user asks for the Entity Analytics dashboard or home-style overview, use these results (and optional security.get_entity) then call attachments.add with type "security.entity_analytics_dashboard" so the UI shows Preview→Canvas (see entity-analytics skill).
     Do NOT use if entity ID (EUID) is known; use the "security.get_entity" tool instead.`,
     tags: ['security', 'entity-store', 'entity-analytics'],
     schema,

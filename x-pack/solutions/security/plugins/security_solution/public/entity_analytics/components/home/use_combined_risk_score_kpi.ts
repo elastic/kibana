@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
+import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../../common/search_strategy';
 import { useRiskScoreKpi } from '../../api/hooks/use_risk_score_kpi';
+import { useEntityStoreRiskScoreKpi } from '../../api/hooks/use_entity_store_risk_score_kpi';
 import { useGlobalFilterQuery } from '../../../common/hooks/use_global_filter_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useUiSetting } from '../../../common/lib/kibana';
 import type { SeverityCount } from '../severity/types';
+
+const mergeSeverityCounts = (
+  a: SeverityCount | undefined,
+  b: SeverityCount | undefined
+): SeverityCount => ({
+  [RiskSeverity.Unknown]: (a?.[RiskSeverity.Unknown] ?? 0) + (b?.[RiskSeverity.Unknown] ?? 0),
+  [RiskSeverity.Low]: (a?.[RiskSeverity.Low] ?? 0) + (b?.[RiskSeverity.Low] ?? 0),
+  [RiskSeverity.Moderate]: (a?.[RiskSeverity.Moderate] ?? 0) + (b?.[RiskSeverity.Moderate] ?? 0),
+  [RiskSeverity.High]: (a?.[RiskSeverity.High] ?? 0) + (b?.[RiskSeverity.High] ?? 0),
+  [RiskSeverity.Critical]: (a?.[RiskSeverity.Critical] ?? 0) + (b?.[RiskSeverity.Critical] ?? 0),
+});
 
 interface UseCombinedRiskScoreKpiResult {
   severityCount: SeverityCount;
@@ -28,6 +42,7 @@ interface UseCombinedRiskScoreKpiResult {
 export const useCombinedRiskScoreKpi = (skip?: boolean): UseCombinedRiskScoreKpiResult => {
   const { from, to } = useGlobalTime();
   const { filterQuery } = useGlobalFilterQuery();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) === true;
 
   const timerange = useMemo(
     () => ({
@@ -40,24 +55,53 @@ export const useCombinedRiskScoreKpi = (skip?: boolean): UseCombinedRiskScoreKpi
   // Memoize entity array to prevent re-creation on every render
   const entityTypes = useMemo(() => [EntityType.user, EntityType.host, EntityType.service], []);
 
-  // Query all three entity types in a single call
+  // Query all three entity types in a single call (legacy risk-score indices)
   const combinedRiskKpi = useRiskScoreKpi({
     filterQuery,
-    skip,
+    skip: skip || entityStoreV2Enabled,
     riskEntity: entityTypes,
     timerange,
   });
 
-  const loading = combinedRiskKpi.loading;
-  const error = combinedRiskKpi.error;
-  const isModuleDisabled = combinedRiskKpi.isModuleDisabled;
+  const hostStoreKpi = useEntityStoreRiskScoreKpi({
+    filterQuery,
+    skip: skip || !entityStoreV2Enabled,
+    riskEntity: EntityType.host,
+    timerange,
+  });
 
-  const refetch = () => {
-    combinedRiskKpi.refetch();
-  };
+  const userStoreKpi = useEntityStoreRiskScoreKpi({
+    filterQuery,
+    skip: skip || !entityStoreV2Enabled,
+    riskEntity: EntityType.user,
+    timerange,
+  });
+
+  const loading = entityStoreV2Enabled
+    ? hostStoreKpi.loading || userStoreKpi.loading
+    : combinedRiskKpi.loading;
+  const error = entityStoreV2Enabled
+    ? hostStoreKpi.error ?? userStoreKpi.error
+    : combinedRiskKpi.error;
+  const isModuleDisabled = entityStoreV2Enabled
+    ? hostStoreKpi.isModuleDisabled && userStoreKpi.isModuleDisabled
+    : combinedRiskKpi.isModuleDisabled;
+
+  const refetch = useCallback(() => {
+    if (entityStoreV2Enabled) {
+      hostStoreKpi.refetch();
+      userStoreKpi.refetch();
+    } else {
+      combinedRiskKpi.refetch();
+    }
+  }, [combinedRiskKpi, entityStoreV2Enabled, hostStoreKpi, userStoreKpi]);
+
+  const severityCount = entityStoreV2Enabled
+    ? mergeSeverityCounts(hostStoreKpi.severityCount, userStoreKpi.severityCount)
+    : combinedRiskKpi.severityCount ?? EMPTY_SEVERITY_COUNT;
 
   return {
-    severityCount: combinedRiskKpi.severityCount ?? EMPTY_SEVERITY_COUNT,
+    severityCount,
     loading,
     error,
     isModuleDisabled,

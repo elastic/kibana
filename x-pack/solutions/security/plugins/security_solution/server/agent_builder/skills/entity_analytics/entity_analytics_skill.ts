@@ -29,12 +29,42 @@ export interface EntityAnalyticsSkillsContext {
 }
 
 const entityStoreV2Content = `
+## Critical rule — single winner or explicit entity card (overrides entity list)
+
+Use this block when the user’s **main deliverable is exactly one entity** or they **explicitly ask for an entity card** / **card** / **flyout-style** view (e.g. “show me the **entity card** for…”, “**card** for the riskiest host”, “**the** riskiest **host**”, “**the** highest-risk **user**”, “#1 host”, “the host at the top of the list”). Singular phrasing (**the** + one entity type) means **one** primary entity, not a multi-row list attachment.
+
+- Call \`security.search_entities\` with \`maxResults\`: **1** (and the right \`entityTypes\`, e.g. \`["host"]\` for hosts) unless the user clearly asked for several entities. That keeps the investigation aligned with a **single** EUID.
+- Call \`security.get_entity\` for that EUID, then \`attachments.add\` with \`type\` exactly \`security.entity_card\` (see **Rich single-entity card**). **Do not** use \`security.entity_list\` as the rich attachment for this answer — the conversation UI’s **Preview → Canvas** **entity card** layout requires \`security.entity_card\`. **Note:** \`security.entity_list\` **rejects** payloads with fewer than two rows; a mistaken list call will error until you use \`security.entity_card\`.
+- If \`security.search_entities\` returned **multiple** rows (for example default sizing), you **still** must **not** attach \`security.entity_list\` for this intent: pick the **one** winner (highest \`risk_score_norm\` unless the user specified otherwise), mention any runners-up only in prose, and add **only** \`security.entity_card\` for that winner.
+
+This rule **outranks** the “ranked / multi-entity” block below when intent is singular or the user says **entity card**, even if the wording includes “riskiest” or “highest risk”.
+
+## Critical rule — Entity Analytics "dashboard" / home / overview
+
+This section applies **only** when the user clearly wants the **Security → Entity Analytics home / dashboard experience** in Canvas: e.g. they name **Entity Analytics dashboard** or **home**, ask for an **overview like the Entity Analytics page**, **risk level breakdown / donut**, **highlights panel plus entities table together**, or **the same layout as Entity Analytics**.
+
+It does **not** apply to generic requests for a **list**, **ranking**, **top N**, or **who are the riskiest entities** — those use **Rich entity list attachment** below (plus markdown); the dashboard rule does not replace that.
+
+When this dashboard rule **does** apply:
+
+- You **MUST** call \`attachments.add\` with \`type\` exactly \`security.entity_analytics_dashboard\` in the **same turn** after you have entity data from \`security.search_entities\` (and optionally \`security.get_entity\`). The conversation UI only shows that **dashboard-shaped** Canvas when this attachment exists; prose or \`security.entity_list\` alone does **not** render that dashboard layout.
+- You **MUST NOT** satisfy **that** dashboard-shaped request using only \`security.entity_list\` or only markdown — use \`security.entity_analytics_dashboard\` for the two-column home-style Canvas.
+- Populate \`entities\` from tool output: copying rows from \`security.search_entities\` is acceptable for the dashboard snapshot when calling \`security.get_entity\` for every row would be impractical; add \`get_entity\` when you need richer fields for highlights or accuracy.
+
+## Critical rule — ranked / multi-entity answers (list, top, riskiest)
+
+When the user asks for the **riskiest**, **highest-risk**, **top N**, **most risky**, or **a list of** entities (any phrasing where the main deliverable is **multiple entities ranked or tabulated** — plural, “which”, “who are”, “show me the top 5”, **not** “the riskiest host” / “entity card” / the single-winner rule above), and you return **two or more** entities from \`security.search_entities\`:
+
+- After \`security.get_entity\` for those entities, you **MUST** call \`attachments.add\` with \`type\` exactly \`security.entity_list\` (see **Rich entity list attachment**). Do **not** answer with only a markdown table — the user expects the **Entity list** pill and **Preview → Canvas** table in the conversation UI.
+- Use \`security.entity_analytics_dashboard\` **in addition** only if they also asked for the EA **home / dashboard** experience as in the block above; otherwise \`security.entity_list\` is the required rich attachment for multi-entity lists.
+
 This skill provides a guide to investigating specific security entities (hosts, users, services, generic) by entity ID (EUID)
 or by surfacing risky entities based on their risk scores, asset criticality levels and other behavioral and lifecycle attributes.
 
 ## When to Use This Skill
 
 Use this skill when:
+- The user asks about the **Entity Analytics dashboard**, **Entity Analytics home / overview**, or wants a view **like the built-in Entity Analytics page** (risk levels, anomalies-style context, entities table) scoped to their question
 - Investigating the current behavior of a specific entity using its ID (EUID)
 - Looking up the current profile for a specific entity using its ID (EUID), including risk score, asset criticality and watchlists
 - Analyzing the historical behavior of a specific entity using its ID (EUID)
@@ -108,12 +138,57 @@ if 10 entities are found using \`security.search_entities\`, you MUST call \`sec
   - Whether the entity asset criticality has become more or less critical over time
   - Whether the entity has been added to or removed from watchlists over time
   - Whether the entity has exhibited new behaviors or stopped exhibiting certain behaviors over time
-- For \`security.search_entities\` tool results, summarize results in a table format. The table MUST have the following columns if data is available for them:
+- For \`security.search_entities\` tool results with **two or more** entities, you **MUST** add \`security.entity_list\` (see "Rich entity list attachment") after \`security.get_entity\` — a markdown-only table is **not** sufficient. For a **single** row, use the single-entity card when a rich UI helps (see "Rich single-entity card"), or prose. **Exception:** if the user asked for the **Entity Analytics dashboard / home / overview UI** (see that **dashboard** critical rule above), use \`security.entity_analytics_dashboard\` as the primary rich UI; you may still add \`security.entity_list\` if a separate compact list attachment helps (requires **two or more** entities in the list payload). The table MUST have the following columns if data is available for them:
   - risk score
   - asset criticality
   - first_seen
   - last_seen
   Include columns for behavioral attributes if data exists and column is relevant to the user's prompt
+
+## Rich single-entity card (Canvas UI)
+
+When the investigation is about **one primary entity** (single EUID) and you have called \`security.get_entity\` for it:
+1. Call \`attachments.add\` with \`type\` set to exactly \`security.entity_card\`.
+2. Populate \`data\` at minimum with \`entity_type\` and \`entity_id\`. Map the tool response and your analysis into optional fields:
+   - Identity: \`entity_name\`, \`attachmentLabel\` (short card title).
+   - Flyout-aligned summary: \`data_source\`, \`watchlist_names\` (string array), \`criticality\` (use the same criticality keys as in Security, e.g. \`high_impact\`), \`first_seen\`, \`last_activity\`.
+   - Extra attributes: \`field_rows\` as an array of \`{ "label", "value" }\` for any other notable scalar fields you want to highlight.
+   - **Risk summary**: \`risk_score_norm\`, \`risk_level\`, \`risk_note\` (your synthesis), and \`risk_inputs\` as an array of \`{ "title", "detail"?, "alert_count"? }\` mirroring risk inputs / contributing alerts from the tool output.
+   - **Resolution** (entity resolution workflow): \`resolution\` object with optional \`headline\`, \`status\`, and \`items\` as \`{ "label", "value" }\` rows (for example match status, same-as links, or merge notes when present in the API).
+   - **Insights**: \`insights\` as an array of \`{ "title", "body"?, "emphasis"?: "info" | "warning" | "danger" }\` for behavioral or posture highlights (similar in purpose to the Insights area of the entity flyout).
+3. The UI shows a compact **inline** card and a **Preview → Canvas** layout (same interaction pattern as dashboard attachments) with sections for summary, fields, risk, resolution, and insights.
+4. Still write a short natural-language summary in the message; use the card for structured detail and deep links.
+5. The existing \`security.entity\` attachment type remains for minimal identifier payloads from the product UI — use \`security.entity_card\` when you want to render a full investigated-entity view for the user.
+
+## Rich entity list attachment (Canvas UI)
+
+When your answer depends on **two or more entities** and you have already fetched their profiles with \`security.get_entity\`:
+1. Call the \`attachments.add\` tool with \`type\` set to exactly \`security.entity_list\`.
+2. Set \`data\` to a JSON object with:
+   - \`attachmentLabel\`: a short title for the list (for example, "Highest-risk users — last 7 days").
+   - \`entities\`: an array with one entry per entity. Each entry MUST include \`entity_type\` (\`host\`, \`user\`, \`service\`, or \`generic\`) and \`entity_id\` (the EUID). Copy optional fields from the \`security.get_entity\` / \`security.search_entities\` payloads when present: \`entity_name\`, \`source\`, \`risk_score_norm\`, \`risk_level\`, \`criticality\`, \`first_seen\`, \`last_activity\`.
+3. Order \`entities\` in the same priority you describe in prose (for example, highest \`risk_score_norm\` first).
+4. The Security UI renders this attachment like dashboard attachments: a compact inline summary with a **Preview** action that opens a full **Canvas** table (aligned with the Entity Analytics entities list columns).
+5. Still write a concise narrative summary in the message body; use the attachment for the detailed multi-entity view.
+6. For a **single** entity, do **not** use \`security.entity_list\`; use \`security.entity_card\` (above) when a rich card is helpful, otherwise answer in text or rely on an existing \`security.entity\` attachment when the user attached one.
+7. If the user asked for the **Entity Analytics dashboard / home / overview**, do **not** use \`security.entity_list\` as the primary rich UI — use \`security.entity_analytics_dashboard\` (see below).
+
+## Entity Analytics dashboard snapshot (Canvas UI)
+
+When the user wants the **Entity Analytics dashboard experience** (same information architecture as Security → Entity Analytics home: **entity risk levels** with donut + breakdown table, **recent anomalies / highlights**, and **entities**), not just a flat list or a single-entity card:
+
+1. Use \`security.search_entities\` (and \`security.get_entity\` as needed) so the snapshot reflects **real** entity store data aligned with the user’s filters (entity types, risk, criticality, watchlists, time hints in the question).
+2. Call \`attachments.add\` with \`type\` set to exactly \`security.entity_analytics_dashboard\`.
+3. Populate \`data\` with:
+   - \`attachmentLabel\`: short title tailored to the request (for example, "High-risk users — last 7 days").
+   - \`summary\` (optional): 1–3 sentences interpreting the snapshot for this question.
+   - \`time_range_label\` (optional): plain language (for example, "Last 24 hours", "Last 90 days") when the user implied a window.
+   - \`watchlist_id\` / \`watchlist_name\` (optional): when the user or your filters scoped a watchlist (copy from tool/API output when present).
+   - \`severity_count\` (optional but recommended): object \`{ "Critical", "High", "Moderate", "Low", "Unknown" }\` with **non-negative integer** counts. Prefer counts that match the environment when you can infer them reliably from tool outputs. If you only have a **sample** (for example entities returned by \`security.search_entities\`), **bucket those rows by \`risk_level\`**, set the counts from that sample, and set \`distribution_note\` to state clearly that counts reflect that sample (for example, "Counts are from the 50 entities returned for this question, not a full-environment rollup").
+   - \`anomaly_highlights\` (optional): array of \`{ "title", "body"? }\` for the right-hand panel — summarize notable risk changes, criticality, watchlist membership, or detection-driven signals **derived from the tools** (this replaces live ML anomaly charts when those are not available).
+   - \`entities\`: same rows as \`security.entity_list\` (array of \`entity_type\`, \`entity_id\`, plus optional fields from \`security.get_entity\`). Order by the importance you describe in prose. May be empty only when the user asked purely for KPI-style framing and you still supply \`severity_count\` and/or highlights.
+4. The UI shows an **inline** pill and **Preview → Canvas** with the same two-column **risk / highlights** layout as the product home page (above a full **entities** table). It is **more precise** than generic prose because you choose columns, counts, highlights, and ordering for the user’s request.
+5. Still write a concise narrative in the message; use the attachment for the structured dashboard view and deep investigation via **Open Entity Analytics in Security**.
 
 ### 4. Provide recommendation
 - Recommend investigating external activities for user entities
@@ -128,7 +203,8 @@ User query: Which users have the highest risk scores?
 Steps:
 1. Use the 'security.search_entities' tool to get the top N users sorted by their normalized risk scores.
 2. For each user, use the 'security.get_entity' tool to get their full profile. If 10 entities are returned, you MUST call the 'security.get_entity' tool 10 times to get each user's profile.
-3. Present the results in a table format showing entity ID, risk score, risk level, asset criticality level and any watchlists they belong to.
+3. Call \`attachments.add\` with \`type\` \`security.entity_list\` and populate \`entities\` from the profiles (see "Rich entity list attachment").
+4. Present the results in a table format in the message as well, showing entity ID, risk score, risk level, asset criticality level and any watchlists they belong to.
 
 ### Example 2: Risk Score Changes Over Time
 
@@ -148,7 +224,8 @@ User query: What are the riskiest hosts in my environment that are high impact?
 Steps:
 1. Use the 'security.search_entities' tool to get the top N hosts sorted by their normalized risk scores, using parameter
 criticalityLevels: ['high_impact', 'extreme_impact'] to filter for high impact.
-2. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
+2. For each host returned, use \`security.get_entity\`, then call \`attachments.add\` with \`type\` \`security.entity_list\` when there are two or more hosts.
+3. Present the results in a table format showing entity ID, risk score, risk level, and asset criticality level
 
 ### Example 4: Risk Score History
 
@@ -158,6 +235,16 @@ Steps:
 1. Use the 'security.get_entity' tool with an interval of '30d' to fetch Cielo39's current profile and profile_history for the last 30 days
 2. Analyze the risk scores in the profile history along with the current risk score to determine if the change in risk score is significant (e.g., greater than ${ENTITY_RISK_SCORE_SIGNIFICANT_CHANGE_THRESHOLD} points).
 3. Summarize the trends in risk score changes (stable, increasing, decreasing) and present findings in a concise format showing the previous risk scores, current risk score, and whether the change is significant.
+
+### Example 5: Entity card for the single riskiest host
+
+User query: Show me the entity card for the most risky host.
+
+Steps:
+1. Use \`security.search_entities\` with \`entityTypes\`: \`["host"]\`, sort implicitly by risk (tool returns highest risk first), and \`maxResults\`: **1**.
+2. Use \`security.get_entity\` for that host’s EUID.
+3. Call \`attachments.add\` with \`type\` \`security.entity_card\` (not \`security.entity_list\`) and populate \`data\` from the profile (see **Rich single-entity card**).
+4. Summarize in prose why this host is the riskiest among hosts in scope.
 
 ## Best Practices
 - Always use \`calculated_score_norm\` (0-100) when reporting risk scores
@@ -178,7 +265,7 @@ Steps:
 ## Response formats
 
 ### Top N entities
-Provide a short table with the key fields:
+When N ≥ 2, you **MUST** call \`attachments.add\` with \`security.entity_list\` (after \`security.get_entity\` for each row). Then in the message body provide a short table with the key fields:
 
 | Entity | Type | Risk score (0-100) | Risk level | Criticality |
 | --- | --- | --- | --- | --- |
@@ -284,6 +371,7 @@ export const getEntityAnalyticsSkill = (ctx: EntityAnalyticsSkillsContext) =>
     name: 'entity-analytics',
     basePath: 'skills/security/entities',
     description: `Guide to finding and investigating security entities (hosts, users, services, generic).
+      Includes the Entity Analytics dashboard / home overview: use the security.entity_analytics_dashboard attachment so the user gets Preview→Canvas with risk breakdown, highlights, and entities (see skill content).
       Analyze how an entity's risk score, criticality, behaviors and attributes have changed over time (e.g. last 90 days).
       Analyze how alerts contribute to an entity's risk score.
       Discover risky entities based on risk score, risk level, criticality level, watchlists, access behaviors, privilege attributes.`,
