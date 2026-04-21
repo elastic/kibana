@@ -27792,6 +27792,10 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/visualization.tsx"
               },
               {
@@ -27821,6 +27825,30 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/axes_configuration.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/color_assignment.test.ts"
               },
               {
                 "plugin": "lens",

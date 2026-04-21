@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../../common/lib/kibana';
+import { EntityEventTypes } from '../../../../common/lib/telemetry';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import { fromApiLead } from './types';
 import * as i18n from './translations';
 
 const HUNTING_LEADS_QUERY_KEY = 'hunting-leads';
-const INDEX_REFRESH_DELAY_MS = 2_000;
+const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
+
+const POLL_INTERVAL_MS = 2_000;
+const MAX_POLLS = 30;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const LEAD_SCHEDULE_QUERY_KEY = 'lead-generation-status';
 
 const FETCH_LEADS_PARAMS = {
   params: {
@@ -29,7 +32,7 @@ const FETCH_LEADS_PARAMS = {
   },
 };
 
-export const useHuntingLeads = (isEnabled: boolean = true) => {
+export const useHuntingLeads = (connectorId: string, isEnabled: boolean = true) => {
   const {
     fetchLeads,
     generateLeads: generateLeadsApi,
@@ -38,7 +41,8 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     disableLeadGeneration,
   } = useEntityAnalyticsRoutes();
   const queryClient = useQueryClient();
-  const { addSuccess, addError } = useAppToasts();
+  const { addSuccess, addError, addWarning } = useAppToasts();
+  const { telemetry } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const [hasGenerated, setHasGenerated] = useState(false);
 
@@ -59,23 +63,45 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
     onError: (error: Error) => addError(error, { title: i18n.FETCH_LEADS_ERROR }),
   });
 
+  const pollForCompletion = useCallback(
+    async (executionUuid: string, signal: AbortSignal): Promise<'success' | 'timeout'> => {
+      for (let i = 0; i < MAX_POLLS; i++) {
+        if (signal.aborted) return 'timeout';
+        await delay(POLL_INTERVAL_MS);
+        if (signal.aborted) return 'timeout';
+
+        const status = await fetchLeadGenerationStatus({ signal });
+        if (status.lastExecutionUuid === executionUuid) {
+          if (status.lastError) {
+            throw new Error(status.lastError);
+          }
+
+          const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
+          queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+          return 'success';
+        }
+      }
+      return 'timeout';
+    },
+    [fetchLeadGenerationStatus, fetchLeads, queryClient]
+  );
+
   const { mutate: generate, isLoading: isGenerating } = useMutation({
     mutationFn: async () => {
       abortCtrl.current = new AbortController();
       const { signal } = abortCtrl.current;
 
-      await generateLeadsApi({ params: {}, signal });
-
-      if (signal.aborted) return;
-      await delay(INDEX_REFRESH_DELAY_MS);
-      if (signal.aborted) return;
-
-      const result = await fetchLeads({ ...FETCH_LEADS_PARAMS, signal });
-      queryClient.setQueryData([HUNTING_LEADS_QUERY_KEY], result);
+      telemetry.reportEvent(EntityEventTypes.LeadGenerationGenerateClicked, {});
+      const { executionUuid } = await generateLeadsApi({ params: { connectorId }, signal });
+      return pollForCompletion(executionUuid, signal);
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       setHasGenerated(true);
-      addSuccess(i18n.GENERATE_SUCCESS);
+      if (result === 'timeout') {
+        addWarning(i18n.GENERATE_TIMEOUT);
+      } else {
+        addSuccess(i18n.GENERATE_SUCCESS);
+      }
     },
     onError: (error: Error) => {
       addError(error, { title: i18n.GENERATE_ERROR });
@@ -90,7 +116,8 @@ export const useHuntingLeads = (isEnabled: boolean = true) => {
   });
 
   const { mutate: toggleSchedule } = useMutation({
-    mutationFn: (enabled: boolean) => (enabled ? enableLeadGeneration() : disableLeadGeneration()),
+    mutationFn: (enabled: boolean) =>
+      enabled ? enableLeadGeneration({ connectorId }) : disableLeadGeneration(),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: [LEAD_SCHEDULE_QUERY_KEY] }),
     onError: (error: Error) => addError(error, { title: i18n.SCHEDULE_UPDATE_ERROR }),
   });
