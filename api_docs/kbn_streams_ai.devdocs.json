@@ -13,6 +13,125 @@
     "functions": [
       {
         "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.buildDocumentStructureOverviewForPipelinePrompt",
+        "type": "Function",
+        "tags": [],
+        "label": "buildDocumentStructureOverviewForPipelinePrompt",
+        "description": [
+          "\nBuilds a JSON-serializable overview of sample document structure (fields, example values, schema hints)\nfor the pipeline suggestion prompt—no ingest simulation or parse-rate semantics."
+        ],
+        "signature": [
+          "(documents: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.FlattenRecord",
+            "text": "FlattenRecord"
+          },
+          "[], fieldsMetadataClient: ",
+          {
+            "pluginId": "fieldsMetadata",
+            "scope": "server",
+            "docId": "kibFieldsMetadataPluginApi",
+            "section": "def-server.IFieldsMetadataClient",
+            "text": "IFieldsMetadataClient"
+          },
+          ", isOtel: boolean, mappedFields: Record<string, string>) => Promise<{ document_count: number; fields: string[]; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+        "lineNumber": 271,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.buildDocumentStructureOverviewForPipelinePrompt.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "documents",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.FlattenRecord",
+                "text": "FlattenRecord"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+            "lineNumber": 276,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.buildDocumentStructureOverviewForPipelinePrompt.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldsMetadataClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldsMetadata",
+                "scope": "server",
+                "docId": "kibFieldsMetadataPluginApi",
+                "section": "def-server.IFieldsMetadataClient",
+                "text": "IFieldsMetadataClient"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+            "lineNumber": 277,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.buildDocumentStructureOverviewForPipelinePrompt.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "isOtel",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+            "lineNumber": 278,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.buildDocumentStructureOverviewForPipelinePrompt.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "mappedFields",
+            "description": [],
+            "signature": [
+              "Record<string, string>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+            "lineNumber": 279,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
         "id": "def-server.createDefaultSignificantEventsToolUsage",
         "type": "Function",
         "tags": [],
@@ -83,6 +202,133 @@
       },
       {
         "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.fetchMappedFieldsForStreamProcessingSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "fetchMappedFieldsForStreamProcessingSuggestions",
+        "description": [
+          "Field types from the stream index (field_caps); reused for prompt overview + simulate tool metrics."
+        ],
+        "signature": [
+          "(esClient: ",
+          "ElasticsearchClient",
+          ", streamIndexName: string) => Promise<Record<string, string>>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+        "lineNumber": 293,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.fetchMappedFieldsForStreamProcessingSuggestions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "ElasticsearchClient"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+            "lineNumber": 295,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.fetchMappedFieldsForStreamProcessingSuggestions.$2",
+            "type": "string",
+            "tags": [],
+            "label": "streamIndexName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+            "lineNumber": 296,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.formatUpstreamSeedParsingContextForPromptMarkdown",
+        "type": "Function",
+        "tags": [],
+        "label": "formatUpstreamSeedParsingContextForPromptMarkdown",
+        "description": [
+          "\nHuman-readable block for the suggestion prompt: describes the system-managed grok/dissect\nthat already ran so samples match that shape. Not a processor the agent should recreate."
+        ],
+        "signature": [
+          "(processor: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.DissectProcessor",
+            "text": "DissectProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.GrokProcessor",
+            "text": "GrokProcessor"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/upstream_seed_parsing_prompt.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.formatUpstreamSeedParsingContextForPromptMarkdown.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "processor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.DissectProcessor",
+                "text": "DissectProcessor"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.GrokProcessor",
+                "text": "GrokProcessor"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/upstream_seed_parsing_prompt.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
         "id": "def-server.generateAllComputedFeatures",
         "type": "Function",
         "tags": [],
@@ -140,7 +386,7 @@
           "\nGenerate significant event definitions using a reasoning agent that fetches\nstream features (including computed dataset analysis) via tool calls."
         ],
         "signature": [
-          "({\n  stream,\n  esClient,\n  getFeatures,\n  inferenceClient,\n  signal,\n  systemPrompt,\n  logger,\n  additionalTools,\n  additionalToolCallbacks,\n}: { stream: ",
+          "({\n  stream,\n  esClient,\n  getFeatures,\n  inferenceClient,\n  signal,\n  systemPrompt,\n  logger,\n  additionalTools,\n  additionalToolCallbacks,\n  existingQueries,\n}: { stream: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -208,7 +454,15 @@
             "section": "def-common.ToolCallbackResult",
             "text": "ToolCallbackResult"
           },
-          ">> | undefined; }) => Promise<{ queries: ParsedToolQuery[]; tokensUsed: ",
+          ">> | undefined; existingQueries?: ",
+          {
+            "pluginId": "@kbn/streams-ai",
+            "scope": "server",
+            "docId": "kibKbnStreamsAiPluginApi",
+            "section": "def-server.ExistingQuerySummary",
+            "text": "ExistingQuerySummary"
+          },
+          "[] | undefined; }) => Promise<{ queries: ParsedToolQuery[]; tokensUsed: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -227,7 +481,7 @@
           "; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-        "lineNumber": 62,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -237,10 +491,10 @@
             "id": "def-server.generateSignificantEvents.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  stream,\n  esClient,\n  getFeatures,\n  inferenceClient,\n  signal,\n  systemPrompt,\n  logger,\n  additionalTools,\n  additionalToolCallbacks,\n}",
+            "label": "{\n  stream,\n  esClient,\n  getFeatures,\n  inferenceClient,\n  signal,\n  systemPrompt,\n  logger,\n  additionalTools,\n  additionalToolCallbacks,\n  existingQueries,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-            "lineNumber": 76,
+            "lineNumber": 90,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -271,7 +525,7 @@
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 77,
+                "lineNumber": 91,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1275,7 +1529,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 78,
+                "lineNumber": 92,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1291,7 +1545,7 @@
                   "(params?: { type?: string[] | undefined; minConfidence?: number | undefined; limit?: number | undefined; } | undefined) => Promise<any[]>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 79,
+                "lineNumber": 93,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1304,7 +1558,7 @@
                     "label": "params",
                     "description": [],
                     "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                    "lineNumber": 79,
+                    "lineNumber": 93,
                     "columnNumber": 24,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -1320,7 +1574,7 @@
                           "string[] | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                        "lineNumber": 80,
+                        "lineNumber": 94,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1336,7 +1590,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                        "lineNumber": 81,
+                        "lineNumber": 95,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1352,7 +1606,7 @@
                           "number | undefined"
                         ],
                         "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                        "lineNumber": 82,
+                        "lineNumber": 96,
                         "columnNumber": 5,
                         "deprecated": false,
                         "trackAdoption": false
@@ -1379,7 +1633,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 84,
+                "lineNumber": 98,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1395,7 +1649,7 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 85,
+                "lineNumber": 99,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1417,7 +1671,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 86,
+                "lineNumber": 100,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1430,7 +1684,7 @@
                 "label": "systemPrompt",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 87,
+                "lineNumber": 101,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1456,7 +1710,7 @@
                   " | undefined>> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 88,
+                "lineNumber": 102,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1504,7 +1758,30 @@
                   ">> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
-                "lineNumber": 89,
+                "lineNumber": 103,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.generateSignificantEvents.$1.existingQueries",
+                "type": "Array",
+                "tags": [],
+                "label": "existingQueries",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/streams-ai",
+                    "scope": "server",
+                    "docId": "kibKbnStreamsAiPluginApi",
+                    "section": "def-server.ExistingQuerySummary",
+                    "text": "ExistingQuerySummary"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+                "lineNumber": 104,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -2722,6 +2999,52 @@
       },
       {
         "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.getPipelineDefinitionJsonSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "getPipelineDefinitionJsonSchema",
+        "description": [],
+        "signature": [
+          "(schema: ",
+          "ZodType",
+          "<unknown, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<unknown, unknown>>) => ",
+          "OpenAPIV3",
+          ".SchemaObject"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/schema.ts",
+        "lineNumber": 85,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.getPipelineDefinitionJsonSchema.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ZodType",
+              "<unknown, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<unknown, unknown>>"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/schema.ts",
+            "lineNumber": 85,
+            "columnNumber": 49,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
         "id": "def-server.identifyFeatures",
         "type": "Function",
         "tags": [],
@@ -2779,6 +3102,113 @@
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
             "lineNumber": 54,
             "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.mergeSeedParsingProcessorIntoSuggestedPipeline",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSeedParsingProcessorIntoSuggestedPipeline",
+        "description": [
+          "\nPrepends a server-selected grok/dissect processor to the agent's suggested pipeline and\nre-assigns step identifiers. Use at the orchestration layer only — `suggestProcessingPipeline`\ndoes not receive the seed parser."
+        ],
+        "signature": [
+          "(seedParsingProcessor: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.DissectProcessor",
+            "text": "DissectProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.GrokProcessor",
+            "text": "GrokProcessor"
+          },
+          ", agentSuggestedPipeline: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.StreamlangDSL",
+            "text": "StreamlangDSL"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/merge_seed_parsing_into_suggested_pipeline.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.mergeSeedParsingProcessorIntoSuggestedPipeline.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "seedParsingProcessor",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.DissectProcessor",
+                "text": "DissectProcessor"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.GrokProcessor",
+                "text": "GrokProcessor"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/merge_seed_parsing_into_suggested_pipeline.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.mergeSeedParsingProcessorIntoSuggestedPipeline.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "agentSuggestedPipeline",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.StreamlangDSL",
+                "text": "StreamlangDSL"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/merge_seed_parsing_into_suggested_pipeline.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -4485,9 +4915,11 @@
         "type": "Function",
         "tags": [],
         "label": "suggestProcessingPipeline",
-        "description": [],
+        "description": [
+          "\nRuns the ingest-pipeline suggestion agent. Callers supply the Zod schema that constrains tool\narguments (full vs post-parse-only), sample `documents` that match that mode, and a\npre-built **`initialDatasetAnalysisJson`** (document structure overview for the samples in `documents`);\nany seed grok/dissect step is composed **outside** this function."
+        ],
         "signature": [
-          "({\n  definition,\n  inferenceClient,\n  parsingProcessor,\n  maxSteps,\n  signal,\n  simulatePipeline,\n  documents,\n  fieldsMetadataClient,\n  esClient,\n}: { definition: ",
+          "({\n  definition,\n  inferenceClient,\n  agentPipelineSchema,\n  maxSteps,\n  maxDurationMs,\n  signal,\n  simulatePipeline,\n  documents,\n  fieldsMetadataClient,\n  esClient,\n  initialDatasetAnalysisJson,\n  mappedFields,\n  upstreamSeedParsingContextMarkdown,\n}: { definition: ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4503,23 +4935,15 @@
             "section": "def-common.BoundInferenceClient",
             "text": "BoundInferenceClient"
           },
-          "; parsingProcessor?: ",
+          "; agentPipelineSchema: ",
           {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.DissectProcessor",
-            "text": "DissectProcessor"
+            "pluginId": "@kbn/streams-ai",
+            "scope": "server",
+            "docId": "kibKbnStreamsAiPluginApi",
+            "section": "def-server.SuggestPipelineAgentSchema",
+            "text": "SuggestPipelineAgentSchema"
           },
-          " | ",
-          {
-            "pluginId": "@kbn/streamlang",
-            "scope": "common",
-            "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.GrokProcessor",
-            "text": "GrokProcessor"
-          },
-          " | undefined; maxSteps?: number | undefined; signal: AbortSignal; simulatePipeline(pipeline: ",
+          "; maxSteps?: number | undefined; maxDurationMs?: number | undefined; signal: AbortSignal; simulatePipeline(pipeline: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4553,7 +4977,7 @@
           },
           "; esClient: ",
           "ElasticsearchClient",
-          "; }) => Promise<",
+          "; initialDatasetAnalysisJson: string; mappedFields: Record<string, string>; upstreamSeedParsingContextMarkdown?: string | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/streams-ai",
             "scope": "server",
@@ -4574,10 +4998,10 @@
             "id": "def-server.suggestProcessingPipeline.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  definition,\n  inferenceClient,\n  parsingProcessor,\n  maxSteps,\n  signal,\n  simulatePipeline,\n  documents,\n  fieldsMetadataClient,\n  esClient,\n}",
+            "label": "{\n  definition,\n  inferenceClient,\n  agentPipelineSchema,\n  maxSteps,\n  maxDurationMs,\n  signal,\n  simulatePipeline,\n  documents,\n  fieldsMetadataClient,\n  esClient,\n  initialDatasetAnalysisJson,\n  mappedFields,\n  upstreamSeedParsingContextMarkdown,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-            "lineNumber": 43,
+            "lineNumber": 53,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -4608,7 +5032,7 @@
                   ".Definition"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 44,
+                "lineNumber": 54,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4630,38 +5054,34 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 45,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/streams-ai",
-                "id": "def-server.suggestProcessingPipeline.$1.parsingProcessor",
+                "id": "def-server.suggestProcessingPipeline.$1.agentPipelineSchema",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "parsingProcessor",
+                "label": "agentPipelineSchema",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/streamlang",
-                    "scope": "common",
-                    "docId": "kibKbnStreamlangPluginApi",
-                    "section": "def-common.DissectProcessor",
-                    "text": "DissectProcessor"
-                  },
-                  " | ",
-                  {
-                    "pluginId": "@kbn/streamlang",
-                    "scope": "common",
-                    "docId": "kibKbnStreamlangPluginApi",
-                    "section": "def-common.GrokProcessor",
-                    "text": "GrokProcessor"
-                  },
-                  " | undefined"
+                  "ZodObject",
+                  "<{ steps: ",
+                  "ZodArray",
+                  "<any>; }, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$strip> | ",
+                  "ZodObject",
+                  "<{ steps: ",
+                  "ZodArray",
+                  "<any>; }, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$strip>"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 46,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4677,7 +5097,23 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 47,
+                "lineNumber": 57,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.suggestProcessingPipeline.$1.maxDurationMs",
+                "type": "number",
+                "tags": [],
+                "label": "maxDurationMs",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+                "lineNumber": 58,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4693,7 +5129,7 @@
                   "AbortSignal"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 48,
+                "lineNumber": 59,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4725,7 +5161,7 @@
                   ">"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 49,
+                "lineNumber": 60,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4747,7 +5183,7 @@
                       }
                     ],
                     "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                    "lineNumber": 49,
+                    "lineNumber": 60,
                     "columnNumber": 20,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -4774,7 +5210,7 @@
                   "[]"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 50,
+                "lineNumber": 61,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4796,7 +5232,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 51,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5800,7 +6236,58 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
-                "lineNumber": 52,
+                "lineNumber": 63,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.suggestProcessingPipeline.$1.initialDatasetAnalysisJson",
+                "type": "string",
+                "tags": [],
+                "label": "initialDatasetAnalysisJson",
+                "description": [
+                  "Pre-computed JSON for `initial_dataset_analysis` (field layout / sample values for `documents`)."
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+                "lineNumber": 64,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.suggestProcessingPipeline.$1.mappedFields",
+                "type": "Object",
+                "tags": [],
+                "label": "mappedFields",
+                "description": [
+                  "Mapped fields from field_caps; callers must fetch before calling."
+                ],
+                "signature": [
+                  "{ [x: string]: string; }"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+                "lineNumber": 66,
+                "columnNumber": 3,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/streams-ai",
+                "id": "def-server.suggestProcessingPipeline.$1.upstreamSeedParsingContextMarkdown",
+                "type": "string",
+                "tags": [],
+                "label": "upstreamSeedParsingContextMarkdown",
+                "description": [
+                  "\nWhen the caller runs an upstream grok/dissect seed step, pass a formatted description so the model\nknows parsing already happened. Omit or leave empty when the full processor schema is used."
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/index.ts",
+                "lineNumber": 68,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6002,6 +6489,103 @@
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/features/identify_features.ts",
             "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.ExistingQuerySummary",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExistingQuerySummary",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+        "lineNumber": 46,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.ExistingQuerySummary.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+            "lineNumber": 47,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.ExistingQuerySummary.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.ExistingQuerySummary.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.ExistingQuerySummary.severity_score",
+            "type": "number",
+            "tags": [],
+            "label": "severity_score",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.ExistingQuerySummary.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-ai",
+            "id": "def-server.ExistingQuerySummary.esql",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-ai/src/significant_events/generate_significant_events.ts",
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6732,9 +7316,86 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.SuggestPipelineAgentSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "SuggestPipelineAgentSchema",
+        "description": [
+          "Zod schema passed to `suggestProcessingPipeline` to constrain tool calls; chosen by the caller."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<any>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip> | ",
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<any>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/schema.ts",
+        "lineNumber": 80,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.pipelineDefinitionSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "pipelineDefinitionSchema",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<any>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/schema.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-ai",
+        "id": "def-server.postParsePipelineDefinitionSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "postParsePipelineDefinitionSchema",
+        "description": [
+          "\nWhen a system-managed grok/dissect step runs first, the agent only proposes\npost-parse processors; grok/dissect are excluded to avoid duplicate parsing."
+        ],
+        "signature": [
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<any>; }, ",
+          "node_modules/zod/v4/core/schemas",
+          "$strip>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-ai/workflows/suggest_processing_pipeline/schema.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   },
   "common": {
     "classes": [],

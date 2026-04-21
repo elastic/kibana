@@ -53,7 +53,7 @@ test.describe.skip(
       await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+          body: JSON.stringify({ connectors: [], soEntryFound: false }),
         });
       });
 
@@ -68,8 +68,7 @@ test.describe.skip(
         await route.fulfill({
           status: 200,
           body: JSON.stringify({
-            connectors: [],
-            allConnectors: [
+            connectors: [
               {
                 connectorId: 'test-connector-1',
                 name: 'Test Connector 1',
@@ -89,6 +88,7 @@ test.describe.skip(
                 isInferenceEndpoint: false,
               },
             ],
+            allConnectors: [],
             soEntryFound: false,
           }),
         });

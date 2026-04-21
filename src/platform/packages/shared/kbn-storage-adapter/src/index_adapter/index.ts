@@ -160,6 +160,10 @@ export class StorageIndexAdapter<
     const version = getSchemaVersion(this.storage);
 
     const template: IndicesPutIndexTemplateIndexTemplateMapping = {
+      settings: {
+        auto_expand_replicas: '0-1',
+        number_of_shards: 1,
+      },
       mappings: {
         _meta: {
           version,
@@ -319,11 +323,13 @@ export class StorageIndexAdapter<
     if (!writeIndex) {
       this.logger.debug(`Creating index`);
       await this.createIndex();
-    } else if (writeIndex?.state.mappings?._meta?.version !== expectedSchemaVersion) {
-      this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
-      await this.updateMappingsOfExistingIndex({
-        name: writeIndex.name,
-      });
+    } else {
+      if (writeIndex.state.mappings?._meta?.version !== expectedSchemaVersion) {
+        this.logger.debug(`Updating mappings of existing index due to schema version mismatch`);
+        await this.updateMappingsOfExistingIndex({
+          name: writeIndex.name,
+        });
+      }
     }
 
     return await cb();
@@ -441,6 +447,17 @@ export class StorageIndexAdapter<
             },
           },
           operation.index.document as {},
+        ];
+      }
+
+      if ('create' in operation) {
+        return [
+          {
+            create: {
+              _id: operation.create._id,
+            },
+          },
+          operation.create.document as {},
         ];
       }
 
