@@ -130,13 +130,13 @@ export const findLiveQueryRoute = (
                   .map((query) => query.action_id)
                   .filter((id): id is string => !!id);
 
-                const result_counts = action.pack_id
+                const resultCounts = action.pack_id
                   ? buildPackResultCounts(actionQueryIds, resultCountsMap)
                   : buildSingleQueryResultCounts(actionQueryIds[0], resultCountsMap);
 
                 return {
                   ...item,
-                  _source: { ...action, result_counts },
+                  _source: { ...action, result_counts: resultCounts },
                 };
               });
             } catch (err) {
