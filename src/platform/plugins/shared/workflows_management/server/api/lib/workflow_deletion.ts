@@ -163,16 +163,16 @@ const hardDeleteWorkflows = async (
 
   const disabledIds = await disableWorkflowsForDeletion(hits, client);
 
-  const runningIds: string[] = [];
-  for (const id of foundIds) {
-    const executions = await getWorkflowExecutions(
-      { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-      spaceId
-    );
-    if (executions.total > 0) {
-      runningIds.push(id);
-    }
-  }
+  const executionChecks = await Promise.all(
+    foundIds.map(async (id) => {
+      const executions = await getWorkflowExecutions(
+        { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+        spaceId
+      );
+      return { id, hasRunning: executions.total > 0 };
+    })
+  );
+  const runningIds = executionChecks.filter((c) => c.hasRunning).map((c) => c.id);
   if (runningIds.length > 0) {
     await restoreDisabledWorkflows(hits, disabledIds, client, logger);
     throw new WorkflowConflictError(
@@ -218,11 +218,16 @@ const softDeleteWorkflows = async (
   const now = new Date();
   const successfulIds: string[] = [];
 
-  const bulkOperations = hits.map((hit) => ({
+  const validHits = hits.filter(
+    (hit): hit is { _id: string; _source: WorkflowProperties } =>
+      Boolean(hit._id) && Boolean(hit._source)
+  );
+
+  const bulkOperations = validHits.map((hit) => ({
     index: {
       _id: hit._id,
       document: {
-        ...(hit._source as WorkflowProperties),
+        ...(hit._source satisfies WorkflowProperties),
         deleted_at: now,
         enabled: false,
       },

@@ -39,6 +39,14 @@ import type { SearchWorkflowExecutionsParams } from '../api/workflows_management
 
 const DEFAULT_PAGE_SIZE = 100;
 
+/**
+ * Extends EsWorkflowStepExecution with the legacy `endedAt` field
+ * that may exist on older documents written before the rename to `finishedAt`.
+ */
+interface StepExecutionWithLegacyFields extends EsWorkflowStepExecution {
+  endedAt?: string;
+}
+
 export class WorkflowExecutionQueryService {
   constructor(private readonly deps: WorkflowExecutionQueryDeps) {}
 
@@ -133,7 +141,7 @@ export class WorkflowExecutionQueryService {
     executionId: string,
     spaceId: string
   ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = await this.deps.esClient.search<EsWorkflowStepExecution>({
+    const response = await this.deps.esClient.search<StepExecutionWithLegacyFields>({
       index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
       query: {
         bool: {
@@ -149,9 +157,7 @@ export class WorkflowExecutionQueryService {
       }
       const source = hit._source;
       const startedAt = source.startedAt;
-      // TODO: add these types
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const finishedAt = (source as any).endedAt || (source as any).finishedAt;
+      const finishedAt = source.endedAt || source.finishedAt;
 
       let duration = 0;
       if (startedAt && finishedAt) {
@@ -233,6 +239,6 @@ export class WorkflowExecutionQueryService {
       return null;
     }
 
-    return response.hits.hits[0]._source as EsWorkflowStepExecution;
+    return response.hits.hits[0]._source ?? null;
   }
 }

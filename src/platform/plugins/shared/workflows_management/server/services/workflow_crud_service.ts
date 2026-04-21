@@ -8,12 +8,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { isNotFoundError } from '@kbn/es-errors';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
-  WorkflowYaml,
 } from '@kbn/workflows';
 import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 
@@ -61,7 +61,7 @@ export class WorkflowCrudService {
       const document = response.hits.hits[0];
       return transformStorageDocumentToWorkflowDto(document._id, document._source);
     } catch (error) {
-      if ((error as { statusCode?: number }).statusCode === 404) {
+      if (isNotFoundError(error)) {
         return null;
       }
       throw error;
@@ -69,7 +69,7 @@ export class WorkflowCrudService {
   }
 
   async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {
-    if (!this.deps.workflowStorage || ids.length === 0) {
+    if (ids.length === 0) {
       return [];
     }
 
@@ -92,7 +92,7 @@ export class WorkflowCrudService {
     spaceId: string,
     source?: string[]
   ): Promise<WorkflowPartialDetailDto[]> {
-    if (!this.deps.workflowStorage || ids.length === 0) {
+    if (ids.length === 0) {
       return [];
     }
 
@@ -321,10 +321,10 @@ export class WorkflowCrudService {
           const resolvedEnabled =
             workflow.enabled !== undefined ? workflow.enabled : existingSource.enabled;
           updatedData.enabled = resolvedEnabled;
-          updatedData.definition = {
-            ...updatedData.definition,
-            enabled: resolvedEnabled,
-          } as WorkflowYaml;
+          const currentDefinition = updatedData.definition;
+          if (currentDefinition) {
+            updatedData.definition = { ...currentDefinition, enabled: resolvedEnabled };
+          }
         }
       } else {
         updatedData = { ...updatedData, ...applyFieldUpdates(workflow, existingSource) };
@@ -350,7 +350,6 @@ export class WorkflowCrudService {
           finalData,
           taskScheduler,
           logger: this.deps.logger,
-          getWorkflow: (wId, sp) => this.getWorkflow(wId, sp),
         });
       }
 
@@ -363,7 +362,7 @@ export class WorkflowCrudService {
         valid: finalData.valid,
       };
     } catch (error) {
-      if ((error as { statusCode?: number }).statusCode === 404) {
+      if (isNotFoundError(error)) {
         throw new Error(`Workflow with id ${id} not found`);
       }
       throw error;

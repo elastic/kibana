@@ -39,10 +39,7 @@ export class WorkflowSearchService {
     triggerId: string,
     spaceId: string
   ): Promise<WorkflowDetailDto[]> {
-    const { workflowStorage, esClient, logger } = this.deps;
-    if (!workflowStorage) {
-      throw new Error('WorkflowSearchService not initialized');
-    }
+    const { esClient, logger } = this.deps;
 
     const pageSize = 1000;
     const MAX_PAGES = 50;
@@ -304,7 +301,7 @@ export class WorkflowSearchService {
     workflowIds: string[],
     spaceId: string
   ): Promise<Record<string, WorkflowExecutionHistoryModel[]>> {
-    if (!this.deps.esClient || workflowIds.length === 0) {
+    if (workflowIds.length === 0) {
       return {};
     }
 
