@@ -17,6 +17,8 @@ project:
   owner: '@elastic/kibana-visualizations'
   sourceRoot: src/platform/plugins/shared/data
 dependsOn:
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
   - '@kbn/core'
   - '@kbn/bfetch-plugin'
   - '@kbn/ui-actions-plugin'
@@ -74,6 +76,8 @@ fileGroups:
     - config.mock.ts
     - common/**/*.json
     - public/**/*.json
+    - test/scout/**/*
+    - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
