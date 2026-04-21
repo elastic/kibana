@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+export { AlertFlyoutPage } from './alert_flyout';
+export { OsqueryCasesPage } from './cases';
 export { EcsMappingEditorPage } from './ecs_mapping_editor';
+export { InventoryHostOsqueryPage } from './inventory_host_osquery';
 export { LiveQueryFormPage } from './live_query_form';
 export { OsqueryNavigation } from './navigation';
+export { PackFormPage } from './pack_form';
+export { RuleEditorPage } from './rule_editor';
 export { SavedQueryPage } from './saved_query';

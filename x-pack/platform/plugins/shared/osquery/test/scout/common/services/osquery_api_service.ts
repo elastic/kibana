@@ -13,11 +13,17 @@ const OSQUERY_PACKS_URL = '/api/osquery/packs';
 const OSQUERY_SAVED_QUERIES_URL = '/api/osquery/saved_queries';
 const OSQUERY_LIVE_QUERIES_URL = '/api/osquery/live_queries';
 
+const FLEET_WRAPPER_HEADERS = {
+  'elastic-api-version': '1',
+};
+
 export interface OsqueryApiService {
   packs: {
     create: (body: Record<string, unknown>, space?: string) => Promise<any>;
     get: (id: string) => Promise<any>;
     delete: (id: string, space?: string) => Promise<void>;
+    /** Lists osquery_manager package policies via the internal Fleet wrapper (pack config assertions). */
+    listFleetWrapperPackagePolicies: () => Promise<any>;
   };
   savedQueries: {
     create: (body: Record<string, unknown>) => Promise<any>;
@@ -81,6 +87,15 @@ export const getOsqueryApiService = ({
           });
         });
       },
+
+      listFleetWrapperPackagePolicies: async () =>
+        await measurePerformanceAsync(log, 'osquery.packs.listFleetWrapperPackagePolicies', async () =>
+          kbnClient.request({
+            method: 'GET',
+            path: '/internal/osquery/fleet_wrapper/package_policies',
+            headers: { ...headers, ...FLEET_WRAPPER_HEADERS },
+          })
+        ),
     },
 
     savedQueries: {

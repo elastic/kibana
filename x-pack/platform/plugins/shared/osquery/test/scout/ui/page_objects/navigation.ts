@@ -11,6 +11,9 @@ import { waitForKibanaChromeLoadingFinished } from '../../common/wait_for_kibana
 /**
  * Osquery left-nav and deep links. With `queryHistoryRework` enabled (default in tests),
  * the app redirects `/` → `/history`, new query lives at `/new`, and `/live_queries` redirects to history.
+ *
+ * Use pathname-style `gotoApp('osquery/...')` (not `hash:`): Kibana scoped history lives in the URL
+ * path (`/app/osquery/new`), matching Cypress (`/app/osquery/new`). A URL hash does not activate routes.
  */
 export class OsqueryNavigation {
   constructor(private readonly page: ScoutPage) {}
@@ -21,28 +24,28 @@ export class OsqueryNavigation {
   }
 
   async gotoHistory(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/history' });
+    await this.page.gotoApp('osquery/history');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoLiveQueriesLegacy(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/live_queries' });
+    await this.page.gotoApp('osquery/live_queries');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoPacks(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/packs' });
+    await this.page.gotoApp('osquery/packs');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   async gotoSavedQueries(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/saved_queries' });
+    await this.page.gotoApp('osquery/saved_queries');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
   }
 
   /** New live query form (`/new` when queryHistoryRework is on, else `/live_queries/new`). */
   async gotoNewLiveQuery(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/new' });
+    await this.page.gotoApp('osquery/new');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.page.testSubj
       .locator('liveQuerySubmitButton')
@@ -51,7 +54,7 @@ export class OsqueryNavigation {
 
   /** Legacy deep link; with queryHistoryRework, router redirects to `/new`. */
   async gotoNewLiveQueryLegacyPath(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/live_queries/new' });
+    await this.page.gotoApp('osquery/live_queries/new');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.page.testSubj
       .locator('liveQuerySubmitButton')

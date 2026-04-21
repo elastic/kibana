@@ -7,6 +7,7 @@
 
 import type {
   ApiServicesFixture,
+  KibanaUrl,
   PageObjects,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
@@ -17,9 +18,14 @@ import {
   type OsqueryApiService,
 } from '../../common/services/osquery_api_service';
 import {
+  AlertFlyoutPage,
   EcsMappingEditorPage,
+  InventoryHostOsqueryPage,
   LiveQueryFormPage,
+  OsqueryCasesPage,
   OsqueryNavigation,
+  PackFormPage,
+  RuleEditorPage,
   SavedQueryPage,
 } from '../page_objects';
 
@@ -33,6 +39,11 @@ export interface OsqueryUiTestFixtures extends ScoutParallelTestFixtures {
     osqueryLiveQueryForm: LiveQueryFormPage;
     osquerySavedQuery: SavedQueryPage;
     osqueryEcsMappingEditor: EcsMappingEditorPage;
+    osqueryPackForm: PackFormPage;
+    osqueryAlertFlyout: AlertFlyoutPage;
+    osqueryRuleEditor: RuleEditorPage;
+    osqueryCasesPage: OsqueryCasesPage;
+    osqueryInventoryHostOsquery: InventoryHostOsqueryPage;
   };
 }
 
@@ -64,9 +75,11 @@ export const uiTest = baseSpaceTest.extend<
     {
       pageObjects,
       page,
+      kbnUrl,
     }: {
       pageObjects: OsqueryUiTestFixtures['pageObjects'];
       page: OsqueryUiTestFixtures['page'];
+      kbnUrl: KibanaUrl;
     },
     use: (extended: OsqueryUiTestFixtures['pageObjects']) => Promise<void>
   ) => {
@@ -76,6 +89,11 @@ export const uiTest = baseSpaceTest.extend<
       osqueryLiveQueryForm: createLazyPageObject(LiveQueryFormPage, page),
       osquerySavedQuery: createLazyPageObject(SavedQueryPage, page),
       osqueryEcsMappingEditor: createLazyPageObject(EcsMappingEditorPage, page),
+      osqueryPackForm: createLazyPageObject(PackFormPage, page),
+      osqueryAlertFlyout: createLazyPageObject(AlertFlyoutPage, page),
+      osqueryRuleEditor: createLazyPageObject(RuleEditorPage, page),
+      osqueryCasesPage: createLazyPageObject(OsqueryCasesPage, page),
+      osqueryInventoryHostOsquery: createLazyPageObject(InventoryHostOsqueryPage, page, kbnUrl),
     });
   },
 });

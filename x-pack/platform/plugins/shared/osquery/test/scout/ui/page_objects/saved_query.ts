@@ -12,7 +12,7 @@ export class SavedQueryPage {
   constructor(private readonly page: ScoutPage) {}
 
   async navigateToList(): Promise<void> {
-    await this.page.gotoApp('osquery', { hash: '/saved_queries' });
+    await this.page.gotoApp('osquery/saved_queries');
     await waitForKibanaChromeLoadingFinished(this.page).catch(() => {});
     await this.page.testSubj
       .locator('savedQueriesTable')
