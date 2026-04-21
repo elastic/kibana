@@ -1744,9 +1744,20 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/plugins/shared/streams/server/lib/streams/lifecycle/ilm_phases.test.ts @elastic/kibana-management
 
 # Streams — sig events overrides (obs-sig-events-team owns these subtrees)
+# schemas
+x-pack/platform/packages/shared/kbn-streams-schema/src/api/features @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/api/significant_events @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/inference_feature_ids.ts @elastic/obs-sig-events-team
+x-pack/platform/packages/shared/kbn-streams-schema/src/queries @elastic/obs-sig-events-team
+# app
 x-pack/platform/plugins/shared/streams_app/public/components/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams_app/public/hooks/sig_events @elastic/obs-sig-events-team
+# server
 x-pack/platform/plugins/shared/streams/server/lib/sig_events @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/streams/assets/query @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/streams/feature @elastic/obs-sig-events-team
+x-pack/platform/plugins/shared/streams/server/lib/tasks/task_definitions/features_identification @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elastic/obs-sig-events-team
 x-pack/platform/plugins/shared/streams/test/scout/api/tests/sig_events @elastic/obs-sig-events-team
