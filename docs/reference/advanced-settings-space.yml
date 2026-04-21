@@ -31,7 +31,7 @@ groups:
           eck: ga 9.0-9.3, deprecated 9.4+
           self: ga 9.0-9.3, deprecated 9.4+
           serverless: unavailable
-        note: "{applies_to}`ech: ga 9.4+, ece: ga 9.4+, eck: ga 9.4+, self: ga 9.4+` If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space."
+        note: "{applies_to}`stack: ga 9.4+` If this setting is set to `false` but the `hideAnnouncements` setting located in the **Global Settings** tab is set to `true`, then messages and tours that highlight new features won't show for the current space."
 
       - setting: dateFormat
         id: dateformat
@@ -571,7 +571,7 @@ groups:
           eck: ga 9.1
           self: ga 9.1
           serverless: unavailable
-        note: "{applies_to}`ech: ga 9.2, ece: ga 9.2, eck: ga 9.2, self: ga 9.2` Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md)."
+        note: "{applies_to}`stack: ga 9.2` Configure the `aiAssistant:preferredAIAssistantType` setting from the **GenAI Settings** page, which you can find using the Classic navigation menu or the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md). Note that this setting is unavailable from the **GenAI Settings** page when using a [solution view](docs-content://deploy-manage/manage-spaces.md)."
 
   - group: Presentation Labs
     id: presentation-labs
