@@ -15,7 +15,7 @@ paths:
       description: |
         Creates a new note or updates an existing one.
 
-        **Create:** Send `note` as a `BareNote` (required fields include `timelineId`). Omit `noteId` to create a new saved object.
+        **Create:** Send `note` and omit `noteId` to create a new saved object.
 
         **Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
 
@@ -24,7 +24,7 @@ paths:
         - access:securitySolution
       requestBody:
         description: |
-          Body must include `note` (`BareNote`). For updates, include `noteId` (and optionally `version`).
+          Body must include the `note` object. For updates, include `noteId` (and optionally `version`).
           To attach a note to a specific event, set `note.eventId` to that event's document `_id`; for a timeline-wide note, omit or clear `eventId` per product rules.
         required: true
         content:
