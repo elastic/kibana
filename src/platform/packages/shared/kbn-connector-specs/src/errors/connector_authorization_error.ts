@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isError } from 'lodash';
+
 export type ConnectorAuthorizationReason =
   | 'no_token'
   | 'token_expired'
@@ -43,6 +45,6 @@ export const isConnectorAuthorizationError = (
 ): error is ConnectorAuthorizationError => {
   return (
     error instanceof ConnectorAuthorizationError ||
-    (Error.isError(error) && error.name === 'ConnectorAuthorizationError')
+    (isError(error) && error.name === 'ConnectorAuthorizationError')
   );
 };
