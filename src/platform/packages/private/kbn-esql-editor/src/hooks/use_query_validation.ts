@@ -81,9 +81,6 @@ export const useQueryValidation = ({
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
 
-  // Mirror editorMessages into a ref so callbacks (Monaco providers, long-lived
-  // closures) can read the latest value without needing to be re-created on every
-  // validation tick.
   const editorMessagesRef = useRef(editorMessages);
   useEffect(() => {
     editorMessagesRef.current = editorMessages;
@@ -94,17 +91,8 @@ export const useQueryValidation = ({
       if (editorModel.current) {
         const { callbacks: timedCallbacks, getCallbacksDuration } =
           createTimedCallbacks(esqlCallbacks);
-        const { errors, warnings } = await ESQLLang.validate(
-          editorModel.current,
-          code,
-          timedCallbacks,
-          options
-        );
-        return {
-          errors,
-          warnings,
-          callbacksDuration: getCallbacksDuration(),
-        };
+        const result = await ESQLLang.validate(editorModel.current, code, timedCallbacks, options);
+        return { ...result, callbacksDuration: getCallbacksDuration() };
       }
       return {
         errors: [],

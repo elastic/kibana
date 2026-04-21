@@ -25,7 +25,6 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
-import { fixesByMessageCode } from '../../../language/code_actions/fixes_by_message_code';
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -520,8 +519,7 @@ export function getMessageFromId<K extends ErrorTypes>({
   locations: ESQLLocation;
 }): ESQLMessage {
   const { message, type = 'error', underlinedWarning } = getMessageAndTypeFromId(payload);
-  const quickFix = fixesByMessageCode[payload.messageId];
-  return createMessage(type, message, locations, payload.messageId, underlinedWarning, quickFix);
+  return createMessage(type, message, locations, payload.messageId, underlinedWarning);
 }
 
 export function createMessage(

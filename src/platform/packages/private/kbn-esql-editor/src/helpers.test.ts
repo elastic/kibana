@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import {
   filterDataErrors,
   filterOutWarningsOverlappingWithErrors,

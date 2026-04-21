@@ -25,6 +25,7 @@ const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
   getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
 });
 
+// This provider depends on getEditorMessages, so it needs to be model URI specific
 const sharedEsqlCodeActionProvider = ESQLLang.getCodeActionProvider?.({
   getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
 });

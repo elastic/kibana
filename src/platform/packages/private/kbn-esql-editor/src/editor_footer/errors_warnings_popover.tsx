@@ -98,34 +98,29 @@ function ErrorsWarningsContent({
               `}
               onClick={() => handleClick(item)}
             >
-              <div
-                css={css`
-                  display: grid;
-                  grid-template-columns: auto 1fr;
-                  column-gap: ${euiTheme.size.xl};
-                  row-gap: ${euiTheme.size.s};
-                  align-items: start;
-                `}
-              >
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
-                    {i18n.translate('esqlEditor.query.lineNumber', {
-                      defaultMessage: 'Line {lineNumber}',
-                      values: { lineNumber: item.startLineNumber },
-                    })}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <div
+              <EuiFlexGroup gutterSize="xl" alignItems="flexStart">
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={type} color={color} size="s" aria-hidden={true} />
+                    </EuiFlexItem>
+                    <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
+                      {i18n.translate('esqlEditor.query.lineNumber', {
+                        defaultMessage: 'Line {lineNumber}',
+                        values: { lineNumber: item.startLineNumber },
+                      })}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
                   css={css`
                     ${euiTextBreakWord()}
                   `}
                 >
                   {item.message}
-                </div>
-              </div>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiDescriptionListDescription>
           );
         })}

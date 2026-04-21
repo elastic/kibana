@@ -363,7 +363,9 @@ const ESQLEditorInternal = function ESQLEditor({
         return;
       }
 
-      // Do not trigger suggestions when the code actions menu is visible.
+      // When the quick fix menu is displayed, it triggers onDidFocusEditorText,
+      // calling then this method that makes the popup to close right away.
+      // If the quick fix menu is visible, do not trigger suggestions to avoid this issue.
       if (isCodeActionMenuVisible(editorRef.current)) {
         return;
       }
@@ -760,16 +762,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     // Skip triggering suggestions on initial focus to avoid interfering
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
-                    // Also skip when code action widget is visible to prevent overlap..
-                    const isCodeActionWidgetVisible = Boolean(
-                      editor.getDomNode()?.ownerDocument.querySelector('.action-widget')
-                    );
-
-                    if (
-                      !isFirstFocusRef.current &&
-                      !datePickerOpenStatusRef.current &&
-                      !isCodeActionWidgetVisible
-                    ) {
+                    if (!isFirstFocusRef.current && !datePickerOpenStatusRef.current) {
                       triggerSuggestions();
                     }
 
