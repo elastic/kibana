@@ -96,8 +96,9 @@ test('Otel Kubernetes', async ({
   await page.evaluate('window.dispatchEvent(new Event("blur"))');
 
   /**
-   * Additional buffer to ensure data has propagated
-   * to dashboards and Discover before navigating.
+   * Wait for the data to be ingested into the cluster.
+   * 5 minutes is generous and should be more then enough
+   * for the data to propagate everywhere.
    */
   await page.waitForTimeout(5 * 60000);
 
@@ -108,6 +109,12 @@ test('Otel Kubernetes', async ({
    * once both logs and metrics have arrived.
    */
   await otelKubernetesFlowPage.assertDataReceivedIndicator();
+
+  /**
+   * Additional buffer to ensure data has propagated
+   * to dashboards and Discover before navigating.
+   */
+  await page.waitForTimeout(2 * 60000);
 
   /**
    * Wired streams only reroutes logs (to logs.otel); metrics and traces are
