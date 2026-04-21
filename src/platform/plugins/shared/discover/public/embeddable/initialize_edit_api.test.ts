@@ -9,8 +9,12 @@
 
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import { BehaviorSubject } from 'rxjs';
 
 import { dataViewAdHoc } from '../__mocks__/data_view_complex';
 import { mockControlState } from '../__mocks__/esql_controls';
@@ -20,6 +24,13 @@ import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
 import { getMockedSearchApi } from './__mocks__/get_mocked_api';
 import { fromSavedSearchToSavedObjectTab } from '../application/main/state_management/redux';
 import * as getDiscoverLocatorParamsModule from './utils/get_discover_locator_params';
+
+const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) => ({
+  uuid,
+  type: ESQL_CONTROL,
+  serializeState: () => state,
+  applySerializedState: () => undefined,
+});
 
 describe('initialize edit api', () => {
   const searchSource = createSearchSourceMock({ index: dataViewMock });
@@ -156,6 +167,8 @@ describe('initialize edit api', () => {
 
   describe('on edit', () => {
     const mockedParentApi = {
+      ...getMockPresentationContainer(),
+      children$: new BehaviorSubject<Record<string, unknown>>({}),
       getAppContext: jest.fn().mockReturnValue({
         getCurrentPath: jest.fn().mockReturnValue('/current-parent-path'),
         currentAppId: 'dashboard',
@@ -180,6 +193,8 @@ describe('initialize edit api', () => {
         path: '/mock-url-for-onedit',
         state: {},
       });
+
+      mockedParentApi.children$.next({});
     });
 
     it('should call navigateToEditor', async () => {
@@ -260,6 +275,7 @@ describe('initialize edit api', () => {
 
     it('should pass controls to Discover for by-value embeddables', async () => {
       mockedApi.savedObjectId$.next(undefined);
+      const { type: _type, ...controlState } = mockControlState.panel1;
 
       const partialApi = {
         ...mockedApi,
@@ -268,7 +284,8 @@ describe('initialize edit api', () => {
       };
       const controlsState = {
         panel1: {
-          ...mockControlState.panel1,
+          ...controlState,
+          type: ESQL_CONTROL,
           variable_name: 'host.name',
           title: 'Host name',
         },
@@ -280,6 +297,13 @@ describe('initialize edit api', () => {
           ...locatorParams,
           esqlControls: controlsState,
         });
+      mockedParentApi.children$.next({
+        panel1: createEsqlControlApi('panel1', {
+          ...controlState,
+          variable_name: 'host.name',
+          title: 'Host name',
+        }),
+      });
       const editApi = initializeEditApi({
         uuid: 'test',
         parentApi: mockedParentApi,

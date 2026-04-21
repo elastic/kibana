@@ -15,7 +15,10 @@ import type {
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { apiHasAppContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext, apiIsPresentationContainer } from '@kbn/presentation-publishing';
+import { getAllEsqlControls } from '@kbn/esql-utils';
+import type { ControlPanelsState } from '@kbn/control-group-renderer';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch, PublishesSelectedTabId } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';
@@ -90,32 +93,30 @@ export function initializeEditApi({
       const stateTransfer = discoverServices.embeddable.getStateTransfer();
       const isByReference = Boolean(partialApi.savedObjectId$.getValue());
       const locatorParams = getDiscoverLocatorParams({ ...partialApi, parentApi });
-      const discoverSessionTab = isByReference
+      const valueInput: DiscoverSessionByValueInput | undefined = isByReference
         ? undefined
-        : fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: uuid,
-              label:
-                getTitle() ||
-                i18n.translate('discover.embeddable.byValueTabName', {
-                  defaultMessage: 'By-value Discover session',
-                }),
-            },
-            savedSearch: {
-              ...partialApi.savedSearch$.getValue(),
-              controlGroupJson: locatorParams.esqlControls
-                ? JSON.stringify(locatorParams.esqlControls)
-                : undefined,
-            },
-            services: discoverServices,
-          });
-
-      const valueInput: DiscoverSessionByValueInput | undefined = discoverSessionTab
-        ? {
-            discoverSessionTab,
-            dashboardControlGroupState: locatorParams.esqlControls,
-          }
-        : undefined;
+        : {
+            discoverSessionTab: fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: uuid,
+                label:
+                  getTitle() ||
+                  i18n.translate('discover.embeddable.byValueTabName', {
+                    defaultMessage: 'By-value Discover session',
+                  }),
+              },
+              savedSearch: {
+                ...partialApi.savedSearch$.getValue(),
+                controlGroupJson: locatorParams.esqlControls
+                  ? JSON.stringify(locatorParams.esqlControls)
+                  : undefined,
+              },
+              services: discoverServices,
+            }),
+            dashboardControlGroupState: apiIsPresentationContainer(parentApi)
+              ? (getAllEsqlControls(parentApi) as ControlPanelsState<OptionsListESQLControlState>)
+              : undefined,
+          };
 
       let app: string;
       let path: string | undefined;
