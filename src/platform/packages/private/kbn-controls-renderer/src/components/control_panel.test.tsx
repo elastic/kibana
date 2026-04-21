@@ -67,7 +67,7 @@ const mockOptionsListFactory: EmbeddableFactory<{ type: typeof OPTIONS_LIST_CONT
 describe('render', () => {
   beforeAll(() => {
     registerEmbeddablePublicDefinition(
-      'optionsListControl',
+      'options_list_control',
       jest.fn().mockResolvedValue(mockOptionsListFactory)
     );
   });
@@ -83,7 +83,7 @@ describe('render', () => {
           control={{
             ...DEFAULT_PINNED_CONTROL_STATE,
             id: 'control1',
-            type: 'optionsListControl',
+            type: 'options_list_control',
             order: 0,
           }}
           parentApi={parentApi}
@@ -102,7 +102,7 @@ describe('render', () => {
         <ControlPanel
           control={{
             id: 'control1',
-            type: 'optionsListControl',
+            type: 'options_list_control',
             order: 0,
             width: 'small',
             grow: true,
