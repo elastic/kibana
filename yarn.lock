@@ -6411,6 +6411,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-source-management-plugin@link:x-pack/platform/plugins/private/data_source_management":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
   version "0.0.0"
   uid ""
